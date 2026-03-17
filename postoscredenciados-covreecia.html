@@ -146,7 +146,7 @@
       </div><!-- Tipo de Combustível -->
       <div><label class="block text-sm font-semibold text-gray-900 mb-2">Tipo *</label> <select id="fuel-type" required class="w-full px-3 sm:px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition text-sm"> <option value="">Selecione o tipo</option> <option value="Gasolina">Gasolina</option> <option value="Diesel">Diesel</option> <option value="Etanol">Etanol</option> <option value="Gasolina Aditivada">Gasolina Aditivada</option> </select>
       </div><!-- Valor -->
-      <div><label class="block text-sm font-semibold text-gray-900 mb-2">Valor *</label> <input type="number" id="fuel-value" required placeholder="Ex: 250.50" step="0.01" class="w-full px-3 sm:px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition text-sm">
+      <div><label class="block text-sm font-semibold text-gray-900 mb-2">Valor *</label> <input type="text" id="fuel-value" required placeholder="R$ 0,00" class="w-full px-3 sm:px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition text-sm" oninput="formatCurrency(this)">
       </div><!-- Foto do Comprovante -->
       <div><label class="block text-sm font-semibold text-gray-900 mb-3">Comprovante (Foto) *</label>
        <div id="photo-preview-container" class="hidden mb-4">
@@ -248,7 +248,7 @@
      </div>
     </div>
    </div><!-- Fixed Header -->
-   <div class="sticky top-0 z-30 bg-white/95 shadow-lg backdrop-blur-sm">
+   <div class="sticky top-0 z-30 bg-white/85 shadow-lg backdrop-blur-sm">
     <div class="max-w-7xl mx-auto px-3 sm:px-6 py-3 sm:py-4">
      <div class="flex items-center justify-between"><!-- Logo -->
       <div class="flex items-center gap-2 sm:gap-3 flex-shrink-0"><img src="https://i.ibb.co/fGzJKxy8/Grupo-Covre-0000.png" alt="Logo Grupo Covre" loading="lazy" decoding="async" class="h-16 sm:h-24 lg:h-32 w-auto object-contain" onerror="console.error('Image failed to load:', this.src); this.style.display='none';">
@@ -413,7 +413,7 @@
       </div>
      </div>
     </div><!-- Footer Content Inside Main Area -->
-    <div class="bg-gradient-to-br from-white via-gray-50 to-gray-100 border-t border-gray-200 py-8 sm:py-10">
+    <div class="bg-gradient-to-br from-white via-gray-50 to-gray-100 border-t border-gray-200 py-4 sm:py-5">
      <div class="max-w-7xl mx-auto px-3 sm:px-6">
       <div class="flex flex-col items-center gap-5"><!-- Logo -->
        <div class="flex items-center justify-center"><img src="https://i.ibb.co/fGzJKxy8/Grupo-Covre-0000.png" alt="Logo Grupo Covre" loading="lazy" decoding="async" class="h-20 sm:h-28 lg:h-32 w-auto object-contain" onerror="console.error('Image failed to load:', this.src); this.style.display='none';">
@@ -497,6 +497,55 @@
       }
     });
 
+    // Navegação por Enter nos selects e inputs
+    document.getElementById('fuel-city').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter' && this.value) {
+        document.getElementById('fuel-station').focus();
+      }
+    });
+
+    document.getElementById('fuel-station').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter' && this.value) {
+        document.getElementById('driver-name').focus();
+      }
+    });
+
+    document.getElementById('driver-name').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        document.getElementById('fuel-date').focus();
+      }
+    });
+
+    document.getElementById('fuel-date').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        document.getElementById('fuel-km').focus();
+      }
+    });
+
+    document.getElementById('fuel-km').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        document.getElementById('fuel-liters').focus();
+      }
+    });
+
+    document.getElementById('fuel-liters').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        document.getElementById('fuel-type').focus();
+      }
+    });
+
+    document.getElementById('fuel-type').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        document.getElementById('fuel-value').focus();
+      }
+    });
+
+    document.getElementById('fuel-value').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        document.getElementById('fuel-photo').click();
+      }
+    });
+
     function toggleMenu() {
       const menu = document.getElementById('menu-dropdown');
       menu.classList.toggle('hidden');
@@ -534,7 +583,8 @@
       const km = document.getElementById('fuel-km').value;
       const litros = document.getElementById('fuel-liters').value;
       const tipoCombustivel = document.getElementById('fuel-type').value;
-      const valor = document.getElementById('fuel-value').value;
+      const valorInput = document.getElementById('fuel-value').value;
+      const valor = valorInput.replace(/\D/g, '').replace(/(\d{2})$/, '.$1').replace(/,/, '');
       const fileInput = document.getElementById('fuel-photo');
 
       if (!fileInput.files || fileInput.files.length === 0) {
@@ -573,7 +623,7 @@
             await progressPromise;
 
             setTimeout(() => {
-              const mensagem = `*REGISTRO DE ABASTECIMENTO*\n\nMotorista: ${motorista}\nPosto: ${posto}\nCidade: ${cidade}\nData: ${dataFormatada}\nKM: ${km} km\nCombustível: ${litros} L\nTipo: ${tipoCombustivel}\nValor: R$ ${valor}`;
+              const mensagem = `📋 *REGISTRO DE ABASTECIMENTO*\n\n👤 *Motorista:* ${motorista}\n⛽ *Posto:* ${posto}\n📍 *Cidade:* ${cidade}\n📅 *Data:* ${dataFormatada}\n🛣️ *KM:* ${km} km\n🛢️ *Combustível:* ${litros} L\n🔋 *Tipo:* ${tipoCombustivel}\n💰 *Valor:* R$ ${valor}`;
 
               const numeroWhatsApp = '5527999884208';
               const urlWhatsApp = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensagem)}`;
@@ -795,6 +845,28 @@
       document.getElementById('photo-preview').src = '';
     }
 
+    function formatCurrency(input) {
+      let value = input.value.replace(/\D/g, '');
+      
+      if (value.length === 0) {
+        input.value = '';
+        return;
+      }
+
+      // Garantir que tenha pelo menos 2 dígitos (para centavos)
+      if (value.length <= 2) {
+        value = value.padStart(2, '0');
+        input.value = `R$ 0,${value}`;
+      } else {
+        const inteiros = value.slice(0, -2);
+        const decimais = value.slice(-2);
+        // Remove zeros à esquerda dos inteiros
+        const inteirosLimpos = inteiros.replace(/^0+/, '') || '0';
+        const inteirosFormatados = inteirosLimpos.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        input.value = `R$ ${inteirosFormatados},${decimais}`;
+      }
+    }
+
     function capturePhoto() {
       const fileInput = document.getElementById('fuel-photo');
       fileInput.setAttribute('capture', 'environment');
@@ -946,5 +1018,5 @@
       }
     });
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9dd90a389760464c',t:'MTc3MzcxOTQ5NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9dd91d4920003236',t:'MTc3MzcyMDI3NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
