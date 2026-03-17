@@ -747,15 +747,40 @@
     }
 
     function openFuelForm(postoNome, cidadeNome) {
-      document.getElementById('fuel-station').value = postoNome;
-      document.getElementById('fuel-city').value = cidadeNome;
       document.getElementById('fuel-form-modal').classList.remove('hidden');
+      document.getElementById('fuel-form').reset();
       
+      // Carregar postos da cidade
+      const citySelect = document.getElementById('fuel-city');
+      const stationSelect = document.getElementById('fuel-station');
+      
+      // Definir a cidade
+      citySelect.value = cidadeNome;
+      
+      // Preencher os postos disponíveis
+      if (postosPorCidade[cidadeNome]) {
+        stationSelect.innerHTML = '<option value="">Selecione um posto</option>';
+        postosPorCidade[cidadeNome].forEach(posto => {
+          const option = document.createElement('option');
+          option.value = posto.nome;
+          option.textContent = posto.nome;
+          stationSelect.appendChild(option);
+        });
+        // Selecionar o posto específico
+        stationSelect.value = postoNome;
+      }
+      
+      // Definir data de hoje
       const today = new Date();
       const year = today.getFullYear();
       const month = String(today.getMonth() + 1).padStart(2, '0');
       const day = String(today.getDate()).padStart(2, '0');
       document.getElementById('fuel-date').value = `${year}-${month}-${day}`;
+      
+      // Limpar foto
+      document.getElementById('fuel-photo').value = '';
+      document.getElementById('photo-preview-container').classList.add('hidden');
+      document.getElementById('photo-buttons').classList.remove('hidden');
     }
 
     function openWhatsAppSuggestions() {
@@ -791,15 +816,21 @@
 
     function selectCity(cityName) {
       let postos = [];
+      let postosCidades = {}; // Armazena a cidade para cada posto
       
       if (cityName === 'Todos os Postos') {
-        Object.values(postosPorCidade).forEach(cityPostos => {
+        Object.entries(postosPorCidade).forEach(([cidade, cityPostos]) => {
           cityPostos.forEach(posto => {
             postos.push(posto);
+            postosCidades[posto.nome] = cidade; // Mapeia posto para sua cidade
           });
         });
-      } else {
-        postos = postosPorCidade[cityName] ? postosPorCidade[cityName].map(posto => ({ ...posto })) : [];
+      } else if (postosPorCidade[cityName]) {
+        postos = postosPorCidade[cityName];
+        // Se está em uma cidade específica, todos os postos são dessa cidade
+        postos.forEach(posto => {
+          postosCidades[posto.nome] = cityName;
+        });
       }
       
       const postosDisplay = document.getElementById('postos-display');
@@ -847,7 +878,7 @@
             Ver no Mapa
           </button>` : ''}
           <button 
-            onclick="openFuelForm('${posto.nome.replace(/'/g, "\\'").replace(/"/g, '\\"')}', '${cityName.replace(/'/g, "\\'").replace(/"/g, '\\"')}')"
+            onclick="openFuelForm('${posto.nome.replace(/'/g, "\\'").replace(/"/g, '\\"')}', '${postosCidades[posto.nome].replace(/'/g, "\\'").replace(/"/g, '\\"')}')"
             class="w-full ${posto.link ? 'mt-2' : ''} bg-green-600 hover:bg-green-700 text-white font-medium py-2 sm:py-2.5 px-3 sm:px-4 rounded-lg flex items-center justify-center gap-2 transition-colors text-xs sm:text-sm"
           >
             <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1078,5 +1109,5 @@
       }
     });
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9dd97f1033a1f89b',t:'MTc3MzcyNDI4MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9dd989be44716ea8',t:'MTc3MzcyNDcxOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
