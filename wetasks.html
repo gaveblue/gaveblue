@@ -1,0 +1,615 @@
+<!doctype html>
+<html lang="pt-BR" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task Agenda</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
+  <style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;font-family:'Plus Jakarta Sans',sans-serif}
+:root{
+--bg:#F0F4F8;--surface:#FFFFFF;--text:#1E293B;--primary:#2563EB;--secondary:#64748B;
+--urgent:#EF4444;--high:#2563EB;--medium:#F59E0B;--low:#10B981;
+}
+.app-wrapper{height:100%;width:100%;overflow:auto;background:var(--bg);color:var(--text)}
+.fade-in{animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.slide-up{animation:slideUp .35s ease}
+@keyframes slideUp{from{opacity:0;transform:translateY(100%)}to{opacity:1;transform:translateY(0)}}
+.card{background:var(--surface);border-radius:16px;box-shadow:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);transition:all .2s}
+.card:hover{box-shadow:0 4px 12px rgba(0,0,0,.08)}
+.priority-bar{width:4px;border-radius:4px;min-height:100%}
+.nav-btn{transition:all .2s;position:relative}
+.nav-btn.active::after{content:'';position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);width:20px;height:3px;border-radius:2px;background:var(--primary)}
+.badge{position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;border-radius:9px;background:var(--urgent);color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 4px}
+.modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.4);backdrop-filter:blur(4px);z-index:50;display:flex;align-items:flex-end;justify-content:center}
+@media(min-width:640px){.modal-overlay{align-items:center}}
+.modal-content{background:var(--surface);border-radius:24px 24px 0 0;width:100%;max-width:500px;max-height:90%;overflow:auto;padding:24px}
+@media(min-width:640px){.modal-content{border-radius:24px}}
+input,textarea,select{border:1.5px solid #E2E8F0;border-radius:12px;padding:10px 14px;font-family:inherit;font-size:14px;width:100%;transition:border .2s;background:#F8FAFC}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--primary);background:#fff}
+.btn{border:none;border-radius:12px;padding:10px 20px;font-family:inherit;font-weight:600;font-size:14px;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:6px}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-primary:hover{background:#1D4ED8}
+.btn-danger{background:#FEE2E2;color:var(--urgent)}
+.btn-danger:hover{background:#FECACA}
+.btn-ghost{background:transparent;color:var(--secondary)}
+.btn-ghost:hover{background:#F1F5F9}
+.tab-btn{padding:8px 16px;border-radius:10px;font-weight:600;font-size:13px;border:none;cursor:pointer;background:transparent;color:var(--secondary);transition:all .15s}
+.tab-btn.active{background:var(--primary);color:#fff}
+.confirm-bar{background:#FEF3C7;border:1.5px solid #FCD34D;border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:500}
+.toast{position:fixed;top:20px;right:20px;z-index:100;background:var(--surface);border-radius:14px;padding:14px 20px;box-shadow:0 8px 24px rgba(0,0,0,.12);display:flex;align-items:center;gap:10px;font-size:14px;font-weight:500;animation:slideIn .3s ease}
+@keyframes slideIn{from{opacity:0;transform:translateX(100px)}to{opacity:1;transform:translateX(0)}}
+.cal-day{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;border:none;background:transparent}
+.cal-day:hover{background:#EFF6FF}
+.cal-day.today{background:var(--primary);color:#fff;font-weight:700}
+.cal-day.selected{outline:2px solid var(--primary);outline-offset:1px}
+.cal-day.has-tasks::after{content:'';position:absolute;bottom:2px;width:4px;height:4px;border-radius:50%;background:var(--primary)}
+.cal-day{position:relative}
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;color:var(--secondary);text-align:center}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-thumb{background:#CBD5E1;border-radius:3px}
+</style>
+  <style>body { box-sizing: border-box; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full">
+  <div class="app-wrapper" id="app"><!-- Toast container -->
+   <div id="toast-container"></div><!-- Header -->
+   <header style="background:linear-gradient(135deg,#2563EB 0%,#3B82F6 50%,#60A5FA 100%);color:#fff;padding:20px 20px 60px;position:relative">
+    <div style="max-width:600px;margin:0 auto">
+     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <div>
+       <p style="font-size:13px;opacity:.8" id="greeting-text">Olá! Bem-vindo 👋</p>
+       <h1 style="font-size:22px;font-weight:800;letter-spacing:-.3px" id="app-title">Minha Agenda</h1>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center"><button onclick="toggleNotifications()" style="background:rgba(255,255,255,.15);border:none;border-radius:12px;width:42px;height:42px;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;color:#fff"> <i data-lucide="bell" style="width:20px;height:20px"></i> <span class="badge" id="notif-badge" style="display:none">0</span> </button>
+      </div>
+     </div>
+     <div style="display:flex;gap:6px;align-items:center;font-size:14px;opacity:.9"><i data-lucide="calendar" style="width:16px;height:16px"></i> <span id="header-date"></span>
+     </div>
+    </div>
+   </header><!-- Summary Cards -->
+   <div style="max-width:600px;margin:-40px auto 0;padding:0 16px;position:relative;z-index:2">
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px" id="summary-cards">
+     <div class="card" style="padding:14px;text-align:center">
+      <p style="font-size:24px;font-weight:800;color:var(--primary)" id="total-count">0</p>
+      <p style="font-size:11px;color:var(--secondary);font-weight:500">Total</p>
+     </div>
+     <div class="card" style="padding:14px;text-align:center">
+      <p style="font-size:24px;font-weight:800;color:var(--low)" id="done-count">0</p>
+      <p style="font-size:11px;color:var(--secondary);font-weight:500">Concluídas</p>
+     </div>
+     <div class="card" style="padding:14px;text-align:center">
+      <p style="font-size:24px;font-weight:800;color:var(--urgent)" id="urgent-count">0</p>
+      <p style="font-size:11px;color:var(--secondary);font-weight:500">Urgentes</p>
+     </div>
+    </div>
+   </div><!-- Navigation Tabs -->
+   <div style="max-width:600px;margin:16px auto 0;padding:0 16px">
+    <div style="display:flex;gap:6px;background:var(--surface);border-radius:14px;padding:4px;box-shadow:0 1px 3px rgba(0,0,0,.05)"><button class="tab-btn active" onclick="switchTab('tasks')" id="tab-tasks">Tarefas</button> <button class="tab-btn" onclick="switchTab('calendar')" id="tab-calendar">Calendário</button>
+    </div>
+   </div><!-- Tasks View -->
+   <div id="view-tasks" style="max-width:600px;margin:12px auto 100px;padding:0 16px"><!-- Filter -->
+    <div style="display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;padding:4px 0"><button class="tab-btn active" onclick="filterTasks('all')" data-filter="all" style="font-size:12px;white-space:nowrap">Todas</button> <button class="tab-btn" onclick="filterTasks('pending')" data-filter="pending" style="font-size:12px;white-space:nowrap">Pendentes</button> <button class="tab-btn" onclick="filterTasks('done')" data-filter="done" style="font-size:12px;white-space:nowrap">Concluídas</button> <button class="tab-btn" onclick="filterTasks('urgent')" data-filter="urgent" style="font-size:12px;white-space:nowrap">Urgentes</button>
+    </div>
+    <div id="tasks-list"></div>
+   </div><!-- Calendar View -->
+   <div id="view-calendar" style="max-width:600px;margin:12px auto 100px;padding:0 16px;display:none">
+    <div class="card" style="padding:20px;margin-bottom:16px">
+     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><button onclick="changeMonth(-1)" class="btn btn-ghost" style="padding:8px"><i data-lucide="chevron-left" style="width:18px;height:18px"></i></button>
+      <h3 style="font-weight:700;font-size:16px" id="cal-month-label"></h3><button onclick="changeMonth(1)" class="btn btn-ghost" style="padding:8px"><i data-lucide="chevron-right" style="width:18px;height:18px"></i></button>
+     </div>
+     <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center;margin-bottom:8px"><span style="font-size:11px;font-weight:600;color:var(--secondary);padding:4px">Dom</span> <span style="font-size:11px;font-weight:600;color:var(--secondary);padding:4px">Seg</span> <span style="font-size:11px;font-weight:600;color:var(--secondary);padding:4px">Ter</span> <span style="font-size:11px;font-weight:600;color:var(--secondary);padding:4px">Qua</span> <span style="font-size:11px;font-weight:600;color:var(--secondary);padding:4px">Qui</span> <span style="font-size:11px;font-weight:600;color:var(--secondary);padding:4px">Sex</span> <span style="font-size:11px;font-weight:600;color:var(--secondary);padding:4px">Sáb</span>
+     </div>
+     <div id="cal-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px"></div>
+    </div>
+    <h3 style="font-weight:700;font-size:15px;margin-bottom:10px" id="cal-day-label">Tarefas do dia</h3>
+    <div id="cal-tasks-list"></div>
+   </div><!-- Notifications Panel -->
+   <div id="notif-panel" style="display:none;position:fixed;top:0;right:0;bottom:0;width:100%;max-width:360px;background:var(--surface);z-index:60;box-shadow:-4px 0 24px rgba(0,0,0,.1);overflow:auto" class="slide-up">
+    <div style="padding:20px">
+     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <h2 style="font-weight:800;font-size:18px">Notificações</h2><button onclick="toggleNotifications()" class="btn btn-ghost" style="padding:8px"><i data-lucide="x" style="width:20px;height:20px"></i></button>
+     </div>
+     <div id="notif-list"></div>
+    </div>
+   </div>
+   <div id="notif-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:55" onclick="toggleNotifications()"></div><!-- FAB --> <button onclick="openTaskModal()" style="position:fixed;bottom:24px;right:24px;width:56px;height:56px;border-radius:16px;background:var(--primary);color:#fff;border:none;box-shadow:0 4px 16px rgba(37,99,235,.4);cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;transition:all .2s" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'"> <i data-lucide="plus" style="width:24px;height:24px"></i> </button> <!-- Task Modal -->
+   <div id="task-modal" class="modal-overlay" style="display:none" onclick="if(event.target===this)closeTaskModal()">
+    <div class="modal-content slide-up">
+     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <h2 style="font-weight:800;font-size:18px" id="modal-title">Nova Tarefa</h2><button onclick="closeTaskModal()" class="btn btn-ghost" style="padding:8px"><i data-lucide="x" style="width:20px;height:20px"></i></button>
+     </div>
+     <form id="task-form" onsubmit="handleFormSubmit(event)"><input type="hidden" id="task-id">
+      <div style="display:flex;flex-direction:column;gap:14px">
+       <div><label style="font-size:12px;font-weight:600;color:var(--secondary);margin-bottom:4px;display:block">Título *</label> <input type="text" id="f-title" required placeholder="Nome da tarefa">
+       </div>
+       <div><label style="font-size:12px;font-weight:600;color:var(--secondary);margin-bottom:4px;display:block">Descrição</label> <textarea id="f-desc" rows="2" placeholder="Detalhes da tarefa" style="resize:vertical"></textarea>
+       </div>
+       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div><label style="font-size:12px;font-weight:600;color:var(--secondary);margin-bottom:4px;display:block">Data *</label> <input type="date" id="f-date" required>
+        </div>
+        <div><label style="font-size:12px;font-weight:600;color:var(--secondary);margin-bottom:4px;display:block">Horário</label> <input type="time" id="f-time">
+        </div>
+       </div>
+       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div><label style="font-size:12px;font-weight:600;color:var(--secondary);margin-bottom:4px;display:block">Prioridade</label> <select id="f-priority"> <option value="low">🟢 Baixa</option> <option value="medium">🟡 Média</option> <option value="high">🔵 Alta</option> <option value="urgent">🔴 Urgente</option> </select>
+        </div>
+        <div><label style="font-size:12px;font-weight:600;color:var(--secondary);margin-bottom:4px;display:block">Categoria</label> <select id="f-category"> <option value="geral">Geral</option> <option value="trabalho">Trabalho</option> <option value="pessoal">Pessoal</option> <option value="estudo">Estudo</option> <option value="saude">Saúde</option> </select>
+        </div>
+       </div>
+       <div><label style="font-size:12px;font-weight:600;color:var(--secondary);margin-bottom:4px;display:block">Observações</label> <textarea id="f-notes" rows="2" placeholder="Notas adicionais..." style="resize:vertical"></textarea>
+       </div><!-- Confirm bar for editing -->
+       <div id="confirm-save-bar" style="display:none" class="confirm-bar"><i data-lucide="alert-triangle" style="width:16px;height:16px;color:#D97706;flex-shrink:0"></i> <span>Confirma salvar as alterações?</span>
+        <div style="margin-left:auto;display:flex;gap:6px"><button type="button" onclick="cancelConfirm()" class="btn btn-ghost" style="padding:6px 12px;font-size:12px">Não</button> <button type="submit" class="btn btn-primary" style="padding:6px 12px;font-size:12px">Sim</button>
+        </div>
+       </div>
+       <div id="form-actions" style="display:flex;gap:10px;justify-content:flex-end"><button type="button" onclick="closeTaskModal()" class="btn btn-ghost">Cancelar</button> <button type="button" onclick="requestSaveConfirm()" class="btn btn-primary" id="save-btn"> <i data-lucide="check" style="width:16px;height:16px"></i> Salvar </button>
+       </div>
+      </div>
+     </form>
+    </div>
+   </div><!-- Delete Confirm Modal -->
+   <div id="delete-modal" class="modal-overlay" style="display:none" onclick="if(event.target===this)closeDeleteModal()">
+    <div class="modal-content slide-up" style="max-width:380px;text-align:center">
+     <div style="width:56px;height:56px;border-radius:16px;background:#FEE2E2;display:flex;align-items:center;justify-content:center;margin:0 auto 16px"><i data-lucide="trash-2" style="width:24px;height:24px;color:var(--urgent)"></i>
+     </div>
+     <h3 style="font-weight:700;font-size:17px;margin-bottom:8px">Excluir tarefa?</h3>
+     <p style="font-size:13px;color:var(--secondary);margin-bottom:20px" id="delete-task-name"></p>
+     <div style="display:flex;gap:10px;justify-content:center"><button onclick="closeDeleteModal()" class="btn btn-ghost">Cancelar</button> <button onclick="confirmDelete()" class="btn btn-danger"><i data-lucide="trash-2" style="width:14px;height:14px"></i> Excluir</button>
+     </div>
+    </div>
+   </div><!-- Complete Confirm Modal -->
+   <div id="complete-modal" class="modal-overlay" style="display:none" onclick="if(event.target===this)closeCompleteModal()">
+    <div class="modal-content slide-up" style="max-width:380px;text-align:center">
+     <div style="width:56px;height:56px;border-radius:16px;background:#D1FAE5;display:flex;align-items:center;justify-content:center;margin:0 auto 16px"><i data-lucide="check-circle" style="width:24px;height:24px;color:var(--low)"></i>
+     </div>
+     <h3 style="font-weight:700;font-size:17px;margin-bottom:8px" id="complete-modal-title">Concluir tarefa?</h3>
+     <p style="font-size:13px;color:var(--secondary);margin-bottom:20px" id="complete-task-name"></p>
+     <div style="display:flex;gap:10px;justify-content:center"><button onclick="closeCompleteModal()" class="btn btn-ghost">Cancelar</button> <button onclick="confirmComplete()" class="btn btn-primary"><i data-lucide="check" style="width:14px;height:14px"></i> Confirmar</button>
+     </div>
+    </div>
+   </div>
+  </div>
+  <script>
+// ===== STATE =====
+let tasks = JSON.parse(localStorage.getItem('agenda_tasks') || '[]');
+let notifications = JSON.parse(localStorage.getItem('agenda_notifs') || '[]');
+let currentFilter = 'all';
+let currentTab = 'tasks';
+let calMonth = new Date().getMonth();
+let calYear = new Date().getFullYear();
+let selectedCalDate = null;
+let deleteTargetId = null;
+let completeTargetId = null;
+let editingId = null;
+let needsConfirm = false;
+
+const PRIORITY_COLORS = { urgent:'#EF4444', high:'#2563EB', medium:'#F59E0B', low:'#10B981' };
+const PRIORITY_LABELS = { urgent:'Urgente', high:'Alta', medium:'Média', low:'Baixa' };
+const CATEGORY_LABELS = { geral:'Geral', trabalho:'Trabalho', pessoal:'Pessoal', estudo:'Estudo', saude:'Saúde' };
+const MONTHS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+function save() {
+  localStorage.setItem('agenda_tasks', JSON.stringify(tasks));
+  localStorage.setItem('agenda_notifs', JSON.stringify(notifications));
+}
+
+function todayStr() { return new Date().toISOString().split('T')[0]; }
+
+function formatDate(d) {
+  const dt = new Date(d + 'T00:00:00');
+  return dt.toLocaleDateString('pt-BR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+}
+
+// ===== TOAST =====
+function showToast(msg, type='success') {
+  const c = document.getElementById('toast-container');
+  const colors = { success:'#10B981', error:'#EF4444', info:'#2563EB' };
+  const icons = { success:'check-circle', error:'alert-circle', info:'info' };
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.innerHTML = `<i data-lucide="${icons[type]}" style="width:18px;height:18px;color:${colors[type]}"></i><span>${msg}</span>`;
+  c.appendChild(t);
+  lucide.createIcons();
+  setTimeout(() => { t.style.opacity='0'; t.style.transform='translateX(100px)'; t.style.transition='all .3s'; setTimeout(() => t.remove(), 300); }, 3000);
+}
+
+// ===== NOTIFICATIONS =====
+function addNotification(msg, type='info') {
+  notifications.unshift({ id: Date.now(), msg, type, time: new Date().toISOString(), read: false });
+  if (notifications.length > 50) notifications = notifications.slice(0, 50);
+  save();
+  renderNotifBadge();
+}
+
+function renderNotifBadge() {
+  const unread = notifications.filter(n => !n.read).length;
+  const b = document.getElementById('notif-badge');
+  if (unread > 0) { b.style.display = 'flex'; b.textContent = unread > 9 ? '9+' : unread; }
+  else b.style.display = 'none';
+}
+
+function toggleNotifications() {
+  const p = document.getElementById('notif-panel');
+  const o = document.getElementById('notif-overlay');
+  const show = p.style.display === 'none';
+  p.style.display = show ? 'block' : 'none';
+  o.style.display = show ? 'block' : 'none';
+  if (show) {
+    notifications.forEach(n => n.read = true);
+    save();
+    renderNotifBadge();
+    renderNotifications();
+  }
+}
+
+function renderNotifications() {
+  const list = document.getElementById('notif-list');
+  if (!notifications.length) { list.innerHTML = '<div class="empty-state" style="padding:20px"><p style="font-size:14px">Nenhuma notificação</p></div>'; return; }
+  list.innerHTML = notifications.slice(0, 20).map(n => {
+    const t = new Date(n.time);
+    const timeStr = t.toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
+    const iconMap = { urgent:'alert-triangle', added:'plus-circle', done:'check-circle', deleted:'trash-2', info:'info' };
+    const colorMap = { urgent:'#EF4444', added:'#2563EB', done:'#10B981', deleted:'#64748B', info:'#2563EB' };
+    return `<div style="display:flex;gap:10px;padding:12px 0;border-bottom:1px solid #F1F5F9;align-items:flex-start">
+      <div style="width:32px;height:32px;border-radius:10px;background:${colorMap[n.type]||'#2563EB'}15;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <i data-lucide="${iconMap[n.type]||'info'}" style="width:16px;height:16px;color:${colorMap[n.type]||'#2563EB'}"></i>
+      </div>
+      <div><p style="font-size:13px;font-weight:500">${n.msg}</p><p style="font-size:11px;color:var(--secondary)">${timeStr}</p></div>
+    </div>`;
+  }).join('');
+  lucide.createIcons();
+}
+
+// ===== RENDER HEADER =====
+function renderHeader() {
+  document.getElementById('header-date').textContent = formatDate(todayStr());
+  // Greeting based on time
+  const h = new Date().getHours();
+  const greetings = h < 12 ? 'Bom dia! ☀️' : h < 18 ? 'Boa tarde! 🌤️' : 'Boa noite! 🌙';
+  const gt = document.getElementById('greeting-text');
+  if (!gt.dataset.custom) gt.textContent = greetings;
+}
+
+// ===== RENDER SUMMARY =====
+function renderSummary() {
+  const today = todayStr();
+  const todayTasks = tasks.filter(t => t.date === today);
+  document.getElementById('total-count').textContent = todayTasks.length;
+  document.getElementById('done-count').textContent = todayTasks.filter(t => t.status === 'done').length;
+  document.getElementById('urgent-count').textContent = todayTasks.filter(t => t.priority === 'urgent' && t.status !== 'done').length;
+}
+
+// ===== RENDER TASKS =====
+function renderTasks(targetTasks, container) {
+  const list = container || document.getElementById('tasks-list');
+  let filtered = targetTasks || tasks;
+  const today = todayStr();
+
+  if (!targetTasks) {
+    if (currentFilter === 'pending') filtered = tasks.filter(t => t.date === today && t.status !== 'done');
+    else if (currentFilter === 'done') filtered = tasks.filter(t => t.date === today && t.status === 'done');
+    else if (currentFilter === 'urgent') filtered = tasks.filter(t => t.date === today && t.priority === 'urgent');
+    else filtered = tasks.filter(t => t.date === today);
+  }
+
+  // Sort: pending first, then by priority weight
+  const pw = { urgent:0, high:1, medium:2, low:3 };
+  filtered.sort((a, b) => {
+    if (a.status === 'done' && b.status !== 'done') return 1;
+    if (a.status !== 'done' && b.status === 'done') return -1;
+    return (pw[a.priority]||3) - (pw[b.priority]||3);
+  });
+
+  if (!filtered.length) {
+    list.innerHTML = `<div class="empty-state fade-in">
+      <div style="width:64px;height:64px;border-radius:20px;background:#EFF6FF;display:flex;align-items:center;justify-content:center;margin-bottom:12px">
+        <i data-lucide="clipboard-list" style="width:28px;height:28px;color:var(--primary)"></i>
+      </div>
+      <p style="font-weight:600;font-size:15px;margin-bottom:4px">Nenhuma tarefa</p>
+      <p style="font-size:13px">Toque no + para adicionar</p>
+    </div>`;
+    lucide.createIcons();
+    return;
+  }
+
+  list.innerHTML = filtered.map(t => {
+    const pc = PRIORITY_COLORS[t.priority] || '#64748B';
+    const isDone = t.status === 'done';
+    const timeStr = t.time ? ` • ${t.time}` : '';
+    return `<div class="card fade-in" style="display:flex;gap:12px;padding:14px;margin-bottom:10px;${isDone?'opacity:.6':''}">
+      <div class="priority-bar" style="background:${pc}"></div>
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+          <div style="flex:1;min-width:0">
+            <h4 style="font-weight:700;font-size:14px;${isDone?'text-decoration:line-through;color:var(--secondary)':''};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.title}</h4>
+            ${t.description?`<p style="font-size:12px;color:var(--secondary);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.description}</p>`:''}
+          </div>
+          <span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;background:${pc}18;color:${pc};white-space:nowrap">${PRIORITY_LABELS[t.priority]}</span>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;align-items:center">
+          <span style="font-size:11px;color:var(--secondary);display:flex;align-items:center;gap:3px"><i data-lucide="clock" style="width:12px;height:12px"></i>${t.date}${timeStr}</span>
+          <span style="font-size:10px;padding:2px 8px;border-radius:6px;background:#F1F5F9;color:var(--secondary);font-weight:500">${CATEGORY_LABELS[t.category]||t.category}</span>
+          ${isDone?'<span style="font-size:10px;padding:2px 8px;border-radius:6px;background:#D1FAE5;color:#059669;font-weight:600">✓ Concluída</span>':''}
+        </div>
+        <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">
+          ${!isDone?`<button onclick="requestComplete('${t.id}')" class="btn btn-ghost" style="padding:5px 10px;font-size:11px;color:var(--low)"><i data-lucide="check" style="width:13px;height:13px"></i> Concluir</button>`
+          :`<button onclick="requestUncomplete('${t.id}')" class="btn btn-ghost" style="padding:5px 10px;font-size:11px;color:var(--primary)"><i data-lucide="rotate-ccw" style="width:13px;height:13px"></i> Reabrir</button>`}
+          <button onclick="editTask('${t.id}')" class="btn btn-ghost" style="padding:5px 10px;font-size:11px"><i data-lucide="edit-2" style="width:13px;height:13px"></i> Editar</button>
+          <button onclick="requestDelete('${t.id}')" class="btn btn-ghost" style="padding:5px 10px;font-size:11px;color:var(--urgent)"><i data-lucide="trash-2" style="width:13px;height:13px"></i> Excluir</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  lucide.createIcons();
+}
+
+// ===== FILTERS =====
+function filterTasks(f) {
+  currentFilter = f;
+  document.querySelectorAll('[data-filter]').forEach(b => b.classList.toggle('active', b.dataset.filter === f));
+  renderTasks();
+}
+
+// ===== TABS =====
+function switchTab(tab) {
+  currentTab = tab;
+  document.getElementById('tab-tasks').classList.toggle('active', tab === 'tasks');
+  document.getElementById('tab-calendar').classList.toggle('active', tab === 'calendar');
+  document.getElementById('view-tasks').style.display = tab === 'tasks' ? 'block' : 'none';
+  document.getElementById('view-calendar').style.display = tab === 'calendar' ? 'block' : 'none';
+  if (tab === 'calendar') renderCalendar();
+}
+
+// ===== CALENDAR =====
+function renderCalendar() {
+  document.getElementById('cal-month-label').textContent = `${MONTHS[calMonth]} ${calYear}`;
+  const grid = document.getElementById('cal-grid');
+  const firstDay = new Date(calYear, calMonth, 1).getDay();
+  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+  const today = todayStr();
+
+  let html = '';
+  for (let i = 0; i < firstDay; i++) html += '<div></div>';
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isToday = dateStr === today;
+    const isSel = dateStr === selectedCalDate;
+    const hasTasks = tasks.some(t => t.date === dateStr);
+    html += `<button class="cal-day${isToday?' today':''}${isSel?' selected':''}" onclick="selectCalDate('${dateStr}')">${d}${hasTasks?'<span style="position:absolute;bottom:2px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:'+(isToday?'#fff':'var(--primary)')+'"></span>':''}</button>`;
+  }
+  grid.innerHTML = html;
+
+  const selDate = selectedCalDate || today;
+  document.getElementById('cal-day-label').textContent = `Tarefas — ${new Date(selDate+'T00:00:00').toLocaleDateString('pt-BR',{day:'numeric',month:'long'})}`;
+  const dayTasks = tasks.filter(t => t.date === selDate);
+  renderTasks(dayTasks, document.getElementById('cal-tasks-list'));
+}
+
+function selectCalDate(d) { selectedCalDate = d; renderCalendar(); }
+function changeMonth(dir) {
+  calMonth += dir;
+  if (calMonth > 11) { calMonth = 0; calYear++; }
+  if (calMonth < 0) { calMonth = 11; calYear--; }
+  renderCalendar();
+}
+
+// ===== TASK MODAL =====
+function openTaskModal(id) {
+  editingId = id || null;
+  needsConfirm = false;
+  document.getElementById('confirm-save-bar').style.display = 'none';
+  document.getElementById('form-actions').style.display = 'flex';
+  document.getElementById('modal-title').textContent = id ? 'Editar Tarefa' : 'Nova Tarefa';
+  document.getElementById('save-btn').innerHTML = '<i data-lucide="check" style="width:16px;height:16px"></i> ' + (id ? 'Atualizar' : 'Salvar');
+
+  if (id) {
+    const t = tasks.find(x => x.id === id);
+    if (t) {
+      document.getElementById('f-title').value = t.title;
+      document.getElementById('f-desc').value = t.description || '';
+      document.getElementById('f-date').value = t.date;
+      document.getElementById('f-time').value = t.time || '';
+      document.getElementById('f-priority').value = t.priority;
+      document.getElementById('f-category').value = t.category || 'geral';
+      document.getElementById('f-notes').value = t.notes || '';
+    }
+  } else {
+    document.getElementById('task-form').reset();
+    document.getElementById('f-date').value = selectedCalDate || todayStr();
+  }
+
+  document.getElementById('task-modal').style.display = 'flex';
+  lucide.createIcons();
+}
+
+function closeTaskModal() {
+  document.getElementById('task-modal').style.display = 'none';
+  editingId = null;
+  needsConfirm = false;
+}
+
+function requestSaveConfirm() {
+  if (!document.getElementById('f-title').value.trim()) {
+    document.getElementById('f-title').focus();
+    return;
+  }
+  if (!document.getElementById('f-date').value) {
+    document.getElementById('f-date').focus();
+    return;
+  }
+  // Show confirm bar
+  document.getElementById('confirm-save-bar').style.display = 'flex';
+  document.getElementById('form-actions').style.display = 'none';
+  lucide.createIcons();
+}
+
+function cancelConfirm() {
+  document.getElementById('confirm-save-bar').style.display = 'none';
+  document.getElementById('form-actions').style.display = 'flex';
+}
+
+function handleFormSubmit(e) {
+  e.preventDefault();
+  const data = {
+    title: document.getElementById('f-title').value.trim(),
+    description: document.getElementById('f-desc').value.trim(),
+    date: document.getElementById('f-date').value,
+    time: document.getElementById('f-time').value,
+    priority: document.getElementById('f-priority').value,
+    category: document.getElementById('f-category').value,
+    notes: document.getElementById('f-notes').value.trim(),
+  };
+
+  if (editingId) {
+    const idx = tasks.findIndex(t => t.id === editingId);
+    if (idx > -1) {
+      tasks[idx] = { ...tasks[idx], ...data };
+      addNotification(`Tarefa "${data.title}" atualizada`, 'info');
+      showToast('Tarefa atualizada!');
+    }
+  } else {
+    const newTask = { id: 'task_' + Date.now(), ...data, status: 'pending', createdAt: new Date().toISOString() };
+    tasks.push(newTask);
+    addNotification(`Nova tarefa: "${data.title}"`, 'added');
+    if (data.priority === 'urgent') addNotification(`⚠️ Tarefa URGENTE: "${data.title}"`, 'urgent');
+    showToast('Tarefa criada!');
+  }
+
+  save();
+  closeTaskModal();
+  renderAll();
+}
+
+function editTask(id) { openTaskModal(id); }
+
+// ===== DELETE =====
+function requestDelete(id) {
+  deleteTargetId = id;
+  const t = tasks.find(x => x.id === id);
+  document.getElementById('delete-task-name').textContent = t ? `"${t.title}"` : '';
+  document.getElementById('delete-modal').style.display = 'flex';
+  lucide.createIcons();
+}
+function closeDeleteModal() { document.getElementById('delete-modal').style.display = 'none'; deleteTargetId = null; }
+function confirmDelete() {
+  if (!deleteTargetId) return;
+  const t = tasks.find(x => x.id === deleteTargetId);
+  tasks = tasks.filter(x => x.id !== deleteTargetId);
+  if (t) addNotification(`Tarefa "${t.title}" excluída`, 'deleted');
+  save();
+  closeDeleteModal();
+  showToast('Tarefa excluída', 'error');
+  renderAll();
+}
+
+// ===== COMPLETE =====
+function requestComplete(id) {
+  completeTargetId = id;
+  const t = tasks.find(x => x.id === id);
+  document.getElementById('complete-task-name').textContent = t ? `"${t.title}"` : '';
+  document.getElementById('complete-modal-title').textContent = 'Concluir tarefa?';
+  document.getElementById('complete-modal').style.display = 'flex';
+  lucide.createIcons();
+}
+function requestUncomplete(id) {
+  completeTargetId = id;
+  const t = tasks.find(x => x.id === id);
+  document.getElementById('complete-task-name').textContent = t ? `Reabrir "${t.title}"?` : '';
+  document.getElementById('complete-modal-title').textContent = 'Reabrir tarefa?';
+  document.getElementById('complete-modal').style.display = 'flex';
+  lucide.createIcons();
+}
+function closeCompleteModal() { document.getElementById('complete-modal').style.display = 'none'; completeTargetId = null; }
+function confirmComplete() {
+  if (!completeTargetId) return;
+  const t = tasks.find(x => x.id === completeTargetId);
+  if (t) {
+    t.status = t.status === 'done' ? 'pending' : 'done';
+    const action = t.status === 'done' ? 'concluída' : 'reaberta';
+    addNotification(`Tarefa "${t.title}" ${action}`, 'done');
+    showToast(`Tarefa ${action}!`);
+  }
+  save();
+  closeCompleteModal();
+  renderAll();
+}
+
+// ===== RENDER ALL =====
+function renderAll() {
+  renderHeader();
+  renderSummary();
+  renderNotifBadge();
+  if (currentTab === 'tasks') renderTasks();
+  if (currentTab === 'calendar') renderCalendar();
+}
+
+// ===== ELEMENT SDK =====
+const defaultConfig = {
+  app_title: 'Minha Agenda',
+  greeting_text: '',
+  background_color: '#F0F4F8',
+  surface_color: '#FFFFFF',
+  text_color: '#1E293B',
+  primary_color: '#2563EB',
+  secondary_color: '#64748B',
+  font_family: 'Plus Jakarta Sans',
+  font_size: 14,
+};
+
+function applyConfig(cfg) {
+  const c = { ...defaultConfig, ...cfg };
+  document.documentElement.style.setProperty('--bg', c.background_color);
+  document.documentElement.style.setProperty('--surface', c.surface_color);
+  document.documentElement.style.setProperty('--text', c.text_color);
+  document.documentElement.style.setProperty('--primary', c.primary_color);
+  document.documentElement.style.setProperty('--secondary', c.secondary_color);
+
+  const title = document.getElementById('app-title');
+  if (title) title.textContent = c.app_title;
+
+  const gt = document.getElementById('greeting-text');
+  if (gt && c.greeting_text) { gt.textContent = c.greeting_text; gt.dataset.custom = '1'; }
+  else if (gt && !c.greeting_text) { delete gt.dataset.custom; renderHeader(); }
+
+  document.body.style.fontFamily = `${c.font_family}, 'Plus Jakarta Sans', sans-serif`;
+
+  const base = c.font_size || 14;
+  document.body.style.fontSize = base + 'px';
+}
+
+if (window.elementSdk) {
+  window.elementSdk.init({
+    defaultConfig,
+    onConfigChange: async (cfg) => applyConfig(cfg),
+    mapToCapabilities: (cfg) => ({
+      recolorables: [
+        { get: () => cfg.background_color || defaultConfig.background_color, set: v => { cfg.background_color = v; window.elementSdk.setConfig({ background_color: v }); } },
+        { get: () => cfg.surface_color || defaultConfig.surface_color, set: v => { cfg.surface_color = v; window.elementSdk.setConfig({ surface_color: v }); } },
+        { get: () => cfg.text_color || defaultConfig.text_color, set: v => { cfg.text_color = v; window.elementSdk.setConfig({ text_color: v }); } },
+        { get: () => cfg.primary_color || defaultConfig.primary_color, set: v => { cfg.primary_color = v; window.elementSdk.setConfig({ primary_color: v }); } },
+        { get: () => cfg.secondary_color || defaultConfig.secondary_color, set: v => { cfg.secondary_color = v; window.elementSdk.setConfig({ secondary_color: v }); } },
+      ],
+      borderables: [],
+      fontEditable: { get: () => cfg.font_family || defaultConfig.font_family, set: v => { cfg.font_family = v; window.elementSdk.setConfig({ font_family: v }); } },
+      fontSizeable: { get: () => cfg.font_size || defaultConfig.font_size, set: v => { cfg.font_size = v; window.elementSdk.setConfig({ font_size: v }); } },
+    }),
+    mapToEditPanelValues: (cfg) => new Map([
+      ['app_title', cfg.app_title || defaultConfig.app_title],
+      ['greeting_text', cfg.greeting_text || defaultConfig.greeting_text],
+    ]),
+  });
+}
+
+// Init
+renderAll();
+lucide.createIcons();
+</script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9e2d94d594943522',t:'MTc3NDYwNTk3Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
