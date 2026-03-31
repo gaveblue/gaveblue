@@ -123,16 +123,47 @@ input:focus,textarea:focus,select:focus{outline:none;border-color:var(--primary)
      </div>
      <div style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid #F1F5F9">
       <p style="font-size:12px;font-weight:600;color:var(--secondary);margin-bottom:8px" id="name-label">Editar nome</p>
-      <div style="display:flex;gap:8px"><input type="text" id="settings-name-input" placeholder="Digite seu nome" style="border:1.5px solid #E2E8F0;border-radius:12px;padding:10px 14px;font-family:inherit;font-size:14px;flex:1;background:var(--surface);color:var(--text)"> <button onclick="updateUserName()" class="btn btn-primary" style="padding:10px 16px"><i data-lucide="check" style="width:16px;height:16px"></i></button>
+      <div style="display:flex;gap:8px"><input type="text" id="settings-name-input" placeholder="Digite seu nome" style="border:1.5px solid #E2E8F0;border-radius:12px;padding:10px 14px;font-family:inherit;font-size:14px;flex:1;background:var(--surface);color:var(--text)"> <button onclick="updateUserName()" class="btn btn-primary" style="padding:10px 16px"><i data-lucide="pencil" style="width:16px;height:16px"></i></button>
       </div>
      </div>
-     <div>
+     <div style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid #F1F5F9">
       <p style="font-size:12px;font-weight:600;color:var(--secondary);margin-bottom:12px">Tema</p>
       <div style="display:flex;gap:8px"><button onclick="setTheme('light')" id="theme-light" class="btn" style="flex:1;justify-content:center;border:2px solid #E2E8F0;background:transparent;color:var(--secondary)"><i data-lucide="sun" style="width:16px;height:16px"></i> Claro</button> <button onclick="setTheme('dark')" id="theme-dark" class="btn" style="flex:1;justify-content:center;border:2px solid #E2E8F0;background:transparent;color:var(--secondary)"><i data-lucide="moon" style="width:16px;height:16px"></i> Escuro</button>
       </div>
      </div>
-     <div style="margin-top:20px;padding-top:20px;border-top:1px solid #F1F5F9">
-      <p style="font-size:12px;font-weight:600;color:var(--secondary);margin-bottom:8px">Notificações</p><button onclick="clearNotifications()" class="btn btn-ghost" style="width:100%;justify-content:center;border:1.5px solid #E2E8F0;font-size:12px;border-radius:16px"><i data-lucide="trash-2" style="width:14px;height:14px"></i> Limpar Todas</button>
+     <div style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid #F1F5F9">
+      <p style="font-size:12px;font-weight:600;color:var(--secondary);margin-bottom:10px">Exibição</p>
+      <div style="display:flex;flex-direction:column;gap:10px">
+       <button onclick="toggleTaskCompletedVisibility()" class="btn btn-ghost" style="width:100%;justify-content:space-between;border:1.5px solid #E2E8F0;font-size:12px;border-radius:12px;padding:10px 12px"> <span style="display:flex;align-items:center;gap:8px"><i data-lucide="eye" style="width:14px;height:14px"></i> Tarefas Concluídas</span> <span id="completed-visibility" style="font-weight:700;color:var(--primary)">Ocultar</span> </button> <button onclick="toggleWeekView()" class="btn btn-ghost" style="width:100%;justify-content:space-between;border:1.5px solid #E2E8F0;font-size:12px;border-radius:12px;padding:10px 12px"> <span style="display:flex;align-items:center;gap:8px"><i data-lucide="calendar" style="width:14px;height:14px"></i> Visão Semanal</span> <span id="week-view-toggle" style="font-weight:700;color:var(--primary)">Desativado</span> </button>
+      </div>
+     </div>
+     <div style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid #F1F5F9">
+      <p style="font-size:12px;font-weight:600;color:var(--secondary);margin-bottom:10px">Dados</p>
+      <div style="display:flex;flex-direction:column;gap:8px">
+       <button onclick="exportTasks()" class="btn btn-ghost" style="width:100%;justify-content:center;border:1.5px solid #E2E8F0;font-size:12px;border-radius:12px"><i data-lucide="download" style="width:14px;height:14px"></i> Exportar Tarefas</button> <button onclick="importTasks()" class="btn btn-ghost" style="width:100%;justify-content:center;border:1.5px solid #E2E8F0;font-size:12px;border-radius:12px"><i data-lucide="upload" style="width:14px;height:14px"></i> Importar Tarefas</button> <input type="file" id="import-file" accept=".json" style="display:none" onchange="handleImportFile(event)">
+      </div>
+     </div>
+     <div style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid #F1F5F9">
+      <p style="font-size:12px;font-weight:600;color:var(--secondary);margin-bottom:10px">Notificações</p>
+      <div style="display:flex;flex-direction:column;gap:8px">
+       <button onclick="toggleNotifications()" class="btn btn-ghost" style="width:100%;justify-content:space-between;border:1.5px solid #E2E8F0;font-size:12px;border-radius:12px;padding:10px 12px"> <span style="display:flex;align-items:center;gap:8px"><i data-lucide="bell" style="width:14px;height:14px"></i> Notificações</span> <span id="notif-toggle" style="font-weight:700;color:var(--primary)">Ativadas</span> </button> <button onclick="clearNotifications()" class="btn btn-danger" style="width:100%;justify-content:center;border-radius:12px;font-size:12px"><i data-lucide="trash-2" style="width:14px;height:14px"></i> Limpar Todas</button>
+      </div>
+     </div>
+     <div style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid #F1F5F9">
+      <p style="font-size:12px;font-weight:600;color:var(--secondary);margin-bottom:10px">Estatísticas</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+       <div class="card" style="padding:12px;text-align:center;background:#EFF6FF">
+        <p style="font-size:18px;font-weight:800;color:var(--primary)" id="stats-total">0</p>
+        <p style="font-size:10px;color:var(--secondary);margin-top:4px">Total</p>
+       </div>
+       <div class="card" style="padding:12px;text-align:center;background:#F0FDF4">
+        <p style="font-size:18px;font-weight:800;color:var(--low)" id="stats-completed">0</p>
+        <p style="font-size:10px;color:var(--secondary);margin-top:4px">Concluídas</p>
+       </div>
+      </div>
+     </div>
+     <div style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid #F1F5F9">
+      <p style="font-size:12px;font-weight:600;color:var(--secondary);margin-bottom:10px">Limpeza</p><button onclick="requestClearAll()" class="btn" style="width:100%;justify-content:center;border:1.5px solid #FEE2E2;background:#FEE2E2;color:var(--urgent);border-radius:12px;font-size:12px;font-weight:600"><i data-lucide="trash" style="width:14px;height:14px"></i> Limpar Tudo</button>
      </div>
     </div>
    </div>
@@ -263,6 +294,9 @@ let tasks = JSON.parse(localStorage.getItem('agenda_tasks') || '[]');
 let notifications = JSON.parse(localStorage.getItem('agenda_notifs') || '[]');
 let userName = localStorage.getItem('user_name') || '';
 let currentTheme = localStorage.getItem('user_theme') || 'light';
+let showCompletedTasks = localStorage.getItem('show_completed') === 'true';
+let weekViewEnabled = localStorage.getItem('week_view') === 'true';
+let notificationsEnabled = localStorage.getItem('notif_enabled') !== 'false';
 let currentFilter = 'all';
 let currentTab = 'tasks';
 let calMonth = new Date().getMonth();
@@ -272,6 +306,7 @@ let selectedTaskDate = null;
 let deleteTargetId = null;
 let completeTargetId = null;
 let editingId = null;
+let clearAllTargetId = null;
 
 const PRIORITY_COLORS = { urgent:'#EF4444', high:'#FF8C42', medium:'#FBBF24', low:'#10B981' };
 const PRIORITY_LABELS = { urgent:'Urgente', high:'Alta', medium:'Média', low:'Baixa' };
@@ -428,6 +463,8 @@ function toggleSettings(event) {
   if (show) {
     document.getElementById('settings-name-input').value = userName;
     updateThemeButtons();
+    updateSettingsToggles();
+    updateStatsDisplay();
   }
   updateFabVisibility();
 }
@@ -491,7 +528,135 @@ function applyTheme() {
   }
 }
 
+function toggleTaskCompletedVisibility() {
+  showCompletedTasks = !showCompletedTasks;
+  localStorage.setItem('show_completed', showCompletedTasks);
+  document.getElementById('completed-visibility').textContent = showCompletedTasks ? 'Mostrar' : 'Ocultar';
+  renderTasks();
+  showToast(showCompletedTasks ? 'Tarefas concluídas mostradas' : 'Tarefas concluídas ocultadas');
+}
+
+function toggleWeekView() {
+  weekViewEnabled = !weekViewEnabled;
+  localStorage.setItem('week_view', weekViewEnabled);
+  document.getElementById('week-view-toggle').textContent = weekViewEnabled ? 'Ativado' : 'Desativado';
+  showToast(weekViewEnabled ? 'Visão semanal ativada' : 'Visão semanal desativada');
+}
+
+function toggleNotificationsFeature() {
+  notificationsEnabled = !notificationsEnabled;
+  localStorage.setItem('notif_enabled', notificationsEnabled);
+  document.getElementById('notif-toggle').textContent = notificationsEnabled ? 'Ativadas' : 'Desativadas';
+  showToast(notificationsEnabled ? 'Notificações ativadas' : 'Notificações desativadas');
+}
+
+function updateSettingsToggles() {
+  document.getElementById('completed-visibility').textContent = showCompletedTasks ? 'Mostrar' : 'Ocultar';
+  document.getElementById('week-view-toggle').textContent = weekViewEnabled ? 'Ativado' : 'Desativado';
+  document.getElementById('notif-toggle').textContent = notificationsEnabled ? 'Ativadas' : 'Desativadas';
+}
+
+function updateStatsDisplay() {
+  const total = tasks.length;
+  const completed = tasks.filter(t => t.status === 'done').length;
+  document.getElementById('stats-total').textContent = total;
+  document.getElementById('stats-completed').textContent = completed;
+}
+
+function exportTasks() {
+  const data = {
+    exportDate: new Date().toISOString(),
+    tasks: tasks,
+    userName: userName,
+    version: '1.0'
+  };
+  
+  const json = JSON.stringify(data, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `tarefas_agenda_${new Date().toISOString().split('T')[0]}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  
+  showToast('Tarefas exportadas com sucesso!');
+}
+
+function importTasks() {
+  document.getElementById('import-file').click();
+}
+
+function handleImportFile(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data.tasks || !Array.isArray(data.tasks)) {
+        showToast('Arquivo inválido!', 'error');
+        return;
+      }
+      
+      tasks = [...tasks, ...data.tasks];
+      save();
+      renderAll();
+      showToast(`${data.tasks.length} tarefas importadas!`);
+    } catch (err) {
+      showToast('Erro ao ler arquivo!', 'error');
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+function requestClearAll() {
+  clearAllTargetId = true;
+  const modal = `
+    <div class="modal-overlay" id="clear-all-modal" style="display:flex" onclick="if(event.target===this)closeClearAllModal()">
+      <div class="modal-content slide-up" style="max-width:380px;text-align:center">
+        <div style="width:56px;height:56px;border-radius:16px;background:#FEE2E2;display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
+          <i data-lucide="alert-triangle" style="width:24px;height:24px;color:var(--urgent)"></i>
+        </div>
+        <h3 style="font-weight:700;font-size:17px;margin-bottom:8px">Limpar Tudo?</h3>
+        <p style="font-size:13px;color:var(--secondary);margin-bottom:20px">Isto vai deletar <strong>todas</strong> as tarefas e não pode ser desfeito.</p>
+        <div style="display:flex;gap:10px;justify-content:center">
+          <button onclick="closeClearAllModal()" class="btn btn-ghost" style="border-radius:14px">Cancelar</button>
+          <button onclick="confirmClearAll()" class="btn btn-danger" style="border-radius:14px">
+            <i data-lucide="trash" style="width:14px;height:14px"></i> Deletar Tudo
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  const container = document.getElementById('app');
+  const tempDiv = document.createElement('div');
+  tempDiv.innerHTML = modal;
+  container.appendChild(tempDiv.firstElementChild);
+  lucide.createIcons();
+}
+
+function closeClearAllModal() {
+  const modal = document.getElementById('clear-all-modal');
+  if (modal) modal.remove();
+  clearAllTargetId = null;
+}
+
+function confirmClearAll() {
+  tasks = [];
+  save();
+  closeClearAllModal();
+  renderAll();
+  showToast('Todas as tarefas foram deletadas', 'error');
+}
+
 function addNotification(msg, type='info') {
+  if (!notificationsEnabled) return;
   notifications.unshift({ id: Date.now(), msg, type, time: new Date().toISOString(), read: false });
   if (notifications.length > 50) notifications = notifications.slice(0, 50);
   save();
@@ -612,25 +777,25 @@ function renderTasks(targetTasks, container) {
     const timeStr = t.time ? `${t.time}` : 'Sem horário';
     const prioritySymbol = { urgent: '⬤', high: '■', medium: '▲', low: '▢' }[t.priority] || '○';
     return `<div class="card fade-in" style="display:grid;grid-template-columns:80px 1fr;gap:16px;padding:16px;margin-bottom:12px;border-left:4px solid ${pc};${isDone?'opacity:.6':''}">
-      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px;background:${pc}08;border-radius:12px;min-height:80px">
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px;background:${pc}08;border-radius:12px;min-height:80px;gap:2px">
         ${t.time?`<div style="font-size:28px;font-weight:800;color:${pc};line-height:1.1;letter-spacing:-0.5px">${t.time.split(':')[0]}<span style="font-size:28px">:${t.time.split(':')[1]}</span></div>`:`<div style="font-size:11px;color:var(--secondary)">sem hora</div>`}
-        <div style="font-size:10px;color:var(--secondary);margin-top:4px">${dateFormatted}</div>
+        <div style="font-size:12px;color:var(--text);font-weight:900;margin-top:2px">${dateFormatted}</div>
+        <span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;background:${pc}18;color:${pc};margin-top:4px">${PRIORITY_LABELS[t.priority]}</span>
       </div>
       <div style="display:flex;flex-direction:column;justify-content:center">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:6px">
           <div style="flex:1;min-width:0">
             <div style="display:flex;gap:6px;align-items:center;margin-bottom:2px">
               <span style="font-size:12px;color:${pc};font-weight:700">${prioritySymbol}</span>
-              <h4 style="font-weight:700;font-size:15px;${isDone?'text-decoration:line-through;color:var(--secondary)':''};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1">${t.title}</h4>
+              <h4 style="font-weight:700;font-size:15px;${isDone?'text-decoration:line-through;color:var(--secondary)':''};word-break:break-word">${t.title}</h4>
             </div>
-            ${t.description?`<p style="font-size:12px;color:var(--secondary);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.description}</p>`:''}
+            ${t.description?`<p style="font-size:12px;color:var(--secondary);margin-top:2px;word-break:break-word">${t.description}</p>`:''}
           </div>
-          <span style="font-size:10px;font-weight:700;padding:4px 10px;border-radius:8px;background:${pc}18;color:${pc};white-space:nowrap">${PRIORITY_LABELS[t.priority]}</span>
         </div>
         <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
           ${!isDone?`<button onclick="requestComplete('${t.id}')" class="btn btn-ghost" style="padding:5px 10px;font-size:11px;color:var(--low)"><i data-lucide="check" style="width:13px;height:13px"></i> Concluir</button>`
           :`<button onclick="requestUncomplete('${t.id}')" class="btn btn-ghost" style="padding:5px 10px;font-size:11px;color:var(--primary)"><i data-lucide="rotate-ccw" style="width:13px;height:13px"></i> Reabrir</button>`}
-          <button onclick="openTaskModal('${t.id}')" class="btn btn-ghost" style="padding:5px 10px;font-size:11px"><i data-lucide="edit-2" style="width:13px;height:13px"></i> Editar</button>
+          <button onclick="openTaskModal('${t.id}')" class="btn btn-ghost" style="padding:5px 10px;font-size:11px"><i data-lucide="pencil" style="width:13px;height:13px"></i> Editar</button>
           <button onclick="requestDelete('${t.id}')" class="btn btn-ghost" style="padding:5px 10px;font-size:11px;color:var(--urgent)"><i data-lucide="trash-2" style="width:13px;height:13px"></i> Excluir</button>
         </div>
       </div>
@@ -926,6 +1091,7 @@ function renderAll() {
 
 // ===== ELEMENT SDK =====
 const defaultConfig = {
+  page_title: 'Task Agenda',
   app_title: 'Minha Agenda',
   greeting_text: '',
   background_color: '#F0F4F8',
@@ -939,6 +1105,7 @@ const defaultConfig = {
 
 function applyConfig(cfg) {
   const c = { ...defaultConfig, ...cfg };
+  document.title = c.page_title;
   document.documentElement.style.setProperty('--bg', c.background_color);
   document.documentElement.style.setProperty('--surface', c.surface_color);
   document.documentElement.style.setProperty('--text', c.text_color);
@@ -975,6 +1142,7 @@ if (window.elementSdk) {
       fontSizeable: { get: () => cfg.font_size || defaultConfig.font_size, set: v => { cfg.font_size = v; window.elementSdk.setConfig({ font_size: v }); } },
     }),
     mapToEditPanelValues: (cfg) => new Map([
+      ['page_title', cfg.page_title || defaultConfig.page_title],
       ['app_title', cfg.app_title || defaultConfig.app_title],
       ['greeting_text', cfg.greeting_text || defaultConfig.greeting_text],
     ]),
@@ -984,13 +1152,9 @@ if (window.elementSdk) {
 function initApp() {
   applyTheme();
   getTodayFromAPI().then(() => {
-    if (!userName) {
-      showNameModal();
-    } else {
-      renderAll();
-      lucide.createIcons();
-      updateFabVisibility();
-    }
+    renderAll();
+    lucide.createIcons();
+    updateFabVisibility();
   });
 }
 
@@ -1157,5 +1321,5 @@ function finishTutorial() {
 initApp();
 </script>
   </div>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9e4c1c74906daf44',t:'MTc3NDkyNjEwMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9e50a3ee31d364f1',t:'MTc3NDk3MzU5Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
