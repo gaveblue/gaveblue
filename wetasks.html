@@ -3,7 +3,8 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Task Agenda</title>
+  <title>WeTasks - gaveblue.com</title>
+  <meta name="description" content="WeTasks - Sua agenda pessoal desenvolvida por gaveblue.com. Organize suas tarefas com facilidade e aumente sua produtividade.">
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
   <script src="/_sdk/element_sdk.js"></script>
@@ -22,13 +23,9 @@ html,body{height:100%;font-family:'Plus Jakarta Sans',sans-serif}
 @keyframes slideUp{from{opacity:0;transform:translateY(100%)}to{opacity:1;transform:translateY(0)}}
 .card{background:var(--surface);border-radius:16px;box-shadow:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);transition:all .2s}
 .card:hover{box-shadow:0 4px 12px rgba(0,0,0,.08)}
-.priority-bar{width:4px;border-radius:4px;min-height:100%}
-.nav-btn{transition:all .2s;position:relative}
-.nav-btn.active::after{content:'';position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);width:20px;height:3px;border-radius:2px;background:var(--primary)}
-.badge{position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;border-radius:9px;background:var(--urgent);color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 4px}
-.modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.4);backdrop-filter:blur(4px);z-index:50;display:flex;align-items:center;justify-content:center}
-.modal-content{background:var(--surface);border-radius:24px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;padding:28px}
-@media(max-width:640px){.modal-content{border-radius:20px 20px 0 0;max-height:85vh}}
+.modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.4);backdrop-filter:blur(4px);z-index:200;display:flex;align-items:center;justify-content:center}
+.modal-content{background:var(--surface);border-radius:24px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;padding:28px;display:flex;flex-direction:column}
+@media(max-width:640px){.modal-content{border-radius:20px;max-height:85vh;width:calc(100% - 24px);margin:12px}}
 input,textarea,select{border:1.5px solid #E2E8F0;border-radius:12px;padding:10px 14px;font-family:inherit;font-size:14px;width:100%;transition:border .2s;background:#F8FAFC}
 input:focus,textarea:focus,select:focus{outline:none;border-color:var(--primary);background:#fff}
 .btn{border:none;border-radius:12px;padding:10px 20px;font-family:inherit;font-weight:600;font-size:14px;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:6px}
@@ -40,47 +37,140 @@ input:focus,textarea:focus,select:focus{outline:none;border-color:var(--primary)
 .btn-ghost:hover{background:#F1F5F9}
 .tab-btn{padding:8px 16px;border-radius:10px;font-weight:600;font-size:13px;border:none;cursor:pointer;background:transparent;color:var(--secondary);transition:all .15s}
 .tab-btn.active{background:var(--primary);color:#fff}
-.confirm-bar{background:#FEF3C7;border:1.5px solid #FCD34D;border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:500}
 .toast{position:fixed;top:20px;right:20px;z-index:100;background:var(--surface);border-radius:14px;padding:14px 20px;box-shadow:0 8px 24px rgba(0,0,0,.12);display:flex;align-items:center;gap:10px;font-size:14px;font-weight:500;animation:slideIn .3s ease}
 @keyframes slideIn{from{opacity:0;transform:translateX(100px)}to{opacity:1;transform:translateX(0)}}
-.cal-day{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;border:none;background:transparent}
+.cal-day{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;border:none;background:transparent;position:relative}
 .cal-day:hover{background:#EFF6FF}
 .cal-day.today{background:var(--primary);color:#fff;font-weight:700}
 .cal-day.selected{outline:2px solid var(--primary);outline-offset:1px}
-.cal-day.has-tasks::after{content:'';position:absolute;bottom:2px;width:4px;height:4px;border-radius:50%;background:var(--primary)}
-.cal-day{position:relative}
 .empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;color:var(--secondary);text-align:center}
+@keyframes pulse{0%{opacity:1;transform:scale(1)}50%{opacity:.7;transform:scale(1.2)}100%{opacity:1;transform:scale(1)}}
 ::-webkit-scrollbar{width:6px}
 ::-webkit-scrollbar-thumb{background:#CBD5E1;border-radius:3px}
-</style>
+  </style>
   <style>body { box-sizing: border-box; }</style>
   <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
  </head>
- <body class="h-full">
-  <button onclick="openTaskModal()" id="fab-button" style="position:fixed;bottom:24px;right:24px;width:56px;height:56px;border-radius:16px;background:var(--primary);color:#fff;border:none;box-shadow:0 4px 16px rgba(37,99,235,.4);cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:100;transition:all .2s" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'"> <i data-lucide="plus" style="width:24px;height:24px"></i> </button>
+ <body class="h-full"><button onclick="openTaskModal()" id="fab-button" style="position:fixed;bottom:24px;right:24px;width:56px;height:56px;border-radius:16px;background:var(--primary);color:#fff;border:none;box-shadow:0 4px 16px rgba(37,99,235,.4);cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:100;transition:all .2s" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'"><i data-lucide="plus" style="width:24px;height:24px"></i></button>
   <div class="app-wrapper" id="app">
    <div id="toast-container"></div>
-   <header style="background:linear-gradient(135deg,#2563EB 0%,#3B82F6 50%,#60A5FA 100%);color:#fff;padding:20px 20px 60px;position:relative">
-    <div style="max-width:600px;margin:0 auto">
-     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-      <div style="display:flex;flex-direction:column;gap:3px">
-       <p style="font-size:13px;opacity:.8" id="greeting-text">Olá! Bem-vindo 👋</p>
-       <h1 style="font-size:22px;font-weight:800;letter-spacing:-.3px" id="app-title">Minha Agenda</h1>
-      </div>
-      <div style="display:flex;gap:10px;align-items:center"><button onclick="toggleDashboard()" style="background:rgba(255,255,255,.15);border:none;border-radius:12px;width:42px;height:42px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff"> <i data-lucide="bar-chart-3" style="width:20px;height:20px"></i> </button> <button onclick="toggleNotifications()" style="background:rgba(255,255,255,.15);border:none;border-radius:12px;width:42px;height:42px;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;color:#fff"> <i data-lucide="bell" style="width:20px;height:20px"></i> <span class="badge" id="notif-badge" style="display:none">0</span> </button> <button onclick="toggleSettings()" style="background:rgba(255,255,255,.15);border:none;border-radius:12px;width:42px;height:42px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff"> <i data-lucide="settings" style="width:20px;height:20px"></i> </button>
+   <header style="background:linear-gradient(135deg,#2563EB 0%,#3B82F6 50%,#60A5FA 100%);color:#fff;padding:20px;position:relative">
+    <style>
+      @media (min-width: 960px) {
+        .header-desktop {
+          display:flex;
+          justify-content:space-between;
+          align-items:center;
+          gap:30px;
+          padding:16px 40px;
+        }
+        .header-desktop-left {
+          flex:1;
+          display:flex;
+          flex-direction:column;
+          align-items:flex-start;
+          gap:4px;
+        }
+        .header-desktop-left-greeting {
+          font-size:12px;
+          font-weight:400;
+          letter-spacing:-0.3px;
+          margin-bottom:6px;
+          opacity:.85;
+        }
+        .header-desktop-left-datetime {
+          display:flex;
+          align-items:center;
+          gap:8px;
+        }
+        .header-desktop-left-date {
+          display:flex;
+          align-items:center;
+          gap:3px;
+          font-size:11px;
+          font-weight:500;
+          letter-spacing:-0.3px;
+          opacity:.65;
+        }
+        .header-desktop-left-time {
+          display:flex;
+          align-items:center;
+          gap:3px;
+          font-size:11px;
+          font-weight:500;
+          letter-spacing:-0.3px;
+          opacity:.65;
+        }
+        .header-desktop-center {
+          flex:1;
+          display:flex;
+          justify-content:center;
+          align-items:center;
+        }
+        .header-desktop-center img {
+          height:40px;
+          width:auto;
+          object-fit:contain;
+        }
+        .header-desktop-right {
+          flex:1;
+          display:flex;
+          justify-content:flex-end;
+          gap:10px;
+          align-items:center;
+        }
+      }
+      @media (max-width: 959px) {
+        .header-desktop {
+          display:none;
+        }
+      }
+      @media (min-width: 960px) {
+        .header-mobile {
+          display:none;
+        }
+      }
+    </style><!-- LAYOUT DESKTOP -->
+    <div class="header-desktop">
+     <div class="header-desktop-left">
+      <div class="header-desktop-left-greeting" id="greeting-text-desktop"></div>
+      <div class="header-desktop-left-datetime">
+       <div class="header-desktop-left-date">
+        <i data-lucide="calendar" style="width:16px;height:16px"></i> <span id="header-date-desktop"></span>
+       </div>
+       <div class="header-desktop-left-time">
+        <i data-lucide="clock" style="width:16px;height:16px"></i> <span id="header-time-desktop"></span>
+       </div>
       </div>
      </div>
-     <div style="display:flex;gap:6px;align-items:center;font-size:14px;opacity:.9"><i data-lucide="calendar" style="width:16px;height:16px"></i> <span id="header-date"></span> <span style="opacity:.6">•</span> <span id="header-time"></span>
+     <div class="header-desktop-center"><img src="https://imgur.com/QVTXWdN.png" alt="Logo" loading="lazy" onerror="console.error('Image failed to load:', this.src); this.style.display='none';">
+     </div>
+     <div class="header-desktop-right">
+      <button onclick="toggleNotifications()" style="background:rgba(255,255,255,.15);border:none;border-radius:12px;width:42px;height:42px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;position:relative;transition:all .2s" onmouseover="this.style.background='rgba(255,255,255,.25)'" onmouseout="this.style.background='rgba(255,255,255,.15)'"><i data-lucide="bell" style="width:20px;height:20px"></i><span id="notification-badge-desktop" style="position:absolute;top:-4px;right:-4px;background:#FF6B6B;color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;display:none"></span></button> <button onclick="toggleSettings()" style="background:rgba(255,255,255,.15);border:none;border-radius:12px;width:42px;height:42px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;transition:all .2s" onmouseover="this.style.background='rgba(255,255,255,.25)'" onmouseout="this.style.background='rgba(255,255,255,.15)'"><i data-lucide="settings" style="width:20px;height:20px"></i></button> <button onclick="goToWebsite()" style="background:rgba(255,255,255,.15);border:none;border-radius:12px;width:42px;height:42px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;transition:all .2s" onmouseover="this.style.background='rgba(255,255,255,.25)'" onmouseout="this.style.background='rgba(255,255,255,.15)'"><i data-lucide="log-out" style="width:20px;height:20px"></i></button>
+     </div>
+    </div><!-- LAYOUT MOBILE -->
+    <div class="header-mobile">
+     <div style="max-width:600px;margin:0 auto">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+       <div style="display:flex;flex-direction:column;gap:12px;align-items:flex-start;flex:1;margin-right:24px">
+        <img src="https://imgur.com/QVTXWdN.png" alt="Logo" style="height:48px;width:auto;object-fit:contain;margin-left:-8px" loading="lazy" onerror="console.error('Image failed to load:', this.src); this.style.display='none';">
+        <div style="font-size:18px;font-weight:700;letter-spacing:-0.3px" id="greeting-text"></div>
+       </div>
+       <div style="display:flex;gap:10px;align-items:center;position:relative">
+        <button onclick="toggleNotifications()" style="background:rgba(255,255,255,.15);border:none;border-radius:12px;width:42px;height:42px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;position:relative;transition:all .2s" onmouseover="this.style.background='rgba(255,255,255,.25)'" onmouseout="this.style.background='rgba(255,255,255,.15)'"><i data-lucide="bell" style="width:20px;height:20px"></i><span id="notification-badge-mobile" style="position:absolute;top:-4px;right:-4px;background:#FF6B6B;color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;display:none"></span></button> <button onclick="toggleSettings()" style="background:rgba(255,255,255,.15);border:none;border-radius:12px;width:42px;height:42px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;transition:all .2s" onmouseover="this.style.background='rgba(255,255,255,.25)'" onmouseout="this.style.background='rgba(255,255,255,.15)'"><i data-lucide="settings" style="width:20px;height:20px"></i></button> <button onclick="goToWebsite()" style="background:rgba(255,255,255,.15);border:none;border-radius:12px;width:42px;height:42px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;transition:all .2s" onmouseover="this.style.background='rgba(255,255,255,.25)'" onmouseout="this.style.background='rgba(255,255,255,.15)'"><i data-lucide="log-out" style="width:20px;height:20px"></i></button>
+       </div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;font-size:15px;font-weight:700;letter-spacing:-0.3px;margin-top:6px"><i data-lucide="calendar" style="width:18px;height:18px"></i> <span id="header-date"></span> <span style="opacity:.6">•</span> <span id="header-time"></span>
+      </div>
      </div>
     </div>
    </header>
    <div style="max-width:600px;margin:16px auto 0;padding:0 16px">
-    <div style="display:flex;gap:6px;background:var(--surface);border-radius:14px;padding:4px;box-shadow:0 1px 3px rgba(0,0,0,.05)"><button class="tab-btn active" onclick="switchTab('tasks')" id="tab-tasks">Tarefas</button> <button class="tab-btn" onclick="switchTab('calendar')" id="tab-calendar">Calendário</button>
+    <div style="display:flex;gap:6px;background:var(--surface);border-radius:14px;padding:4px;box-shadow:0 1px 3px rgba(0,0,0,.05)"><button class="tab-btn active" onclick="switchTab('tasks')" id="tab-tasks">Tarefas</button> <button class="tab-btn" onclick="switchTab('calendar')" id="tab-calendar">Calendário</button> <button class="tab-btn" onclick="switchTab('dashboard')" id="tab-dashboard">Dashboard</button>
     </div>
    </div>
    <div id="view-tasks" style="max-width:600px;margin:12px auto 100px;padding:0 16px">
-    <div style="display:flex;gap:8px;margin-bottom:16px;align-items:center">
-     <button onclick="changeTaskDate(-1)" class="btn btn-ghost" style="padding:8px"><i data-lucide="chevron-left" style="width:18px;height:18px"></i></button>
+    <div style="display:flex;gap:8px;margin-bottom:16px;align-items:center"><button onclick="changeTaskDate(-1)" class="btn btn-ghost" style="padding:8px"><i data-lucide="chevron-left" style="width:18px;height:18px"></i></button>
      <div style="flex:1;text-align:center;font-weight:700;font-size:14px" id="tasks-date-label">
       Hoje
      </div><button onclick="changeTaskDate(1)" class="btn btn-ghost" style="padding:8px"><i data-lucide="chevron-right" style="width:18px;height:18px"></i></button>
@@ -90,8 +180,7 @@ input:focus,textarea:focus,select:focus{outline:none;border-color:var(--primary)
     <div id="tasks-list"></div>
    </div>
    <div id="view-calendar" style="max-width:600px;margin:12px auto 100px;padding:0 16px;display:none">
-    <div style="display:flex;gap:8px;margin-bottom:16px;align-items:center">
-     <button onclick="changeTaskDate(-1)" class="btn btn-ghost" style="padding:8px"><i data-lucide="chevron-left" style="width:18px;height:18px"></i></button>
+    <div style="display:flex;gap:8px;margin-bottom:16px;align-items:center"><button onclick="changeTaskDate(-1)" class="btn btn-ghost" style="padding:8px"><i data-lucide="chevron-left" style="width:18px;height:18px"></i></button>
      <div style="flex:1;text-align:center;font-weight:700;font-size:14px" id="cal-date-label">
       Hoje
      </div><button onclick="changeTaskDate(1)" class="btn btn-ghost" style="padding:8px"><i data-lucide="chevron-right" style="width:18px;height:18px"></i></button>
@@ -107,24 +196,60 @@ input:focus,textarea:focus,select:focus{outline:none;border-color:var(--primary)
     <h3 style="font-weight:700;font-size:15px;margin-bottom:10px" id="cal-day-label">Tarefas do dia</h3>
     <div id="cal-tasks-list"></div>
    </div>
-   <div id="notif-panel" style="display:none;position:fixed;top:0;right:0;bottom:0;width:100%;max-width:360px;background:var(--surface);z-index:60;box-shadow:-4px 0 24px rgba(0,0,0,.1);overflow:auto" class="slide-up">
-    <div style="padding:20px">
-     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
-      <h2 style="font-weight:800;font-size:18px">Notificações</h2><button onclick="toggleNotifications()" class="btn btn-ghost" style="padding:8px"><i data-lucide="x" style="width:20px;height:20px"></i></button>
+   <div id="view-dashboard" style="max-width:600px;margin:12px auto 100px;padding:0 16px;display:none">
+    <h2 style="font-weight:800;font-size:18px;margin-bottom:16px;color:var(--text)">Resumo da Agenda</h2><!-- AVISO DE LIMITE (SEMPRE VISÍVEL) -->
+    <div style="margin-bottom:16px;padding:16px;background:linear-gradient(135deg,#FEF3C7 0%,#FDE68A 100%);border-left:4px solid #F59E0B;border-radius:12px;animation:slideDown .3s ease;box-shadow:0 4px 12px rgba(245,158,11,.15)">
+     <div style="display:flex;gap:12px;align-items:flex-start">
+      <div style="width:40px;height:40px;border-radius:10px;background:#F59E0B;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+       <i data-lucide="alert-triangle" style="width:22px;height:22px;color:#fff"></i>
+      </div>
+      <div style="flex:1">
+       <p style="font-weight:800;color:#B45309;font-size:14px;margin-bottom:6px">💡 Dica de Manutenção</p>
+       <p style="font-size:13px;color:#B45309;margin-bottom:12px;line-height:1.5">Você tem <strong id="warning-count">0</strong> tarefas. Para manter tudo rápido e fluido, recomendamos <strong>limpar tarefas concluídas quando atingir 1.000</strong>. Seu sistema agradece! 🚀</p>
+       <div style="display:flex;justify-content:center;width:100%">
+        <button onclick="requestClearCompleted()" class="btn" style="padding:8px 16px;background:#B45309;color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;transition:all .2s;cursor:pointer" onmouseover="this.style.background='#92400e'" onmouseout="this.style.background='#B45309'"><i data-lucide="trash-2" style="width:15px;height:15px"></i> Limpar Concluídas</button>
+       </div>
+      </div>
      </div>
-     <div id="notif-list"></div>
+    </div><!-- CARDS DE RESUMO -->
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:20px">
+     <div class="card fade-in" style="padding:16px;background:linear-gradient(135deg,#EFF6FF 0%,#DBEAFE 100%);border-left:4px solid var(--primary)">
+      <p style="font-size:12px;font-weight:700;color:var(--primary);margin-bottom:8px;text-transform:uppercase">Total</p>
+      <h3 style="font-size:32px;font-weight:800;color:var(--primary);letter-spacing:-1px" id="stat-total">0</h3>
+      <p style="font-size:11px;color:var(--primary);opacity:.8;margin-top:4px">tarefas criadas</p>
+     </div>
+     <div class="card fade-in" style="padding:16px;background:linear-gradient(135deg,#ECFDF5 0%,#D1FAE5 100%);border-left:4px solid var(--low)">
+      <p style="font-size:12px;font-weight:700;color:var(--low);margin-bottom:8px;text-transform:uppercase">Concluídas</p>
+      <h3 style="font-size:32px;font-weight:800;color:var(--low);letter-spacing:-1px" id="stat-done">0</h3>
+      <p style="font-size:11px;color:var(--low);opacity:.8;margin-top:4px">tarefas finalizadas</p>
+     </div>
+     <div class="card fade-in" style="padding:16px;background:linear-gradient(135deg,#FEF3C7 0%,#FDE68A 100%);border-left:4px solid var(--medium)">
+      <p style="font-size:12px;font-weight:700;color:#B45309;margin-bottom:8px;text-transform:uppercase">Pendentes</p>
+      <h3 style="font-size:32px;font-weight:800;color:#B45309;letter-spacing:-1px" id="stat-pending">0</h3>
+      <p style="font-size:11px;color:#B45309;opacity:.8;margin-top:4px">aguardando conclusão</p>
+     </div>
+     <div class="card fade-in" style="padding:16px;background:linear-gradient(135deg,#FEE2E2 0%,#FECACA 100%);border-left:4px solid var(--urgent)">
+      <p style="font-size:12px;font-weight:700;color:var(--urgent);margin-bottom:8px;text-transform:uppercase">Urgentes</p>
+      <h3 style="font-size:32px;font-weight:800;color:var(--urgent);letter-spacing:-1px" id="stat-urgent">0</h3>
+      <p style="font-size:11px;color:var(--urgent);opacity:.8;margin-top:4px">requer atenção</p>
+     </div>
+    </div><!-- DISTRIBUIÇÃO POR PRIORIDADE -->
+    <h3 style="font-weight:700;font-size:15px;margin-bottom:12px;color:var(--text)">Distribuição por Prioridade</h3>
+    <div class="card fade-in" style="padding:16px;margin-bottom:20px">
+     <div style="display:flex;flex-direction:column;gap:12px" id="priority-dist"><!-- Será renderizado via JS -->
+     </div>
+    </div><!-- CATEGORIAS DE STATUS -->
+    <h3 style="font-weight:700;font-size:15px;margin-bottom:12px;color:var(--text)">Tarefas por Categoria</h3>
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:20px" id="category-cards"><!-- Será renderizado via JS -->
+    </div><!-- ÚLTIMAS TAREFAS -->
+    <h3 style="font-weight:700;font-size:15px;margin-bottom:12px;color:var(--text)">Últimas Tarefas Criadas</h3>
+    <div id="recent-tasks" style="display:flex;flex-direction:column;gap:10px"><!-- Será renderizado via JS -->
     </div>
    </div>
-   <div id="notif-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:55" onclick="toggleNotifications()"></div>
    <div id="settings-panel" style="display:none;position:fixed;top:0;right:0;bottom:0;width:100%;max-width:360px;background:var(--surface);z-index:60;box-shadow:-4px 0 24px rgba(0,0,0,.1);overflow:auto" class="slide-up">
     <div style="padding:20px">
      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
       <h2 style="font-weight:800;font-size:18px">Configurações</h2><button onclick="toggleSettings()" class="btn btn-ghost" style="padding:8px"><i data-lucide="x" style="width:20px;height:20px"></i></button>
-     </div>
-     <div style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid #F1F5F9">
-      <p style="font-size:12px;font-weight:600;color:var(--secondary);margin-bottom:8px" id="name-label">Editar nome</p>
-      <div style="display:flex;gap:8px"><input type="text" id="settings-name-input" placeholder="Digite seu nome" style="border:1.5px solid #E2E8F0;border-radius:12px;padding:10px 14px;font-family:inherit;font-size:14px;flex:1;background:var(--surface);color:var(--text)"> <button onclick="updateUserName()" class="btn btn-primary" style="padding:10px 16px"><i data-lucide="pencil" style="width:16px;height:16px"></i></button>
-      </div>
      </div>
      <div style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid #F1F5F9">
       <p style="font-size:12px;font-weight:600;color:var(--secondary);margin-bottom:12px">Tema</p>
@@ -132,71 +257,38 @@ input:focus,textarea:focus,select:focus{outline:none;border-color:var(--primary)
       </div>
      </div>
      <div style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid #F1F5F9">
-      <p style="font-size:12px;font-weight:600;color:var(--secondary);margin-bottom:10px">Exibição</p>
-      <div style="display:flex;flex-direction:column;gap:10px">
-       <button onclick="toggleTaskCompletedVisibility()" class="btn btn-ghost" style="width:100%;justify-content:space-between;border:1.5px solid #E2E8F0;font-size:12px;border-radius:12px;padding:10px 12px"> <span style="display:flex;align-items:center;gap:8px"><i data-lucide="eye" style="width:14px;height:14px"></i> Tarefas Concluídas</span> <span id="completed-visibility" style="font-weight:700;color:var(--primary)">Ocultar</span> </button> <button onclick="toggleWeekView()" class="btn btn-ghost" style="width:100%;justify-content:space-between;border:1.5px solid #E2E8F0;font-size:12px;border-radius:12px;padding:10px 12px"> <span style="display:flex;align-items:center;gap:8px"><i data-lucide="calendar" style="width:14px;height:14px"></i> Visão Semanal</span> <span id="week-view-toggle" style="font-weight:700;color:var(--primary)">Desativado</span> </button>
-      </div>
-     </div>
-     <div style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid #F1F5F9">
       <p style="font-size:12px;font-weight:600;color:var(--secondary);margin-bottom:10px">Dados</p>
-      <div style="display:flex;flex-direction:column;gap:8px">
-       <button onclick="exportTasks()" class="btn btn-ghost" style="width:100%;justify-content:center;border:1.5px solid #E2E8F0;font-size:12px;border-radius:12px"><i data-lucide="download" style="width:14px;height:14px"></i> Exportar Tarefas</button> <button onclick="importTasks()" class="btn btn-ghost" style="width:100%;justify-content:center;border:1.5px solid #E2E8F0;font-size:12px;border-radius:12px"><i data-lucide="upload" style="width:14px;height:14px"></i> Importar Tarefas</button> <input type="file" id="import-file" accept=".json" style="display:none" onchange="handleImportFile(event)">
-      </div>
-     </div>
-     <div style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid #F1F5F9">
-      <p style="font-size:12px;font-weight:600;color:var(--secondary);margin-bottom:10px">Notificações</p>
-      <div style="display:flex;flex-direction:column;gap:8px">
-       <button onclick="toggleNotifications()" class="btn btn-ghost" style="width:100%;justify-content:space-between;border:1.5px solid #E2E8F0;font-size:12px;border-radius:12px;padding:10px 12px"> <span style="display:flex;align-items:center;gap:8px"><i data-lucide="bell" style="width:14px;height:14px"></i> Notificações</span> <span id="notif-toggle" style="font-weight:700;color:var(--primary)">Ativadas</span> </button> <button onclick="clearNotifications()" class="btn btn-danger" style="width:100%;justify-content:center;border-radius:12px;font-size:12px"><i data-lucide="trash-2" style="width:14px;height:14px"></i> Limpar Todas</button>
-      </div>
-     </div>
-     <div style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid #F1F5F9">
-      <p style="font-size:12px;font-weight:600;color:var(--secondary);margin-bottom:10px">Estatísticas</p>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-       <div class="card" style="padding:12px;text-align:center;background:#EFF6FF">
-        <p style="font-size:18px;font-weight:800;color:var(--primary)" id="stats-total">0</p>
-        <p style="font-size:10px;color:var(--secondary);margin-top:4px">Total</p>
-       </div>
-       <div class="card" style="padding:12px;text-align:center;background:#F0FDF4">
-        <p style="font-size:18px;font-weight:800;color:var(--low)" id="stats-completed">0</p>
-        <p style="font-size:10px;color:var(--secondary);margin-top:4px">Concluídas</p>
-       </div>
+      <div style="display:flex;flex-direction:column;gap:8px"><button onclick="exportTasks()" class="btn btn-ghost" style="width:100%;justify-content:center;border:1.5px solid #E2E8F0;font-size:12px;border-radius:12px"><i data-lucide="download" style="width:14px;height:14px"></i> Exportar</button> <button onclick="importTasks()" class="btn btn-ghost" style="width:100%;justify-content:center;border:1.5px solid #E2E8F0;font-size:12px;border-radius:12px"><i data-lucide="upload" style="width:14px;height:14px"></i> Importar</button> <input type="file" id="import-file" accept=".json" style="display:none" onchange="handleImportFile(event)">
       </div>
      </div>
      <div style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid #F1F5F9">
       <p style="font-size:12px;font-weight:600;color:var(--secondary);margin-bottom:10px">Limpeza</p><button onclick="requestClearAll()" class="btn" style="width:100%;justify-content:center;border:1.5px solid #FEE2E2;background:#FEE2E2;color:var(--urgent);border-radius:12px;font-size:12px;font-weight:600"><i data-lucide="trash" style="width:14px;height:14px"></i> Limpar Tudo</button>
      </div>
+     <div>
+      <p style="font-size:12px;font-weight:600;color:var(--secondary);margin-bottom:10px">Histórico de notificações</p><button onclick="clearAllNotifications()" class="btn" style="width:100%;justify-content:center;border:1.5px solid #E2E8F0;background:transparent;color:var(--secondary);border-radius:12px;font-size:12px;font-weight:600"><i data-lucide="trash-2" style="width:14px;height:14px"></i> Limpar Notificações</button>
+     </div>
+     <div style="margin-top:20px;padding-top:20px;border-top:1px solid #F1F5F9">
+      <p style="font-size:12px;font-weight:600;color:var(--secondary);margin-bottom:10px">Sobre</p>
+      <div style="display:flex;justify-content:center;margin-bottom:16px">
+       <div style="width:240px;height:80px;border-radius:16px;background:linear-gradient(135deg,#2563EB 0%,#3B82F6 50%,#60A5FA 100%);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(37,99,235,.2)">
+        <img src="https://imgur.com/QVTXWdN.png" alt="Logo WeTasks" style="height:50px;width:auto;object-fit:contain" loading="lazy" onerror="console.error('Image failed to load:', this.src); this.style.display='none';">
+       </div>
+      </div>
+      <p style="font-size:12px;color:var(--secondary);line-height:1.6;margin-bottom:12px;text-align:center">Sua agenda pessoal criada com dedicação e amor. Organizar nunca foi tão fácil.</p>
+      <p style="font-size:11px;color:var(--secondary);margin-bottom:8px;text-align:center"><strong>Desenvolvido e criado por:</strong> <a href="https://gaveblue.com" target="_blank" rel="noopener noreferrer" style="color:var(--primary);text-decoration:none;font-weight:600">gaveblue.com</a></p>
+      <p style="font-size:11px;color:var(--secondary);text-align:center">Desenvolvido com ❤️ para sua produtividade</p>
+     </div>
     </div>
    </div>
    <div id="settings-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:55" onclick="toggleSettings()"></div>
-   <div id="dashboard-panel" style="display:none;position:fixed;top:0;right:0;bottom:0;width:100%;max-width:360px;background:var(--surface);z-index:60;box-shadow:-4px 0 24px rgba(0,0,0,.1);overflow:auto" class="slide-up">
-    <div style="padding:20px">
-     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
-      <h2 style="font-weight:800;font-size:18px">Dashboard</h2><button onclick="toggleDashboard()" class="btn btn-ghost" style="padding:8px"><i data-lucide="x" style="width:20px;height:20px"></i></button>
-     </div>
-     <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:20px">
-      <div class="card" style="padding:16px;text-align:center">
-       <p style="font-size:28px;font-weight:800;color:var(--primary)" id="dash-total-count">0</p>
-       <p style="font-size:12px;color:var(--secondary);font-weight:500;margin-top:6px">Total</p>
-      </div>
-      <div class="card" style="padding:16px;text-align:center">
-       <p style="font-size:28px;font-weight:800;color:var(--low)" id="dash-done-count">0</p>
-       <p style="font-size:12px;color:var(--secondary);font-weight:500;margin-top:6px">Concluídas</p>
-      </div>
-      <div class="card" style="padding:16px;text-align:center">
-       <p style="font-size:28px;font-weight:800;color:var(--urgent)" id="dash-urgent-count">0</p>
-       <p style="font-size:12px;color:var(--secondary);font-weight:500;margin-top:6px">Urgentes</p>
-      </div>
-      <div class="card" style="padding:16px;text-align:center">
-       <p style="font-size:28px;font-weight:800;color:var(--high)" id="dash-pending-count">0</p>
-       <p style="font-size:12px;color:var(--secondary);font-weight:500;margin-top:6px">Pendentes</p>
-      </div>
-     </div>
-     <h3 style="font-weight:700;font-size:14px;margin-bottom:12px;margin-top:20px;padding-top:20px;border-top:1px solid #F1F5F9">Prioridades</h3>
-     <div style="display:flex;flex-direction:column;gap:10px" id="priority-breakdown"></div>
+   <div id="notifications-panel" style="display:none;position:fixed;top:0;right:0;bottom:0;width:100%;max-width:360px;background:var(--surface);z-index:65;box-shadow:-4px 0 24px rgba(0,0,0,.1);overflow:auto" class="slide-up">
+    <div style="padding:20px;border-bottom:1px solid #F1F5F9;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:var(--surface);z-index:10">
+     <h2 style="font-weight:800;font-size:18px">Notificações</h2><button onclick="toggleNotifications()" class="btn btn-ghost" style="padding:8px"><i data-lucide="x" style="width:20px;height:20px"></i></button>
     </div>
+    <div id="notifications-list" style="padding:20px;display:flex;flex-direction:column;gap:12px"></div>
    </div>
-   <div id="dashboard-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:55" onclick="toggleDashboard()"></div>
-   <div id="delete-modal" class="modal-overlay" style="display:none" onclick="if(event.target===this)closeDeleteModal()">
+   <div id="notifications-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:60" onclick="toggleNotifications()"></div>
+   <div id="delete-modal" class="modal-overlay" style="display:none;z-index:220" onclick="if(event.target===this)closeDeleteModal()">
     <div class="modal-content slide-up" style="max-width:380px;text-align:center">
      <div style="width:56px;height:56px;border-radius:16px;background:#FEE2E2;display:flex;align-items:center;justify-content:center;margin:0 auto 16px"><i data-lucide="trash-2" style="width:24px;height:24px;color:var(--urgent)"></i>
      </div>
@@ -206,7 +298,7 @@ input:focus,textarea:focus,select:focus{outline:none;border-color:var(--primary)
      </div>
     </div>
    </div>
-   <div id="complete-modal" class="modal-overlay" style="display:none" onclick="if(event.target===this)closeCompleteModal()">
+   <div id="complete-modal" class="modal-overlay" style="display:none;z-index:220" onclick="if(event.target===this)closeCompleteModal()">
     <div class="modal-content slide-up" style="max-width:380px;text-align:center">
      <div style="width:56px;height:56px;border-radius:16px;background:#D1FAE5;display:flex;align-items:center;justify-content:center;margin:0 auto 16px"><i data-lucide="check-circle" style="width:24px;height:24px;color:var(--low)"></i>
      </div>
@@ -216,87 +308,55 @@ input:focus,textarea:focus,select:focus{outline:none;border-color:var(--primary)
      </div>
     </div>
    </div>
-   <div id="confirm-save-modal" class="modal-overlay" style="display:none" onclick="if(event.target===this)cancelConfirm()">
-    <div class="modal-content slide-up" style="max-width:380px;text-align:center">
-     <div style="width:56px;height:56px;border-radius:16px;background:#D1FAE5;display:flex;align-items:center;justify-content:center;margin:0 auto 16px"><i data-lucide="check-circle" style="width:24px;height:24px;color:var(--low)"></i>
-     </div>
-     <h3 style="font-weight:700;font-size:17px;margin-bottom:8px">Salvar tarefa?</h3>
-     <p style="font-size:13px;color:var(--secondary);margin-bottom:20px" id="confirm-task-title"></p>
-     <div style="display:flex;gap:10px;justify-content:center"><button onclick="cancelConfirm()" class="btn btn-ghost" style="border-radius:14px">Cancelar</button> <button onclick="submitForm()" class="btn btn-primary" style="border-radius:14px"><i data-lucide="check" style="width:14px;height:14px"></i> Confirmar</button>
-     </div>
-    </div>
-   </div>
-   <div id="task-modal" class="modal-overlay" style="display:none" onclick="if(event.target===this)closeTaskModal()">
+   <div id="task-modal" class="modal-overlay" style="display:none;z-index:220" onclick="if(event.target===this)closeTaskModal()">
     <div class="modal-content slide-up">
-     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
-      <h2 style="font-weight:800;font-size:18px" id="modal-title">Nova Tarefa</h2><button onclick="closeTaskModal()" class="btn btn-ghost" style="padding:8px"><i data-lucide="x" style="width:20px;height:20px"></i></button>
+     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+      <h2 style="font-weight:800;font-size:20px;letter-spacing:-.3px" id="modal-title">Nova Tarefa</h2><button onclick="closeTaskModal()" class="btn btn-ghost" style="padding:8px"><i data-lucide="x" style="width:20px;height:20px"></i></button>
      </div>
-     <form id="task-form" onsubmit="event.preventDefault(); requestSaveConfirm();"><input type="hidden" id="task-id">
-      <div style="display:flex;flex-direction:column;gap:14px">
-       <div><label style="font-size:12px;font-weight:600;color:var(--secondary);margin-bottom:4px;display:block">Título *</label> <input type="text" id="f-title" required placeholder="Nome da tarefa">
-       </div>
-       <div><label style="font-size:12px;font-weight:600;color:var(--secondary);margin-bottom:4px;display:block">Descrição</label> <textarea id="f-desc" rows="2" placeholder="Detalhes da tarefa" style="resize:vertical"></textarea>
-       </div>
-       <div><label style="font-size:12px;font-weight:600;color:var(--secondary);margin-bottom:4px;display:block">Data *</label> <input type="date" id="f-date" required>
-       </div>
-       <div><label style="font-size:12px;font-weight:600;color:var(--secondary);margin-bottom:4px;display:block">Horário</label> <input type="time" id="f-time">
-       </div>
-       <div><label style="font-size:12px;font-weight:600;color:var(--secondary);margin-bottom:8px;display:block">Prioridade</label>
-        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px" id="priority-buttons">
-         <button type="button" onclick="setPriority('low')" class="priority-btn" data-priority="low" style="display:flex;align-items:center;gap:8px;padding:12px;border:2px solid #E2E8F0;border-radius:12px;background:transparent;cursor:pointer;transition:all .2s;font-weight:600;font-size:13px">
-          <div style="width:12px;height:12px;border-radius:50%;background:var(--low)"></div> Baixa </button> <button type="button" onclick="setPriority('medium')" class="priority-btn" data-priority="medium" style="display:flex;align-items:center;gap:8px;padding:12px;border:2px solid #E2E8F0;border-radius:12px;background:transparent;cursor:pointer;transition:all .2s;font-weight:600;font-size:13px">
-          <div style="width:12px;height:12px;background:var(--medium);clip-path:polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%)"></div> Média </button> <button type="button" onclick="setPriority('high')" class="priority-btn" data-priority="high" style="display:flex;align-items:center;gap:8px;padding:12px;border:2px solid #E2E8F0;border-radius:12px;background:transparent;cursor:pointer;transition:all .2s;font-weight:600;font-size:13px">
-          <div style="width:12px;height:12px;background:var(--high)"></div> Alta </button> <button type="button" onclick="setPriority('urgent')" class="priority-btn" data-priority="urgent" style="display:flex;align-items:center;gap:8px;padding:12px;border:2px solid #E2E8F0;border-radius:12px;background:transparent;cursor:pointer;transition:all .2s;font-weight:600;font-size:13px">
-          <div style="width:12px;height:12px;border-radius:50%;background:var(--urgent)"></div> Urgente </button>
+     <form id="task-form" onsubmit="event.preventDefault(); submitForm();"><input type="hidden" id="task-id">
+      <div style="display:flex;flex-direction:column;gap:18px">
+       <!-- TÍTULO -->
+       <div>
+        <label style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px;display:block;letter-spacing:.4px">Título da Tarefa *</label> <input type="text" id="f-title" required placeholder="O que você precisa fazer?" style="border:1.5px solid #E2E8F0;border-radius:14px;padding:14px 16px;font-family:inherit;font-size:15px;width:100%;background:var(--bg);color:var(--text);transition:all .2s" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='#E2E8F0'">
+       </div><!-- DESCRIÇÃO -->
+       <div>
+        <label style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px;display:block;letter-spacing:.4px">Descrição</label> <textarea id="f-desc" rows="3" placeholder="Adicione mais detalhes sobre a tarefa..." style="border:1.5px solid #E2E8F0;border-radius:14px;padding:14px 16px;font-family:inherit;font-size:14px;width:100%;background:var(--bg);color:var(--text);resize:vertical;transition:all .2s" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='#E2E8F0'"></textarea>
+       </div><!-- DATA E HORA -->
+       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div>
+         <label style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px;display:block;letter-spacing:.4px">Data *</label> <input type="date" id="f-date" required style="border:1.5px solid #E2E8F0;border-radius:14px;padding:14px 16px;font-family:inherit;font-size:14px;width:100%;background:var(--bg);color:var(--text);transition:all .2s" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='#E2E8F0'">
+        </div>
+        <div>
+         <label style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px;display:block;letter-spacing:.4px">Horário</label> <input type="time" id="f-time" style="border:1.5px solid #E2E8F0;border-radius:14px;padding:14px 16px;font-family:inherit;font-size:14px;width:100%;background:var(--bg);color:var(--text);transition:all .2s" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='#E2E8F0'">
+        </div>
+       </div><!-- PRIORIDADE -->
+       <div>
+        <label style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px;display:block;letter-spacing:.4px">Nível de Prioridade</label>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px" id="priority-buttons">
+         <button type="button" onclick="setPriority('low')" class="priority-btn" data-priority="low" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:14px 12px;border:2px solid #E2E8F0;border-radius:12px;background:transparent;cursor:pointer;transition:all .2s;font-weight:600;font-size:13px;color:var(--text)">
+          <div style="width:14px;height:14px;border-radius:50%;background:var(--low)"></div><span>Baixa</span> </button> <button type="button" onclick="setPriority('medium')" class="priority-btn" data-priority="medium" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:14px 12px;border:2px solid #E2E8F0;border-radius:12px;background:transparent;cursor:pointer;transition:all .2s;font-weight:600;font-size:13px;color:var(--text)">
+          <div style="width:14px;height:14px;background:var(--medium);clip-path:polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%)"></div><span>Média</span> </button> <button type="button" onclick="setPriority('high')" class="priority-btn" data-priority="high" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:14px 12px;border:2px solid #E2E8F0;border-radius:12px;background:transparent;cursor:pointer;transition:all .2s;font-weight:600;font-size:13px;color:var(--text)">
+          <div style="width:14px;height:14px;background:var(--high)"></div><span>Alta</span> </button> <button type="button" onclick="setPriority('urgent')" class="priority-btn" data-priority="urgent" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:14px 12px;border:2px solid #E2E8F0;border-radius:12px;background:transparent;cursor:pointer;transition:all .2s;font-weight:600;font-size:13px;color:var(--text)">
+          <div style="width:14px;height:14px;border-radius:50%;background:var(--urgent)"></div><span>Urgente</span> </button>
         </div><input type="hidden" id="f-priority" value="low">
-       </div>
-       <div><label style="font-size:12px;font-weight:600;color:var(--secondary);margin-bottom:4px;display:block">Observações</label> <textarea id="f-notes" rows="2" placeholder="Notas adicionais..." style="resize:vertical"></textarea>
-       </div>
-       <div id="form-actions" style="display:flex;gap:10px;justify-content:flex-end"><button type="button" onclick="closeTaskModal()" class="btn btn-ghost">Cancelar</button> <button type="button" onclick="handleSaveClick()" class="btn btn-primary" id="save-btn"> <i data-lucide="check" style="width:16px;height:16px"></i> Salvar </button>
+       </div><!-- OBSERVAÇÕES -->
+       <div>
+        <label style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px;display:block;letter-spacing:.4px">Observações</label> <textarea id="f-notes" rows="2" placeholder="Notas adicionais para lembrar..." style="border:1.5px solid #E2E8F0;border-radius:14px;padding:14px 16px;font-family:inherit;font-size:14px;width:100%;background:var(--bg);color:var(--text);resize:vertical;transition:all .2s" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='#E2E8F0'"></textarea>
+       </div><!-- BOTÕES -->
+       <div id="form-actions" style="display:flex;gap:12px;justify-content:flex-end;padding-top:8px">
+        <button type="button" onclick="closeTaskModal()" class="btn btn-ghost" style="border-radius:12px;padding:12px 24px;font-weight:600;border:1.5px solid #E2E8F0">Cancelar</button> <button type="submit" class="btn btn-primary" id="save-btn" style="border-radius:12px;padding:12px 28px;font-weight:700"><i data-lucide="check" style="width:16px;height:16px"></i> Salvar Tarefa</button>
        </div>
       </div>
      </form>
     </div>
-    <div id="delete-modal" class="modal-overlay" style="display:none" onclick="if(event.target===this)closeDeleteModal()">
-     <div class="modal-content slide-up" style="max-width:380px;text-align:center">
-      <div style="width:56px;height:56px;border-radius:16px;background:#FEE2E2;display:flex;align-items:center;justify-content:center;margin:0 auto 16px"><i data-lucide="trash-2" style="width:24px;height:24px;color:var(--urgent)"></i>
-      </div>
-      <h3 style="font-weight:700;font-size:17px;margin-bottom:8px">Excluir tarefa?</h3>
-      <p style="font-size:13px;color:var(--secondary);margin-bottom:20px" id="delete-task-name"></p>
-      <div style="display:flex;gap:10px;justify-content:center"><button onclick="closeDeleteModal()" class="btn btn-ghost" style="border-radius:14px">Cancelar</button> <button onclick="confirmDelete()" class="btn btn-danger" style="border-radius:14px"><i data-lucide="trash-2" style="width:14px;height:14px"></i> Excluir</button>
-      </div>
-     </div>
-    </div>
-    <div id="complete-modal" class="modal-overlay" style="display:none" onclick="if(event.target===this)closeCompleteModal()">
-     <div class="modal-content slide-up" style="max-width:380px;text-align:center">
-      <div style="width:56px;height:56px;border-radius:16px;background:#D1FAE5;display:flex;align-items:center;justify-content:center;margin:0 auto 16px"><i data-lucide="check-circle" style="width:24px;height:24px;color:var(--low)"></i>
-      </div>
-      <h3 style="font-weight:700;font-size:17px;margin-bottom:8px" id="complete-modal-title">Concluir tarefa?</h3>
-      <p style="font-size:13px;color:var(--secondary);margin-bottom:20px" id="complete-task-name"></p>
-      <div style="display:flex;gap:10px;justify-content:center"><button onclick="closeCompleteModal()" class="btn btn-ghost" style="border-radius:14px">Cancelar</button> <button onclick="confirmComplete()" class="btn btn-primary" style="border-radius:14px"><i data-lucide="check" style="width:14px;height:14px"></i> Confirmar</button>
-      </div>
-     </div>
-    </div>
-    <div id="confirm-save-modal" class="modal-overlay" style="display:none" onclick="if(event.target===this)cancelConfirm()">
-     <div class="modal-content slide-up" style="max-width:380px;text-align:center">
-      <div style="width:56px;height:56px;border-radius:16px;background:#D1FAE5;display:flex;align-items:center;justify-content:center;margin:0 auto 16px"><i data-lucide="check-circle" style="width:24px;height:24px;color:var(--low)"></i>
-      </div>
-      <h3 style="font-weight:700;font-size:17px;margin-bottom:8px">Salvar tarefa?</h3>
-      <p style="font-size:13px;color:var(--secondary);margin-bottom:20px" id="confirm-task-title"></p>
-      <div style="display:flex;gap:10px;justify-content:center"><button onclick="cancelConfirm()" class="btn btn-ghost" style="border-radius:14px">Cancelar</button> <button onclick="submitForm()" class="btn btn-primary" style="border-radius:14px"><i data-lucide="check" style="width:14px;height:14px"></i> Confirmar</button>
-      </div>
-     </div>
-    </div>
    </div>
-   <script>
+  </div>
+  <script>
 // ===== STATE =====
 let tasks = JSON.parse(localStorage.getItem('agenda_tasks') || '[]');
-let notifications = JSON.parse(localStorage.getItem('agenda_notifs') || '[]');
+let notifications = JSON.parse(localStorage.getItem('agenda_notifications') || '[]');
 let userName = localStorage.getItem('user_name') || '';
 let currentTheme = localStorage.getItem('user_theme') || 'light';
-let showCompletedTasks = localStorage.getItem('show_completed') === 'true';
-let weekViewEnabled = localStorage.getItem('week_view') === 'true';
-let notificationsEnabled = localStorage.getItem('notif_enabled') !== 'false';
 let currentFilter = 'all';
 let currentTab = 'tasks';
 let calMonth = new Date().getMonth();
@@ -306,16 +366,31 @@ let selectedTaskDate = null;
 let deleteTargetId = null;
 let completeTargetId = null;
 let editingId = null;
-let clearAllTargetId = null;
+let headerInterval = null;
+let overdueCheckInterval = null;
+let tasksAlreadyNotified = new Set();
 
 const PRIORITY_COLORS = { urgent:'#EF4444', high:'#FF8C42', medium:'#FBBF24', low:'#10B981' };
 const PRIORITY_LABELS = { urgent:'Urgente', high:'Alta', medium:'Média', low:'Baixa' };
-const CATEGORY_LABELS = { geral:'Geral', trabalho:'Trabalho', pessoal:'Pessoal', estudo:'Estudo', saude:'Saúde' };
 const MONTHS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 
 function save() {
   localStorage.setItem('agenda_tasks', JSON.stringify(tasks));
-  localStorage.setItem('agenda_notifs', JSON.stringify(notifications));
+  localStorage.setItem('agenda_notifications', JSON.stringify(notifications));
+}
+
+function addNotification(type, message) {
+  const notification = {
+    id: 'notif_' + Date.now(),
+    type: type,
+    message: message,
+    timestamp: new Date().toISOString(),
+    read: false
+  };
+  notifications.unshift(notification);
+  if (notifications.length > 50) notifications.pop();
+  save();
+  updateNotificationBadge();
 }
 
 async function getTodayFromAPI() {
@@ -327,7 +402,6 @@ async function getTodayFromAPI() {
     localStorage.setItem('today_cache_time', Date.now());
     return correctDate;
   } catch (e) {
-    console.error('Erro ao buscar data da API:', e);
     const fallback = new Date().toISOString().split('T')[0];
     localStorage.setItem('today_cache', fallback);
     return fallback;
@@ -337,13 +411,7 @@ async function getTodayFromAPI() {
 function todayStr() { 
   const stored = localStorage.getItem('today_cache');
   const cacheTime = localStorage.getItem('today_cache_time');
-  
-  // Se temos cache e foi salvo há menos de 1 hora, usa
-  if (stored && cacheTime && (Date.now() - parseInt(cacheTime)) < 3600000) {
-    return stored;
-  }
-  
-  // Se passou 1 hora, já tenta buscar a data correta novamente
+  if (stored && cacheTime && (Date.now() - parseInt(cacheTime)) < 3600000) return stored;
   getTodayFromAPI();
   return stored || new Date().toISOString().split('T')[0];
 }
@@ -354,44 +422,21 @@ function formatDate(d) {
 }
 
 function getBrasiliaTime() {
-  const formatter = new Intl.DateTimeFormat('pt-BR', {
-    timeZone: 'America/Sao_Paulo',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: false
-  });
+  const formatter = new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Sao_Paulo', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
   return formatter.format(new Date());
 }
 
 function getGreeting() {
-  const h = new Date().getHours();
-  let greeting = '';
-  let emoji = '';
-  
-  if (h < 12) { greeting = 'Bom dia'; emoji = '☀️'; }
-  else if (h < 18) { greeting = 'Boa tarde'; emoji = '🌤️'; }
-  else { greeting = 'Boa noite'; emoji = '🌙'; }
-  
-  return `${greeting}! ${emoji}`;
-}
+  const formatter = new Intl.DateTimeFormat('pt-BR', {
+    timeZone: 'America/Sao_Paulo',
+    hour: '2-digit',
+    hour12: false
+  });
+  const h = parseInt(formatter.format(new Date()), 10);
 
-function formatTaskDate(dateStr, timeStr) {
-  const today = todayStr();
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  const tomorrowStr = tomorrow.toISOString().split('T')[0];
-  
-  let dateLabel = '';
-  if (dateStr === today) dateLabel = 'Hoje';
-  else if (dateStr === tomorrowStr) dateLabel = 'Amanhã';
-  else {
-    const [y, m, day] = dateStr.split('-');
-    dateLabel = `${day}/${m}`;
-  }
-  
-  const timeFormatted = timeStr ? ` - ${timeStr}` : '';
-  return `${dateLabel}${timeFormatted}`;
+  if (h < 12) return '<strong>Bom dia</strong>! ☀️';
+  if (h < 18) return '<strong>Boa tarde</strong>! 🌤️';
+  return '<strong>Boa noite</strong>! 🌙';
 }
 
 // ===== TOAST =====
@@ -402,97 +447,262 @@ function showToast(msg, type='success') {
   const t = document.createElement('div');
   t.className = 'toast';
   t.innerHTML = `<i data-lucide="${icons[type]}" style="width:18px;height:18px;color:${colors[type]}"></i><span>${msg}</span>`;
+  t.style.cursor = 'grab';
+  t.style.touchAction = 'none';
   c.appendChild(t);
   lucide.createIcons();
-  setTimeout(() => { t.style.opacity='0'; t.style.transform='translateX(100px)'; t.style.transition='all .3s'; setTimeout(() => t.remove(), 300); }, 3000);
+  
+  let startX = 0;
+  let currentX = 0;
+  let isDragging = false;
+  let startTime = 0;
+  
+  function startDrag(clientX) {
+    isDragging = true;
+    startX = clientX;
+    startTime = Date.now();
+    t.style.cursor = 'grabbing';
+    t.style.transition = 'none';
+  }
+  
+  function moveDrag(clientX) {
+    if (!isDragging || !t.parentElement) return;
+    currentX = clientX - startX;
+    t.style.transform = `translateX(calc(100px + ${currentX}px))`;
+    t.style.opacity = Math.max(0, 1 - Math.abs(currentX) / 100);
+  }
+  
+  function endDrag() {
+    if (!isDragging) return;
+    isDragging = false;
+    t.style.cursor = 'grab';
+    
+    if (Math.abs(currentX) > 60) {
+      t.style.transition = 'all .3s';
+      t.style.opacity = '0';
+      t.style.transform = 'translateX(150px)';
+      setTimeout(() => t.remove(), 300);
+    } else {
+      t.style.transition = 'all .3s';
+      t.style.transform = 'translateX(100px)';
+      t.style.opacity = '1';
+    }
+  }
+  
+  // Mouse events
+  t.addEventListener('mousedown', (e) => startDrag(e.clientX));
+  document.addEventListener('mousemove', (e) => moveDrag(e.clientX));
+  document.addEventListener('mouseup', endDrag);
+  
+  // Touch events
+  t.addEventListener('touchstart', (e) => startDrag(e.touches[0].clientX), { passive: false });
+  document.addEventListener('touchmove', (e) => moveDrag(e.touches[0].clientX), { passive: false });
+  document.addEventListener('touchend', endDrag);
+  
+  setTimeout(() => {
+    if (t.parentElement) {
+      t.style.transition = 'all .3s';
+      t.style.opacity = '0';
+      t.style.transform = 'translateX(100px)';
+      setTimeout(() => t.remove(), 300);
+    }
+  }, 3000);
 }
 
 // ===== SETTINGS =====
-function toggleDashboard(event) {
-  if (event && event.target.id === 'dashboard-overlay') return;
-  const p = document.getElementById('dashboard-panel');
-  const o = document.getElementById('dashboard-overlay');
-  const show = p.style.display === 'none';
-  p.style.display = show ? 'block' : 'none';
-  if (o) o.style.display = show ? 'block' : 'none';
-  if (show) renderDashboard();
-  updateFabVisibility();
-}
-
-function renderDashboard() {
-  const total = tasks.length;
-  const done = tasks.filter(t => t.status === 'done').length;
-  const urgent = tasks.filter(t => t.priority === 'urgent' && t.status !== 'done').length;
-  const pending = tasks.filter(t => t.status !== 'done').length;
-  
-  document.getElementById('dash-total-count').textContent = total;
-  document.getElementById('dash-done-count').textContent = done;
-  document.getElementById('dash-urgent-count').textContent = urgent;
-  document.getElementById('dash-pending-count').textContent = pending;
-  
-  const priorityBreakdown = document.getElementById('priority-breakdown');
-  const priorities = { urgent: 0, high: 0, medium: 0, low: 0 };
-  tasks.forEach(t => { if (t.priority && !priorities.hasOwnProperty(t.priority)) return; priorities[t.priority]++; });
-  
-  priorityBreakdown.innerHTML = Object.entries(priorities).map(([p, count]) => {
-    const colors = { urgent: '#EF4444', high: '#FF8C42', medium: '#FBBF24', low: '#10B981' };
-    const labels = { urgent: 'Urgente', high: 'Alta', medium: 'Média', low: 'Baixa' };
-    const percent = total > 0 ? Math.round((count / total) * 100) : 0;
-    return `<div style="display:flex;align-items:center;gap:10px">
-      <div style="width:4px;height:24px;border-radius:2px;background:${colors[p]}"></div>
-      <div style="flex:1;min-width:0">
-        <div style="display:flex;justify-content:space-between;margin-bottom:2px">
-          <span style="font-size:12px;font-weight:600;color:var(--text)">${labels[p]}</span>
-          <span style="font-size:12px;font-weight:600;color:${colors[p]}">${count}</span>
-        </div>
-        <div style="height:6px;background:#F1F5F9;border-radius:3px;overflow:hidden">
-          <div style="height:100%;background:${colors[p]};width:${percent}%;border-radius:3px"></div>
-        </div>
-      </div>
-    </div>`;
-  }).join('');
-}
-
 function toggleSettings(event) {
   if (event && event.target.id === 'settings-overlay') return;
   const p = document.getElementById('settings-panel');
   const o = document.getElementById('settings-overlay');
+  const show = p.style.display === 'none' || p.style.display === '';
+  p.style.display = show ? 'block' : 'none';
+  if (o) o.style.display = show ? 'block' : 'none';
+  if (show) {
+    updateThemeButtons();
+  }
+  updateFabVisibility();
+}
+
+// ===== NOTIFICATIONS =====
+function updateNotificationBadge() {
+  const unread = notifications.filter(n => !n.read).length;
+  const badges = [
+    document.getElementById('notification-badge-mobile'),
+    document.getElementById('notification-badge-desktop')
+  ];
+
+  badges.forEach(badge => {
+    if (!badge) return;
+
+    if (unread > 0) {
+      badge.textContent = unread > 9 ? '9+' : unread;
+      badge.style.display = 'flex';
+    } else {
+      badge.style.display = 'none';
+    }
+  });
+}
+
+function toggleNotifications(event) {
+  if (event && event.target.id === 'notifications-overlay') return;
+  const p = document.getElementById('notifications-panel');
+  const o = document.getElementById('notifications-overlay');
   const show = p.style.display === 'none';
   p.style.display = show ? 'block' : 'none';
   if (o) o.style.display = show ? 'block' : 'none';
   if (show) {
-    document.getElementById('settings-name-input').value = userName;
-    updateThemeButtons();
-    updateSettingsToggles();
-    updateStatsDisplay();
+    renderNotifications();
+    notifications.forEach(n => n.read = true);
+    save();
+    updateNotificationBadge();
   }
   updateFabVisibility();
+}
+
+function renderNotifications() {
+  const list = document.getElementById('notifications-list');
+  if (notifications.length === 0) {
+    list.innerHTML = `<div class="empty-state"><div style="width:48px;height:48px;border-radius:16px;background:#EFF6FF;display:flex;align-items:center;justify-content:center;margin-bottom:12px"><i data-lucide="bell-off" style="width:20px;height:20px;color:var(--primary)"></i></div><p style="font-weight:600;font-size:14px;color:var(--text)">Sem notificações</p><p style="font-size:12px;color:var(--secondary)">Voltaremos em breve</p></div>`;
+    lucide.createIcons();
+    return;
+  }
+  list.innerHTML = notifications.map(n => {
+    const date = new Date(n.timestamp);
+    const now = new Date();
+    let timeStr = '';
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+    
+    if (diffMins < 1) timeStr = 'Agora';
+    else if (diffMins < 60) timeStr = `${diffMins}min`;
+    else if (diffHours < 24) timeStr = `${diffHours}h`;
+    else if (diffDays < 7) timeStr = `${diffDays}d`;
+    else timeStr = date.toLocaleDateString('pt-BR');
+
+    const icons = {
+      'create': 'plus-circle',
+      'update': 'edit',
+      'delete': 'trash-2',
+      'complete': 'check-circle',
+      'uncomplete': 'rotate-ccw',
+      'urgent': 'alert-triangle'
+    };
+    const colors = {
+      'create': '#10B981',
+      'update': '#2563EB',
+      'delete': '#EF4444',
+      'complete': '#10B981',
+      'uncomplete': '#2563EB',
+      'urgent': '#EF4444'
+    };
+
+    return `<div class="notification-card fade-in" data-notification-id="${n.id}" style="padding:12px;border-left:3px solid ${colors[n.type] || '#2563EB'};background:var(--surface);border-radius:12px;display:flex;gap:10px;align-items:flex-start;cursor:grab;user-select:none;transition:all .2s;position:relative;overflow:hidden">
+      <div style="position:absolute;top:0;right:0;bottom:0;width:60px;background:linear-gradient(90deg,transparent 0%,#EF4444 100%);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s">
+        <i data-lucide="trash-2" style="width:16px;height:16px;color:#fff"></i>
+      </div>
+      <div style="width:36px;height:36px;border-radius:10px;background:${colors[n.type]}15;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <i data-lucide="${icons[n.type] || 'info'}" style="width:18px;height:18px;color:${colors[n.type] || '#2563EB'}"></i>
+      </div>
+      <div style="flex:1;min-width:0">
+        <p style="font-size:13px;font-weight:600;color:var(--text);word-break:break-word">${n.message}</p>
+        <p style="font-size:11px;color:var(--secondary);margin-top:4px">${timeStr}</p>
+      </div>
+    </div>`;
+  }).join('');
+  lucide.createIcons();
+  attachNotificationDragListeners();
+}
+
+function attachNotificationDragListeners() {
+  const cards = document.querySelectorAll('.notification-card');
+  
+  cards.forEach(card => {
+    let startX = 0;
+    let currentX = 0;
+    let isDragging = false;
+    const notifId = card.dataset.notificationId;
+    
+    function startDrag(clientX) {
+      isDragging = true;
+      startX = clientX;
+      card.style.cursor = 'grabbing';
+      card.style.transition = 'none';
+    }
+    
+    function moveDrag(clientX) {
+      if (!isDragging || !card.parentElement) return;
+      currentX = clientX - startX;
+      card.style.transform = `translateX(${currentX}px)`;
+      card.style.opacity = Math.max(0.3, 1 - Math.abs(currentX) / 150);
+      
+      const deleteIcon = card.querySelector('[data-lucide="trash-2"]').parentElement;
+      deleteIcon.style.opacity = Math.min(1, Math.abs(currentX) / 80);
+    }
+    
+    function endDrag() {
+      if (!isDragging) return;
+      isDragging = false;
+      card.style.cursor = 'grab';
+      
+      if (Math.abs(currentX) > 80) {
+        card.style.transition = 'all .3s';
+        card.style.opacity = '0';
+        card.style.transform = `translateX(${currentX > 0 ? 300 : -300}px)`;
+        setTimeout(() => {
+          notifications = notifications.filter(n => n.id !== notifId);
+          save();
+          renderNotifications();
+          showToast('Notificação removida');
+        }, 300);
+      } else {
+        card.style.transition = 'all .3s';
+        card.style.transform = 'translateX(0)';
+        card.style.opacity = '1';
+      }
+    }
+    
+    // Mouse events
+    card.addEventListener('mousedown', (e) => startDrag(e.clientX));
+    document.addEventListener('mousemove', (e) => moveDrag(e.clientX));
+    document.addEventListener('mouseup', endDrag);
+    
+    // Touch events
+    card.addEventListener('touchstart', (e) => startDrag(e.touches[0].clientX), { passive: false });
+    document.addEventListener('touchmove', (e) => moveDrag(e.touches[0].clientX), { passive: false });
+    document.addEventListener('touchend', endDrag);
+    
+    // Prevent scrolling while dragging
+    card.addEventListener('touchstart', (e) => {
+      if (e.target.closest('[data-lucide]')) return;
+      e.preventDefault();
+    }, { passive: false });
+  });
+}
+
+function clearAllNotifications() {
+  notifications = [];
+  save();
+  updateNotificationBadge();
+
+  const panelOpen = document.getElementById('notifications-panel').style.display === 'block';
+  if (panelOpen) {
+    renderNotifications();
+  }
+
+  showToast('Notificações limpas!');
 }
 
 function updateUserName() {
   const nameInput = document.getElementById('settings-name-input');
   const newName = nameInput.value.trim();
-  
-  if (!newName) {
-    nameInput.focus();
-    return;
-  }
-  
+  if (!newName) { nameInput.focus(); return; }
   userName = newName;
   localStorage.setItem('user_name', userName);
-  
   document.getElementById('app-title').textContent = userName;
-  renderHeader();
   toggleSettings();
   showToast(`Nome atualizado para ${userName}! 👋`);
-}
-
-function clearNotifications() {
-  notifications = [];
-  save();
-  renderNotifBadge();
-  renderNotifications();
-  showToast('Notificações limpas!');
 }
 
 function setTheme(theme) {
@@ -508,7 +718,6 @@ function updateThemeButtons() {
   document.getElementById('theme-light').style.borderColor = isDark ? '#E2E8F0' : 'var(--primary)';
   document.getElementById('theme-light').style.color = isDark ? 'var(--secondary)' : 'var(--primary)';
   document.getElementById('theme-light').style.background = isDark ? 'transparent' : 'var(--primary)18';
-  
   document.getElementById('theme-dark').style.borderColor = isDark ? 'var(--primary)' : '#E2E8F0';
   document.getElementById('theme-dark').style.color = isDark ? 'var(--primary)' : 'var(--secondary)';
   document.getElementById('theme-dark').style.background = isDark ? 'var(--primary)18' : 'transparent';
@@ -528,49 +737,8 @@ function applyTheme() {
   }
 }
 
-function toggleTaskCompletedVisibility() {
-  showCompletedTasks = !showCompletedTasks;
-  localStorage.setItem('show_completed', showCompletedTasks);
-  document.getElementById('completed-visibility').textContent = showCompletedTasks ? 'Mostrar' : 'Ocultar';
-  renderTasks();
-  showToast(showCompletedTasks ? 'Tarefas concluídas mostradas' : 'Tarefas concluídas ocultadas');
-}
-
-function toggleWeekView() {
-  weekViewEnabled = !weekViewEnabled;
-  localStorage.setItem('week_view', weekViewEnabled);
-  document.getElementById('week-view-toggle').textContent = weekViewEnabled ? 'Ativado' : 'Desativado';
-  showToast(weekViewEnabled ? 'Visão semanal ativada' : 'Visão semanal desativada');
-}
-
-function toggleNotificationsFeature() {
-  notificationsEnabled = !notificationsEnabled;
-  localStorage.setItem('notif_enabled', notificationsEnabled);
-  document.getElementById('notif-toggle').textContent = notificationsEnabled ? 'Ativadas' : 'Desativadas';
-  showToast(notificationsEnabled ? 'Notificações ativadas' : 'Notificações desativadas');
-}
-
-function updateSettingsToggles() {
-  document.getElementById('completed-visibility').textContent = showCompletedTasks ? 'Mostrar' : 'Ocultar';
-  document.getElementById('week-view-toggle').textContent = weekViewEnabled ? 'Ativado' : 'Desativado';
-  document.getElementById('notif-toggle').textContent = notificationsEnabled ? 'Ativadas' : 'Desativadas';
-}
-
-function updateStatsDisplay() {
-  const total = tasks.length;
-  const completed = tasks.filter(t => t.status === 'done').length;
-  document.getElementById('stats-total').textContent = total;
-  document.getElementById('stats-completed').textContent = completed;
-}
-
 function exportTasks() {
-  const data = {
-    exportDate: new Date().toISOString(),
-    tasks: tasks,
-    userName: userName,
-    version: '1.0'
-  };
-  
+  const data = { exportDate: new Date().toISOString(), tasks, userName, version: '1.0' };
   const json = JSON.stringify(data, null, 2);
   const blob = new Blob([json], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
@@ -581,7 +749,6 @@ function exportTasks() {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
-  
   showToast('Tarefas exportadas com sucesso!');
 }
 
@@ -592,16 +759,11 @@ function importTasks() {
 function handleImportFile(event) {
   const file = event.target.files[0];
   if (!file) return;
-  
   const reader = new FileReader();
   reader.onload = (e) => {
     try {
       const data = JSON.parse(e.target.result);
-      if (!data.tasks || !Array.isArray(data.tasks)) {
-        showToast('Arquivo inválido!', 'error');
-        return;
-      }
-      
+      if (!data.tasks || !Array.isArray(data.tasks)) { showToast('Arquivo inválido!', 'error'); return; }
       tasks = [...tasks, ...data.tasks];
       save();
       renderAll();
@@ -615,25 +777,29 @@ function handleImportFile(event) {
 }
 
 function requestClearAll() {
-  clearAllTargetId = true;
   const modal = `
-    <div class="modal-overlay" id="clear-all-modal" style="display:flex" onclick="if(event.target===this)closeClearAllModal()">
+    <div class="modal-overlay" id="clear-all-modal" style="display:flex;z-index:220" onclick="if(event.target===this)closeClearAllModal()">
       <div class="modal-content slide-up" style="max-width:380px;text-align:center">
-        <div style="width:56px;height:56px;border-radius:16px;background:#FEE2E2;display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
-          <i data-lucide="alert-triangle" style="width:24px;height:24px;color:var(--urgent)"></i>
+        <div style="width:64px;height:64px;border-radius:20px;background:linear-gradient(135deg,#FEE2E2 0%,#FECACA 100%);display:flex;align-items:center;justify-content:center;margin:0 auto 20px">
+          <i data-lucide="alert-triangle" style="width:32px;height:32px;color:var(--urgent)"></i>
         </div>
-        <h3 style="font-weight:700;font-size:17px;margin-bottom:8px">Limpar Tudo?</h3>
-        <p style="font-size:13px;color:var(--secondary);margin-bottom:20px">Isto vai deletar <strong>todas</strong> as tarefas e não pode ser desfeito.</p>
+        <h3 style="font-weight:800;font-size:20px;margin-bottom:8px;color:var(--urgent)">Limpar Tudo?</h3>
+        <p style="font-size:14px;color:var(--secondary);margin-bottom:12px">Você está prestes a <strong>deletar permanentemente</strong> todas as suas tarefas.</p>
+        <div style="background:#FEE2E2;border-radius:12px;padding:12px;margin-bottom:20px;text-align:left">
+          <p style="font-size:13px;color:var(--urgent);font-weight:600;margin-bottom:8px">⚠️ Esta ação:</p>
+          <ul style="font-size:12px;color:var(--urgent);margin:0;padding-left:20px;list-style:disc">
+            <li>Deletará <strong>TODAS</strong> as tarefas criadas</li>
+            <li>Não pode ser desfeita</li>
+            <li>Limpará seu histórico completamente</li>
+          </ul>
+        </div>
         <div style="display:flex;gap:10px;justify-content:center">
-          <button onclick="closeClearAllModal()" class="btn btn-ghost" style="border-radius:14px">Cancelar</button>
-          <button onclick="confirmClearAll()" class="btn btn-danger" style="border-radius:14px">
-            <i data-lucide="trash" style="width:14px;height:14px"></i> Deletar Tudo
-          </button>
+          <button onclick="closeClearAllModal()" class="btn btn-ghost" style="border-radius:14px;flex:1;border:1.5px solid #E2E8F0;font-weight:600">Cancelar</button>
+          <button onclick="confirmClearAll()" class="btn btn-danger" style="border-radius:14px;flex:1;font-weight:600"><i data-lucide="trash" style="width:14px;height:14px"></i> Deletar Tudo</button>
         </div>
       </div>
     </div>
   `;
-  
   const container = document.getElementById('app');
   const tempDiv = document.createElement('div');
   tempDiv.innerHTML = modal;
@@ -644,82 +810,197 @@ function requestClearAll() {
 function closeClearAllModal() {
   const modal = document.getElementById('clear-all-modal');
   if (modal) modal.remove();
-  clearAllTargetId = null;
 }
 
 function confirmClearAll() {
   tasks = [];
+  notifications = [];
   save();
   closeClearAllModal();
   renderAll();
   showToast('Todas as tarefas foram deletadas', 'error');
 }
 
-function addNotification(msg, type='info') {
-  if (!notificationsEnabled) return;
-  notifications.unshift({ id: Date.now(), msg, type, time: new Date().toISOString(), read: false });
-  if (notifications.length > 50) notifications = notifications.slice(0, 50);
-  save();
-  renderNotifBadge();
-}
-
-function renderNotifBadge() {
-  const unread = notifications.filter(n => !n.read).length;
-  const b = document.getElementById('notif-badge');
-  if (unread > 0) { b.style.display = 'flex'; b.textContent = unread > 9 ? '9+' : unread; }
-  else b.style.display = 'none';
-}
-
-function toggleNotifications() {
-  const p = document.getElementById('notif-panel');
-  const o = document.getElementById('notif-overlay');
-  const show = p.style.display === 'none';
-  p.style.display = show ? 'block' : 'none';
-  o.style.display = show ? 'block' : 'none';
-  if (show) {
-    notifications.forEach(n => n.read = true);
-    save();
-    renderNotifBadge();
-    renderNotifications();
+function requestClearCompleted() {
+  const completedCount = tasks.filter(t => t.status === 'done').length;
+  if (completedCount === 0) {
+    showToast('Nenhuma tarefa concluída para limpar!', 'info');
+    return;
   }
-  updateFabVisibility();
-}
-
-function renderNotifications() {
-  const list = document.getElementById('notif-list');
-  if (!notifications.length) { list.innerHTML = '<div class="empty-state" style="padding:20px"><p style="font-size:14px">Nenhuma notificação</p></div>'; return; }
-  list.innerHTML = notifications.slice(0, 20).map(n => {
-    const t = new Date(n.time);
-    const timeStr = t.toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
-    const iconMap = { urgent:'alert-triangle', added:'plus-circle', done:'check-circle', deleted:'trash-2', info:'info' };
-    const colorMap = { urgent:'#EF4444', added:'#2563EB', done:'#10B981', deleted:'#64748B', info:'#2563EB' };
-    return `<div style="display:flex;gap:10px;padding:12px 0;border-bottom:1px solid #F1F5F9;align-items:flex-start">
-      <div style="width:32px;height:32px;border-radius:10px;background:${colorMap[n.type]||'#2563EB'}15;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-        <i data-lucide="${iconMap[n.type]||'info'}" style="width:16px;height:16px;color:${colorMap[n.type]||'#2563EB'}"></i>
+  
+  const modal = `
+    <div class="modal-overlay" id="clear-completed-modal" style="display:flex;z-index:220" onclick="if(event.target===this)closeClearCompletedModal()">
+      <div class="modal-content slide-up" style="max-width:380px;text-align:center">
+        <div style="width:64px;height:64px;border-radius:20px;background:linear-gradient(135deg,#FEE2E2 0%,#FECACA 100%);display:flex;align-items:center;justify-content:center;margin:0 auto 20px">
+          <i data-lucide="alert-triangle" style="width:32px;height:32px;color:var(--urgent)"></i>
+        </div>
+        <h3 style="font-weight:800;font-size:20px;margin-bottom:8px;color:var(--urgent)">Limpar Tarefas Concluídas?</h3>
+        <p style="font-size:14px;color:var(--secondary);margin-bottom:12px">Você está prestes a deletar <strong>${completedCount} tarefa${completedCount !== 1 ? 's' : ''}</strong> concluída${completedCount !== 1 ? 's' : ''}.</p>
+        <div style="background:#FEE2E2;border-radius:12px;padding:12px;margin-bottom:20px;text-align:left">
+          <p style="font-size:13px;color:var(--urgent);font-weight:600;margin-bottom:8px">⚠️ Esta ação:</p>
+          <ul style="font-size:12px;color:var(--urgent);margin:0;padding-left:20px;list-style:disc">
+            <li>Deletará <strong>apenas tarefas concluídas</strong></li>
+            <li>Suas tarefas pendentes serão mantidas</li>
+            <li>Não pode ser desfeita</li>
+          </ul>
+        </div>
+        <div style="display:flex;gap:10px;justify-content:center">
+          <button onclick="closeClearCompletedModal()" class="btn btn-ghost" style="border-radius:14px;flex:1;border:1.5px solid #E2E8F0;font-weight:600">Cancelar</button>
+          <button onclick="confirmClearCompleted()" class="btn btn-danger" style="border-radius:14px;flex:1;font-weight:600"><i data-lucide="trash" style="width:14px;height:14px"></i> Deletar</button>
+        </div>
       </div>
-      <div><p style="font-size:13px;font-weight:500">${n.msg}</p><p style="font-size:11px;color:var(--secondary)">${timeStr}</p></div>
-    </div>`;
-  }).join('');
+    </div>
+  `;
+  const container = document.getElementById('app');
+  const tempDiv = document.createElement('div');
+  tempDiv.innerHTML = modal;
+  container.appendChild(tempDiv.firstElementChild);
   lucide.createIcons();
 }
 
-// ===== RENDER HEADER =====
-function renderHeader() {
-  document.getElementById('header-date').textContent = formatDate(todayStr());
-  document.getElementById('header-time').textContent = getBrasiliaTime();
-  document.getElementById('greeting-text').textContent = getGreeting();
-  setInterval(() => {
-    document.getElementById('header-time').textContent = getBrasiliaTime();
-    document.getElementById('greeting-text').textContent = getGreeting();
-  }, 1000);
+function closeClearCompletedModal() {
+  const modal = document.getElementById('clear-completed-modal');
+  if (modal) modal.remove();
 }
 
-// ===== RENDER SUMMARY =====
-function renderSummary() {
-  // Summary removed - now shown in dashboard
+function confirmClearCompleted() {
+  const completedTasks = tasks.filter(t => t.status === 'done');
+  completedTasks.forEach(t => clearTaskNotification(t.id));
+  tasks = tasks.filter(t => t.status !== 'done');
+  save();
+  saveNotifiedTasks();
+  closeClearCompletedModal();
+  renderAll();
+  showToast(`${completedTasks.length} tarefa${completedTasks.length !== 1 ? 's' : ''} concluída${completedTasks.length !== 1 ? 's' : ''} deletada${completedTasks.length !== 1 ? 's' : ''}!`, 'success');
+}
+
+function goToWebsite() {
+  const modal = `
+    <div class="modal-overlay" id="exit-modal" style="display:flex;z-index:220" onclick="if(event.target===this)closeExitModal()">
+      <div class="modal-content slide-up" style="max-width:380px;text-align:center">
+        <div style="width:64px;height:64px;border-radius:20px;background:linear-gradient(135deg,#BAE6FD 0%,#7DD3FC 100%);display:flex;align-items:center;justify-content:center;margin:0 auto 20px">
+          <i data-lucide="log-out" style="width:32px;height:32px;color:var(--primary)"></i>
+        </div>
+        <h3 style="font-weight:800;font-size:20px;margin-bottom:8px;color:var(--text)">Sair da Agenda?</h3>
+        <p style="font-size:14px;color:var(--secondary);margin-bottom:20px">Você será redirecionado para o site do desenvolvedor.</p>
+        <div style="display:flex;gap:10px;justify-content:center">
+          <button onclick="closeExitModal()" class="btn btn-ghost" style="border-radius:14px;flex:1;border:1.5px solid #E2E8F0;font-weight:600">Cancelar</button>
+          <button onclick="confirmExit()" class="btn btn-primary" style="border-radius:14px;flex:1;font-weight:600"><i data-lucide="arrow-right" style="width:14px;height:14px"></i> Confirmar</button>
+        </div>
+      </div>
+    </div>
+  `;
+  const container = document.getElementById('app');
+  const tempDiv = document.createElement('div');
+  tempDiv.innerHTML = modal;
+  container.appendChild(tempDiv.firstElementChild);
+  lucide.createIcons();
+}
+
+function closeExitModal() {
+  const modal = document.getElementById('exit-modal');
+  if (modal) modal.remove();
+}
+
+function confirmExit() {
+  closeExitModal();
+  window.location.href = 'https://gaveblue.com';
+}
+
+function renderHeader() {
+  const today = formatDate(todayStr());
+  const time = getBrasiliaTime();
+  const greeting = getGreeting();
+  
+  // Update mobile
+  document.getElementById('header-date').textContent = today;
+  document.getElementById('header-time').textContent = time;
+  document.getElementById('greeting-text').innerHTML = greeting;
+  
+  // Update desktop
+  document.getElementById('header-date-desktop').textContent = today;
+  document.getElementById('header-time-desktop').textContent = time;
+  document.getElementById('greeting-text-desktop').innerHTML = greeting;
+  
+  if (!headerInterval) {
+    headerInterval = setInterval(() => {
+      const newTime = getBrasiliaTime();
+      const newGreeting = getGreeting();
+      
+      // Update mobile
+      document.getElementById('header-time').textContent = newTime;
+      document.getElementById('greeting-text').innerHTML = newGreeting;
+      
+      // Update desktop
+      document.getElementById('header-time-desktop').textContent = newTime;
+      document.getElementById('greeting-text-desktop').innerHTML = newGreeting;
+    }, 1000);
+  }
 }
 
 // ===== RENDER TASKS =====
+function isTaskOverdue(task) {
+  if (task.status === 'done') return false;
+  if (!task.time) return false;
+  
+  const taskDate = new Date(task.date + 'T' + task.time);
+  const now = new Date();
+  const oneMinuteLater = new Date(taskDate.getTime() + 60000);
+  
+  return now >= oneMinuteLater;
+}
+
+// Monitor contínuo para tarefas em atraso
+function startOverdueMonitor() {
+  if (overdueCheckInterval) clearInterval(overdueCheckInterval);
+  
+  overdueCheckInterval = setInterval(() => {
+    // Verificar apenas tarefas PENDENTES (bem mais rápido!)
+    const pendingTasks = tasks.filter(t => t.status !== 'done');
+    
+    pendingTasks.forEach(task => {
+      // Pular se já foi notificado ou sem hora
+      if (tasksAlreadyNotified.has(task.id) || !task.time) return;
+      
+      if (isTaskOverdue(task)) {
+        // Primeira vez que detecta atraso - gerar notificação
+        tasksAlreadyNotified.add(task.id);
+        addNotification('urgent', `⏰ Tarefa "${task.title}" está em ATRASO!`);
+        
+        // Re-renderizar apenas se estamos vendo tarefas
+        if (currentTab === 'tasks') {
+          renderTasks();
+        } else if (currentTab === 'calendar') {
+          renderCalendar();
+        }
+      }
+    });
+  }, 1000); // Verifica a cada 1 segundo
+}
+
+// Restaurar tarefas já notificadas do localStorage
+function restoreNotifiedTasks() {
+  const notifiedIds = localStorage.getItem('tasks_notified') || '[]';
+  try {
+    tasksAlreadyNotified = new Set(JSON.parse(notifiedIds));
+  } catch {
+    tasksAlreadyNotified = new Set();
+  }
+}
+
+// Salvar tarefas já notificadas
+function saveNotifiedTasks() {
+  localStorage.setItem('tasks_notified', JSON.stringify([...tasksAlreadyNotified]));
+}
+
+// Limpar notificações quando tarefa é deletada ou completada
+function clearTaskNotification(taskId) {
+  if (tasksAlreadyNotified.has(taskId)) {
+    tasksAlreadyNotified.delete(taskId);
+    saveNotifiedTasks();
+  }
+}
+
 function renderTasks(targetTasks, container) {
   const list = container || document.getElementById('tasks-list');
   let filtered = targetTasks || tasks;
@@ -736,35 +1017,24 @@ function renderTasks(targetTasks, container) {
     else filtered = tasks.filter(t => t.date === displayDate);
   }
 
-  // Ordenar por horário (tarefas com horário primeiro, depois sem horário)
+  // Ordenação: pendentes no topo (por horário), depois concluídas (por horário)
   filtered.sort((a, b) => {
-    // Tarefas concluídas para o final
-    if (a.status === 'done' && b.status !== 'done') return 1;
-    if (a.status !== 'done' && b.status === 'done') return -1;
+    // Primeiro: tarefas pendentes vêm antes das concluídas
+    if (a.status !== b.status) {
+      return a.status === 'done' ? 1 : -1;
+    }
     
-    // Tarefas com horário antes das sem horário
+    // Segundo: ordenar por horário (principal critério)
     const aHasTime = a.time && a.time.trim();
     const bHasTime = b.time && b.time.trim();
     if (aHasTime && !bHasTime) return -1;
     if (!aHasTime && bHasTime) return 1;
-    
-    // Se ambas têm horário, ordenar por hora
-    if (aHasTime && bHasTime) {
-      return a.time.localeCompare(b.time);
-    }
-    
-    // Se nenhuma tem horário, manter ordem de criação
+    if (aHasTime && bHasTime) return a.time.localeCompare(b.time);
     return 0;
   });
 
   if (!filtered.length) {
-    list.innerHTML = `<div class="empty-state fade-in">
-      <div style="width:64px;height:64px;border-radius:20px;background:#EFF6FF;display:flex;align-items:center;justify-content:center;margin-bottom:12px">
-        <i data-lucide="clipboard-list" style="width:28px;height:28px;color:var(--primary)"></i>
-      </div>
-      <p style="font-weight:600;font-size:15px;margin-bottom:4px">Nenhuma tarefa</p>
-      <p style="font-size:13px">Toque no + para adicionar</p>
-    </div>`;
+    list.innerHTML = `<div class="empty-state fade-in"><div style="width:64px;height:64px;border-radius:20px;background:#EFF6FF;display:flex;align-items:center;justify-content:center;margin-bottom:12px"><i data-lucide="clipboard-list" style="width:28px;height:28px;color:var(--primary)"></i></div><p style="font-weight:600;font-size:15px;margin-bottom:4px">Nenhuma tarefa</p><p style="font-size:13px">Toque no + para adicionar</p></div>`;
     lucide.createIcons();
     return;
   }
@@ -772,32 +1042,41 @@ function renderTasks(targetTasks, container) {
   list.innerHTML = filtered.map(t => {
     const pc = PRIORITY_COLORS[t.priority] || '#64748B';
     const isDone = t.status === 'done';
+    const isOverdue = isTaskOverdue(t);
     const [y, m, d] = t.date.split('-');
     const dateFormatted = `${d}/${m}`;
-    const timeStr = t.time ? `${t.time}` : 'Sem horário';
-    const prioritySymbol = { urgent: '⬤', high: '■', medium: '▲', low: '▢' }[t.priority] || '○';
-    return `<div class="card fade-in" style="display:grid;grid-template-columns:80px 1fr;gap:16px;padding:16px;margin-bottom:12px;border-left:4px solid ${pc};${isDone?'opacity:.6':''}">
-      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px;background:${pc}08;border-radius:12px;min-height:80px;gap:2px">
+    const priorityLabel = PRIORITY_LABELS[t.priority] || 'Normal';
+    let timeDisplay = '--:--';
+    if (t.time && t.time.trim()) timeDisplay = t.time;
+    
+    return `<div class="card fade-in" style="display:grid;grid-template-columns:80px 1fr auto;gap:12px;padding:16px;border-left:4px solid ${pc};${isDone?'background:#F8FAFC':'background:var(--surface)'};cursor:pointer;user-select:none;transition:all .2s;align-items:start;position:relative;margin-bottom:16px">
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px;background:${pc}08;border-radius:12px;min-height:80px;gap:2px;${isDone?'opacity:.6':''}">
         ${t.time?`<div style="font-size:28px;font-weight:800;color:${pc};line-height:1.1;letter-spacing:-0.5px">${t.time.split(':')[0]}<span style="font-size:28px">:${t.time.split(':')[1]}</span></div>`:`<div style="font-size:11px;color:var(--secondary)">sem hora</div>`}
         <div style="font-size:12px;color:var(--text);font-weight:900;margin-top:2px">${dateFormatted}</div>
         <span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;background:${pc}18;color:${pc};margin-top:4px">${PRIORITY_LABELS[t.priority]}</span>
       </div>
-      <div style="display:flex;flex-direction:column;justify-content:center">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:6px">
-          <div style="flex:1;min-width:0">
-            <div style="display:flex;gap:6px;align-items:center;margin-bottom:2px">
-              <span style="font-size:12px;color:${pc};font-weight:700">${prioritySymbol}</span>
-              <h4 style="font-weight:700;font-size:15px;${isDone?'text-decoration:line-through;color:var(--secondary)':''};word-break:break-word">${t.title}</h4>
-            </div>
-            ${t.description?`<p style="font-size:12px;color:var(--secondary);margin-top:2px;word-break:break-word">${t.description}</p>`:''}
-          </div>
-        </div>
-        <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
-          ${!isDone?`<button onclick="requestComplete('${t.id}')" class="btn btn-ghost" style="padding:5px 10px;font-size:11px;color:var(--low)"><i data-lucide="check" style="width:13px;height:13px"></i> Concluir</button>`
-          :`<button onclick="requestUncomplete('${t.id}')" class="btn btn-ghost" style="padding:5px 10px;font-size:11px;color:var(--primary)"><i data-lucide="rotate-ccw" style="width:13px;height:13px"></i> Reabrir</button>`}
-          <button onclick="openTaskModal('${t.id}')" class="btn btn-ghost" style="padding:5px 10px;font-size:11px"><i data-lucide="pencil" style="width:13px;height:13px"></i> Editar</button>
-          <button onclick="requestDelete('${t.id}')" class="btn btn-ghost" style="padding:5px 10px;font-size:11px;color:var(--urgent)"><i data-lucide="trash-2" style="width:13px;height:13px"></i> Excluir</button>
-        </div>
+      
+      <div style="display:flex;flex-direction:column;justify-content:flex-start;min-width:0;flex:1">
+        <h4 style="font-weight:700;font-size:15px;${isDone?'text-decoration:line-through;color:#94A3B8':'color:var(--text)'};word-break:break-word;margin-bottom:4px">${t.title}</h4>
+        ${t.description?`<p style="font-size:12px;color:${isDone?'#94A3B8':'var(--secondary)'};word-break:break-word;${isDone?'text-decoration:line-through':''}">${t.description}</p>`:''}
+        ${isOverdue?`<div style="display:flex;align-items:center;gap:4px;margin-top:8px"><div style="width:6px;height:6px;border-radius:50%;background:#EF4444"></div><span style="font-size:11px;font-weight:700;color:#EF4444;text-transform:uppercase">Em Atraso</span></div>`:''}
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:4px;min-width:fit-content">
+        <button onclick="openTaskModal('${t.id}')" class="btn btn-ghost" style="padding:6px 8px;border-radius:8px;border:1.5px solid var(--primary);color:var(--primary)">
+          <i data-lucide="pencil" style="width:18px;height:18px"></i>
+        </button>
+        <button onclick="requestDelete('${t.id}')" class="btn btn-ghost" style="padding:6px 8px;border-radius:8px;color:var(--urgent);border:1.5px solid var(--urgent)">
+          <i data-lucide="trash-2" style="width:18px;height:18px"></i>
+        </button>
+        ${!isDone
+          ? `<button onclick="requestComplete('${t.id}')" class="btn btn-ghost" style="padding:6px 8px;font-size:12px;border-radius:8px;background:#10B981;color:#fff;font-weight:700;white-space:nowrap">
+               <i data-lucide="check" style="width:18px;height:18px"></i>
+             </button>`
+          : `<button onclick="requestUncomplete('${t.id}')" class="btn btn-ghost" style="padding:6px 8px;font-size:12px;border-radius:8px;background:var(--primary);color:#fff;font-weight:700;white-space:nowrap">
+               <i data-lucide="rotate-ccw" style="width:18px;height:18px"></i>
+             </button>`
+        }
       </div>
     </div>`;
   }).join('');
@@ -817,40 +1096,39 @@ function changeTaskDate(days) {
   const date = new Date(selectedTaskDate + 'T00:00:00');
   date.setDate(date.getDate() + days);
   selectedTaskDate = date.toISOString().split('T')[0];
-  
-  // Atualizar mês e ano do calendário e definir como data selecionada
   const [year, month, day] = selectedTaskDate.split('-');
   calYear = parseInt(year);
   calMonth = parseInt(month) - 1;
   selectedCalDate = selectedTaskDate;
-  
-  if (currentTab === 'tasks') {
-    renderTasks();
-  } else if (currentTab === 'calendar') {
-    renderCalendar();
-  }
+  if (currentTab === 'tasks') renderTasks();
+  else if (currentTab === 'calendar') renderCalendar();
   updateTaskDateLabel();
 }
 
 function updateTaskDateLabel() {
   const displayDate = selectedTaskDate || todayStr();
-  const dateObj = new Date(displayDate + 'T00:00:00');
-  const formatted = dateObj.toLocaleDateString('pt-BR', { weekday:'long', day:'2-digit', month:'long', year:'numeric' });
-  const label = formatted.charAt(0).toUpperCase() + formatted.slice(1);
+  const today = todayStr();
+  let label = '';
+  
+  if (displayDate === today) {
+    label = 'Hoje';
+  } else {
+    const dateObj = new Date(displayDate + 'T00:00:00');
+    const formatted = dateObj.toLocaleDateString('pt-BR', { weekday:'long', day:'2-digit', month:'long', year:'numeric' });
+    label = formatted.charAt(0).toUpperCase() + formatted.slice(1);
+  }
+  
   document.getElementById('tasks-date-label').textContent = label;
   document.getElementById('cal-date-label').textContent = label;
 }
 
-// ===== FAB VISIBILITY =====
 function updateFabVisibility() {
   const fab = document.getElementById('fab-button');
   const settingsOpen = document.getElementById('settings-panel').style.display === 'block';
-  const notificationsOpen = document.getElementById('notif-panel').style.display === 'block';
-  const dashboardOpen = document.getElementById('dashboard-panel').style.display === 'block';
-  const isTasksTab = currentTab === 'tasks';
+  const notificationsOpen = document.getElementById('notifications-panel').style.display === 'block';
+  const isMainView = currentTab === 'tasks' || currentTab === 'calendar';
 
-  const shouldShow = isTasksTab && !settingsOpen && !notificationsOpen && !dashboardOpen;
-  fab.style.display = shouldShow ? 'flex' : 'none';
+  fab.style.display = (isMainView && !settingsOpen && !notificationsOpen) ? 'flex' : 'none';
 }
 
 // ===== TABS =====
@@ -858,9 +1136,15 @@ function switchTab(tab) {
   currentTab = tab;
   document.getElementById('tab-tasks').classList.toggle('active', tab === 'tasks');
   document.getElementById('tab-calendar').classList.toggle('active', tab === 'calendar');
+  document.getElementById('tab-dashboard').classList.toggle('active', tab === 'dashboard');
   document.getElementById('view-tasks').style.display = tab === 'tasks' ? 'block' : 'none';
   document.getElementById('view-calendar').style.display = tab === 'calendar' ? 'block' : 'none';
+  document.getElementById('view-dashboard').style.display = tab === 'dashboard' ? 'block' : 'none';
+  
+  if (tab === 'tasks') renderTasks();
   if (tab === 'calendar') renderCalendar();
+  if (tab === 'dashboard') renderDashboard();
+  
   updateFabVisibility();
 }
 
@@ -871,7 +1155,6 @@ function renderCalendar() {
   const firstDay = new Date(calYear, calMonth, 1).getDay();
   const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
   const today = todayStr();
-
   let html = '';
   for (let i = 0; i < firstDay; i++) html += '<div></div>';
   for (let d = 1; d <= daysInMonth; d++) {
@@ -882,19 +1165,13 @@ function renderCalendar() {
     html += `<button class="cal-day${isToday?' today':''}${isSel?' selected':''}" onclick="selectCalDate('${dateStr}')">${d}${hasTasks?'<span style="position:absolute;bottom:2px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:'+(isToday?'#fff':'var(--primary)')+'"></span>':''}</button>`;
   }
   grid.innerHTML = html;
-
   const selDate = selectedCalDate || today;
   document.getElementById('cal-day-label').textContent = `Tarefas — ${new Date(selDate+'T00:00:00').toLocaleDateString('pt-BR',{day:'numeric',month:'long'})}`;
   const dayTasks = tasks.filter(t => t.date === selDate);
   renderTasks(dayTasks, document.getElementById('cal-tasks-list'));
 }
 
-function selectCalDate(d) { 
-  selectedTaskDate = d;
-  selectedCalDate = d;
-  updateTaskDateLabel();
-  renderCalendar(); 
-}
+function selectCalDate(d) { selectedTaskDate = d; selectedCalDate = d; updateTaskDateLabel(); renderCalendar(); }
 function changeMonth(dir) {
   calMonth += dir;
   if (calMonth > 11) { calMonth = 0; calYear++; }
@@ -902,12 +1179,189 @@ function changeMonth(dir) {
   renderCalendar();
 }
 
+// ===== RENDER DASHBOARD =====
+function renderDashboard() {
+  const total = tasks.length;
+  const done = tasks.filter(t => t.status === 'done').length;
+  const pending = tasks.filter(t => t.status !== 'done').length;
+  const urgent = tasks.filter(t => t.priority === 'urgent').length;
+
+  // ATUALIZAR CONTAGEM NO AVISO (SEMPRE VISÍVEL)
+  document.getElementById('warning-count').textContent = total;
+
+  // Atualizar cards de resumo
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('stat-done').textContent = done;
+  document.getElementById('stat-pending').textContent = pending;
+  document.getElementById('stat-urgent').textContent = urgent;
+
+  // Renderizar distribuição por prioridade
+  const priorityDist = document.getElementById('priority-dist');
+  const priorities = { urgent: 0, high: 0, medium: 0, low: 0 };
+  tasks.forEach(t => { if (priorities.hasOwnProperty(t.priority)) priorities[t.priority]++; });
+
+  const maxPriority = Math.max(Object.values(priorities).reduce((a, b) => Math.max(a, b), 0), 1);
+  const priorityLabels = { urgent: 'Urgente', high: 'Alta', medium: 'Média', low: 'Baixa' };
+  const priorityColors = { urgent: '#EF4444', high: '#FF8C42', medium: '#FBBF24', low: '#10B981' };
+
+  priorityDist.innerHTML = Object.entries(priorities).map(([key, count]) => {
+    const percent = (count / maxPriority) * 100;
+    const color = priorityColors[key];
+    return `
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:13px;font-weight:600;color:var(--text)">${priorityLabels[key]}</span>
+          <span style="font-size:12px;font-weight:700;color:${color}">${count} tarefa${count !== 1 ? 's' : ''}</span>
+        </div>
+        <div style="width:100%;height:8px;background:#E2E8F0;border-radius:4px;overflow:hidden">
+          <div style="height:100%;background:${color};width:${percent}%;transition:width .3s ease"></div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  // Renderizar categorias
+  const categoryCards = document.getElementById('category-cards');
+  const overdueCount = tasks.filter(t => {
+    if (t.status === 'done') return false;
+    if (!t.time) return false;
+    const taskDate = new Date(t.date + 'T' + t.time);
+    const now = new Date();
+    return taskDate < now;
+  }).length;
+  
+  const pendingCount = tasks.filter(t => t.status !== 'done').length;
+  const completedCount = tasks.filter(t => t.status === 'done').length;
+  const urgentCount = tasks.filter(t => t.priority === 'urgent').length;
+  
+  categoryCards.innerHTML = `
+    <div class="card fade-in" style="padding:14px;background:linear-gradient(135deg,#DBEAFE 0%,#BAE6FD 100%);border-left:4px solid var(--primary);cursor:pointer;transition:all .2s;opacity:.9;hover:opacity:1" onclick="goToDashboardFilter('today')">
+      <p style="font-size:11px;font-weight:700;color:var(--primary);margin-bottom:4px;text-transform:uppercase">Hoje</p>
+      <h3 style="font-size:24px;font-weight:800;color:var(--primary)">${tasks.filter(t => t.date === todayStr()).length}</h3>
+      <p style="font-size:10px;color:var(--primary);opacity:.8">agendadas</p>
+    </div>
+    <div class="card fade-in" style="padding:14px;background:linear-gradient(135deg,#FEE2E2 0%,#FECACA 100%);border-left:4px solid var(--urgent);cursor:pointer;transition:all .2s;opacity:.9;hover:opacity:1" onclick="goToDashboardFilter('overdue')">
+      <p style="font-size:11px;font-weight:700;color:var(--urgent);margin-bottom:4px;text-transform:uppercase">Atrasadas</p>
+      <h3 style="font-size:24px;font-weight:800;color:var(--urgent)">${overdueCount}</h3>
+      <p style="font-size:10px;color:var(--urgent);opacity:.8">requer ação</p>
+    </div>
+    <div class="card fade-in" style="padding:14px;background:linear-gradient(135deg,#FEF3C7 0%,#FDE68A 100%);border-left:4px solid var(--medium);cursor:pointer;transition:all .2s;opacity:.9;hover:opacity:1" onclick="goToDashboardFilter('pending')">
+      <p style="font-size:11px;font-weight:700;color:#B45309;margin-bottom:4px;text-transform:uppercase">Pendentes</p>
+      <h3 style="font-size:24px;font-weight:800;color:#B45309">${pendingCount}</h3>
+      <p style="font-size:10px;color:#B45309;opacity:.8">aguardando</p>
+    </div>
+    <div class="card fade-in" style="padding:14px;background:linear-gradient(135deg,#FED7AA 0%,#FDBA74 100%);border-left:4px solid var(--high);cursor:pointer;transition:all .2s;opacity:.9;hover:opacity:1" onclick="goToDashboardFilter('urgent')">
+      <p style="font-size:11px;font-weight:700;color:#EA580C;margin-bottom:4px;text-transform:uppercase">Urgentes</p>
+      <h3 style="font-size:24px;font-weight:800;color:#EA580C">${urgentCount}</h3>
+      <p style="font-size:10px;color:#EA580C;opacity:.8">prioridade urgente</p>
+    </div>
+  `;
+
+  // Renderizar últimas tarefas
+  const recentTasks = document.getElementById('recent-tasks');
+  const lastTasks = tasks.slice(-5).reverse();
+  
+  if (lastTasks.length === 0) {
+    recentTasks.innerHTML = `<div class="empty-state" style="padding:20px;background:var(--surface);border-radius:12px"><p style="font-size:13px;color:var(--secondary)">Nenhuma tarefa criada ainda</p></div>`;
+  } else {
+    recentTasks.innerHTML = lastTasks.map(t => `
+      <div class="card fade-in" style="padding:12px;display:flex;gap:10px;align-items:center;border-left:3px solid ${PRIORITY_COLORS[t.priority]}">
+        <div style="width:3px;height:40px;background:${PRIORITY_COLORS[t.priority]};border-radius:2px"></div>
+        <div style="flex:1;min-width:0">
+          <p style="font-size:13px;font-weight:600;color:var(--text);word-break:break-word;margin-bottom:2px">${t.title}</p>
+          <p style="font-size:11px;color:var(--secondary)">${t.date} ${t.time ? '• ' + t.time : ''}</p>
+        </div>
+        <span style="font-size:10px;font-weight:700;padding:4px 10px;border-radius:6px;background:${PRIORITY_COLORS[t.priority]}15;color:${PRIORITY_COLORS[t.priority]};white-space:nowrap">${PRIORITY_LABELS[t.priority]}</span>
+      </div>
+    `).join('');
+  }
+  
+  lucide.createIcons();
+}
+
+function goToDashboardFilter(filterType) {
+  switchTab('tasks');
+
+  if (filterType === 'today') {
+    currentFilter = 'all';
+    selectedTaskDate = todayStr();
+    document.querySelectorAll('[data-filter]').forEach(b => {
+      b.classList.toggle('active', b.dataset.filter === 'all');
+    });
+    updateTaskDateLabel();
+    renderTasks();
+    return;
+  }
+
+  if (filterType === 'overdue') {
+    currentFilter = 'all';
+    selectedTaskDate = null;
+
+    document.querySelectorAll('[data-filter]').forEach(b => {
+      b.classList.remove('active');
+    });
+    document.querySelector('[data-filter="all"]').classList.add('active');
+
+    const overdueFilteredTasks = tasks.filter(t => {
+      if (t.status === 'done') return false;
+      if (!t.time) return false;
+      return isTaskOverdue(t);
+    });
+
+    renderTasks(overdueFilteredTasks, document.getElementById('tasks-list'));
+    document.getElementById('tasks-date-label').textContent = 'Tarefas Atrasadas';
+    return;
+  }
+
+  if (filterType === 'pending') {
+    currentFilter = 'pending';
+    selectedTaskDate = null;
+    
+    document.querySelectorAll('[data-filter]').forEach(b => {
+      b.classList.toggle('active', b.dataset.filter === 'pending');
+    });
+
+    const pendingFilteredTasks = tasks.filter(t => t.status !== 'done');
+    renderTasks(pendingFilteredTasks, document.getElementById('tasks-list'));
+    document.getElementById('tasks-date-label').textContent = 'Tarefas Pendentes';
+    return;
+  }
+
+  if (filterType === 'completed') {
+    currentFilter = 'done';
+    selectedTaskDate = null;
+    
+    document.querySelectorAll('[data-filter]').forEach(b => {
+      b.classList.toggle('active', b.dataset.filter === 'done');
+    });
+
+    const completedFilteredTasks = tasks.filter(t => t.status === 'done');
+    renderTasks(completedFilteredTasks, document.getElementById('tasks-list'));
+    document.getElementById('tasks-date-label').textContent = 'Tarefas Concluídas';
+    return;
+  }
+
+  if (filterType === 'urgent') {
+    currentFilter = 'urgent';
+    selectedTaskDate = null;
+    
+    document.querySelectorAll('[data-filter]').forEach(b => {
+      b.classList.remove('active');
+    });
+
+    const urgentFilteredTasks = tasks.filter(t => t.priority === 'urgent');
+    renderTasks(urgentFilteredTasks, document.getElementById('tasks-list'));
+    document.getElementById('tasks-date-label').textContent = 'Tarefas Urgentes';
+    return;
+  }
+}
+
+
 // ===== TASK MODAL =====
 function openTaskModal(id) {
   editingId = id || null;
   document.getElementById('modal-title').textContent = id ? 'Editar Tarefa' : 'Nova Tarefa';
   document.getElementById('save-btn').innerHTML = '<i data-lucide="check" style="width:16px;height:16px"></i> ' + (id ? 'Atualizar' : 'Salvar');
-
   if (id) {
     const t = tasks.find(x => x.id === id);
     if (t) {
@@ -925,7 +1379,6 @@ function openTaskModal(id) {
     document.getElementById('f-priority').value = 'low';
     updatePriorityButtons('low');
   }
-
   document.getElementById('task-modal').style.display = 'flex';
   lucide.createIcons();
 }
@@ -950,34 +1403,6 @@ function closeTaskModal() {
   editingId = null;
 }
 
-function requestSaveConfirm() {
-  if (!document.getElementById('f-title').value.trim()) {
-    document.getElementById('f-title').focus();
-    return;
-  }
-  if (!document.getElementById('f-date').value) {
-    document.getElementById('f-date').focus();
-    return;
-  }
-  const title = document.getElementById('f-title').value;
-  document.getElementById('confirm-task-title').textContent = `"${title}"`;
-  document.getElementById('confirm-save-modal').style.display = 'flex';
-  lucide.createIcons();
-}
-
-function handleSaveClick() {
-  if (!document.getElementById('f-title').value.trim()) {
-    document.getElementById('f-title').focus();
-    return;
-  }
-  if (!document.getElementById('f-date').value) {
-    document.getElementById('f-date').focus();
-    return;
-  }
-
-  submitForm();
-}
-
 function submitForm() {
   const titleVal = document.getElementById('f-title').value.trim();
   const descVal = document.getElementById('f-desc').value.trim();
@@ -991,41 +1416,27 @@ function submitForm() {
     return;
   }
 
-  const data = {
-    title: titleVal,
-    description: descVal,
-    date: dateVal,
-    time: timeVal,
-    priority: priorityVal,
-    notes: notesVal,
-  };
+  const data = { title: titleVal, description: descVal, date: dateVal, time: timeVal, priority: priorityVal, notes: notesVal };
 
   if (editingId) {
     const idx = tasks.findIndex(t => t.id === editingId);
     if (idx > -1) {
       tasks[idx] = { ...tasks[idx], ...data };
-      addNotification(`Tarefa "${data.title}" atualizada`, 'info');
-      showToast('Tarefa atualizada!');
+      addNotification('update', `✏️ Tarefa "${titleVal}" foi atualizada`);
+      // Limpar a notificação de atraso quando edita, assim se entrar em atraso de novo vai notificar
+      clearTaskNotification(editingId);
     }
   } else {
     const newTask = { id: 'task_' + Date.now(), ...data, status: 'pending', createdAt: new Date().toISOString() };
     tasks.push(newTask);
-    addNotification(`Nova tarefa: "${data.title}"`, 'added');
-    if (data.priority === 'urgent') addNotification(`⚠️ Tarefa URGENTE: "${data.title}"`, 'urgent');
-    showToast('Tarefa criada!');
+    addNotification('create', `✨ Nova tarefa "${titleVal}" criada`);
+    showToast(`✨ Tarefa "${titleVal}" criada com sucesso!`);
   }
 
   save();
-  cancelConfirm();
   closeTaskModal();
   renderAll();
 }
-
-function cancelConfirm() {
-  document.getElementById('confirm-save-modal').style.display = 'none';
-}
-
-function editTask(id) { openTaskModal(id); }
 
 // ===== DELETE =====
 function requestDelete(id) {
@@ -1035,13 +1446,20 @@ function requestDelete(id) {
   document.getElementById('delete-modal').style.display = 'flex';
   lucide.createIcons();
 }
-function closeDeleteModal() { document.getElementById('delete-modal').style.display = 'none'; deleteTargetId = null; }
+
+function closeDeleteModal() { 
+  document.getElementById('delete-modal').style.display = 'none'; 
+  deleteTargetId = null; 
+}
+
 function confirmDelete() {
   if (!deleteTargetId) return;
-  const t = tasks.find(x => x.id === deleteTargetId);
+  const task = tasks.find(t => t.id === deleteTargetId);
+  clearTaskNotification(deleteTargetId);
   tasks = tasks.filter(x => x.id !== deleteTargetId);
-  if (t) addNotification(`Tarefa "${t.title}" excluída`, 'deleted');
+  if (task) addNotification('delete', `Tarefa "${task.title}" foi deletada`);
   save();
+  saveNotifiedTasks();
   closeDeleteModal();
   showToast('Tarefa excluída', 'error');
   renderAll();
@@ -1056,6 +1474,7 @@ function requestComplete(id) {
   document.getElementById('complete-modal').style.display = 'flex';
   lucide.createIcons();
 }
+
 function requestUncomplete(id) {
   completeTargetId = id;
   const t = tasks.find(x => x.id === id);
@@ -1064,17 +1483,29 @@ function requestUncomplete(id) {
   document.getElementById('complete-modal').style.display = 'flex';
   lucide.createIcons();
 }
-function closeCompleteModal() { document.getElementById('complete-modal').style.display = 'none'; completeTargetId = null; }
+
+function closeCompleteModal() { 
+  document.getElementById('complete-modal').style.display = 'none'; 
+  completeTargetId = null; 
+}
+
 function confirmComplete() {
   if (!completeTargetId) return;
   const t = tasks.find(x => x.id === completeTargetId);
   if (t) {
     t.status = t.status === 'done' ? 'pending' : 'done';
     const action = t.status === 'done' ? 'concluída' : 'reaberta';
-    addNotification(`Tarefa "${t.title}" ${action}`, 'done');
+    const notifType = t.status === 'done' ? 'complete' : 'uncomplete';
+    addNotification(notifType, `Tarefa "${t.title}" foi ${action}`);
     showToast(`Tarefa ${action}!`);
+    
+    // Limpar notificação de atraso se tarefa foi concluída
+    if (t.status === 'done') {
+      clearTaskNotification(completeTargetId);
+    }
   }
   save();
+  saveNotifiedTasks();
   closeCompleteModal();
   renderAll();
 }
@@ -1082,244 +1513,26 @@ function confirmComplete() {
 // ===== RENDER ALL =====
 function renderAll() {
   renderHeader();
-  renderSummary();
-  renderNotifBadge();
   updateTaskDateLabel();
   if (currentTab === 'tasks') renderTasks();
   if (currentTab === 'calendar') renderCalendar();
+  if (currentTab === 'dashboard') renderDashboard();
 }
 
-// ===== ELEMENT SDK =====
-const defaultConfig = {
-  page_title: 'Task Agenda',
-  app_title: 'Minha Agenda',
-  greeting_text: '',
-  background_color: '#F0F4F8',
-  surface_color: '#FFFFFF',
-  text_color: '#1E293B',
-  primary_color: '#2563EB',
-  secondary_color: '#64748B',
-  font_family: 'Plus Jakarta Sans',
-  font_size: 14,
-};
-
-function applyConfig(cfg) {
-  const c = { ...defaultConfig, ...cfg };
-  document.title = c.page_title;
-  document.documentElement.style.setProperty('--bg', c.background_color);
-  document.documentElement.style.setProperty('--surface', c.surface_color);
-  document.documentElement.style.setProperty('--text', c.text_color);
-  document.documentElement.style.setProperty('--primary', c.primary_color);
-  document.documentElement.style.setProperty('--secondary', c.secondary_color);
-
-  const title = document.getElementById('app-title');
-  if (title) title.textContent = userName || c.app_title;
-
-  const gt = document.getElementById('greeting-text');
-  if (gt && c.greeting_text) { gt.textContent = c.greeting_text; gt.dataset.custom = '1'; }
-  else if (gt && !c.greeting_text) { delete gt.dataset.custom; renderHeader(); }
-
-  document.body.style.fontFamily = `${c.font_family}, 'Plus Jakarta Sans', sans-serif`;
-
-  const base = c.font_size || 14;
-  document.body.style.fontSize = base + 'px';
-}
-
-if (window.elementSdk) {
-  window.elementSdk.init({
-    defaultConfig,
-    onConfigChange: async (cfg) => applyConfig(cfg),
-    mapToCapabilities: (cfg) => ({
-      recolorables: [
-        { get: () => cfg.background_color || defaultConfig.background_color, set: v => { cfg.background_color = v; window.elementSdk.setConfig({ background_color: v }); } },
-        { get: () => cfg.surface_color || defaultConfig.surface_color, set: v => { cfg.surface_color = v; window.elementSdk.setConfig({ surface_color: v }); } },
-        { get: () => cfg.text_color || defaultConfig.text_color, set: v => { cfg.text_color = v; window.elementSdk.setConfig({ text_color: v }); } },
-        { get: () => cfg.primary_color || defaultConfig.primary_color, set: v => { cfg.primary_color = v; window.elementSdk.setConfig({ primary_color: v }); } },
-        { get: () => cfg.secondary_color || defaultConfig.secondary_color, set: v => { cfg.secondary_color = v; window.elementSdk.setConfig({ secondary_color: v }); } },
-      ],
-      borderables: [],
-      fontEditable: { get: () => cfg.font_family || defaultConfig.font_family, set: v => { cfg.font_family = v; window.elementSdk.setConfig({ font_family: v }); } },
-      fontSizeable: { get: () => cfg.font_size || defaultConfig.font_size, set: v => { cfg.font_size = v; window.elementSdk.setConfig({ font_size: v }); } },
-    }),
-    mapToEditPanelValues: (cfg) => new Map([
-      ['page_title', cfg.page_title || defaultConfig.page_title],
-      ['app_title', cfg.app_title || defaultConfig.app_title],
-      ['greeting_text', cfg.greeting_text || defaultConfig.greeting_text],
-    ]),
-  });
-}
-
+// ===== INIT =====
 function initApp() {
   applyTheme();
+  restoreNotifiedTasks();
   getTodayFromAPI().then(() => {
     renderAll();
+    updateNotificationBadge();
     lucide.createIcons();
     updateFabVisibility();
+    startOverdueMonitor();
   });
-}
-
-function showNameModal() {
-  const modal = `
-    <div class="modal-overlay" id="name-modal" style="z-index:1000" onclick="if(event.target===this)return false">
-      <div class="modal-content slide-up" style="max-width:380px;text-align:center">
-        <h2 style="font-weight:800;font-size:20px;margin-bottom:8px">Bem-vindo ao WeTasks! 👋</h2>
-        <p style="font-size:14px;color:var(--secondary);margin-bottom:20px">Para iniciar sua personalização, por favor, informe seu nome.</p>
-        <div style="display:flex;flex-direction:column;gap:14px">
-          <input type="text" id="name-input" placeholder="Digite seu nome aqui..." style="border:1.5px solid #E2E8F0;border-radius:12px;padding:12px 14px;font-family:inherit;font-size:14px;width:100%;box-sizing:border-box;background:#F8FAFC" autofocus>
-          <button onclick="saveName()" class="btn btn-primary" style="width:100%;justify-content:center">
-            <i data-lucide="arrow-right" style="width:16px;height:16px"></i> Começar
-          </button>
-        </div>
-      </div>
-    </div>
-  `;
-  
-  const container = document.getElementById('app');
-  const tempDiv = document.createElement('div');
-  tempDiv.innerHTML = modal;
-  container.appendChild(tempDiv.firstElementChild);
-  
-  document.getElementById('name-input').addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') saveName();
-  });
-  
-  lucide.createIcons();
-}
-
-function saveName() {
-  const nameInput = document.getElementById('name-input');
-  const name = nameInput.value.trim();
-  
-  if (!name) {
-    nameInput.focus();
-    return;
-  }
-  
-  userName = name;
-  localStorage.setItem('user_name', userName);
-  
-  const modal = document.getElementById('name-modal');
-  modal.parentElement.removeChild(modal);
-  
-  document.getElementById('app-title').textContent = userName;
-  
-  renderAll();
-  lucide.createIcons();
-  updateFabVisibility();
-  
-  showToast(`Bem-vindo, ${userName}! 🎉`);
-}
-
-// ===== TUTORIAL =====
-let tutorialStep = 0;
-const tutorialSteps = [];
-
-function showTutorial() {
-  tutorialStep = 0;
-  renderTutorialStep();
-}
-
-function renderTutorialStep() {
-  const step = tutorialSteps[tutorialStep];
-  const progress = ((tutorialStep + 1) / tutorialSteps.length) * 100;
-  
-  let highlightHTML = '';
-  if (step.highlight) {
-    const el = document.getElementById(step.highlight);
-    if (el) {
-      const rect = el.getBoundingClientRect();
-      highlightHTML = `
-        <div id="tutorial-highlight" style="position:fixed;top:${rect.top-8}px;left:${rect.left-8}px;width:${rect.width+16}px;height:${rect.height+16}px;border:3px solid var(--primary);border-radius:16px;pointer-events:none;z-index:70;animation:pulse 2s infinite;box-shadow:0 0 0 4px rgba(37,99,235,.2)"></div>
-        <div id="tutorial-overlay-bg" style="position:fixed;inset:0;background:rgba(15,23,42,.6);z-index:65;pointer-events:none" onclick="event.stopPropagation()"></div>
-      `;
-    }
-  }
-  
-  const tutorial = `
-    <div class="modal-overlay" id="tutorial-modal" style="z-index:100;animation:fadeIn .3s ease" onclick="if(event.target===this)skipTutorial()">
-      ${highlightHTML}
-      <div class="modal-content slide-up" style="max-width:420px;position:relative;z-index:101">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
-          <div style="display:flex;gap:4px;align-items:center">
-            ${Array.from({length:tutorialSteps.length}).map((_, i) => `
-              <div style="width:6px;height:6px;border-radius:50%;background:${i<=tutorialStep?'var(--primary)':'#CBD5E1'};transition:all .3s"></div>
-            `).join('')}
-          </div>
-          <button onclick="skipTutorial()" class="btn btn-ghost" style="padding:6px;font-size:12px"><i data-lucide="x" style="width:16px;height:16px"></i></button>
-        </div>
-        
-        <div style="text-align:center;margin-bottom:24px">
-          <div style="width:72px;height:72px;border-radius:20px;background:var(--primary)15;display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
-            <i data-lucide="${step.icon}" style="width:36px;height:36px;color:var(--primary)"></i>
-          </div>
-          <h2 style="font-weight:800;font-size:18px;margin-bottom:8px">${step.title}</h2>
-          <p style="font-size:13px;color:var(--secondary);line-height:1.5">${step.description}</p>
-        </div>
-        
-        <div style="display:flex;gap:10px;justify-content:center">
-          <button onclick="skipTutorial()" class="btn btn-ghost" style="flex:1;border:1.5px solid #E2E8F0;border-radius:12px">Pular</button>
-          <button onclick="nextTutorialStep()" class="btn btn-primary" style="flex:1;border-radius:12px">
-            ${tutorialStep === tutorialSteps.length - 1 ? '<i data-lucide="check" style="width:16px;height:16px"></i> Concluir' : '<i data-lucide="arrow-right" style="width:16px;height:16px"></i> Avançar'}
-          </button>
-        </div>
-      </div>
-    </div>
-    <style>
-      @keyframes pulse {
-        0%, 100% { box-shadow: 0 0 0 4px rgba(37,99,235,.2); }
-        50% { box-shadow: 0 0 0 8px rgba(37,99,235,.1); }
-      }
-    </style>
-  `;
-  
-  const container = document.getElementById('app') || document.body;
-  let tutorialModal = document.getElementById('tutorial-modal');
-  
-  if (tutorialModal) {
-    tutorialModal.remove();
-    const highlight = document.getElementById('tutorial-highlight');
-    const overlay = document.getElementById('tutorial-overlay-bg');
-    if (highlight) highlight.remove();
-    if (overlay) overlay.remove();
-  }
-  
-  const tempDiv = document.createElement('div');
-  tempDiv.innerHTML = tutorial;
-  container.appendChild(tempDiv.firstElementChild);
-  
-  lucide.createIcons();
-}
-
-function nextTutorialStep() {
-  tutorialStep++;
-  if (tutorialStep >= tutorialSteps.length) {
-    finishTutorial();
-  } else {
-    renderTutorialStep();
-  }
-}
-
-function skipTutorial() {
-  finishTutorial();
-}
-
-function finishTutorial() {
-  const modal = document.getElementById('tutorial-modal');
-  const highlight = document.getElementById('tutorial-highlight');
-  const overlay = document.getElementById('tutorial-overlay-bg');
-  
-  if (modal) modal.remove();
-  if (highlight) highlight.remove();
-  if (overlay) overlay.remove();
-  
-  localStorage.setItem('tutorial_seen', 'true');
-  renderAll();
-  lucide.createIcons();
-  updateFabVisibility();
 }
 
 initApp();
-</script>
-  </div>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9e50a3ee31d364f1',t:'MTc3NDk3MzU5Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9e5de01ac7689aa9',t:'MTc3NTExMjM3Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
