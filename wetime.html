@@ -1,0 +1,564 @@
+<!doctype html>
+<html lang="pt-BR" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WeTime - Relógio online</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    html, body { height: 100%; margin: 0; box-sizing: border-box; }
+    * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+    body {
+      min-height: 100vh;
+      color: white;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.22), transparent 32%),
+        radial-gradient(circle at 80% 15%, rgba(139, 92, 246, 0.22), transparent 28%),
+        radial-gradient(circle at 50% 85%, rgba(45, 212, 191, 0.12), transparent 30%),
+        linear-gradient(135deg, #0a0f1f 0%, #111936 35%, #181c3f 65%, #0b1220 100%);
+      background-attachment: fixed;
+      overflow-x: hidden;
+    }
+    .card-gradient {
+      background: linear-gradient(180deg, rgba(30, 41, 59, 0.86), rgba(15, 23, 42, 0.95));
+      border: 1px solid rgba(148, 163, 184, 0.16);
+      box-shadow: 0 24px 60px rgba(7, 12, 32, 0.32);
+    }
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.58);
+      border: 1px solid rgba(148, 163, 184, 0.14);
+      backdrop-filter: blur(18px);
+    }
+    .gradient-text {
+      background: linear-gradient(90deg, #ffffff 0%, #b6c9ff 35%, #8be9ff 65%, #c7b8ff 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .btn-secondary {
+      background: rgba(15, 23, 42, 0.55);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      transition: all 0.25s ease;
+    }
+    .btn-secondary:hover {
+      background: rgba(30, 41, 59, 0.72);
+      border-color: rgba(148, 163, 184, 0.3);
+    }
+    .mode-btn.active {
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.22));
+      border-color: rgba(96, 165, 250, 0.45);
+      color: white;
+      box-shadow: 0 0 0 1px rgba(96, 165, 250, 0.18) inset;
+    }
+    .clock-digits {
+      font-family: 'IBM Plex Mono', monospace;
+      letter-spacing: -0.06em;
+      line-height: 1;
+      text-shadow: 0 0 24px rgba(96, 165, 250, 0.18);
+      font-variant-numeric: tabular-nums;
+      font-feature-settings: 'tnum' 1, 'lnum' 1;
+      white-space: nowrap;
+    }
+    .analog-clock {
+      position: relative;
+      width: min(72vw, 320px);
+      height: min(72vw, 320px);
+      border-radius: 999px;
+      background:
+        radial-gradient(circle at 50% 40%, rgba(96, 165, 250, 0.16), transparent 42%),
+        linear-gradient(180deg, rgba(30, 41, 59, 0.96), rgba(15, 23, 42, 0.98));
+      border: 1px solid rgba(96, 165, 250, 0.28);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 25px 50px rgba(2, 6, 23, 0.45);
+    }
+    .clock-ring {
+      position: absolute;
+      inset: 14px;
+      border-radius: inherit;
+      border: 1px solid rgba(148, 163, 184, 0.12);
+    }
+    .tick {
+      position: absolute;
+      top: 14px;
+      left: 50%;
+      width: 2px;
+      height: 18px;
+      margin-left: -1px;
+      border-radius: 999px;
+      background: rgba(191, 219, 254, 0.75);
+      transform-origin: center calc((min(72vw, 320px) / 2) - 14px);
+    }
+    .tick.major {
+      height: 26px;
+      background: rgba(255, 255, 255, 0.92);
+    }
+    .hand {
+      position: absolute;
+      left: 50%;
+      bottom: 50%;
+      transform-origin: bottom center;
+      border-radius: 999px;
+    }
+    .hour-hand {
+      width: 6px;
+      height: 68px;
+      margin-left: -3px;
+      background: linear-gradient(180deg, #ffffff 0%, #93c5fd 100%);
+    }
+    .minute-hand {
+      width: 4px;
+      height: 98px;
+      margin-left: -2px;
+      background: linear-gradient(180deg, #c7d2fe 0%, #60a5fa 100%);
+    }
+    .second-hand {
+      width: 2px;
+      height: 112px;
+      margin-left: -1px;
+      background: linear-gradient(180deg, #fda4af 0%, #fb7185 100%);
+      box-shadow: 0 0 12px rgba(251, 113, 133, 0.4);
+    }
+    .clock-center {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 14px;
+      height: 14px;
+      margin: -7px 0 0 -7px;
+      border-radius: 999px;
+      background: white;
+      box-shadow: 0 0 0 5px rgba(59, 130, 246, 0.18);
+      z-index: 5;
+    }
+    .hidden-panel { display: none; }
+    .timezone-select,
+    .language-select {
+      appearance: none;
+      background: rgba(15, 23, 42, 0.82);
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      color: white;
+    }
+    .timezone-select:focus,
+    .language-select:focus {
+      outline: none;
+      border-color: rgba(96, 165, 250, 0.45);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.16);
+    }
+    .hero-badge {
+      background: rgba(99, 102, 241, 0.14);
+      border: 1px solid rgba(129, 140, 248, 0.2);
+    }
+    .settings-popover {
+      position: absolute;
+      top: calc(100% + 0.75rem);
+      right: 0;
+      width: min(92vw, 360px);
+      z-index: 60;
+    }
+    .settings-popover.hidden {
+      display: none;
+    }
+    .icon-button {
+      width: 42px;
+      height: 42px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.2);
+      backdrop-filter: blur(10px);
+      transition: all 0.2s ease;
+    }
+    .icon-button:hover {
+      background: rgba(255,255,255,0.25);
+    }
+    .exit-button {
+      min-width: 88px;
+      height: 42px;
+      padding: 0 1rem;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.2);
+      backdrop-filter: blur(10px);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
+    }
+    .exit-button:hover {
+      background: rgba(255,255,255,0.25);
+    }
+    .clock-action {
+      position: absolute;
+      top: 1.25rem;
+      right: 1.25rem;
+      z-index: 4;
+    }
+    .fullscreen-active #hero-section,
+    .fullscreen-active #footer {
+      display: none;
+    }
+    .fullscreen-active main {
+      padding-top: 4rem;
+      padding-bottom: 2rem;
+    }
+    .fullscreen-active #clock-card {
+      min-height: calc(100vh - 6rem);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .fullscreen-active .clock-digits {
+      font-size: min(22vw, 13rem);
+    }
+    @media (max-width: 767px) {
+      .clock-digits {
+        font-size: clamp(3.5rem, 16vw, 5.8rem);
+      }
+    }
+    @media (min-width: 768px) {
+      .clock-digits {
+        font-size: clamp(5.8rem, 10vw, 8.5rem);
+      }
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+</head>
+<body class="text-white">
+  <header class="fixed top-0 left-0 right-0 z-50 bg-slate-900/95 backdrop-blur-xl border-b border-slate-700/50 h-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between gap-3">
+      <a href="https://gaveblue.com" target="_self" rel="noopener noreferrer">
+        <img src="https://i.imgur.com/Zih5jH8.png" alt="Logo GaveBlue" class="h-12 w-auto cursor-pointer hover:opacity-80 transition-opacity" loading="lazy">
+      </a>
+      <div class="relative flex items-center gap-3">
+        <button id="settings-toggle" class="icon-button text-white" aria-label="Configurações" aria-expanded="false">
+          <i data-lucide="settings" style="width:20px;height:20px"></i>
+        </button>
+        <button onclick="sairApp()" class="exit-button text-white text-sm font-semibold">
+          <i data-lucide="log-out" style="width:18px;height:18px"></i>
+          Sair
+        </button>
+        <div id="settings-popover" class="settings-popover hidden">
+          <div class="card-gradient rounded-3xl p-4 sm:p-5">
+            <p class="text-slate-300 text-xs font-semibold uppercase tracking-[0.22em] mb-4">Configurações</p>
+            <div class="space-y-4">
+              <div>
+                <span class="text-slate-400 text-xs font-semibold uppercase tracking-[0.22em] block mb-2">Tipo de relógio</span>
+                <div class="grid grid-cols-2 gap-2">
+                  <button id="settings-digital-mode-btn" class="mode-btn active btn-secondary rounded-xl px-4 py-2 text-sm font-semibold" data-mode="digital">Digital</button>
+                  <button id="settings-analog-mode-btn" class="mode-btn btn-secondary rounded-xl px-4 py-2 text-sm font-semibold" data-mode="analog">Analógico</button>
+                </div>
+              </div>
+              <label class="block">
+                <span class="text-slate-400 text-xs font-semibold uppercase tracking-[0.22em] block mb-2">Idioma</span>
+                <select id="language-select" class="language-select w-full rounded-xl px-4 py-3 text-sm font-medium">
+                  <option value="pt-BR" selected>Português (Brasil)</option>
+                  <option value="en-US">English</option>
+                  <option value="es-ES">Español</option>
+                </select>
+              </label>
+              <label class="block">
+                <span class="text-slate-400 text-xs font-semibold uppercase tracking-[0.22em] block mb-2">Fuso horário</span>
+                <select id="timezone-select" class="timezone-select w-full rounded-xl px-4 py-3 text-sm font-medium">
+                  <option value="America/Sao_Paulo" selected>America/Sao_Paulo</option>
+                  <option value="UTC">UTC</option>
+                  <option value="America/New_York">America/New_York</option>
+                  <option value="America/Chicago">America/Chicago</option>
+                  <option value="America/Los_Angeles">America/Los_Angeles</option>
+                  <option value="Europe/London">Europe/London</option>
+                  <option value="Europe/Paris">Europe/Paris</option>
+                  <option value="Asia/Tokyo">Asia/Tokyo</option>
+                </select>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="pt-24 pb-10 px-4 sm:px-6">
+    <div class="max-w-7xl mx-auto">
+      <section id="hero-section" class="mb-8 lg:mb-10">
+        <div class="text-center max-w-5xl mx-auto">
+          <h1 id="display-title" class="text-4xl sm:text-5xl lg:text-[4.25rem] font-extrabold leading-[0.98] tracking-[-0.04em] mb-5">
+            <span class="block text-white">WeTime - <span class="gradient-text">Relógio online</span></span>
+          </h1>
+          <p id="hero-subtitle" class="text-slate-300 text-base sm:text-lg leading-relaxed max-w-3xl mx-auto">
+            Acompanhe a hora em tempo real, altere o fuso horário, escolha entre visual digital ou analógico e use uma tela pronta para ambientes de trabalho, recepção ou monitoramento.
+          </p>
+        </div>
+      </section>
+
+      <section class="max-w-5xl mx-auto">
+        <div id="clock-card" class="card-gradient rounded-[2rem] p-5 sm:p-8 lg:p-10 relative">
+          <button id="fullscreen-btn" class="clock-action btn-secondary rounded-full px-3 py-2 text-xs font-semibold text-slate-200">Tela cheia</button>
+          <div class="text-center border-t border-slate-700/50 pt-7 mb-7">
+            <p id="date-heading" class="text-2xl sm:text-4xl font-bold text-white">Carregando data...</p>
+          </div>
+
+          <div id="digital-clock" class="flex flex-col items-center justify-center text-center">
+            <div class="clock-digits font-bold text-white bg-white/[0.04] border border-white/10 rounded-[1.75rem] px-5 py-6 sm:px-8 sm:py-8 w-full overflow-x-auto">
+              <span id="hours">00</span><span class="text-blue-300">:</span><span id="minutes">00</span><span class="text-blue-300">:</span><span id="seconds">00</span>
+            </div>
+          </div>
+
+          <div id="analog-clock-panel" class="hidden-panel">
+            <div class="flex justify-center">
+              <div class="analog-clock">
+                <div class="clock-ring"></div>
+                <div id="ticks-layer"></div>
+                <div id="hour-hand" class="hand hour-hand"></div>
+                <div id="minute-hand" class="hand minute-hand"></div>
+                <div id="second-hand" class="hand second-hand"></div>
+                <div class="clock-center"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-6 text-center">
+            <a href="https://gaveblue.com/wetasks" target="_self" rel="noopener noreferrer" class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/[0.04] border border-white/10 text-slate-300 hover:text-white hover:bg-white/[0.08] transition-all text-sm font-medium">
+              <svg class="w-4 h-4 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v12m6-6H6" />
+              </svg>
+              Adicionar tarefa para daqui a 5 minutos
+            </a>
+          </div>
+
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer id="footer" class="border-t border-slate-700/50 bg-slate-950/35 px-4 sm:px-6 py-6 mt-4">
+    <div class="max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-5">
+      <img src="https://i.imgur.com/Zih5jH8.png" alt="Logo GaveBlue" class="h-10 w-auto" loading="lazy">
+      <div class="flex items-center justify-center gap-3">
+        <a href="https://instagram.com/gaveblue" target="_blank" rel="noopener noreferrer" class="flex items-center justify-center w-10 h-10 rounded-xl bg-white/10 border border-white/15 hover:bg-white/15 transition-all" title="Instagram">
+          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5" ry="5" stroke-width="2"></rect><circle cx="12" cy="12" r="4" stroke-width="2"></circle><circle cx="17" cy="7" r="1.2" fill="currentColor"></circle></svg>
+        </a>
+        <a href="https://wa.me/5527988790381" target="_blank" rel="noopener noreferrer" class="flex items-center justify-center w-10 h-10 rounded-xl bg-white/10 border border-white/15 hover:bg-white/15 transition-all" title="WhatsApp">
+          <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" /></svg>
+        </a>
+        <a href="mailto:contato@gaveblue.com" class="flex items-center justify-center w-10 h-10 rounded-xl bg-white/10 border border-white/15 hover:bg-white/15 transition-all" title="E-mail">
+          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+        </a>
+      </div>
+      <div class="text-center lg:text-right">
+        <a href="https://gaveblue.com" target="_blank" rel="noopener noreferrer" class="text-slate-300 hover:text-white transition-colors text-base block">gaveblue.com</a>
+        <p class="text-slate-500 text-sm mt-1">© 2026 GaveBlue — Todos os direitos reservados</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const defaultConfig = {
+      display_title: 'WeTime - Relógio online',
+      hero_subtitle: 'Acompanhe a hora em tempo real, altere o fuso horário, escolha entre visual digital ou analógico e use uma tela pronta para ambientes de trabalho, recepção ou monitoramento.'
+    };
+
+    let config = { ...defaultConfig };
+    let currentMode = 'digital';
+    let currentLanguage = 'pt-BR';
+    let currentTimezone = 'America/Sao_Paulo';
+    let isFullscreen = false;
+
+    const languageCopy = {
+      'pt-BR': { week: 'Semana', am: 'AM', pm: 'PM' },
+      'en-US': { week: 'Week', am: 'AM', pm: 'PM' },
+      'es-ES': { week: 'Semana', am: 'AM', pm: 'PM' }
+    };
+
+    const titleEl = document.getElementById('display-title');
+    const subtitleEl = document.getElementById('hero-subtitle');
+    const digitalClockEl = document.getElementById('digital-clock');
+    const analogPanelEl = document.getElementById('analog-clock-panel');
+    const hoursEl = document.getElementById('hours');
+    const minutesEl = document.getElementById('minutes');
+    const secondsEl = document.getElementById('seconds');
+    const dateHeadingEl = document.getElementById('date-heading');
+    const languageSelectEl = document.getElementById('language-select');
+    const timezoneSelectEl = document.getElementById('timezone-select');
+    const fullscreenBtnEl = document.getElementById('fullscreen-btn');
+    const settingsToggleEl = document.getElementById('settings-toggle');
+    const settingsPopoverEl = document.getElementById('settings-popover');
+
+    function sairApp() {
+      window.location.href = 'https://gaveblue.com';
+    }
+
+    function focusClockCard() {
+      document.getElementById('clock-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function buildTicks() {
+      const layer = document.getElementById('ticks-layer');
+      for (let i = 0; i < 60; i += 1) {
+        const tick = document.createElement('div');
+        tick.className = `tick${i % 5 === 0 ? ' major' : ''}`;
+        tick.style.transform = `rotate(${i * 6}deg)`;
+        layer.appendChild(tick);
+      }
+    }
+
+    function getLocalizedNowParts() {
+      const parts = new Intl.DateTimeFormat('en-CA', {
+        timeZone: currentTimezone,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+      }).formatToParts(new Date());
+
+      const map = {};
+      parts.forEach((part) => {
+        map[part.type] = part.value;
+      });
+      return map;
+    }
+
+    function getWeekNumber(date) {
+      const firstDay = new Date(date.getFullYear(), 0, 1);
+      const pastDaysOfYear = (date - firstDay) / 86400000;
+      return Math.ceil((pastDaysOfYear + firstDay.getDay() + 1) / 7);
+    }
+
+    function getDateInTimezone() {
+      const formatter = new Intl.DateTimeFormat('en-CA', {
+        timeZone: currentTimezone,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      });
+      const parts = formatter.formatToParts(new Date());
+      const map = {};
+      parts.forEach((part) => {
+        map[part.type] = part.value;
+      });
+      return new Date(`${map.year}-${map.month}-${map.day}T12:00:00`);
+    }
+
+    function updateClock() {
+      const timeParts = getLocalizedNowParts();
+      const hours = Number(timeParts.hour);
+      const minutes = Number(timeParts.minute);
+      const seconds = Number(timeParts.second);
+      const milliseconds = new Date().getMilliseconds();
+
+      hoursEl.textContent = String(hours).padStart(2, '0');
+      minutesEl.textContent = String(minutes).padStart(2, '0');
+      secondsEl.textContent = String(seconds).padStart(2, '0');
+
+      const hourDegrees = ((hours % 12) + (minutes / 60)) * 30;
+      const minuteDegrees = (minutes + (seconds / 60)) * 6;
+      const secondDegrees = (seconds + (milliseconds / 1000)) * 6;
+
+      document.getElementById('hour-hand').style.transform = `rotate(${hourDegrees}deg)`;
+      document.getElementById('minute-hand').style.transform = `rotate(${minuteDegrees}deg)`;
+      document.getElementById('second-hand').style.transform = `rotate(${secondDegrees}deg)`;
+
+      const localizedDate = new Intl.DateTimeFormat(currentLanguage, {
+        timeZone: currentTimezone,
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      }).format(new Date());
+      dateHeadingEl.textContent = localizedDate.charAt(0).toUpperCase() + localizedDate.slice(1);
+    }
+
+    function setMode(mode) {
+      currentMode = mode;
+      document.querySelectorAll('.mode-btn').forEach((button) => {
+        button.classList.toggle('active', button.dataset.mode === mode);
+      });
+      digitalClockEl.style.display = mode === 'digital' ? 'flex' : 'none';
+      analogPanelEl.style.display = mode === 'analog' ? 'block' : 'none';
+    }
+
+    function toggleFullscreen() {
+      isFullscreen = !isFullscreen;
+      document.body.classList.toggle('fullscreen-active', isFullscreen);
+      fullscreenBtnEl.textContent = isFullscreen ? 'Fechar tela cheia' : 'Tela cheia';
+      focusClockCard();
+    }
+
+    function toggleSettings(forceOpen) {
+      const shouldOpen = typeof forceOpen === 'boolean' ? forceOpen : settingsPopoverEl.classList.contains('hidden');
+      settingsPopoverEl.classList.toggle('hidden', !shouldOpen);
+      settingsToggleEl.setAttribute('aria-expanded', shouldOpen ? 'true' : 'false');
+    }
+
+    async function onConfigChange(newConfig) {
+      config = { ...config, ...newConfig };
+      titleEl.innerHTML = `<span class="block text-white">${config.display_title || defaultConfig.display_title}</span>`;
+      subtitleEl.textContent = config.hero_subtitle || defaultConfig.hero_subtitle;
+    }
+
+    function mapToCapabilities() {
+      return {
+        recolorables: [],
+        borderables: [],
+        fontEditable: undefined,
+        fontSizeable: undefined
+      };
+    }
+
+    function mapToEditPanelValues(cfg) {
+      return new Map([
+        ['display_title', cfg.display_title || defaultConfig.display_title],
+        ['hero_subtitle', cfg.hero_subtitle || defaultConfig.hero_subtitle]
+      ]);
+    }
+
+    document.getElementById('settings-digital-mode-btn').addEventListener('click', () => setMode('digital'));
+    document.getElementById('settings-analog-mode-btn').addEventListener('click', () => setMode('analog'));
+    fullscreenBtnEl.addEventListener('click', toggleFullscreen);
+    settingsToggleEl.addEventListener('click', () => toggleSettings());
+
+    languageSelectEl.addEventListener('change', (event) => {
+      currentLanguage = event.target.value;
+      updateClock();
+    });
+
+    timezoneSelectEl.addEventListener('change', (event) => {
+      currentTimezone = event.target.value;
+      updateClock();
+    });
+
+    document.addEventListener('click', (event) => {
+      if (!settingsPopoverEl.contains(event.target) && !settingsToggleEl.contains(event.target)) {
+        toggleSettings(false);
+      }
+    });
+
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig,
+        onConfigChange,
+        mapToCapabilities,
+        mapToEditPanelValues
+      });
+    }
+
+    if (window.lucide) {
+      window.lucide.createIcons();
+    }
+
+    buildTicks();
+    setMode('digital');
+    updateClock();
+    setInterval(updateClock, 100);
+  </script>
+</body>
+</html>
