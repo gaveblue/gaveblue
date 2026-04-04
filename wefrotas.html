@@ -507,6 +507,16 @@
             <span class="nav-tooltip">Financeiro</span>
           </button>
 
+          <button class="nav-btn" onclick="showModule('relatorios', this)">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M4 19h16"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M7 16V9"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M12 16V5"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M17 16v-7"/>
+            </svg>
+            <span class="nav-tooltip">Relatórios</span>
+          </button>
+
           <div class="toolbar-divider"></div>
 
           <button class="nav-btn" onclick="showModule('veiculos', this)">
@@ -647,7 +657,7 @@
 
         <section id="panel-home" class="module-panel active content-card p-8 sm:p-10">
           <h2 class="text-[2rem] font-extrabold text-slate-900 mb-6">Home</h2>
-          <div class="grid md:grid-cols-3 gap-5">
+          <div class="grid md:grid-cols-3 xl:grid-cols-6 gap-5">
             <div class="filter-card p-6">
               <p class="text-slate-500 text-sm font-semibold mb-2">Veículos</p>
               <p id="home-total-vehicles" class="text-4xl font-extrabold text-[#6267d9]">0</p>
@@ -659,6 +669,33 @@
             <div class="filter-card p-6">
               <p class="text-slate-500 text-sm font-semibold mb-2">Contas</p>
               <p id="home-total-finance" class="text-4xl font-extrabold text-[#6267d9]">0</p>
+            </div>
+            <div class="filter-card p-6">
+              <p class="text-slate-500 text-sm font-semibold mb-2">Melhor custo/KM</p>
+              <p id="home-cost-per-km" class="text-2xl font-extrabold text-[#6267d9]">R$ 0,00</p>
+              <p id="home-cost-per-km-label" class="text-xs text-slate-500 mt-2">Nenhum abastecimento registrado</p>
+            </div>
+            <div class="filter-card p-6">
+              <p class="text-slate-500 text-sm font-semibold mb-2">CNHs a vencer</p>
+              <p id="home-cnh-expiring" class="text-4xl font-extrabold text-[#6267d9]">0</p>
+            </div>
+            <div class="filter-card p-6">
+              <p class="text-slate-500 text-sm font-semibold mb-2">Seguros a vencer</p>
+              <p id="home-insurance-expiring" class="text-4xl font-extrabold text-[#6267d9]">0</p>
+            </div>
+          </div>
+          <div class="grid xl:grid-cols-3 gap-5 mt-6">
+            <div class="filter-card p-6 xl:col-span-1">
+              <h3 class="text-lg font-extrabold text-slate-900 mb-4">Custo por KM por veículo</h3>
+              <div id="home-cost-table" class="space-y-3 text-sm text-slate-600"></div>
+            </div>
+            <div class="filter-card p-6 xl:col-span-1">
+              <h3 class="text-lg font-extrabold text-slate-900 mb-4">CNHs próximas a vencer</h3>
+              <div id="home-cnh-table" class="space-y-3 text-sm text-slate-600"></div>
+            </div>
+            <div class="filter-card p-6 xl:col-span-1">
+              <h3 class="text-lg font-extrabold text-slate-900 mb-4">Seguros próximos a vencer</h3>
+              <div id="home-insurance-table" class="space-y-3 text-sm text-slate-600"></div>
             </div>
           </div>
         </section>
@@ -749,6 +786,36 @@
 
         <section id="panel-financeiro" class="module-panel content-card p-8 sm:p-10">
           <h2 class="text-[2rem] font-extrabold text-slate-900 mb-10">Financeiro</h2>
+          <div class="filter-card p-6 sm:p-7 mb-10">
+            <div class="grid xl:grid-cols-[1.2fr_1fr_1fr_1fr_auto_auto] gap-4 items-end">
+              <div>
+                <label class="block text-[13px] font-bold uppercase tracking-wide text-slate-600 mb-3">Fornecedor</label>
+                <input id="finance-filter-supplier" class="soft-input w-full" placeholder="Buscar fornecedor">
+              </div>
+              <div>
+                <label class="block text-[13px] font-bold uppercase tracking-wide text-slate-600 mb-3">Nota Fiscal</label>
+                <input id="finance-filter-nf" class="soft-input w-full" placeholder="Ex: NF 1542">
+              </div>
+              <div>
+                <label class="block text-[13px] font-bold uppercase tracking-wide text-slate-600 mb-3">OS</label>
+                <input id="finance-filter-os" class="soft-input w-full" placeholder="Ex: 0001">
+              </div>
+              <div>
+                <label class="block text-[13px] font-bold uppercase tracking-wide text-slate-600 mb-3">Data de VT</label>
+                <input id="finance-filter-date" type="date" class="soft-input w-full">
+              </div>
+              <button class="icon-action primary" title="Aplicar Filtros" onclick="renderFinance()">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M4 5h16l-6 7v6l-4-2v-4L4 5z"/>
+                </svg>
+              </button>
+              <button class="icon-action bg-white border border-slate-200 text-slate-600" title="Limpar Filtros" onclick="clearFinanceFilters()">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M6 6l12 12M18 6L6 18"/>
+                </svg>
+              </button>
+            </div>
+          </div>
           <div class="flex items-center justify-between gap-4 flex-wrap mb-10">
             <div class="flex items-center gap-4">
               <button id="select-all-finance" class="selection-check" onclick="toggleSelectAllFinance(event)">
@@ -772,6 +839,48 @@
           </div>
           <div id="finance-list" class="space-y-4">
             <div class="empty-state">Nenhum lançamento financeiro cadastrado.</div>
+          </div>
+        </section>
+
+        <section id="panel-relatorios" class="module-panel content-card p-8 sm:p-10">
+          <h2 class="text-[2rem] font-extrabold text-slate-900 mb-10">Relatórios</h2>
+          <div class="filter-card p-6 sm:p-7 mb-8">
+            <div class="grid xl:grid-cols-[1fr_1fr_1fr_auto_auto] gap-4 items-end">
+              <div>
+                <label class="block text-[13px] font-bold uppercase tracking-wide text-slate-600 mb-3">Veículo</label>
+                <select id="report-filter-vehicle" class="soft-input w-full">
+                  <option value="">Todos os veículos</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-[13px] font-bold uppercase tracking-wide text-slate-600 mb-3">Período inicial</label>
+                <input id="report-filter-start" type="date" class="soft-input w-full">
+              </div>
+              <div>
+                <label class="block text-[13px] font-bold uppercase tracking-wide text-slate-600 mb-3">Período final</label>
+                <input id="report-filter-end" type="date" class="soft-input w-full">
+              </div>
+              <button class="icon-action primary" title="Atualizar relatório" onclick="renderReports()">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M4 5h16l-6 7v6l-4-2v-4L4 5z"/>
+                </svg>
+              </button>
+              <button class="icon-action text-[#bd8dff]" title="Imprimir relatório" onclick="printReport()">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M7 8V4h10v4M7 16H5a2 2 0 01-2-2v-3a2 2 0 012-2h14a2 2 0 012 2v3a2 2 0 01-2 2h-2M7 12h10v8H7z"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="grid xl:grid-cols-2 gap-6">
+            <div class="filter-card p-6">
+              <h3 class="text-lg font-extrabold text-slate-900 mb-4">Custo por KM por veículo</h3>
+              <div id="report-cost-table" class="space-y-3 text-sm text-slate-600"></div>
+            </div>
+            <div class="filter-card p-6">
+              <h3 class="text-lg font-extrabold text-slate-900 mb-4">OS por veículo</h3>
+              <div id="report-orders-table" class="space-y-3 text-sm text-slate-600"></div>
+            </div>
           </div>
         </section>
       </div>
@@ -835,6 +944,15 @@
 
     function formatCurrency(value) {
       return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(value || 0));
+    }
+
+    function daysUntil(dateString) {
+      if (!dateString) return null;
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const target = new Date(`${dateString}T00:00:00`);
+      if (Number.isNaN(target.getTime())) return null;
+      return Math.ceil((target.getTime() - today.getTime()) / 86400000);
     }
 
     function escapeHtml(value) {
@@ -953,6 +1071,10 @@
           <div class="field-wrap">
             <label>Cor</label>
             <input class="soft-input w-full" id="vehicle-cor" placeholder="Branco">
+          </div>
+          <div class="field-wrap">
+            <label>Vencimento do seguro</label>
+            <input class="soft-input w-full" id="vehicle-seguro" type="date">
           </div>
           <div class="field-wrap full">
             <label>Chassi</label>
@@ -1154,6 +1276,95 @@
       };
     }
 
+    function getVehicleCostStats(options = {}) {
+      const vehicleId = options.vehicleId || '';
+      const start = options.start || '';
+      const end = options.end || '';
+      const statsMap = new Map();
+
+      allVehicles.forEach(vehicle => {
+        statsMap.set(vehicle.id, {
+          vehicleId: vehicle.id,
+          frota: vehicle.numeroFrota || '-',
+          placa: vehicle.placa || '-',
+          modelo: vehicle.modelo || '-',
+          totalCost: 0,
+          totalKm: 0,
+          entries: 0
+        });
+      });
+
+      allFinanceEntries
+        .filter(entry => entry.entryType === 'combustivel')
+        .forEach(entry => {
+          const order = allOrders.find(item => item.id === entry.orderId);
+          if (!order || !order.vehicleId) return;
+          if (vehicleId && order.vehicleId !== vehicleId) return;
+          if (start && (!entry.dataVencimento || entry.dataVencimento < start)) return;
+          if (end && (!entry.dataVencimento || entry.dataVencimento > end)) return;
+
+          const stats = statsMap.get(order.vehicleId);
+          if (!stats) return;
+
+          const kmInicial = Number(entry.kmInicial || 0);
+          const kmFinal = Number(entry.kmFinal || 0);
+          stats.totalCost += Number(entry.total || 0);
+          stats.totalKm += Math.max(0, kmFinal - kmInicial);
+          stats.entries += 1;
+        });
+
+      return Array.from(statsMap.values())
+        .filter(item => !vehicleId || item.vehicleId === vehicleId)
+        .map(item => ({
+          ...item,
+          costPerKm: item.totalKm > 0 ? item.totalCost / item.totalKm : 0
+        }))
+        .sort((a, b) => {
+          if (a.entries === 0 && b.entries !== 0) return 1;
+          if (b.entries === 0 && a.entries !== 0) return -1;
+          return a.costPerKm - b.costPerKm;
+        });
+    }
+
+    function getDashboardExpirations() {
+      const cnhItems = allDrivers
+        .map(driver => ({ ...driver, days: daysUntil(driver.validade) }))
+        .filter(item => item.days !== null && item.days >= 0 && item.days <= 45)
+        .sort((a, b) => a.days - b.days);
+
+      const insuranceItems = allVehicles
+        .map(vehicle => ({ ...vehicle, days: daysUntil(vehicle.seguroVencimento) }))
+        .filter(item => item.days !== null && item.days >= 0 && item.days <= 45)
+        .sort((a, b) => a.days - b.days);
+
+      return { cnhItems, insuranceItems };
+    }
+
+    function renderDashboardTableRows(items, formatter) {
+      if (!items.length) {
+        return '<div class="text-slate-400 text-sm">Nenhum item para exibir no momento.</div>';
+      }
+      return items.map(formatter).join('');
+    }
+
+    function getReportFilters() {
+      return {
+        vehicleId: document.getElementById('report-filter-vehicle')?.value || '',
+        start: document.getElementById('report-filter-start')?.value || '',
+        end: document.getElementById('report-filter-end')?.value || ''
+      };
+    }
+
+    function getFilteredReportOrders() {
+      const { vehicleId, start, end } = getReportFilters();
+      return allOrders.filter(order => {
+        if (vehicleId && order.vehicleId !== vehicleId) return false;
+        if (start && (!order.dataInicio || order.dataInicio < start)) return false;
+        if (end && (!order.dataInicio || order.dataInicio > end)) return false;
+        return true;
+      }).sort((a, b) => String(a.numero || '').localeCompare(String(b.numero || '')));
+    }
+
     function setModalSubmitState(visible, label = 'Salvar cadastro') {
       const button = document.getElementById('modal-submit-btn');
       if (!button) return;
@@ -1248,9 +1459,233 @@
       const vehiclesNode = document.getElementById('home-total-vehicles');
       const driversNode = document.getElementById('home-total-drivers');
       const financeNode = document.getElementById('home-total-finance');
+      const costNode = document.getElementById('home-cost-per-km');
+      const costLabelNode = document.getElementById('home-cost-per-km-label');
+      const cnhNode = document.getElementById('home-cnh-expiring');
+      const insuranceNode = document.getElementById('home-insurance-expiring');
+      const costTableNode = document.getElementById('home-cost-table');
+      const cnhTableNode = document.getElementById('home-cnh-table');
+      const insuranceTableNode = document.getElementById('home-insurance-table');
+      const vehicleStats = getVehicleCostStats().filter(item => item.entries > 0);
+      const bestVehicle = vehicleStats[0];
+      const { cnhItems, insuranceItems } = getDashboardExpirations();
+
       if (vehiclesNode) vehiclesNode.textContent = allVehicles.length;
       if (driversNode) driversNode.textContent = allDrivers.length;
       if (financeNode) financeNode.textContent = allFinanceEntries.length;
+      if (costNode) costNode.textContent = bestVehicle ? formatCurrency(bestVehicle.costPerKm) : formatCurrency(0);
+      if (costLabelNode) costLabelNode.textContent = bestVehicle
+        ? `${bestVehicle.placa} • ${bestVehicle.modelo}`
+        : 'Nenhum abastecimento registrado';
+      if (cnhNode) cnhNode.textContent = cnhItems.length;
+      if (insuranceNode) insuranceNode.textContent = insuranceItems.length;
+      if (costTableNode) {
+        costTableNode.innerHTML = renderDashboardTableRows(
+          vehicleStats.slice(0, 6),
+          item => `
+            <div class="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 px-4 py-3">
+              <div>
+                <p class="font-bold text-slate-800">${escapeHtml(item.placa)} • ${escapeHtml(item.modelo)}</p>
+                <p class="text-xs text-slate-500">Frota ${escapeHtml(item.frota)} • ${item.totalKm} km • ${item.entries} lançamento(s)</p>
+              </div>
+              <div class="text-right">
+                <p class="font-extrabold text-[#6267d9]">${escapeHtml(formatCurrency(item.costPerKm))}</p>
+                <p class="text-xs text-slate-500">${escapeHtml(formatCurrency(item.totalCost))}</p>
+              </div>
+            </div>
+          `
+        );
+      }
+      if (cnhTableNode) {
+        cnhTableNode.innerHTML = renderDashboardTableRows(
+          cnhItems.slice(0, 6),
+          item => `
+            <div class="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 px-4 py-3">
+              <div>
+                <p class="font-bold text-slate-800">${escapeHtml(item.nome)}</p>
+                <p class="text-xs text-slate-500">CPF ${escapeHtml(item.cpf || '-')} • CNH ${escapeHtml(item.cnh || '-')}</p>
+              </div>
+              <div class="text-right">
+                <p class="font-extrabold text-[#6267d9]">${escapeHtml(formatDate(item.validade))}</p>
+                <p class="text-xs text-slate-500">${item.days} dia(s)</p>
+              </div>
+            </div>
+          `
+        );
+      }
+      if (insuranceTableNode) {
+        insuranceTableNode.innerHTML = renderDashboardTableRows(
+          insuranceItems.slice(0, 6),
+          item => `
+            <div class="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 px-4 py-3">
+              <div>
+                <p class="font-bold text-slate-800">${escapeHtml(item.placa)} • ${escapeHtml(item.modelo)}</p>
+                <p class="text-xs text-slate-500">Frota ${escapeHtml(item.numeroFrota || '-')}</p>
+              </div>
+              <div class="text-right">
+                <p class="font-extrabold text-[#6267d9]">${escapeHtml(formatDate(item.seguroVencimento))}</p>
+                <p class="text-xs text-slate-500">${item.days} dia(s)</p>
+              </div>
+            </div>
+          `
+        );
+      }
+    }
+
+    function renderReports() {
+      const select = document.getElementById('report-filter-vehicle');
+      const costNode = document.getElementById('report-cost-table');
+      const ordersNode = document.getElementById('report-orders-table');
+      if (!select || !costNode || !ordersNode) return;
+
+      const currentValue = select.value;
+      select.innerHTML = '<option value="">Todos os veículos</option>' + allVehicles.map(vehicle => `
+        <option value="${vehicle.id}">${escapeHtml(vehicle.placa)} • ${escapeHtml(vehicle.modelo)} • Frota ${escapeHtml(vehicle.numeroFrota || '-')}</option>
+      `).join('');
+      if (Array.from(select.options).some(option => option.value === currentValue)) {
+        select.value = currentValue;
+      }
+
+      const filters = getReportFilters();
+      const vehicleStats = getVehicleCostStats(filters).filter(item => filters.vehicleId ? item.vehicleId === filters.vehicleId : item.entries > 0);
+      const reportOrders = getFilteredReportOrders();
+
+      costNode.innerHTML = renderDashboardTableRows(
+        vehicleStats,
+        item => `
+          <div class="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 px-4 py-3">
+            <div>
+              <p class="font-bold text-slate-800">${escapeHtml(item.placa)} • ${escapeHtml(item.modelo)}</p>
+              <p class="text-xs text-slate-500">Frota ${escapeHtml(item.frota)} • ${item.totalKm} km rodados</p>
+            </div>
+            <div class="text-right">
+              <p class="font-extrabold text-[#6267d9]">${escapeHtml(formatCurrency(item.costPerKm))}</p>
+              <p class="text-xs text-slate-500">${escapeHtml(formatCurrency(item.totalCost))} em combustível</p>
+            </div>
+          </div>
+        `
+      );
+
+      ordersNode.innerHTML = renderDashboardTableRows(
+        reportOrders,
+        order => {
+          const vehicle = allVehicles.find(item => item.id === order.vehicleId);
+          const linkedEntries = allFinanceEntries.filter(entry => entry.orderId === order.id);
+          const total = linkedEntries.reduce((sum, entry) => sum + getFinanceTotal(entry), 0);
+          return `
+            <div class="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 px-4 py-3">
+              <div>
+                <p class="font-bold text-slate-800">OS ${escapeHtml(getOrderNumberLabel(order))} • ${escapeHtml(vehicle ? vehicle.placa : '-')}</p>
+                <p class="text-xs text-slate-500">${escapeHtml(order.descricao || '-')}</p>
+              </div>
+              <div class="text-right">
+                <p class="font-extrabold text-[#6267d9]">${escapeHtml(formatCurrency(total))}</p>
+                <p class="text-xs text-slate-500">${escapeHtml(formatDate(order.dataInicio))} • ${escapeHtml(order.status || '-')}</p>
+              </div>
+            </div>
+          `;
+        }
+      );
+    }
+
+    function printReport() {
+      const filters = getReportFilters();
+      const vehicleStats = getVehicleCostStats(filters).filter(item => filters.vehicleId ? item.vehicleId === filters.vehicleId : item.entries > 0);
+      const reportOrders = getFilteredReportOrders();
+      const printWindow = window.open('', '_blank', 'width=1080,height=1200');
+      if (!printWindow) {
+        showToast('Não foi possível abrir a impressão do relatório.');
+        return;
+      }
+
+      const rowsCost = vehicleStats.map(item => `
+        <tr>
+          <td>${escapeHtml(item.frota)}</td>
+          <td>${escapeHtml(item.placa)}</td>
+          <td>${escapeHtml(item.modelo)}</td>
+          <td style="text-align:right;">${item.totalKm}</td>
+          <td style="text-align:right;">${escapeHtml(formatCurrency(item.totalCost))}</td>
+          <td style="text-align:right;">${escapeHtml(formatCurrency(item.costPerKm))}</td>
+        </tr>
+      `).join('') || '<tr><td colspan="6">Nenhum dado encontrado.</td></tr>';
+
+      const rowsOrders = reportOrders.map(order => {
+        const vehicle = allVehicles.find(item => item.id === order.vehicleId);
+        const total = allFinanceEntries
+          .filter(entry => entry.orderId === order.id)
+          .reduce((sum, entry) => sum + getFinanceTotal(entry), 0);
+        return `
+          <tr>
+            <td>${escapeHtml(getOrderNumberLabel(order))}</td>
+            <td>${escapeHtml(vehicle ? vehicle.placa : '-')}</td>
+            <td>${escapeHtml(vehicle ? vehicle.modelo : '-')}</td>
+            <td>${escapeHtml(formatDate(order.dataInicio))}</td>
+            <td>${escapeHtml(order.status || '-')}</td>
+            <td style="text-align:right;">${escapeHtml(formatCurrency(total))}</td>
+          </tr>
+        `;
+      }).join('') || '<tr><td colspan="6">Nenhum dado encontrado.</td></tr>';
+
+      printWindow.document.open();
+      printWindow.document.write(`
+        <!doctype html>
+        <html lang="pt-BR">
+        <head>
+          <meta charset="UTF-8">
+          <title>Relatórios WeFrotas</title>
+          <style>
+            * { box-sizing: border-box; font-family: Arial, Helvetica, sans-serif; }
+            body { margin: 24px; color: #111; }
+            h1, h2 { margin: 0 0 12px; }
+            p { margin: 0 0 20px; color: #444; }
+            table { width: 100%; border-collapse: collapse; margin-bottom: 28px; }
+            th, td { border: 1px solid #222; padding: 8px 10px; font-size: 12px; }
+            th { text-transform: uppercase; background: #f4f4f4; }
+          </style>
+        </head>
+        <body>
+          <h1>Relatórios WeFrotas</h1>
+          <p>Período: ${escapeHtml(formatDate(filters.start))} até ${escapeHtml(formatDate(filters.end))}</p>
+          <h2>Custo por KM por veículo</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Frota</th>
+                <th>Placa</th>
+                <th>Veículo</th>
+                <th>KM</th>
+                <th>Custo</th>
+                <th>Custo/KM</th>
+              </tr>
+            </thead>
+            <tbody>${rowsCost}</tbody>
+          </table>
+          <h2>OS por veículo</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>OS</th>
+                <th>Placa</th>
+                <th>Veículo</th>
+                <th>Data</th>
+                <th>Status</th>
+                <th>Total vinculado</th>
+              </tr>
+            </thead>
+            <tbody>${rowsOrders}</tbody>
+          </table>
+          <script>
+            window.onload = function () {
+              setTimeout(function () {
+                window.print();
+                window.close();
+              }, 180);
+            };
+          <\/script>
+        </body>
+        </html>
+      `);
+      printWindow.document.close();
     }
 
     function pruneSelections() {
@@ -1422,10 +1857,11 @@
                 <span class="mini-badge">${vehicle.ano}</span>
               </div>
               <p class="text-slate-700 font-semibold mt-2">${vehicle.modelo}</p>
-              <div class="flex gap-3 flex-wrap mt-4 text-sm text-slate-500">
-                ${vehicle.cor ? `<span>Cor: ${vehicle.cor}</span>` : ''}
-                ${vehicle.chassi ? `<span>Chassi: ${vehicle.chassi}</span>` : ''}
-              </div>
+                <div class="flex gap-3 flex-wrap mt-4 text-sm text-slate-500">
+                  ${vehicle.cor ? `<span>Cor: ${vehicle.cor}</span>` : ''}
+                  ${vehicle.chassi ? `<span>Chassi: ${vehicle.chassi}</span>` : ''}
+                  ${vehicle.seguroVencimento ? `<span>Seguro: ${formatDate(vehicle.seguroVencimento)}</span>` : ''}
+                </div>
               </div>
             </div>
             <div class="mini-badge">Veículo ativo</div>
@@ -1582,13 +2018,28 @@
     function renderFinance() {
       const list = document.getElementById('finance-list');
       if (!list) return;
-      if (!allFinanceEntries.length) {
+      const supplierFilter = document.getElementById('finance-filter-supplier')?.value.trim().toLowerCase() || '';
+      const nfFilter = document.getElementById('finance-filter-nf')?.value.trim().toLowerCase() || '';
+      const osFilter = document.getElementById('finance-filter-os')?.value.trim().toLowerCase() || '';
+      const dateFilter = document.getElementById('finance-filter-date')?.value || '';
+      let visibleEntries = allFinanceEntries.filter(entry => {
+        const order = allOrders.find(item => item.id === entry.orderId);
+        return order && order.status !== 'fechada';
+      });
+      if (supplierFilter) visibleEntries = visibleEntries.filter(entry => String(entry.fornecedor || '').toLowerCase().includes(supplierFilter));
+      if (nfFilter) visibleEntries = visibleEntries.filter(entry => String(entry.nf || '').toLowerCase().includes(nfFilter));
+      if (osFilter) visibleEntries = visibleEntries.filter(entry => {
+        const order = allOrders.find(item => item.id === entry.orderId);
+        return order && String(order.numero || '').toLowerCase().includes(osFilter);
+      });
+      if (dateFilter) visibleEntries = visibleEntries.filter(entry => entry.dataVencimento === dateFilter);
+      if (!visibleEntries.length) {
         list.innerHTML = '<div class="empty-state">Nenhum lançamento financeiro cadastrado.</div>';
         selectedFinance.clear();
         updateFinanceSelectionUI();
         return;
       }
-      list.innerHTML = allFinanceEntries.map(entry => {
+      list.innerHTML = visibleEntries.map(entry => {
         const order = allOrders.find(item => item.id === entry.orderId);
         return `
           <div class="list-card ${selectedFinance.has(entry.id) ? 'selected' : ''}">
@@ -1633,6 +2084,14 @@
       renderOrders();
     }
 
+    function clearFinanceFilters() {
+      document.getElementById('finance-filter-supplier').value = '';
+      document.getElementById('finance-filter-nf').value = '';
+      document.getElementById('finance-filter-os').value = '';
+      document.getElementById('finance-filter-date').value = '';
+      renderFinance();
+    }
+
     function editSelectedVehicle() {
       if (selectedVehicles.size !== 1) {
         showToast('Selecione apenas um veículo para editar.');
@@ -1648,6 +2107,7 @@
       document.getElementById('vehicle-modelo').value = vehicle.modelo;
       document.getElementById('vehicle-ano').value = vehicle.ano;
       document.getElementById('vehicle-cor').value = vehicle.cor || '';
+      document.getElementById('vehicle-seguro').value = vehicle.seguroVencimento || '';
       document.getElementById('vehicle-chassi').value = vehicle.chassi || '';
       document.getElementById('modal-title').textContent = 'Editar veículo';
     }
@@ -1884,8 +2344,9 @@
             .value { font-size: 12px; height: 24px; }
             .desc-box { height: 120px; vertical-align: top; padding-top: 10px; }
             .section-title { text-align: center; font-weight: 700; text-transform: uppercase; font-size: 12px; }
-            .auth-wrap { width: 260px; margin: 26px auto 8px; text-align: center; }
-            .auth-line { border-top: 1px solid #222; padding-top: 4px; font-size: 12px; font-weight: 700; text-transform: uppercase; }
+            .auth-wrap { width: 260px; margin: 16px auto 6px; text-align: center; }
+            .auth-sign-line { width: 100%; border-top: 1px solid #222; height: 0; }
+            .auth-label { margin-top: 2px; font-size: 12px; font-weight: 700; text-transform: uppercase; line-height: 1; }
             .financial-table th { text-transform: uppercase; font-size: 11px; text-align: center; }
             .financial-table td { height: 24px; }
             .financial-table .money { text-align: right; white-space: nowrap; }
@@ -1936,8 +2397,8 @@
             </table>
 
             <div class="auth-wrap">
-              <div class="auth-line">&nbsp;</div>
-              <div class="auth-line" style="border-top:none; padding-top:2px;">AUTORIZADOR</div>
+              <div class="auth-sign-line"></div>
+              <div class="auth-label">AUTORIZADOR</div>
             </div>
 
             <table class="financial-table">
@@ -1980,6 +2441,7 @@
       renderSuppliers();
       renderOrders();
       renderFinance();
+      renderReports();
     }
 
     document.getElementById('cadastro-form').addEventListener('submit', function (event) {
@@ -1990,6 +2452,7 @@
         const modelo = document.getElementById('vehicle-modelo').value.trim();
         const ano = document.getElementById('vehicle-ano').value.trim();
         const cor = document.getElementById('vehicle-cor').value.trim();
+        const seguroVencimento = document.getElementById('vehicle-seguro').value.trim();
         const chassi = document.getElementById('vehicle-chassi').value.trim();
         if (!numeroFrota || !placa || !modelo || !ano) {
           showToast('Preencha número de frota, placa, modelo e ano.');
@@ -1997,11 +2460,11 @@
         }
         if (currentEditingId) {
           allVehicles = allVehicles.map(vehicle => vehicle.id === currentEditingId
-            ? { ...vehicle, numeroFrota, placa, modelo, ano, cor, chassi }
+            ? { ...vehicle, numeroFrota, placa, modelo, ano, cor, seguroVencimento, chassi }
             : vehicle);
           showToast('Veículo atualizado com sucesso.');
         } else {
-          allVehicles.unshift({ id: `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`, numeroFrota, placa, modelo, ano, cor, chassi });
+          allVehicles.unshift({ id: `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`, numeroFrota, placa, modelo, ano, cor, seguroVencimento, chassi });
           showToast('Veículo cadastrado com sucesso.');
         }
         saveToLocalStorage();
@@ -2135,6 +2598,22 @@
     loadFromLocalStorage();
     renderAll();
     applyThemeState(localStorage.getItem('wefrotas_theme') === 'dark');
+    ['order-filter-number', 'order-filter-start', 'order-filter-end', 'order-filter-status', 'order-filter-sort'].forEach(id => {
+      const node = document.getElementById(id);
+      if (node) node.addEventListener(id === 'order-filter-number' ? 'input' : 'change', renderOrders);
+    });
+    ['finance-filter-supplier', 'finance-filter-nf', 'finance-filter-os'].forEach(id => {
+      const node = document.getElementById(id);
+      if (node) node.addEventListener('input', renderFinance);
+    });
+    const financeDateFilter = document.getElementById('finance-filter-date');
+    if (financeDateFilter) financeDateFilter.addEventListener('change', renderFinance);
+    ['report-filter-start', 'report-filter-end'].forEach(id => {
+      const node = document.getElementById(id);
+      if (node) node.addEventListener('change', renderReports);
+    });
+    const reportVehicleFilter = document.getElementById('report-filter-vehicle');
+    if (reportVehicleFilter) reportVehicleFilter.addEventListener('change', renderReports);
   </script>
 </body>
 </html>
