@@ -1,509 +1,440 @@
 <!doctype html>
 <html lang="pt-BR" class="h-full">
- <head>
+<head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Em Manuten��ão</title>
+  <title>GaveBlue | Ferramentas Online para Recibos, Tarefas, Consultas e Testes</title>
+  <meta name="description" content="Acesse as ferramentas online da GaveBlue para gerar recibos, organizar tarefas, consultar informações e testar HTML com praticidade e rapidez.">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <link rel="canonical" href="https://gaveblue.com/">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="pt_BR">
+  <meta property="og:site_name" content="GaveBlue">
+  <meta property="og:title" content="GaveBlue | Ferramentas Online para Recibos, Tarefas, Consultas e Testes">
+  <meta property="og:description" content="Ferramentas online para gerar recibos, organizar tarefas, consultar informações e testar HTML em um só lugar.">
+  <meta property="og:url" content="https://gaveblue.com/">
+  <meta property="og:image" content="https://i.imgur.com/Zih5jH8.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="GaveBlue | Ferramentas Online para Recibos, Tarefas, Consultas e Testes">
+  <meta name="twitter:description" content="Ferramentas online da GaveBlue para recibos, tarefas, consultas e testes HTML.">
+  <meta name="twitter:image" content="https://i.imgur.com/Zih5jH8.png">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="/_sdk/element_sdk.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&amp;family=Outfit:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    body {
-      box-sizing: border-box;
+    html, body { height: 100%; margin: 0; box-sizing: border-box; }
+    * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+    .gradient-bg { position: relative; background: #0b1220; overflow: hidden; }
+    .bg-layer {
+      position: fixed; inset: -2px; z-index: 0; pointer-events: none;
+      background-image:
+        linear-gradient(135deg, #0a0f1f 0%, #0f172a 25%, #1a1f3a 50%, #0f172a 75%, #0a0f1f 100%),
+        radial-gradient(circle at 15% 30%, rgba(59, 130, 246, 0.25) 0%, transparent 45%),
+        radial-gradient(circle at 85% 75%, rgba(139, 92, 246, 0.22) 0%, transparent 50%),
+        radial-gradient(circle at 20% 80%, rgba(139, 92, 246, 0.12) 0%, transparent 40%);
+      animation: bg-subtle-shift 20s ease-in-out infinite;
     }
-    
-    @keyframes float {
-      0%, 100% { transform: translateY(0px) rotate(0deg); }
-      50% { transform: translateY(-20px) rotate(5deg); }
+    @keyframes bg-subtle-shift {
+      0%, 100% { background-position: 0% 0%; }
+      50% { background-position: 2% 2%; }
     }
-    
-    @keyframes pulse-ring {
-      0% { transform: scale(0.8); opacity: 0.8; }
-      50% { transform: scale(1.2); opacity: 0.3; }
-      100% { transform: scale(0.8); opacity: 0.8; }
+    @media (max-width: 1023px) {
+      .bg-layer { animation: none !important; background-image: linear-gradient(135deg, #0a0f1f 0%, #0f172a 50%, #1a1f3a 100%) !important; }
     }
-    
-    @keyframes shimmer {
-      0% { background-position: -200% 0; }
-      100% { background-position: 200% 0; }
+    .w-full.min-h-full, header, section, footer { position: relative; z-index: 1; }
+    .card-gradient { background: linear-gradient(180deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.92) 100%); }
+    .feature-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    .feature-card:hover { transform: translateY(-6px); box-shadow: 0 25px 50px rgba(59, 130, 246, 0.16); }
+    .icon-container { transition: transform 0.3s ease; }
+    .feature-card:hover .icon-container { transform: scale(1.06) rotate(4deg); }
+    @media (max-width: 1023px) {
+      .feature-card:hover, .feature-card:hover .icon-container { transform: none; box-shadow: none; }
     }
-    
-    @keyframes gear-rotate {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); }
+      50% { box-shadow: 0 0 40px rgba(59, 130, 246, 0.45); }
     }
-    
-    @keyframes gear-rotate-reverse {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(-360deg); }
+    .pulse-glow { animation: pulse-glow 3s ease-in-out infinite; }
+    .mouse-glow {
+      position: fixed; pointer-events: none; z-index: 0; width: 450px; height: 450px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.4) 0%, rgba(59, 130, 246, 0.15) 35%, transparent 65%);
+      filter: blur(90px); opacity: 0; transition: opacity 0.3s ease; display: none;
     }
-    
-    .floating {
-      animation: float 6s ease-in-out infinite;
+    .mouse-glow.active { opacity: 0.35; }
+    @media (min-width: 1024px) { .mouse-glow { display: block; } }
+    .sparkle { position: fixed; pointer-events: none; z-index: -1; }
+    @keyframes sparkle-fade {
+      0% { opacity: 1; transform: scale(1) translateY(0); }
+      100% { opacity: 0; transform: scale(0) translateY(-20px); }
     }
-    
-    .pulse-ring {
-      animation: pulse-ring 3s ease-in-out infinite;
-    }
-    
-    .shimmer-text {
-      background: linear-gradient(90deg, currentColor 0%, rgba(255,255,255,0.8) 50%, currentColor 100%);
-      background-size: 200% 100%;
-      -webkit-background-clip: text;
-      background-clip: text;
-      animation: shimmer 3s linear infinite;
-    }
-    
-    .gear-spin {
-      animation: gear-rotate 8s linear infinite;
-    }
-    
-    .gear-spin-reverse {
-      animation: gear-rotate-reverse 6s linear infinite;
-    }
-    
-    @keyframes run {
-      0% {
-        transform: translateY(0px);
-      }
-      25% {
-        transform: translateY(-2px);
-      }
-      50% {
-        transform: translateY(0px);
-      }
-      75% {
-        transform: translateY(-2px);
-      }
-      100% {
-        transform: translateY(0px);
-      }
-    }
-    
-    .runner-animate {
-      animation: run 0.4s ease-in-out infinite;
-    }
-    
-    @keyframes left-arm-swing {
-      0%, 100% { transform: rotate(-20deg); transform-origin: 50px 35px; }
-      50% { transform: rotate(40deg); transform-origin: 50px 35px; }
-    }
-    
-    @keyframes right-arm-swing {
-      0%, 100% { transform: rotate(40deg); transform-origin: 50px 35px; }
-      50% { transform: rotate(-20deg); transform-origin: 50px 35px; }
-    }
-    
-    @keyframes left-leg-swing {
-      0%, 100% { transform: rotate(30deg); transform-origin: 50px 55px; }
-      50% { transform: rotate(-20deg); transform-origin: 50px 55px; }
-    }
-    
-    @keyframes right-leg-swing {
-      0%, 100% { transform: rotate(-20deg); transform-origin: 50px 55px; }
-      50% { transform: rotate(30deg); transform-origin: 50px 55px; }
-    }
-    
-    .left-arm {
-      animation: left-arm-swing 0.4s ease-in-out infinite;
-    }
-    
-    .right-arm {
-      animation: right-arm-swing 0.4s ease-in-out infinite;
-    }
-    
-    .left-leg {
-      animation: left-leg-swing 0.4s ease-in-out infinite;
-    }
-    
-    .right-leg {
-      animation: right-leg-swing 0.4s ease-in-out infinite;
-    }
-
-    @keyframes sparkle {
-      0%, 100% { opacity: 0.1; }
-      50% { opacity: 0.5; }
-    }
-
-    @keyframes float-sparkle {
-      0% { transform: translateY(0px) translateX(0px); opacity: 0.1; }
-      50% { opacity: 0.5; }
-      100% { transform: translateY(-20px) translateX(10px); opacity: 0.1; }
-    }
-
-    @keyframes universe-drift {
-      0% { transform: translate(0, 0); }
-      100% { transform: translate(-200px, -200px); }
-    }
-
-    #sparkles-container {
-      animation: universe-drift 6s linear infinite !important;
-    }
-
-    @keyframes float-deep {
-      0% { transform: translateZ(-100px); opacity: 0.15; }
-      50% { opacity: 0.4; }
-      100% { transform: translateZ(100px); opacity: 0.15; }
-    }
-
-    @keyframes galaxy-rotate-1 {
-      0% { transform: rotate(0deg) scale(1); }
-      100% { transform: rotate(360deg) scale(1.1); }
-    }
-
-    @keyframes galaxy-rotate-2 {
-      0% { transform: rotate(360deg) scale(1); }
-      100% { transform: rotate(0deg) scale(0.95); }
-    }
-
-    @keyframes galaxy-pulse {
-      0%, 100% { opacity: 0.3; }
-      50% { opacity: 0.6; }
-    }
-
-    .sparkle {
-      position: absolute;
-      border-radius: 50%;
-      background: radial-gradient(circle, #a78bfa, #7c3aed);
-      animation: sparkle 4s ease-in-out infinite;
-      box-shadow: 0 0 10px rgba(167, 139, 250, 0.6), 0 0 20px rgba(217, 70, 239, 0.3);
-    }
-
-    .sparkle-moving {
-      animation: float-sparkle 6s ease-in-out infinite;
-    }
-
-    .sparkle-deep {
-      animation: float-deep 8s ease-in-out infinite;
-    }
-
-    #sparkles-container {
-      animation: universe-drift 15s linear infinite;
-    }
-
-    .galaxy {
-      position: absolute;
-      border-radius: 50%;
-      opacity: 0.4;
-    }
-
-    .galaxy-1 {
-      animation: galaxy-rotate-1 20s linear infinite, galaxy-pulse 8s ease-in-out infinite;
-    }
-
-    .galaxy-2 {
-      animation: galaxy-rotate-2 25s linear infinite, galaxy-pulse 10s ease-in-out infinite;
+    .sparkle::before {
+      content: ''; position: absolute; width: 4px; height: 4px;
+      background: radial-gradient(circle, #3b82f6, #8b5cf6); border-radius: 50%;
+      box-shadow: 0 0 6px rgba(59, 130, 246, 0.8); animation: sparkle-fade 0.8s ease-out forwards;
     }
   </style>
+  <script src="/_sdk/data_sdk.js"></script>
   <style>@view-transition { navigation: auto; }</style>
-  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
- </head>
- <body class="h-full m-0 overflow-auto" style="font-family: 'Outfit', sans-serif;">
-  <div id="app-wrapper" class="min-h-full w-full flex flex-col items-center justify-center relative overflow-hidden" style="background: linear-gradient(135deg, #0f0a1a 0%, #1a0f3a 30%, #2d1b4e 60%, #1a0f3a 100%);"><!-- Galaxies Background -->
-   <div class="absolute inset-0 overflow-hidden pointer-events-none"><!-- Galaxy 1 - Large spiral galaxy -->
-    <div class="galaxy galaxy-1" style="width: 400px; height: 400px; top: 10%; left: 5%; background: radial-gradient(circle at 30% 30%, rgba(217, 70, 239, 0.4), rgba(167, 139, 250, 0.2), transparent 70%); filter: blur(40px);"></div><!-- Galaxy 2 - Small elliptical -->
-    <div class="galaxy galaxy-2" style="width: 250px; height: 250px; top: 60%; right: 10%; background: radial-gradient(circle at 40% 40%, rgba(167, 139, 250, 0.5), rgba(168, 85, 247, 0.2), transparent 60%); filter: blur(30px);"></div><!-- Galaxy 3 - Large spiral on the right -->
-    <div class="galaxy galaxy-1" style="width: 350px; height: 350px; bottom: 5%; right: 5%; background: radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.35), rgba(139, 92, 246, 0.15), transparent 70%); filter: blur(45px); animation-delay: -5s;"></div><!-- Galaxy 4 - Small nebula top right -->
-    <div class="galaxy galaxy-2" style="width: 200px; height: 200px; top: 15%; right: 20%; background: radial-gradient(circle at 60% 40%, rgba(217, 70, 239, 0.45), rgba(236, 72, 153, 0.1), transparent 60%); filter: blur(35px); animation-delay: -8s;"></div>
-   </div><!-- Animated Background Elements -->
-   <div class="absolute inset-0 overflow-hidden pointer-events-none">
-    <div class="absolute top-20 left-10 w-32 h-32 rounded-full opacity-15" style="background: #a78bfa; filter: blur(50px);"></div>
-    <div class="absolute bottom-32 right-20 w-48 h-48 rounded-full opacity-10" style="background: #7c3aed; filter: blur(70px);"></div>
-    <div class="absolute top-1/3 right-1/4 w-24 h-24 rounded-full opacity-12" style="background: #d946ef; filter: blur(40px);"></div>
-    <div class="absolute -bottom-20 left-1/4 w-64 h-64 rounded-full opacity-10" style="background: #6366f1; filter: blur(80px);"></div>
-   </div><!-- Sparkles Background -->
-   <div class="absolute inset-0 overflow-hidden pointer-events-none" id="sparkles-container"></div><!-- Main Content -->
-   <div class="relative z-10 text-center px-6 py-12 max-w-2xl mx-auto"><!-- Animated Icon -->
-    <div class="relative mb-8 lg:mb-12 floating">
-     <div class="relative inline-block"><!-- Pulse rings -->
-      <div class="absolute inset-0 flex items-center justify-center">
-       <div class="w-32 h-32 md:w-40 md:h-40 lg:w-48 lg:h-48 rounded-full border-2 pulse-ring" style="border-color: rgba(245, 158, 11, 0.3);"></div>
+  <script type="application/ld+json">
+    {"@context":"https://schema.org","@type":"WebSite","name":"GaveBlue","url":"https://gaveblue.com/","description":"Ferramentas online para gerar recibos, organizar tarefas, consultar informações e testar HTML.","publisher":{"@type":"Organization","name":"GaveBlue","logo":{"@type":"ImageObject","url":"https://i.imgur.com/Zih5jH8.png"}}}
+  </script>
+  <script type="application/ld+json">
+    {"@context":"https://schema.org","@type":"ItemList","name":"Ferramentas GaveBlue","itemListElement":[{"@type":"ListItem","position":1,"name":"WeRecibos","url":"https://gaveblue.com/recibos"},{"@type":"ListItem","position":2,"name":"WeTime","url":"https://gaveblue.com/wetime"},{"@type":"ListItem","position":3,"name":"WeConsultas","url":"https://gaveblue.com/weconsultas"},{"@type":"ListItem","position":4,"name":"WeDevs","url":"https://gaveblue.com/wedevs"},{"@type":"ListItem","position":5,"name":"WeTasks","url":"https://gaveblue.com/wetasks"}]}
+  </script>
+</head>
+<body class="h-full gradient-bg text-white overflow-auto">
+  <div class="bg-layer" aria-hidden="true"></div>
+  <div class="mouse-glow" id="mouseGlow"></div>
+  <div class="w-full min-h-full">
+    <header class="fixed top-0 left-0 right-0 z-50 bg-slate-900/95 backdrop-blur-xl border-b border-slate-700/50 h-16">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between gap-3">
+        <img src="https://i.imgur.com/Zih5jH8.png" alt="Logo GaveBlue" class="h-10 sm:h-12 w-auto max-w-[150px] sm:max-w-none cursor-pointer hover:opacity-80 transition-opacity" loading="lazy" onclick="goToSection('inicio');">
+        <div class="flex items-center gap-3 shrink-0">
+          <a href="https://wa.me/5527988790381" target="_blank" rel="noopener noreferrer" class="px-3 sm:px-5 py-2 text-xs sm:text-sm font-semibold bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all shadow-lg whitespace-nowrap">Falar com consultor</a>
+        </div>
       </div>
-      <div class="absolute inset-0 flex items-center justify-center">
-       <div class="w-40 h-40 md:w-52 md:h-52 lg:w-64 lg:h-64 rounded-full border pulse-ring" style="border-color: rgba(245, 158, 11, 0.15); animation-delay: 0.5s;"></div>
-      </div><!-- Elegant Maintenance Icon -->
-      <div class="relative w-24 h-24 md:w-32 md:h-32 lg:w-40 lg:h-40 flex items-center justify-center"><!-- Main Icon - Classic Gear -->
-       <svg class="w-24 h-24 md:w-32 md:h-32 lg:w-40 lg:h-40 gear-spin" viewbox="0 0 200 200" fill="none" style="color: #f59e0b;"><!-- Outer circle --> <circle cx="100" cy="100" r="95" stroke="currentColor" stroke-width="2" opacity="0.2" /> <!-- Gear teeth - 12 teeth --> <g fill="currentColor"><!-- Top tooth -->
-         <rect x="92" y="8" width="16" height="24" rx="2" /> <!-- Top-right teeth (60 degrees) -->
-         <g transform="rotate(60 100 100)">
-          <rect x="92" y="8" width="16" height="24" rx="2" />
-         </g> <!-- Right tooth (120 degrees) -->
-         <g transform="rotate(120 100 100)">
-          <rect x="92" y="8" width="16" height="24" rx="2" />
-         </g> <!-- Bottom tooth (180 degrees) -->
-         <g transform="rotate(180 100 100)">
-          <rect x="92" y="8" width="16" height="24" rx="2" />
-         </g> <!-- Bottom-left tooth (240 degrees) -->
-         <g transform="rotate(240 100 100)">
-          <rect x="92" y="8" width="16" height="24" rx="2" />
-         </g> <!-- Left tooth (300 degrees) -->
-         <g transform="rotate(300 100 100)">
-          <rect x="92" y="8" width="16" height="24" rx="2" />
-         </g>
-        </g> <!-- Outer ring --> <circle cx="100" cy="100" r="80" fill="none" stroke="currentColor" stroke-width="3" /> <!-- Middle ring --> <circle cx="100" cy="100" r="60" fill="none" stroke="currentColor" stroke-width="2" opacity="0.6" /> <!-- Center hole --> <circle cx="100" cy="100" r="35" fill="none" stroke="currentColor" stroke-width="3" /> <circle cx="100" cy="100" r="20" fill="currentColor" opacity="0.3" />
-       </svg>
+    </header>
+    <main id="main-content" class="pt-16 sm:pt-14 pb-8 sm:pb-10 px-4 sm:px-6 lg:px-8">
+      <div class="max-w-7xl mx-auto relative z-10"></div>
+    </main>
+    <footer class="border-t border-slate-700/50 px-4 sm:px-6 lg:px-8 mt-0">
+      <div class="max-w-7xl mx-auto py-12">
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-10 xl:gap-8">
+          <div class="xl:col-span-1">
+            <img src="https://i.imgur.com/Zih5jH8.png" alt="Logo GaveBlue" class="h-10 sm:h-11 w-auto cursor-pointer hover:opacity-80 transition-opacity mb-4 sm:-ml-4" loading="lazy" onclick="goToSection('inicio');">
+            <div class="flex items-center gap-3 justify-center md:justify-start">
+              <a href="https://instagram.com/gaveblue" target="_blank" rel="noopener noreferrer" class="flex items-center justify-center w-10 h-10 rounded-lg backdrop-blur-md bg-white/10 border border-white/20 hover:bg-white/20 hover:border-white/40 transition-all shadow-lg group" title="Instagram">
+                <svg class="w-5 h-5 text-white group-hover:text-pink-300 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5" ry="5" stroke-width="2"></rect><circle cx="12" cy="12" r="4" stroke-width="2"></circle><circle cx="17" cy="7" r="1.2" fill="currentColor"></circle></svg>
+              </a>
+              <a href="https://wa.me/5527988790381" target="_blank" rel="noopener noreferrer" class="flex items-center justify-center w-10 h-10 rounded-lg backdrop-blur-md bg-white/10 border border-white/20 hover:bg-white/20 hover:border-white/40 transition-all shadow-lg group" title="WhatsApp">
+                <svg class="w-5 h-5 text-white group-hover:text-green-300 transition-colors" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" /></svg>
+              </a>
+              <a href="mailto:contato@gaveblue.com" class="flex items-center justify-center w-10 h-10 rounded-lg backdrop-blur-md bg-white/10 border border-white/20 hover:bg-white/20 hover:border-white/40 transition-all shadow-lg group" title="E-mail">
+                <svg class="w-5 h-5 text-white group-hover:text-orange-300 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+              </a>
+            </div>
+          </div>
+
+          <div>
+            <h3 class="text-sm font-semibold tracking-[0.18em] uppercase text-slate-300 mb-4">Ferramentas</h3>
+            <div class="flex flex-col gap-3 text-slate-400">
+              <a href="https://gaveblue.com/recibos" class="hover:text-white transition-colors">WeRecibos</a>
+              <a href="https://gaveblue.com/wetasks" class="hover:text-white transition-colors">WeTasks</a>
+              <a href="https://gaveblue.com/weconsultas" class="hover:text-white transition-colors">WeConsultas</a>
+              <a href="https://gaveblue.com/wedevs" class="hover:text-white transition-colors">WeDevs</a>
+              <a href="https://gaveblue.com/wetime" class="hover:text-white transition-colors">WeTime</a>
+            </div>
+          </div>
+
+          <div>
+            <h3 class="text-sm font-semibold tracking-[0.18em] uppercase text-slate-300 mb-4">Soluções</h3>
+            <div class="flex flex-col gap-3 text-slate-400">
+              <span>Emissão de recibos</span>
+              <span>Organização de tarefas</span>
+              <span>Consultas rápidas</span>
+              <span>Teste de código HTML</span>
+              <span>Utilidades operacionais</span>
+            </div>
+          </div>
+
+          <div>
+            <h3 class="text-sm font-semibold tracking-[0.18em] uppercase text-slate-300 mb-4">Empresa</h3>
+            <div class="flex flex-col gap-3 text-slate-400">
+              <a href="https://gaveblue.com" target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors">Site oficial</a>
+              <a href="https://instagram.com/gaveblue" target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors">Instagram</a>
+              <a href="https://wa.me/5527988790381" target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors">WhatsApp</a>
+              <a href="mailto:contato@gaveblue.com" class="hover:text-white transition-colors">E-mail</a>
+            </div>
+          </div>
+
+          <div>
+            <h3 class="text-sm font-semibold tracking-[0.18em] uppercase text-slate-300 mb-4">Plataforma</h3>
+            <div class="flex flex-col gap-3 text-slate-400">
+              <span>Ferramentas gratuitas</span>
+              <span>Novo módulo: WeTasks</span>
+              <span>Novos recursos em breve</span>
+              <span>Interface centralizada</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-10 pt-6 border-t border-slate-700/40 flex flex-col md:flex-row items-center justify-between gap-4">
+          <div class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-sm text-slate-400">
+            <span class="w-2.5 h-2.5 rounded-full bg-green-400 shadow-[0_0_10px_rgba(74,222,128,0.7)]"></span>
+            Todas as ferramentas disponíveis estão online
+          </div>
+          <div class="text-slate-500 text-sm">© 2026 GaveBlue • Todos os direitos reservados</div>
+        </div>
       </div>
-     </div>
-    </div><!-- Title -->
-    <h1 id="main-title" class="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold mb-3 md:mb-4 lg:mb-6 tracking-tight" style="font-family: 'Space Grotesk', sans-serif; color: #f8fafc;">Em Manutenção</h1><!-- Subtitle -->
-    <p id="subtitle" class="text-lg sm:text-xl md:text-2xl lg:text-4xl font-medium mb-4 md:mb-6 lg:mb-8" style="color: #d946ef;">Voltamos em breve!</p><!-- Description -->
-    <p id="description" class="text-sm sm:text-base md:text-lg lg:text-xl mb-8 md:mb-10 lg:mb-12 max-w-lg mx-auto leading-relaxed" style="color: #94a3b8;">Estamos trabalhando para melhorar sua experiência. Nossa equipe está realizando atualizações importantes no sistema.</p><!-- Progress indicator -->
-    <div class="mb-8 md:mb-10 lg:mb-14">
-     <div class="relative w-48 sm:w-56 md:w-64 lg:w-96 h-2 md:h-3 mx-auto rounded-full overflow-hidden" style="background: #2d1b4e;">
-      <div id="progress-bar" class="h-full rounded-full transition-all" style="width: 0%; background: linear-gradient(90deg, #a78bfa, #d946ef); animation: shimmer 2s linear infinite; background-size: 200% 100%;"></div>
-     </div>
-     <p id="progress-text" class="text-xs sm:text-sm md:text-base mt-2 md:mt-3" style="color: #64748b;">Progresso da manutenção: 0%</p>
-     <p class="text-xs mt-1 md:mt-2" style="color: #475569;">Retorno estimado: 05 de março</p>
-    </div><!-- Status Cards -->
-    <div class="flex flex-wrap justify-center gap-3 md:gap-4 mb-8 md:mb-10 lg:mb-14">
-     <div class="px-4 md:px-5 py-2 md:py-3 rounded-lg md:rounded-xl backdrop-blur-sm text-sm md:text-base" style="background: rgba(45, 27, 78, 0.6); border: 1px solid rgba(167, 139, 250, 0.3);">
-      <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full animate-pulse" style="background: #22c55e;"></span> <span class="font-medium" style="color: #f8fafc;">Servidores Online</span>
-      </div>
-     </div>
-     <div class="px-4 md:px-5 py-2 md:py-3 rounded-lg md:rounded-xl backdrop-blur-sm text-sm md:text-base" style="background: rgba(45, 27, 78, 0.6); border: 1px solid rgba(167, 139, 250, 0.3);">
-      <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full animate-pulse" style="background: #d946ef;"></span> <span class="font-medium" style="color: #f8fafc;">Atualização em Progresso</span>
-      </div>
-     </div>
-    </div><!-- Instagram Link -->
-    <div class="mt-12 md:mt-14 lg:mt-16"><a href="https://instagram.com/gaveblue" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-3 px-6 md:px-8 py-3 md:py-4 rounded-lg backdrop-blur-md bg-white/10 border border-white/20 hover:bg-white/20 hover:border-white/40 transition-all shadow-lg group" title="Instagram">
-      <svg class="w-5 h-5 md:w-6 md:h-6 text-white group-hover:text-pink-300 transition-colors" fill="none" stroke="currentColor" viewbox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5" ry="5" stroke-width="2" /> <circle cx="12" cy="12" r="4" stroke-width="2" /> <circle cx="17" cy="7" r="1.2" fill="currentColor" />
-      </svg><span class="font-medium text-sm md:text-base text-white group-hover:text-pink-300 transition-colors">@gaveblue</span> </a>
-    </div>
-   </div>
+    </footer>
   </div>
   <script>
-    // Generate sparkles - universe background
-    function createSparkles() {
-      const container = document.getElementById('sparkles-container');
-      const sparkleCount = 200; // Increased from 40
-      
-      for (let i = 0; i < sparkleCount; i++) {
-        const sparkle = document.createElement('div');
-        sparkle.className = 'sparkle';
-        
-        const x = Math.random() * 150 - 25; // Extended range for continuous animation
-        const y = Math.random() * 150 - 25;
-        const size = 1 + Math.random() * 3;
-        const delay = Math.random() * 6;
-        const duration = 4 + Math.random() * 5;
-        const randomType = Math.random();
-        
-        sparkle.style.left = x + '%';
-        sparkle.style.top = y + '%';
-        sparkle.style.width = size + 'px';
-        sparkle.style.height = size + 'px';
-        sparkle.style.animationDelay = delay + 's';
-        sparkle.style.animationDuration = duration + 's';
-        
-        if (randomType > 0.7) {
-          sparkle.classList.add('sparkle-moving');
-          sparkle.style.animationDuration = (5 + Math.random() * 5) + 's';
-        } else if (randomType > 0.4) {
-          sparkle.classList.add('sparkle-deep');
-          sparkle.style.animationDuration = (6 + Math.random() * 6) + 's';
-        }
-        
-        container.appendChild(sparkle);
-      }
+    const pages = {
+      inicio: () => `
+        <section class="mt-10 sm:mt-16 px-1 sm:px-0">
+          <div class="max-w-4xl mx-auto text-center mb-8 sm:mb-10">
+            <span class="inline-flex items-center px-4 py-1.5 rounded-full bg-indigo-500/15 border border-indigo-400/20 text-indigo-200 text-sm font-semibold mb-5">O que você encontra na GaveBlue?</span>
+            <h1 id="hero-title" class="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-white leading-tight">
+              <span class="block bg-gradient-to-r from-white via-slate-100 to-slate-300 bg-clip-text text-transparent">Ferramentas úteis para</span>
+              <span class="block bg-gradient-to-r from-blue-300 via-cyan-300 to-indigo-300 bg-clip-text text-transparent">rotinas mais rápidas e organizadas</span>
+            </h1>
+            <p id="hero-subtitle" class="text-slate-300 text-sm sm:text-lg max-w-3xl mx-auto leading-relaxed mt-4 sm:mt-5 px-2 sm:px-0">
+              Desenvolvida para reunir ferramentas úteis em um só lugar, a GaveBlue facilita rotinas operacionais, consultas rápidas, organização de tarefas e testes práticos no dia a dia.
+            </p>
+            <div class="flex justify-center mt-6 sm:mt-8">
+              <a href="https://gaveblue.com/recibos" target="_self" rel="noopener noreferrer" class="inline-flex px-5 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl font-semibold text-sm sm:text-lg hover:from-blue-600 hover:to-purple-700 transition-all shadow-xl pulse-glow items-center gap-2 w-fit text-center">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                Testar Grátis - Gerador de Recibos
+              </a>
+            </div>
+            <div class="flex justify-center items-center gap-2 mt-4">
+              <div class="flex gap-1">
+                <svg class="w-5 h-5 text-yellow-400 fill-yellow-400" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                <svg class="w-5 h-5 text-yellow-400 fill-yellow-400" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                <svg class="w-5 h-5 text-yellow-400 fill-yellow-400" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                <svg class="w-5 h-5 text-yellow-400 fill-yellow-400" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                <svg class="w-5 h-5 text-yellow-400 fill-yellow-400" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+              </div>
+              <span class="text-sm text-slate-300 font-medium">4.99/5</span>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5">
+            <a href="https://gaveblue.com/recibos" class="group rounded-[1.5rem] sm:rounded-[1.75rem] border border-slate-700/50 bg-white/[0.04] p-5 sm:p-7 hover:bg-white/[0.06] hover:border-blue-400/40 transition-all">
+              <div class="w-14 h-14 rounded-2xl bg-blue-500/15 border border-blue-400/20 flex items-center justify-center mb-5">
+                <svg class="w-7 h-7 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+              </div>
+              <h3 class="text-xl sm:text-2xl font-bold text-white mb-3">WeRecibos</h3>
+              <p class="text-slate-300 leading-relaxed">Crie recibos online com rapidez e mais apresentação, ideal para quem precisa emitir documentos de forma prática e profissional.</p>
+            </a>
+            <a href="https://gaveblue.com/wetasks" class="group rounded-[1.5rem] sm:rounded-[1.75rem] border border-slate-700/50 bg-white/[0.04] p-5 sm:p-7 hover:bg-white/[0.06] hover:border-amber-400/40 transition-all relative overflow-hidden">
+              <span class="absolute top-5 right-5 px-3 py-1 rounded-full bg-red-500 text-white text-xs font-bold shadow-lg">Novo</span>
+              <div class="w-14 h-14 rounded-2xl bg-amber-500/15 border border-amber-400/20 flex items-center justify-center mb-5">
+                <svg class="w-7 h-7 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 6h11M9 12h11M9 18h11M5 6h.01M5 12h.01M5 18h.01" /></svg>
+              </div>
+              <h3 class="text-xl sm:text-2xl font-bold text-white mb-3">WeTasks</h3>
+              <p class="text-slate-300 leading-relaxed">Organize tarefas, acompanhe demandas e mantenha a rotina mais clara com um módulo pensado para produtividade diária.</p>
+            </a>
+            <a href="https://gaveblue.com/weconsultas" class="group rounded-[1.5rem] sm:rounded-[1.75rem] border border-slate-700/50 bg-white/[0.04] p-5 sm:p-7 hover:bg-white/[0.06] hover:border-purple-400/40 transition-all">
+              <div class="w-14 h-14 rounded-2xl bg-purple-500/15 border border-purple-400/20 flex items-center justify-center mb-5">
+                <svg class="w-7 h-7 text-purple-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+              </div>
+              <h3 class="text-xl sm:text-2xl font-bold text-white mb-3">WeConsultas</h3>
+              <p class="text-slate-300 leading-relaxed">Consulte CEP, CNPJ e outras informações com mais agilidade para acelerar atendimentos, cadastros e verificações rápidas.</p>
+            </a>
+            <a href="https://gaveblue.com/wedevs" class="group rounded-[1.5rem] sm:rounded-[1.75rem] border border-slate-700/50 bg-white/[0.04] p-5 sm:p-7 hover:bg-white/[0.06] hover:border-cyan-400/40 transition-all">
+              <div class="w-14 h-14 rounded-2xl bg-cyan-500/15 border border-cyan-400/20 flex items-center justify-center mb-5">
+                <svg class="w-7 h-7 text-cyan-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4m0 0l-4 4m4-4H3" /></svg>
+              </div>
+              <h3 class="text-xl sm:text-2xl font-bold text-white mb-3">WeDevs</h3>
+              <p class="text-slate-300 leading-relaxed">Teste HTML com rapidez em um ambiente simples para validar ideias, trechos de código e ajustes visuais sem complicação.</p>
+            </a>
+            <a href="https://gaveblue.com/wetime" class="group rounded-[1.5rem] sm:rounded-[1.75rem] border border-slate-700/50 bg-white/[0.04] p-5 sm:p-7 hover:bg-white/[0.06] hover:border-green-400/40 transition-all">
+              <div class="w-14 h-14 rounded-2xl bg-green-500/15 border border-green-400/20 flex items-center justify-center mb-5">
+                <svg class="w-7 h-7 text-green-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+              </div>
+              <h3 class="text-xl sm:text-2xl font-bold text-white mb-3">WeTime</h3>
+              <p class="text-slate-300 leading-relaxed">Acompanhe o horário em tempo real com uma ferramenta leve, útil para rotinas operacionais, conferências e uso rápido no navegador.</p>
+            </a>
+            <div class="rounded-[1.5rem] sm:rounded-[1.75rem] border border-dashed border-slate-600/60 bg-slate-900/30 p-5 sm:p-7">
+              <div class="w-14 h-14 rounded-2xl bg-slate-800 border border-slate-700 flex items-center justify-center mb-5">
+                <svg class="w-7 h-7 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+              </div>
+              <h3 class="text-xl sm:text-2xl font-bold text-slate-200 mb-3">Novos módulos em breve</h3>
+            <p class="text-slate-400 leading-relaxed">A plataforma continua evoluindo com novas utilidades e recursos pensados para expandir o ecossistema da GaveBlue.</p>
+            </div>
+          </div>
+        </section>
+        <section class="mt-12 sm:mt-16 rounded-[1.5rem] sm:rounded-[2rem] border border-slate-700/50 bg-gradient-to-br from-slate-950/90 via-slate-900/85 to-slate-950/90 p-5 sm:p-8 lg:p-10 shadow-2xl shadow-blue-950/20">
+          <div class="max-w-3xl mx-auto text-center mb-10">
+            <span class="inline-flex items-center px-4 py-1.5 rounded-full bg-blue-500/10 border border-blue-400/20 text-blue-300 text-sm font-semibold mb-4">Por que escolher a GaveBlue?</span>
+            <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-4">Mais praticidade do que usar ferramentas soltas</h2>
+            <p class="text-slate-300 leading-relaxed">Em vez de depender de sites genéricos e soluções separadas, a GaveBlue reúne utilidades úteis para a rotina do dia a dia com acesso rápido, visual consistente e foco em produtividade.</p>
+          </div>
+          <div class="grid grid-cols-1 lg:grid-cols-[1.2fr_0.9fr_1fr] gap-4 lg:gap-0 items-stretch overflow-hidden rounded-[1.75rem] border border-slate-700/50 bg-slate-950/40">
+            <div class="bg-white/[0.04] border-b lg:border-b-0 lg:border-r border-slate-700/50 p-6 sm:p-7">
+              <div class="h-14 flex items-center text-slate-200 font-semibold text-lg border-b border-slate-700/50">Recursos disponíveis</div>
+              <div class="space-y-0 pt-2">
+                <div class="h-12 flex items-center text-slate-200">Gerador de recibos online</div>
+                <div class="h-12 flex items-center text-slate-200">Organização de tarefas</div>
+                <div class="h-12 flex items-center text-slate-200">Consulta de CEP e CNPJ</div>
+                <div class="h-12 flex items-center text-slate-200">Teste rápido de HTML</div>
+                <div class="h-12 flex items-center text-slate-200">Relógio online em tempo real</div>
+                <div class="h-12 flex items-center text-slate-200">Acesso centralizado</div>
+                <div class="h-12 flex items-center text-slate-200">Interface padronizada</div>
+                <div class="h-12 flex items-center text-slate-200">Lançamentos e novos módulos</div>
+                <div class="h-12 flex items-center text-slate-200">Ferramentas gratuitas no ar</div>
+              </div>
+            </div>
+            <div class="border-b lg:border-b-0 lg:border-r border-slate-700/50 p-6 sm:p-7 bg-slate-900/40">
+              <div class="h-14 flex items-center justify-center text-slate-300 font-semibold text-center border-b border-slate-700/50">Ferramentas genéricas</div>
+              <div class="space-y-0 pt-2 text-center">
+                <div class="h-12 flex items-center justify-center text-pink-400 text-2xl">×</div>
+                <div class="h-12 flex items-center justify-center text-pink-400 text-2xl">×</div>
+                <div class="h-12 flex items-center justify-center text-pink-400 text-2xl">×</div>
+                <div class="h-12 flex items-center justify-center text-pink-400 text-2xl">×</div>
+                <div class="h-12 flex items-center justify-center text-pink-400 text-2xl">×</div>
+                <div class="h-12 flex items-center justify-center text-pink-400 text-2xl">×</div>
+                <div class="h-12 flex items-center justify-center text-pink-400 text-2xl">×</div>
+                <div class="h-12 flex items-center justify-center text-pink-400 text-2xl">×</div>
+                <div class="h-12 flex items-center justify-center text-yellow-300 text-xl">~</div>
+              </div>
+            </div>
+            <div class="relative p-6 sm:p-7 bg-gradient-to-b from-cyan-400/10 via-blue-500/5 to-emerald-400/10">
+              <div class="absolute inset-0 rounded-[1.6rem] border-2 border-cyan-300/70 pointer-events-none"></div>
+              <div class="h-14 flex items-center justify-center text-white font-bold text-center border-b border-cyan-300/20 relative">
+                <span class="inline-flex items-center gap-2">
+                  <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_12px_rgba(74,222,128,0.9)]"></span>
+                  GaveBlue
+                </span>
+              </div>
+              <div class="space-y-0 pt-2 text-center relative">
+                <div class="h-12 flex items-center justify-center text-emerald-400 text-2xl">✓</div>
+                <div class="h-12 flex items-center justify-center text-emerald-400 text-2xl">✓</div>
+                <div class="h-12 flex items-center justify-center text-emerald-400 text-2xl">✓</div>
+                <div class="h-12 flex items-center justify-center text-emerald-400 text-2xl">✓</div>
+                <div class="h-12 flex items-center justify-center text-emerald-400 text-2xl">✓</div>
+                <div class="h-12 flex items-center justify-center text-emerald-400 text-2xl">✓</div>
+                <div class="h-12 flex items-center justify-center text-emerald-400 text-2xl">✓</div>
+                <div class="h-12 flex items-center justify-center text-emerald-400 text-2xl">✓</div>
+                <div class="h-12 flex items-center justify-center text-emerald-400 text-2xl">✓</div>
+              </div>
+            </div>
+          </div>
+        </section>
+      `
+    };
+
+    function loadPage(pageName) {
+      const mainContent = document.getElementById('main-content');
+      const pageContent = pages[pageName] ? pages[pageName]() : pages.inicio();
+      mainContent.querySelector('.max-w-7xl').innerHTML = pageContent;
+      updateClock();
     }
 
-    // Enhanced mouse sparkle effects
-    const container = document.getElementById('sparkles-container');
-    const mouseGlowContainer = document.createElement('div');
-    mouseGlowContainer.id = 'mouse-sparkles';
-    mouseGlowContainer.style.position = 'fixed';
-    mouseGlowContainer.style.pointerEvents = 'none';
-    mouseGlowContainer.style.zIndex = '999';
-    document.body.appendChild(mouseGlowContainer);
-    
-    document.addEventListener('mousemove', (e) => {
-      // Create occasional larger and more frequent sparkles under cursor
-      if (Math.random() > 0.88) {
+    function goToSection(section) {
+      loadPage(section);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    loadPage('inicio');
+
+    const mouseGlow = document.getElementById('mouseGlow');
+    let mouseX = 0;
+    let mouseY = 0;
+    let glowX = 0;
+    let glowY = 0;
+    const isMobile = window.matchMedia('(max-width: 1023px)').matches;
+
+    if (!isMobile) {
+      document.addEventListener('mousemove', (e) => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+        mouseGlow.classList.add('active');
+        if (Math.random() > 0.7) createSparkle(mouseX, mouseY);
+      });
+
+      document.addEventListener('mouseleave', () => {
+        mouseGlow.classList.remove('active');
+      });
+
+      function createSparkle(x, y) {
         const sparkle = document.createElement('div');
         sparkle.className = 'sparkle';
-        
-        const size = 2 + Math.random() * 5;
-        sparkle.style.left = e.clientX + 'px';
-        sparkle.style.top = e.clientY + 'px';
-        sparkle.style.position = 'fixed';
-        sparkle.style.width = size + 'px';
-        sparkle.style.height = size + 'px';
-        sparkle.style.pointerEvents = 'none';
-        sparkle.style.animationDuration = (1.5 + Math.random() * 1) + 's';
-        sparkle.style.animationDelay = '0s';
-        sparkle.style.zIndex = '999';
-        sparkle.style.boxShadow = '0 0 15px rgba(167, 139, 250, 0.8), 0 0 30px rgba(217, 70, 239, 0.5)';
-        
-        mouseGlowContainer.appendChild(sparkle);
-        
-        setTimeout(() => sparkle.remove(), 2500);
+        sparkle.style.left = (x + (Math.random() - 0.5) * 40) + 'px';
+        sparkle.style.top = (y + (Math.random() - 0.5) * 40) + 'px';
+        document.body.appendChild(sparkle);
+        setTimeout(() => sparkle.remove(), 800);
       }
-    });
 
-    createSparkles();
+      function updateGlow() {
+        glowX += (mouseX - glowX) * 0.15;
+        glowY += (mouseY - glowY) * 0.15;
+        mouseGlow.style.left = (glowX - 225) + 'px';
+        mouseGlow.style.top = (glowY - 225) + 'px';
+        requestAnimationFrame(updateGlow);
+      }
+
+      updateGlow();
+    }
+    function updateClock() {
+      const clockDisplay = document.getElementById('wetime-display');
+      if (!clockDisplay) return;
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+      clockDisplay.textContent = `${hours}:${minutes}:${seconds}`;
+    }
+
+    updateClock();
+    setInterval(updateClock, 1000);
 
     const defaultConfig = {
-      main_title: 'Em Manutenção',
-      subtitle: 'Voltamos em breve!',
-      description: 'Estamos trabalhando para melhorar sua experiência. Nossa equipe está realizando atualizações importantes no sistema.',
-      background_color: '#0f0a1a',
-      surface_color: '#1a0f3a',
-      text_color: '#f8fafc',
-      primary_action_color: '#d946ef',
-      secondary_action_color: '#a78bfa',
-      font_family: 'Space Grotesk',
-      font_size: 16
+      company_name: 'GaveBlue',
+      hero_title: 'Ferramentas úteis para rotinas mais rápidas e organizadas',
+      hero_subtitle: 'A GaveBlue reúne utilidades online para gerar recibos, organizar tarefas, consultar informações e testar soluções em um só lugar, com mais praticidade no dia a dia.',
+      primary_color: '#3b82f6',
+      secondary_color: '#8b5cf6'
     };
 
     let config = { ...defaultConfig };
 
-    // Progress simulation
-    let currentProgress = 0;
-    const startTime = Date.now();
-    const totalDuration = 5 * 60 * 1000; // 5 minutes in milliseconds
-
-    function updateProgress() {
-      const elapsed = Date.now() - startTime;
-      const progress = Math.min((elapsed / totalDuration) * 100, 99.9);
-      
-      // Slow down significantly after 90%
-      let adjustedProgress = progress;
-      if (progress >= 90) {
-        // Map 90-100 to 90-99.9 with exponential slowdown
-        const remaining = progress - 90;
-        adjustedProgress = 90 + (remaining / 10) * 9.9;
-      }
-      
-      currentProgress = adjustedProgress;
-      const progressBar = document.getElementById('progress-bar');
-      const progressText = document.getElementById('progress-text');
-      
-      progressBar.style.width = adjustedProgress + '%';
-      progressText.textContent = `Progresso da manutenção: ${Math.floor(adjustedProgress)}%`;
-      
-      if (adjustedProgress < 99.9) {
-        requestAnimationFrame(updateProgress);
-      }
-    }
-
-    // Start progress animation
-    updateProgress();
-
     async function onConfigChange(newConfig) {
       config = { ...config, ...newConfig };
-      
-      // Update text content
-      document.getElementById('main-title').textContent = config.main_title || defaultConfig.main_title;
-      document.getElementById('subtitle').textContent = config.subtitle || defaultConfig.subtitle;
-      document.getElementById('description').textContent = config.description || defaultConfig.description;
-      
-      // Update colors
-      const bgColor = config.background_color || defaultConfig.background_color;
-      const surfaceColor = config.surface_color || defaultConfig.surface_color;
-      const textColor = config.text_color || defaultConfig.text_color;
-      const primaryColor = config.primary_action_color || defaultConfig.primary_action_color;
-      const secondaryColor = config.secondary_action_color || defaultConfig.secondary_action_color;
-      
-      // Background
-      const wrapper = document.getElementById('app-wrapper');
-      wrapper.style.background = `linear-gradient(135deg, ${bgColor} 0%, ${surfaceColor} 50%, ${bgColor} 100%)`;
-      
-      // Text colors
-      document.getElementById('main-title').style.color = textColor;
-      document.getElementById('subtitle').style.color = primaryColor;
-      
-      // Update gears
-      const gears = document.querySelectorAll('.gear-spin');
-      gears.forEach(gear => gear.style.color = primaryColor);
-      const gearsReverse = document.querySelectorAll('.gear-spin-reverse');
-      gearsReverse.forEach(gear => gear.style.color = secondaryColor);
-      
-      // Update button
-      const button = document.querySelector('button[type="submit"]');
-      button.style.background = `linear-gradient(135deg, ${primaryColor}, ${primaryColor}dd)`;
-      
-      // Update progress bar
-      const progressBar = document.getElementById('progress-bar');
-      if (progressBar) {
-        progressBar.style.background = `linear-gradient(90deg, ${primaryColor}, ${secondaryColor})`;
+
+      const heroTitle = document.getElementById('hero-title');
+      if (heroTitle) {
+        const titleText = config.hero_title || defaultConfig.hero_title;
+        const parts = titleText.split(' ');
+        const midPoint = Math.ceil(parts.length / 2);
+        const firstLine = parts.slice(0, midPoint).join(' ');
+        const secondLine = parts.slice(midPoint).join(' ');
+        heroTitle.innerHTML = `
+          <span class="bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">${firstLine}</span>
+          <span class="bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent"> ${secondLine}</span>
+        `;
       }
-      
-      // Update font
-      const fontFamily = config.font_family || defaultConfig.font_family;
-      const baseSize = config.font_size || defaultConfig.font_size;
-      
-      document.getElementById('main-title').style.fontFamily = `'${fontFamily}', sans-serif`;
-      document.getElementById('main-title').style.fontSize = `${baseSize * 3}px`;
-      document.getElementById('subtitle').style.fontSize = `${baseSize * 1.75}px`;
-      document.getElementById('description').style.fontSize = `${baseSize}px`;
+
+      const heroSubtitle = document.getElementById('hero-subtitle');
+      if (heroSubtitle) {
+        heroSubtitle.textContent = config.hero_subtitle || defaultConfig.hero_subtitle;
+      }
     }
 
-    function mapToCapabilities(cfg) {
+    function mapToCapabilities(currentConfig) {
       return {
         recolorables: [
           {
-            get: () => cfg.background_color || defaultConfig.background_color,
+            get: () => currentConfig.primary_color || defaultConfig.primary_color,
             set: (value) => {
-              cfg.background_color = value;
-              window.elementSdk.setConfig({ background_color: value });
+              currentConfig.primary_color = value;
+              window.elementSdk.setConfig({ primary_color: value });
             }
           },
           {
-            get: () => cfg.surface_color || defaultConfig.surface_color,
+            get: () => currentConfig.secondary_color || defaultConfig.secondary_color,
             set: (value) => {
-              cfg.surface_color = value;
-              window.elementSdk.setConfig({ surface_color: value });
-            }
-          },
-          {
-            get: () => cfg.text_color || defaultConfig.text_color,
-            set: (value) => {
-              cfg.text_color = value;
-              window.elementSdk.setConfig({ text_color: value });
-            }
-          },
-          {
-            get: () => cfg.primary_action_color || defaultConfig.primary_action_color,
-            set: (value) => {
-              cfg.primary_action_color = value;
-              window.elementSdk.setConfig({ primary_action_color: value });
-            }
-          },
-          {
-            get: () => cfg.secondary_action_color || defaultConfig.secondary_action_color,
-            set: (value) => {
-              cfg.secondary_action_color = value;
-              window.elementSdk.setConfig({ secondary_action_color: value });
+              currentConfig.secondary_color = value;
+              window.elementSdk.setConfig({ secondary_color: value });
             }
           }
         ],
         borderables: [],
-        fontEditable: {
-          get: () => cfg.font_family || defaultConfig.font_family,
-          set: (value) => {
-            cfg.font_family = value;
-            window.elementSdk.setConfig({ font_family: value });
-          }
-        },
-        fontSizeable: {
-          get: () => cfg.font_size || defaultConfig.font_size,
-          set: (value) => {
-            cfg.font_size = value;
-            window.elementSdk.setConfig({ font_size: value });
-          }
-        }
+        fontEditable: undefined,
+        fontSizeable: undefined
       };
     }
 
-    function mapToEditPanelValues(cfg) {
+    function mapToEditPanelValues(currentConfig) {
       return new Map([
-        ['main_title', cfg.main_title || defaultConfig.main_title],
-        ['subtitle', cfg.subtitle || defaultConfig.subtitle],
-        ['description', cfg.description || defaultConfig.description]
+        ['company_name', currentConfig.company_name || defaultConfig.company_name],
+        ['hero_title', currentConfig.hero_title || defaultConfig.hero_title],
+        ['hero_subtitle', currentConfig.hero_subtitle || defaultConfig.hero_subtitle]
       ]);
     }
 
-    // Initialize SDK
     if (window.elementSdk) {
       window.elementSdk.init({
         defaultConfig,
@@ -512,8 +443,6 @@
         mapToEditPanelValues
       });
     }
-
-
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9cc7a77844731b1a',t:'MTc3MDg1MjgzNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>
