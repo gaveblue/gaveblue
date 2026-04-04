@@ -1,1237 +1,2140 @@
 <!doctype html>
 <html lang="pt-BR" class="h-full">
- <head>
+<head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>WeFrotas - Gestão de Frotas</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WeFrotas - GaveBlue</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
+    html, body { height: 100%; margin: 0; box-sizing: border-box; }
+    * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
     body {
-      box-sizing: border-box;
+      min-height: 100vh;
+      background: linear-gradient(180deg, #eef3fb 0%, #dce6f5 100%);
+      color: #182033;
+      overflow-x: hidden;
     }
-    
-    :root{--p1:#667eea;--p2:#764ba2}
-    body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Roboto,sans-serif}
-    body{background:linear-gradient(135deg,#f5f7fa 0%,#c3cfe2 100%)}
-    .glass{background:rgba(255,255,255,.72);backdrop-filter:blur(40px)saturate(180%);border-bottom:.5px solid rgba(0,0,0,.08)}
-    .card{background:rgba(255,255,255,.86);backdrop-filter:blur(20px)saturate(180%);border:.5px solid rgba(0,0,0,.06);border-radius:20px;box-shadow:0 2px 16px rgba(0,0,0,.04)}
-    .card:hover{transform:translateY(-1px);box-shadow:0 4px 20px rgba(0,0,0,.06)}
-    .grad{background:linear-gradient(135deg,var(--p1) 0%,var(--p2) 100%);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:800}
-    .tab{border-radius:16px;transition:.2s}
-    .tab:hover{background:rgba(102,126,234,.08)}
-    .tab[aria-current="page"]{background:linear-gradient(135deg,var(--p1) 0%,var(--p2) 100%);color:#fff;font-weight:700;box-shadow:0 4px 16px rgba(102,126,234,.3)}
-    .chip{border-radius:999px;padding:.2rem .6rem;font-weight:800;font-size:.7rem}
-    .chip-warn{background:rgba(245,158,11,.14);color:#a16207}
-    .chip-ok{background:rgba(34,197,94,.14);color:#166534}
-    .chip-bad{background:rgba(239,68,68,.14);color:#991b1b}
-    .ico{width:56px;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:28px;background:linear-gradient(135deg,rgba(102,126,234,.1) 0%,rgba(118,75,162,.1) 100%)}
-    .input{background:rgba(245,247,250,.8);border:1.5px solid rgba(0,0,0,.06);border-radius:14px;padding:12px 16px;font-size:15px}
-    .btn{background:linear-gradient(135deg,var(--p1) 0%,var(--p2) 100%);border:none;border-radius:14px;padding:12px 24px;color:#fff;font-weight:800;box-shadow:0 4px 16px rgba(102,126,234,.3);cursor:pointer;transition:.2s}
-    .btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(102,126,234,.4)}
-    .btn2{background:rgba(0,0,0,.04);border:1.5px solid rgba(0,0,0,.08);border-radius:14px;padding:12px 24px;color:#333;font-weight:800;cursor:pointer;transition:.2s}
-    .btn2:hover{background:rgba(0,0,0,.08)}
-    .view{display:none}
-    .view.active{display:block}
-    html, body {
-      height: 100%;
-      margin: 0;
-      padding: 0;
+    .workspace-shell {
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top right, rgba(102, 126, 234, 0.12), transparent 26%),
+        linear-gradient(180deg, #f5f8fd 0%, #dbe4f2 100%);
     }
-    #app {
-      height: 100%;
+    .app-header {
+      background: rgba(15, 23, 42, 0.95);
+      border-bottom: 1px solid rgba(71, 85, 105, 0.5);
+      backdrop-filter: blur(18px);
+    }
+    .top-action {
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.18);
+      backdrop-filter: blur(10px);
+      transition: all 0.2s ease;
+    }
+    .top-action:hover { background: rgba(255,255,255,0.2); }
+    .nav-strip {
+      background: rgba(255, 255, 255, 0.72);
+      border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+      backdrop-filter: blur(12px);
+      overflow: hidden;
+    }
+    .nav-btn {
+      width: 60px;
+      height: 60px;
+      border-radius: 20px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #111827;
+      transition: all 0.22s ease;
+      position: relative;
+      transform-origin: center;
+    }
+    .nav-btn:hover {
+      background: rgba(255, 255, 255, 0.72);
+      box-shadow: 0 10px 24px rgba(148, 163, 184, 0.2);
+      transform: translateY(-2px);
+    }
+    .nav-btn.active {
+      background: linear-gradient(135deg, #6670e6 0%, #8558d8 100%);
+      color: white;
+      box-shadow: 0 16px 32px rgba(118, 91, 216, 0.35);
+      transform: translateY(-1px) scale(1.03);
+    }
+    .nav-btn.active svg {
+      stroke: currentColor;
+    }
+    .nav-tooltip {
+      position: absolute;
+      top: calc(100% + 12px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1f2937;
+      color: white;
+      font-size: 12px;
+      padding: 6px 10px;
+      border-radius: 10px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: 0.18s ease;
+      z-index: 20;
+    }
+    .nav-btn:hover .nav-tooltip,
+    .nav-btn.active .nav-tooltip {
+      opacity: 1;
+    }
+    .content-card {
+      background: rgba(255, 255, 255, 0.94);
+      border: 1px solid rgba(226, 232, 240, 0.9);
+      border-radius: 30px;
+      box-shadow: 0 24px 48px rgba(148, 163, 184, 0.18);
+    }
+    .filter-card {
+      background: linear-gradient(180deg, #ffffff 0%, #fcfdff 100%);
+      border: 1px solid rgba(226, 232, 240, 0.9);
+      border-radius: 28px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.9);
+    }
+    .soft-input {
+      background: #f3f6fb;
+      border: 1px solid #d7deea;
+      border-radius: 18px;
+      height: 58px;
+      padding: 0 18px;
+      color: #111827;
+      font-size: 15px;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+    .soft-input:focus {
+      border-color: #7c83f6;
+      box-shadow: 0 0 0 4px rgba(124, 131, 246, 0.12);
+      background: #fff;
+    }
+    .icon-action {
+      width: 58px;
+      height: 58px;
+      border-radius: 20px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      background: transparent;
+      border: 1px solid transparent;
+    }
+    .icon-action:hover {
+      background: rgba(255,255,255,0.78);
+      border-color: rgba(226,232,240,0.9);
+      box-shadow: 0 12px 22px rgba(148, 163, 184, 0.16);
+    }
+    .icon-action.primary {
+      background: linear-gradient(135deg, #6670e6 0%, #8558d8 100%);
+      color: white;
+      box-shadow: 0 16px 28px rgba(118, 91, 216, 0.24);
+    }
+    .empty-state {
+      min-height: 260px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: #7b8799;
+      font-size: 18px;
+    }
+    .module-panel { display: none; }
+    .module-panel.active {
+      display: block;
+      animation: panelIn 0.28s ease;
+    }
+    @keyframes panelIn {
+      from {
+        opacity: 0;
+        transform: translateY(12px) scale(0.99);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+    .selection-check {
+      width: 26px;
+      height: 26px;
+      border-radius: 10px;
+      border: 2px solid #6d7df6;
+      background: white;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      color: transparent;
+    }
+    .selection-check.checked {
+      background: linear-gradient(135deg, #6670e6 0%, #8558d8 100%);
+      color: white;
+      box-shadow: 0 10px 20px rgba(118, 91, 216, 0.24);
+    }
+    .toolbar-divider {
+      width: 1px;
+      height: 38px;
+      background: rgba(148, 163, 184, 0.4);
+      margin: 0 6px;
+    }
+    .list-card {
+      background: linear-gradient(180deg, #ffffff 0%, #f9fbff 100%);
+      border: 1px solid rgba(226, 232, 240, 0.96);
+      border-radius: 24px;
+      padding: 20px 22px;
+      box-shadow: 0 18px 34px rgba(148, 163, 184, 0.12);
+      transition: all 0.22s ease;
+    }
+    .list-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 24px 42px rgba(148, 163, 184, 0.18);
+    }
+    .list-card.selected {
+      border-color: rgba(124, 131, 246, 0.75);
+      box-shadow: 0 0 0 2px rgba(124, 131, 246, 0.16), 0 24px 42px rgba(148, 163, 184, 0.18);
+    }
+    .mini-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #5b6473;
+      background: #eef2ff;
+      border: 1px solid #d9e0fb;
+    }
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.34);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      z-index: 60;
+    }
+    .modal-backdrop.show { display: flex; }
+    .modal-card {
+      width: min(100%, 640px);
+      background: rgba(255,255,255,0.96);
+      border: 1px solid rgba(226, 232, 240, 0.96);
+      border-radius: 30px;
+      box-shadow: 0 32px 64px rgba(15, 23, 42, 0.18);
+      overflow: hidden;
+      animation: modalIn 0.24s ease;
+    }
+    @keyframes modalIn {
+      from {
+        opacity: 0;
+        transform: translateY(16px) scale(0.98);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+    .modal-header {
+      padding: 22px 26px 18px;
+      border-bottom: 1px solid rgba(226, 232, 240, 0.9);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .modal-body {
+      padding: 24px 26px 26px;
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+    .field-wrap label {
+      display: block;
+      font-size: 13px;
+      font-weight: 800;
+      color: #5b6473;
+      margin-bottom: 10px;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+    .field-wrap.full { grid-column: 1 / -1; }
+    .soft-input.textarea {
+      height: auto;
+      min-height: 120px;
+      padding: 16px 18px;
+      resize: vertical;
+    }
+    .soft-btn {
+      height: 56px;
+      padding: 0 22px;
+      border-radius: 18px;
+      border: 1px solid #d7deea;
+      background: #fff;
+      color: #475569;
+      font-weight: 700;
+      transition: all 0.2s ease;
+    }
+    .soft-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 14px 24px rgba(148, 163, 184, 0.16);
+    }
+    .soft-btn.primary {
+      border-color: transparent;
+      background: linear-gradient(135deg, #6670e6 0%, #8558d8 100%);
+      color: white;
+      box-shadow: 0 16px 28px rgba(118, 91, 216, 0.24);
+    }
+    .toast-stack {
+      position: fixed;
+      top: 86px;
+      right: 24px;
+      z-index: 70;
       display: flex;
       flex-direction: column;
+      gap: 10px;
     }
-    main {
-      flex: 1;
-      overflow-y: auto;
+    .toast-item {
+      min-width: 280px;
+      max-width: 360px;
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.96);
+      border: 1px solid rgba(226, 232, 240, 0.96);
+      box-shadow: 0 22px 38px rgba(148, 163, 184, 0.18);
+      color: #1f2937;
+      font-weight: 600;
+      animation: toastIn 0.22s ease;
+    }
+    @keyframes toastIn {
+      from {
+        opacity: 0;
+        transform: translateY(-8px) translateX(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) translateX(0);
+      }
+    }
+    body.dark-mode {
+      background: linear-gradient(180deg, #0b1220 0%, #131c30 100%);
+      color: #e5eefc;
+    }
+    body.dark-mode .workspace-shell {
+      background:
+        radial-gradient(circle at top right, rgba(124, 131, 246, 0.15), transparent 28%),
+        linear-gradient(180deg, #0f172a 0%, #172033 100%);
+    }
+    body.dark-mode .nav-strip {
+      background: rgba(15, 23, 42, 0.72);
+      border-bottom-color: rgba(71, 85, 105, 0.45);
+    }
+    body.dark-mode .nav-btn {
+      color: #e2e8f0;
+    }
+    body.dark-mode .nav-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 12px 28px rgba(2, 6, 23, 0.3);
+    }
+    body.dark-mode .toolbar-divider {
+      background: rgba(100, 116, 139, 0.45);
+    }
+    body.dark-mode .content-card {
+      background: rgba(15, 23, 42, 0.9);
+      border-color: rgba(71, 85, 105, 0.5);
+      box-shadow: 0 24px 48px rgba(2, 6, 23, 0.34);
+    }
+    body.dark-mode .filter-card {
+      background: linear-gradient(180deg, rgba(30, 41, 59, 0.96) 0%, rgba(15, 23, 42, 0.96) 100%);
+      border-color: rgba(71, 85, 105, 0.46);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+    }
+    body.dark-mode .soft-input {
+      background: rgba(30, 41, 59, 0.94);
+      border-color: rgba(71, 85, 105, 0.55);
+      color: #f8fafc;
+    }
+    body.dark-mode .soft-input:focus {
+      background: rgba(30, 41, 59, 1);
+      border-color: #8b92ff;
+      box-shadow: 0 0 0 4px rgba(124, 131, 246, 0.16);
+    }
+    body.dark-mode .icon-action:hover {
+      background: rgba(255,255,255,0.06);
+      border-color: rgba(71, 85, 105, 0.5);
+      box-shadow: 0 12px 22px rgba(2, 6, 23, 0.28);
+    }
+    body.dark-mode .selection-check {
+      background: rgba(15, 23, 42, 0.8);
+      border-color: #8b92ff;
+    }
+    body.dark-mode .selection-check.checked {
+      background: linear-gradient(135deg, #6670e6 0%, #8558d8 100%);
+      color: white;
+    }
+    body.dark-mode .list-card {
+      background: linear-gradient(180deg, rgba(30, 41, 59, 0.98) 0%, rgba(15, 23, 42, 0.98) 100%);
+      border-color: rgba(71, 85, 105, 0.55);
+      box-shadow: 0 20px 36px rgba(2, 6, 23, 0.28);
+    }
+    body.dark-mode .list-card.selected {
+      border-color: rgba(139, 146, 255, 0.85);
+      box-shadow: 0 0 0 2px rgba(139, 146, 255, 0.18), 0 20px 36px rgba(2, 6, 23, 0.28);
+    }
+    body.dark-mode .mini-badge {
+      background: rgba(99, 102, 241, 0.15);
+      border-color: rgba(129, 140, 248, 0.24);
+      color: #c7d2fe;
+    }
+    body.dark-mode .empty-state,
+    body.dark-mode .text-slate-700 {
+      color: #cbd5e1 !important;
+    }
+    body.dark-mode .text-slate-900 {
+      color: #f8fafc !important;
+    }
+    body.dark-mode .text-slate-600 {
+      color: #94a3b8 !important;
+    }
+    body.dark-mode .text-slate-500 {
+      color: #94a3b8 !important;
+    }
+    body.dark-mode .modal-card {
+      background: rgba(15, 23, 42, 0.98);
+      border-color: rgba(71, 85, 105, 0.55);
+      box-shadow: 0 30px 60px rgba(2, 6, 23, 0.42);
+    }
+    body.dark-mode .modal-header {
+      border-bottom-color: rgba(71, 85, 105, 0.46);
+    }
+    body.dark-mode .field-wrap label {
+      color: #94a3b8;
+    }
+    body.dark-mode .soft-btn {
+      background: rgba(30, 41, 59, 0.92);
+      border-color: rgba(71, 85, 105, 0.52);
+      color: #e2e8f0;
+    }
+    body.dark-mode .soft-btn.primary {
+      border-color: transparent;
+      color: white;
+    }
+    body.dark-mode .toast-item {
+      background: rgba(15, 23, 42, 0.96);
+      border-color: rgba(71, 85, 105, 0.5);
+      color: #f8fafc;
+      box-shadow: 0 22px 42px rgba(2, 6, 23, 0.34);
+    }
+    @media (max-width: 900px) {
+      .nav-btn {
+        width: 54px;
+        height: 54px;
+        border-radius: 18px;
+      }
+      .content-card {
+        border-radius: 24px;
+      }
+      .filter-card {
+        border-radius: 24px;
+      }
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
   <style>@view-transition { navigation: auto; }</style>
-  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
-  <script src="/_sdk/element_sdk.js" type="text/javascript"></script>
- </head>
- <body class="min-h-screen">
-  <div id="app" class="min-h-screen flex flex-col overflow-auto"><!-- Header -->
-   <header class="glass px-6 py-5 sticky top-0 z-40">
-    <div class="flex items-center justify-between">
-     <div>
-      <h1 id="system-title" class="text-3xl grad">WeFrotas</h1>
-      <p id="system-subtitle" class="text-sm text-gray-600 font-semibold mt-1">Gestão de Frotas</p>
-     </div>
-     <div class="flex items-center gap-3"><button onclick="handleLogout()" class="btn2 text-sm px-4 py-2">Sair</button>
-     </div>
+</head>
+<body>
+  <div class="workspace-shell flex flex-col min-h-full">
+    <header class="app-header">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3 min-w-0">
+          <a href="https://gaveblue.com" target="_self" rel="noopener noreferrer">
+            <img src="https://i.imgur.com/Zih5jH8.png" alt="Logo GaveBlue" class="h-12 w-auto cursor-pointer hover:opacity-80 transition-opacity" loading="lazy">
+          </a>
+          <div class="hidden md:block w-px h-6 bg-slate-700/70"></div>
+          <div class="hidden md:block min-w-0">
+            <p class="text-slate-400 text-xs uppercase tracking-[0.22em] font-semibold">WeFrotas</p>
+            <h1 class="text-white text-sm sm:text-base font-bold truncate">Gestão de frotas inteligente</h1>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 sm:gap-3">
+          <button class="top-action rounded-xl px-3 sm:px-4 py-2 text-sm font-semibold text-white inline-flex items-center gap-2" onclick="window.location.href='https://gaveblue.com'">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            <span class="hidden sm:inline">Sair</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div class="nav-strip">
+      <div class="max-w-[1280px] mx-auto px-6 py-4 overflow-hidden">
+        <div class="flex items-center gap-2 flex-wrap">
+          <button class="nav-btn active" onclick="showModule('home', this)">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M3 10.5L12 3l9 7.5V20a1 1 0 01-1 1h-5v-7H9v7H4a1 1 0 01-1-1v-9.5z"/>
+            </svg>
+            <span class="nav-tooltip">Home</span>
+          </button>
+
+          <button class="nav-btn" onclick="showModule('orders', this)">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M7 3h7l5 5v13H7z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M14 3v5h5M10 12h6M10 16h6"/>
+            </svg>
+            <span class="nav-tooltip">OS</span>
+          </button>
+
+          <button class="nav-btn" onclick="showModule('financeiro', this)">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M12 3v18"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M16.5 7.5c0-1.933-2.015-3.5-4.5-3.5S7.5 5.567 7.5 7.5 9.515 11 12 11s4.5 1.567 4.5 3.5S14.485 18 12 18s-4.5-1.567-4.5-3.5"/>
+            </svg>
+            <span class="nav-tooltip">Financeiro</span>
+          </button>
+
+          <div class="toolbar-divider"></div>
+
+          <button class="nav-btn" onclick="showModule('veiculos', this)">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M3 6h11v9H3z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M14 10h4l3 3v2h-7z"/>
+              <circle cx="7" cy="18" r="2"></circle>
+              <circle cx="18" cy="18" r="2"></circle>
+            </svg>
+            <span class="nav-tooltip">Veículos</span>
+          </button>
+
+          <button class="nav-btn" onclick="showModule('motoristas', this)">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <circle cx="12" cy="8" r="3.2" stroke-width="1.9"></circle>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M5 20c0-3.314 3.134-6 7-6s7 2.686 7 6"/>
+            </svg>
+            <span class="nav-tooltip">Motoristas</span>
+          </button>
+
+          <button class="nav-btn" onclick="showModule('fornecedores', this)">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <rect x="4" y="5" width="16" height="14" rx="2" stroke-width="1.9"></rect>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M9 5v14M15 5v14M4 10h16"/>
+            </svg>
+            <span class="nav-tooltip">Fornecedores</span>
+          </button>
+
+          <button id="theme-toggle-btn" class="nav-btn" onclick="toggleTheme(this)">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M20 15.5A7.5 7.5 0 1112.5 4 6 6 0 0020 15.5z"/>
+            </svg>
+            <span class="nav-tooltip">Tema</span>
+          </button>
+
+        </div>
+      </div>
     </div>
-   </header><!-- Nav -->
-   <nav class="glass px-6 py-3 sticky top-[88px] z-30 overflow-x-auto">
-    <div class="flex gap-2 items-center"><button class="tab w-12 h-12 flex items-center justify-center" data-view="dashboard" aria-current="page" title="Dashboard" onclick="selectView('dashboard')">
-      <svg width="22" height="22" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-       <rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /><rect x="3" y="14" width="7" height="7" />
-      </svg></button> <button class="tab w-12 h-12 flex items-center justify-center" data-view="contas" title="Contas a Pagar" onclick="selectView('contas')">
-      <svg width="22" height="22" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-       <line x1="12" y1="20" x2="12" y2="10" /><line x1="18" y1="20" x2="18" y2="4" /><line x1="6" y1="20" x2="6" y2="16" />
-      </svg></button> <button class="tab w-12 h-12 flex items-center justify-center" data-view="orders" title="Ordens de Serviço" onclick="selectView('orders')">
-      <svg width="22" height="22" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-       <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="9" y1="15" x2="15" y2="15" /><line x1="9" y1="18" x2="15" y2="18" /><line x1="9" y1="12" x2="12" y2="12" />
-      </svg></button> <button class="tab w-12 h-12 flex items-center justify-center" data-view="lancamentos" title="Lançamentos" onclick="selectView('lancamentos')">
-      <svg width="22" height="22" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-       <line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-      </svg></button>
-     <div class="w-px h-8 bg-gray-300 mx-1"></div><button class="tab w-12 h-12 flex items-center justify-center" data-view="veiculos" title="Veículos" onclick="selectView('veiculos')">
-      <svg width="22" height="22" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-       <rect x="1" y="3" width="15" height="13" /><polygon points="17 16 16 8" /><circle cx="5.5" cy="18.5" r="2.5" /><circle cx="18.5" cy="18.5" r="2.5" />
-      </svg></button> <button class="tab w-12 h-12 flex items-center justify-center" data-view="motoristas" title="Motoristas" onclick="selectView('motoristas')">
-      <svg width="22" height="22" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-       <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
-      </svg></button> <button class="tab w-12 h-12 flex items-center justify-center" data-view="fornecedores" title="Fornecedores" onclick="selectView('fornecedores')">
-      <svg width="22" height="22" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-       <rect x="2" y="7" width="20" height="14" rx="2" /><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
-      </svg></button> <button class="tab w-12 h-12 flex items-center justify-center" data-view="ajuda" title="Ajuda" onclick="selectView('ajuda')">
-      <svg width="22" height="22" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-       <circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" /><line x1="12" y1="17" x2="12.01" y2="17" />
-      </svg></button>
-    </div>
-   </nav><!-- Main -->
-   <main class="flex-1 p-6 overflow-auto"><!-- DASHBOARD -->
-    <section id="dashboard" class="view active">
-     <div class="space-y-6">
-      <div class="grid grid-cols-1 md:grid-cols-5 gap-6">
-       <div class="card p-5 text-center">
-        <div class="ico mx-auto mb-3">
-         🚗
-        </div>
-        <div class="text-xs text-gray-500 font-bold uppercase tracking-wide">
-         Veículos
-        </div>
-        <div class="text-4xl grad mt-2">
-         0
-        </div>
-       </div>
-       <div class="card p-5 text-center">
-        <div class="ico mx-auto mb-3">
-         👤
-        </div>
-        <div class="text-xs text-gray-500 font-bold uppercase tracking-wide">
-         Motoristas
-        </div>
-        <div class="text-4xl grad mt-2">
-         0
-        </div>
-       </div>
-       <div class="card p-5 text-center">
-        <div class="ico mx-auto mb-3">
-         🏢
-        </div>
-        <div class="text-xs text-gray-500 font-bold uppercase tracking-wide">
-         Fornecedores
-        </div>
-        <div class="text-4xl grad mt-2">
-         0
-        </div>
-       </div>
-       <div class="card p-5 text-center">
-        <div class="ico mx-auto mb-3">
-         📋
-        </div>
-        <div class="text-xs text-gray-500 font-bold uppercase tracking-wide">
-         Ordens Abertas
-        </div>
-        <div class="text-4xl grad mt-2">
-         0
-        </div>
-       </div>
-       <div class="card p-5 text-center">
-        <div class="ico mx-auto mb-3">
-         💰
-        </div>
-        <div class="text-xs text-gray-500 font-bold uppercase tracking-wide">
-         Contas Pendentes
-        </div>
-        <div class="text-4xl grad mt-2">
-         0
-        </div>
-       </div>
-      </div>
-      <div class="card p-8">
-       <h3 class="text-2xl font-extrabold text-gray-900 mb-6">Resumo Financeiro</h3>
-       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="card p-5" style="background:linear-gradient(135deg,rgba(239,68,68,.10),rgba(220,38,38,.10));border:1.5px solid rgba(239,68,68,.20)">
-         <div class="text-sm text-red-700 font-extrabold uppercase tracking-wide">
-          Total a Pagar
-         </div>
-         <div class="text-3xl font-extrabold text-red-700 mt-3">
-          R$ 0,00
-         </div>
-        </div>
-        <div class="card p-5" style="background:linear-gradient(135deg,rgba(245,158,11,.10),rgba(217,119,6,.10));border:1.5px solid rgba(245,158,11,.20)">
-         <div class="text-sm text-yellow-700 font-extrabold uppercase tracking-wide">
-          Contas Vencidas
-         </div>
-         <div class="text-3xl font-extrabold text-yellow-700 mt-3">
-          R$ 0,00
-         </div>
-        </div>
-        <div class="card p-5" style="background:linear-gradient(135deg,rgba(34,197,94,.10),rgba(22,163,74,.10));border:1.5px solid rgba(34,197,94,.20)">
-         <div class="text-sm text-green-700 font-extrabold uppercase tracking-wide">
-          Total Pago
-         </div>
-         <div class="text-3xl font-extrabold text-green-700 mt-3">
-          R$ 0,00
-         </div>
-        </div>
-       </div>
-      </div>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-       <div class="card p-8">
-        <h3 class="text-xl font-extrabold text-gray-900 mb-5">Últimas Ordens de Serviço</h3>
-        <div class="text-center py-10 text-gray-500 text-sm">
-         Nenhuma ordem registrada
-        </div>
-       </div>
-       <div class="card p-8">
-        <h3 class="text-xl font-extrabold text-gray-900 mb-5">Últimos Lançamentos</h3>
-        <div class="text-center py-10 text-gray-500 text-sm">
-         Nenhum lançamento registrado
-        </div>
-       </div>
-      </div>
-     </div>
-    </section><!-- CONTAS -->
-    <section id="contas" class="view">
-     <div class="card p-8">
-      <div class="flex items-center justify-between mb-8">
-       <h2 class="text-2xl font-extrabold text-gray-900">Contas a Pagar</h2>
-       <div class="flex gap-3"><button class="btn w-12 h-12 flex items-center justify-center p-0" type="button" title="Novo">
-         <svg width="24" height="24" viewbox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
-          <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
-         </svg></button> <button class="btn2 w-12 h-12 flex items-center justify-center p-0" type="button" title="Exportar">
-         <svg width="24" height="24" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
-         </svg></button>
-       </div>
-      </div>
-      <div class="card p-5 mb-6" style="background:rgba(255,255,255,.60)">
-       <div class="flex flex-wrap gap-3 items-end">
-        <div class="flex-1 min-w-[150px]"><label class="block text-xs font-extrabold text-gray-700 mb-2 uppercase tracking-wide">Status</label> <select class="input w-full"> <option>Todas as Contas</option> </select>
-        </div>
-        <div class="flex-1 min-w-[150px]"><label class="block text-xs font-extrabold text-gray-700 mb-2 uppercase tracking-wide">Vencimento Inicial</label> <input type="date" class="input w-full">
-        </div>
-        <div class="flex-1 min-w-[150px]"><label class="block text-xs font-extrabold text-gray-700 mb-2 uppercase tracking-wide">Vencimento Final</label> <input type="date" class="input w-full">
-        </div><button class="btn w-12 h-12 flex items-center justify-center p-0" type="button" title="Aplicar">
-         <svg width="24" height="24" viewbox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
-          <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
-         </svg></button> <button class="btn2 w-12 h-12 flex items-center justify-center p-0" type="button" title="Limpar">
-         <svg width="24" height="24" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
-         </svg></button>
-       </div>
-      </div>
-      <div class="flex items-center justify-between mb-6 px-2">
-       <div class="flex items-center gap-3"><span class="text-sm font-extrabold text-gray-700">0 selecionadas</span> <span class="text-sm font-extrabold grad">R$ 0,00</span>
-       </div>
-       <div class="flex items-center gap-3"><button class="w-10 h-10 flex items-center justify-center rounded-xl text-blue-600 hover:bg-blue-50 transition-all" type="button" title="Editar">
-         <svg width="20" height="20" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-         </svg></button> <button class="w-10 h-10 flex items-center justify-center rounded-xl text-red-600 hover:bg-red-50 transition-all" type="button" title="Excluir">
-         <svg width="20" height="20" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-         </svg></button> <button class="w-10 h-10 flex items-center justify-center rounded-xl text-green-600 hover:bg-green-50 transition-all" type="button" title="Dar baixa">
-         <svg width="20" height="20" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="20 6 9 17 4 12" />
-         </svg></button>
-       </div>
-      </div>
-      <div class="text-center py-16 text-gray-500">
-       Nenhuma conta cadastrada.
-      </div>
-     </div>
-    </section><!-- ORDERS -->
-    <section id="orders" class="view">
-     <div class="card p-8">
-      <div class="flex items-center justify-between mb-8">
-       <h2 class="text-2xl font-extrabold text-gray-900">Ordens de Serviço</h2><button class="btn w-12 h-12 flex items-center justify-center p-0" type="button" title="Nova OS">
-        <svg width="24" height="24" viewbox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
-         <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
-        </svg></button>
-      </div>
-      <div class="card p-5 mb-6" style="background:rgba(255,255,255,.60)">
-       <div class="flex flex-wrap gap-3 items-end">
-        <div class="flex-1 min-w-[120px]"><label class="block text-xs font-extrabold text-gray-700 mb-2 uppercase tracking-wide">Nº da OS</label> <input class="input w-full" placeholder="Ex: 0001">
-        </div>
-        <div class="flex-1 min-w-[150px]"><label class="block text-xs font-extrabold text-gray-700 mb-2 uppercase tracking-wide">Data Inicial</label> <input type="date" class="input w-full">
-        </div>
-        <div class="flex-1 min-w-[150px]"><label class="block text-xs font-extrabold text-gray-700 mb-2 uppercase tracking-wide">Data Final</label> <input type="date" class="input w-full">
-        </div>
-        <div class="flex-1 min-w-[150px]"><label class="block text-xs font-extrabold text-gray-700 mb-2 uppercase tracking-wide">Status</label> <select class="input w-full"><option>Todos os Status</option></select>
-        </div>
-        <div class="flex-1 min-w-[150px]"><label class="block text-xs font-extrabold text-gray-700 mb-2 uppercase tracking-wide">Ordenação</label> <select class="input w-full"><option>Mais Recentes</option></select>
-        </div><button class="btn w-12 h-12 flex items-center justify-center p-0" type="button" title="Aplicar">
-         <svg width="24" height="24" viewbox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
-          <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
-         </svg></button> <button class="btn2 w-12 h-12 flex items-center justify-center p-0" type="button" title="Limpar">
-         <svg width="24" height="24" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
-         </svg></button>
-       </div>
-      </div>
-      <div class="flex items-center justify-between mb-6 px-2">
-       <div class="text-sm font-extrabold text-gray-700">
-        0 selecionadas
-       </div>
-       <div class="flex items-center gap-3"><button class="w-10 h-10 flex items-center justify-center rounded-xl text-blue-600 hover:bg-blue-50 transition-all" type="button" title="Editar">
-         <svg width="20" height="20" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-         </svg></button> <button class="w-10 h-10 flex items-center justify-center rounded-xl text-purple-600 hover:bg-purple-50 transition-all" type="button" title="Imprimir">
-         <svg width="20" height="20" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="6 9 6 2 18 2 18 9" /><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" /><rect x="6" y="14" width="12" height="8" />
-         </svg></button> <button class="w-10 h-10 flex items-center justify-center rounded-xl text-red-600 hover:bg-red-50 transition-all" type="button" title="Excluir">
-         <svg width="20" height="20" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-         </svg></button>
-       </div>
-      </div>
-      <div class="text-center py-16 text-gray-500">
-       Nenhuma ordem de serviço cadastrada.
-      </div>
-     </div>
-    </section><!-- LANÇAMENTOS -->
-    <section id="lancamentos" class="view">
-     <div class="card p-8">
-      <h2 class="text-2xl font-extrabold text-gray-900 mb-8">Central de Lançamentos</h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-       <div class="card p-6" style="background:linear-gradient(135deg,rgba(132,250,176,.1),rgba(143,211,244,.1))">
-        <div class="flex items-center gap-4">
-         <div class="ico">
-          ��
-         </div>
-         <div>
-          <h3 class="text-lg font-extrabold text-gray-900">Abastecimento</h3>
-          <p class="text-sm text-gray-600 font-semibold">Registrar abastecimento de veículo</p>
-         </div><button class="ml-auto btn w-12 h-12 flex items-center justify-center p-0" type="button" title="Novo">
-          <svg width="24" height="24" viewbox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
-           <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
-          </svg></button>
-        </div>
-       </div>
-       <div class="card p-6" style="background:linear-gradient(135deg,rgba(246,211,101,.1),rgba(253,160,133,.1))">
-        <div class="flex items-center gap-4">
-         <div class="ico">
-          ��
-         </div>
-         <div>
-          <h3 class="text-lg font-extrabold text-gray-900">Despesa</h3>
-          <p class="text-sm text-gray-600 font-semibold">Registrar despesa da frota</p>
-         </div><button class="ml-auto btn w-12 h-12 flex items-center justify-center p-0" type="button" title="Novo">
-          <svg width="24" height="24" viewbox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
-           <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
-          </svg></button>
-        </div>
-       </div>
-      </div>
-      <h3 class="text-xl font-extrabold text-gray-900 mb-5">Todos os Lançamentos</h3>
-      <div class="text-center py-16 text-gray-500">
-       Nenhum lançamento registrado.
-      </div>
-     </div>
-    </section><!-- VEÍCULOS -->
-    <section id="veiculos" class="view">
-     <div class="card p-8">
-      <div class="flex items-center justify-between mb-8">
-       <h2 class="text-2xl font-extrabold text-gray-900">Lista de Veículos</h2>
-       <div class="flex items-center gap-3"><button id="btn-novo-veiculo" class="w-10 h-10 flex items-center justify-center rounded-xl text-purple-600 hover:bg-purple-50 transition-all" type="button" title="Novo">
-         <svg width="20" height="20" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
-         </svg></button> <button id="btn-editar-veiculo" class="w-10 h-10 flex items-center justify-center rounded-xl text-blue-600 hover:bg-blue-50 transition-all" type="button" title="Editar" disabled>
-         <svg width="20" height="20" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-         </svg></button> <button id="btn-duplicar-veiculo" class="w-10 h-10 flex items-center justify-center rounded-xl text-green-600 hover:bg-green-50 transition-all" type="button" title="Duplicar" disabled>
-         <svg width="20" height="20" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M8 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" /><rect x="8" y="2" width="12" height="14" rx="2" />
-         </svg></button> <button id="btn-excluir-veiculo" class="w-10 h-10 flex items-center justify-center rounded-xl text-red-600 hover:bg-red-50 transition-all" type="button" title="Excluir" disabled>
-         <svg width="20" height="20" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-         </svg></button>
-       </div>
-      </div><!-- Listagem de Veículos -->
-      <div id="lista-veiculos" class="space-y-3">
-       <div class="text-center py-16 text-gray-500">
-        Carregando...
-       </div>
-      </div>
-     </div>
-    </section><!-- MODAL: Confirmação de Exclusão -->
-    <div id="modal-confirmacao" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[999] p-4">
-     <div class="card p-8 w-full max-w-sm">
-      <h3 class="text-2xl font-extrabold text-gray-900 mb-3">🗑��� Excluir Veículo</h3>
-      <p class="text-gray-700 mb-8 leading-relaxed">Tem certeza que deseja excluir o veículo <strong id="confirmacao-placa">---</strong>? Esta ação não pode ser desfeita.</p>
-      <div class="flex gap-3"><button type="button" class="btn2 flex-1" onclick="fecharModalConfirmacao()">Cancelar</button> <button type="button" class="btn flex-1" id="btn-confirmar-excluir" onclick="confirmarExclusao()">Excluir</button>
-      </div>
-     </div>
-    </div><!-- MODAL: Cadastro/Edição de Ve��culo -->
-    <div id="modal-veiculo" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-     <div class="card p-8 w-full max-w-md max-h-[90vh] overflow-y-auto">
-      <h3 id="modal-veiculo-titulo" class="text-2xl font-extrabold text-gray-900 mb-6">Novo Veículo</h3>
-      <form id="form-veiculo" class="space-y-5">
-       <div><label for="veiculo-placa" class="block text-xs font-extrabold text-gray-700 mb-2 uppercase tracking-wide">Placa *</label> <input id="veiculo-placa" type="text" class="input w-full" placeholder="ABC-1234" required>
-       </div>
-       <div><label for="veiculo-marca" class="block text-xs font-extrabold text-gray-700 mb-2 uppercase tracking-wide">Marca *</label> <input id="veiculo-marca" type="text" class="input w-full" placeholder="Ex: Volkswagen" required>
-       </div>
-       <div><label for="veiculo-modelo" class="block text-xs font-extrabold text-gray-700 mb-2 uppercase tracking-wide">Modelo *</label> <input id="veiculo-modelo" type="text" class="input w-full" placeholder="Ex: Caminhão" required>
-       </div>
-       <div><label for="veiculo-ano" class="block text-xs font-extrabold text-gray-700 mb-2 uppercase tracking-wide">Ano *</label> <input id="veiculo-ano" type="number" class="input w-full" placeholder="Ex: 2020" required>
-       </div>
-       <div><label for="veiculo-km" class="block text-xs font-extrabold text-gray-700 mb-2 uppercase tracking-wide">Quilometragem</label> <input id="veiculo-km" type="number" class="input w-full" placeholder="Ex: 50000">
-       </div>
-       <div class="flex gap-3 pt-4"><button type="button" onclick="fecharModalVeiculo()" class="btn2 flex-1">Cancelar</button> <button type="submit" class="btn flex-1">Salvar</button>
-       </div>
-      </form>
-     </div>
-    </div><!-- MOTORISTAS -->
-    <section id="motoristas" class="view">
-     <div class="card p-8">
-      <div class="flex items-center justify-between mb-8">
-       <h2 class="text-2xl font-extrabold text-gray-900">Lista de Motoristas</h2>
-       <div class="flex items-center gap-3"><button id="btn-novo-motorista" class="w-10 h-10 flex items-center justify-center rounded-xl text-purple-600 hover:bg-purple-50 transition-all" type="button" title="Novo">
-         <svg width="20" height="20" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
-         </svg></button> <button id="btn-editar-motorista" class="w-10 h-10 flex items-center justify-center rounded-xl text-blue-600 hover:bg-blue-50 transition-all" type="button" title="Editar" disabled>
-         <svg width="20" height="20" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-         </svg></button> <button id="btn-excluir-motorista" class="w-10 h-10 flex items-center justify-center rounded-xl text-red-600 hover:bg-red-50 transition-all" type="button" title="Excluir" disabled>
-         <svg width="20" height="20" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-         </svg></button>
-       </div>
-      </div><!-- Listagem de Motoristas -->
-      <div id="lista-motoristas" class="space-y-3">
-       <div class="text-center py-16 text-gray-500">
-        Carregando...
-       </div>
-      </div>
-     </div>
-    </section><!-- MODAL: Cadastro/Edição de Motorista -->
-    <div id="modal-motorista" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-     <div class="card p-8 w-full max-w-md max-h-[90vh] overflow-y-auto">
-      <h3 id="modal-motorista-titulo" class="text-2xl font-extrabold text-gray-900 mb-6">Novo Motorista</h3>
-      <form id="form-motorista" class="space-y-5">
-       <div><label for="motorista-nome" class="block text-xs font-extrabold text-gray-700 mb-2 uppercase tracking-wide">Nome Completo *</label> <input id="motorista-nome" type="text" class="input w-full" placeholder="Ex: João Silva" required>
-       </div>
-       <div><label for="motorista-cpf" class="block text-xs font-extrabold text-gray-700 mb-2 uppercase tracking-wide">CPF</label> <input id="motorista-cpf" type="text" class="input w-full" placeholder="Ex: 123.456.789-00">
-       </div>
-       <div><label for="motorista-nascimento" class="block text-xs font-extrabold text-gray-700 mb-2 uppercase tracking-wide">Data de Nascimento</label> <input id="motorista-nascimento" type="date" class="input w-full">
-       </div>
-       <div><label for="motorista-cnh" class="block text-xs font-extrabold text-gray-700 mb-2 uppercase tracking-wide">CNH *</label> <input id="motorista-cnh" type="text" class="input w-full" placeholder="Ex: 1234567890" required>
-       </div>
-       <div><label for="motorista-categoria" class="block text-xs font-extrabold text-gray-700 mb-2 uppercase tracking-wide">Categoria CNH *</label> <select id="motorista-categoria" class="input w-full" required> <option value="">Selecione...</option> <option value="A">A</option> <option value="B">B</option> <option value="C">C</option> <option value="D">D</option> <option value="E">E</option> </select>
-       </div>
-       <div><label for="motorista-validade" class="block text-xs font-extrabold text-gray-700 mb-2 uppercase tracking-wide">Validade da CNH *</label> <input id="motorista-validade" type="date" class="input w-full" required>
-       </div>
-       <div><label for="motorista-veiculo" class="block text-xs font-extrabold text-gray-700 mb-2 uppercase tracking-wide">Veículo *</label> <select id="motorista-veiculo" class="input w-full" required> <option value="">Carregando veículos...</option> </select>
-       </div>
-       <div class="flex gap-3 pt-4"><button type="button" onclick="fecharModalMotorista()" class="btn2 flex-1">Cancelar</button> <button type="button" onclick="salvarMotorista()" class="btn flex-1">Salvar</button>
-       </div>
-      </form>
-     </div>
-    </div><!-- MODAL: Confirmação de Exclus��o de Motorista -->
-    <div id="modal-confirmacao-motorista" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[999] p-4">
-     <div class="card p-8 w-full max-w-sm">
-      <h3 class="text-2xl font-extrabold text-gray-900 mb-3">🗑️ Excluir Motorista</h3>
-      <p class="text-gray-700 mb-8 leading-relaxed">Tem certeza que deseja excluir o motorista <strong id="confirmacao-motorista-nome">---</strong>? Esta ação não pode ser desfeita.</p>
-      <div class="flex gap-3"><button type="button" class="btn2 flex-1" onclick="fecharModalConfirmacaoMotorista()">Cancelar</button> <button type="button" class="btn flex-1" id="btn-confirmar-excluir-motorista" onclick="confirmarExclusaoMotorista()">Excluir</button>
-      </div>
-     </div>
-    </div><!-- FORNECEDORES -->
-    <section id="fornecedores" class="view">
-     <div class="card p-8">
-      <div class="flex items-center justify-between mb-8">
-       <h2 class="text-2xl font-extrabold text-gray-900">Lista de Fornecedores</h2>
-       <div class="flex items-center gap-3"><button class="w-10 h-10 flex items-center justify-center rounded-xl text-purple-600 hover:bg-purple-50 transition-all" type="button" title="Novo">
-         <svg width="20" height="20" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
-         </svg></button> <button class="w-10 h-10 flex items-center justify-center rounded-xl text-blue-600 hover:bg-blue-50 transition-all" type="button" title="Editar">
-         <svg width="20" height="20" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-         </svg></button> <button class="w-10 h-10 flex items-center justify-center rounded-xl text-red-600 hover:bg-red-50 transition-all" type="button" title="Excluir">
-         <svg width="20" height="20" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-         </svg></button>
-       </div>
-      </div>
-      <div class="text-center py-16 text-gray-500">
-       Nenhum fornecedor cadastrado.
-      </div>
-     </div>
-    </section><!-- AJUDA -->
-    <section id="ajuda" class="view">
-     <div class="card p-8">
-      <h2 class="text-2xl font-extrabold text-gray-900 mb-4">Ajuda</h2>
-      <p class="text-gray-700 leading-relaxed">Bem-vindo ao WeFrotas! Este �������� um sistema de gestão de frotas com navegação intuitiva. Use os ícones acima para navegar entre as diferentes seções.</p>
-      <div class="mt-6 flex flex-wrap gap-3"><button class="btn2" onclick="selectView('dashboard')">Ir para Dashboard</button> <button class="btn2" onclick="selectView('orders')">Ir para OS</button> <button class="btn2" onclick="selectView('contas')">Ir para Contas</button>
-      </div>
-     </div>
-    </section>
-   </main>
-  </div>
-  <script>
-    console.log("=== WEFROTAS INICIADO ===");
-    
-    const defaultConfig = {
-      system_title: 'WeFrotas',
-      system_subtitle: 'Gestão de Frotas'
-    };
 
-    let currentView = 'dashboard';
+    <main class="flex-1">
+      <div class="max-w-[1280px] mx-auto px-6 py-8">
+        <section id="panel-orders" class="module-panel content-card p-8 sm:p-10">
+          <h2 class="text-[2rem] font-extrabold text-slate-900 mb-10">OS</h2>
 
-    function selectView(viewId) {
-      document.querySelectorAll('.view').forEach(view => {
-        view.classList.remove('active');
-      });
-
-      const selectedView = document.getElementById(viewId);
-      if (selectedView) {
-        selectedView.classList.add('active');
-        currentView = viewId;
-
-        document.querySelectorAll('.tab').forEach(tab => {
-          tab.removeAttribute('aria-current');
-        });
-        const activeTab = document.querySelector(`[data-view="${viewId}"]`);
-        if (activeTab) {
-          activeTab.setAttribute('aria-current', 'page');
-        }
-
-        if (viewId === 'veiculos') {
-          console.log("��� Aba Veículos ativada!");
-          renderizarVeiculos();
-        } else if (viewId === 'motoristas') {
-          console.log("🎯 Aba Motoristas ativada!");
-          renderizarMotoristas();
-        }
-      }
-    }
-
-    function handleLogout() {
-      if (confirm('Tem certeza que deseja sair do sistema?')) {
-        window.open('https://gaveblue.com', '_blank');
-      }
-    }
-
-    async function onConfigChange(config) {
-      const title = config.system_title || defaultConfig.system_title;
-      const subtitle = config.system_subtitle || defaultConfig.system_subtitle;
-      
-      document.getElementById('system-title').textContent = title;
-      document.getElementById('system-subtitle').textContent = subtitle;
-    }
-
-    function mapToCapabilities(config) {
-      return {
-        recolorables: [],
-        borderables: [],
-        fontEditable: undefined,
-        fontSizeable: undefined
-      };
-    }
-
-    function mapToEditPanelValues(config) {
-      return new Map([
-        ['system_title', config.system_title || defaultConfig.system_title],
-        ['system_subtitle', config.system_subtitle || defaultConfig.system_subtitle]
-      ]);
-    }
-
-    if (window.elementSdk) {
-      window.elementSdk.init({
-        defaultConfig,
-        onConfigChange,
-        mapToCapabilities,
-        mapToEditPanelValues
-      });
-    }
-
-    // ==================== API ====================
-    const SHEETS_API_URL = "https://script.google.com/macros/s/AKfycbz1okpwRj8S_k4hPF3f1_TA53zSOGlemlX67emhPjCTqCM4OoyrlfyGEiyv-2W83YVECQ/exec";
-
-    async function apiListVeiculos() {
-      console.log("🔌 [API] Conectando a:", SHEETS_API_URL);
-      try {
-        // Usando modo dev sem ?dev para evitar CORS
-        const url = `${SHEETS_API_URL}?action=list`;
-        console.log("📡 [API] URL:", url);
-        
-        const res = await fetch(url, { 
-          method: "GET",
-          mode: 'cors',
-          headers: {
-            'Accept': 'application/json'
-          }
-        });
-        
-        console.log("✅ [API] Status HTTP:", res.status);
-        
-        const txt = await res.text();
-        console.log("📝 [API] Resposta bruta:", txt);
-        console.log("📏 [API] Tamanho:", txt.length, "bytes");
-        
-        if (!res.ok) {
-          console.error("❌ [API] HTTP Error:", res.status, res.statusText);
-          throw new Error(`HTTP ${res.status}: ${txt}`);
-        }
-        
-        // Google Apps Script às vezes retorna "OK" ou texto simples
-        if (txt.trim() === "OK" || txt.trim() === "ok") {
-          console.log("⚠️ [API] Recebeu 'OK' sem dados, retornando vazio");
-          return { ok: true, data: [] };
-        }
-        
-        if (!txt.trim()) {
-          console.warn("⚠️ [API] Resposta vazia!");
-          return { ok: true, data: [] };
-        }
-        
-        const json = JSON.parse(txt);
-        console.log("✅ [API] JSON parseado:", json);
-        return json;
-      } catch (e) {
-        console.error("❌ [API] Erro crítico:", e.message);
-        console.error("💡 [API] Dica: Verifique se a API está publicada como 'Execute as me' no Apps Script");
-        throw e;
-      }
-    }
-
-    async function apiUpsertVeiculo(veiculo) {
-      const body = new URLSearchParams();
-      body.append("action", "upsert");
-      body.append("placa", veiculo.placa);
-      body.append("marca", veiculo.marca);
-      body.append("modelo", veiculo.modelo);
-      body.append("ano", String(veiculo.ano));
-      body.append("km", String(veiculo.km || 0));
-
-      console.log("📤 [API] Dados que serão enviados:", {
-        action: "upsert",
-        placa: veiculo.placa,
-        marca: veiculo.marca,
-        modelo: veiculo.modelo,
-        ano: veiculo.ano,
-        km: veiculo.km
-      });
-      console.log("📤 [API] URL:", SHEETS_API_URL);
-      console.log("📤 [API] Body string:", body.toString());
-
-      const res = await fetch(SHEETS_API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
-        body
-      });
-
-      console.log("📥 [API] Status da resposta:", res.status);
-      const txt = await res.text();
-      console.log("📥 [API] Resposta UPSERT:", txt);
-      if (!res.ok) throw new Error(`HTTP ${res.status}: ${txt}`);
-      
-      try {
-        return JSON.parse(txt);
-      } catch (e) {
-        console.error("❌ [API] Erro ao parsear JSON:", e);
-        throw new Error("Resposta inválida do servidor: " + txt);
-      }
-    }
-
-    async function apiDeleteVeiculo(placa) {
-      const body = new URLSearchParams();
-      body.append("action", "delete");
-      body.append("placa", placa);
-
-      console.log("🗑️ [API] Enviando DELETE:", placa);
-
-      const res = await fetch(SHEETS_API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
-        body
-      });
-
-      const txt = await res.text();
-      console.log("��� [API] Resposta DELETE:", txt);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      return JSON.parse(txt);
-    }
-
-    // ==================== UI ====================
-    let veiculoSelecionado = null;
-    let veiculosCache = [];
-
-    async function carregarVeiculos() {
-      try {
-        console.log("📡 [Carregamento] Iniciando...");
-        const json = await apiListVeiculos();
-        
-        if (!json.ok) {
-          console.warn("⚠️ [Carregamento] API retornou ok=false:", json.error);
-          return [];
-        }
-
-        if (!Array.isArray(json.data)) {
-          console.warn("⚠️ [Carregamento] data não é array:", typeof json.data);
-          return [];
-        }
-
-        console.log("✅ [Carregamento] " + json.data.length + " veículos carregados");
-        return json.data;
-      } catch (e) {
-        console.error("❌ [Carregamento] Erro:", e.message);
-        return [];
-      }
-    }
-
-    async function renderizarVeiculos() {
-      try {
-        console.log("��� [Renderização] Iniciando...");
-        veiculosCache = await carregarVeiculos();
-        const container = document.getElementById("lista-veiculos");
-        
-        if (!veiculosCache || veiculosCache.length === 0) {
-          console.log("📭 [Renderização] Lista vazia");
-          container.innerHTML = '<div class="text-center py-16 text-gray-500">Nenhum veículo cadastrado.</div>';
-          return;
-        }
-
-        console.log("🎨 [Renderização] Renderizando " + veiculosCache.length + " veículos");
-        container.innerHTML = veiculosCache.map((v, index) => `
-          <div class="card p-5 cursor-pointer hover:shadow-lg transition-all"
-               data-index="${index}"
-               onclick="selecionarVeiculo(${index})">
-            <div class="flex items-start justify-between">
-              <div class="flex-1">
-                <div class="flex items-center gap-3">
-                  <div class="text-2xl">🚗</div>
-                  <div>
-                    <h4 class="font-extrabold text-gray-900">${v.placa || 'N/A'}</h4>
-                    <p class="text-sm text-gray-600">${v.marca || ''} ${v.modelo || ''}</p>
-                  </div>
-                </div>
-                <div class="mt-3 flex flex-wrap gap-4 text-sm">
-                  <span class="text-gray-600"><strong>Ano:</strong> ${v.ano || 'N/A'}</span>
-                  <span class="text-gray-600"><strong>KM:</strong> ${v.km || 0}</span>
-                </div>
+          <div class="filter-card p-6 sm:p-7 mb-10">
+            <div class="grid xl:grid-cols-[1fr_1fr_1fr_1fr_1fr_auto_auto] gap-4 items-end">
+              <div>
+                <label class="block text-[13px] font-bold uppercase tracking-wide text-slate-600 mb-3">Nº da OS</label>
+                <input id="order-filter-number" class="soft-input w-full" placeholder="Ex: 0001">
               </div>
-              <div class="text-right">
-                <div class="chip chip-ok">Ativo</div>
+              <div>
+                <label class="block text-[13px] font-bold uppercase tracking-wide text-slate-600 mb-3">Data Inicial</label>
+                <input id="order-filter-start" type="date" class="soft-input w-full">
               </div>
+              <div>
+                <label class="block text-[13px] font-bold uppercase tracking-wide text-slate-600 mb-3">Data Final</label>
+                <input id="order-filter-end" type="date" class="soft-input w-full">
+              </div>
+              <div>
+                <label class="block text-[13px] font-bold uppercase tracking-wide text-slate-600 mb-3">Status</label>
+                <select id="order-filter-status" class="soft-input w-full">
+                  <option value="">Todos os Status</option>
+                  <option value="aberta">Aberta</option>
+                  <option value="andamento">Em andamento</option>
+                  <option value="fechada">Fechada</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-[13px] font-bold uppercase tracking-wide text-slate-600 mb-3">Ordenação</label>
+                <select id="order-filter-sort" class="soft-input w-full">
+                  <option value="recentes">Mais Recentes</option>
+                  <option value="antigas">Mais Antigas</option>
+                </select>
+              </div>
+              <button class="icon-action primary" title="Aplicar Filtros" onclick="renderOrders()">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M4 5h16l-6 7v6l-4-2v-4L4 5z"/>
+                </svg>
+              </button>
+              <button class="icon-action bg-white border border-slate-200 text-slate-600" title="Limpar Filtros" onclick="clearOrderFilters()">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M6 6l12 12M18 6L6 18"/>
+                </svg>
+              </button>
             </div>
           </div>
-        `).join("");
 
-      } catch (err) {
-        console.error("❌ [Renderizaç����o] Erro:", err);
-        document.getElementById("lista-veiculos").innerHTML =
-          '<div class="text-center py-16 text-red-600 font-bold">Erro: ' + err.message + '</div>';
-      }
+          <div class="flex items-center justify-between gap-4 flex-wrap mb-10">
+            <div class="flex items-center gap-4">
+              <button id="select-all-orders" class="selection-check" onclick="toggleSelectAllOrders(event)">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 12l4 4 10-10"/>
+                </svg>
+              </button>
+              <span id="orders-selected-text" class="text-[1.05rem] font-semibold text-slate-700">0 selecionadas</span>
+            </div>
+
+            <div class="flex items-center gap-3 flex-wrap">
+              <button class="icon-action text-[#8b3dff]" title="Nova OS" onclick="openCadastroModal('order')">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M12 5v14M5 12h14"/>
+                </svg>
+              </button>
+              <button id="edit-order-btn" class="icon-action text-[#81a4ff]" title="Editar" onclick="editSelectedOrder()">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M16.5 4.5l3 3L9 18l-4 1 1-4 10.5-10.5z"/>
+                </svg>
+              </button>
+              <button id="print-order-btn" class="icon-action text-[#bd8dff]" title="Imprimir" onclick="printSelectedOrder()">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M7 8V4h10v4M7 16H5a2 2 0 01-2-2v-3a2 2 0 012-2h14a2 2 0 012 2v3a2 2 0 01-2 2h-2M7 12h10v8H7z"/>
+                </svg>
+              </button>
+              <button id="close-order-btn" class="icon-action text-[#71d08b]" title="Fechar OS" onclick="closeSelectedOrder()">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M5 12l5 5L19 8"/>
+                </svg>
+              </button>
+              <button id="reopen-order-btn" class="icon-action text-[#f59e0b]" title="Reabrir OS" onclick="reopenSelectedOrder()">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M3 10v6a2 2 0 0 0 2 2h6"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M3 16l6-6"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M21 14v-4a2 2 0 0 0-2-2h-6"/>
+                </svg>
+              </button>
+              <button id="delete-order-btn" class="icon-action text-[#f28787]" title="Excluir" onclick="deleteSelectedOrders()">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M4 7h16M9 7V5h6v2M8 7l1 12h6l1-12"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div id="orders-list" class="space-y-4">
+            <div class="empty-state">Nenhuma ordem de serviço cadastrada.</div>
+          </div>
+        </section>
+
+        <section id="panel-home" class="module-panel active content-card p-8 sm:p-10">
+          <h2 class="text-[2rem] font-extrabold text-slate-900 mb-6">Home</h2>
+          <div class="grid md:grid-cols-3 gap-5">
+            <div class="filter-card p-6">
+              <p class="text-slate-500 text-sm font-semibold mb-2">Veículos</p>
+              <p id="home-total-vehicles" class="text-4xl font-extrabold text-[#6267d9]">0</p>
+            </div>
+            <div class="filter-card p-6">
+              <p class="text-slate-500 text-sm font-semibold mb-2">Motoristas</p>
+              <p id="home-total-drivers" class="text-4xl font-extrabold text-[#6267d9]">0</p>
+            </div>
+            <div class="filter-card p-6">
+              <p class="text-slate-500 text-sm font-semibold mb-2">Contas</p>
+              <p id="home-total-finance" class="text-4xl font-extrabold text-[#6267d9]">0</p>
+            </div>
+          </div>
+        </section>
+
+        <section id="panel-veiculos" class="module-panel content-card p-8 sm:p-10">
+          <h2 class="text-[2rem] font-extrabold text-slate-900 mb-10">Lista de Veículos</h2>
+          <div class="flex items-center justify-between gap-4 flex-wrap mb-10">
+            <div class="flex items-center gap-4">
+              <button id="select-all-vehicles" class="selection-check" onclick="toggleSelectAllVehicles(event)">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 12l4 4 10-10"/>
+                </svg>
+              </button>
+              <span id="vehicles-selected-text" class="text-[1.05rem] font-semibold text-slate-700">0 selecionados</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <button class="icon-action text-[#8b3dff]" title="Novo Veículo" onclick="openCadastroModal('vehicle')">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M12 5v14M5 12h14"/></svg>
+              </button>
+              <button id="edit-vehicle-btn" class="icon-action text-[#81a4ff]" title="Editar Veículo" onclick="editSelectedVehicle()">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M16.5 4.5l3 3L9 18l-4 1 1-4 10.5-10.5z"/></svg>
+              </button>
+              <button id="delete-vehicle-btn" class="icon-action text-[#f28787]" title="Excluir Veículo" onclick="deleteSelectedVehicles()">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M4 7h16M9 7V5h6v2M8 7l1 12h6l1-12"/></svg>
+              </button>
+            </div>
+          </div>
+          <div id="vehicles-list" class="space-y-4">
+            <div class="empty-state">Nenhum veículo cadastrado. Clique no botão + para começar.</div>
+          </div>
+        </section>
+
+        <section id="panel-motoristas" class="module-panel content-card p-8 sm:p-10">
+          <h2 class="text-[2rem] font-extrabold text-slate-900 mb-10">Lista de Motoristas</h2>
+          <div class="flex items-center justify-between gap-4 flex-wrap mb-10">
+            <div class="flex items-center gap-4">
+              <button id="select-all-drivers" class="selection-check" onclick="toggleSelectAllDrivers(event)">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 12l4 4 10-10"/>
+                </svg>
+              </button>
+              <span id="drivers-selected-text" class="text-[1.05rem] font-semibold text-slate-700">0 selecionados</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <button class="icon-action text-[#8b3dff]" title="Novo Motorista" onclick="openCadastroModal('driver')">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M12 5v14M5 12h14"/></svg>
+              </button>
+              <button id="edit-driver-btn" class="icon-action text-[#81a4ff]" title="Editar Motorista" onclick="editSelectedDriver()">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M16.5 4.5l3 3L9 18l-4 1 1-4 10.5-10.5z"/></svg>
+              </button>
+              <button id="delete-driver-btn" class="icon-action text-[#f28787]" title="Excluir Motorista" onclick="deleteSelectedDrivers()">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M4 7h16M9 7V5h6v2M8 7l1 12h6l1-12"/></svg>
+              </button>
+            </div>
+          </div>
+          <div id="drivers-list" class="space-y-4">
+            <div class="empty-state">Nenhum motorista cadastrado. Clique no botão + para começar.</div>
+          </div>
+        </section>
+
+        <section id="panel-fornecedores" class="module-panel content-card p-8 sm:p-10">
+          <h2 class="text-[2rem] font-extrabold text-slate-900 mb-10">Lista de Fornecedores</h2>
+          <div class="flex items-center justify-between gap-4 flex-wrap mb-10">
+            <div class="flex items-center gap-4">
+              <button id="select-all-suppliers" class="selection-check" onclick="toggleSelectAllSuppliers(event)">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 12l4 4 10-10"/>
+                </svg>
+              </button>
+              <span id="suppliers-selected-text" class="text-[1.05rem] font-semibold text-slate-700">0 selecionados</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <button class="icon-action text-[#8b3dff]" title="Novo fornecedor" onclick="openCadastroModal('supplier')">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M12 5v14M5 12h14"/></svg>
+              </button>
+              <button id="edit-supplier-btn" class="icon-action text-[#81a4ff]" title="Editar fornecedor" onclick="editSelectedSupplier()">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M16.5 4.5l3 3L9 18l-4 1 1-4 10.5-10.5z"/></svg>
+              </button>
+              <button id="delete-supplier-btn" class="icon-action text-[#f28787]" title="Excluir fornecedor" onclick="deleteSelectedSuppliers()">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M4 7h16M9 7V5h6v2M8 7l1 12h6l1-12"/></svg>
+              </button>
+            </div>
+          </div>
+          <div id="suppliers-list" class="space-y-4">
+            <div class="empty-state">Nenhum fornecedor cadastrado ainda.</div>
+          </div>
+        </section>
+
+        <section id="panel-financeiro" class="module-panel content-card p-8 sm:p-10">
+          <h2 class="text-[2rem] font-extrabold text-slate-900 mb-10">Financeiro</h2>
+          <div class="flex items-center justify-between gap-4 flex-wrap mb-10">
+            <div class="flex items-center gap-4">
+              <button id="select-all-finance" class="selection-check" onclick="toggleSelectAllFinance(event)">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 12l4 4 10-10"/>
+                </svg>
+              </button>
+              <span id="finance-selected-text" class="text-[1.05rem] font-semibold text-slate-700">0 selecionados</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <button class="icon-action text-[#8b3dff]" title="Novo lançamento" onclick="openCadastroModal('finance')">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M12 5v14M5 12h14"/></svg>
+              </button>
+              <button id="edit-finance-btn" class="icon-action text-[#81a4ff]" title="Editar lançamento" onclick="editSelectedFinance()">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M16.5 4.5l3 3L9 18l-4 1 1-4 10.5-10.5z"/></svg>
+              </button>
+              <button id="delete-finance-btn" class="icon-action text-[#f28787]" title="Excluir lançamento" onclick="deleteSelectedFinance()">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M4 7h16M9 7V5h6v2M8 7l1 12h6l1-12"/></svg>
+              </button>
+            </div>
+          </div>
+          <div id="finance-list" class="space-y-4">
+            <div class="empty-state">Nenhum lançamento financeiro cadastrado.</div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+  </div>
+
+  <div id="toast-stack" class="toast-stack"></div>
+
+  <div id="modal-backdrop" class="modal-backdrop" onclick="handleModalBackdrop(event)">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div>
+          <p id="modal-kicker" class="text-xs font-extrabold uppercase tracking-[0.2em] text-[#6670e6]">Cadastro</p>
+          <h3 id="modal-title" class="text-2xl font-extrabold text-slate-900 mt-2">Novo cadastro</h3>
+        </div>
+        <button class="icon-action bg-white border border-slate-200 text-slate-600" onclick="closeCadastroModal()">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 6l12 12M18 6L6 18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="cadastro-form" class="space-y-6">
+          <div id="modal-fields" class="form-grid"></div>
+          <div class="flex items-center justify-end gap-3 pt-2">
+            <button type="button" class="soft-btn" onclick="closeCadastroModal()">Cancelar</button>
+            <button id="modal-submit-btn" type="submit" class="soft-btn primary">Salvar cadastro</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let allVehicles = [];
+    let allDrivers = [];
+    let allSuppliers = [];
+    let allOrders = [];
+    let allFinanceEntries = [];
+    let selectedVehicles = new Set();
+    let selectedDrivers = new Set();
+    let selectedSuppliers = new Set();
+    let selectedOrders = new Set();
+    let selectedFinance = new Set();
+    let currentModalType = null;
+    let currentEditingId = null;
+    let currentFinanceEntryType = null;
+    let orderCounter = 1;
+
+    function generateId() {
+      return `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
     }
 
-    function selecionarVeiculo(index) {
-      const v = veiculosCache[index];
-      if (!v) return;
-
-      veiculoSelecionado = { index, ...v };
-      console.log("✅ [Seleção] Veículo selecionado:", v.placa);
-
-      document.querySelectorAll('#lista-veiculos > div').forEach((el, i) => {
-        if (i === index) {
-          el.style.background = 'linear-gradient(135deg,rgba(102,126,234,.15),rgba(118,75,162,.15))';
-          el.style.borderColor = 'rgba(102,126,234,.3)';
-        } else {
-          el.style.background = '';
-          el.style.borderColor = '';
-        }
-      });
-
-      document.getElementById('btn-editar-veiculo').disabled = false;
-      document.getElementById('btn-duplicar-veiculo').disabled = false;
-      document.getElementById('btn-excluir-veiculo').disabled = false;
+    function formatDate(dateString) {
+      if (!dateString) return '-';
+      const date = new Date(`${dateString}T00:00:00`);
+      if (Number.isNaN(date.getTime())) return dateString;
+      return date.toLocaleDateString('pt-BR');
     }
 
-    function abrirModalNovoVeiculo() {
-      veiculoSelecionado = null;
-      document.getElementById('modal-veiculo-titulo').textContent = 'Novo Veículo';
-      document.getElementById('form-veiculo').reset();
-      document.getElementById('modal-veiculo').classList.remove('hidden');
+    function formatCurrency(value) {
+      return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(value || 0));
     }
 
-    function abrirModalEditarVeiculo() {
-      if (!veiculoSelecionado) return;
-
-      document.getElementById('modal-veiculo-titulo').textContent = 'Editar Veículo';
-      document.getElementById('veiculo-placa').value = veiculoSelecionado.placa || '';
-      document.getElementById('veiculo-marca').value = veiculoSelecionado.marca || '';
-      document.getElementById('veiculo-modelo').value = veiculoSelecionado.modelo || '';
-      document.getElementById('veiculo-ano').value = veiculoSelecionado.ano || '';
-      document.getElementById('veiculo-km').value = veiculoSelecionado.km || '';
-      document.getElementById('modal-veiculo').classList.remove('hidden');
+    function escapeHtml(value) {
+      return String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
     }
 
-    function fecharModalVeiculo() {
-      document.getElementById('modal-veiculo').classList.add('hidden');
-      veiculoSelecionado = null;
-      document.getElementById('btn-editar-veiculo').disabled = true;
-      document.getElementById('btn-duplicar-veiculo').disabled = true;
-      document.getElementById('btn-excluir-veiculo').disabled = true;
+    function getVehicleLabel(vehicleId) {
+      const vehicle = allVehicles.find(item => item.id === vehicleId);
+      return vehicle ? `${vehicle.numeroFrota} • ${vehicle.placa} • ${vehicle.modelo}` : 'Veículo não encontrado';
     }
 
-    document.getElementById('form-veiculo').addEventListener('submit', async (e) => {
-      e.preventDefault();
-
-      const botaoSalvar = e.target.querySelector('button[type="submit"]');
-      const textOriginal = botaoSalvar.innerHTML;
-      botaoSalvar.disabled = true;
-      botaoSalvar.innerHTML = '<span class="inline-block animate-spin mr-2">⏳</span>Salvando...';
-
-      const novoVeiculo = {
-        placa: document.getElementById('veiculo-placa').value.trim().toUpperCase(),
-        marca: document.getElementById('veiculo-marca').value.trim(),
-        modelo: document.getElementById('veiculo-modelo').value.trim(),
-        ano: Number(document.getElementById('veiculo-ano').value),
-        km: document.getElementById('veiculo-km').value ? Number(document.getElementById('veiculo-km').value) : 0
-      };
-
-      try {
-        await apiUpsertVeiculo(novoVeiculo);
-        await renderizarVeiculos();
-        fecharModalVeiculo();
-        mostrarToast('Veículo salvo com sucesso!', 'success');
-      } catch (err) {
-        console.error(err);
-        mostrarToast('Erro ao salvar: ' + err.message, 'error');
-        botaoSalvar.disabled = false;
-        botaoSalvar.innerHTML = textOriginal;
-      }
-    });
-
-    function excluirVeiculo() {
-      if (!veiculoSelecionado) return;
-
-      document.getElementById('confirmacao-placa').textContent = veiculoSelecionado.placa;
-      document.getElementById('modal-confirmacao').classList.remove('hidden');
+    function getDriverLabel(driverId) {
+      const driver = allDrivers.find(item => item.id === driverId);
+      return driver ? driver.nome : 'Responsável não encontrado';
     }
 
-    function fecharModalConfirmacao() {
-      document.getElementById('modal-confirmacao').classList.add('hidden');
+    function getOrderNumberLabel(order) {
+      return String(order.numero || '').padStart(4, '0');
     }
 
-    async function confirmarExclusao() {
-      const botao = document.getElementById('btn-confirmar-excluir');
-      botao.disabled = true;
-      botao.innerHTML = '<span class="inline-block animate-spin mr-2">⏳</span>Excluindo...';
-
-      try {
-        await apiDeleteVeiculo(veiculoSelecionado.placa);
-        await renderizarVeiculos();
-        fecharModalVeiculo();
-        fecharModalConfirmacao();
-        mostrarToast('✅ Veículo excluído com sucesso!', 'success');
-      } catch (err) {
-        console.error(err);
-        mostrarToast('❌ Erro ao excluir: ' + err.message, 'error');
-      } finally {
-        botao.disabled = false;
-        botao.innerHTML = 'Excluir';
-      }
+    function getFinanceTotal(entry) {
+      return Number(entry.total || 0);
     }
 
-    function mostrarToast(mensagem, tipo = 'info') {
+    function saveToLocalStorage() {
+      localStorage.setItem('wefrotas_vehicles', JSON.stringify(allVehicles));
+      localStorage.setItem('wefrotas_drivers', JSON.stringify(allDrivers));
+      localStorage.setItem('wefrotas_suppliers', JSON.stringify(allSuppliers));
+      localStorage.setItem('wefrotas_orders', JSON.stringify(allOrders));
+      localStorage.setItem('wefrotas_finance', JSON.stringify(allFinanceEntries));
+      localStorage.setItem('wefrotas_order_counter', String(orderCounter));
+    }
+
+    function loadFromLocalStorage() {
+      const savedVehicles = localStorage.getItem('wefrotas_vehicles');
+      const savedDrivers = localStorage.getItem('wefrotas_drivers');
+      const savedSuppliers = localStorage.getItem('wefrotas_suppliers');
+      const savedOrders = localStorage.getItem('wefrotas_orders');
+      const savedFinance = localStorage.getItem('wefrotas_finance');
+      const savedCounter = localStorage.getItem('wefrotas_order_counter');
+      if (savedVehicles) allVehicles = JSON.parse(savedVehicles);
+      if (savedDrivers) allDrivers = JSON.parse(savedDrivers);
+      if (savedSuppliers) allSuppliers = JSON.parse(savedSuppliers);
+      if (savedOrders) allOrders = JSON.parse(savedOrders);
+      if (savedFinance) allFinanceEntries = JSON.parse(savedFinance);
+      if (savedCounter) orderCounter = Number(savedCounter) || 1;
+    }
+
+    function showToast(message) {
+      const stack = document.getElementById('toast-stack');
       const toast = document.createElement('div');
-      toast.className = `fixed bottom-6 right-6 card p-4 max-w-sm z-50 animate-pulse ${
-        tipo === 'success' ? 'border-l-4 border-green-500' : 'border-l-4 border-red-500'
-      }`;
-      toast.textContent = mensagem;
-      document.body.appendChild(toast);
-      setTimeout(() => toast.remove(), 3000);
+      toast.className = 'toast-item';
+      toast.textContent = message;
+      stack.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(-6px)';
+        setTimeout(() => toast.remove(), 180);
+      }, 2600);
     }
 
-    function duplicarVeiculo() {
-      if (!veiculoSelecionado) return;
-
-      document.getElementById('modal-veiculo-titulo').textContent = 'Duplicar Veículo';
-      document.getElementById('veiculo-placa').value = '';
-      document.getElementById('veiculo-marca').value = veiculoSelecionado.marca || '';
-      document.getElementById('veiculo-modelo').value = veiculoSelecionado.modelo || '';
-      document.getElementById('veiculo-ano').value = veiculoSelecionado.ano || '';
-      document.getElementById('veiculo-km').value = veiculoSelecionado.km || '';
-      document.getElementById('modal-veiculo').classList.remove('hidden');
+    function showModule(module, button) {
+      document.querySelectorAll('.module-panel').forEach(panel => panel.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+      const panel = document.getElementById(`panel-${module}`);
+      if (panel) panel.classList.add('active');
+      if (button) button.classList.add('active');
     }
 
-    // ==================== MOTORISTAS ====================
-    let motoristasSelecionado = null;
-    let motoristasCache = [];
-    let veiculosSelect = [];
+    function applyThemeState(isDark) {
+      document.body.classList.toggle('dark-mode', isDark);
+      const themeButton = document.getElementById('theme-toggle-btn');
+      if (themeButton) themeButton.classList.toggle('active', isDark);
+      localStorage.setItem('wefrotas_theme', isDark ? 'dark' : 'light');
+    }
 
-    async function salvarMotorista() {
-      const nome = document.getElementById('motorista-nome').value.trim();
-      const cpf = document.getElementById('motorista-cpf').value.trim();
-      const nascimento = document.getElementById('motorista-nascimento').value;
-      const cnh = document.getElementById('motorista-cnh').value.trim();
-      const categoria = document.getElementById('motorista-categoria').value;
-      const validade = document.getElementById('motorista-validade').value;
-      const veiculo = document.getElementById('motorista-veiculo').value;
+    function toggleTheme() {
+      applyThemeState(!document.body.classList.contains('dark-mode'));
+    }
 
-      // Validação básica
-      if (!nome || !cnh || !categoria || !validade || !veiculo) {
-        mostrarToast('❌ Preencha todos os campos obrigat��rios!', 'error');
+    function openCadastroModal(type) {
+      currentModalType = type;
+      currentEditingId = null;
+      currentFinanceEntryType = null;
+      const backdrop = document.getElementById('modal-backdrop');
+      const fields = document.getElementById('modal-fields');
+      const kicker = document.getElementById('modal-kicker');
+      const title = document.getElementById('modal-title');
+      setModalSubmitState(true, 'Salvar cadastro');
+
+      if (type === 'vehicle') {
+        kicker.textContent = 'Veículos';
+        title.textContent = 'Cadastrar veículo';
+        fields.innerHTML = `
+          <div class="field-wrap">
+            <label>Número de Frota</label>
+            <input class="soft-input w-full" id="vehicle-frota" placeholder="Ex: 015" required>
+          </div>
+          <div class="field-wrap">
+            <label>Placa</label>
+            <input class="soft-input w-full" id="vehicle-placa" placeholder="ABC-1234" required>
+          </div>
+          <div class="field-wrap">
+            <label>Modelo</label>
+            <input class="soft-input w-full" id="vehicle-modelo" placeholder="Ex: Ford Cargo 816" required>
+          </div>
+          <div class="field-wrap">
+            <label>Ano</label>
+            <input class="soft-input w-full" id="vehicle-ano" placeholder="2024" required>
+          </div>
+          <div class="field-wrap">
+            <label>Cor</label>
+            <input class="soft-input w-full" id="vehicle-cor" placeholder="Branco">
+          </div>
+          <div class="field-wrap full">
+            <label>Chassi</label>
+            <input class="soft-input w-full" id="vehicle-chassi" placeholder="9BWZZZ377VT004251">
+          </div>
+        `;
+      } else if (type === 'driver') {
+        kicker.textContent = 'Motoristas';
+        title.textContent = 'Cadastrar motorista';
+        fields.innerHTML = `
+          <div class="field-wrap full">
+            <label>Nome completo</label>
+            <input class="soft-input w-full" id="driver-nome" placeholder="Nome do motorista" required>
+          </div>
+          <div class="field-wrap">
+            <label>CPF</label>
+            <input class="soft-input w-full" id="driver-cpf" placeholder="000.000.000-00" required>
+          </div>
+          <div class="field-wrap">
+            <label>CNH</label>
+            <input class="soft-input w-full" id="driver-cnh" placeholder="00000000000" required>
+          </div>
+          <div class="field-wrap">
+            <label>Categoria</label>
+            <select class="soft-input w-full" id="driver-categoria" required>
+              <option value="">Selecione</option>
+              <option value="A">A</option>
+              <option value="B">B</option>
+              <option value="C">C</option>
+              <option value="D">D</option>
+              <option value="E">E</option>
+            </select>
+          </div>
+          <div class="field-wrap">
+            <label>Telefone</label>
+            <input class="soft-input w-full" id="driver-telefone" placeholder="(00) 00000-0000">
+          </div>
+          <div class="field-wrap">
+            <label>Validade da CNH</label>
+            <input class="soft-input w-full" id="driver-validade" type="date">
+          </div>
+        `;
+      } else if (type === 'supplier') {
+        kicker.textContent = 'Fornecedores';
+        title.textContent = 'Cadastrar fornecedor';
+        fields.innerHTML = `
+          <div class="field-wrap full">
+            <label>Nome do parceiro</label>
+            <input class="soft-input w-full" id="supplier-name" placeholder="Nome do fornecedor ou parceiro" required>
+          </div>
+          <div class="field-wrap">
+            <label>Tipo de parceiro</label>
+            <select class="soft-input w-full" id="supplier-type" required>
+              <option value="">Selecione</option>
+              <option value="posto">Posto de combustível</option>
+              <option value="oficina">Oficina</option>
+              <option value="concessionaria">Concessionária</option>
+              <option value="pecas">Loja de peças</option>
+              <option value="pneus">Pneus</option>
+              <option value="outro">Outro</option>
+            </select>
+          </div>
+          <div class="field-wrap">
+            <label>Documento</label>
+            <input class="soft-input w-full" id="supplier-document" placeholder="CPF/CNPJ">
+          </div>
+          <div class="field-wrap">
+            <label>Telefone</label>
+            <input class="soft-input w-full" id="supplier-phone" placeholder="(00) 00000-0000">
+          </div>
+          <div class="field-wrap">
+            <label>E-mail</label>
+            <input class="soft-input w-full" id="supplier-email" placeholder="contato@fornecedor.com">
+          </div>
+          <div class="field-wrap full">
+            <label>Observações</label>
+            <textarea class="soft-input textarea w-full" id="supplier-notes" placeholder="Observações do parceiro"></textarea>
+          </div>
+        `;
+      } else if (type === 'order') {
+        kicker.textContent = 'Ordens de serviço';
+        title.textContent = 'Cadastrar OS';
+        fields.innerHTML = `
+          <div class="field-wrap">
+            <label>Número da OS</label>
+            <input class="soft-input w-full" id="order-numero" value="${String(orderCounter).padStart(4, '0')}" readonly>
+          </div>
+          <div class="field-wrap">
+            <label>Administração</label>
+            <input class="soft-input w-full" id="order-administracao" placeholder="Ex: Administração">
+          </div>
+          <div class="field-wrap">
+            <label>Veículo</label>
+            <select class="soft-input w-full" id="order-veiculo" required>
+              <option value="">Selecione um veículo</option>
+              ${allVehicles.map(vehicle => `<option value="${vehicle.id}">${escapeHtml(vehicle.numeroFrota)} • ${escapeHtml(vehicle.placa)} • ${escapeHtml(vehicle.modelo)}</option>`).join('')}
+            </select>
+          </div>
+          <div class="field-wrap">
+            <label>Responsável</label>
+            <select class="soft-input w-full" id="order-driver">
+              <option value="">Selecione um motorista</option>
+              ${allDrivers.map(driver => `<option value="${driver.id}">${escapeHtml(driver.nome)}</option>`).join('')}
+            </select>
+          </div>
+          <div class="field-wrap">
+            <label>Data de início</label>
+            <input class="soft-input w-full" id="order-data-inicio" type="date">
+          </div>
+          <div class="field-wrap">
+            <label>Data de término</label>
+            <input class="soft-input w-full" id="order-data-termino" type="date">
+          </div>
+          <div class="field-wrap">
+            <label>Status</label>
+            <select class="soft-input w-full" id="order-status">
+              <option value="aberta">Aberta</option>
+              <option value="andamento">Em andamento</option>
+              <option value="fechada">Fechada</option>
+            </select>
+          </div>
+          <div class="field-wrap full">
+            <label>Descrição do serviço / problema</label>
+            <textarea class="soft-input textarea w-full" id="order-descricao" placeholder="Descreva tudo que deve sair na impressão da OS."></textarea>
+          </div>
+        `;
+      } else if (type === 'finance') {
+        kicker.textContent = 'Financeiro';
+        title.textContent = 'Novo lançamento';
+        fields.innerHTML = `
+          <div class="field-wrap full">
+            <label>O que você quer lançar?</label>
+            <div class="grid md:grid-cols-2 gap-4">
+              <button type="button" class="soft-btn primary !h-auto py-5 px-5 text-left" onclick="loadFinanceForm('combustivel')">
+                <span class="block text-base font-extrabold">Lançamento de combustível</span>
+                <span class="block text-sm font-medium opacity-90 mt-2">Mostra apenas postos e habilita combustível + KM inicial/final.</span>
+              </button>
+              <button type="button" class="soft-btn !h-auto py-5 px-5 text-left" onclick="loadFinanceForm('despesa')">
+                <span class="block text-base font-extrabold">Lançamento de despesa</span>
+                <span class="block text-sm font-medium text-slate-500 mt-2">Usa a lista completa de parceiros cadastrados no sistema.</span>
+              </button>
+            </div>
+          </div>
+        `;
+        setModalSubmitState(false);
+      }
+
+      backdrop.classList.add('show');
+    }
+
+    function closeCadastroModal() {
+      document.getElementById('modal-backdrop').classList.remove('show');
+      document.getElementById('cadastro-form').reset();
+      currentModalType = null;
+      currentEditingId = null;
+      currentFinanceEntryType = null;
+      setModalSubmitState(true, 'Salvar cadastro');
+    }
+
+    function handleModalBackdrop(event) {
+      if (event.target.id === 'modal-backdrop') {
+        closeCadastroModal();
+      }
+    }
+
+    function getSupplierTypeLabel(type) {
+      return {
+        posto: 'Posto de combustível',
+        oficina: 'Oficina',
+        concessionaria: 'Concessionária',
+        pecas: 'Loja de peças',
+        pneus: 'Pneus',
+        outro: 'Outro'
+      }[type] || 'Outro';
+    }
+
+    function toggleFinanceSpecificFields() {
+      const supplierId = document.getElementById('finance-supplier-id')?.value;
+      const supplier = allSuppliers.find(item => item.id === supplierId);
+      const wrap = document.getElementById('finance-fuel-wrap');
+      if (!wrap) return;
+      wrap.style.display = supplier && supplier.tipo === 'posto' ? 'block' : 'none';
+      if (!supplier || supplier.tipo !== 'posto') {
+        const fuelField = document.getElementById('finance-fuel-type');
+        if (fuelField) fuelField.value = '';
+      }
+    }
+
+    function getOrderKmData(orderId) {
+      const fuelEntries = allFinanceEntries
+        .filter(entry => entry.orderId === orderId && entry.entryType === 'combustivel')
+        .sort((a, b) => String(a.createdAt || '').localeCompare(String(b.createdAt || '')));
+      if (!fuelEntries.length) {
+        return { kmInicial: '', kmFinal: '' };
+      }
+      return {
+        kmInicial: fuelEntries[0].kmInicial || '',
+        kmFinal: fuelEntries[fuelEntries.length - 1].kmFinal || ''
+      };
+    }
+
+    function setModalSubmitState(visible, label = 'Salvar cadastro') {
+      const button = document.getElementById('modal-submit-btn');
+      if (!button) return;
+      button.textContent = label;
+      button.style.display = visible ? 'inline-flex' : 'none';
+    }
+
+    function loadFinanceForm(entryType) {
+      currentModalType = 'finance';
+      currentFinanceEntryType = entryType;
+      const fields = document.getElementById('modal-fields');
+      const kicker = document.getElementById('modal-kicker');
+      const title = document.getElementById('modal-title');
+      const supplierOptions = allSuppliers
+        .filter(supplier => entryType === 'combustivel' ? supplier.tipo === 'posto' : true)
+        .map(supplier => `<option value="${supplier.id}">${escapeHtml(supplier.nome)} • ${escapeHtml(supplier.tipoLabel)}</option>`)
+        .join('');
+
+      kicker.textContent = 'Financeiro';
+      title.textContent = entryType === 'combustivel' ? 'Lançamento de combustível' : 'Lançar despesa';
+      fields.innerHTML = `
+        <div class="field-wrap full">
+          <label>Alocar na OS</label>
+          <select class="soft-input w-full" id="finance-order-id" required>
+            <option value="">Selecione a OS</option>
+            ${allOrders.map(order => `<option value="${order.id}">OS ${escapeHtml(getOrderNumberLabel(order))} • ${escapeHtml(getVehicleLabel(order.vehicleId))}</option>`).join('')}
+          </select>
+        </div>
+        ${entryType === 'despesa' ? `
+        <div class="field-wrap">
+          <label>Natureza financeira</label>
+          <select class="soft-input w-full" id="finance-kind" required>
+            <option value="despesa">Despesa</option>
+            <option value="receita">Receita</option>
+          </select>
+        </div>
+        ` : `<input id="finance-kind" type="hidden" value="despesa">`}
+        <div class="field-wrap">
+          <label>Data de vencimento</label>
+          <input class="soft-input w-full" id="finance-data-vencimento" type="date" required>
+        </div>
+        <div class="field-wrap">
+          <label>${entryType === 'combustivel' ? 'Posto de combustível' : 'Fornecedor'}</label>
+          <select class="soft-input w-full" id="finance-supplier-id" onchange="toggleFinanceSpecificFields()" required>
+            <option value="">Selecione um parceiro</option>
+            ${supplierOptions}
+          </select>
+        </div>
+        <div class="field-wrap">
+          <label>NF / referência</label>
+          <input class="soft-input w-full" id="finance-nf" placeholder="Ex: NF 1542">
+        </div>
+        <div class="field-wrap">
+          <label>Valor</label>
+          <input class="soft-input w-full" id="finance-total" type="number" min="0" step="0.01" value="0">
+        </div>
+        ${entryType === 'combustivel' ? `
+        <div class="field-wrap" id="finance-fuel-wrap">
+          <label>Tipo de combustível</label>
+          <select class="soft-input w-full" id="finance-fuel-type">
+            <option value="">Selecione</option>
+            <option value="Diesel">Diesel</option>
+            <option value="Diesel S10">Diesel S10</option>
+            <option value="Gasolina">Gasolina</option>
+            <option value="Etanol">Etanol</option>
+            <option value="GNV">GNV</option>
+            <option value="Arla 32">Arla 32</option>
+            <option value="Óleo hidráulico">Óleo hidráulico</option>
+            <option value="Óleo de motor">Óleo de motor</option>
+          </select>
+        </div>
+        <div class="field-wrap">
+          <label>KM inicial</label>
+          <input class="soft-input w-full" id="finance-km-inicial" type="number" min="0" step="1" placeholder="Ex: 20000">
+        </div>
+        <div class="field-wrap">
+          <label>KM final</label>
+          <input class="soft-input w-full" id="finance-km-final" type="number" min="0" step="1" placeholder="Ex: 20115">
+        </div>
+        ` : ''}
+        <div class="field-wrap full">
+          <label>Observações</label>
+          <textarea class="soft-input textarea w-full" id="finance-observacoes" placeholder="Observações do lançamento"></textarea>
+        </div>
+      `;
+
+      setModalSubmitState(true, entryType === 'combustivel' ? 'Salvar lançamento de combustível' : 'Salvar lançamento');
+      toggleFinanceSpecificFields();
+    }
+
+    function renderHomeCards() {
+      const vehiclesNode = document.getElementById('home-total-vehicles');
+      const driversNode = document.getElementById('home-total-drivers');
+      const financeNode = document.getElementById('home-total-finance');
+      if (vehiclesNode) vehiclesNode.textContent = allVehicles.length;
+      if (driversNode) driversNode.textContent = allDrivers.length;
+      if (financeNode) financeNode.textContent = allFinanceEntries.length;
+    }
+
+    function pruneSelections() {
+      const vehicleIds = new Set(allVehicles.map(vehicle => vehicle.id));
+      const driverIds = new Set(allDrivers.map(driver => driver.id));
+      const supplierIds = new Set(allSuppliers.map(supplier => supplier.id));
+      const orderIds = new Set(allOrders.map(order => order.id));
+      const financeIds = new Set(allFinanceEntries.map(entry => entry.id));
+      selectedVehicles = new Set(Array.from(selectedVehicles).filter(id => vehicleIds.has(id)));
+      selectedDrivers = new Set(Array.from(selectedDrivers).filter(id => driverIds.has(id)));
+      selectedSuppliers = new Set(Array.from(selectedSuppliers).filter(id => supplierIds.has(id)));
+      selectedOrders = new Set(Array.from(selectedOrders).filter(id => orderIds.has(id)));
+      selectedFinance = new Set(Array.from(selectedFinance).filter(id => financeIds.has(id)));
+    }
+
+    function updateButtonState(editId, deleteId, count, requiresSingle = true) {
+      const editButton = document.getElementById(editId);
+      const deleteButton = document.getElementById(deleteId);
+      if (editButton) {
+        editButton.style.opacity = !requiresSingle || count === 1 ? '1' : '0.45';
+        editButton.style.pointerEvents = !requiresSingle || count === 1 ? 'auto' : 'none';
+      }
+      if (deleteButton) {
+        deleteButton.style.opacity = count > 0 ? '1' : '0.45';
+        deleteButton.style.pointerEvents = count > 0 ? 'auto' : 'none';
+      }
+    }
+
+    function updateVehicleSelectionUI() {
+      pruneSelections();
+      const count = selectedVehicles.size;
+      document.getElementById('vehicles-selected-text').textContent = `${count} selecionado${count === 1 ? '' : 's'}`;
+      document.getElementById('select-all-vehicles').classList.toggle('checked', allVehicles.length > 0 && count === allVehicles.length);
+      updateButtonState('edit-vehicle-btn', 'delete-vehicle-btn', count);
+    }
+
+    function updateDriverSelectionUI() {
+      pruneSelections();
+      const count = selectedDrivers.size;
+      document.getElementById('drivers-selected-text').textContent = `${count} selecionado${count === 1 ? '' : 's'}`;
+      document.getElementById('select-all-drivers').classList.toggle('checked', allDrivers.length > 0 && count === allDrivers.length);
+      updateButtonState('edit-driver-btn', 'delete-driver-btn', count);
+    }
+
+    function updateSupplierSelectionUI() {
+      pruneSelections();
+      const count = selectedSuppliers.size;
+      document.getElementById('suppliers-selected-text').textContent = `${count} selecionado${count === 1 ? '' : 's'}`;
+      document.getElementById('select-all-suppliers').classList.toggle('checked', allSuppliers.length > 0 && count === allSuppliers.length);
+      updateButtonState('edit-supplier-btn', 'delete-supplier-btn', count);
+    }
+
+    function updateOrderSelectionUI() {
+      pruneSelections();
+      const count = selectedOrders.size;
+      document.getElementById('orders-selected-text').textContent = `${count} selecionada${count === 1 ? '' : 's'}`;
+      document.getElementById('select-all-orders').classList.toggle('checked', allOrders.length > 0 && count === allOrders.length);
+      updateButtonState('edit-order-btn', 'delete-order-btn', count);
+      const printButton = document.getElementById('print-order-btn');
+      const closeButton = document.getElementById('close-order-btn');
+      const reopenButton = document.getElementById('reopen-order-btn');
+      [printButton, closeButton, reopenButton].forEach(button => {
+        if (!button) return;
+        button.style.opacity = count === 1 ? '1' : '0.45';
+        button.style.pointerEvents = count === 1 ? 'auto' : 'none';
+      });
+    }
+
+    function updateFinanceSelectionUI() {
+      pruneSelections();
+      const count = selectedFinance.size;
+      document.getElementById('finance-selected-text').textContent = `${count} selecionado${count === 1 ? '' : 's'}`;
+      document.getElementById('select-all-finance').classList.toggle('checked', allFinanceEntries.length > 0 && count === allFinanceEntries.length);
+      updateButtonState('edit-finance-btn', 'delete-finance-btn', count);
+    }
+
+    function toggleVehicleSelection(event, id) {
+      if (event) event.stopPropagation();
+      if (selectedVehicles.has(id)) selectedVehicles.delete(id);
+      else selectedVehicles.add(id);
+      renderVehicles();
+    }
+
+    function toggleDriverSelection(event, id) {
+      if (event) event.stopPropagation();
+      if (selectedDrivers.has(id)) selectedDrivers.delete(id);
+      else selectedDrivers.add(id);
+      renderDrivers();
+    }
+
+    function toggleSupplierSelection(event, id) {
+      if (event) event.stopPropagation();
+      if (selectedSuppliers.has(id)) selectedSuppliers.delete(id);
+      else selectedSuppliers.add(id);
+      renderSuppliers();
+    }
+
+    function toggleOrderSelection(event, id) {
+      if (event) event.stopPropagation();
+      if (selectedOrders.has(id)) selectedOrders.delete(id);
+      else selectedOrders.add(id);
+      renderOrders();
+    }
+
+    function toggleFinanceSelection(event, id) {
+      if (event) event.stopPropagation();
+      if (selectedFinance.has(id)) selectedFinance.delete(id);
+      else selectedFinance.add(id);
+      renderFinance();
+    }
+
+    function toggleSelectAllVehicles(event) {
+      if (event) event.stopPropagation();
+      if (selectedVehicles.size === allVehicles.length) selectedVehicles.clear();
+      else selectedVehicles = new Set(allVehicles.map(vehicle => vehicle.id));
+      renderVehicles();
+    }
+
+    function toggleSelectAllDrivers(event) {
+      if (event) event.stopPropagation();
+      if (selectedDrivers.size === allDrivers.length) selectedDrivers.clear();
+      else selectedDrivers = new Set(allDrivers.map(driver => driver.id));
+      renderDrivers();
+    }
+
+    function toggleSelectAllSuppliers(event) {
+      if (event) event.stopPropagation();
+      if (selectedSuppliers.size === allSuppliers.length) selectedSuppliers.clear();
+      else selectedSuppliers = new Set(allSuppliers.map(supplier => supplier.id));
+      renderSuppliers();
+    }
+
+    function toggleSelectAllOrders(event) {
+      if (event) event.stopPropagation();
+      if (selectedOrders.size === allOrders.length) selectedOrders.clear();
+      else selectedOrders = new Set(allOrders.map(order => order.id));
+      renderOrders();
+    }
+
+    function toggleSelectAllFinance(event) {
+      if (event) event.stopPropagation();
+      if (selectedFinance.size === allFinanceEntries.length) selectedFinance.clear();
+      else selectedFinance = new Set(allFinanceEntries.map(entry => entry.id));
+      renderFinance();
+    }
+
+    function renderVehicles() {
+      const list = document.getElementById('vehicles-list');
+      if (!list) return;
+      if (!allVehicles.length) {
+        list.innerHTML = '<div class="empty-state">Nenhum veículo cadastrado. Clique no botão + para começar.</div>';
+        selectedVehicles.clear();
+        updateVehicleSelectionUI();
+        return;
+      }
+      list.innerHTML = allVehicles.map(vehicle => `
+        <div class="list-card ${selectedVehicles.has(vehicle.id) ? 'selected' : ''}">
+          <div class="flex items-start justify-between gap-4 flex-wrap">
+            <div class="flex items-start gap-4">
+              <button class="selection-check ${selectedVehicles.has(vehicle.id) ? 'checked' : ''}" onclick="toggleVehicleSelection(event, '${vehicle.id}')">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 12l4 4 10-10"/>
+                </svg>
+              </button>
+              <div>
+              <div class="flex items-center gap-3 flex-wrap">
+                <h3 class="text-2xl font-extrabold text-slate-900">${vehicle.placa}</h3>
+                <span class="mini-badge">Frota ${vehicle.numeroFrota}</span>
+                <span class="mini-badge">${vehicle.ano}</span>
+              </div>
+              <p class="text-slate-700 font-semibold mt-2">${vehicle.modelo}</p>
+              <div class="flex gap-3 flex-wrap mt-4 text-sm text-slate-500">
+                ${vehicle.cor ? `<span>Cor: ${vehicle.cor}</span>` : ''}
+                ${vehicle.chassi ? `<span>Chassi: ${vehicle.chassi}</span>` : ''}
+              </div>
+              </div>
+            </div>
+            <div class="mini-badge">Veículo ativo</div>
+          </div>
+        </div>
+      `).join('');
+      updateVehicleSelectionUI();
+    }
+
+    function renderDrivers() {
+      const list = document.getElementById('drivers-list');
+      if (!list) return;
+      if (!allDrivers.length) {
+        list.innerHTML = '<div class="empty-state">Nenhum motorista cadastrado. Clique no botão + para começar.</div>';
+        selectedDrivers.clear();
+        updateDriverSelectionUI();
+        return;
+      }
+      list.innerHTML = allDrivers.map(driver => `
+        <div class="list-card ${selectedDrivers.has(driver.id) ? 'selected' : ''}">
+          <div class="flex items-start justify-between gap-4 flex-wrap">
+            <div class="flex items-start gap-4">
+              <button class="selection-check ${selectedDrivers.has(driver.id) ? 'checked' : ''}" onclick="toggleDriverSelection(event, '${driver.id}')">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 12l4 4 10-10"/>
+                </svg>
+              </button>
+              <div>
+              <div class="flex items-center gap-3 flex-wrap">
+                <h3 class="text-2xl font-extrabold text-slate-900">${driver.nome}</h3>
+                <span class="mini-badge">Categoria ${driver.categoria}</span>
+              </div>
+              <div class="flex gap-3 flex-wrap mt-4 text-sm text-slate-500">
+                <span>CPF: ${driver.cpf}</span>
+                <span>CNH: ${driver.cnh}</span>
+                ${driver.telefone ? `<span>Telefone: ${driver.telefone}</span>` : ''}
+                ${driver.validade ? `<span>Validade: ${driver.validade}</span>` : ''}
+              </div>
+              </div>
+            </div>
+            <div class="mini-badge">Motorista ativo</div>
+          </div>
+        </div>
+      `).join('');
+      updateDriverSelectionUI();
+    }
+
+    function renderSuppliers() {
+      const list = document.getElementById('suppliers-list');
+      if (!list) return;
+      if (!allSuppliers.length) {
+        list.innerHTML = '<div class="empty-state">Nenhum fornecedor cadastrado ainda.</div>';
+        selectedSuppliers.clear();
+        updateSupplierSelectionUI();
+        return;
+      }
+      list.innerHTML = allSuppliers.map(supplier => `
+        <div class="list-card ${selectedSuppliers.has(supplier.id) ? 'selected' : ''}">
+          <div class="flex items-start justify-between gap-4 flex-wrap">
+            <div class="flex items-start gap-4">
+              <button class="selection-check ${selectedSuppliers.has(supplier.id) ? 'checked' : ''}" onclick="toggleSupplierSelection(event, '${supplier.id}')">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 12l4 4 10-10"/>
+                </svg>
+              </button>
+              <div>
+                <div class="flex items-center gap-3 flex-wrap">
+                  <h3 class="text-2xl font-extrabold text-slate-900">${escapeHtml(supplier.nome)}</h3>
+                  <span class="mini-badge">${escapeHtml(supplier.tipoLabel)}</span>
+                </div>
+                <div class="flex gap-3 flex-wrap mt-4 text-sm text-slate-500">
+                  ${supplier.documento ? `<span>Documento: ${escapeHtml(supplier.documento)}</span>` : ''}
+                  ${supplier.telefone ? `<span>Telefone: ${escapeHtml(supplier.telefone)}</span>` : ''}
+                  ${supplier.email ? `<span>E-mail: ${escapeHtml(supplier.email)}</span>` : ''}
+                </div>
+                ${supplier.observacoes ? `<p class="text-slate-700 mt-4 leading-7">${escapeHtml(supplier.observacoes)}</p>` : ''}
+              </div>
+            </div>
+            <div class="mini-badge">Parceiro ativo</div>
+          </div>
+        </div>
+      `).join('');
+      updateSupplierSelectionUI();
+    }
+
+    function getFilteredOrders() {
+      const number = document.getElementById('order-filter-number')?.value.trim().toLowerCase() || '';
+      const start = document.getElementById('order-filter-start')?.value || '';
+      const end = document.getElementById('order-filter-end')?.value || '';
+      const status = document.getElementById('order-filter-status')?.value || '';
+      const sort = document.getElementById('order-filter-sort')?.value || 'recentes';
+
+      let items = [...allOrders];
+      if (number) items = items.filter(order => String(order.numero).toLowerCase().includes(number));
+      if (start) items = items.filter(order => !order.dataInicio || order.dataInicio >= start);
+      if (end) items = items.filter(order => !order.dataInicio || order.dataInicio <= end);
+      if (status) items = items.filter(order => order.status === status);
+      items.sort((a, b) => sort === 'antigas'
+        ? String(a.numero).localeCompare(String(b.numero))
+        : String(b.numero).localeCompare(String(a.numero))
+      );
+      return items;
+    }
+
+    function renderOrders() {
+      const list = document.getElementById('orders-list');
+      if (!list) return;
+      const filteredOrders = getFilteredOrders();
+      if (!filteredOrders.length) {
+        list.innerHTML = '<div class="empty-state">Nenhuma ordem de serviço cadastrada.</div>';
+        selectedOrders = new Set(Array.from(selectedOrders).filter(id => allOrders.some(order => order.id === id)));
+        updateOrderSelectionUI();
+        return;
+      }
+      list.innerHTML = filteredOrders.map(order => {
+        const vehicle = allVehicles.find(item => item.id === order.vehicleId);
+        const driver = allDrivers.find(item => item.id === order.driverId);
+        const financialItems = allFinanceEntries.filter(item => item.orderId === order.id);
+        const totalFinance = financialItems.reduce((sum, item) => sum + getFinanceTotal(item), 0);
+        return `
+          <div class="list-card ${selectedOrders.has(order.id) ? 'selected' : ''}">
+            <div class="flex items-start justify-between gap-5 flex-wrap">
+              <div class="flex items-start gap-4">
+                <button class="selection-check ${selectedOrders.has(order.id) ? 'checked' : ''}" onclick="toggleOrderSelection(event, '${order.id}')">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 12l4 4 10-10"/>
+                  </svg>
+                </button>
+                <div>
+                  <div class="flex items-center gap-3 flex-wrap">
+                    <h3 class="text-2xl font-extrabold text-slate-900">OS ${escapeHtml(getOrderNumberLabel(order))}</h3>
+                    <span class="mini-badge">${escapeHtml(order.status || 'aberta')}</span>
+                    <span class="mini-badge">${financialItems.length} lançamento(s)</span>
+                  </div>
+                  <div class="flex gap-3 flex-wrap mt-4 text-sm text-slate-500">
+                    <span>Veículo: ${escapeHtml(vehicle ? vehicle.placa : '-')}</span>
+                    <span>Responsável: ${escapeHtml(driver ? driver.nome : order.responsavelNome || '-')}</span>
+                    <span>Início: ${formatDate(order.dataInicio)}</span>
+                    <span>Término: ${formatDate(order.dataTermino)}</span>
+                    <span>KM inicial: ${escapeHtml(getOrderKmData(order.id).kmInicial || '-')}</span>
+                    <span>KM final: ${escapeHtml(getOrderKmData(order.id).kmFinal || '-')}</span>
+                  </div>
+                  <p class="text-slate-700 mt-4 leading-7">${escapeHtml(order.descricao || '-')}</p>
+                </div>
+              </div>
+              <div class="mini-badge">${formatCurrency(totalFinance)}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+      updateOrderSelectionUI();
+    }
+
+    function renderFinance() {
+      const list = document.getElementById('finance-list');
+      if (!list) return;
+      if (!allFinanceEntries.length) {
+        list.innerHTML = '<div class="empty-state">Nenhum lançamento financeiro cadastrado.</div>';
+        selectedFinance.clear();
+        updateFinanceSelectionUI();
+        return;
+      }
+      list.innerHTML = allFinanceEntries.map(entry => {
+        const order = allOrders.find(item => item.id === entry.orderId);
+        return `
+          <div class="list-card ${selectedFinance.has(entry.id) ? 'selected' : ''}">
+            <div class="flex items-start justify-between gap-5 flex-wrap">
+              <div class="flex items-start gap-4">
+                <button class="selection-check ${selectedFinance.has(entry.id) ? 'checked' : ''}" onclick="toggleFinanceSelection(event, '${entry.id}')">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 12l4 4 10-10"/>
+                  </svg>
+                </button>
+                <div>
+                  <div class="flex items-center gap-3 flex-wrap">
+                    <h3 class="text-2xl font-extrabold text-slate-900">${escapeHtml(entry.fornecedor || 'Lançamento')}</h3>
+                    <span class="mini-badge">OS ${escapeHtml(order ? getOrderNumberLabel(order) : '-')}</span>
+                    <span class="mini-badge">${escapeHtml(entry.kindLabel || 'Despesa')}</span>
+                    ${entry.nf ? `<span class="mini-badge">${escapeHtml(entry.nf)}</span>` : ''}
+                  </div>
+                  <div class="flex gap-3 flex-wrap mt-4 text-sm text-slate-500">
+                    <span>Vencimento: ${formatDate(entry.dataVencimento)}</span>
+                    <span>Tipo: ${escapeHtml(entry.entryType === 'combustivel' ? 'Combustível' : 'Despesa')}</span>
+                    ${entry.fuelType ? `<span>Combustível: ${escapeHtml(entry.fuelType)}</span>` : ''}
+                    ${entry.kmInicial ? `<span>KM inicial: ${escapeHtml(entry.kmInicial)}</span>` : ''}
+                    ${entry.kmFinal ? `<span>KM final: ${escapeHtml(entry.kmFinal)}</span>` : ''}
+                  </div>
+                  ${entry.observacoes ? `<p class="text-slate-700 mt-4 leading-7">${escapeHtml(entry.observacoes)}</p>` : ''}
+                </div>
+              </div>
+              <div class="mini-badge">${formatCurrency(getFinanceTotal(entry))}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+      updateFinanceSelectionUI();
+    }
+
+    function clearOrderFilters() {
+      document.getElementById('order-filter-number').value = '';
+      document.getElementById('order-filter-start').value = '';
+      document.getElementById('order-filter-end').value = '';
+      document.getElementById('order-filter-status').value = '';
+      document.getElementById('order-filter-sort').value = 'recentes';
+      renderOrders();
+    }
+
+    function editSelectedVehicle() {
+      if (selectedVehicles.size !== 1) {
+        showToast('Selecione apenas um veículo para editar.');
+        return;
+      }
+      const id = Array.from(selectedVehicles)[0];
+      const vehicle = allVehicles.find(item => item.id === id);
+      if (!vehicle) return;
+      openCadastroModal('vehicle');
+      currentEditingId = id;
+      document.getElementById('vehicle-frota').value = vehicle.numeroFrota;
+      document.getElementById('vehicle-placa').value = vehicle.placa;
+      document.getElementById('vehicle-modelo').value = vehicle.modelo;
+      document.getElementById('vehicle-ano').value = vehicle.ano;
+      document.getElementById('vehicle-cor').value = vehicle.cor || '';
+      document.getElementById('vehicle-chassi').value = vehicle.chassi || '';
+      document.getElementById('modal-title').textContent = 'Editar veículo';
+    }
+
+    function editSelectedDriver() {
+      if (selectedDrivers.size !== 1) {
+        showToast('Selecione apenas um motorista para editar.');
+        return;
+      }
+      const id = Array.from(selectedDrivers)[0];
+      const driver = allDrivers.find(item => item.id === id);
+      if (!driver) return;
+      openCadastroModal('driver');
+      currentEditingId = id;
+      document.getElementById('driver-nome').value = driver.nome;
+      document.getElementById('driver-cpf').value = driver.cpf;
+      document.getElementById('driver-cnh').value = driver.cnh;
+      document.getElementById('driver-categoria').value = driver.categoria;
+      document.getElementById('driver-telefone').value = driver.telefone || '';
+      document.getElementById('driver-validade').value = driver.validade || '';
+      document.getElementById('modal-title').textContent = 'Editar motorista';
+    }
+
+    function editSelectedSupplier() {
+      if (selectedSuppliers.size !== 1) {
+        showToast('Selecione apenas um fornecedor para editar.');
+        return;
+      }
+      const id = Array.from(selectedSuppliers)[0];
+      const supplier = allSuppliers.find(item => item.id === id);
+      if (!supplier) return;
+      openCadastroModal('supplier');
+      currentEditingId = id;
+      document.getElementById('supplier-name').value = supplier.nome || '';
+      document.getElementById('supplier-type').value = supplier.tipo || '';
+      document.getElementById('supplier-document').value = supplier.documento || '';
+      document.getElementById('supplier-phone').value = supplier.telefone || '';
+      document.getElementById('supplier-email').value = supplier.email || '';
+      document.getElementById('supplier-notes').value = supplier.observacoes || '';
+      document.getElementById('modal-title').textContent = 'Editar fornecedor';
+    }
+
+    function editSelectedOrder() {
+      if (selectedOrders.size !== 1) {
+        showToast('Selecione apenas uma OS para editar.');
+        return;
+      }
+      const id = Array.from(selectedOrders)[0];
+      const order = allOrders.find(item => item.id === id);
+      if (!order) return;
+      openCadastroModal('order');
+      currentEditingId = id;
+      document.getElementById('order-numero').value = getOrderNumberLabel(order);
+      document.getElementById('order-administracao').value = order.administracao || '';
+      document.getElementById('order-veiculo').value = order.vehicleId || '';
+      document.getElementById('order-driver').value = order.driverId || '';
+      document.getElementById('order-data-inicio').value = order.dataInicio || '';
+      document.getElementById('order-data-termino').value = order.dataTermino || '';
+      document.getElementById('order-status').value = order.status || 'aberta';
+      document.getElementById('order-descricao').value = order.descricao || '';
+      document.getElementById('modal-title').textContent = 'Editar OS';
+    }
+
+    function editSelectedFinance() {
+      if (selectedFinance.size !== 1) {
+        showToast('Selecione apenas um lançamento para editar.');
+        return;
+      }
+      const id = Array.from(selectedFinance)[0];
+      const entry = allFinanceEntries.find(item => item.id === id);
+      if (!entry) return;
+      openCadastroModal('finance');
+      loadFinanceForm(entry.entryType || 'despesa');
+      currentEditingId = id;
+      document.getElementById('finance-order-id').value = entry.orderId || '';
+      document.getElementById('finance-kind').value = entry.kind || 'despesa';
+      document.getElementById('finance-data-vencimento').value = entry.dataVencimento || '';
+      document.getElementById('finance-supplier-id').value = entry.supplierId || '';
+      document.getElementById('finance-nf').value = entry.nf || '';
+      document.getElementById('finance-total').value = entry.total ?? 0;
+      toggleFinanceSpecificFields();
+      if (document.getElementById('finance-fuel-type')) {
+        document.getElementById('finance-fuel-type').value = entry.fuelType || '';
+      }
+      if (document.getElementById('finance-km-inicial')) {
+        document.getElementById('finance-km-inicial').value = entry.kmInicial || '';
+      }
+      if (document.getElementById('finance-km-final')) {
+        document.getElementById('finance-km-final').value = entry.kmFinal || '';
+      }
+      document.getElementById('finance-observacoes').value = entry.observacoes || '';
+      document.getElementById('modal-title').textContent = 'Editar lançamento';
+    }
+
+    function deleteSelectedVehicles() {
+      if (!selectedVehicles.size) {
+        showToast('Selecione pelo menos um veículo para excluir.');
+        return;
+      }
+      allVehicles = allVehicles.filter(vehicle => !selectedVehicles.has(vehicle.id));
+      selectedVehicles.clear();
+      saveToLocalStorage();
+      renderAll();
+      showToast('Veículo(s) excluído(s) com sucesso.');
+    }
+
+    function deleteSelectedDrivers() {
+      if (!selectedDrivers.size) {
+        showToast('Selecione pelo menos um motorista para excluir.');
+        return;
+      }
+      allDrivers = allDrivers.filter(driver => !selectedDrivers.has(driver.id));
+      selectedDrivers.clear();
+      saveToLocalStorage();
+      renderAll();
+      showToast('Motorista(s) excluído(s) com sucesso.');
+    }
+
+    function deleteSelectedSuppliers() {
+      if (!selectedSuppliers.size) {
+        showToast('Selecione pelo menos um fornecedor para excluir.');
+        return;
+      }
+      allSuppliers = allSuppliers.filter(supplier => !selectedSuppliers.has(supplier.id));
+      selectedSuppliers.clear();
+      saveToLocalStorage();
+      renderAll();
+      showToast('Fornecedor(es) excluído(s) com sucesso.');
+    }
+
+    function deleteSelectedOrders() {
+      if (!selectedOrders.size) {
+        showToast('Selecione pelo menos uma OS para excluir.');
+        return;
+      }
+      const deletedIds = new Set(selectedOrders);
+      allOrders = allOrders.filter(order => !deletedIds.has(order.id));
+      allFinanceEntries = allFinanceEntries.filter(entry => !deletedIds.has(entry.orderId));
+      selectedOrders.clear();
+      saveToLocalStorage();
+      renderAll();
+      showToast('OS e lançamentos vinculados excluídos com sucesso.');
+    }
+
+    function deleteSelectedFinance() {
+      if (!selectedFinance.size) {
+        showToast('Selecione pelo menos um lançamento para excluir.');
+        return;
+      }
+      allFinanceEntries = allFinanceEntries.filter(entry => !selectedFinance.has(entry.id));
+      selectedFinance.clear();
+      saveToLocalStorage();
+      renderAll();
+      showToast('Lançamento(s) excluído(s) com sucesso.');
+    }
+
+    function closeSelectedOrder() {
+      if (selectedOrders.size !== 1) {
+        showToast('Selecione uma OS para fechar.');
+        return;
+      }
+      const id = Array.from(selectedOrders)[0];
+      allOrders = allOrders.map(order => order.id === id
+        ? { ...order, status: 'fechada', dataTermino: order.dataTermino || new Date().toISOString().split('T')[0] }
+        : order);
+      saveToLocalStorage();
+      renderAll();
+      showToast('OS fechada com sucesso.');
+    }
+
+    function reopenSelectedOrder() {
+      if (selectedOrders.size !== 1) {
+        showToast('Selecione uma OS para reabrir.');
+        return;
+      }
+      const id = Array.from(selectedOrders)[0];
+      allOrders = allOrders.map(order => order.id === id
+        ? { ...order, status: 'aberta' }
+        : order);
+      saveToLocalStorage();
+      renderAll();
+      showToast('OS reaberta com sucesso.');
+    }
+
+    function printSelectedOrder() {
+      if (selectedOrders.size !== 1) {
+        showToast('Selecione uma OS para imprimir.');
+        return;
+      }
+      const id = Array.from(selectedOrders)[0];
+      const order = allOrders.find(item => item.id === id);
+      if (!order) return;
+      const vehicle = allVehicles.find(item => item.id === order.vehicleId);
+      const driver = allDrivers.find(item => item.id === order.driverId);
+      const kmData = getOrderKmData(order.id);
+      const entries = allFinanceEntries.filter(item => item.orderId === order.id);
+      const totalEntries = entries.reduce((sum, item) => sum + getFinanceTotal(item), 0);
+
+      const rows = Array.from({ length: Math.max(entries.length, 10) }, (_, index) => {
+        const entry = entries[index];
+        return `
+          <tr>
+            <td>${entry ? escapeHtml(formatDate(entry.dataVencimento)) : ''}</td>
+            <td>${entry ? escapeHtml([entry.fornecedor, entry.nf, entry.fuelType].filter(Boolean).join(' • ')) : ''}</td>
+            <td class="money">${entry && entry.kind === 'despesa' ? escapeHtml(formatCurrency(entry.total)) : ''}</td>
+            <td class="money">${entry && entry.kind === 'receita' ? escapeHtml(formatCurrency(entry.total)) : ''}</td>
+            <td class="money">${entry ? escapeHtml(formatCurrency(getFinanceTotal(entry))) : ''}</td>
+          </tr>
+        `;
+      }).join('');
+
+      const printWindow = window.open('', '_blank', 'width=980,height=1200');
+      if (!printWindow) {
+        showToast('Não foi possível abrir a janela de impressão.');
         return;
       }
 
-      const botao = document.querySelector('#modal-motorista button[onclick="salvarMotorista()"]');
-      const textOriginal = botao.innerHTML;
-      botao.disabled = true;
-      botao.innerHTML = '<span class="inline-block animate-spin mr-2">⏳</span>Salvando...';
+      printWindow.document.open();
+      printWindow.document.write(`
+        <!doctype html>
+        <html lang="pt-BR">
+        <head>
+          <meta charset="UTF-8">
+          <title>OS ${escapeHtml(getOrderNumberLabel(order))}</title>
+          <style>
+            * { box-sizing: border-box; font-family: Arial, Helvetica, sans-serif; }
+            body { margin: 0; padding: 6px; background: #fff; color: #000; }
+            .sheet { width: 100%; max-width: 1120px; margin: 0 auto; }
+            table { width: 100%; border-collapse: collapse; }
+            .main-table td, .financial-table td, .financial-table th { border: 1px solid #222; padding: 3px 6px; font-size: 12px; vertical-align: middle; }
+            .main-table .title-cell { text-align: center; font-weight: 700; font-size: 15px; height: 72px; padding: 16px 10px; }
+            .main-table .number-cell { width: 120px; vertical-align: top; font-weight: 700; }
+            .label { width: 130px; font-weight: 700; text-transform: uppercase; font-size: 11px; }
+            .value { font-size: 12px; height: 24px; }
+            .desc-box { height: 120px; vertical-align: top; padding-top: 10px; }
+            .section-title { text-align: center; font-weight: 700; text-transform: uppercase; font-size: 12px; }
+            .auth-wrap { width: 260px; margin: 26px auto 8px; text-align: center; }
+            .auth-line { border-top: 1px solid #222; padding-top: 4px; font-size: 12px; font-weight: 700; text-transform: uppercase; }
+            .financial-table th { text-transform: uppercase; font-size: 11px; text-align: center; }
+            .financial-table td { height: 24px; }
+            .financial-table .money { text-align: right; white-space: nowrap; }
+            .total-row td { font-weight: 700; }
+          </style>
+        </head>
+        <body>
+          <div class="sheet">
+            <table class="main-table">
+              <tr>
+                <td colspan="4" class="title-cell">ORDEM DE SERVIÇO PARA VEÍCULOS E MÁQUINAS</td>
+                <td class="number-cell">Nº: ${escapeHtml(getOrderNumberLabel(order))}</td>
+              </tr>
+              <tr>
+                <td class="label">ADMINISTRAÇÃO</td>
+                <td class="value">${escapeHtml(order.administracao || '')}</td>
+                <td class="label">DT. INÍCIO</td>
+                <td colspan="2" class="value">${escapeHtml(formatDate(order.dataInicio))}</td>
+              </tr>
+              <tr>
+                <td class="label">VEÍCULO</td>
+                <td class="value">${escapeHtml(vehicle ? vehicle.modelo : '')}</td>
+                <td class="label">DT. TÉRMINO</td>
+                <td colspan="2" class="value">${escapeHtml(formatDate(order.dataTermino))}</td>
+              </tr>
+              <tr>
+                <td class="label">PLACA/ANO</td>
+                <td class="value">${escapeHtml(vehicle ? `${vehicle.placa}/${vehicle.ano}` : '')}</td>
+                <td class="label">KM INICIAL</td>
+                <td colspan="2" class="value">${escapeHtml(kmData.kmInicial || '')}</td>
+              </tr>
+              <tr>
+                <td class="label">CHASSI</td>
+                <td class="value">${escapeHtml(vehicle ? vehicle.chassi || '' : '')}</td>
+                <td class="label">KM FINAL</td>
+                <td colspan="2" class="value">${escapeHtml(kmData.kmFinal || '')}</td>
+              </tr>
+              <tr>
+                <td class="label">RESPONSÁVEL</td>
+                <td colspan="4" class="value">${escapeHtml(driver ? driver.nome : order.responsavelNome || '')}</td>
+              </tr>
+              <tr>
+                <td colspan="5" class="section-title">DESCRIÇÃO DO SERVIÇO/PROBLEMA:</td>
+              </tr>
+              <tr>
+                <td colspan="5" class="desc-box">${escapeHtml(order.descricao || '')}</td>
+              </tr>
+            </table>
 
-      try {
-        const body = new URLSearchParams();
-        body.append("action", "upsert_motorista");
-        body.append("nome_completo", nome);
-        body.append("cpf", cpf);
-        body.append("data_nascimento", nascimento);
-        body.append("cnh_numero", cnh);
-        body.append("cnh_categoria", categoria);
-        body.append("cnh_validade", validade);
-        body.append("placa_veiculo", veiculo);
-
-        const res = await fetch(SHEETS_API_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
-          body
-        });
-
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        
-        console.log("✅ Motorista salvo com sucesso!");
-        await renderizarMotoristas();
-        fecharModalMotorista();
-        mostrarToast('✅ Motorista salvo com sucesso!', 'success');
-      } catch (err) {
-        console.error("❌ Erro ao salvar:", err);
-        mostrarToast('❌ Erro ao salvar: ' + err.message, 'error');
-      } finally {
-        botao.disabled = false;
-        botao.innerHTML = textOriginal;
-      }
-    }
-
-    async function carregarVeiculosSelect() {
-      try {
-        console.log("📡 [Carregamento Veículos] Iniciando com lista padrão...");
-        // Usar os veículos já carregados em cache
-        if (veiculosCache && veiculosCache.length > 0) {
-          console.log("✅ [Carregamento Veículos] " + veiculosCache.length + " veículos do cache");
-          return veiculosCache;
-        }
-
-        // Se não tiver no cache, carregar manualmente
-        const veiculos = await carregarVeiculos();
-        veiculosSelect = veiculos || [];
-        console.log("✅ [Carregamento Veículos] " + veiculosSelect.length + " veículos carregados");
-        return veiculosSelect;
-      } catch (e) {
-        console.error("❌ [Carregamento Veículos] Erro:", e.message);
-        return [];
-      }
-    }
-
-    async function populateSelectVeiculos() {
-      const select = document.getElementById('motorista-veiculo');
-      select.innerHTML = '<option value="">Carregando veículos...</option>';
-      
-      try {
-        console.log("📡 [Dropdown] Carregando veículos do Sheets...");
-        
-        // Sempre carrega direto do Sheets
-        const res = await fetch(`${SHEETS_API_URL}?action=list`, { method: "GET" });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        
-        const txt = await res.text();
-        if (txt.trim() === "OK" || txt.trim() === "ok") {
-          console.log("⚠️ [Dropdown] API retornou 'OK' sem dados");
-          select.innerHTML = '<option value="">❌ Nenhum veículo cadastrado</option>';
-          return;
-        }
-        
-        const json = JSON.parse(txt);
-        if (!json.ok) throw new Error(json.error);
-
-        const veiculos = json.data || [];
-        console.log("🚗 [Dropdown] " + veiculos.length + " veículos carregados do Sheets");
-
-        if (veiculos.length === 0) {
-          select.innerHTML = '<option value="">❌ Nenhum veículo cadastrado</option>';
-          return;
-        }
-
-        select.innerHTML = '<option value="">Selecione um veículo...</option>';
-        veiculos.forEach(v => {
-          const opt = document.createElement('option');
-          opt.value = v.placa || '';
-          opt.textContent = `${v.placa || 'N/A'} - ${v.marca || ''} ${v.modelo || ''}`.trim();
-          select.appendChild(opt);
-        });
-        
-        console.log("✅ [Dropdown] Dropdown preenchido com " + veiculos.length + " opç����es");
-      } catch (err) {
-        console.error("❌ [Dropdown] Erro:", err);
-        select.innerHTML = '<option value="">❌ Erro ao carregar veículos</option>';
-      }
-    }
-
-    async function carregarMotoristas() {
-      try {
-        console.log("📡 [Carregamento Motoristas] Iniciando...");
-        const body = new URLSearchParams();
-        body.append("action", "list_motoristas");
-
-        const res = await fetch(SHEETS_API_URL, { 
-          method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
-          body
-        });
-        console.log("✅ [Carregamento Motoristas] Status HTTP:", res.status);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        
-        const txt = await res.text();
-        console.log("📝 [Carregamento Motoristas] Resposta bruta:", txt);
-        if (txt.trim() === "OK" || txt.trim() === "ok") return [];
-        
-        const json = JSON.parse(txt);
-        if (!json.ok) throw new Error(json.error);
-
-        motoristasCache = json.data || [];
-        console.log("✅ [Carregamento Motoristas] " + motoristasCache.length + " motoristas carregados");
-        return motoristasCache;
-      } catch (e) {
-        console.error("❌ [Carregamento Motoristas] Erro:", e.message);
-        return [];
-      }
-    }
-
-    async function renderizarMotoristas() {
-      try {
-        console.log("🎨 [Renderização Motoristas] Iniciando...");
-        motoristasCache = await carregarMotoristas();
-        const container = document.getElementById("lista-motoristas");
-        
-        if (!motoristasCache || motoristasCache.length === 0) {
-          console.log("📭 [Renderização Motoristas] Lista vazia");
-          container.innerHTML = '<div class="text-center py-16 text-gray-500">Nenhum motorista cadastrado.</div>';
-          return;
-        }
-
-        console.log("🎨 [Renderização Motoristas] Renderizando " + motoristasCache.length + " motoristas");
-        container.innerHTML = motoristasCache.map((m, index) => {
-          const cnhValidade = new Date(m.cnh_validade);
-          const hoje = new Date();
-          const diasRestantes = Math.floor((cnhValidade - hoje) / (1000 * 60 * 60 * 24));
-          const statusCNH = diasRestantes < 0 ? 'chip-bad' : diasRestantes < 30 ? 'chip-warn' : 'chip-ok';
-          const textoCNH = diasRestantes < 0 ? 'Vencida' : diasRestantes < 30 ? 'Pr��ximo Vencer' : 'Válida';
-
-          return `
-            <div class="card p-5 cursor-pointer hover:shadow-lg transition-all"
-                 data-index="${index}"
-                 onclick="selecionarMotorista(${index})">
-              <div class="flex items-start justify-between">
-                <div class="flex-1">
-                  <div class="flex items-center gap-3">
-                    <div class="text-2xl">👤</div>
-                    <div>
-                      <h4 class="font-extrabold text-gray-900">${m.nome_completo || 'N/A'}</h4>
-                      <p class="text-sm text-gray-600">CNH: ${m.cnh_numero || 'N/A'} | Cat. ${m.cnh_categoria || 'N/A'}</p>
-                    </div>
-                  </div>
-                  <div class="mt-3 flex flex-wrap gap-4 text-sm">
-                    <span class="text-gray-600"><strong>CPF:</strong> ${m.cpf || 'N/A'}</span>
-                    <span class="text-gray-600"><strong>Veículo:</strong> ${m.placa_veiculo || 'N/A'}</span>
-                  </div>
-                </div>
-                <div class="text-right">
-                  <div class="chip ${statusCNH}">${textoCNH}</div>
-                  <div class="text-xs text-gray-500 mt-2">${m.cnh_validade || 'N/A'}</div>
-                </div>
-              </div>
+            <div class="auth-wrap">
+              <div class="auth-line">&nbsp;</div>
+              <div class="auth-line" style="border-top:none; padding-top:2px;">AUTORIZADOR</div>
             </div>
-          `;
-        }).join("");
 
-      } catch (err) {
-        console.error("❌ [Renderização Motoristas] Erro:", err);
-        document.getElementById("lista-motoristas").innerHTML =
-          '<div class="text-center py-16 text-red-600 font-bold">Erro: ' + err.message + '</div>';
-      }
+            <table class="financial-table">
+              <thead>
+                <tr>
+                  <th style="width: 17%;">DATA VENCIMENTO</th>
+                  <th>FORNECEDOR E NF´S</th>
+                  <th style="width: 16%;">DÉBITO</th>
+                  <th style="width: 16%;">CRÉDITO</th>
+                  <th style="width: 16%;">TOTAL</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${rows}
+                <tr class="total-row">
+                  <td colspan="4" class="money">TOTAL</td>
+                  <td class="money">${escapeHtml(formatCurrency(totalEntries))}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <script>
+            window.onload = function () {
+              setTimeout(function () {
+                window.print();
+                window.close();
+              }, 180);
+            };
+          <\/script>
+        </body>
+        </html>
+      `);
+      printWindow.document.close();
     }
 
-    function selecionarMotorista(index) {
-      const m = motoristasCache[index];
-      if (!m) return;
+    function renderAll() {
+      renderHomeCards();
+      renderVehicles();
+      renderDrivers();
+      renderSuppliers();
+      renderOrders();
+      renderFinance();
+    }
 
-      motoristasSelecionado = { index, ...m };
-      console.log("✅ [Seleção Motorista] Motorista selecionado:", m.nome_completo);
-
-      document.querySelectorAll('#lista-motoristas > div').forEach((el, i) => {
-        if (i === index) {
-          el.style.background = 'linear-gradient(135deg,rgba(102,126,234,.15),rgba(118,75,162,.15))';
-          el.style.borderColor = 'rgba(102,126,234,.3)';
-        } else {
-          el.style.background = '';
-          el.style.borderColor = '';
+    document.getElementById('cadastro-form').addEventListener('submit', function (event) {
+      event.preventDefault();
+      if (currentModalType === 'vehicle') {
+        const numeroFrota = document.getElementById('vehicle-frota').value.trim();
+        const placa = document.getElementById('vehicle-placa').value.trim();
+        const modelo = document.getElementById('vehicle-modelo').value.trim();
+        const ano = document.getElementById('vehicle-ano').value.trim();
+        const cor = document.getElementById('vehicle-cor').value.trim();
+        const chassi = document.getElementById('vehicle-chassi').value.trim();
+        if (!numeroFrota || !placa || !modelo || !ano) {
+          showToast('Preencha número de frota, placa, modelo e ano.');
+          return;
         }
-      });
+        if (currentEditingId) {
+          allVehicles = allVehicles.map(vehicle => vehicle.id === currentEditingId
+            ? { ...vehicle, numeroFrota, placa, modelo, ano, cor, chassi }
+            : vehicle);
+          showToast('Veículo atualizado com sucesso.');
+        } else {
+          allVehicles.unshift({ id: `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`, numeroFrota, placa, modelo, ano, cor, chassi });
+          showToast('Veículo cadastrado com sucesso.');
+        }
+        saveToLocalStorage();
+        renderAll();
+        closeCadastroModal();
+      }
 
-      document.getElementById('btn-editar-motorista').disabled = false;
-      document.getElementById('btn-excluir-motorista').disabled = false;
-    }
+      if (currentModalType === 'driver') {
+        const nome = document.getElementById('driver-nome').value.trim();
+        const cpf = document.getElementById('driver-cpf').value.trim();
+        const cnh = document.getElementById('driver-cnh').value.trim();
+        const categoria = document.getElementById('driver-categoria').value.trim();
+        const telefone = document.getElementById('driver-telefone').value.trim();
+        const validade = document.getElementById('driver-validade').value.trim();
+        if (!nome || !cpf || !cnh || !categoria) {
+          showToast('Preencha nome, CPF, CNH e categoria do motorista.');
+          return;
+        }
+        if (currentEditingId) {
+          allDrivers = allDrivers.map(driver => driver.id === currentEditingId
+            ? { ...driver, nome, cpf, cnh, categoria, telefone, validade }
+            : driver);
+          showToast('Motorista atualizado com sucesso.');
+        } else {
+          allDrivers.unshift({ id: `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`, nome, cpf, cnh, categoria, telefone, validade });
+          showToast('Motorista cadastrado com sucesso.');
+        }
+        saveToLocalStorage();
+        renderAll();
+        closeCadastroModal();
+      }
 
-    function abrirModalNovoMotorista() {
-      motoristasSelecionado = null;
-      document.getElementById('modal-motorista-titulo').textContent = 'Novo Motorista';
-      document.getElementById('form-motorista').reset();
-      populateSelectVeiculos();
-      document.getElementById('modal-motorista').classList.remove('hidden');
-    }
+      if (currentModalType === 'supplier') {
+        const nome = document.getElementById('supplier-name').value.trim();
+        const tipo = document.getElementById('supplier-type').value;
+        const documento = document.getElementById('supplier-document').value.trim();
+        const telefone = document.getElementById('supplier-phone').value.trim();
+        const email = document.getElementById('supplier-email').value.trim();
+        const observacoes = document.getElementById('supplier-notes').value.trim();
+        if (!nome || !tipo) {
+          showToast('Preencha o nome do parceiro e o tipo de fornecedor.');
+          return;
+        }
+        const tipoLabel = getSupplierTypeLabel(tipo);
+        if (currentEditingId) {
+          allSuppliers = allSuppliers.map(supplier => supplier.id === currentEditingId
+            ? { ...supplier, nome, tipo, tipoLabel, documento, telefone, email, observacoes }
+            : supplier);
+          showToast('Fornecedor atualizado com sucesso.');
+        } else {
+          allSuppliers.unshift({ id: generateId(), nome, tipo, tipoLabel, documento, telefone, email, observacoes });
+          showToast('Fornecedor cadastrado com sucesso.');
+        }
+        saveToLocalStorage();
+        renderAll();
+        closeCadastroModal();
+      }
 
-    function abrirModalEditarMotorista() {
-      if (!motoristasSelecionado) return;
+      if (currentModalType === 'order') {
+        const numero = document.getElementById('order-numero').value.trim();
+        const administracao = document.getElementById('order-administracao').value.trim();
+        const vehicleId = document.getElementById('order-veiculo').value;
+        const driverId = document.getElementById('order-driver').value;
+        const dataInicio = document.getElementById('order-data-inicio').value;
+        const dataTermino = document.getElementById('order-data-termino').value;
+        const status = document.getElementById('order-status').value;
+        const descricao = document.getElementById('order-descricao').value.trim();
+        const responsavelNome = getDriverLabel(driverId);
+        if (!vehicleId || !descricao) {
+          showToast('Selecione um veículo e preencha a descrição da OS.');
+          return;
+        }
+        if (currentEditingId) {
+          allOrders = allOrders.map(order => order.id === currentEditingId
+            ? { ...order, numero, administracao, vehicleId, driverId, responsavelNome, dataInicio, dataTermino, status, descricao }
+            : order);
+          showToast('OS atualizada com sucesso.');
+        } else {
+          allOrders.unshift({ id: generateId(), numero, administracao, vehicleId, driverId, responsavelNome, dataInicio, dataTermino, status, descricao });
+          orderCounter += 1;
+          showToast('OS cadastrada com sucesso.');
+        }
+        saveToLocalStorage();
+        renderAll();
+        closeCadastroModal();
+      }
 
-      document.getElementById('modal-motorista-titulo').textContent = 'Editar Motorista';
-      document.getElementById('motorista-nome').value = motoristasSelecionado.nome_completo || '';
-      document.getElementById('motorista-cpf').value = motoristasSelecionado.cpf || '';
-      document.getElementById('motorista-nascimento').value = motoristasSelecionado.data_nascimento || '';
-      document.getElementById('motorista-cnh').value = motoristasSelecionado.cnh_numero || '';
-      document.getElementById('motorista-categoria').value = motoristasSelecionado.cnh_categoria || '';
-      document.getElementById('motorista-validade').value = motoristasSelecionado.cnh_validade || '';
-      document.getElementById('motorista-veiculo').value = motoristasSelecionado.placa_veiculo || '';
-      document.getElementById('modal-motorista').classList.remove('hidden');
-    }
-
-    function fecharModalMotorista() {
-      document.getElementById('modal-motorista').classList.add('hidden');
-      motoristasSelecionado = null;
-      document.getElementById('btn-editar-motorista').disabled = true;
-      document.getElementById('btn-excluir-motorista').disabled = true;
-    }
-
-    document.getElementById('form-motorista').addEventListener('submit', async (e) => {
-      e.preventDefault();
-
-      const botaoSalvar = e.target.querySelector('button[type="submit"]');
-      const textOriginal = botaoSalvar.innerHTML;
-      botaoSalvar.disabled = true;
-      botaoSalvar.innerHTML = '<span class="inline-block animate-spin mr-2">⏳</span>Salvando...';
-
-      const novoMotorista = {
-        nome_completo: document.getElementById('motorista-nome').value.trim(),
-        cpf: document.getElementById('motorista-cpf').value.trim(),
-        data_nascimento: document.getElementById('motorista-nascimento').value,
-        cnh_numero: document.getElementById('motorista-cnh').value.trim(),
-        cnh_categoria: document.getElementById('motorista-categoria').value,
-        cnh_validade: document.getElementById('motorista-validade').value,
-        placa_veiculo: document.getElementById('motorista-veiculo').value
-      };
-
-      try {
-        const body = new URLSearchParams();
-        body.append("action", "upsert_motorista");
-        body.append("nome_completo", novoMotorista.nome_completo);
-        body.append("cpf", novoMotorista.cpf);
-        body.append("data_nascimento", novoMotorista.data_nascimento);
-        body.append("cnh_numero", novoMotorista.cnh_numero);
-        body.append("cnh_categoria", novoMotorista.cnh_categoria);
-        body.append("cnh_validade", novoMotorista.cnh_validade);
-        body.append("placa_veiculo", novoMotorista.placa_veiculo);
-
-        const res = await fetch(SHEETS_API_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
-          body
-        });
-
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        await renderizarMotoristas();
-        fecharModalMotorista();
-        mostrarToast('✅ Motorista salvo com sucesso!', 'success');
-      } catch (err) {
-        console.error(err);
-        mostrarToast('❌ Erro ao salvar: ' + err.message, 'error');
-        botaoSalvar.disabled = false;
-        botaoSalvar.innerHTML = textOriginal;
+      if (currentModalType === 'finance') {
+        const entryType = currentFinanceEntryType || 'despesa';
+        const orderId = document.getElementById('finance-order-id').value;
+        const kind = document.getElementById('finance-kind').value;
+        const dataVencimento = document.getElementById('finance-data-vencimento').value;
+        const supplierId = document.getElementById('finance-supplier-id').value;
+        const nf = document.getElementById('finance-nf').value.trim();
+        const totalField = document.getElementById('finance-total').value;
+        const total = Number(totalField || 0);
+        const supplier = allSuppliers.find(item => item.id === supplierId);
+        const fornecedor = supplier ? supplier.nome : '';
+        const supplierType = supplier ? supplier.tipo : '';
+        const fuelType = document.getElementById('finance-fuel-type')?.value || '';
+        const kmInicial = document.getElementById('finance-km-inicial')?.value || '';
+        const kmFinal = document.getElementById('finance-km-final')?.value || '';
+        const observacoes = document.getElementById('finance-observacoes').value.trim();
+        if (!orderId || !dataVencimento || !supplierId) {
+          showToast('Selecione a OS, o parceiro e a data de vencimento do lançamento.');
+          return;
+        }
+        if (supplierType === 'posto' && !fuelType) {
+          showToast('Selecione o tipo de combustível para lançamentos de posto.');
+          return;
+        }
+        if (entryType === 'combustivel' && (!kmInicial || !kmFinal)) {
+          showToast('Preencha KM inicial e KM final no lançamento de combustível.');
+          return;
+        }
+        if (currentEditingId) {
+          allFinanceEntries = allFinanceEntries.map(entry => entry.id === currentEditingId
+            ? { ...entry, entryType, orderId, kind, kindLabel: kind === 'receita' ? 'Receita' : 'Despesa', supplierId, supplierType, fornecedor, nf, fuelType, kmInicial, kmFinal, dataVencimento, total, observacoes }
+            : entry);
+          showToast('Lançamento atualizado com sucesso.');
+        } else {
+          allFinanceEntries.unshift({ id: generateId(), createdAt: new Date().toISOString(), entryType, orderId, kind, kindLabel: kind === 'receita' ? 'Receita' : 'Despesa', supplierId, supplierType, fornecedor, nf, fuelType, kmInicial, kmFinal, dataVencimento, total, observacoes });
+          showToast('Lançamento vinculado à OS com sucesso.');
+        }
+        saveToLocalStorage();
+        renderAll();
+        closeCadastroModal();
       }
     });
 
-    function excluirMotorista() {
-      if (!motoristasSelecionado) return;
-
-      document.getElementById('confirmacao-motorista-nome').textContent = motoristasSelecionado.nome_completo;
-      document.getElementById('modal-confirmacao-motorista').classList.remove('hidden');
-    }
-
-    function fecharModalConfirmacaoMotorista() {
-      document.getElementById('modal-confirmacao-motorista').classList.add('hidden');
-    }
-
-    async function confirmarExclusaoMotorista() {
-      const botao = document.getElementById('btn-confirmar-excluir-motorista');
-      botao.disabled = true;
-      botao.innerHTML = '<span class="inline-block animate-spin mr-2">⏳</span>Excluindo...';
-
-      try {
-        const body = new URLSearchParams();
-        body.append("action", "delete_motorista");
-        body.append("cnh_numero", motoristasSelecionado.cnh_numero);
-
-        const res = await fetch(SHEETS_API_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
-          body
-        });
-
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        await renderizarMotoristas();
-        fecharModalMotorista();
-        fecharModalConfirmacaoMotorista();
-        mostrarToast('✅ Motorista excluído com sucesso!', 'success');
-      } catch (err) {
-        console.error(err);
-        mostrarToast('❌ Erro ao excluir: ' + err.message, 'error');
-      } finally {
-        botao.disabled = false;
-        botao.innerHTML = 'Excluir';
-      }
-    }
-
-    // ==================== EVENTOS ====================
-    document.getElementById('btn-novo-veiculo').addEventListener('click', abrirModalNovoVeiculo);
-    document.getElementById('btn-editar-veiculo').addEventListener('click', abrirModalEditarVeiculo);
-    document.getElementById('btn-duplicar-veiculo').addEventListener('click', duplicarVeiculo);
-    document.getElementById('btn-excluir-veiculo').addEventListener('click', excluirVeiculo);
-
-    document.getElementById('btn-novo-motorista').addEventListener('click', abrirModalNovoMotorista);
-    document.getElementById('btn-editar-motorista').addEventListener('click', abrirModalEditarMotorista);
-    document.getElementById('btn-excluir-motorista').addEventListener('click', excluirMotorista);
-
-    document.getElementById('modal-veiculo').addEventListener('click', (e) => {
-      if (e.target.id === 'modal-veiculo') fecharModalVeiculo();
-    });
-
-    document.getElementById('modal-motorista').addEventListener('click', (e) => {
-      if (e.target.id === 'modal-motorista') fecharModalMotorista();
-    });
-
-    document.getElementById('modal-confirmacao').addEventListener('click', (e) => {
-      if (e.target.id === 'modal-confirmacao') fecharModalConfirmacao();
-    });
-
-    document.getElementById('modal-confirmacao-motorista').addEventListener('click', (e) => {
-      if (e.target.id === 'modal-confirmacao-motorista') fecharModalConfirmacaoMotorista();
-    });
-
-    // ==================== INIT ====================
-    console.log("🚀 Sistema iniciado!");
-    selectView('dashboard');
+    loadFromLocalStorage();
+    renderAll();
+    applyThemeState(localStorage.getItem('wefrotas_theme') === 'dark');
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9cc09ea4b2de1a9e',t:'MTc3MDc3OTA3NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>
