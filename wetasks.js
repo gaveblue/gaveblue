@@ -28,6 +28,106 @@ const GLOBAL_MODULES = [
   { name:'WeTasks', desc:'Tarefas e organização', url:'https://gaveblue.com/wetasks' }
 ];
 
+function canUseBrowserNotifications() {
+  return typeof window !== 'undefined' && 'Notification' in window;
+}
+
+async function ensureBrowserNotificationPermission() {
+  if (!canUseBrowserNotifications()) return 'unsupported';
+  if (Notification.permission === 'granted') return 'granted';
+  if (Notification.permission === 'denied') return 'denied';
+  try {
+    return await Notification.requestPermission();
+  } catch {
+    return 'denied';
+  }
+}
+
+function sendOverdueBrowserNotification(task) {
+  if (!canUseBrowserNotifications()) return;
+  if (Notification.permission !== 'granted') return;
+
+  const body = task.time
+    ? `A tarefa "${task.title}" entrou em atraso às ${task.time}.`
+    : `A tarefa "${task.title}" entrou em atraso.`;
+
+  const notification = new Notification('WeTasks • Tarefa em atraso', {
+    body,
+    tag: `wetasks-overdue-${task.id}`,
+    renotify: false
+  });
+
+  notification.onclick = () => {
+    window.focus();
+    currentTab = 'tasks';
+    selectedTaskDate = task.date;
+    renderAll();
+    notification.close();
+  };
+}
+
+function updateBrowserNotificationStatus() {
+  const statusEl = document.getElementById('browser-notification-status');
+  if (!statusEl) return;
+
+  if (!canUseBrowserNotifications()) {
+    statusEl.textContent = 'Este navegador não suporta notificações do dispositivo.';
+    return;
+  }
+
+  if (Notification.permission === 'granted') {
+    statusEl.textContent = 'Ativas: o dispositivo já pode receber alertas de tarefas em atraso.';
+    return;
+  }
+
+  if (Notification.permission === 'denied') {
+    statusEl.textContent = 'Bloqueadas: libere as notificações nas permissões do navegador para usar esse recurso.';
+    return;
+  }
+
+  statusEl.textContent = 'Desativadas: toque em "Ativar Notificações" para permitir alertas do dispositivo.';
+}
+
+async function enableBrowserNotifications() {
+  const permission = await ensureBrowserNotificationPermission();
+  updateBrowserNotificationStatus();
+
+  if (permission === 'granted') {
+    showToast('Notificações do dispositivo ativadas!');
+    return;
+  }
+
+  if (permission === 'denied') {
+    showToast('As notificações foram bloqueadas no navegador.', 'error');
+    return;
+  }
+
+  showToast('Este navegador não suporta notificações do dispositivo.', 'info');
+}
+
+function testBrowserNotification() {
+  if (!canUseBrowserNotifications()) {
+    showToast('Este navegador não suporta notificações do dispositivo.', 'info');
+    return;
+  }
+
+  if (Notification.permission !== 'granted') {
+    showToast('Ative as notificações primeiro para testar.', 'info');
+    return;
+  }
+
+  const notification = new Notification('WeTasks • Teste de notificação', {
+    body: 'Tudo certo por aqui. Seus alertas do dispositivo estão funcionando.'
+  });
+
+  notification.onclick = () => {
+    window.focus();
+    notification.close();
+  };
+
+  showToast('Notificação de teste enviada!');
+}
+
 function save() {
   localStorage.setItem('agenda_tasks', JSON.stringify(tasks));
   localStorage.setItem('agenda_notifications', JSON.stringify(notifications));
@@ -230,6 +330,7 @@ function toggleSettings(event) {
   if (o) o.style.display = show ? 'block' : 'none';
   if (show) {
     updateThemeButtons();
+    updateBrowserNotificationStatus();
   }
   updateFabVisibility();
 }
@@ -686,9 +787,11 @@ function startOverdueMonitor() {
       if (tasksAlreadyNotified.has(task.id) || !task.time) return;
       
       if (isTaskOverdue(task)) {
-        // Primeira vez que detecta atraso - gerar notificaÃ§Ã£o
+        // Primeira vez que detecta atraso - gerar notificação
         tasksAlreadyNotified.add(task.id);
-        addNotification('urgent', `â° Tarefa "${task.title}" estÃ¡ em ATRASO!`);
+        saveNotifiedTasks();
+        addNotification('urgent', `Tarefa "${task.title}" está em ATRASO!`);
+        sendOverdueBrowserNotification(task);
         
         // Re-renderizar apenas se estamos vendo tarefas
         if (currentTab === 'tasks') {
@@ -1212,10 +1315,15 @@ function initApp() {
   getTodayFromAPI().then(() => {
     renderAll();
     updateNotificationBadge();
+    updateBrowserNotificationStatus();
     lucide.createIcons();
     updateFabVisibility();
     startOverdueMonitor();
   });
+
+  setTimeout(() => {
+    ensureBrowserNotificationPermission();
+  }, 800);
 }
 
 initApp();
