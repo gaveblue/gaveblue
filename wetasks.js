@@ -694,7 +694,7 @@ function goToWebsite() {
           <i data-lucide="log-out" style="width:32px;height:32px;color:var(--primary)"></i>
         </div>
         <h3 style="font-weight:800;font-size:20px;margin-bottom:8px;color:var(--text)">Sair da Agenda?</h3>
-        <p style="font-size:14px;color:var(--secondary);margin-bottom:20px">VocÃª serÃ¡ redirecionado para o site do desenvolvedor.</p>
+        <p style="font-size:14px;color:var(--secondary);margin-bottom:20px">Você será redirecionado para o site do desenvolvedor.</p>
         <div style="display:flex;gap:10px;justify-content:center">
           <button onclick="closeExitModal()" class="btn btn-ghost" style="border-radius:14px;flex:1;border:1.5px solid #E2E8F0;font-weight:600">Cancelar</button>
           <button onclick="confirmExit()" class="btn btn-primary" style="border-radius:14px;flex:1;font-weight:600"><i data-lucide="arrow-right" style="width:14px;height:14px"></i> Confirmar</button>
