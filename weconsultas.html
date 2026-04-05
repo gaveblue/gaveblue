@@ -1548,7 +1548,7 @@
       `;
     }
 
-    function buildCnpjPrintDocument() {
+    function buildCnpjPrintDocument(includePrintScript = false) {
       if (!lastCnpjData || !lastCnpjDigits) {
         return null;
       }
@@ -1762,6 +1762,7 @@
               </div>
             </div>
           </div>
+          ${includePrintScript ? `
           <script>
             window.onload = function() {
               setTimeout(function() {
@@ -1773,7 +1774,7 @@
                 try { window.close(); } catch (e) {}
               }, 400);
             };
-          <\/script>
+          <\/script>` : ''}
         </body>
         </html>
       `;
@@ -1785,7 +1786,7 @@
     }
 
     function printCnpjDocument() {
-      const doc = buildCnpjPrintDocument();
+      const doc = buildCnpjPrintDocument(true);
       if (!doc) {
         showError('Faça uma consulta de CNPJ antes de imprimir.');
         return;
@@ -1802,7 +1803,7 @@
     }
 
     async function downloadCnpjPdf() {
-      const doc = buildCnpjPrintDocument();
+      const doc = buildCnpjPrintDocument(false);
       if (!doc) {
         showError('Faça uma consulta de CNPJ antes de baixar o PDF.');
         return;
