@@ -158,6 +158,12 @@
       </div>
      </div>
      <div style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid #F1F5F9">
+      <p style="font-size:12px;font-weight:600;color:var(--secondary);margin-bottom:10px">Notificações do dispositivo</p>
+      <p id="browser-notification-status" style="font-size:12px;color:var(--secondary);margin-bottom:10px;line-height:1.5">Verificando disponibilidade...</p>
+      <div style="display:flex;flex-direction:column;gap:8px"><button onclick="enableBrowserNotifications()" class="btn btn-ghost" style="width:100%;justify-content:center;border:1.5px solid #E2E8F0;font-size:12px;border-radius:12px"><i data-lucide="bell-ring" style="width:14px;height:14px"></i> Ativar Notificações</button> <button onclick="testBrowserNotification()" class="btn btn-ghost" style="width:100%;justify-content:center;border:1.5px solid #E2E8F0;font-size:12px;border-radius:12px"><i data-lucide="send" style="width:14px;height:14px"></i> Testar Notificação</button>
+      </div>
+     </div>
+     <div style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid #F1F5F9">
       <p style="font-size:12px;font-weight:600;color:var(--secondary);margin-bottom:10px">Limpeza</p><button onclick="requestClearAll()" class="btn" style="width:100%;justify-content:center;border:1.5px solid #FEE2E2;background:#FEE2E2;color:var(--urgent);border-radius:12px;font-size:12px;font-weight:600"><i data-lucide="trash" style="width:14px;height:14px"></i> Limpar Tudo</button>
      </div>
      <div>
