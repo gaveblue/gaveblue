@@ -160,6 +160,106 @@
       width: min(92vw, 360px);
       z-index: 60;
     }
+    .global-search {
+      position: relative;
+      width: min(38vw, 320px);
+      z-index: 70;
+    }
+    .global-search-input {
+      width: 100%;
+      height: 42px;
+      padding: 0 0.95rem 0 2.75rem;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.16);
+      color: white;
+      backdrop-filter: blur(10px);
+      transition: all 0.2s ease;
+    }
+    .global-search-input::placeholder {
+      color: rgba(226, 232, 240, 0.72);
+    }
+    .global-search-input:focus {
+      outline: none;
+      background: rgba(255,255,255,0.14);
+      border-color: rgba(147, 197, 253, 0.45);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.16);
+    }
+    .global-search-icon {
+      position: absolute;
+      left: 0.9rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: rgba(191, 219, 254, 0.92);
+      pointer-events: none;
+      z-index: 2;
+    }
+    .global-search-results {
+      position: absolute;
+      top: calc(100% + 0.65rem);
+      left: 0;
+      right: 0;
+      background: rgba(15, 23, 42, 0.96);
+      border: 1px solid rgba(148, 163, 184, 0.16);
+      border-radius: 18px;
+      box-shadow: 0 24px 50px rgba(2, 6, 23, 0.42);
+      overflow: hidden;
+      z-index: 65;
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      transition: opacity 0.22s ease, transform 0.22s ease;
+    }
+    .global-search-results.hidden {
+      display: none;
+    }
+    .global-search-item {
+      width: 100%;
+      border: 0;
+      background: transparent;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.9rem 1rem;
+      text-align: left;
+      transition: background 0.2s ease;
+    }
+    .global-search-item:hover,
+    .global-search-item.active {
+      background: rgba(59, 130, 246, 0.12);
+    }
+    .global-search-kicker {
+      display: block;
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: rgba(148, 163, 184, 0.88);
+      margin-bottom: 0.12rem;
+    }
+    .global-search-route {
+      font-size: 0.74rem;
+      color: rgba(148, 163, 184, 0.9);
+    }
+    .global-search-empty {
+      padding: 0.95rem 1rem;
+      color: rgba(148, 163, 184, 0.95);
+      font-size: 0.92rem;
+    }
+    .search-focus-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(7, 11, 24, 0.26);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      opacity: 1;
+      transition: opacity 0.22s ease;
+      z-index: 45;
+      pointer-events: none;
+    }
+    .search-focus-overlay.hidden {
+      display: none;
+    }
     .settings-popover.hidden {
       display: none;
     }
@@ -228,16 +328,35 @@
         font-size: clamp(5.8rem, 10vw, 8.5rem);
       }
     }
+    @media (max-width: 900px) {
+      .global-search {
+        width: min(100%, 220px);
+      }
+      .global-search-input {
+        height: 40px;
+      }
+    }
+    @media (max-width: 640px) {
+      .global-search {
+        display: none;
+      }
+    }
   </style>
   <style>@view-transition { navigation: auto; }</style>
 </head>
 <body class="text-white">
+  <div id="search-focus-overlay" class="search-focus-overlay hidden"></div>
   <header class="fixed top-0 left-0 right-0 z-50 bg-slate-900/95 backdrop-blur-xl border-b border-slate-700/50 h-16">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between gap-3">
       <a href="https://gaveblue.com" target="_self" rel="noopener noreferrer">
         <img src="https://i.imgur.com/Zih5jH8.png" alt="Logo GaveBlue" class="h-12 w-auto cursor-pointer hover:opacity-80 transition-opacity" loading="lazy">
       </a>
       <div class="relative flex items-center gap-3">
+        <div class="global-search">
+          <i data-lucide="search" class="global-search-icon" style="width:18px;height:18px"></i>
+          <input id="global-search-input" type="text" class="global-search-input text-sm font-medium" placeholder="Pesquisar módulo..." autocomplete="off" aria-label="Pesquisar módulo">
+          <div id="global-search-results" class="global-search-results hidden"></div>
+        </div>
         <button id="settings-toggle" class="icon-button text-white" aria-label="Configurações" aria-expanded="false">
           <i data-lucide="settings" style="width:20px;height:20px"></i>
         </button>
@@ -389,9 +508,92 @@
     const fullscreenBtnEl = document.getElementById('fullscreen-btn');
     const settingsToggleEl = document.getElementById('settings-toggle');
     const settingsPopoverEl = document.getElementById('settings-popover');
+    const globalSearchInputEl = document.getElementById('global-search-input');
+    const globalSearchResultsEl = document.getElementById('global-search-results');
+    const searchFocusOverlayEl = document.getElementById('search-focus-overlay');
+    const ecosystemModules = [
+      { name: 'WeTime', description: 'Relógio online e painel de horário', url: 'https://gaveblue.com/wetime' },
+      { name: 'WeRecibos', description: 'Gerador de recibos', url: 'https://gaveblue.com/recibos' },
+      { name: 'WeConsultas', description: 'Consultas empresariais', url: 'https://gaveblue.com/weconsultas' },
+      { name: 'WeFrotas', description: 'Gestão de frotas', url: 'https://gaveblue.com/wefrotas' },
+      { name: 'WeDevs', description: 'Ferramentas e utilidades dev', url: 'https://gaveblue.com/wedevs' },
+      { name: 'WeTasks', description: 'Tarefas e organização', url: 'https://gaveblue.com/wetasks' }
+    ];
+    let filteredModules = [];
+    let highlightedModuleIndex = -1;
 
     function sairApp() {
       window.location.href = 'https://gaveblue.com';
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
+
+    function navigateToModule(url) {
+      window.location.href = url;
+    }
+
+    function hideGlobalSearchResults() {
+      globalSearchResultsEl.classList.add('hidden');
+      searchFocusOverlayEl.classList.add('hidden');
+      highlightedModuleIndex = -1;
+    }
+
+    function syncHighlightedGlobalSearchItem() {
+      const items = globalSearchResultsEl.querySelectorAll('.global-search-item');
+      items.forEach((item, index) => {
+        item.classList.toggle('active', index === highlightedModuleIndex);
+      });
+    }
+
+    function renderGlobalSearchResults(modules) {
+      filteredModules = modules;
+      highlightedModuleIndex = modules.length ? 0 : -1;
+
+      if (!modules.length) {
+        globalSearchResultsEl.innerHTML = '<div class="global-search-empty">Nenhum módulo encontrado.</div>';
+        globalSearchResultsEl.classList.remove('hidden');
+        searchFocusOverlayEl.classList.remove('hidden');
+        return;
+      }
+
+      globalSearchResultsEl.innerHTML = modules.map((module, index) => `
+        <button type="button" class="global-search-item${index === highlightedModuleIndex ? ' active' : ''}" data-index="${index}" data-url="${module.url}">
+          <span>
+            <span class="global-search-kicker">Ecossistema GaveBlue</span>
+            <span class="block font-semibold text-sm">${escapeHtml(module.name)}</span>
+            <span class="global-search-route">${escapeHtml(module.description)}</span>
+          </span>
+          <i data-lucide="arrow-up-right" style="width:16px;height:16px;color:rgba(191,219,254,0.95)"></i>
+        </button>
+      `).join('');
+
+      globalSearchResultsEl.classList.remove('hidden');
+      searchFocusOverlayEl.classList.remove('hidden');
+      if (window.lucide) {
+        window.lucide.createIcons();
+      }
+    }
+
+    function updateGlobalSearch(query) {
+      const normalizedQuery = query.trim().toLowerCase();
+      if (!normalizedQuery) {
+        renderGlobalSearchResults(ecosystemModules);
+        return;
+      }
+
+      const modules = ecosystemModules.filter((module) =>
+        module.name.toLowerCase().includes(normalizedQuery) ||
+        module.description.toLowerCase().includes(normalizedQuery)
+      );
+
+      renderGlobalSearchResults(modules);
     }
 
     function focusClockCard() {
@@ -525,6 +727,55 @@
     document.getElementById('settings-analog-mode-btn').addEventListener('click', () => setMode('analog'));
     fullscreenBtnEl.addEventListener('click', toggleFullscreen);
     settingsToggleEl.addEventListener('click', () => toggleSettings());
+    globalSearchInputEl.addEventListener('input', (event) => {
+      updateGlobalSearch(event.target.value);
+    });
+
+    globalSearchInputEl.addEventListener('focus', (event) => {
+      updateGlobalSearch(event.target.value);
+    });
+
+    globalSearchInputEl.addEventListener('keydown', (event) => {
+      if (globalSearchResultsEl.classList.contains('hidden')) {
+        if (event.key === 'Enter' && globalSearchInputEl.value.trim()) {
+          updateGlobalSearch(globalSearchInputEl.value);
+          if (filteredModules[0]) {
+            navigateToModule(filteredModules[0].url);
+          }
+        }
+        return;
+      }
+
+      if (event.key === 'ArrowDown') {
+        event.preventDefault();
+        highlightedModuleIndex = Math.min(highlightedModuleIndex + 1, filteredModules.length - 1);
+        syncHighlightedGlobalSearchItem();
+      }
+
+      if (event.key === 'ArrowUp') {
+        event.preventDefault();
+        highlightedModuleIndex = Math.max(highlightedModuleIndex - 1, 0);
+        syncHighlightedGlobalSearchItem();
+      }
+
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        const selectedModule = filteredModules[highlightedModuleIndex] || filteredModules[0];
+        if (selectedModule) {
+          navigateToModule(selectedModule.url);
+        }
+      }
+
+      if (event.key === 'Escape') {
+        hideGlobalSearchResults();
+      }
+    });
+
+    globalSearchResultsEl.addEventListener('click', (event) => {
+      const item = event.target.closest('.global-search-item');
+      if (!item) return;
+      navigateToModule(item.dataset.url);
+    });
 
     languageSelectEl.addEventListener('change', (event) => {
       currentLanguage = event.target.value;
@@ -539,6 +790,9 @@
     document.addEventListener('click', (event) => {
       if (!settingsPopoverEl.contains(event.target) && !settingsToggleEl.contains(event.target)) {
         toggleSettings(false);
+      }
+      if (!globalSearchResultsEl.contains(event.target) && !globalSearchInputEl.contains(event.target)) {
+        hideGlobalSearchResults();
       }
     });
 
