@@ -1,4 +1,4 @@
-﻿// ===== STATE =====
+// ===== STATE =====
 let tasks = JSON.parse(localStorage.getItem('agenda_tasks') || '[]');
 let notifications = JSON.parse(localStorage.getItem('agenda_notifications') || '[]');
 let userName = localStorage.getItem('user_name') || '';
@@ -20,12 +20,12 @@ const PRIORITY_COLORS = { urgent:'#EF4444', high:'#FF8C42', medium:'#FBBF24', lo
 const PRIORITY_LABELS = { urgent:'Urgente', high:'Alta', medium:'Média', low:'Baixa' };
 const MONTHS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 const GLOBAL_MODULES = [
-  { name:'WeTime', desc:'Relógio online e painel de horário', url:'wetime.html' },
-  { name:'WeRecibos', desc:'Gerador de recibos', url:'recibos.html' },
-  { name:'WeConsultas', desc:'Consultas empresariais', url:'weconsultas.html' },
-  { name:'WeFrotas', desc:'Gestão de frotas', url:'wefrotas.html' },
-  { name:'WeDevs', desc:'Ferramentas e utilidades dev', url:'wedevs.html' },
-  { name:'WeTasks', desc:'Tarefas e organização', url:'wetasks.html' }
+  { name:'WeTime', desc:'Relógio online e painel de horário', url:'https://gaveblue.com/wetime' },
+  { name:'WeRecibos', desc:'Gerador de recibos', url:'https://gaveblue.com/recibos' },
+  { name:'WeConsultas', desc:'Consultas empresariais', url:'https://gaveblue.com/weconsultas' },
+  { name:'WeFrotas', desc:'Gestão de frotas', url:'https://gaveblue.com/wefrotas' },
+  { name:'WeDevs', desc:'Ferramentas e utilidades dev', url:'https://gaveblue.com/wedevs' },
+  { name:'WeTasks', desc:'Tarefas e organização', url:'https://gaveblue.com/wetasks' }
 ];
 
 function save() {
@@ -89,12 +89,21 @@ function getGreeting() {
   const h = parseInt(formatter.format(new Date()), 10);
 
   if (h < 12) {
-    return `<span class="greeting-badge greeting-morning"><i data-lucide="sunrise"></i><strong>Bom dia</strong></span>`;
+    return {
+      html: `<span class="greeting-badge greeting-morning"><i data-lucide="sunrise"></i><strong>Bom dia</strong></span>`,
+      period: 'morning'
+    };
   }
   if (h < 18) {
-    return `<span class="greeting-badge greeting-afternoon"><i data-lucide="sun"></i><strong>Boa tarde</strong></span>`;
+    return {
+      html: `<span class="greeting-badge greeting-afternoon"><i data-lucide="sun"></i><strong>Boa tarde</strong></span>`,
+      period: 'afternoon'
+    };
   }
-  return `<span class="greeting-badge greeting-night"><i data-lucide="moon-star"></i><strong>Boa noite</strong></span>`;
+  return {
+    html: `<span class="greeting-badge greeting-night"><i data-lucide="moon-star"></i><strong>Boa noite</strong></span>`,
+    period: 'night'
+  };
 }
 
 // ===== TOAST =====
@@ -123,6 +132,7 @@ function showToast(msg, type='success') {
 function getSearchNodes() {
   return {
     overlay: document.getElementById('global-search-overlay'),
+    mobilePanel: document.getElementById('mobile-search-panel'),
     desktopInput: document.getElementById('global-search-input-desktop'),
     mobileInput: document.getElementById('global-search-input-mobile'),
     desktopResults: document.getElementById('global-search-results-desktop'),
@@ -145,17 +155,25 @@ function focusGlobalSearch() {
   if (input) input.focus();
 }
 
-function openGlobalSearch() {
-  const { overlay } = getSearchNodes();
+function openGlobalSearch(forceMobileOpen = false) {
+  const { overlay, mobilePanel } = getSearchNodes();
   const results = getActiveSearchResults();
   if (overlay) overlay.classList.add('active');
+  if (window.innerWidth < 960 && mobilePanel) mobilePanel.classList.add('active');
   if (results) results.classList.add('active');
   renderGlobalSearch(getActiveSearchInput()?.value || '');
+  if (forceMobileOpen) {
+    setTimeout(() => {
+      const input = getActiveSearchInput();
+      if (input) input.focus();
+    }, 20);
+  }
 }
 
 function closeGlobalSearch() {
-  const { overlay, desktopResults, mobileResults, desktopInput, mobileInput } = getSearchNodes();
+  const { overlay, mobilePanel, desktopResults, mobileResults, desktopInput, mobileInput } = getSearchNodes();
   if (overlay) overlay.classList.remove('active');
+  if (mobilePanel) mobilePanel.classList.remove('active');
   [desktopResults, mobileResults].forEach(node => node && node.classList.remove('active'));
   [desktopInput, mobileInput].forEach(node => { if (node) node.value = ''; });
 }
@@ -604,30 +622,40 @@ function renderHeader() {
   const today = formatDate(todayStr());
   const time = getBrasiliaTime();
   const greeting = getGreeting();
+  const header = document.querySelector('.header-shell');
+  if (header) {
+    header.classList.remove('period-morning', 'period-afternoon', 'period-night');
+    header.classList.add(`period-${greeting.period}`);
+  }
   
   // Update mobile
   document.getElementById('header-date').textContent = today;
   document.getElementById('header-time').textContent = time;
-  document.getElementById('greeting-text').innerHTML = greeting;
+  document.getElementById('greeting-text').innerHTML = greeting.html;
   
   // Update desktop
   document.getElementById('header-date-desktop').textContent = today;
   document.getElementById('header-time-desktop').textContent = time;
-  document.getElementById('greeting-text-desktop').innerHTML = greeting;
+  document.getElementById('greeting-text-desktop').innerHTML = greeting.html;
   lucide.createIcons();
   
   if (!headerInterval) {
     headerInterval = setInterval(() => {
       const newTime = getBrasiliaTime();
       const newGreeting = getGreeting();
+      const headerEl = document.querySelector('.header-shell');
+      if (headerEl) {
+        headerEl.classList.remove('period-morning', 'period-afternoon', 'period-night');
+        headerEl.classList.add(`period-${newGreeting.period}`);
+      }
       
       // Update mobile
       document.getElementById('header-time').textContent = newTime;
-      document.getElementById('greeting-text').innerHTML = newGreeting;
+      document.getElementById('greeting-text').innerHTML = newGreeting.html;
       
       // Update desktop
       document.getElementById('header-time-desktop').textContent = newTime;
-      document.getElementById('greeting-text-desktop').innerHTML = newGreeting;
+      document.getElementById('greeting-text-desktop').innerHTML = newGreeting.html;
       lucide.createIcons();
     }, 1000);
   }
