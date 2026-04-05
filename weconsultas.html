@@ -8,6 +8,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="/_sdk/element_sdk.js"></script>
   <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -250,8 +251,58 @@
       }
     }
     @media (max-width: 640px) {
+      header {
+        height: auto !important;
+      }
       .global-search {
         display: none;
+      }
+      .global-search.mobile-open {
+        display: block;
+        position: absolute;
+        top: calc(100% + 10px);
+        left: 16px;
+        right: 16px;
+        width: auto;
+        z-index: 70;
+      }
+      .global-search-results {
+        max-height: min(60vh, 380px);
+        overflow-y: auto;
+      }
+      main {
+        padding-left: 0.75rem !important;
+        padding-right: 0.75rem !important;
+        padding-top: 5.5rem !important;
+      }
+      #hero-block {
+        margin-bottom: 1.1rem !important;
+      }
+      #hero-title {
+        font-size: 2rem !important;
+        line-height: 1.08 !important;
+      }
+      #hero-subtitle {
+        font-size: 0.98rem !important;
+      }
+      #home-tab .card-gradient,
+      #content-tab .card-gradient,
+      #help-tab .card-gradient,
+      .query-section.card-gradient {
+        padding: 1.15rem !important;
+        border-radius: 1.35rem !important;
+      }
+      #cards-container {
+        grid-template-columns: 1fr !important;
+      }
+      .feature-card {
+        min-height: 0;
+      }
+      #error-toast {
+        left: 0.75rem !important;
+        right: 0.75rem !important;
+        width: auto;
+        transform: translateY(0) !important;
       }
     }
   </style>
@@ -260,11 +311,17 @@
 <body class="text-white flex flex-col min-h-full">
   <div id="search-focus-overlay" class="search-focus-overlay hidden"></div>
   <header class="fixed top-0 left-0 right-0 z-50 bg-slate-900/95 backdrop-blur-xl border-b border-slate-700/50 h-16">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full min-h-16 py-3 sm:py-0 flex items-center justify-between gap-3">
       <a href="https://gaveblue.com" target="_self" rel="noopener noreferrer">
         <img src="https://i.imgur.com/Zih5jH8.png" alt="Logo GaveBlue" class="h-12 w-auto cursor-pointer hover:opacity-80 transition-opacity" loading="lazy" />
       </a>
-      <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2 sm:gap-3">
+        <button id="mobile-search-btn" class="flex items-center justify-center p-2.5 rounded-xl bg-slate-700/50 hover:bg-slate-600/70 transition-all text-white sm:hidden" aria-label="Pesquisar módulo">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <circle cx="11" cy="11" r="7" stroke-width="2"></circle>
+            <path d="M20 20L17 17" stroke-width="2" stroke-linecap="round"></path>
+          </svg>
+        </button>
         <div class="global-search">
           <svg class="global-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor">
             <circle cx="11" cy="11" r="7" stroke-width="2"></circle>
@@ -273,11 +330,11 @@
           <input id="global-search-input" type="text" class="global-search-input text-sm font-medium" placeholder="Pesquisar módulo..." autocomplete="off" aria-label="Pesquisar módulo">
           <div id="global-search-results" class="global-search-results hidden"></div>
         </div>
-        <button onclick="sairApp()" class="flex items-center gap-2 px-5 py-2 text-sm font-semibold bg-slate-700/50 hover:bg-slate-600/70 rounded-lg transition-all text-white">
+        <button onclick="sairApp()" class="flex items-center gap-2 px-3 sm:px-5 py-2 text-sm font-semibold bg-slate-700/50 hover:bg-slate-600/70 rounded-lg transition-all text-white">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
           </svg>
-          Sair
+          <span class="hidden sm:inline">Sair</span>
         </button>
       </div>
     </div>
@@ -629,6 +686,7 @@
     let config = { ...defaultConfig };
     let banksCache = null;
 
+    const mobileSearchBtn = document.getElementById('mobile-search-btn');
     const globalSearchInputEl = document.getElementById('global-search-input');
     const globalSearchResultsEl = document.getElementById('global-search-results');
     const searchFocusOverlayEl = document.getElementById('search-focus-overlay');
@@ -659,6 +717,10 @@
     function hideGlobalSearchResults() {
       globalSearchResultsEl.classList.add('hidden');
       searchFocusOverlayEl.classList.add('hidden');
+      if (window.innerWidth <= 640) {
+        globalSearchInputEl.closest('.global-search')?.classList.remove('mobile-open');
+        globalSearchInputEl.value = '';
+      }
       highlightedModuleIndex = -1;
     }
 
@@ -766,6 +828,13 @@
       updateGlobalSearch(event.target.value);
     });
 
+    mobileSearchBtn?.addEventListener('click', (event) => {
+      event.stopPropagation();
+      const wrapper = globalSearchInputEl.closest('.global-search');
+      wrapper?.classList.add('mobile-open');
+      setTimeout(() => globalSearchInputEl.focus(), 20);
+    });
+
     globalSearchInputEl.addEventListener('keydown', (event) => {
       if (globalSearchResultsEl.classList.contains('hidden')) {
         if (event.key === 'Enter' && globalSearchInputEl.value.trim()) {
@@ -809,7 +878,13 @@
     });
 
     document.addEventListener('click', (event) => {
-      if (!globalSearchResultsEl.contains(event.target) && !globalSearchInputEl.contains(event.target)) {
+      const searchWrapper = globalSearchInputEl.closest('.global-search');
+      if (
+        !globalSearchResultsEl.contains(event.target) &&
+        !globalSearchInputEl.contains(event.target) &&
+        !searchWrapper?.contains(event.target) &&
+        !mobileSearchBtn?.contains(event.target)
+      ) {
         hideGlobalSearchResults();
       }
     });
@@ -1363,7 +1438,13 @@
 
       document.getElementById('cnpj-data').innerHTML = `
         <div class="space-y-3 text-sm">
-          <div class="flex justify-end">
+          <div class="flex justify-end flex-wrap gap-2">
+            <button onclick="downloadCnpjPdf()" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-500/15 border border-emerald-400/25 text-emerald-100 hover:bg-emerald-500/20 transition-colors">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 16V4m0 12l-4-4m4 4l4-4M4 18v1a2 2 0 002 2h12a2 2 0 002-2v-1" />
+              </svg>
+              Download PDF
+            </button>
             <button onclick="printCnpjDocument()" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white/10 border border-white/15 text-white hover:bg-white/15 transition-colors">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2m-10 0h8v4H10v-4z" />
@@ -1467,10 +1548,9 @@
       `;
     }
 
-    function printCnpjDocument() {
+    function buildCnpjPrintDocument() {
       if (!lastCnpjData || !lastCnpjDigits) {
-        showError('Faça uma consulta de CNPJ antes de imprimir.');
-        return;
+        return null;
       }
 
       const d = lastCnpjData;
@@ -1509,6 +1589,7 @@
         <html lang="pt-BR">
         <head>
           <meta charset="UTF-8">
+          <base href="${window.location.href}">
           <title>Comprovante CNPJ - ${cnpjFmt}</title>
           <style>
             body { font-family: Arial, sans-serif; margin: 12px; color: #000; }
@@ -1691,14 +1772,83 @@
         </html>
       `;
 
+      return {
+        fileName: `cnpj-${lastCnpjDigits}.pdf`,
+        html: printHtml
+      };
+    }
+
+    function printCnpjDocument() {
+      const doc = buildCnpjPrintDocument();
+      if (!doc) {
+        showError('Faça uma consulta de CNPJ antes de imprimir.');
+        return;
+      }
+
       const printWindow = window.open('', '_blank', 'width=900,height=1000');
       if (!printWindow) {
         showError('Não foi possível abrir a janela de impressão.');
         return;
       }
       printWindow.document.open();
-      printWindow.document.write(printHtml);
+      printWindow.document.write(doc.html);
       printWindow.document.close();
+    }
+
+    async function downloadCnpjPdf() {
+      const doc = buildCnpjPrintDocument();
+      if (!doc) {
+        showError('Faça uma consulta de CNPJ antes de baixar o PDF.');
+        return;
+      }
+
+      if (!window.html2pdf) {
+        showError('O recurso de PDF não está disponível neste navegador.');
+        return;
+      }
+
+      const iframe = document.createElement('iframe');
+      iframe.style.position = 'fixed';
+      iframe.style.right = '0';
+      iframe.style.bottom = '0';
+      iframe.style.width = '794px';
+      iframe.style.height = '1123px';
+      iframe.style.opacity = '0';
+      iframe.style.pointerEvents = 'none';
+      iframe.style.border = '0';
+      iframe.style.zIndex = '-1';
+      document.body.appendChild(iframe);
+
+      try {
+        iframe.srcdoc = doc.html;
+
+        await new Promise((resolve, reject) => {
+          const timeout = setTimeout(() => reject(new Error('timeout')), 5000);
+          iframe.onload = () => {
+            clearTimeout(timeout);
+            setTimeout(resolve, 250);
+          };
+        });
+
+        const targetDoc = iframe.contentDocument;
+        const targetSheet = targetDoc?.querySelector('.sheet');
+        if (!targetSheet) {
+          throw new Error('sheet_not_found');
+        }
+
+        await window.html2pdf().set({
+          margin: [8, 8, 8, 8],
+          filename: doc.fileName,
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        }).from(targetSheet).save();
+      } catch (error) {
+        console.error('Erro ao gerar PDF:', error);
+        showError('Não foi possível gerar o PDF agora.');
+      } finally {
+        iframe.remove();
+      }
     }
 
     async function consultarCNPJ() {
