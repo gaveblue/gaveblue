@@ -37,6 +37,103 @@
       transition: all 0.2s ease;
     }
     .top-action:hover { background: rgba(255,255,255,0.2); }
+    .global-search {
+      position: relative;
+      width: min(38vw, 320px);
+      z-index: 70;
+    }
+    .global-search-input {
+      width: 100%;
+      height: 42px;
+      padding: 0 0.95rem 0 2.75rem;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.16);
+      color: white;
+      backdrop-filter: blur(10px);
+      transition: all 0.2s ease;
+    }
+    .global-search-input::placeholder {
+      color: rgba(226, 232, 240, 0.72);
+    }
+    .global-search-input:focus {
+      outline: none;
+      background: rgba(255,255,255,0.14);
+      border-color: rgba(147, 197, 253, 0.45);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.16);
+    }
+    .global-search-icon {
+      position: absolute;
+      left: 0.9rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: rgba(191, 219, 254, 0.92);
+      pointer-events: none;
+      z-index: 2;
+    }
+    .global-search-results {
+      position: absolute;
+      top: calc(100% + 0.65rem);
+      left: 0;
+      right: 0;
+      background: rgba(15, 23, 42, 0.96);
+      border: 1px solid rgba(148, 163, 184, 0.16);
+      border-radius: 18px;
+      box-shadow: 0 24px 50px rgba(2, 6, 23, 0.42);
+      overflow: hidden;
+      z-index: 65;
+    }
+    .global-search-results.hidden {
+      display: none;
+    }
+    .global-search-item {
+      width: 100%;
+      border: 0;
+      background: transparent;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.9rem 1rem;
+      text-align: left;
+      transition: background 0.2s ease;
+    }
+    .global-search-item:hover,
+    .global-search-item.active {
+      background: rgba(59, 130, 246, 0.12);
+    }
+    .global-search-kicker {
+      display: block;
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: rgba(148, 163, 184, 0.88);
+      margin-bottom: 0.12rem;
+    }
+    .global-search-route {
+      font-size: 0.74rem;
+      color: rgba(148, 163, 184, 0.9);
+    }
+    .global-search-empty {
+      padding: 0.95rem 1rem;
+      color: rgba(148, 163, 184, 0.95);
+      font-size: 0.92rem;
+    }
+    .search-focus-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(7, 11, 24, 0.26);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      opacity: 1;
+      transition: opacity 0.22s ease;
+      z-index: 45;
+      pointer-events: none;
+    }
+    .search-focus-overlay.hidden {
+      display: none;
+    }
     .nav-strip {
       background: rgba(255, 255, 255, 0.72);
       border-bottom: 1px solid rgba(148, 163, 184, 0.18);
@@ -474,6 +571,12 @@
       .modal-backdrop {
         padding: 10px;
       }
+      .global-search {
+        width: min(100%, 220px);
+      }
+      .global-search-input {
+        height: 40px;
+      }
       .nav-btn {
         width: 54px;
         height: 54px;
@@ -502,12 +605,18 @@
         grid-template-columns: 1fr;
       }
     }
+    @media (max-width: 640px) {
+      .global-search {
+        display: none;
+      }
+    }
   </style>
   <style>@view-transition { navigation: auto; }</style>
 </head>
 <body>
+  <div id="search-focus-overlay" class="search-focus-overlay hidden"></div>
   <div class="workspace-shell flex flex-col min-h-full">
-    <header class="app-header">
+    <header class="app-header relative z-50">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-3">
         <div class="flex items-center gap-3 min-w-0">
           <a href="https://gaveblue.com" target="_self" rel="noopener noreferrer">
@@ -520,6 +629,14 @@
           </div>
         </div>
         <div class="flex items-center gap-2 sm:gap-3">
+          <div class="global-search">
+            <svg class="global-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <circle cx="11" cy="11" r="7" stroke-width="2"></circle>
+              <path d="M20 20L17 17" stroke-width="2" stroke-linecap="round"></path>
+            </svg>
+            <input id="global-search-input" type="text" class="global-search-input text-sm font-medium" placeholder="Pesquisar módulo..." autocomplete="off" aria-label="Pesquisar módulo">
+            <div id="global-search-results" class="global-search-results hidden"></div>
+          </div>
           <button class="top-action rounded-xl px-3 sm:px-4 py-2 text-sm font-semibold text-white inline-flex items-center gap-2" onclick="window.location.href='https://gaveblue.com'">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -984,6 +1101,17 @@
     let allSuppliers = [];
     let allOrders = [];
     let allFinanceEntries = [];
+    const globalSearchInputEl = document.getElementById('global-search-input');
+    const globalSearchResultsEl = document.getElementById('global-search-results');
+    const searchFocusOverlayEl = document.getElementById('search-focus-overlay');
+    const ecosystemModules = [
+      { name: 'WeTime', description: 'Relógio online e painel de horário', url: 'https://gaveblue.com/wetime' },
+      { name: 'WeRecibos', description: 'Gerador de recibos', url: 'https://gaveblue.com/recibos' },
+      { name: 'WeConsultas', description: 'Consultas empresariais', url: 'https://gaveblue.com/weconsultas' },
+      { name: 'WeFrotas', description: 'Gestão de frotas', url: 'https://gaveblue.com/wefrotas' },
+      { name: 'WeDevs', description: 'Ferramentas e utilidades dev', url: 'https://gaveblue.com/wedevs' },
+      { name: 'WeTasks', description: 'Tarefas e organização', url: 'https://gaveblue.com/wetasks' }
+    ];
     let selectedVehicles = new Set();
     let selectedDrivers = new Set();
     let selectedSuppliers = new Set();
@@ -992,6 +1120,8 @@
     let currentModalType = null;
     let currentEditingId = null;
     let currentFinanceEntryType = null;
+    let filteredModules = [];
+    let highlightedModuleIndex = -1;
     let orderCounter = 1;
     const wefrotasLogoSrc = 'file:///C:/Users/Lucas%20Pimentel/Documents/Playground%202/wefrotas.png';
 
@@ -1026,6 +1156,67 @@
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#39;');
+    }
+
+    function navigateToModule(url) {
+      window.location.href = url;
+    }
+
+    function hideGlobalSearchResults() {
+      globalSearchResultsEl.classList.add('hidden');
+      searchFocusOverlayEl.classList.add('hidden');
+      highlightedModuleIndex = -1;
+    }
+
+    function syncHighlightedGlobalSearchItem() {
+      const items = globalSearchResultsEl.querySelectorAll('.global-search-item');
+      items.forEach((item, index) => {
+        item.classList.toggle('active', index === highlightedModuleIndex);
+      });
+    }
+
+    function renderGlobalSearchResults(modules) {
+      filteredModules = modules;
+      highlightedModuleIndex = modules.length ? 0 : -1;
+
+      if (!modules.length) {
+        globalSearchResultsEl.innerHTML = '<div class="global-search-empty">Nenhum módulo encontrado.</div>';
+        globalSearchResultsEl.classList.remove('hidden');
+        searchFocusOverlayEl.classList.remove('hidden');
+        return;
+      }
+
+      globalSearchResultsEl.innerHTML = modules.map((module, index) => `
+        <button type="button" class="global-search-item${index === highlightedModuleIndex ? ' active' : ''}" data-url="${module.url}">
+          <span>
+            <span class="global-search-kicker">Ecossistema GaveBlue</span>
+            <span class="block font-semibold text-sm">${escapeHtml(module.name)}</span>
+            <span class="global-search-route">${escapeHtml(module.description)}</span>
+          </span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="color:rgba(191,219,254,0.95)">
+            <path d="M7 17L17 7" stroke-width="2" stroke-linecap="round"></path>
+            <path d="M9 7H17V15" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+        </button>
+      `).join('');
+
+      globalSearchResultsEl.classList.remove('hidden');
+      searchFocusOverlayEl.classList.remove('hidden');
+    }
+
+    function updateGlobalSearch(query) {
+      const normalizedQuery = query.trim().toLowerCase();
+      if (!normalizedQuery) {
+        renderGlobalSearchResults(ecosystemModules);
+        return;
+      }
+
+      const modules = ecosystemModules.filter((module) =>
+        module.name.toLowerCase().includes(normalizedQuery) ||
+        module.description.toLowerCase().includes(normalizedQuery)
+      );
+
+      renderGlobalSearchResults(modules);
     }
 
     function getVehicleLabel(vehicleId) {
@@ -1091,6 +1282,64 @@
       const panel = document.getElementById(`panel-${module}`);
       if (panel) panel.classList.add('active');
       if (button) button.classList.add('active');
+    }
+
+    if (globalSearchInputEl && globalSearchResultsEl) {
+      globalSearchInputEl.addEventListener('input', (event) => {
+        updateGlobalSearch(event.target.value);
+      });
+
+      globalSearchInputEl.addEventListener('focus', (event) => {
+        updateGlobalSearch(event.target.value);
+      });
+
+      globalSearchInputEl.addEventListener('keydown', (event) => {
+        if (globalSearchResultsEl.classList.contains('hidden')) {
+          if (event.key === 'Enter' && globalSearchInputEl.value.trim()) {
+            updateGlobalSearch(globalSearchInputEl.value);
+            if (filteredModules[0]) {
+              navigateToModule(filteredModules[0].url);
+            }
+          }
+          return;
+        }
+
+        if (event.key === 'ArrowDown') {
+          event.preventDefault();
+          highlightedModuleIndex = Math.min(highlightedModuleIndex + 1, filteredModules.length - 1);
+          syncHighlightedGlobalSearchItem();
+        }
+
+        if (event.key === 'ArrowUp') {
+          event.preventDefault();
+          highlightedModuleIndex = Math.max(highlightedModuleIndex - 1, 0);
+          syncHighlightedGlobalSearchItem();
+        }
+
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          const selectedModule = filteredModules[highlightedModuleIndex] || filteredModules[0];
+          if (selectedModule) {
+            navigateToModule(selectedModule.url);
+          }
+        }
+
+        if (event.key === 'Escape') {
+          hideGlobalSearchResults();
+        }
+      });
+
+      globalSearchResultsEl.addEventListener('click', (event) => {
+        const item = event.target.closest('.global-search-item');
+        if (!item) return;
+        navigateToModule(item.dataset.url);
+      });
+
+      document.addEventListener('click', (event) => {
+        if (!globalSearchResultsEl.contains(event.target) && !globalSearchInputEl.contains(event.target)) {
+          hideGlobalSearchResults();
+        }
+      });
     }
 
     function applyThemeState(isDark) {
