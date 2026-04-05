@@ -57,11 +57,36 @@
     .editor-surface {
       background: #09101d;
       border: 1px solid rgba(59, 130, 246, 0.12);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+    }
+    .editor-surface.drag-over {
+      border-color: rgba(96, 165, 250, 0.7);
+      box-shadow: inset 0 0 0 1px rgba(96, 165, 250, 0.38), 0 0 0 4px rgba(59, 130, 246, 0.14);
     }
     .editor-stack {
       position: absolute;
       inset: 0;
       overflow: hidden;
+    }
+    .drop-hint {
+      position: absolute;
+      inset: 1rem;
+      border-radius: 1.1rem;
+      border: 1px dashed rgba(96, 165, 250, 0.42);
+      background: linear-gradient(135deg, rgba(14, 165, 233, 0.12), rgba(59, 130, 246, 0.08));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 1.25rem;
+      color: #bfdbfe;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+      z-index: 5;
+    }
+    .editor-surface.drag-over .drop-hint {
+      opacity: 1;
     }
     .highlight-layer,
     .editor-area {
@@ -381,17 +406,25 @@
 
         <section class="grid lg:grid-cols-[1.05fr_0.95fr] gap-4 items-start">
           <div class="card-gradient rounded-[1.75rem] p-3 sm:p-4 flex flex-col min-h-[520px]">
-            <div class="flex items-center justify-between gap-3 mb-3">
+              <div class="flex items-center justify-between gap-3 mb-3">
               <div>
                 <p class="text-slate-400 text-xs uppercase tracking-[0.22em] font-semibold">Editor</p>
                 <p class="text-white font-semibold">Monte seu código por abas</p>
               </div>
-              <button id="run-btn" class="primary-action rounded-xl px-4 py-2 text-sm font-semibold text-white inline-flex items-center gap-2">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-5.197-3.029A1 1 0 008 9v6a1 1 0 001.555.832l5.197-3.03a1 1 0 000-1.664z" />
-                </svg>
-                Executar
-              </button>
+              <div class="flex items-center gap-2">
+                <button id="load-file-btn" class="top-action rounded-xl px-3 py-2 text-sm font-semibold text-cyan-100 inline-flex items-center gap-2">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M12 11v8m0 0l-3-3m3 3l3-3" />
+                  </svg>
+                  <span class="hidden sm:inline">Carregar arquivo</span>
+                </button>
+                <button id="run-btn" class="primary-action rounded-xl px-4 py-2 text-sm font-semibold text-white inline-flex items-center gap-2">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-5.197-3.029A1 1 0 008 9v6a1 1 0 001.555.832l5.197-3.03a1 1 0 000-1.664z" />
+                  </svg>
+                  Executar
+                </button>
+              </div>
             </div>
 
             <div class="flex items-center gap-2 overflow-x-auto pb-1 mb-3">
@@ -402,6 +435,12 @@
 
             <div class="editor-surface rounded-[1.5rem] flex-1 min-h-[360px] overflow-hidden">
               <div class="relative h-full min-h-[360px]">
+                <div id="drop-hint" class="drop-hint">
+                  <div>
+                    <p class="text-sm sm:text-base font-semibold text-white">Arraste e solte um arquivo aqui</p>
+                    <p class="text-xs sm:text-sm text-slate-300 mt-2">Ou use o botão carregar arquivo para preencher a aba ativa.</p>
+                  </div>
+                </div>
                 <div id="html-stack" class="editor-stack">
                   <pre id="html-highlight" class="highlight-layer editor-font scrollbar-thin"></pre>
                   <textarea id="html-editor" class="editor-area editor-font scrollbar-thin" spellcheck="false" placeholder="<!-- Digite seu HTML aqui -->
@@ -512,6 +551,7 @@ console.log('Olá!');"></textarea>
     <div id="toast" class="success-toast fixed bottom-6 left-1/2 -translate-x-1/2 px-5 py-3 rounded-2xl text-sm font-semibold text-white opacity-0 pointer-events-none transition-all duration-300" style="transform: translateX(-50%) translateY(20px);">
       Código executado com sucesso!
     </div>
+    <input id="file-input" type="file" class="hidden" multiple accept=".html,.htm,.css,.js,.mjs,.cjs,.jsx,.ts,.tsx,.txt,.json,.md,.svg,.xml,.csv">
   </div>
 
   <script>
@@ -531,7 +571,10 @@ console.log('Olá!');"></textarea>
     const previewFrame = document.getElementById('preview-frame');
     const fullscreenFrame = document.getElementById('fullscreen-frame');
     const clearBtn = document.getElementById('clear-btn');
+    const loadFileBtn = document.getElementById('load-file-btn');
     const runBtn = document.getElementById('run-btn');
+    const fileInput = document.getElementById('file-input');
+    const editorSurface = document.querySelector('.editor-surface');
     const charCount = document.getElementById('char-count');
     const lineCount = document.getElementById('line-count');
     const toast = document.getElementById('toast');
@@ -701,8 +744,9 @@ console.log('Olá!');"></textarea>
       lineCount.textContent = getLineLabel(lines);
     }
 
-    function showToast() {
+    function showToast(message = 'Código executado com sucesso!') {
       const mobileToast = window.innerWidth <= 640;
+      toast.textContent = message;
       toast.style.opacity = '1';
       toast.style.transform = mobileToast ? 'translateY(0)' : 'translateX(-50%) translateY(0)';
       setTimeout(() => {
@@ -711,22 +755,75 @@ console.log('Olá!');"></textarea>
       }, 1800);
     }
 
+    function injectIntoHead(doc, content) {
+      if (!content.trim()) return doc;
+      if (/<\/head>/i.test(doc)) {
+        return doc.replace(/<\/head>/i, `${content}\n</head>`);
+      }
+      if (/<html[\s>]/i.test(doc)) {
+        return doc.replace(/<html([^>]*)>/i, `<html$1><head>${content}</head>`);
+      }
+      return `<head>${content}</head>${doc}`;
+    }
+
+    function injectIntoBody(doc, content) {
+      if (!content.trim()) return doc;
+      if (/<\/body>/i.test(doc)) {
+        return doc.replace(/<\/body>/i, `${content}\n</body>`);
+      }
+      return `${doc}\n${content}`;
+    }
+
+    function ensurePreviewBase(doc) {
+      if (/<base[\s>]/i.test(doc)) return doc;
+      const baseTag = `<base href="${window.location.href}">`;
+      return injectIntoHead(doc, baseTag);
+    }
+
+    function escapeScriptContent(content) {
+      return content.replace(/<\/script/gi, '<\\/script');
+    }
+
+    function escapeStyleContent(content) {
+      return content.replace(/<\/style/gi, '<\\/style');
+    }
+
     function buildPreviewDoc() {
+      const htmlContent = htmlEditor.value.trim();
+      const cssContent = cssEditor.value.trim();
+      const jsContent = jsEditor.value.trim();
+      const hasFullDocument = /<html[\s>]|<!doctype/i.test(htmlContent);
+
+      if (hasFullDocument) {
+        let fullDocument = htmlEditor.value;
+
+        if (cssContent) {
+          fullDocument = injectIntoHead(fullDocument, `<style>\n${escapeStyleContent(cssEditor.value)}\n</style>`);
+        }
+
+        if (jsContent) {
+          fullDocument = injectIntoBody(fullDocument, `<script>\n${escapeScriptContent(jsEditor.value)}\n<\/script>`);
+        }
+
+        return ensurePreviewBase(fullDocument);
+      }
+
       return `
         <!DOCTYPE html>
         <html lang="pt-BR">
         <head>
           <meta charset="UTF-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <base href="${window.location.href}">
           <style>
             * { box-sizing: border-box; }
             body { margin: 0; padding: 16px; font-family: system-ui, sans-serif; }
-            ${cssEditor.value}
+            ${escapeStyleContent(cssEditor.value)}
           </style>
         </head>
         <body>
           ${htmlEditor.value}
-          <script>${jsEditor.value}<\/script>
+          <script>${escapeScriptContent(jsEditor.value)}<\/script>
         </body>
         </html>
       `;
@@ -748,9 +845,91 @@ console.log('Olá!');"></textarea>
       htmlEditor.value = '';
       cssEditor.value = '';
       jsEditor.value = '';
+      htmlHighlight.innerHTML = '';
+      cssHighlight.innerHTML = '';
+      jsHighlight.innerHTML = '';
       previewFrame.srcdoc = '';
       fullscreenFrame.srcdoc = '';
       updateCounts();
+      showToast('Editor limpo com sucesso!');
+    }
+
+    function getEditorMetaByTab(tab = currentTab) {
+      if (tab === 'css') return { editor: cssEditor, layer: cssHighlight, type: 'css' };
+      if (tab === 'js') return { editor: jsEditor, layer: jsHighlight, type: 'js' };
+      return { editor: htmlEditor, layer: htmlHighlight, type: 'html' };
+    }
+
+    function detectTabFromFileName(fileName = '') {
+      const lowerName = fileName.toLowerCase();
+      if (lowerName.endsWith('.css')) return 'css';
+      if (lowerName.endsWith('.js') || lowerName.endsWith('.mjs') || lowerName.endsWith('.cjs') || lowerName.endsWith('.jsx') || lowerName.endsWith('.ts') || lowerName.endsWith('.tsx')) return 'js';
+      if (lowerName.endsWith('.html') || lowerName.endsWith('.htm') || lowerName.endsWith('.svg') || lowerName.endsWith('.xml')) return 'html';
+      return currentTab;
+    }
+
+    function loadTextIntoEditorTab(content, tab, fileName = '') {
+      const { editor, layer, type } = getEditorMetaByTab(tab);
+      editor.value = content;
+      syncHighlight(editor, layer, type);
+      updateCounts();
+      debounceRun();
+    }
+
+    function readFileEntry(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          resolve({
+            file,
+            content: String(reader.result || ''),
+            tab: detectTabFromFileName(file.name)
+          });
+        };
+        reader.onerror = reject;
+        reader.readAsText(file, 'UTF-8');
+      });
+    }
+
+    async function readFilesIntoEditors(fileList) {
+      const files = Array.from(fileList || []);
+      if (!files.length) return;
+
+      try {
+        const results = await Promise.all(files.map(readFileEntry));
+        const importedTabs = new Set();
+
+        results.forEach(({ content, tab, file }) => {
+          loadTextIntoEditorTab(content, tab, file.name);
+          importedTabs.add(tab);
+        });
+
+        const preferredTab = ['html', 'css', 'js'].find((tab) => importedTabs.has(tab)) || results[0]?.tab;
+        if (preferredTab) {
+          switchTab(preferredTab);
+        }
+
+        const label = files.length === 1
+          ? `Arquivo carregado: ${files[0].name}`
+          : `${files.length} arquivos carregados com sucesso!`;
+        showToast(label);
+      } catch (error) {
+        showToast('Não foi possível ler um dos arquivos.');
+      }
+    }
+
+    async function readFileIntoActiveEditor(file) {
+      if (!file) return;
+      await readFilesIntoEditors([file]);
+    }
+
+    function handleDroppedFiles(fileList) {
+      if (!fileList?.length) return;
+      readFilesIntoEditors(fileList);
+    }
+
+    function setDragState(active) {
+      editorSurface?.classList.toggle('drag-over', active);
     }
 
     function openFullscreen() {
@@ -784,6 +963,11 @@ console.log('Olá!');"></textarea>
     });
 
     clearBtn.addEventListener('click', clearEditors);
+    loadFileBtn.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', (event) => {
+      readFilesIntoEditors(event.target.files);
+      event.target.value = '';
+    });
     runBtn.addEventListener('click', runCode);
     fullscreenBtn.addEventListener('click', openFullscreen);
     closeFullscreenBtn.addEventListener('click', closeFullscreen);
@@ -838,6 +1022,30 @@ console.log('Olá!');"></textarea>
 
     exitBtn.addEventListener('click', () => {
       window.location.href = 'https://gaveblue.com';
+    });
+
+    ['dragenter', 'dragover'].forEach((eventName) => {
+      editorSurface?.addEventListener(eventName, (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        setDragState(true);
+      });
+    });
+
+    ['dragleave', 'dragend'].forEach((eventName) => {
+      editorSurface?.addEventListener(eventName, (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        if (event.relatedTarget && editorSurface.contains(event.relatedTarget)) return;
+        setDragState(false);
+      });
+    });
+
+    editorSurface?.addEventListener('drop', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      setDragState(false);
+      handleDroppedFiles(event.dataTransfer?.files);
     });
 
     document.addEventListener('keydown', (event) => {
