@@ -57,22 +57,55 @@
       background: #09101d;
       border: 1px solid rgba(59, 130, 246, 0.12);
     }
+    .editor-stack {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+    }
+    .highlight-layer,
+    .editor-area {
+      padding: 1.25rem;
+      line-height: 1.65;
+      tab-size: 2;
+      font-size: 14px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      overflow: auto;
+    }
+    .highlight-layer {
+      margin: 0;
+      color: #dbeafe;
+      pointer-events: none;
+    }
     .editor-area {
       background: transparent;
-      color: #dbeafe;
+      color: transparent;
       caret-color: #60a5fa;
       border: 0;
       resize: none;
       outline: none;
       width: 100%;
       height: 100%;
-      padding: 1.25rem;
-      line-height: 1.65;
-      tab-size: 2;
+      position: absolute;
+      inset: 0;
     }
     .editor-area::placeholder {
       color: rgba(148, 163, 184, 0.65);
     }
+    .editor-area::selection {
+      background: rgba(96, 165, 250, 0.28);
+      color: transparent;
+    }
+    .token-tag { color: #7dd3fc; }
+    .token-attr { color: #f9a8d4; }
+    .token-string { color: #86efac; }
+    .token-comment { color: #64748b; }
+    .token-keyword { color: #c4b5fd; }
+    .token-selector { color: #f0abfc; }
+    .token-property { color: #7dd3fc; }
+    .token-number { color: #fdba74; }
+    .token-function { color: #93c5fd; }
+    .token-plain { color: #dbeafe; }
     .preview-frame {
       width: 100%;
       height: 100%;
@@ -116,12 +149,123 @@
     .fullscreen-shell {
       background: white;
     }
+    .global-search {
+      position: relative;
+      width: min(38vw, 320px);
+      z-index: 70;
+    }
+    .global-search-input {
+      width: 100%;
+      height: 42px;
+      padding: 0 0.95rem 0 2.75rem;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.16);
+      color: white;
+      backdrop-filter: blur(10px);
+      transition: all 0.2s ease;
+    }
+    .global-search-input::placeholder {
+      color: rgba(226, 232, 240, 0.72);
+    }
+    .global-search-input:focus {
+      outline: none;
+      background: rgba(255,255,255,0.14);
+      border-color: rgba(147, 197, 253, 0.45);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.16);
+    }
+    .global-search-icon {
+      position: absolute;
+      left: 0.9rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: rgba(191, 219, 254, 0.92);
+      pointer-events: none;
+      z-index: 2;
+    }
+    .global-search-results {
+      position: absolute;
+      top: calc(100% + 0.65rem);
+      left: 0;
+      right: 0;
+      background: rgba(15, 23, 42, 0.96);
+      border: 1px solid rgba(148, 163, 184, 0.16);
+      border-radius: 18px;
+      box-shadow: 0 24px 50px rgba(2, 6, 23, 0.42);
+      overflow: hidden;
+      z-index: 65;
+    }
+    .global-search-results.hidden {
+      display: none;
+    }
+    .global-search-item {
+      width: 100%;
+      border: 0;
+      background: transparent;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.9rem 1rem;
+      text-align: left;
+      transition: background 0.2s ease;
+    }
+    .global-search-item:hover,
+    .global-search-item.active {
+      background: rgba(59, 130, 246, 0.12);
+    }
+    .global-search-kicker {
+      display: block;
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: rgba(148, 163, 184, 0.88);
+      margin-bottom: 0.12rem;
+    }
+    .global-search-route {
+      font-size: 0.74rem;
+      color: rgba(148, 163, 184, 0.9);
+    }
+    .global-search-empty {
+      padding: 0.95rem 1rem;
+      color: rgba(148, 163, 184, 0.95);
+      font-size: 0.92rem;
+    }
+    .search-focus-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(7, 11, 24, 0.26);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      opacity: 1;
+      transition: opacity 0.22s ease;
+      z-index: 45;
+      pointer-events: none;
+    }
+    .search-focus-overlay.hidden {
+      display: none;
+    }
+    @media (max-width: 900px) {
+      .global-search {
+        width: min(100%, 220px);
+      }
+      .global-search-input {
+        height: 40px;
+      }
+    }
+    @media (max-width: 640px) {
+      .global-search {
+        display: none;
+      }
+    }
   </style>
   <style>@view-transition { navigation: auto; }</style>
 </head>
 <body>
+  <div id="search-focus-overlay" class="search-focus-overlay hidden"></div>
   <div id="app" class="h-full w-full flex flex-col">
-    <header class="flex-shrink-0 h-16 border-b border-slate-700/50 bg-slate-900/95 backdrop-blur-xl">
+    <header class="relative z-50 flex-shrink-0 h-16 border-b border-slate-700/50 bg-slate-900/95 backdrop-blur-xl">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between gap-3">
         <div class="flex items-center gap-3 min-w-0">
           <a href="https://gaveblue.com" target="_self" rel="noopener noreferrer">
@@ -134,6 +278,14 @@
           </div>
         </div>
         <div class="flex items-center gap-2 sm:gap-3">
+          <div class="global-search">
+            <svg class="global-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <circle cx="11" cy="11" r="7" stroke-width="2"></circle>
+              <path d="M20 20L17 17" stroke-width="2" stroke-linecap="round"></path>
+            </svg>
+            <input id="global-search-input" type="text" class="global-search-input text-sm font-medium" placeholder="Pesquisar módulo..." autocomplete="off" aria-label="Pesquisar módulo">
+            <div id="global-search-results" class="global-search-results hidden"></div>
+          </div>
           <button id="clear-btn" class="top-action rounded-xl px-3 sm:px-4 py-2 text-sm font-semibold text-rose-200 inline-flex items-center gap-2">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -185,12 +337,17 @@
 
             <div class="editor-surface rounded-[1.5rem] flex-1 min-h-0 overflow-hidden">
               <div class="relative h-full min-h-0">
-                <textarea id="html-editor" class="editor-area editor-font scrollbar-thin absolute inset-0" spellcheck="false" placeholder="<!-- Digite seu HTML aqui -->
+                <div id="html-stack" class="editor-stack">
+                  <pre id="html-highlight" class="highlight-layer editor-font scrollbar-thin"></pre>
+                  <textarea id="html-editor" class="editor-area editor-font scrollbar-thin" spellcheck="false" placeholder="<!-- Digite seu HTML aqui -->
 <div class='container'>
   <h1>Olá, mundo!</h1>
   <p>Comece a criar...</p>
 </div>"></textarea>
-                <textarea id="css-editor" class="editor-area editor-font scrollbar-thin absolute inset-0 hidden" spellcheck="false" placeholder="/* Estilos CSS */
+                </div>
+                <div id="css-stack" class="editor-stack hidden">
+                  <pre id="css-highlight" class="highlight-layer editor-font scrollbar-thin"></pre>
+                  <textarea id="css-editor" class="editor-area editor-font scrollbar-thin" spellcheck="false" placeholder="/* Estilos CSS */
 .container {
   padding: 24px;
   text-align: center;
@@ -199,8 +356,12 @@
 h1 {
   color: #2563eb;
 }"></textarea>
-                <textarea id="js-editor" class="editor-area editor-font scrollbar-thin absolute inset-0 hidden" spellcheck="false" placeholder="// JavaScript
+                </div>
+                <div id="js-stack" class="editor-stack hidden">
+                  <pre id="js-highlight" class="highlight-layer editor-font scrollbar-thin"></pre>
+                  <textarea id="js-editor" class="editor-area editor-font scrollbar-thin" spellcheck="false" placeholder="// JavaScript
 console.log('Olá!');"></textarea>
+                </div>
               </div>
             </div>
 
@@ -296,6 +457,12 @@ console.log('Olá!');"></textarea>
     const htmlEditor = document.getElementById('html-editor');
     const cssEditor = document.getElementById('css-editor');
     const jsEditor = document.getElementById('js-editor');
+    const htmlHighlight = document.getElementById('html-highlight');
+    const cssHighlight = document.getElementById('css-highlight');
+    const jsHighlight = document.getElementById('js-highlight');
+    const htmlStack = document.getElementById('html-stack');
+    const cssStack = document.getElementById('css-stack');
+    const jsStack = document.getElementById('js-stack');
     const previewFrame = document.getElementById('preview-frame');
     const fullscreenFrame = document.getElementById('fullscreen-frame');
     const clearBtn = document.getElementById('clear-btn');
@@ -309,9 +476,22 @@ console.log('Olá!');"></textarea>
     const fullscreenModal = document.getElementById('fullscreen-modal');
     const closeFullscreenBtn = document.getElementById('close-fullscreen-btn');
     const exitBtn = document.getElementById('exit-btn');
+    const globalSearchInputEl = document.getElementById('global-search-input');
+    const globalSearchResultsEl = document.getElementById('global-search-results');
+    const searchFocusOverlayEl = document.getElementById('search-focus-overlay');
+    const ecosystemModules = [
+      { name: 'WeTime', description: 'Relógio online e painel de horário', url: 'https://gaveblue.com/wetime' },
+      { name: 'WeRecibos', description: 'Gerador de recibos', url: 'https://gaveblue.com/recibos' },
+      { name: 'WeConsultas', description: 'Consultas empresariais', url: 'https://gaveblue.com/weconsultas' },
+      { name: 'WeFrotas', description: 'Gestão de frotas', url: 'https://gaveblue.com/wefrotas' },
+      { name: 'WeDevs', description: 'Ferramentas e utilidades dev', url: 'https://gaveblue.com/wedevs' },
+      { name: 'WeTasks', description: 'Tarefas e organização', url: 'https://gaveblue.com/wetasks' }
+    ];
 
     let currentTab = 'html';
     let runTimeout;
+    let filteredModules = [];
+    let highlightedModuleIndex = -1;
 
     function getActiveEditor() {
       if (currentTab === 'css') return cssEditor;
@@ -330,10 +510,113 @@ console.log('Olá!');"></textarea>
     function switchTab(tab) {
       currentTab = tab;
       updateTabStyles(tab);
-      htmlEditor.classList.toggle('hidden', tab !== 'html');
-      cssEditor.classList.toggle('hidden', tab !== 'css');
-      jsEditor.classList.toggle('hidden', tab !== 'js');
+      htmlStack.classList.toggle('hidden', tab !== 'html');
+      cssStack.classList.toggle('hidden', tab !== 'css');
+      jsStack.classList.toggle('hidden', tab !== 'js');
       updateCounts();
+    }
+
+    function escapeHtml(value) {
+      return value
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    }
+
+    function navigateToModule(url) {
+      window.location.href = url;
+    }
+
+    function hideGlobalSearchResults() {
+      globalSearchResultsEl.classList.add('hidden');
+      searchFocusOverlayEl.classList.add('hidden');
+      highlightedModuleIndex = -1;
+    }
+
+    function syncHighlightedGlobalSearchItem() {
+      const items = globalSearchResultsEl.querySelectorAll('.global-search-item');
+      items.forEach((item, index) => {
+        item.classList.toggle('active', index === highlightedModuleIndex);
+      });
+    }
+
+    function renderGlobalSearchResults(modules) {
+      filteredModules = modules;
+      highlightedModuleIndex = modules.length ? 0 : -1;
+
+      if (!modules.length) {
+        globalSearchResultsEl.innerHTML = '<div class="global-search-empty">Nenhum módulo encontrado.</div>';
+        globalSearchResultsEl.classList.remove('hidden');
+        searchFocusOverlayEl.classList.remove('hidden');
+        return;
+      }
+
+      globalSearchResultsEl.innerHTML = modules.map((module, index) => `
+        <button type="button" class="global-search-item${index === highlightedModuleIndex ? ' active' : ''}" data-url="${module.url}">
+          <span>
+            <span class="global-search-kicker">Ecossistema GaveBlue</span>
+            <span class="block font-semibold text-sm">${escapeHtml(module.name)}</span>
+            <span class="global-search-route">${escapeHtml(module.description)}</span>
+          </span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="color:rgba(191,219,254,0.95)">
+            <path d="M7 17L17 7" stroke-width="2" stroke-linecap="round"></path>
+            <path d="M9 7H17V15" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+        </button>
+      `).join('');
+
+      globalSearchResultsEl.classList.remove('hidden');
+      searchFocusOverlayEl.classList.remove('hidden');
+    }
+
+    function updateGlobalSearch(query) {
+      const normalizedQuery = query.trim().toLowerCase();
+      if (!normalizedQuery) {
+        renderGlobalSearchResults(ecosystemModules);
+        return;
+      }
+
+      const modules = ecosystemModules.filter((module) =>
+        module.name.toLowerCase().includes(normalizedQuery) ||
+        module.description.toLowerCase().includes(normalizedQuery)
+      );
+
+      renderGlobalSearchResults(modules);
+    }
+
+    function highlightHtml(code) {
+      let value = escapeHtml(code);
+      value = value.replace(/(&lt;!--[\s\S]*?--&gt;)/g, '<span class="token-comment">$1</span>');
+      value = value.replace(/(&lt;\/?)([a-zA-Z0-9-]+)/g, '$1<span class="token-tag">$2</span>');
+      value = value.replace(/([a-zA-Z-:]+)(=)(&quot;.*?&quot;|'.*?')/g, '<span class="token-attr">$1</span>$2<span class="token-string">$3</span>');
+      return value || '<span class="token-plain"> </span>';
+    }
+
+    function highlightCss(code) {
+      let value = escapeHtml(code);
+      value = value.replace(/(\/\*[\s\S]*?\*\/)/g, '<span class="token-comment">$1</span>');
+      value = value.replace(/([.#]?[a-zA-Z0-9_-]+)(\s*\{)/g, '<span class="token-selector">$1</span>$2');
+      value = value.replace(/([a-z-]+)(\s*:)/g, '<span class="token-property">$1</span>$2');
+      value = value.replace(/(:\s*)(#[0-9a-fA-F]+|\d+px|\d+rem|\d+%|\d+)/g, '$1<span class="token-number">$2</span>');
+      return value || '<span class="token-plain"> </span>';
+    }
+
+    function highlightJs(code) {
+      let value = escapeHtml(code);
+      value = value.replace(/(\/\/.*?$)/gm, '<span class="token-comment">$1</span>');
+      value = value.replace(/('(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*")/g, '<span class="token-string">$1</span>');
+      value = value.replace(/\b(const|let|var|function|return|if|else|for|while|new|class|import|from|export)\b/g, '<span class="token-keyword">$1</span>');
+      value = value.replace(/\b(\d+)\b/g, '<span class="token-number">$1</span>');
+      value = value.replace(/\b([a-zA-Z_$][\w$]*)(?=\()/g, '<span class="token-function">$1</span>');
+      return value || '<span class="token-plain"> </span>';
+    }
+
+    function syncHighlight(editor, layer, type) {
+      if (type === 'html') layer.innerHTML = highlightHtml(editor.value);
+      if (type === 'css') layer.innerHTML = highlightCss(editor.value);
+      if (type === 'js') layer.innerHTML = highlightJs(editor.value);
+      layer.scrollTop = editor.scrollTop;
+      layer.scrollLeft = editor.scrollLeft;
     }
 
     function getLineLabel(lines) {
@@ -413,10 +696,19 @@ console.log('Olá!');"></textarea>
       button.addEventListener('click', () => switchTab(button.dataset.tab));
     });
 
-    [htmlEditor, cssEditor, jsEditor].forEach((editor) => {
+    [
+      [htmlEditor, htmlHighlight, 'html'],
+      [cssEditor, cssHighlight, 'css'],
+      [jsEditor, jsHighlight, 'js']
+    ].forEach(([editor, layer, type]) => {
       editor.addEventListener('input', () => {
         updateCounts();
+        syncHighlight(editor, layer, type);
         debounceRun();
+      });
+      editor.addEventListener('scroll', () => {
+        layer.scrollTop = editor.scrollTop;
+        layer.scrollLeft = editor.scrollLeft;
       });
     });
 
@@ -424,6 +716,49 @@ console.log('Olá!');"></textarea>
     runBtn.addEventListener('click', runCode);
     fullscreenBtn.addEventListener('click', openFullscreen);
     closeFullscreenBtn.addEventListener('click', closeFullscreen);
+    globalSearchInputEl.addEventListener('input', (event) => {
+      updateGlobalSearch(event.target.value);
+    });
+    globalSearchInputEl.addEventListener('focus', (event) => {
+      updateGlobalSearch(event.target.value);
+    });
+    globalSearchInputEl.addEventListener('keydown', (event) => {
+      if (globalSearchResultsEl.classList.contains('hidden')) {
+        if (event.key === 'Enter' && globalSearchInputEl.value.trim()) {
+          updateGlobalSearch(globalSearchInputEl.value);
+          if (filteredModules[0]) {
+            navigateToModule(filteredModules[0].url);
+          }
+        }
+        return;
+      }
+
+      if (event.key === 'ArrowDown') {
+        event.preventDefault();
+        highlightedModuleIndex = Math.min(highlightedModuleIndex + 1, filteredModules.length - 1);
+        syncHighlightedGlobalSearchItem();
+      }
+      if (event.key === 'ArrowUp') {
+        event.preventDefault();
+        highlightedModuleIndex = Math.max(highlightedModuleIndex - 1, 0);
+        syncHighlightedGlobalSearchItem();
+      }
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        const selectedModule = filteredModules[highlightedModuleIndex] || filteredModules[0];
+        if (selectedModule) {
+          navigateToModule(selectedModule.url);
+        }
+      }
+      if (event.key === 'Escape') {
+        hideGlobalSearchResults();
+      }
+    });
+    globalSearchResultsEl.addEventListener('click', (event) => {
+      const item = event.target.closest('.global-search-item');
+      if (!item) return;
+      navigateToModule(item.dataset.url);
+    });
 
     exitBtn.addEventListener('click', () => {
       window.location.href = 'https://gaveblue.com';
@@ -436,6 +771,12 @@ console.log('Olá!');"></textarea>
       }
       if (event.key === 'Escape' && !fullscreenModal.classList.contains('hidden')) {
         closeFullscreen();
+      }
+    });
+
+    document.addEventListener('click', (event) => {
+      if (!globalSearchResultsEl.contains(event.target) && !globalSearchInputEl.contains(event.target)) {
+        hideGlobalSearchResults();
       }
     });
 
@@ -468,6 +809,9 @@ console.log('Olá!');"></textarea>
     }
 
     switchTab('html');
+    syncHighlight(htmlEditor, htmlHighlight, 'html');
+    syncHighlight(cssEditor, cssHighlight, 'css');
+    syncHighlight(jsEditor, jsHighlight, 'js');
     updateCounts();
   </script>
 </body>
