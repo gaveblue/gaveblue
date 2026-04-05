@@ -23,7 +23,8 @@
         radial-gradient(circle at 50% 100%, rgba(139, 92, 246, 0.18), transparent 35%),
         linear-gradient(135deg, #09111f 0%, #0f172a 38%, #151b3b 68%, #0b1220 100%);
       background-attachment: fixed;
-      overflow: hidden;
+      overflow-x: hidden;
+      overflow-y: hidden;
     }
     .card-gradient {
       background: linear-gradient(180deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.96));
@@ -246,6 +247,11 @@
     .search-focus-overlay.hidden {
       display: none;
     }
+    @media (max-width: 1024px) {
+      body {
+        overflow-y: auto;
+      }
+    }
     @media (max-width: 900px) {
       .global-search {
         width: min(100%, 220px);
@@ -255,6 +261,15 @@
       }
     }
     @media (max-width: 640px) {
+      body {
+        overflow-y: auto;
+      }
+      #app {
+        min-height: 100vh;
+      }
+      header {
+        height: auto !important;
+      }
       .global-search {
         display: none;
       }
@@ -266,6 +281,50 @@
         right: 16px;
         width: auto;
       }
+      .global-search-results {
+        max-height: min(60vh, 380px);
+        overflow-y: auto;
+      }
+      main {
+        padding: 0.75rem !important;
+      }
+      main > div {
+        height: auto !important;
+        min-height: 0;
+      }
+      section.glass-panel {
+        padding: 1.1rem !important;
+        border-radius: 1.35rem !important;
+      }
+      section.glass-panel h2 {
+        font-size: 1.65rem !important;
+        line-height: 1.2 !important;
+      }
+      section.flex-1.min-h-0.grid {
+        min-height: auto !important;
+        display: flex !important;
+        flex-direction: column !important;
+      }
+      section.flex-1.min-h-0.grid > div {
+        min-height: auto !important;
+      }
+      .editor-surface {
+        min-height: 360px;
+      }
+      #preview-frame {
+        min-height: 360px;
+      }
+      footer {
+        padding-left: 0.75rem !important;
+        padding-right: 0.75rem !important;
+      }
+      #toast {
+        left: 0.75rem !important;
+        right: 0.75rem !important;
+        bottom: 1rem !important;
+        width: auto;
+        transform: translateY(20px) !important;
+      }
     }
   </style>
   <style>@view-transition { navigation: auto; }</style>
@@ -274,7 +333,7 @@
   <div id="search-focus-overlay" class="search-focus-overlay hidden"></div>
   <div id="app" class="h-full w-full flex flex-col">
     <header class="relative z-50 flex-shrink-0 h-16 border-b border-slate-700/50 bg-slate-900/95 backdrop-blur-xl">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between gap-3">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full min-h-16 py-3 sm:py-0 flex items-center justify-between gap-3">
         <div class="flex items-center gap-3 min-w-0">
           <a href="https://gaveblue.com" target="_self" rel="noopener noreferrer">
             <img src="https://i.imgur.com/Zih5jH8.png" alt="Logo GaveBlue" class="h-12 w-auto cursor-pointer hover:opacity-80 transition-opacity" loading="lazy">
@@ -349,7 +408,7 @@
               <button class="tab-btn inactive rounded-xl px-4 py-2 text-sm font-semibold shrink-0" data-tab="js">JavaScript</button>
             </div>
 
-            <div class="editor-surface rounded-[1.5rem] flex-1 min-h-0 overflow-hidden">
+            <div class="editor-surface rounded-[1.5rem] flex-1 min-h-[360px] overflow-hidden">
               <div class="relative h-full min-h-0">
                 <div id="html-stack" class="editor-stack">
                   <pre id="html-highlight" class="highlight-layer editor-font scrollbar-thin"></pre>
@@ -409,7 +468,7 @@ console.log('Olá!');"></textarea>
               </button>
             </div>
 
-            <div class="rounded-[1.5rem] overflow-hidden bg-white flex-1 min-h-0">
+            <div class="rounded-[1.5rem] overflow-hidden bg-white flex-1 min-h-[360px]">
               <iframe id="preview-frame" class="preview-frame" sandbox="allow-scripts" title="Preview"></iframe>
             </div>
           </div>
@@ -651,11 +710,12 @@ console.log('Olá!');"></textarea>
     }
 
     function showToast() {
+      const mobileToast = window.innerWidth <= 640;
       toast.style.opacity = '1';
-      toast.style.transform = 'translateX(-50%) translateY(0)';
+      toast.style.transform = mobileToast ? 'translateY(0)' : 'translateX(-50%) translateY(0)';
       setTimeout(() => {
         toast.style.opacity = '0';
-        toast.style.transform = 'translateX(-50%) translateY(20px)';
+        toast.style.transform = mobileToast ? 'translateY(20px)' : 'translateX(-50%) translateY(20px)';
       }, 1800);
     }
 
