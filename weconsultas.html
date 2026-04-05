@@ -1764,8 +1764,14 @@
           </div>
           <script>
             window.onload = function() {
-              window.print();
-              setTimeout(function() { window.close(); }, 200);
+              setTimeout(function() {
+                window.print();
+              }, 120);
+            };
+            window.onafterprint = function() {
+              setTimeout(function() {
+                try { window.close(); } catch (e) {}
+              }, 400);
             };
           <\/script>
         </body>
