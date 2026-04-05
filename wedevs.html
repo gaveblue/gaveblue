@@ -24,7 +24,7 @@
         linear-gradient(135deg, #09111f 0%, #0f172a 38%, #151b3b 68%, #0b1220 100%);
       background-attachment: fixed;
       overflow-x: hidden;
-      overflow-y: hidden;
+      overflow-y: auto;
     }
     .card-gradient {
       background: linear-gradient(180deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.96));
@@ -247,11 +247,6 @@
     .search-focus-overlay.hidden {
       display: none;
     }
-    @media (max-width: 1024px) {
-      body {
-        overflow-y: auto;
-      }
-    }
     @media (max-width: 900px) {
       .global-search {
         width: min(100%, 220px);
@@ -261,9 +256,6 @@
       }
     }
     @media (max-width: 640px) {
-      body {
-        overflow-y: auto;
-      }
       #app {
         min-height: 100vh;
       }
@@ -331,7 +323,7 @@
 </head>
 <body>
   <div id="search-focus-overlay" class="search-focus-overlay hidden"></div>
-  <div id="app" class="h-full w-full flex flex-col">
+  <div id="app" class="min-h-screen w-full flex flex-col">
     <header class="relative z-50 flex-shrink-0 h-16 border-b border-slate-700/50 bg-slate-900/95 backdrop-blur-xl">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full min-h-16 py-3 sm:py-0 flex items-center justify-between gap-3">
         <div class="flex items-center gap-3 min-w-0">
@@ -375,8 +367,8 @@
       </div>
     </header>
 
-    <main class="flex-1 min-h-0 p-3 sm:p-4 lg:p-5">
-      <div class="max-w-7xl mx-auto h-full min-h-0 flex flex-col gap-4">
+    <main class="flex-1 p-3 sm:p-4 lg:p-5">
+      <div class="max-w-7xl mx-auto w-full flex flex-col gap-4">
         <section class="glass-panel rounded-[1.75rem] px-5 py-5 sm:px-6 sm:py-6">
           <div class="max-w-4xl">
             <span class="inline-flex px-4 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-400/20 text-cyan-300 text-sm font-semibold mb-4">WeDevs</span>
@@ -387,8 +379,8 @@
           </div>
         </section>
 
-        <section class="flex-1 min-h-0 grid lg:grid-cols-[1.05fr_0.95fr] gap-4">
-          <div class="card-gradient rounded-[1.75rem] p-3 sm:p-4 flex flex-col min-h-0">
+        <section class="grid lg:grid-cols-[1.05fr_0.95fr] gap-4 items-start">
+          <div class="card-gradient rounded-[1.75rem] p-3 sm:p-4 flex flex-col min-h-[520px]">
             <div class="flex items-center justify-between gap-3 mb-3">
               <div>
                 <p class="text-slate-400 text-xs uppercase tracking-[0.22em] font-semibold">Editor</p>
@@ -409,7 +401,7 @@
             </div>
 
             <div class="editor-surface rounded-[1.5rem] flex-1 min-h-[360px] overflow-hidden">
-              <div class="relative h-full min-h-0">
+              <div class="relative h-full min-h-[360px]">
                 <div id="html-stack" class="editor-stack">
                   <pre id="html-highlight" class="highlight-layer editor-font scrollbar-thin"></pre>
                   <textarea id="html-editor" class="editor-area editor-font scrollbar-thin" spellcheck="false" placeholder="<!-- Digite seu HTML aqui -->
@@ -447,7 +439,7 @@ console.log('Olá!');"></textarea>
             </div>
           </div>
 
-          <div class="card-gradient rounded-[1.75rem] p-3 sm:p-4 flex flex-col min-h-0">
+          <div class="card-gradient rounded-[1.75rem] p-3 sm:p-4 flex flex-col min-h-[520px]">
             <div class="flex items-center justify-between gap-3 mb-3">
               <div class="flex items-center gap-2 min-w-0">
                 <div class="flex gap-1 shrink-0">
