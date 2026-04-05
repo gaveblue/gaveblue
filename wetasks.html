@@ -51,12 +51,12 @@
         <div style="font-size:18px;font-weight:700;letter-spacing:-0.3px" id="greeting-text"></div>
        </div>
        <div class="header-actions" style="display:flex;gap:10px;align-items:center;position:relative">
-        <button onclick="toggleNotifications()" style="position:relative"><i data-lucide="bell" style="width:20px;height:20px"></i><span id="notification-badge-mobile" style="position:absolute;top:-4px;right:-4px;background:#FF6B6B;color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;display:none"></span></button> <button onclick="toggleSettings()"><i data-lucide="settings" style="width:20px;height:20px"></i></button> <button onclick="goToWebsite()"><i data-lucide="log-out" style="width:20px;height:20px"></i></button>
+        <button onclick="openGlobalSearch(true)"><i data-lucide="search" style="width:20px;height:20px"></i></button> <button onclick="toggleNotifications()" style="position:relative"><i data-lucide="bell" style="width:20px;height:20px"></i><span id="notification-badge-mobile" style="position:absolute;top:-4px;right:-4px;background:#FF6B6B;color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;display:none"></span></button> <button onclick="toggleSettings()"><i data-lucide="settings" style="width:20px;height:20px"></i></button> <button onclick="goToWebsite()"><i data-lucide="log-out" style="width:20px;height:20px"></i></button>
        </div>
       </div>
       <div style="display:flex;gap:8px;align-items:center;font-size:15px;font-weight:700;letter-spacing:-0.3px;margin-top:6px"><i data-lucide="calendar" style="width:18px;height:18px"></i> <span id="header-date"></span> <span style="opacity:.6">•</span> <span id="header-time"></span>
       </div>
-      <div class="search-anchor" style="margin-top:14px">
+      <div id="mobile-search-panel" class="search-anchor mobile-search-panel" style="margin-top:14px">
        <div class="global-search" onclick="focusGlobalSearch()"><i data-lucide="search" style="width:18px;height:18px"></i><input id="global-search-input-mobile" type="text" placeholder="Pesquisar módulo..." onfocus="openGlobalSearch()" oninput="renderGlobalSearch(this.value)" onkeydown="handleGlobalSearchKeydown(event)"></div>
        <div id="global-search-results-mobile" class="search-results"></div>
       </div>
