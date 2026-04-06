@@ -263,7 +263,7 @@ function getGreeting() {
   });
   const h = parseInt(formatter.format(new Date()), 10);
 
-  if (h < 12) {
+  if (h < 15) {
     return {
       html: `<span class="greeting-badge greeting-morning"><i data-lucide="sunrise"></i><strong>Bom dia</strong></span>`,
       period: 'morning'
@@ -449,7 +449,7 @@ function toggleNotifications(event) {
 function renderNotifications() {
   const list = document.getElementById('notifications-list');
   if (notifications.length === 0) {
-    list.innerHTML = `<div class="empty-state"><div style="width:48px;height:48px;border-radius:16px;background:#EFF6FF;display:flex;align-items:center;justify-content:center;margin-bottom:12px"><i data-lucide="bell-off" style="width:20px;height:20px;color:var(--primary)"></i></div><p style="font-weight:600;font-size:14px;color:var(--text)">Sem notificaÃ§Ãµes</p><p style="font-size:12px;color:var(--secondary)">Voltaremos em breve</p></div>`;
+  list.innerHTML = `<div class="empty-state"><div style="width:48px;height:48px;border-radius:16px;background:#EFF6FF;display:flex;align-items:center;justify-content:center;margin-bottom:12px"><i data-lucide="bell-off" style="width:20px;height:20px;color:var(--primary)"></i></div><p style="font-weight:600;font-size:14px;color:var(--text)">Sem notificações</p><p style="font-size:12px;color:var(--secondary)">Voltaremos em breve</p></div>`;
     lucide.createIcons();
     return;
   }
@@ -671,13 +671,13 @@ function requestClearAll() {
           <i data-lucide="alert-triangle" style="width:32px;height:32px;color:var(--urgent)"></i>
         </div>
         <h3 style="font-weight:800;font-size:20px;margin-bottom:8px;color:var(--urgent)">Limpar Tudo?</h3>
-        <p style="font-size:14px;color:var(--secondary);margin-bottom:12px">VocÃª estÃ¡ prestes a <strong>deletar permanentemente</strong> todas as suas tarefas.</p>
+        <p style="font-size:14px;color:var(--secondary);margin-bottom:12px">Você está prestes a <strong>deletar permanentemente</strong> todas as suas tarefas.</p>
         <div style="background:#FEE2E2;border-radius:12px;padding:12px;margin-bottom:20px;text-align:left">
-          <p style="font-size:13px;color:var(--urgent);font-weight:600;margin-bottom:8px">âš ï¸ Esta aÃ§Ã£o:</p>
+          <p style="font-size:13px;color:var(--urgent);font-weight:600;margin-bottom:8px">Esta ação:</p>
           <ul style="font-size:12px;color:var(--urgent);margin:0;padding-left:20px;list-style:disc">
-            <li>DeletarÃ¡ <strong>TODAS</strong> as tarefas criadas</li>
-            <li>NÃ£o pode ser desfeita</li>
-            <li>LimparÃ¡ seu histÃ³rico completamente</li>
+            <li>Deletará <strong>TODAS</strong> as tarefas criadas</li>
+            <li>Não pode ser desfeita</li>
+            <li>Limpará seu histórico completamente</li>
           </ul>
         </div>
         <div style="display:flex;gap:10px;justify-content:center">
@@ -721,14 +721,14 @@ function requestClearCompleted() {
         <div style="width:64px;height:64px;border-radius:20px;background:linear-gradient(135deg,#FEE2E2 0%,#FECACA 100%);display:flex;align-items:center;justify-content:center;margin:0 auto 20px">
           <i data-lucide="alert-triangle" style="width:32px;height:32px;color:var(--urgent)"></i>
         </div>
-        <h3 style="font-weight:800;font-size:20px;margin-bottom:8px;color:var(--urgent)">Limpar Tarefas ConcluÃ­das?</h3>
-        <p style="font-size:14px;color:var(--secondary);margin-bottom:12px">VocÃª estÃ¡ prestes a deletar <strong>${completedCount} tarefa${completedCount !== 1 ? 's' : ''}</strong> concluÃ­da${completedCount !== 1 ? 's' : ''}.</p>
+        <h3 style="font-weight:800;font-size:20px;margin-bottom:8px;color:var(--urgent)">Limpar Tarefas Concluídas?</h3>
+        <p style="font-size:14px;color:var(--secondary);margin-bottom:12px">Você está prestes a deletar <strong>${completedCount} tarefa${completedCount !== 1 ? 's' : ''}</strong> concluída${completedCount !== 1 ? 's' : ''}.</p>
         <div style="background:#FEE2E2;border-radius:12px;padding:12px;margin-bottom:20px;text-align:left">
-          <p style="font-size:13px;color:var(--urgent);font-weight:600;margin-bottom:8px">âš ï¸ Esta aÃ§Ã£o:</p>
+          <p style="font-size:13px;color:var(--urgent);font-weight:600;margin-bottom:8px">Esta ação:</p>
           <ul style="font-size:12px;color:var(--urgent);margin:0;padding-left:20px;list-style:disc">
-            <li>DeletarÃ¡ <strong>apenas tarefas concluÃ­das</strong></li>
-            <li>Suas tarefas pendentes serÃ£o mantidas</li>
-            <li>NÃ£o pode ser desfeita</li>
+            <li>Deletará <strong>apenas tarefas concluídas</strong></li>
+            <li>Suas tarefas pendentes serão mantidas</li>
+            <li>Não pode ser desfeita</li>
           </ul>
         </div>
         <div style="display:flex;gap:10px;justify-content:center">
@@ -849,20 +849,20 @@ function isTaskOverdue(task) {
   return now >= oneMinuteLater;
 }
 
-// Monitor contÃ­nuo para tarefas em atraso
+// Monitor contínuo para tarefas em atraso
 function startOverdueMonitor() {
   if (overdueCheckInterval) clearInterval(overdueCheckInterval);
   
   overdueCheckInterval = setInterval(() => {
-    // Verificar apenas tarefas PENDENTES (bem mais rÃ¡pido!)
+// Verificar apenas tarefas pendentes
     const pendingTasks = tasks.filter(t => t.status !== 'done');
     
     pendingTasks.forEach(task => {
-      // Pular se jÃ¡ foi notificado ou sem hora
+    // Pular se já foi notificado ou se estiver sem hora
       if (tasksAlreadyNotified.has(task.id) || !task.time) return;
       
       if (isTaskOverdue(task)) {
-        // Primeira vez que detecta atraso - gerar notificação
+    // Primeira vez que detecta atraso: gerar notificação
         tasksAlreadyNotified.add(task.id);
         saveNotifiedTasks();
         addNotification('urgent', `Tarefa "${task.title}" está em ATRASO!`);
@@ -879,7 +879,7 @@ function startOverdueMonitor() {
   }, 1000); // Verifica a cada 1 segundo
 }
 
-// Restaurar tarefas jÃ¡ notificadas do localStorage
+// Restaurar tarefas já notificadas do localStorage
 function restoreNotifiedTasks() {
   const notifiedIds = localStorage.getItem('tasks_notified') || '[]';
   try {
@@ -889,12 +889,12 @@ function restoreNotifiedTasks() {
   }
 }
 
-// Salvar tarefas jÃ¡ notificadas
+// Salvar tarefas já notificadas
 function saveNotifiedTasks() {
   localStorage.setItem('tasks_notified', JSON.stringify([...tasksAlreadyNotified]));
 }
 
-// Limpar notificaÃ§Ãµes quando tarefa Ã© deletada ou completada
+// Limpar notificações quando a tarefa é deletada ou concluída
 function clearTaskNotification(taskId) {
   if (tasksAlreadyNotified.has(taskId)) {
     tasksAlreadyNotified.delete(taskId);
@@ -918,14 +918,14 @@ function renderTasks(targetTasks, container) {
     else filtered = tasks.filter(t => t.date === displayDate);
   }
 
-  // OrdenaÃ§Ã£o: pendentes no topo (por horÃ¡rio), depois concluÃ­das (por horÃ¡rio)
+  // Ordenação: pendentes no topo, depois concluídas
   filtered.sort((a, b) => {
-    // Primeiro: tarefas pendentes vÃªm antes das concluÃ­das
+    // Primeiro: tarefas pendentes vêm antes das concluídas
     if (a.status !== b.status) {
       return a.status === 'done' ? 1 : -1;
     }
     
-    // Segundo: ordenar por horÃ¡rio (principal critÃ©rio)
+    // Segundo: ordenar por horário
     const aHasTime = a.time && a.time.trim();
     const bHasTime = b.time && b.time.trim();
     if (aHasTime && !bHasTime) return -1;
@@ -1093,7 +1093,7 @@ function renderDashboard() {
   const pending = tasks.filter(t => t.status !== 'done').length;
   const urgent = tasks.filter(t => t.priority === 'urgent').length;
 
-  // ATUALIZAR CONTAGEM NO AVISO (SEMPRE VISÃVEL)
+  // Atualizar contagem no aviso
   document.getElementById('warning-count').textContent = total;
 
   // Atualizar cards de resumo
@@ -1102,7 +1102,7 @@ function renderDashboard() {
   document.getElementById('stat-pending').textContent = pending;
   document.getElementById('stat-urgent').textContent = urgent;
 
-  // Renderizar distribuiÃ§Ã£o por prioridade
+  // Renderizar distribuição por prioridade
   const priorityDist = document.getElementById('priority-dist');
   const priorities = { urgent: 0, high: 0, medium: 0, low: 0 };
   tasks.forEach(t => { if (priorities.hasOwnProperty(t.priority)) priorities[t.priority]++; });
@@ -1139,7 +1139,7 @@ function renderDashboard() {
         <div style="width:3px;height:40px;background:${PRIORITY_COLORS[t.priority]};border-radius:2px"></div>
         <div style="flex:1;min-width:0">
           <p style="font-size:13px;font-weight:600;color:var(--text);word-break:break-word;margin-bottom:2px">${t.title}</p>
-          <p style="font-size:11px;color:var(--secondary)">${t.date} ${t.time ? 'â€¢ ' + t.time : ''}</p>
+          <p style="font-size:11px;color:var(--secondary)">${t.date} ${t.time ? '• ' + t.time : ''}</p>
         </div>
         <span style="font-size:10px;font-weight:700;padding:4px 10px;border-radius:6px;background:${PRIORITY_COLORS[t.priority]}15;color:${PRIORITY_COLORS[t.priority]};white-space:nowrap">${PRIORITY_LABELS[t.priority]}</span>
       </div>
@@ -1207,7 +1207,7 @@ function goToDashboardFilter(filterType) {
 
     const completedFilteredTasks = tasks.filter(t => t.status === 'done');
     renderTasks(completedFilteredTasks, document.getElementById('tasks-list'));
-    document.getElementById('tasks-date-label').textContent = 'Tarefas ConcluÃ­das';
+    document.getElementById('tasks-date-label').textContent = 'Tarefas Concluídas';
     return;
   }
 
@@ -1296,8 +1296,8 @@ function submitForm() {
     const idx = tasks.findIndex(t => t.id === editingId);
     if (idx > -1) {
       tasks[idx] = { ...tasks[idx], ...data };
-      addNotification('update', `âœï¸ Tarefa "${titleVal}" foi atualizada`);
-      // Limpar a notificaÃ§Ã£o de atraso quando edita, assim se entrar em atraso de novo vai notificar
+      addNotification('update', `Tarefa "${titleVal}" foi atualizada`);
+      // Limpar a notificação de atraso quando editar, para permitir novo alerta se ela atrasar de novo
       clearTaskNotification(editingId);
     }
   } else {
