@@ -1814,47 +1814,69 @@
         return;
       }
 
-      const iframe = document.createElement('iframe');
-      iframe.style.position = 'fixed';
-      iframe.style.right = '0';
-      iframe.style.bottom = '0';
-      iframe.style.width = '794px';
-      iframe.style.height = '1123px';
-      iframe.style.opacity = '0';
-      iframe.style.pointerEvents = 'none';
-      iframe.style.border = '0';
-      iframe.style.zIndex = '-1';
-      document.body.appendChild(iframe);
+      const parser = new DOMParser();
+      const parsed = parser.parseFromString(doc.html, 'text/html');
+      const sheet = parsed.querySelector('.sheet');
+      if (!sheet) {
+        showError('Não foi possível montar o PDF deste documento.');
+        return;
+      }
+
+      const tempWrapper = document.createElement('div');
+      tempWrapper.style.position = 'absolute';
+      tempWrapper.style.left = '-99999px';
+      tempWrapper.style.top = '0';
+      tempWrapper.style.width = '210mm';
+      tempWrapper.style.padding = '0';
+      tempWrapper.style.margin = '0';
+      tempWrapper.style.background = '#ffffff';
+      tempWrapper.style.visibility = 'visible';
+      tempWrapper.style.opacity = '1';
+      tempWrapper.style.pointerEvents = 'none';
+
+      const styleEl = document.createElement('style');
+      styleEl.textContent = `
+        body { margin: 0; background: #ffffff; }
+        .sheet {
+          width: 190mm;
+          background: #ffffff;
+          box-sizing: border-box;
+        }
+        ${Array.from(parsed.querySelectorAll('style')).map((style) => style.textContent).join('\n')}
+      `;
+
+      const sheetClone = sheet.cloneNode(true);
+
+      tempWrapper.appendChild(styleEl);
+      tempWrapper.appendChild(sheetClone);
+      document.body.appendChild(tempWrapper);
 
       try {
-        iframe.srcdoc = doc.html;
-
-        await new Promise((resolve, reject) => {
-          const timeout = setTimeout(() => reject(new Error('timeout')), 5000);
-          iframe.onload = () => {
-            clearTimeout(timeout);
-            setTimeout(resolve, 250);
-          };
-        });
-
-        const targetDoc = iframe.contentDocument;
-        const targetSheet = targetDoc?.querySelector('.sheet');
-        if (!targetSheet) {
-          throw new Error('sheet_not_found');
-        }
-
         await window.html2pdf().set({
-          margin: [8, 8, 8, 8],
+          margin: [10, 10, 10, 10],
           filename: doc.fileName,
-          image: { type: 'jpeg', quality: 0.98 },
-          html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
-          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        }).from(targetSheet).save();
+          image: { type: 'jpeg', quality: 1 },
+          html2canvas: {
+            scale: 2,
+            useCORS: true,
+            backgroundColor: '#ffffff',
+            scrollX: 0,
+            scrollY: 0
+          },
+          jsPDF: {
+            unit: 'mm',
+            format: 'a4',
+            orientation: 'portrait'
+          },
+          pagebreak: {
+            mode: ['avoid-all', 'css', 'legacy']
+          }
+        }).from(sheetClone).save();
       } catch (error) {
         console.error('Erro ao gerar PDF:', error);
         showError('Não foi possível gerar o PDF agora.');
       } finally {
-        iframe.remove();
+        tempWrapper.remove();
       }
     }
 
