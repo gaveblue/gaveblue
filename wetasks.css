@@ -51,6 +51,18 @@ input:focus,textarea:focus,select:focus{outline:none;border-color:var(--primary)
 .calendar-today-btn{height:46px;border-radius:14px;border:1px solid var(--picker-border,rgba(148,163,184,.16));background:var(--picker-subtle-bg,rgba(255,255,255,.6))}
 .calendar-today-btn:hover{background:rgba(37,99,235,.08)}
 .task-swipe-card{touch-action:pan-y}
+.tutorial-overlay{position:fixed;inset:0;background:rgba(2,6,23,.58);backdrop-filter:blur(6px);z-index:260;pointer-events:auto}
+.tutorial-spotlight{position:fixed;border-radius:22px;border:2px solid rgba(96,165,250,.95);box-shadow:0 0 0 9999px rgba(2,6,23,.48),0 0 0 6px rgba(96,165,250,.12),0 16px 38px rgba(2,6,23,.28);transition:all .25s ease;pointer-events:none}
+.tutorial-card{position:fixed;right:24px;bottom:24px;width:min(380px,calc(100vw - 28px));border-radius:24px;background:linear-gradient(180deg,rgba(255,255,255,.98) 0%,rgba(248,250,252,.98) 100%);border:1px solid rgba(148,163,184,.18);box-shadow:0 28px 70px rgba(2,6,23,.28);padding:20px;display:flex;flex-direction:column;gap:16px;color:#0f172a}
+.tutorial-target-active{position:relative!important;z-index:275!important;filter:none!important;opacity:1!important;box-shadow:0 0 0 2px rgba(125,211,252,.38)!important}
+.tutorial-card-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
+.tutorial-step-label{font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#2563eb;margin-bottom:6px}
+.tutorial-title{font-size:20px;font-weight:800;letter-spacing:-.03em;line-height:1.1}
+.tutorial-description{font-size:14px;line-height:1.65;color:#475569}
+.tutorial-actions{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.tutorial-close{width:38px;height:38px;border-radius:12px;border:1px solid rgba(148,163,184,.18);background:rgba(241,245,249,.9);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;color:#334155}
+.tutorial-close:hover{background:#e2e8f0}
+.tutorial-prev-btn,.tutorial-next-btn,.tutorial-skip-btn{border-radius:14px}
 .empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;color:var(--secondary);text-align:center}
 @keyframes pulse{0%{opacity:1;transform:scale(1)}50%{opacity:.7;transform:scale(1.2)}100%{opacity:1;transform:scale(1)}}
 ::-webkit-scrollbar{width:6px}
@@ -194,3 +206,4 @@ body { box-sizing: border-box; }
   .header-desktop-right { flex:1.2; }
 }
 @media(max-width:640px){.toast{max-width:calc(100vw - 24px)}#toast-container{top:12px}.header-shell{padding:16px 14px 18px}.global-search{height:50px;border-radius:16px}.mobile-search-panel{display:none}.mobile-search-panel.active{display:block;animation:fadeIn .2s ease}.panel-shell{max-width:100%;border-radius:24px 24px 0 0;top:auto;left:0;right:0;height:min(84vh,760px);bottom:0}.calendar-jump-controls{grid-template-columns:1fr 104px auto;gap:8px}.calendar-picker-trigger{height:44px;padding:0 12px;border-radius:13px;font-size:13px}.calendar-today-btn{height:44px;padding:0 10px}.calendar-month-grid,.calendar-year-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.calendar-picker-panel{padding:14px}}
+@media(max-width:640px){.tutorial-card{left:14px;right:14px;bottom:14px;width:auto;padding:18px;border-radius:22px}.tutorial-title{font-size:18px}.tutorial-actions{flex-direction:column;align-items:stretch}.tutorial-actions>div{display:grid;grid-template-columns:1fr 1fr}.tutorial-skip-btn{width:100%;justify-content:center}}
