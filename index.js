@@ -85,65 +85,6 @@ const pages = {
             </div>
           </div>
         </section>
-        <section class="mt-12 sm:mt-16 rounded-[1.5rem] sm:rounded-[2rem] border border-slate-700/50 bg-gradient-to-br from-slate-950/90 via-slate-900/85 to-slate-950/90 p-5 sm:p-8 lg:p-10 shadow-2xl shadow-blue-950/20">
-          <div class="max-w-3xl mx-auto text-center mb-10">
-            <span class="inline-flex items-center px-4 py-1.5 rounded-full bg-blue-500/10 border border-blue-400/20 text-blue-300 text-sm font-semibold mb-4">Por que escolher a GaveBlue?</span>
-            <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-4">Mais praticidade do que usar ferramentas soltas</h2>
-            <p class="text-slate-300 leading-relaxed">Em vez de depender de sites genéricos e soluções separadas, a GaveBlue reúne utilidades úteis para a rotina do dia a dia com acesso rápido, visual consistente e foco em produtividade.</p>
-          </div>
-          <div class="overflow-x-auto rounded-[1.75rem] border border-slate-700/50 bg-slate-950/40">
-            <div class="min-w-[760px] grid grid-cols-[1.2fr_0.9fr_1fr] gap-0 items-stretch overflow-hidden">
-              <div class="bg-white/[0.04] border-r border-slate-700/50 p-5 sm:p-7">
-                <div class="h-14 flex items-center text-slate-200 font-semibold text-lg border-b border-slate-700/50">Recursos disponíveis</div>
-                <div class="space-y-0 pt-2">
-                  <div class="h-12 flex items-center text-slate-200">Gerador de recibos online</div>
-                  <div class="h-12 flex items-center text-slate-200">Organização de tarefas</div>
-                  <div class="h-12 flex items-center text-slate-200">Consulta de CEP e CNPJ</div>
-                  <div class="h-12 flex items-center text-slate-200">Teste rápido de HTML</div>
-                  <div class="h-12 flex items-center text-slate-200">Relógio online em tempo real</div>
-                  <div class="h-12 flex items-center text-slate-200">Acesso centralizado</div>
-                  <div class="h-12 flex items-center text-slate-200">Interface padronizada</div>
-                  <div class="h-12 flex items-center text-slate-200">Lançamentos e novos módulos</div>
-                  <div class="h-12 flex items-center text-slate-200">Ferramentas gratuitas no ar</div>
-                </div>
-              </div>
-              <div class="border-r border-slate-700/50 p-5 sm:p-7 bg-slate-900/40">
-                <div class="h-14 flex items-center justify-center text-slate-300 font-semibold text-center border-b border-slate-700/50">Ferramentas genéricas</div>
-                <div class="space-y-0 pt-2 text-center">
-                  <div class="h-12 flex items-center justify-center text-pink-400 text-2xl">×</div>
-                  <div class="h-12 flex items-center justify-center text-pink-400 text-2xl">×</div>
-                  <div class="h-12 flex items-center justify-center text-pink-400 text-2xl">×</div>
-                  <div class="h-12 flex items-center justify-center text-pink-400 text-2xl">×</div>
-                  <div class="h-12 flex items-center justify-center text-pink-400 text-2xl">×</div>
-                  <div class="h-12 flex items-center justify-center text-pink-400 text-2xl">×</div>
-                  <div class="h-12 flex items-center justify-center text-pink-400 text-2xl">×</div>
-                  <div class="h-12 flex items-center justify-center text-pink-400 text-2xl">×</div>
-                  <div class="h-12 flex items-center justify-center text-yellow-300 text-xl">~</div>
-                </div>
-              </div>
-              <div class="relative p-5 sm:p-7 bg-gradient-to-b from-cyan-400/10 via-blue-500/5 to-emerald-400/10">
-                <div class="absolute inset-0 rounded-[1.6rem] border-2 border-cyan-300/70 pointer-events-none"></div>
-                <div class="h-14 flex items-center justify-center text-white font-bold text-center border-b border-cyan-300/20 relative">
-                  <span class="inline-flex items-center gap-2">
-                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_12px_rgba(74,222,128,0.9)]"></span>
-                    GaveBlue
-                  </span>
-                </div>
-                <div class="space-y-0 pt-2 text-center relative">
-                  <div class="h-12 flex items-center justify-center text-emerald-400 text-2xl">✓</div>
-                  <div class="h-12 flex items-center justify-center text-emerald-400 text-2xl">✓</div>
-                  <div class="h-12 flex items-center justify-center text-emerald-400 text-2xl">✓</div>
-                  <div class="h-12 flex items-center justify-center text-emerald-400 text-2xl">✓</div>
-                  <div class="h-12 flex items-center justify-center text-emerald-400 text-2xl">✓</div>
-                  <div class="h-12 flex items-center justify-center text-emerald-400 text-2xl">✓</div>
-                  <div class="h-12 flex items-center justify-center text-emerald-400 text-2xl">✓</div>
-                  <div class="h-12 flex items-center justify-center text-emerald-400 text-2xl">✓</div>
-                  <div class="h-12 flex items-center justify-center text-emerald-400 text-2xl">✓</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
         <section class="mt-12 sm:mt-16 rounded-[1.5rem] sm:rounded-[2rem] border border-slate-700/50 bg-gradient-to-br from-slate-900/90 via-slate-950/85 to-slate-900/90 p-5 sm:p-8 lg:p-10 shadow-2xl shadow-fuchsia-950/20">
           <div class="grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-8 items-center">
             <div>
@@ -216,6 +157,65 @@ const pages = {
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-4 4v-4z" /></svg>
               Quero ser parceiro da GaveBlue
             </a>
+          </div>
+        </section>
+        <section class="mt-12 sm:mt-16 rounded-[1.5rem] sm:rounded-[2rem] border border-slate-700/50 bg-gradient-to-br from-slate-950/90 via-slate-900/85 to-slate-950/90 p-5 sm:p-8 lg:p-10 shadow-2xl shadow-blue-950/20">
+          <div class="max-w-3xl mx-auto text-center mb-10">
+            <span class="inline-flex items-center px-4 py-1.5 rounded-full bg-blue-500/10 border border-blue-400/20 text-blue-300 text-sm font-semibold mb-4">Por que escolher a GaveBlue?</span>
+            <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-4">Mais praticidade do que usar ferramentas soltas</h2>
+            <p class="text-slate-300 leading-relaxed">Em vez de depender de sites genéricos e soluções separadas, a GaveBlue reúne utilidades úteis para a rotina do dia a dia com acesso rápido, visual consistente e foco em produtividade.</p>
+          </div>
+          <div class="overflow-x-auto rounded-[1.75rem] border border-slate-700/50 bg-slate-950/40">
+            <div class="min-w-[760px] grid grid-cols-[1.2fr_0.9fr_1fr] gap-0 items-stretch overflow-hidden">
+              <div class="bg-white/[0.04] border-r border-slate-700/50 p-5 sm:p-7">
+                <div class="h-14 flex items-center text-slate-200 font-semibold text-lg border-b border-slate-700/50">Recursos disponíveis</div>
+                <div class="space-y-0 pt-2">
+                  <div class="h-12 flex items-center text-slate-200">Gerador de recibos online</div>
+                  <div class="h-12 flex items-center text-slate-200">Organização de tarefas</div>
+                  <div class="h-12 flex items-center text-slate-200">Consulta de CEP e CNPJ</div>
+                  <div class="h-12 flex items-center text-slate-200">Teste rápido de HTML</div>
+                  <div class="h-12 flex items-center text-slate-200">Relógio online em tempo real</div>
+                  <div class="h-12 flex items-center text-slate-200">Acesso centralizado</div>
+                  <div class="h-12 flex items-center text-slate-200">Interface padronizada</div>
+                  <div class="h-12 flex items-center text-slate-200">Lançamentos e novos módulos</div>
+                  <div class="h-12 flex items-center text-slate-200">Ferramentas gratuitas no ar</div>
+                </div>
+              </div>
+              <div class="border-r border-slate-700/50 p-5 sm:p-7 bg-slate-900/40">
+                <div class="h-14 flex items-center justify-center text-slate-300 font-semibold text-center border-b border-slate-700/50">Ferramentas genéricas</div>
+                <div class="space-y-0 pt-2 text-center">
+                  <div class="h-12 flex items-center justify-center text-pink-400 text-2xl">×</div>
+                  <div class="h-12 flex items-center justify-center text-pink-400 text-2xl">×</div>
+                  <div class="h-12 flex items-center justify-center text-pink-400 text-2xl">×</div>
+                  <div class="h-12 flex items-center justify-center text-pink-400 text-2xl">×</div>
+                  <div class="h-12 flex items-center justify-center text-pink-400 text-2xl">×</div>
+                  <div class="h-12 flex items-center justify-center text-pink-400 text-2xl">×</div>
+                  <div class="h-12 flex items-center justify-center text-pink-400 text-2xl">×</div>
+                  <div class="h-12 flex items-center justify-center text-pink-400 text-2xl">×</div>
+                  <div class="h-12 flex items-center justify-center text-yellow-300 text-xl">~</div>
+                </div>
+              </div>
+              <div class="relative p-5 sm:p-7 bg-gradient-to-b from-cyan-400/10 via-blue-500/5 to-emerald-400/10">
+                <div class="absolute inset-0 rounded-[1.6rem] border-2 border-cyan-300/70 pointer-events-none"></div>
+                <div class="h-14 flex items-center justify-center text-white font-bold text-center border-b border-cyan-300/20 relative">
+                  <span class="inline-flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_12px_rgba(74,222,128,0.9)]"></span>
+                    GaveBlue
+                  </span>
+                </div>
+                <div class="space-y-0 pt-2 text-center relative">
+                  <div class="h-12 flex items-center justify-center text-emerald-400 text-2xl">✓</div>
+                  <div class="h-12 flex items-center justify-center text-emerald-400 text-2xl">✓</div>
+                  <div class="h-12 flex items-center justify-center text-emerald-400 text-2xl">✓</div>
+                  <div class="h-12 flex items-center justify-center text-emerald-400 text-2xl">✓</div>
+                  <div class="h-12 flex items-center justify-center text-emerald-400 text-2xl">✓</div>
+                  <div class="h-12 flex items-center justify-center text-emerald-400 text-2xl">✓</div>
+                  <div class="h-12 flex items-center justify-center text-emerald-400 text-2xl">✓</div>
+                  <div class="h-12 flex items-center justify-center text-emerald-400 text-2xl">✓</div>
+                  <div class="h-12 flex items-center justify-center text-emerald-400 text-2xl">✓</div>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
       `
