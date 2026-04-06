@@ -11,10 +11,12 @@ let selectedCalDate = null;
 let selectedTaskDate = null;
 let deleteTargetId = null;
 let completeTargetId = null;
+let completeAction = 'complete';
 let editingId = null;
 let headerInterval = null;
 let overdueCheckInterval = null;
 let tasksAlreadyNotified = new Set();
+let isSubmittingTask = false;
 
 const PRIORITY_COLORS = { urgent:'#EF4444', high:'#FF8C42', medium:'#FBBF24', low:'#10B981' };
 const PRIORITY_LABELS = { urgent:'Urgente', high:'Alta', medium:'Média', low:'Baixa' };
@@ -129,9 +131,57 @@ function testBrowserNotification() {
 }
 
 function save() {
+  tasks = sanitizeTasks(tasks);
   localStorage.setItem('agenda_tasks', JSON.stringify(tasks));
   localStorage.setItem('agenda_notifications', JSON.stringify(notifications));
 }
+
+function sanitizeTasks(taskList) {
+  if (!Array.isArray(taskList)) return [];
+
+  const seen = new Set();
+  const seenSignature = new Set();
+  const normalized = [];
+
+  taskList.forEach((task) => {
+    if (!task || typeof task !== 'object') return;
+
+    const id = String(task.id || '').trim() || `task_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    if (seen.has(id)) return;
+    seen.add(id);
+
+    const normalizedTask = {
+      id,
+      title: String(task.title || '').trim(),
+      description: String(task.description || '').trim(),
+      date: String(task.date || ''),
+      time: String(task.time || ''),
+      priority: PRIORITY_LABELS[task.priority] ? task.priority : 'low',
+      notes: String(task.notes || '').trim(),
+      status: task.status === 'done' ? 'done' : 'pending',
+      createdAt: task.createdAt || new Date().toISOString()
+    };
+
+    const signature = [
+      normalizedTask.title,
+      normalizedTask.description,
+      normalizedTask.date,
+      normalizedTask.time,
+      normalizedTask.priority,
+      normalizedTask.status,
+      normalizedTask.notes
+    ].join('||');
+
+    if (seenSignature.has(signature)) return;
+    seenSignature.add(signature);
+
+    normalized.push(normalizedTask);
+  });
+
+  return normalized.filter((task) => task.title && task.date);
+}
+
+tasks = sanitizeTasks(tasks);
 
 function addNotification(type, message) {
   const notification = {
@@ -601,7 +651,7 @@ function handleImportFile(event) {
     try {
       const data = JSON.parse(e.target.result);
       if (!data.tasks || !Array.isArray(data.tasks)) { showToast('Arquivo inválido!', 'error'); return; }
-      tasks = [...tasks, ...data.tasks];
+      tasks = sanitizeTasks([...tasks, ...data.tasks]);
       save();
       renderAll();
       showToast(`${data.tasks.length} tarefas importadas!`);
@@ -1224,6 +1274,9 @@ function closeTaskModal() {
 }
 
 function submitForm() {
+  if (isSubmittingTask) return;
+  isSubmittingTask = true;
+
   const titleVal = document.getElementById('f-title').value.trim();
   const descVal = document.getElementById('f-desc').value.trim();
   const dateVal = document.getElementById('f-date').value;
@@ -1233,6 +1286,7 @@ function submitForm() {
 
   if (!titleVal || !dateVal) {
     showToast('Preencha título e data!', 'error');
+    isSubmittingTask = false;
     return;
   }
 
@@ -1247,7 +1301,7 @@ function submitForm() {
       clearTaskNotification(editingId);
     }
   } else {
-    const newTask = { id: 'task_' + Date.now(), ...data, status: 'pending', createdAt: new Date().toISOString() };
+    const newTask = { id: `task_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`, ...data, status: 'pending', createdAt: new Date().toISOString() };
     tasks.push(newTask);
     addNotification('create', `Nova tarefa "${titleVal}" criada`);
     showToast(`Tarefa "${titleVal}" criada com sucesso!`);
@@ -1256,6 +1310,7 @@ function submitForm() {
   save();
   closeTaskModal();
   renderAll();
+  setTimeout(() => { isSubmittingTask = false; }, 0);
 }
 
 // ===== DELETE =====
@@ -1288,6 +1343,7 @@ function confirmDelete() {
 // ===== COMPLETE =====
 function requestComplete(id) {
   completeTargetId = id;
+  completeAction = 'complete';
   const t = tasks.find(x => x.id === id);
   document.getElementById('complete-task-name').textContent = t ? `"${t.title}"` : '';
   document.getElementById('complete-modal-title').textContent = 'Concluir tarefa?';
@@ -1297,6 +1353,7 @@ function requestComplete(id) {
 
 function requestUncomplete(id) {
   completeTargetId = id;
+  completeAction = 'uncomplete';
   const t = tasks.find(x => x.id === id);
   document.getElementById('complete-task-name').textContent = t ? `Reabrir "${t.title}"?` : '';
   document.getElementById('complete-modal-title').textContent = 'Reabrir tarefa?';
@@ -1307,19 +1364,20 @@ function requestUncomplete(id) {
 function closeCompleteModal() { 
   document.getElementById('complete-modal').style.display = 'none'; 
   completeTargetId = null; 
+  completeAction = 'complete';
 }
 
 function confirmComplete() {
   if (!completeTargetId) return;
   const t = tasks.find(x => x.id === completeTargetId);
   if (t) {
-    t.status = t.status === 'done' ? 'pending' : 'done';
-    const action = t.status === 'done' ? 'concluÃ­da' : 'reaberta';
+    t.status = completeAction === 'uncomplete' ? 'pending' : 'done';
+    const action = t.status === 'done' ? 'concluída' : 'reaberta';
     const notifType = t.status === 'done' ? 'complete' : 'uncomplete';
     addNotification(notifType, `Tarefa "${t.title}" foi ${action}`);
     showToast(`Tarefa ${action}!`);
     
-    // Limpar notificaÃ§Ã£o de atraso se tarefa foi concluÃ­da
+    // Limpar notificação de atraso se tarefa foi concluída
     if (t.status === 'done') {
       clearTaskNotification(completeTargetId);
     }
@@ -1341,6 +1399,7 @@ function renderAll() {
 
 // ===== INIT =====
 function initApp() {
+  save();
   applyTheme();
   restoreNotifiedTasks();
   getTodayFromAPI().then(() => {
