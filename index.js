@@ -1,4 +1,4 @@
-﻿const pages = {
+const pages = {
       inicio: () => `
         <section class="mt-10 sm:mt-16 px-1 sm:px-0">
           <div class="max-w-4xl mx-auto text-center mb-8 sm:mb-10">
@@ -142,6 +142,80 @@
                 </div>
               </div>
             </div>
+          </div>
+        </section>
+        <section class="mt-12 sm:mt-16 rounded-[1.5rem] sm:rounded-[2rem] border border-slate-700/50 bg-gradient-to-br from-slate-900/90 via-slate-950/85 to-slate-900/90 p-5 sm:p-8 lg:p-10 shadow-2xl shadow-fuchsia-950/20">
+          <div class="grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-8 items-center">
+            <div>
+              <span class="inline-flex items-center px-4 py-1.5 rounded-full bg-fuchsia-500/10 border border-fuchsia-400/20 text-fuchsia-200 text-sm font-semibold mb-4">Apps e soluções sob medida</span>
+              <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-4">Também desenvolvemos experiências para marcas, campanhas e operações reais</h2>
+              <p class="text-slate-300 leading-relaxed max-w-3xl">Além das ferramentas do ecossistema GaveBlue, também criamos aplicativos e interfaces personalizadas para terceiros. Essa vitrine mostra um material promocional desenvolvido para o Grupo Cover, reforçando nossa atuação em produtos digitais com identidade própria.</p>
+              <div class="mt-6 flex flex-wrap gap-3">
+                <a href="https://wa.me/5527988790381" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-fuchsia-500 to-purple-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-fuchsia-950/30 transition hover:from-fuchsia-600 hover:to-purple-700">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-4 4v-4z" /></svg>
+                  Quero um app assim
+                </a>
+                <span class="inline-flex items-center rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-slate-300">Projetos pensados para web, mobile e operação interna</span>
+              </div>
+            </div>
+            <a href="https://gaveblue.com/postoscredenciados-covreecia" target="_self" rel="noopener noreferrer" class="block rounded-[1.5rem] border border-fuchsia-400/20 bg-white/[0.04] p-3 shadow-xl shadow-fuchsia-950/20 transition hover:border-fuchsia-300/40 hover:bg-white/[0.06]">
+              <div class="overflow-hidden rounded-[1.1rem] border border-white/10 bg-slate-950/70">
+                <img src="https://i.imgur.com/2jRKz0K.png" alt="Material promocional de aplicativo desenvolvido para o Grupo Cover" class="w-full h-auto object-cover" loading="lazy">
+              </div>
+            </a>
+          </div>
+        </section>
+        <section class="mt-12 sm:mt-16 rounded-[1.5rem] sm:rounded-[2rem] border border-slate-700/50 bg-gradient-to-br from-slate-950/90 via-slate-900/85 to-slate-950/90 p-5 sm:p-8 lg:p-10 shadow-2xl shadow-cyan-950/20">
+          <div class="max-w-3xl mx-auto text-center mb-10">
+            <span class="inline-flex items-center px-4 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-400/20 text-cyan-200 text-sm font-semibold mb-4">Nossos parceiros</span>
+            <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-4">Empresas e marcas que caminham com a GaveBlue</h2>
+            <p class="text-slate-300 leading-relaxed">Construímos conexões com parceiros que fortalecem nossa entrega, ampliam nosso alcance e ajudam a criar soluções mais completas para quem usa o ecossistema GaveBlue.</p>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+            <a href="https://instagram.com/covreagricola" target="_blank" rel="noopener noreferrer" class="partner-card group rounded-[1.5rem] border border-slate-700/50 p-5 sm:p-6 hover:border-cyan-400/40 transition-all">
+              <div class="partner-logo-wrap rounded-[1.2rem] border border-white/10 p-4">
+                <img src="https://i.imgur.com/ruFvnwS.png" alt="Covre Agrícola" class="w-full h-28 sm:h-32 object-contain" loading="lazy">
+              </div>
+              <div class="mt-5">
+                <h3 class="text-xl font-bold text-white">Covre Agrícola</h3>
+                <p class="mt-2 text-slate-300 leading-relaxed">Parceiro com presença no setor agro, fortalecendo conexões da GaveBlue com operações reais, comunicação digital e projetos que aproximam tecnologia e mercado.</p>
+                <span class="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-cyan-300">Visitar parceiro
+                  <svg class="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h4m0 0v4m0-4L10 14" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5h6M5 5v14h14v-6" /></svg>
+                </span>
+              </div>
+            </a>
+            <a href="https://instagram.com/covreecia" target="_blank" rel="noopener noreferrer" class="partner-card group rounded-[1.5rem] border border-slate-700/50 p-5 sm:p-6 hover:border-cyan-400/40 transition-all">
+              <div class="partner-logo-wrap rounded-[1.2rem] border border-white/10 p-4">
+                <img src="https://i.imgur.com/YuuzkEM.png" alt="Covre e Cia" class="w-full h-28 sm:h-32 object-contain" loading="lazy">
+              </div>
+              <div class="mt-5">
+                <h3 class="text-xl font-bold text-white">Covre e Cia</h3>
+                <p class="mt-2 text-slate-300 leading-relaxed">Uma parceria voltada a relacionamento, visibilidade e presença digital, ampliando a rede de atuação da GaveBlue com marcas que compartilham da mesma visão de crescimento.</p>
+                <span class="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-cyan-300">Visitar parceiro
+                  <svg class="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h4m0 0v4m0-4L10 14" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5h6M5 5v14h14v-6" /></svg>
+                </span>
+              </div>
+            </a>
+            <a href="https://wa.me/5527988790381" target="_blank" rel="noopener noreferrer" class="group rounded-[1.5rem] border border-dashed border-emerald-400/35 bg-emerald-500/[0.06] p-5 sm:p-6 hover:bg-emerald-500/[0.10] hover:border-emerald-300/50 transition-all">
+              <div class="rounded-[1.2rem] border border-dashed border-emerald-300/30 bg-slate-950/60 p-4 flex items-center justify-center">
+                <div class="flex h-28 sm:h-32 w-full items-center justify-center rounded-[1rem] bg-emerald-500/10 text-center">
+                  <span class="text-xl sm:text-2xl font-extrabold tracking-wide text-emerald-200">Sua marca aqui</span>
+                </div>
+              </div>
+              <div class="mt-5">
+                <h3 class="text-xl font-bold text-white">Seja parceiro da GaveBlue</h3>
+                <p class="mt-2 text-slate-300 leading-relaxed">Coloque sua marca em destaque dentro do ecossistema GaveBlue e fortaleça sua presença com uma vitrine pensada para gerar conexão, confiança e novas oportunidades.</p>
+                <span class="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-emerald-300">Quero aparecer aqui
+                  <svg class="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h4m0 0v4m0-4L10 14" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5h6M5 5v14h14v-6" /></svg>
+                </span>
+              </div>
+            </a>
+          </div>
+          <div class="mt-8 flex justify-center">
+            <a href="https://wa.me/5527988790381" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 rounded-xl border border-emerald-400/20 bg-emerald-500/10 px-5 py-3 text-sm font-semibold text-emerald-200 transition hover:bg-emerald-500/15">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-4 4v-4z" /></svg>
+              Quero ser parceiro da GaveBlue
+            </a>
           </div>
         </section>
       `
