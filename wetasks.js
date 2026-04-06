@@ -17,6 +17,9 @@ let headerInterval = null;
 let overdueCheckInterval = null;
 let tasksAlreadyNotified = new Set();
 let isSubmittingTask = false;
+let calendarPickerMode = 'month';
+let calendarYearRangeStart = new Date().getFullYear() - 4;
+let justificationContext = null;
 
 const PRIORITY_COLORS = { urgent:'#EF4444', high:'#FF8C42', medium:'#FBBF24', low:'#10B981' };
 const PRIORITY_LABELS = { urgent:'Urgente', high:'Alta', medium:'Média', low:'Baixa' };
@@ -181,6 +184,56 @@ function sanitizeTasks(taskList) {
   return normalized.filter((task) => task.title && task.date);
 }
 
+function appendTaskObservation(existingNotes, entry) {
+  const notes = String(existingNotes || '').trim();
+  return notes ? `${notes}\n\n${entry}` : entry;
+}
+
+function buildJustificationEntry(prefix, justification) {
+  const stamp = new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+  return `${prefix} (${stamp}): ${justification}`;
+}
+
+function openJustificationModal(config) {
+  justificationContext = config;
+  document.getElementById('justification-title').textContent = config.title || 'Justificativa necessária';
+  document.getElementById('justification-message').textContent = config.message || '';
+  document.getElementById('justification-confirm-btn').innerHTML = `<i data-lucide="file-text" style="width:14px;height:14px"></i> ${config.confirmLabel || 'Salvar justificativa'}`;
+  document.getElementById('justification-text').value = '';
+  document.getElementById('justification-modal').style.display = 'flex';
+  lucide.createIcons();
+  setTimeout(() => {
+    document.getElementById('justification-text').focus();
+  }, 30);
+}
+
+function closeJustificationModal() {
+  document.getElementById('justification-modal').style.display = 'none';
+  document.getElementById('justification-text').value = '';
+  justificationContext = null;
+}
+
+function confirmJustification() {
+  const justification = document.getElementById('justification-text').value.trim();
+  if (!justification) {
+    showToast('Informe uma justificativa para continuar.', 'error');
+    return;
+  }
+  if (!justificationContext) return;
+
+  const context = justificationContext;
+  closeJustificationModal();
+
+  if (context.type === 'date-change') {
+    finalizeTaskSave(context.data, justification, context.previousDate);
+    return;
+  }
+
+  if (context.type === 'late-complete') {
+    finalizeTaskCompletion(context.taskId, context.action, justification);
+  }
+}
+
 tasks = sanitizeTasks(tasks);
 
 function addNotification(type, message) {
@@ -263,9 +316,15 @@ function getGreeting() {
   });
   const h = parseInt(formatter.format(new Date()), 10);
 
-  if (h < 15) {
+  if (h < 12) {
     return {
       html: `<span class="greeting-badge greeting-morning"><i data-lucide="sunrise"></i><strong>Bom dia</strong></span>`,
+      period: 'morning'
+    };
+  }
+  if (h < 15) {
+    return {
+      html: `<span class="greeting-badge greeting-afternoon"><i data-lucide="sun"></i><strong>Boa tarde</strong></span>`,
       period: 'morning'
     };
   }
@@ -616,11 +675,27 @@ function applyTheme() {
     document.documentElement.style.setProperty('--surface', '#1E293B');
     document.documentElement.style.setProperty('--text', '#F1F5F9');
     document.documentElement.style.setProperty('--secondary', '#94A3B8');
+    document.documentElement.style.setProperty('--picker-bg', 'linear-gradient(180deg, rgba(15,23,42,.92) 0%, rgba(30,41,59,.96) 100%)');
+    document.documentElement.style.setProperty('--picker-border', 'rgba(96,165,250,.18)');
+    document.documentElement.style.setProperty('--picker-shadow', '0 12px 32px rgba(2,6,23,.28), inset 0 1px 0 rgba(148,163,184,.08)');
+    document.documentElement.style.setProperty('--picker-panel-bg', 'linear-gradient(180deg, rgba(15,23,42,.96) 0%, rgba(30,41,59,.98) 100%)');
+    document.documentElement.style.setProperty('--picker-panel-border', 'rgba(96,165,250,.12)');
+    document.documentElement.style.setProperty('--picker-panel-shadow', '0 24px 60px rgba(2,6,23,.36), inset 0 1px 0 rgba(148,163,184,.06)');
+    document.documentElement.style.setProperty('--picker-option-bg', 'rgba(51,65,85,.9)');
+    document.documentElement.style.setProperty('--picker-subtle-bg', 'rgba(15,23,42,.54)');
   } else {
     document.documentElement.style.setProperty('--bg', '#F0F4F8');
     document.documentElement.style.setProperty('--surface', '#FFFFFF');
     document.documentElement.style.setProperty('--text', '#1E293B');
     document.documentElement.style.setProperty('--secondary', '#64748B');
+    document.documentElement.style.setProperty('--picker-bg', 'linear-gradient(180deg,rgba(255,255,255,.9) 0%,rgba(248,250,252,.98) 100%)');
+    document.documentElement.style.setProperty('--picker-border', 'rgba(148,163,184,.22)');
+    document.documentElement.style.setProperty('--picker-shadow', '0 8px 24px rgba(15,23,42,.06), inset 0 1px 0 rgba(255,255,255,.82)');
+    document.documentElement.style.setProperty('--picker-panel-bg', 'linear-gradient(180deg,rgba(255,255,255,.95) 0%,rgba(248,250,252,.98) 100%)');
+    document.documentElement.style.setProperty('--picker-panel-border', 'rgba(148,163,184,.14)');
+    document.documentElement.style.setProperty('--picker-panel-shadow', '0 18px 50px rgba(15,23,42,.08), inset 0 1px 0 rgba(255,255,255,.75)');
+    document.documentElement.style.setProperty('--picker-option-bg', 'rgba(226,232,240,.5)');
+    document.documentElement.style.setProperty('--picker-subtle-bg', 'rgba(255,255,255,.6)');
   }
 }
 
@@ -950,7 +1025,13 @@ function renderTasks(targetTasks, container) {
     let timeDisplay = '--:--';
     if (t.time && t.time.trim()) timeDisplay = t.time;
     
-    return `<div class="card fade-in" style="display:grid;grid-template-columns:80px 1fr auto;gap:12px;padding:16px;border-left:4px solid ${pc};${isDone?'background:#F8FAFC':'background:var(--surface)'};cursor:pointer;user-select:none;transition:all .2s;align-items:start;position:relative;margin-bottom:16px">
+    return `<div class="card fade-in task-swipe-card" data-task-id="${t.id}" data-task-status="${t.status}" data-task-overdue="${isOverdue ? 'true' : 'false'}" style="display:grid;grid-template-columns:80px 1fr auto;gap:12px;padding:16px;border-left:4px solid ${pc};${isDone?'background:#F8FAFC':'background:var(--surface)'};cursor:pointer;user-select:none;transition:all .2s;align-items:start;position:relative;margin-bottom:16px;overflow:hidden">
+      <div class="task-swipe-indicator task-swipe-left" style="position:absolute;inset:0 auto 0 0;width:96px;background:linear-gradient(90deg,#EF4444 0%,rgba(239,68,68,.1) 100%);display:flex;align-items:center;justify-content:flex-start;padding-left:18px;opacity:0;pointer-events:none;transition:opacity .18s">
+        <i data-lucide="trash-2" style="width:18px;height:18px;color:#fff"></i>
+      </div>
+      <div class="task-swipe-indicator task-swipe-right" style="position:absolute;inset:0 0 0 auto;width:112px;background:linear-gradient(270deg,${isDone ? '#2563EB' : '#10B981'} 0%,rgba(16,185,129,.1) 100%);display:flex;align-items:center;justify-content:flex-end;padding-right:18px;opacity:0;pointer-events:none;transition:opacity .18s">
+        <i data-lucide="${isDone ? 'rotate-ccw' : 'check'}" style="width:18px;height:18px;color:#fff"></i>
+      </div>
       <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px;background:${pc}08;border-radius:12px;min-height:80px;gap:2px;${isDone?'opacity:.6':''}">
         ${t.time?`<div style="font-size:28px;font-weight:800;color:${pc};line-height:1.1;letter-spacing:-0.5px">${t.time.split(':')[0]}<span style="font-size:28px">:${t.time.split(':')[1]}</span></div>`:`<div style="font-size:11px;color:var(--secondary)">sem hora</div>`}
         <div style="font-size:12px;color:var(--text);font-weight:900;margin-top:2px">${dateFormatted}</div>
@@ -967,7 +1048,7 @@ function renderTasks(targetTasks, container) {
         <button onclick="openTaskModal('${t.id}')" class="btn btn-ghost" style="padding:6px 8px;border-radius:8px;border:1.5px solid var(--primary);color:var(--primary)">
           <i data-lucide="pencil" style="width:18px;height:18px"></i>
         </button>
-        <button onclick="requestDelete('${t.id}')" class="btn btn-ghost" style="padding:6px 8px;border-radius:8px;color:var(--urgent);border:1.5px solid var(--urgent)">
+        <button onclick="requestDelete('${t.id}')" class="btn btn-ghost" style="padding:6px 8px;border-radius:8px;color:var(--urgent);border:1.5px solid var(--urgent);${(isDone || isOverdue) ? 'opacity:.42;cursor:not-allowed;' : ''}">
           <i data-lucide="trash-2" style="width:18px;height:18px"></i>
         </button>
         ${!isDone
@@ -982,6 +1063,77 @@ function renderTasks(targetTasks, container) {
     </div>`;
   }).join('');
   lucide.createIcons();
+  attachTaskSwipeListeners(list);
+}
+
+function attachTaskSwipeListeners(scope) {
+  const cards = (scope || document).querySelectorAll('.task-swipe-card');
+  cards.forEach((card) => {
+    let startX = 0;
+    let currentX = 0;
+    let dragging = false;
+    const taskId = card.dataset.taskId;
+    const leftIndicator = card.querySelector('.task-swipe-left');
+    const rightIndicator = card.querySelector('.task-swipe-right');
+
+    function paintSwipe(deltaX) {
+      const clamped = Math.max(-140, Math.min(140, deltaX));
+      card.style.transform = `translateX(${clamped}px)`;
+      card.style.transition = 'none';
+      if (leftIndicator) leftIndicator.style.opacity = clamped < -24 ? String(Math.min(0.95, Math.abs(clamped) / 120)) : '0';
+      if (rightIndicator) rightIndicator.style.opacity = clamped > 24 ? String(Math.min(0.95, clamped / 120)) : '0';
+    }
+
+    function resetSwipe() {
+      card.style.transition = 'transform .2s ease';
+      card.style.transform = 'translateX(0)';
+      if (leftIndicator) leftIndicator.style.opacity = '0';
+      if (rightIndicator) rightIndicator.style.opacity = '0';
+    }
+
+    function finishSwipe(deltaX) {
+      resetSwipe();
+      if (Math.abs(deltaX) < 96) return;
+      if (!taskId) return;
+
+      if (deltaX > 0) {
+        const task = tasks.find(t => t.id === taskId);
+        if (!task) return;
+        if (task.status === 'done') requestUncomplete(taskId);
+        else requestComplete(taskId);
+        return;
+      }
+
+      requestDelete(taskId);
+    }
+
+    function onStart(clientX, target) {
+      if (target && target.closest('button')) return;
+      dragging = true;
+      startX = clientX;
+      currentX = clientX;
+    }
+
+    function onMove(clientX) {
+      if (!dragging) return;
+      currentX = clientX;
+      paintSwipe(currentX - startX);
+    }
+
+    function onEnd() {
+      if (!dragging) return;
+      dragging = false;
+      finishSwipe(currentX - startX);
+    }
+
+    card.addEventListener('touchstart', (event) => onStart(event.touches[0].clientX, event.target), { passive: true });
+    card.addEventListener('touchmove', (event) => onMove(event.touches[0].clientX), { passive: true });
+    card.addEventListener('touchend', onEnd);
+    card.addEventListener('mousedown', (event) => onStart(event.clientX, event.target));
+    card.addEventListener('mousemove', (event) => onMove(event.clientX));
+    card.addEventListener('mouseup', onEnd);
+    card.addEventListener('mouseleave', onEnd);
+  });
 }
 
 // ===== FILTERS =====
@@ -994,12 +1146,14 @@ function filterTasks(f) {
 function changeTaskDate(days) {
   const today = todayStr();
   if (!selectedTaskDate) selectedTaskDate = today;
-  const date = new Date(selectedTaskDate + 'T00:00:00');
-  date.setDate(date.getDate() + days);
-  selectedTaskDate = date.toISOString().split('T')[0];
-  const [year, month, day] = selectedTaskDate.split('-');
-  calYear = parseInt(year);
-  calMonth = parseInt(month) - 1;
+  const date = createSafeDateFromISO(selectedTaskDate);
+  date.setUTCDate(date.getUTCDate() + days);
+  const nextYear = date.getUTCFullYear();
+  const nextMonth = String(date.getUTCMonth() + 1).padStart(2, '0');
+  const nextDay = String(date.getUTCDate()).padStart(2, '0');
+  selectedTaskDate = `${nextYear}-${nextMonth}-${nextDay}`;
+  calYear = parseInt(nextYear, 10);
+  calMonth = parseInt(nextMonth, 10) - 1;
   selectedCalDate = selectedTaskDate;
   if (currentTab === 'tasks') renderTasks();
   else if (currentTab === 'calendar') renderCalendar();
@@ -1056,8 +1210,93 @@ function switchTab(tab) {
 }
 
 // ===== CALENDAR =====
+function closeCalendarPicker() {
+  const panel = document.getElementById('calendar-picker-panel');
+  const monthTrigger = document.getElementById('calendar-month-trigger');
+  const yearTrigger = document.getElementById('calendar-year-trigger');
+  if (panel) panel.classList.remove('active');
+  if (monthTrigger) monthTrigger.classList.remove('active');
+  if (yearTrigger) yearTrigger.classList.remove('active');
+}
+
+function renderCalendarPickers() {
+  const monthLabel = document.getElementById('cal-month-trigger-label');
+  const yearLabel = document.getElementById('cal-year-trigger-label');
+  const monthOptions = document.getElementById('calendar-month-options');
+  const yearOptions = document.getElementById('calendar-year-options');
+  const yearRangeLabel = document.getElementById('calendar-year-range-label');
+  const panel = document.getElementById('calendar-picker-panel');
+
+  if (!monthLabel || !yearLabel || !monthOptions || !yearOptions || !yearRangeLabel || !panel) return;
+
+  monthLabel.textContent = MONTHS[calMonth];
+  yearLabel.textContent = String(calYear);
+
+  monthOptions.innerHTML = MONTHS.map((month, index) => `
+    <button type="button" class="calendar-picker-option${index === calMonth ? ' active' : ''}" onclick="selectCalendarMonth(${index})">
+      ${month}
+    </button>
+  `).join('');
+
+  const rangeStart = calendarYearRangeStart;
+  const rangeEnd = rangeStart + 8;
+  yearRangeLabel.textContent = `${rangeStart} — ${rangeEnd}`;
+  yearOptions.innerHTML = Array.from({ length: 9 }, (_, offset) => rangeStart + offset).map((year) => `
+    <button type="button" class="calendar-picker-option${year === calYear ? ' active' : ''}" onclick="selectCalendarYear(${year})">
+      ${year}
+    </button>
+  `).join('');
+
+  panel.dataset.mode = calendarPickerMode;
+  monthOptions.style.display = calendarPickerMode === 'month' ? 'grid' : 'none';
+  yearOptions.style.display = calendarPickerMode === 'year' ? 'grid' : 'none';
+  yearRangeLabel.parentElement.style.display = calendarPickerMode === 'year' ? 'flex' : 'none';
+  lucide.createIcons();
+}
+
+function toggleCalendarPicker(mode) {
+  const panel = document.getElementById('calendar-picker-panel');
+  const monthTrigger = document.getElementById('calendar-month-trigger');
+  const yearTrigger = document.getElementById('calendar-year-trigger');
+  if (!panel || !monthTrigger || !yearTrigger) return;
+
+  const isSameModeOpen = panel.classList.contains('active') && calendarPickerMode === mode;
+  calendarPickerMode = mode;
+
+  if (isSameModeOpen) {
+    closeCalendarPicker();
+    return;
+  }
+
+  panel.classList.add('active');
+  monthTrigger.classList.toggle('active', mode === 'month');
+  yearTrigger.classList.toggle('active', mode === 'year');
+  renderCalendarPickers();
+}
+
+function selectCalendarMonth(monthIndex) {
+  calMonth = monthIndex;
+  renderCalendar();
+  closeCalendarPicker();
+}
+
+function selectCalendarYear(year) {
+  calYear = year;
+  renderCalendar();
+  closeCalendarPicker();
+}
+
+function shiftCalendarYearRange(amount) {
+  calendarYearRangeStart += amount;
+  renderCalendarPickers();
+}
+
 function renderCalendar() {
   document.getElementById('cal-month-label').textContent = `${MONTHS[calMonth]} ${calYear}`;
+  if (calYear < calendarYearRangeStart || calYear > calendarYearRangeStart + 8) {
+    calendarYearRangeStart = calYear - 4;
+  }
+  renderCalendarPickers();
   const grid = document.getElementById('cal-grid');
   const firstDay = new Date(calYear, calMonth, 1).getDay();
   const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
@@ -1084,6 +1323,24 @@ function changeMonth(dir) {
   if (calMonth > 11) { calMonth = 0; calYear++; }
   if (calMonth < 0) { calMonth = 11; calYear--; }
   renderCalendar();
+}
+
+function jumpCalendarToSelection() {
+  selectedCalDate = null;
+  renderCalendar();
+}
+
+function jumpCalendarToToday() {
+  const today = todayStr();
+  const [year, month] = today.split('-');
+  calYear = parseInt(year, 10);
+  calMonth = parseInt(month, 10) - 1;
+  calendarYearRangeStart = calYear - 4;
+  selectedTaskDate = today;
+  selectedCalDate = today;
+  updateTaskDateLabel();
+  renderCalendar();
+  closeCalendarPicker();
 }
 
 // ===== RENDER DASHBOARD =====
@@ -1273,6 +1530,34 @@ function closeTaskModal() {
   editingId = null;
 }
 
+function finalizeTaskSave(data, justification = '', previousDate = '') {
+  if (editingId) {
+    const idx = tasks.findIndex(t => t.id === editingId);
+    if (idx > -1) {
+      const updatedTask = { ...tasks[idx], ...data };
+      if (justification && previousDate && previousDate !== data.date) {
+        updatedTask.notes = appendTaskObservation(
+          updatedTask.notes,
+          buildJustificationEntry(`Data alterada de ${previousDate} para ${data.date}`, justification)
+        );
+      }
+      tasks[idx] = updatedTask;
+      addNotification('update', `Tarefa "${data.title}" foi atualizada`);
+      clearTaskNotification(editingId);
+    }
+  } else {
+    const newTask = { id: `task_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`, ...data, status: 'pending', createdAt: new Date().toISOString() };
+    tasks.push(newTask);
+    addNotification('create', `Nova tarefa "${data.title}" criada`);
+    showToast(`Tarefa "${data.title}" criada com sucesso!`);
+  }
+
+  save();
+  closeTaskModal();
+  renderAll();
+  setTimeout(() => { isSubmittingTask = false; }, 0);
+}
+
 function submitForm() {
   if (isSubmittingTask) return;
   isSubmittingTask = true;
@@ -1293,30 +1578,40 @@ function submitForm() {
   const data = { title: titleVal, description: descVal, date: dateVal, time: timeVal, priority: priorityVal, notes: notesVal };
 
   if (editingId) {
-    const idx = tasks.findIndex(t => t.id === editingId);
-    if (idx > -1) {
-      tasks[idx] = { ...tasks[idx], ...data };
-      addNotification('update', `Tarefa "${titleVal}" foi atualizada`);
-      // Limpar a notificação de atraso quando editar, para permitir novo alerta se ela atrasar de novo
-      clearTaskNotification(editingId);
+    const existingTask = tasks.find(t => t.id === editingId);
+    if (existingTask && existingTask.date !== dateVal) {
+      isSubmittingTask = false;
+      openJustificationModal({
+        type: 'date-change',
+        title: 'Justifique a mudança de prazo',
+        message: `Você alterou a data da tarefa "${titleVal}". Explique o motivo de ela não ter sido concluída no prazo anterior.`,
+        confirmLabel: 'Salvar alteração',
+        data,
+        previousDate: existingTask.date
+      });
+      return;
     }
   } else {
-    const newTask = { id: `task_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`, ...data, status: 'pending', createdAt: new Date().toISOString() };
-    tasks.push(newTask);
-    addNotification('create', `Nova tarefa "${titleVal}" criada`);
-    showToast(`Tarefa "${titleVal}" criada com sucesso!`);
+    finalizeTaskSave(data);
+    return;
   }
 
-  save();
-  closeTaskModal();
-  renderAll();
-  setTimeout(() => { isSubmittingTask = false; }, 0);
+  finalizeTaskSave(data);
 }
 
 // ===== DELETE =====
 function requestDelete(id) {
-  deleteTargetId = id;
   const t = tasks.find(x => x.id === id);
+  if (!t) return;
+  if (t.status === 'done') {
+    showToast('Tarefas concluídas não podem ser excluídas por aqui. Use a limpeza do dashboard.', 'info');
+    return;
+  }
+  if (isTaskOverdue(t)) {
+    showToast('Tarefas em atraso não podem ser excluídas.', 'error');
+    return;
+  }
+  deleteTargetId = id;
   document.getElementById('delete-task-name').textContent = t ? `"${t.title}"` : '';
   document.getElementById('delete-modal').style.display = 'flex';
   lucide.createIcons();
@@ -1330,6 +1625,15 @@ function closeDeleteModal() {
 function confirmDelete() {
   if (!deleteTargetId) return;
   const task = tasks.find(t => t.id === deleteTargetId);
+  if (!task) {
+    closeDeleteModal();
+    return;
+  }
+  if (task.status === 'done' || isTaskOverdue(task)) {
+    closeDeleteModal();
+    showToast('Essa tarefa não pode ser excluída por aqui.', 'error');
+    return;
+  }
   clearTaskNotification(deleteTargetId);
   tasks = tasks.filter(x => x.id !== deleteTargetId);
   if (task) addNotification('delete', `Tarefa "${task.title}" foi deletada`);
@@ -1345,6 +1649,7 @@ function requestComplete(id) {
   completeTargetId = id;
   completeAction = 'complete';
   const t = tasks.find(x => x.id === id);
+  if (!t) return;
   document.getElementById('complete-task-name').textContent = t ? `"${t.title}"` : '';
   document.getElementById('complete-modal-title').textContent = 'Concluir tarefa?';
   document.getElementById('complete-modal').style.display = 'flex';
@@ -1355,6 +1660,7 @@ function requestUncomplete(id) {
   completeTargetId = id;
   completeAction = 'uncomplete';
   const t = tasks.find(x => x.id === id);
+  if (!t) return;
   document.getElementById('complete-task-name').textContent = t ? `Reabrir "${t.title}"?` : '';
   document.getElementById('complete-modal-title').textContent = 'Reabrir tarefa?';
   document.getElementById('complete-modal').style.display = 'flex';
@@ -1367,15 +1673,20 @@ function closeCompleteModal() {
   completeAction = 'complete';
 }
 
-function confirmComplete() {
-  if (!completeTargetId) return;
-  const t = tasks.find(x => x.id === completeTargetId);
+function finalizeTaskCompletion(taskId, action, justification = '') {
+  const t = tasks.find(x => x.id === taskId);
   if (t) {
-    t.status = completeAction === 'uncomplete' ? 'pending' : 'done';
-    const action = t.status === 'done' ? 'concluída' : 'reaberta';
+    t.status = action === 'uncomplete' ? 'pending' : 'done';
+    if (justification && action === 'complete') {
+      t.notes = appendTaskObservation(
+        t.notes,
+        buildJustificationEntry('Concluída fora do prazo', justification)
+      );
+    }
+    const actionLabel = t.status === 'done' ? 'concluída' : 'reaberta';
     const notifType = t.status === 'done' ? 'complete' : 'uncomplete';
-    addNotification(notifType, `Tarefa "${t.title}" foi ${action}`);
-    showToast(`Tarefa ${action}!`);
+    addNotification(notifType, `Tarefa "${t.title}" foi ${actionLabel}`);
+    showToast(`Tarefa ${actionLabel}!`);
     
     // Limpar notificação de atraso se tarefa foi concluída
     if (t.status === 'done') {
@@ -1386,6 +1697,31 @@ function confirmComplete() {
   saveNotifiedTasks();
   closeCompleteModal();
   renderAll();
+}
+
+function confirmComplete() {
+  if (!completeTargetId) return;
+  const t = tasks.find(x => x.id === completeTargetId);
+  if (!t) {
+    closeCompleteModal();
+    return;
+  }
+
+  const action = completeAction;
+  if (action === 'complete' && isTaskOverdue(t)) {
+    closeCompleteModal();
+    openJustificationModal({
+      type: 'late-complete',
+      title: 'Justifique a conclusão fora do prazo',
+      message: `A tarefa "${t.title}" já está em atraso. Explique o motivo da conclusão fora do prazo para registrar nas observações.`,
+      confirmLabel: 'Concluir com justificativa',
+      taskId: t.id,
+      action
+    });
+    return;
+  }
+
+  finalizeTaskCompletion(completeTargetId, action);
 }
 
 // ===== RENDER ALL =====
@@ -1402,14 +1738,24 @@ function initApp() {
   save();
   applyTheme();
   restoreNotifiedTasks();
-  getTodayFromAPI().then(() => {
-    renderAll();
-    updateNotificationBadge();
-    updateBrowserNotificationStatus();
-    lucide.createIcons();
-    updateFabVisibility();
-    startOverdueMonitor();
-  });
+  renderAll();
+  updateNotificationBadge();
+  updateBrowserNotificationStatus();
+  lucide.createIcons();
+  updateFabVisibility();
+  startOverdueMonitor();
+
+  getTodayFromAPI()
+    .then(() => {
+      renderAll();
+      updateNotificationBadge();
+      updateBrowserNotificationStatus();
+      lucide.createIcons();
+      updateFabVisibility();
+    })
+    .catch(() => {
+      // A interface já foi renderizada localmente; a API de horário é apenas complementar.
+    });
 
   setTimeout(() => {
     ensureBrowserNotificationPermission();
@@ -1417,3 +1763,11 @@ function initApp() {
 }
 
 initApp();
+
+document.addEventListener('click', (event) => {
+  const panel = document.getElementById('calendar-picker-panel');
+  if (!panel || !panel.classList.contains('active')) return;
+  const controls = event.target.closest('.calendar-jump-controls');
+  const picker = event.target.closest('.calendar-picker-panel');
+  if (!controls && !picker) closeCalendarPicker();
+});
