@@ -147,6 +147,24 @@ function addNotification(type, message) {
   updateNotificationBadge();
 }
 
+function getSaoPauloISODate() {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Sao_Paulo',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).formatToParts(new Date());
+  const year = parts.find((p) => p.type === 'year')?.value;
+  const month = parts.find((p) => p.type === 'month')?.value;
+  const day = parts.find((p) => p.type === 'day')?.value;
+  return `${year}-${month}-${day}`;
+}
+
+function createSafeDateFromISO(dateStr) {
+  const [year, month, day] = String(dateStr).split('-').map(Number);
+  return new Date(Date.UTC(year, month - 1, day, 12, 0, 0));
+}
+
 async function getTodayFromAPI() {
   try {
     const response = await fetch('https://worldtimeapi.org/api/timezone/America/Sao_Paulo');
@@ -156,8 +174,9 @@ async function getTodayFromAPI() {
     localStorage.setItem('today_cache_time', Date.now());
     return correctDate;
   } catch (e) {
-    const fallback = new Date().toISOString().split('T')[0];
+    const fallback = getSaoPauloISODate();
     localStorage.setItem('today_cache', fallback);
+    localStorage.setItem('today_cache_time', Date.now());
     return fallback;
   }
 }
@@ -167,12 +186,18 @@ function todayStr() {
   const cacheTime = localStorage.getItem('today_cache_time');
   if (stored && cacheTime && (Date.now() - parseInt(cacheTime)) < 3600000) return stored;
   getTodayFromAPI();
-  return stored || new Date().toISOString().split('T')[0];
+  return stored || getSaoPauloISODate();
 }
 
 function formatDate(d) {
-  const dt = new Date(d + 'T00:00:00');
-  return dt.toLocaleDateString('pt-BR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+  const dt = createSafeDateFromISO(d);
+  return dt.toLocaleDateString('pt-BR', {
+    timeZone: 'America/Sao_Paulo',
+    weekday:'long',
+    day:'numeric',
+    month:'long',
+    year:'numeric'
+  });
 }
 
 function getBrasiliaTime() {
@@ -939,8 +964,14 @@ function updateTaskDateLabel() {
   if (displayDate === today) {
     label = 'Hoje';
   } else {
-    const dateObj = new Date(displayDate + 'T00:00:00');
-    const formatted = dateObj.toLocaleDateString('pt-BR', { weekday:'long', day:'2-digit', month:'long', year:'numeric' });
+    const dateObj = createSafeDateFromISO(displayDate);
+    const formatted = dateObj.toLocaleDateString('pt-BR', {
+      timeZone: 'America/Sao_Paulo',
+      weekday:'long',
+      day:'2-digit',
+      month:'long',
+      year:'numeric'
+    });
     label = formatted.charAt(0).toUpperCase() + formatted.slice(1);
   }
   
@@ -992,7 +1023,7 @@ function renderCalendar() {
   }
   grid.innerHTML = html;
   const selDate = selectedCalDate || today;
-  document.getElementById('cal-day-label').textContent = `Tarefas â€” ${new Date(selDate+'T00:00:00').toLocaleDateString('pt-BR',{day:'numeric',month:'long'})}`;
+  document.getElementById('cal-day-label').textContent = `Tarefas — ${createSafeDateFromISO(selDate).toLocaleDateString('pt-BR',{ timeZone:'America/Sao_Paulo', day:'numeric',month:'long'})}`;
   const dayTasks = tasks.filter(t => t.date === selDate);
   renderTasks(dayTasks, document.getElementById('cal-tasks-list'));
 }
@@ -1027,7 +1058,7 @@ function renderDashboard() {
   tasks.forEach(t => { if (priorities.hasOwnProperty(t.priority)) priorities[t.priority]++; });
 
   const maxPriority = Math.max(Object.values(priorities).reduce((a, b) => Math.max(a, b), 0), 1);
-  const priorityLabels = { urgent: 'Urgente', high: 'Alta', medium: 'MÃ©dia', low: 'Baixa' };
+  const priorityLabels = { urgent: 'Urgente', high: 'Alta', medium: 'Média', low: 'Baixa' };
   const priorityColors = { urgent: '#EF4444', high: '#FF8C42', medium: '#FBBF24', low: '#10B981' };
 
   priorityDist.innerHTML = Object.entries(priorities).map(([key, count]) => {
