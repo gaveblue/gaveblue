@@ -20,6 +20,12 @@ let isSubmittingTask = false;
 let calendarPickerMode = 'month';
 let calendarYearRangeStart = new Date().getFullYear() - 4;
 let justificationContext = null;
+let tutorialStepIndex = 0;
+let tutorialActive = false;
+let tutorialHighlightedElement = null;
+let tutorialCreatedDemoTask = false;
+const TUTORIAL_STORAGE_KEY = 'wetasks_tutorial_done';
+const TUTORIAL_DEMO_TASK_ID = 'tutorial_demo_task';
 
 const PRIORITY_COLORS = { urgent:'#EF4444', high:'#FF8C42', medium:'#FBBF24', low:'#10B981' };
 const PRIORITY_LABELS = { urgent:'Urgente', high:'Alta', medium:'Média', low:'Baixa' };
@@ -31,6 +37,82 @@ const GLOBAL_MODULES = [
   { name:'WeFrotas', desc:'Gestão de frotas', url:'https://gaveblue.com/wefrotas' },
   { name:'WeDevs', desc:'Ferramentas e utilidades dev', url:'https://gaveblue.com/wedevs' },
   { name:'WeTasks', desc:'Tarefas e organização', url:'https://gaveblue.com/wetasks' }
+];
+const TUTORIAL_STEPS = [
+  {
+    title: 'Bem-vindo ao WeTasks',
+    description: 'Aqui você organiza seu dia sem complicação. Vou te mostrar rapidamente os pontos principais para você sair usando sem dúvida.',
+    target: () => window.innerWidth < 960 ? '#tutorial-brand-mobile' : '#tutorial-brand-desktop',
+    placement: 'bottom',
+    padding: 6
+  },
+  {
+    title: 'Pesquise outros módulos',
+    description: 'Use a busca global para navegar pelo ecossistema GaveBlue sem sair procurando manualmente cada sistema.',
+    target: () => window.innerWidth < 960 ? '#tutorial-search-mobile' : '#tutorial-search-desktop',
+    placement: 'bottom',
+    padding: 6
+  },
+  {
+    title: 'Troque entre Tarefas, Calendário e Dashboard',
+    description: 'Essas abas organizam sua rotina. Tarefas é o operacional do dia, Calendário ajuda na navegação e Dashboard mostra os indicadores.',
+    target: '#tutorial-main-tabs',
+    placement: 'bottom',
+    padding: 8
+  },
+  {
+    title: 'Adicione tarefas rápido',
+    description: 'Esse botão cria uma nova tarefa a qualquer momento. É o atalho mais importante do módulo.',
+    target: '#fab-button',
+    placement: 'top',
+    padding: 4
+  },
+  {
+    title: 'A tarefa aparece nessa lista',
+    description: 'Depois de lançar uma tarefa, ela aparece aqui com horário, prioridade e ações rápidas para gerenciar seu dia.',
+    target: '#tutorial-demo-card',
+    placement: 'top',
+    padding: 6,
+    onEnter: () => ensureTutorialDemoTask()
+  },
+  {
+    title: 'Edite uma tarefa existente',
+    description: 'Use este botão quando precisar ajustar título, data, horário ou observações sem criar tudo de novo.',
+    target: '#tutorial-demo-edit',
+    placement: 'left',
+    padding: 6,
+    onEnter: () => ensureTutorialDemoTask()
+  },
+  {
+    title: 'Conclua ou reabra quando necessário',
+    description: 'Esse botão conclui a tarefa. Se ela já estiver concluída, o mesmo lugar vira atalho para reabrir.',
+    target: '#tutorial-demo-complete',
+    placement: 'left',
+    padding: 6,
+    onEnter: () => ensureTutorialDemoTask()
+  },
+  {
+    title: 'Exclua somente o que ainda está pendente',
+    description: 'Tarefas pendentes podem ser excluídas por aqui. Tarefas em atraso ou concluídas ficam protegidas das exclusões rápidas.',
+    target: '#tutorial-demo-delete',
+    placement: 'left',
+    padding: 6,
+    onEnter: () => ensureTutorialDemoTask()
+  },
+  {
+    title: 'Gerencie pelo gesto ou pelos filtros',
+    description: 'Também dá para arrastar tarefas para concluir ou tentar excluir, além de usar os filtros para focar no que importa agora.',
+    target: '#tutorial-task-filters',
+    placement: 'bottom',
+    padding: 8
+  },
+  {
+    title: 'Abra as configurações quando precisar',
+    description: 'Em Configurações você encontra tema, importação, notificações do dispositivo, limpeza e a opção de rever este tutorial quando quiser.',
+    target: () => window.innerWidth < 960 ? '#tutorial-settings-mobile' : '.header-desktop .header-actions button:nth-child(2)',
+    placement: 'left',
+    padding: 6
+  }
 ];
 
 function canUseBrowserNotifications() {
@@ -92,6 +174,205 @@ function updateBrowserNotificationStatus() {
 
   statusEl.textContent = 'Desativadas: toque em "Ativar Notificações" para permitir alertas do dispositivo.';
 }
+
+function resolveTutorialTarget(step) {
+  if (!step) return null;
+  const selector = typeof step.target === 'function' ? step.target() : step.target;
+  if (!selector) return null;
+  return document.querySelector(selector);
+}
+
+function clearTutorialHighlight() {
+  if (!tutorialHighlightedElement) return;
+  tutorialHighlightedElement.classList.remove('tutorial-target-active');
+  tutorialHighlightedElement = null;
+}
+
+function applyTutorialHighlight(target) {
+  clearTutorialHighlight();
+  if (!target) return;
+  tutorialHighlightedElement = target;
+  tutorialHighlightedElement.classList.add('tutorial-target-active');
+}
+
+function ensureTutorialDemoTask() {
+  if (tasks.some(task => task.id === TUTORIAL_DEMO_TASK_ID)) return;
+  tutorialCreatedDemoTask = true;
+  tasks.unshift({
+    id: TUTORIAL_DEMO_TASK_ID,
+    title: 'Exemplo do tutorial',
+    description: 'Use este card para entender edição, conclusão e exclusão.',
+    date: selectedTaskDate || todayStr(),
+    time: '09:00',
+    priority: 'medium',
+    notes: '',
+    status: 'pending',
+    createdAt: new Date().toISOString()
+  });
+  save();
+  renderAll();
+}
+
+function removeTutorialDemoTask() {
+  const hasDemo = tasks.some(task => task.id === TUTORIAL_DEMO_TASK_ID);
+  if (!hasDemo) return;
+  tasks = tasks.filter(task => task.id !== TUTORIAL_DEMO_TASK_ID);
+  clearTaskNotification(TUTORIAL_DEMO_TASK_ID);
+  save();
+  renderAll();
+}
+
+function positionTutorialCard(target, placement) {
+  const card = document.getElementById('tutorial-card');
+  if (!card) return;
+
+  card.style.left = '';
+  card.style.right = '';
+  card.style.top = '';
+  card.style.bottom = '';
+
+  if (!target) return;
+
+  const rect = target.getBoundingClientRect();
+  const prefersMobile = window.innerWidth < 640;
+  if (prefersMobile) {
+    card.style.left = '14px';
+    card.style.right = '14px';
+    card.style.bottom = '14px';
+    return;
+  }
+
+  const gap = 18;
+  const cardWidth = Math.min(380, window.innerWidth - 48);
+  const estimatedHeight = card.offsetHeight || 250;
+  const clampLeft = (value) => Math.max(24, Math.min(window.innerWidth - cardWidth - 24, value));
+  const clampTop = (value) => Math.max(24, Math.min(window.innerHeight - estimatedHeight - 24, value));
+  const centeredLeft = clampLeft(rect.left + (rect.width / 2) - (cardWidth / 2));
+
+  if (placement === 'top') {
+    const fitsAbove = rect.top - estimatedHeight - gap >= 24;
+    card.style.top = `${clampTop(fitsAbove ? rect.top - estimatedHeight - gap : rect.bottom + gap)}px`;
+    card.style.left = `${centeredLeft}px`;
+    return;
+  }
+
+  if (placement === 'left') {
+    const placeOnLeft = rect.left > (window.innerWidth / 2);
+    const desiredLeft = placeOnLeft ? rect.left - cardWidth - gap : rect.right + gap;
+    card.style.left = `${clampLeft(desiredLeft)}px`;
+    card.style.top = `${clampTop(rect.top + (rect.height / 2) - (estimatedHeight / 2))}px`;
+    return;
+  }
+
+  const fitsBelow = rect.bottom + estimatedHeight + gap <= window.innerHeight - 24;
+  card.style.top = `${clampTop(fitsBelow ? rect.bottom + gap : rect.top - estimatedHeight - gap)}px`;
+  card.style.left = `${centeredLeft}px`;
+}
+
+function renderTutorialStep() {
+  if (!tutorialActive) return;
+  const step = TUTORIAL_STEPS[tutorialStepIndex];
+  const overlay = document.getElementById('tutorial-overlay');
+  const spotlight = document.getElementById('tutorial-spotlight');
+  const title = document.getElementById('tutorial-title');
+  const description = document.getElementById('tutorial-description');
+  const stepLabel = document.getElementById('tutorial-step-label');
+  const nextBtn = document.getElementById('tutorial-next-btn');
+  const prevBtn = document.getElementById('tutorial-prev-btn');
+  const target = resolveTutorialTarget(step);
+
+  if (!overlay || !spotlight || !title || !description || !stepLabel || !nextBtn || !prevBtn) return;
+
+  title.textContent = step.title;
+  description.textContent = step.description;
+  stepLabel.textContent = `Passo ${tutorialStepIndex + 1} de ${TUTORIAL_STEPS.length}`;
+  prevBtn.style.visibility = tutorialStepIndex === 0 ? 'hidden' : 'visible';
+  nextBtn.textContent = tutorialStepIndex === TUTORIAL_STEPS.length - 1 ? 'Finalizar' : 'Próximo';
+
+  if (!target) {
+    clearTutorialHighlight();
+    spotlight.style.opacity = '0';
+    positionTutorialCard(null, step.placement);
+    lucide.createIcons();
+    return;
+  }
+
+  const rect = target.getBoundingClientRect();
+  const padding = step.padding || 10;
+  spotlight.style.opacity = '1';
+  spotlight.style.left = `${Math.max(10, rect.left - padding)}px`;
+  spotlight.style.top = `${Math.max(10, rect.top - padding)}px`;
+  spotlight.style.width = `${Math.min(window.innerWidth - 20, rect.width + padding * 2)}px`;
+  spotlight.style.height = `${rect.height + padding * 2}px`;
+
+  applyTutorialHighlight(target);
+  positionTutorialCard(target, step.placement);
+  lucide.createIcons();
+}
+
+function closeTutorial(markDone = true) {
+  tutorialActive = false;
+  const overlay = document.getElementById('tutorial-overlay');
+  const spotlight = document.getElementById('tutorial-spotlight');
+  if (overlay) overlay.style.display = 'none';
+  if (spotlight) spotlight.style.opacity = '0';
+  clearTutorialHighlight();
+  if (tutorialCreatedDemoTask) {
+    tutorialCreatedDemoTask = false;
+    removeTutorialDemoTask();
+  }
+  if (markDone) localStorage.setItem(TUTORIAL_STORAGE_KEY, 'true');
+}
+
+function startTutorial(force = false) {
+  if (!force && localStorage.getItem(TUTORIAL_STORAGE_KEY) === 'true') return;
+  tutorialActive = true;
+  tutorialStepIndex = 0;
+  closeGlobalSearch();
+  toggleNotifications(false);
+  toggleSettings(false);
+  switchTab('tasks');
+  selectedTaskDate = todayStr();
+  renderAll();
+  if (typeof TUTORIAL_STEPS[0].onEnter === 'function') TUTORIAL_STEPS[0].onEnter();
+  const overlay = document.getElementById('tutorial-overlay');
+  if (overlay) overlay.style.display = 'block';
+  renderTutorialStep();
+}
+
+function nextTutorialStep() {
+  if (!tutorialActive) return;
+  if (tutorialStepIndex >= TUTORIAL_STEPS.length - 1) {
+    closeTutorial(true);
+    showToast('Tutorial concluído! Você pode rever em Configurações.', 'success');
+    return;
+  }
+  const currentStep = TUTORIAL_STEPS[tutorialStepIndex];
+  if (typeof currentStep?.onExit === 'function') currentStep.onExit();
+  tutorialStepIndex += 1;
+  const nextStep = TUTORIAL_STEPS[tutorialStepIndex];
+  if (typeof nextStep?.onEnter === 'function') nextStep.onEnter();
+  renderTutorialStep();
+}
+
+function prevTutorialStep() {
+  if (!tutorialActive || tutorialStepIndex === 0) return;
+  const currentStep = TUTORIAL_STEPS[tutorialStepIndex];
+  if (typeof currentStep?.onExit === 'function') currentStep.onExit();
+  tutorialStepIndex -= 1;
+  const prevStep = TUTORIAL_STEPS[tutorialStepIndex];
+  if (typeof prevStep?.onEnter === 'function') prevStep.onEnter();
+  renderTutorialStep();
+}
+
+function skipTutorial() {
+  closeTutorial(true);
+  showToast('Tutorial pulado. Você pode abrir novamente em Configurações.', 'info');
+}
+
+window.addEventListener('resize', () => {
+  if (tutorialActive) renderTutorialStep();
+});
 
 async function enableBrowserNotifications() {
   const permission = await ensureBrowserNotificationPermission();
@@ -456,6 +737,18 @@ function handleGlobalSearchKeydown(event) {
 
 // ===== SETTINGS =====
 function toggleSettings(event) {
+  if (typeof event === 'boolean') {
+    const p = document.getElementById('settings-panel');
+    const o = document.getElementById('settings-overlay');
+    p.style.display = event ? 'block' : 'none';
+    if (o) o.style.display = event ? 'block' : 'none';
+    if (event) {
+      updateThemeButtons();
+      updateBrowserNotificationStatus();
+    }
+    updateFabVisibility();
+    return;
+  }
   if (event && event.target.id === 'settings-overlay') return;
   const p = document.getElementById('settings-panel');
   const o = document.getElementById('settings-overlay');
@@ -490,6 +783,20 @@ function updateNotificationBadge() {
 }
 
 function toggleNotifications(event) {
+  if (typeof event === 'boolean') {
+    const p = document.getElementById('notifications-panel');
+    const o = document.getElementById('notifications-overlay');
+    p.style.display = event ? 'block' : 'none';
+    if (o) o.style.display = event ? 'block' : 'none';
+    if (event) {
+      renderNotifications();
+      notifications.forEach(n => n.read = true);
+      save();
+      updateNotificationBadge();
+    }
+    updateFabVisibility();
+    return;
+  }
   if (event && event.target.id === 'notifications-overlay') return;
   const p = document.getElementById('notifications-panel');
   const o = document.getElementById('notifications-overlay');
@@ -1019,13 +1326,14 @@ function renderTasks(targetTasks, container) {
     const pc = PRIORITY_COLORS[t.priority] || '#64748B';
     const isDone = t.status === 'done';
     const isOverdue = isTaskOverdue(t);
+    const isTutorialDemo = t.id === TUTORIAL_DEMO_TASK_ID;
     const [y, m, d] = t.date.split('-');
     const dateFormatted = `${d}/${m}`;
     const priorityLabel = PRIORITY_LABELS[t.priority] || 'Normal';
     let timeDisplay = '--:--';
     if (t.time && t.time.trim()) timeDisplay = t.time;
     
-    return `<div class="card fade-in task-swipe-card" data-task-id="${t.id}" data-task-status="${t.status}" data-task-overdue="${isOverdue ? 'true' : 'false'}" style="display:grid;grid-template-columns:80px 1fr auto;gap:12px;padding:16px;border-left:4px solid ${pc};${isDone?'background:#F8FAFC':'background:var(--surface)'};cursor:pointer;user-select:none;transition:all .2s;align-items:start;position:relative;margin-bottom:16px;overflow:hidden">
+    return `<div ${isTutorialDemo ? 'id="tutorial-demo-card"' : ''} class="card fade-in task-swipe-card" data-task-id="${t.id}" data-task-status="${t.status}" data-task-overdue="${isOverdue ? 'true' : 'false'}" style="display:grid;grid-template-columns:80px 1fr auto;gap:12px;padding:16px;border-left:4px solid ${pc};${isDone?'background:#F8FAFC':'background:var(--surface)'};cursor:pointer;user-select:none;transition:all .2s;align-items:start;position:relative;margin-bottom:16px;overflow:hidden">
       <div class="task-swipe-indicator task-swipe-left" style="position:absolute;inset:0 auto 0 0;width:96px;background:linear-gradient(90deg,#EF4444 0%,rgba(239,68,68,.1) 100%);display:flex;align-items:center;justify-content:flex-start;padding-left:18px;opacity:0;pointer-events:none;transition:opacity .18s">
         <i data-lucide="trash-2" style="width:18px;height:18px;color:#fff"></i>
       </div>
@@ -1045,17 +1353,17 @@ function renderTasks(targetTasks, container) {
       </div>
 
       <div style="display:flex;flex-direction:column;gap:4px;min-width:fit-content">
-        <button onclick="openTaskModal('${t.id}')" class="btn btn-ghost" style="padding:6px 8px;border-radius:8px;border:1.5px solid var(--primary);color:var(--primary)">
+        <button ${isTutorialDemo ? 'id="tutorial-demo-edit"' : ''} onclick="openTaskModal('${t.id}')" class="btn btn-ghost" style="padding:6px 8px;border-radius:8px;border:1.5px solid var(--primary);color:var(--primary)">
           <i data-lucide="pencil" style="width:18px;height:18px"></i>
         </button>
-        <button onclick="requestDelete('${t.id}')" class="btn btn-ghost" style="padding:6px 8px;border-radius:8px;color:var(--urgent);border:1.5px solid var(--urgent);${(isDone || isOverdue) ? 'opacity:.42;cursor:not-allowed;' : ''}">
+        <button ${isTutorialDemo ? 'id="tutorial-demo-delete"' : ''} onclick="requestDelete('${t.id}')" class="btn btn-ghost" style="padding:6px 8px;border-radius:8px;color:var(--urgent);border:1.5px solid var(--urgent);${(isDone || isOverdue) ? 'opacity:.42;cursor:not-allowed;' : ''}">
           <i data-lucide="trash-2" style="width:18px;height:18px"></i>
         </button>
         ${!isDone
-          ? `<button onclick="requestComplete('${t.id}')" class="btn btn-ghost" style="padding:6px 8px;font-size:12px;border-radius:8px;background:#10B981;color:#fff;font-weight:700;white-space:nowrap">
+          ? `<button ${isTutorialDemo ? 'id="tutorial-demo-complete"' : ''} onclick="requestComplete('${t.id}')" class="btn btn-ghost" style="padding:6px 8px;font-size:12px;border-radius:8px;background:#10B981;color:#fff;font-weight:700;white-space:nowrap">
                <i data-lucide="check" style="width:18px;height:18px"></i>
              </button>`
-          : `<button onclick="requestUncomplete('${t.id}')" class="btn btn-ghost" style="padding:6px 8px;font-size:12px;border-radius:8px;background:var(--primary);color:#fff;font-weight:700;white-space:nowrap">
+          : `<button ${isTutorialDemo ? 'id="tutorial-demo-complete"' : ''} onclick="requestUncomplete('${t.id}')" class="btn btn-ghost" style="padding:6px 8px;font-size:12px;border-radius:8px;background:var(--primary);color:#fff;font-weight:700;white-space:nowrap">
                <i data-lucide="rotate-ccw" style="width:18px;height:18px"></i>
              </button>`
         }
