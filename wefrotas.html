@@ -86,6 +86,13 @@
     .global-search-results.hidden {
       display: none;
     }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
     .global-search-item {
       width: 100%;
       border: 0;
@@ -133,6 +140,70 @@
     }
     .search-focus-overlay.hidden {
       display: none;
+    }
+    .mobile-search-toggle {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.18);
+      color: white;
+      backdrop-filter: blur(10px);
+      transition: all 0.2s ease;
+    }
+    .mobile-search-toggle:hover {
+      background: rgba(255,255,255,0.2);
+    }
+    .mobile-search-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(7, 11, 24, 0.72);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      z-index: 80;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.22s ease;
+    }
+    .mobile-search-backdrop.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .mobile-search-modal {
+      position: fixed;
+      top: 12px;
+      left: 12px;
+      right: 12px;
+      z-index: 85;
+      border-radius: 22px;
+      background: rgba(15, 23, 42, 0.96);
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      box-shadow: 0 24px 50px rgba(2, 6, 23, 0.42);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      padding: 14px;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-8px);
+      transition: opacity 0.22s ease, transform 0.22s ease;
+    }
+    .mobile-search-modal.open {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+    .mobile-search-modal .global-search {
+      display: block;
+      width: 100%;
+    }
+    .mobile-search-modal .global-search-results {
+      position: static;
+      margin-top: 12px;
+      max-height: min(55vh, 420px);
+      overflow-y: auto;
     }
     .nav-strip {
       background: rgba(255, 255, 255, 0.72);
@@ -584,7 +655,7 @@
       }
       .content-card {
         border-radius: 24px;
-        min-height: 680px;
+        min-height: auto;
       }
       .filter-card {
         border-radius: 24px;
@@ -604,10 +675,58 @@
       .form-grid {
         grid-template-columns: 1fr;
       }
+      .nav-tooltip {
+        display: none;
+      }
+      .nav-strip > div {
+        padding-left: 16px;
+        padding-right: 16px;
+      }
     }
     @media (max-width: 640px) {
       .global-search {
         display: none;
+      }
+      .mobile-search-toggle {
+        display: inline-flex;
+      }
+      .app-header .max-w-7xl {
+        gap: 10px;
+      }
+      .nav-strip {
+        overflow-x: auto;
+      }
+      .nav-strip > div {
+        overflow-x: auto;
+        overflow-y: hidden;
+      }
+      .nav-strip > div > div {
+        flex-wrap: nowrap;
+        width: max-content;
+        padding-bottom: 4px;
+      }
+      .content-card {
+        border-radius: 22px;
+      }
+      .selection-bar {
+        gap: 10px;
+      }
+      .home-premium-banner {
+        overflow: hidden;
+      }
+      .home-premium-banner .premium-actions {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr;
+      }
+      .home-premium-banner .premium-price-card {
+        width: 100%;
+      }
+      .home-premium-banner .premium-cta-btn {
+        width: 100%;
+        justify-content: center;
+        text-align: center;
+        white-space: normal;
       }
     }
   </style>
@@ -615,6 +734,17 @@
 </head>
 <body>
   <div id="search-focus-overlay" class="search-focus-overlay hidden"></div>
+  <div id="mobile-search-backdrop" class="mobile-search-backdrop"></div>
+  <div id="mobile-search-modal" class="mobile-search-modal">
+    <div class="global-search">
+      <svg class="global-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <circle cx="11" cy="11" r="7" stroke-width="2"></circle>
+        <path d="M20 20L17 17" stroke-width="2" stroke-linecap="round"></path>
+      </svg>
+      <input id="mobile-global-search-input" type="text" class="global-search-input text-sm font-medium" placeholder="Pesquisar módulo..." autocomplete="off" aria-label="Pesquisar módulo">
+      <div id="mobile-global-search-results" class="global-search-results hidden"></div>
+    </div>
+  </div>
   <div class="workspace-shell flex flex-col min-h-full">
     <header class="app-header relative z-50">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-3">
@@ -637,6 +767,12 @@
             <input id="global-search-input" type="text" class="global-search-input text-sm font-medium" placeholder="Pesquisar módulo..." autocomplete="off" aria-label="Pesquisar módulo">
             <div id="global-search-results" class="global-search-results hidden"></div>
           </div>
+          <button id="mobile-search-btn" class="mobile-search-toggle" type="button" aria-label="Pesquisar módulo">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <circle cx="11" cy="11" r="7" stroke-width="2"></circle>
+              <path d="M20 20L17 17" stroke-width="2" stroke-linecap="round"></path>
+            </svg>
+          </button>
           <button class="top-action rounded-xl px-3 sm:px-4 py-2 text-sm font-semibold text-white inline-flex items-center gap-2" onclick="window.location.href='https://gaveblue.com'">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -648,8 +784,8 @@
     </header>
 
     <div class="nav-strip">
-      <div class="max-w-[1280px] mx-auto px-6 py-4 overflow-hidden">
-        <div class="flex items-center gap-2 flex-wrap">
+      <div class="max-w-[1280px] mx-auto px-6 py-4 overflow-hidden no-scrollbar">
+        <div class="flex items-center gap-2 flex-wrap no-scrollbar">
           <button class="nav-btn active" onclick="showModule('home', this)">
             <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M3 10.5L12 3l9 7.5V20a1 1 0 01-1 1h-5v-7H9v7H4a1 1 0 01-1-1v-9.5z"/>
@@ -709,13 +845,6 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M9 5v14M15 5v14M4 10h16"/>
             </svg>
             <span class="nav-tooltip">Fornecedores</span>
-          </button>
-
-          <button class="nav-btn premium-btn" onclick="openPremiumModal()">
-            <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 2.5l2.85 5.78 6.38.93-4.62 4.5 1.09 6.36L12 17.08 6.3 20.07l1.09-6.36-4.62-4.5 6.38-.93L12 2.5z"/>
-            </svg>
-            <span class="nav-tooltip">Premium</span>
           </button>
 
           <button id="theme-toggle-btn" class="nav-btn" onclick="toggleTheme(this)">
@@ -855,6 +984,29 @@
             <div class="filter-card p-6">
               <p class="text-slate-500 text-sm font-semibold mb-2">Seguros a vencer</p>
               <p id="home-insurance-expiring" class="text-4xl font-extrabold text-[#6267d9]">0</p>
+            </div>
+          </div>
+          <div class="home-premium-banner mt-6 rounded-[28px] border border-amber-300/30 bg-gradient-to-r from-[#1f2942] via-[#2a2248] to-[#3a2550] p-6 sm:p-7 shadow-[0_24px_50px_rgba(76,29,149,0.18)]">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
+              <div class="max-w-3xl">
+                <span class="inline-flex items-center gap-2 rounded-full bg-amber-400/15 px-4 py-1.5 text-xs font-extrabold uppercase tracking-[0.22em] text-amber-200">
+                  <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2.5l2.85 5.78 6.38.93-4.62 4.5 1.09 6.36L12 17.08 6.3 20.07l1.09-6.36-4.62-4.5 6.38-.93L12 2.5z"/>
+                  </svg>
+                  Premium
+                </span>
+                <h3 class="mt-4 text-2xl sm:text-3xl font-extrabold text-white">Leve o WeFrotas para um nível mais profissional</h3>
+                <p class="mt-3 text-sm sm:text-base leading-relaxed text-slate-200">Desbloqueie personalização com sua marca, mais relatórios, filtros avançados e recursos extras para operação e apresentação profissional.</p>
+              </div>
+              <div class="premium-actions flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                <div class="premium-price-card rounded-2xl border border-white/10 bg-white/5 px-5 py-4 text-center">
+                  <p class="text-xs font-bold uppercase tracking-[0.2em] text-amber-200">Plano Premium</p>
+                  <p class="mt-2 text-3xl font-extrabold text-white whitespace-nowrap">R$ 29,90/ano</p>
+                </div>
+                <button class="premium-cta-btn soft-btn primary !bg-gradient-to-r !from-amber-400 !to-orange-500 !text-slate-950 !shadow-[0_16px_30px_rgba(245,158,11,0.32)]" onclick="openPremiumModal()">
+                  Conhecer Premium
+                </button>
+              </div>
             </div>
           </div>
           <div class="grid xl:grid-cols-3 gap-5 mt-6">
@@ -1103,7 +1255,12 @@
     let allFinanceEntries = [];
     const globalSearchInputEl = document.getElementById('global-search-input');
     const globalSearchResultsEl = document.getElementById('global-search-results');
+    const mobileGlobalSearchInputEl = document.getElementById('mobile-global-search-input');
+    const mobileGlobalSearchResultsEl = document.getElementById('mobile-global-search-results');
     const searchFocusOverlayEl = document.getElementById('search-focus-overlay');
+    const mobileSearchBtnEl = document.getElementById('mobile-search-btn');
+    const mobileSearchBackdropEl = document.getElementById('mobile-search-backdrop');
+    const mobileSearchModalEl = document.getElementById('mobile-search-modal');
     const ecosystemModules = [
       { name: 'WeTime', description: 'Relógio online e painel de horário', url: 'https://gaveblue.com/wetime' },
       { name: 'WeRecibos', description: 'Gerador de recibos', url: 'https://gaveblue.com/recibos' },
@@ -1122,6 +1279,8 @@
     let currentFinanceEntryType = null;
     let filteredModules = [];
     let highlightedModuleIndex = -1;
+    let activeSearchInputEl = null;
+    let activeSearchResultsEl = null;
     let orderCounter = 1;
     const wefrotasLogoSrc = 'file:///C:/Users/Lucas%20Pimentel/Documents/Playground%202/wefrotas.png';
 
@@ -1162,31 +1321,59 @@
       window.location.href = url;
     }
 
+    function setActiveSearchContext(inputEl, resultsEl) {
+      activeSearchInputEl = inputEl;
+      activeSearchResultsEl = resultsEl;
+    }
+
+    function openMobileSearch() {
+      if (!mobileSearchModalEl || !mobileSearchBackdropEl || !mobileGlobalSearchInputEl) return;
+      mobileSearchModalEl.classList.add('open');
+      mobileSearchBackdropEl.classList.add('open');
+      setActiveSearchContext(mobileGlobalSearchInputEl, mobileGlobalSearchResultsEl);
+      updateGlobalSearch(mobileGlobalSearchInputEl.value || '');
+      setTimeout(() => mobileGlobalSearchInputEl.focus(), 40);
+    }
+
+    function closeMobileSearch() {
+      if (!mobileSearchModalEl || !mobileSearchBackdropEl) return;
+      mobileSearchModalEl.classList.remove('open');
+      mobileSearchBackdropEl.classList.remove('open');
+      if (mobileGlobalSearchResultsEl) {
+        mobileGlobalSearchResultsEl.classList.add('hidden');
+      }
+    }
+
     function hideGlobalSearchResults() {
       globalSearchResultsEl.classList.add('hidden');
+      if (mobileGlobalSearchResultsEl) mobileGlobalSearchResultsEl.classList.add('hidden');
       searchFocusOverlayEl.classList.add('hidden');
+      closeMobileSearch();
       highlightedModuleIndex = -1;
     }
 
     function syncHighlightedGlobalSearchItem() {
-      const items = globalSearchResultsEl.querySelectorAll('.global-search-item');
+      const items = (activeSearchResultsEl || globalSearchResultsEl).querySelectorAll('.global-search-item');
       items.forEach((item, index) => {
         item.classList.toggle('active', index === highlightedModuleIndex);
       });
     }
 
-    function renderGlobalSearchResults(modules) {
+    function renderGlobalSearchResults(modules, resultsEl = globalSearchResultsEl) {
       filteredModules = modules;
       highlightedModuleIndex = modules.length ? 0 : -1;
+      activeSearchResultsEl = resultsEl;
 
       if (!modules.length) {
-        globalSearchResultsEl.innerHTML = '<div class="global-search-empty">Nenhum módulo encontrado.</div>';
-        globalSearchResultsEl.classList.remove('hidden');
-        searchFocusOverlayEl.classList.remove('hidden');
+        resultsEl.innerHTML = '<div class="global-search-empty">Nenhum módulo encontrado.</div>';
+        resultsEl.classList.remove('hidden');
+        if (resultsEl === globalSearchResultsEl) {
+          searchFocusOverlayEl.classList.remove('hidden');
+        }
         return;
       }
 
-      globalSearchResultsEl.innerHTML = modules.map((module, index) => `
+      resultsEl.innerHTML = modules.map((module, index) => `
         <button type="button" class="global-search-item${index === highlightedModuleIndex ? ' active' : ''}" data-url="${module.url}">
           <span>
             <span class="global-search-kicker">Ecossistema GaveBlue</span>
@@ -1200,14 +1387,16 @@
         </button>
       `).join('');
 
-      globalSearchResultsEl.classList.remove('hidden');
-      searchFocusOverlayEl.classList.remove('hidden');
+      resultsEl.classList.remove('hidden');
+      if (resultsEl === globalSearchResultsEl) {
+        searchFocusOverlayEl.classList.remove('hidden');
+      }
     }
 
-    function updateGlobalSearch(query) {
+    function updateGlobalSearch(query, resultsEl = activeSearchResultsEl || globalSearchResultsEl) {
       const normalizedQuery = query.trim().toLowerCase();
       if (!normalizedQuery) {
-        renderGlobalSearchResults(ecosystemModules);
+        renderGlobalSearchResults(ecosystemModules, resultsEl);
         return;
       }
 
@@ -1216,7 +1405,7 @@
         module.description.toLowerCase().includes(normalizedQuery)
       );
 
-      renderGlobalSearchResults(modules);
+      renderGlobalSearchResults(modules, resultsEl);
     }
 
     function getVehicleLabel(vehicleId) {
@@ -1284,19 +1473,24 @@
       if (button) button.classList.add('active');
     }
 
-    if (globalSearchInputEl && globalSearchResultsEl) {
-      globalSearchInputEl.addEventListener('input', (event) => {
-        updateGlobalSearch(event.target.value);
+    function setupGlobalSearchInput(inputEl, resultsEl) {
+      if (!inputEl || !resultsEl) return;
+
+      inputEl.addEventListener('input', (event) => {
+        setActiveSearchContext(inputEl, resultsEl);
+        updateGlobalSearch(event.target.value, resultsEl);
       });
 
-      globalSearchInputEl.addEventListener('focus', (event) => {
-        updateGlobalSearch(event.target.value);
+      inputEl.addEventListener('focus', (event) => {
+        setActiveSearchContext(inputEl, resultsEl);
+        updateGlobalSearch(event.target.value, resultsEl);
       });
 
-      globalSearchInputEl.addEventListener('keydown', (event) => {
-        if (globalSearchResultsEl.classList.contains('hidden')) {
-          if (event.key === 'Enter' && globalSearchInputEl.value.trim()) {
-            updateGlobalSearch(globalSearchInputEl.value);
+      inputEl.addEventListener('keydown', (event) => {
+        setActiveSearchContext(inputEl, resultsEl);
+        if (resultsEl.classList.contains('hidden')) {
+          if (event.key === 'Enter' && inputEl.value.trim()) {
+            updateGlobalSearch(inputEl.value, resultsEl);
             if (filteredModules[0]) {
               navigateToModule(filteredModules[0].url);
             }
@@ -1325,20 +1519,62 @@
         }
 
         if (event.key === 'Escape') {
-          hideGlobalSearchResults();
+          if (resultsEl === mobileGlobalSearchResultsEl) {
+            closeMobileSearch();
+          } else {
+            hideGlobalSearchResults();
+          }
         }
       });
+    }
 
+    setupGlobalSearchInput(globalSearchInputEl, globalSearchResultsEl);
+    setupGlobalSearchInput(mobileGlobalSearchInputEl, mobileGlobalSearchResultsEl);
+
+    if (globalSearchResultsEl) {
       globalSearchResultsEl.addEventListener('click', (event) => {
         const item = event.target.closest('.global-search-item');
         if (!item) return;
         navigateToModule(item.dataset.url);
       });
+    }
 
+    if (mobileGlobalSearchResultsEl) {
+      mobileGlobalSearchResultsEl.addEventListener('click', (event) => {
+        const item = event.target.closest('.global-search-item');
+        if (!item) return;
+        navigateToModule(item.dataset.url);
+      });
+    }
+
+    if (globalSearchInputEl && globalSearchResultsEl) {
       document.addEventListener('click', (event) => {
-        if (!globalSearchResultsEl.contains(event.target) && !globalSearchInputEl.contains(event.target)) {
-          hideGlobalSearchResults();
+        const clickedDesktopSearch = globalSearchResultsEl.contains(event.target) || globalSearchInputEl.contains(event.target);
+        const clickedMobileSearch = mobileSearchModalEl?.contains(event.target) || mobileSearchBtnEl?.contains(event.target);
+        if (!clickedDesktopSearch && !clickedMobileSearch) {
+          searchFocusOverlayEl.classList.add('hidden');
+          globalSearchResultsEl.classList.add('hidden');
+          closeMobileSearch();
+          highlightedModuleIndex = -1;
         }
+      });
+    }
+
+    if (mobileSearchBtnEl) {
+      mobileSearchBtnEl.addEventListener('click', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        if (mobileSearchModalEl.classList.contains('open')) {
+          closeMobileSearch();
+        } else {
+          openMobileSearch();
+        }
+      });
+    }
+
+    if (mobileSearchBackdropEl) {
+      mobileSearchBackdropEl.addEventListener('click', () => {
+        closeMobileSearch();
       });
     }
 
