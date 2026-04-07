@@ -1,4 +1,4 @@
-﻿    // Variável global para controlar o zoom
+    // Variável global para controlar o zoom
     let zoomAtual = 100;
 
     // Função para aumentar zoom
@@ -2239,19 +2239,27 @@
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <title>Impressão de Recibos</title>
           <style>
+            @page {
+              size: A4 portrait;
+              margin: 0;
+            }
             * {
               box-sizing: border-box;
             }
             html, body {
               width: auto !important;
               height: auto !important;
-              margin: 0;
-              padding: 0;
+              margin: 0 !important;
+              padding: 0 !important;
               background: #fff;
               color: #000;
               font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
             }
             .print-item {
+              margin: 0 !important;
+              padding: 0 !important;
               break-inside: avoid !important;
               page-break-inside: avoid !important;
             }
@@ -2261,9 +2269,9 @@
             }
             .recibo {
               position: relative;
-              width: 100% !important;
-              max-width: 700px !important;
-              margin: 20px auto !important;
+              width: 190mm !important;
+              max-width: 190mm !important;
+              margin: 0 auto !important;
               padding: 20px 25px 15px 25px !important;
               border: none !important;
               border-radius: 0 !important;
@@ -2298,8 +2306,7 @@
               font-weight: bold;
               color: #000;
             }
-            .valor-topo input,
-            .moyses-valor-input {
+            .valor-topo input {
               width: 130px;
               border: 1px solid #999 !important;
               border-radius: 8px;
@@ -2361,80 +2368,92 @@
               color: #000 !important;
             }
             .recibo-moyses {
-          display: flex;
-          flex-direction: column;
-          padding: 20px !important;
-        }
-        .moyses-topo {
-          display: flex;
-          flex-direction: row;
-          justify-content: space-between;
-          align-items: flex-start;
-          margin-bottom: 20px;
-        }
-        .moyses-titulo {
-          margin: 0;
-          font-size: 16px;
-          font-weight: bold;
-          color: #000 !important;
-        }
-        .moyses-valor-box {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 4px;
-        }
-        .moyses-valor-label,
-        .moyses-label-assinatura,
-        .moyses-label-nome {
-          font-size: 11px;
-          font-weight: bold;
-          color: #000;
-          text-transform: uppercase;
-        }
-        .moyses-valor-input {
-          width: 130px;
-          border: 2px solid #007BFF !important;
-          border-radius: 8px;
-          padding: 3px 8px;
-          background: #eef6ff !important;
-          font-weight: bold;
-          font-size: 16px;
-          text-align: center;
-          color: #000 !important;
-          outline: none;
-        }
-        .moyses-corpo-vazio {
-          flex: 1;
-          min-height: 0;
-        }
-        .moyses-assinatura-area {
-          display: flex;
-          flex-direction: column;
-          gap: 15px;
-          margin-top: 20px;
-        }
-        .moyses-assinatura-container,
-        .moyses-nome-container {
-          display: flex;
-          flex-direction: column;
-          align-items: flex-start;
-          gap: 6px;
-        }
-        .moyses-assinatura-linha {
-          width: 200px;
-          height: 30px;
-          border-bottom: 2px solid #000;
-        }
-        .moyses-nome-input {
-          border: none;
-          border-bottom: 1px solid #000;
-          width: 200px;
-          text-align: left;
-          padding: 4px 0;
-          font-size: 14px;
-          color: #000 !important;
-        }
+              display: flex;
+              flex-direction: column;
+              padding: 18px 34px 20px !important;
+              min-height: 360px;
+              background: #fff !important;
+              color: #000 !important;
+            }
+            .moyses-topo {
+              display: flex;
+              justify-content: space-between;
+              align-items: flex-start;
+              margin-bottom: 10px;
+            }
+            .moyses-topo-espaco {
+              flex: 1;
+              min-height: 10px;
+            }
+            .moyses-valor-box {
+              width: 190px;
+              display: flex;
+              justify-content: flex-end;
+            }
+            .moyses-valor-input {
+              width: 190px;
+              height: 28px;
+              border: 1px solid #222 !important;
+              border-radius: 0 !important;
+              padding: 3px 10px;
+              background: #f4cfb4 !important;
+              font-weight: 500;
+              font-size: 12px;
+              text-align: center;
+              color: #222 !important;
+              outline: none;
+              box-shadow: none !important;
+            }
+            .moyses-corpo-vazio {
+              flex: 1;
+              min-height: 120px;
+            }
+            .moyses-assinatura-area {
+              display: flex;
+              flex-direction: column;
+              gap: 10px;
+              margin-top: auto;
+              padding-top: 8px;
+            }
+            .moyses-assinatura-linha-row {
+              display: flex;
+              align-items: flex-end;
+              gap: 2px;
+            }
+            .moyses-label-assinatura,
+            .moyses-label-nome {
+              font-size: 12px;
+              font-weight: 400;
+              color: #000;
+              text-transform: none;
+              letter-spacing: 0;
+              line-height: 1;
+              white-space: nowrap;
+            }
+            .moyses-assinatura-linha {
+              flex: 1;
+              height: 0;
+              border-bottom: 1px solid #000;
+              transform: translateY(-1px);
+            }
+            .moyses-nome-row {
+              display: flex;
+              align-items: center;
+              gap: 12px;
+            }
+            .moyses-nome-input {
+              width: 210px;
+              border: none;
+              border-bottom: 1px solid #000;
+              border-radius: 0 !important;
+              text-align: left;
+              padding: 1px 0 2px;
+              font-size: 12px;
+              color: #000 !important;
+              background: transparent !important;
+              box-shadow: none !important;
+              outline: none;
+            }
             .checkbox-recibo,
             .botoes,
             .loading-overlay,
@@ -2550,7 +2569,40 @@
 
         jsonData.forEach((row, index) => {
           if (index === 0 && !reciboPrincipalPreenchido) {
-            if (modeloAtual === 'simplificado') {
+            if (modeloAtual === 'completo') {
+              if (row.NumeroRecibo || row['NúmeroRecibo'] || row['Número do Recibo']) {
+                const numeroInput = document.getElementById('numero-recibo-completo');
+                if (numeroInput) numeroInput.value = row.NumeroRecibo || row['NúmeroRecibo'] || row['Número do Recibo'] || '';
+              }
+              if (row.Valor) {
+                const valorInput = document.getElementById('valor-completo');
+                const valorFormatado = processarValorInteligente(row.Valor);
+                valorInput.value = valorFormatado;
+
+                const valorLimpo = valorFormatado.replace(/[^\d,]/g, '').replace(',', '.');
+                const valorNumerico = parseFloat(valorLimpo);
+                if (!isNaN(valorNumerico) && valorNumerico > 0) {
+                  document.getElementById('campoQuantia-completo').value = numeroParaExtenso(valorNumerico).toUpperCase();
+                }
+              }
+              if (row.Recebedor) document.getElementById('recebedor-completo').value = row.Recebedor;
+              if (row.Referencia) document.getElementById('referencia-completo').value = row.Referencia;
+              if (row.Descricao) document.getElementById('descricao-completo').value = row.Descricao;
+              if (row.Emitente) {
+                document.getElementById('emitente-completo').value = row.Emitente;
+                document.getElementById('assinaturaNome-completo').textContent = row.Emitente;
+              }
+              if (row.CPFCNPJ) {
+                const cpfInput = document.getElementById('cpfcnpj-completo');
+                cpfInput.value = row.CPFCNPJ;
+                formatarCpfCnpj(cpfInput);
+                document.getElementById('assinaturaCpf-completo').textContent = cpfInput.value;
+              }
+              if (row.Data) {
+                const dataFormatada = processarDataInteligente(row.Data);
+                document.getElementById('data-completo').value = dataFormatada;
+              }
+            } else if (modeloAtual === 'simplificado') {
               if (row.Valor) {
                 const valorInput = document.getElementById('valor-simples');
                 const valorFormatado = processarValorInteligente(row.Valor);
@@ -2569,15 +2621,14 @@
                 atualizarAssinaturaSimples(nomeInput);
               }
             } else if (modeloAtual === 'covre') {
+              const reciboPrincipal = document.getElementById('recibo-covre');
               if (row.Valor) {
-                const reciboPrincipal = document.getElementById('recibo-moyses');
                 const valorInput = reciboPrincipal.querySelector('.valor');
                 const valorFormatado = processarValorInteligente(row.Valor);
                 valorInput.value = valorFormatado;
               }
               if (row.Recebedor || row.Emitente) {
-                const reciboPrincipal = document.getElementById('recibo-moyses');
-                const nomeInput = reciboPrincipal.querySelector('.nome');
+                const nomeInput = reciboPrincipal.querySelector('.nome-covre');
                 nomeInput.value = row.Recebedor || row.Emitente || '';
               }
             } else {
@@ -2701,15 +2752,13 @@
               const nomeInput = novoRecibo.querySelector('.nome-covre');
               const nome = row.Recebedor || row.Emitente || '';
               nomeInput.value = nome;
-        atualizarAssinaturaSimples(nomeInput);
             }
 
             novoRecibo.querySelector('.valor').oninput = function() { formatarMoeda(this); };
-        const nomeSimplesInput = novoRecibo.querySelector('.nome-simples');
-        if (nomeSimplesInput) {
-          nomeSimplesInput.oninput = function() { atualizarAssinaturaSimples(this); };
-          atualizarAssinaturaSimples(nomeSimplesInput);
-        }
+            const nomeCovreInput = novoRecibo.querySelector('.nome-covre');
+            if (nomeCovreInput) {
+              nomeCovreInput.oninput = function() {};
+            }
           } else {
             if (row.Valor) {
               const valorInput = novoRecibo.querySelector('.valor');
