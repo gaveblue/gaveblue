@@ -1,4 +1,4 @@
-﻿let allVehicles = [];
+let allVehicles = [];
     let allDrivers = [];
     let allSuppliers = [];
     let allOrders = [];
@@ -39,7 +39,7 @@
     const wefrotasLogoSrc = new URL('wefrotas.png', window.location.href).href;
     let customLogoEnabled = false;
     let customLogoUrl = '';
-    let customLogoScale = 120;
+    let customLogoScale = 60;
     let promptModalConfig = {
       allowEmpty: false,
       exactValue: '',
@@ -61,7 +61,7 @@
     }
 
     function getReportLogoStyle() {
-      const scale = Number(customLogoScale || 120) / 100;
+      const scale = Number(customLogoScale || 60) / 100;
       return {
         width: Math.round(320 * scale),
         height: Math.round(110 * scale)
@@ -69,7 +69,7 @@
     }
 
     function getOsLogoStyle() {
-      const scale = Number(customLogoScale || 120) / 100;
+      const scale = Number(customLogoScale || 60) / 100;
       return {
         width: Math.round(220 * scale),
         height: Math.round(78 * scale)
@@ -86,8 +86,8 @@
       if (!toggleButton || !fileInput || !preview || !hint || !sizeInput || !sizeLabel) return;
 
       fileInput.value = '';
-      sizeInput.value = String(customLogoScale || 120);
-      sizeLabel.textContent = `${customLogoScale || 120}%`;
+      sizeInput.value = String(customLogoScale || 60);
+      sizeLabel.textContent = `${customLogoScale || 60}%`;
       toggleButton.textContent = customLogoEnabled ? 'Desativar logo personalizada' : 'Ativar logo personalizada';
       toggleButton.classList.toggle('active', customLogoEnabled);
       preview.hidden = !(customLogoEnabled && customLogoUrl);
@@ -133,7 +133,7 @@
 
       openSettingsFeedback('loading', 'Salvando personalização', 'Aguarde enquanto aplicamos a sua logo personalizada.');
       const sizeInput = document.getElementById('settings-custom-logo-size');
-      customLogoScale = Number(sizeInput?.value || 120);
+      customLogoScale = Number(sizeInput?.value || 60);
       saveToLocalStorage();
       updateCustomLogoUi();
       setTimeout(() => {
@@ -374,7 +374,7 @@
       localStorage.setItem('wefrotas_notifications', JSON.stringify(systemNotifications));
       localStorage.setItem('wefrotas_custom_logo_enabled', customLogoEnabled ? 'true' : 'false');
       localStorage.setItem('wefrotas_custom_logo_url', customLogoUrl);
-      localStorage.setItem('wefrotas_custom_logo_scale', String(customLogoScale || 120));
+      localStorage.setItem('wefrotas_custom_logo_scale', String(customLogoScale || 60));
     }
 
     function loadFromLocalStorage() {
@@ -399,7 +399,7 @@
       if (savedNotifications) systemNotifications = JSON.parse(savedNotifications);
       customLogoEnabled = savedCustomLogoEnabled === 'true';
       customLogoUrl = savedCustomLogoUrl || '';
-      customLogoScale = Number(savedCustomLogoScale) || 120;
+      customLogoScale = Number(savedCustomLogoScale) || 60;
     }
 
     function showToast(message, options = {}) {
@@ -1166,7 +1166,7 @@
           orderCounter = Number(parsed.orderCounter) || 1;
           customLogoEnabled = !!parsed.customLogoEnabled;
           customLogoUrl = parsed.customLogoUrl || '';
-          customLogoScale = Number(parsed.customLogoScale) || 120;
+          customLogoScale = Number(parsed.customLogoScale) || 60;
           if (parsed.theme === 'dark' || parsed.theme === 'light') {
             applyThemeState(parsed.theme === 'dark');
           }
@@ -1204,7 +1204,7 @@
       orderCounter = 1;
       customLogoEnabled = false;
       customLogoUrl = '';
-      customLogoScale = 120;
+      customLogoScale = 60;
       [
         'wefrotas_vehicles',
         'wefrotas_drivers',
