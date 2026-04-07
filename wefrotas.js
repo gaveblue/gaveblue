@@ -85,16 +85,17 @@ let allVehicles = [];
       const sizeLabel = document.getElementById('settings-custom-logo-size-label');
       if (!toggleButton || !fileInput || !preview || !hint || !sizeInput || !sizeLabel) return;
 
-      fileInput.value = '';
       sizeInput.value = String(customLogoScale || 60);
       sizeLabel.textContent = `${customLogoScale || 60}%`;
       toggleButton.textContent = customLogoEnabled ? 'Desativar logo personalizada' : 'Ativar logo personalizada';
       toggleButton.classList.toggle('active', customLogoEnabled);
-      preview.hidden = !(customLogoEnabled && customLogoUrl);
-      preview.src = customLogoEnabled && customLogoUrl ? customLogoUrl : '';
+      preview.hidden = !customLogoUrl;
+      preview.src = customLogoUrl || '';
       hint.textContent = customLogoEnabled && customLogoUrl
         ? 'A logo personalizada está ativa e será usada nas OS e relatórios.'
-        : 'Envie uma imagem do seu computador. Se a chave estiver desligada, o sistema continua usando a logo padrão.';
+        : customLogoUrl
+          ? 'A imagem foi carregada. Ative ou salve a personalização para usar essa logo nas OS e relatórios.'
+          : 'Envie uma imagem do seu computador. Se a chave estiver desligada, o sistema continua usando a logo padrão.';
     }
 
     function toggleCustomLogoEnabled() {
@@ -119,6 +120,7 @@ let allVehicles = [];
       const reader = new FileReader();
       reader.onload = (loadEvent) => {
         customLogoUrl = String(loadEvent.target?.result || '');
+        customLogoEnabled = true;
         updateCustomLogoUi();
         showToast('Logo carregada. Agora clique em salvar para aplicar.');
       };
