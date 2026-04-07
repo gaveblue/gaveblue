@@ -2302,6 +2302,17 @@
               position: absolute;
               right: 0;
             }
+            .numero-topo {
+              font-size: 12px;
+              text-align: left;
+              position: absolute;
+              left: 0;
+            }
+            .valor-topo label,
+            .numero-topo label {
+              font-weight: bold;
+              color: #000;
+            }
             .valor-topo label {
               font-weight: bold;
               color: #000;
@@ -2316,6 +2327,20 @@
               font-size: 12px;
               color: #000 !important;
               outline: none;
+            }
+            .numero-topo input {
+              width: 92px;
+              border: 2px solid #007BFF !important;
+              border-radius: 8px;
+              padding: 3px 8px;
+              background: #eef6ff !important;
+              font-weight: bold;
+              font-size: 12px;
+              color: #000 !important;
+              outline: none;
+              text-align: center;
+              letter-spacing: 0.04em;
+              box-shadow: none !important;
             }
             .linha {
               margin: 5px 0;
@@ -2433,7 +2458,8 @@
             .moyses-assinatura-linha {
               flex: 1;
               height: 0;
-              border-bottom: 1px solid #000;
+              min-width: 220px;
+              border-bottom: 1px solid #000 !important;
               transform: translateY(-1px);
             }
             .moyses-nome-row {
@@ -2443,8 +2469,10 @@
             }
             .moyses-nome-input {
               width: 210px;
-              border: none;
-              border-bottom: 1px solid #000;
+              min-width: 210px;
+              display: block;
+              border: none !important;
+              border-bottom: 1px solid #000 !important;
               border-radius: 0 !important;
               text-align: left;
               padding: 1px 0 2px;
@@ -2453,6 +2481,8 @@
               background: transparent !important;
               box-shadow: none !important;
               outline: none;
+              -webkit-appearance: none;
+              appearance: none;
             }
             .checkbox-recibo,
             .botoes,
