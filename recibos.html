@@ -591,48 +591,50 @@
      </div>
     </div>
    </section><!-- MODELO COVRE oculto -->
-   <section class="recibo recibo-moyses" id="modelo-recibo-covre" style="display: none" aria-hidden="true">
+  <section class="recibo recibo-moyses" id="modelo-recibo-covre" style="display: none" aria-hidden="true">
     <input type="checkbox" class="checkbox-recibo" onchange="toggleSelecaoRecibo(this)" aria-label="Selecionar recibo">
     <div class="moyses-topo">
-     <h1 class="moyses-titulo">RECIBO</h1>
+     <div class="moyses-topo-espaco"></div>
      <div class="moyses-valor-box">
-      <label class="moyses-valor-label">VALOR</label><input type="text" class="valor moyses-valor-input" aria-label="Valor do recibo">
+      <input type="text" class="valor moyses-valor-input" aria-label="Valor do recibo">
      </div>
     </div>
     <div class="moyses-corpo-vazio"></div>
     <div class="moyses-assinatura-area">
-     <div class="moyses-assinatura-container">
-      <div class="moyses-assinatura-linha"></div>
+     <div class="moyses-assinatura-linha-row">
       <div class="moyses-label-assinatura">
        Assinatura
       </div>
+      <div class="moyses-assinatura-linha"></div>
      </div>
-     <div class="moyses-nome-container">
+     <div class="moyses-nome-row">
       <div class="moyses-label-nome">
        Nome
-      </div><input type="text" class="nome moyses-nome-input" aria-label="Nome">
+      </div>
+      <input type="text" class="nome nome-covre moyses-nome-input" aria-label="Nome">
      </div>
     </div>
    </section><!-- Recibo COVRE principal visível, editável manualmente -->
-   <section class="recibo recibo-moyses" id="recibo-covre" style="display: none"><input type="checkbox" class="checkbox-recibo" onchange="toggleSelecaoRecibo(this)" aria-label="Selecionar recibo">
+  <section class="recibo recibo-moyses" id="recibo-covre" style="display: none"><input type="checkbox" class="checkbox-recibo" onchange="toggleSelecaoRecibo(this)" aria-label="Selecionar recibo">
     <div class="moyses-topo">
-     <h1 class="moyses-titulo" id="titulo-covre">RECIBO</h1>
+     <div class="moyses-topo-espaco"></div>
      <div class="moyses-valor-box">
-      <label class="moyses-valor-label">VALOR</label><input type="text" id="valor-covre" class="moyses-valor-input" aria-label="Valor do recibo">
+      <input type="text" id="valor-covre" class="moyses-valor-input" aria-label="Valor do recibo">
      </div>
     </div>
     <div class="moyses-corpo-vazio"></div>
     <div class="moyses-assinatura-area">
-     <div class="moyses-assinatura-container">
-      <div class="moyses-assinatura-linha"></div>
+     <div class="moyses-assinatura-linha-row">
       <div class="moyses-label-assinatura">
        Assinatura
       </div>
+      <div class="moyses-assinatura-linha"></div>
      </div>
-     <div class="moyses-nome-container">
+     <div class="moyses-nome-row">
       <div class="moyses-label-nome">
        Nome
-      </div><input type="text" id="nome-covre" class="moyses-nome-input" aria-label="Nome">
+      </div>
+      <input type="text" id="nome-covre" class="nome-covre moyses-nome-input" aria-label="Nome">
      </div>
     </div>
    </section><!-- Contêiner para os recibos importados -->
