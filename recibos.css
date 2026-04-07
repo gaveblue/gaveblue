@@ -1,4 +1,4 @@
-﻿    body {
+    body {
       box-sizing: border-box;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       margin: 0;
@@ -1871,123 +1871,104 @@
       height: 24px;
     }
 
-    /* Estilos para Modelo COVRE */
+    /* Estilos para Modelo Trainer */
     .recibo-moyses {
-          display: flex;
-          flex-direction: column;
-          padding: 20px !important;
-        }
-        .moyses-topo {
-          display: flex;
-          flex-direction: row;
-          justify-content: space-between;
-          align-items: flex-start;
-          margin-bottom: 20px;
-        }
-        .moyses-titulo {
-          margin: 0;
-          font-size: 16px;
-          font-weight: bold;
-          color: #000 !important;
-        }
-        .moyses-valor-box {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 4px;
-        }
-        .moyses-valor-label,
-        .moyses-label-assinatura,
-        .moyses-label-nome {
-          font-size: 11px;
-          font-weight: bold;
-          color: #000;
-          text-transform: uppercase;
-        }
-        .moyses-valor-input {
-          width: 130px;
-          border: 2px solid #007BFF !important;
-          border-radius: 8px;
-          padding: 3px 8px;
-          background: #eef6ff !important;
-          font-weight: bold;
-          font-size: 16px;
-          text-align: center;
-          color: #000 !important;
-          outline: none;
-        }
-        .moyses-corpo-vazio {
-          flex: 1;
-          min-height: 0;
-        }
-        .moyses-assinatura-area {
-          display: flex;
-          flex-direction: column;
-          gap: 15px;
-          margin-top: 20px;
-        }
-        .moyses-assinatura-container,
-        .moyses-nome-container {
-          display: flex;
-          flex-direction: column;
-          align-items: flex-start;
-          gap: 6px;
-        }
-        .moyses-assinatura-linha {
-          width: 200px;
-          height: 30px;
-          border-bottom: 2px solid #000;
-        }
-        .moyses-nome-input {
-          border: none;
-          border-bottom: 1px solid #000;
-          width: 200px;
-          text-align: left;
-          padding: 4px 0;
-          font-size: 14px;
-          color: #000 !important;
-        }
-
-    .moyses-label-nome {
-      font-size: 11px;
-      font-weight: bold;
-      color: #000;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    .moyses-assinatura-container {
       display: flex;
       flex-direction: column;
+      padding: 18px 34px 20px !important;
+      min-height: 360px;
+      background: #fff !important;
+      color: #000 !important;
+    }
+
+    .moyses-topo {
+      display: flex;
+      justify-content: space-between;
       align-items: flex-start;
-      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    .moyses-topo-espaco {
+      flex: 1;
+      min-height: 10px;
+    }
+
+    .moyses-valor-box {
+      width: 190px;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .moyses-valor-input {
+      width: 190px;
+      height: 28px;
+      border: 1px solid #222 !important;
+      border-radius: 0 !important;
+      padding: 3px 10px;
+      background: #f4cfb4 !important;
+      font-weight: 500;
+      font-size: 12px;
+      text-align: center;
+      color: #222 !important;
+      outline: none;
+      box-shadow: none !important;
+    }
+
+    .moyses-corpo-vazio {
+      flex: 1;
+      min-height: 120px;
+    }
+
+    .moyses-assinatura-area {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: auto;
+      padding-top: 8px;
+    }
+
+    .moyses-assinatura-linha-row {
+      display: flex;
+      align-items: flex-end;
+      gap: 2px;
+    }
+
+    .moyses-label-assinatura,
+    .moyses-label-nome {
+      font-size: 12px;
+      font-weight: 400;
+      color: #000;
+      text-transform: none;
+      letter-spacing: 0;
+      line-height: 1;
+      white-space: nowrap;
     }
 
     .moyses-assinatura-linha {
-      width: 200px;
-      height: 30px;
-      border-bottom: 2px solid #000;
+      flex: 1;
+      height: 0;
+      border-bottom: 1px solid #000;
+      transform: translateY(-1px);
     }
 
-    .moyses-label-assinatura {
-      font-size: 11px;
-      font-weight: bold;
-      color: #000;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    .moyses-nome-linha {
+    .moyses-nome-row {
       display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 8px;
+      align-items: center;
+      gap: 12px;
     }
 
-    .moyses-nome-texto {
-      font-size: 11px;
-      font-weight: bold;
-      color: #000;
+    .moyses-nome-input {
+      width: 210px;
+      border: none;
+      border-bottom: 1px solid #000;
+      border-radius: 0 !important;
+      text-align: left;
+      padding: 1px 0 2px;
+      font-size: 12px;
+      color: #000 !important;
+      background: transparent !important;
+      box-shadow: none !important;
+      outline: none;
     }
 
     .notificacoes-btn {
