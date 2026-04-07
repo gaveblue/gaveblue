@@ -64,46 +64,22 @@ const TUTORIAL_STEPS = [
     title: 'Adicione tarefas rápido',
     description: 'Esse botão cria uma nova tarefa a qualquer momento. É o atalho mais importante do módulo.',
     target: '#fab-button',
-    placement: 'top',
+    placement: 'left',
     padding: 4
   },
   {
-    title: 'A tarefa aparece nessa lista',
-    description: 'Depois de lançar uma tarefa, ela aparece aqui com horário, prioridade e ações rápidas para gerenciar seu dia.',
+    title: 'As tarefas aparecem nessa lista',
+    description: 'Depois de lançar uma tarefa, ela aparece aqui com horário, prioridade e ações rápidas. É desse card que você edita, conclui, reabre ou exclui quando permitido.',
     target: '#tutorial-demo-card',
     placement: 'top',
     padding: 6,
     onEnter: () => ensureTutorialDemoTask()
   },
   {
-    title: 'Edite uma tarefa existente',
-    description: 'Use este botão quando precisar ajustar título, data, horário ou observações sem criar tudo de novo.',
-    target: '#tutorial-demo-edit',
-    placement: 'left',
-    padding: 6,
-    onEnter: () => ensureTutorialDemoTask()
-  },
-  {
-    title: 'Conclua ou reabra quando necessário',
-    description: 'Esse botão conclui a tarefa. Se ela já estiver concluída, o mesmo lugar vira atalho para reabrir.',
-    target: '#tutorial-demo-complete',
-    placement: 'left',
-    padding: 6,
-    onEnter: () => ensureTutorialDemoTask()
-  },
-  {
-    title: 'Exclua somente o que ainda está pendente',
-    description: 'Tarefas pendentes podem ser excluídas por aqui. Tarefas em atraso ou concluídas ficam protegidas das exclusões rápidas.',
-    target: '#tutorial-demo-delete',
-    placement: 'left',
-    padding: 6,
-    onEnter: () => ensureTutorialDemoTask()
-  },
-  {
     title: 'Gerencie pelo gesto ou pelos filtros',
-    description: 'Também dá para arrastar tarefas para concluir ou tentar excluir, além de usar os filtros para focar no que importa agora.',
+    description: 'Use os filtros para separar pendentes, concluídas e prioridades. No celular, também dá para arrastar a tarefa para concluir ou tentar excluir.',
     target: '#tutorial-task-filters',
-    placement: 'bottom',
+    placement: 'top',
     padding: 8
   },
   {
@@ -475,6 +451,11 @@ function buildJustificationEntry(prefix, justification) {
   return `${prefix} (${stamp}): ${justification}`;
 }
 
+function updateJustificationViewportHeight() {
+  const viewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+  document.documentElement.style.setProperty('--justification-viewport-height', `${Math.round(viewportHeight)}px`);
+}
+
 function openJustificationModal(config) {
   justificationContext = config;
   document.getElementById('justification-title').textContent = config.title || 'Justificativa necessária';
@@ -482,10 +463,13 @@ function openJustificationModal(config) {
   document.getElementById('justification-confirm-btn').innerHTML = `<i data-lucide="file-text" style="width:14px;height:14px"></i> ${config.confirmLabel || 'Salvar justificativa'}`;
   document.getElementById('justification-text').value = '';
   document.getElementById('justification-modal').style.display = 'flex';
+  updateJustificationViewportHeight();
   lucide.createIcons();
   setTimeout(() => {
-    document.getElementById('justification-text').focus();
-  }, 30);
+    const input = document.getElementById('justification-text');
+    input.focus();
+    input.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  }, 120);
 }
 
 function closeJustificationModal() {
@@ -516,6 +500,12 @@ function confirmJustification() {
 }
 
 tasks = sanitizeTasks(tasks);
+
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', updateJustificationViewportHeight);
+  window.visualViewport.addEventListener('scroll', updateJustificationViewportHeight);
+}
+window.addEventListener('resize', updateJustificationViewportHeight);
 
 function addNotification(type, message) {
   const notification = {
