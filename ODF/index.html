@@ -1,12 +1,41 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>OPF</title>
+  <title>OPF - GaveBlue</title>
   <link rel="stylesheet" href="assets/css/styles.css" />
 </head>
 <body>
+  <header class="opf-topbar no-print">
+    <div class="opf-topbar__brand">
+      <a href="https://gaveblue.com" target="_self" rel="noopener noreferrer" class="opf-topbar__brand-link">
+        <img src="https://i.imgur.com/Zih5jH8.png" alt="Logo GaveBlue" class="opf-topbar__logo" loading="lazy" />
+      </a>
+      <div class="opf-topbar__brand-text">
+        <span class="opf-topbar__kicker">GaveBlue</span>
+        <strong>OPF</strong>
+        <small>Ordem de Pagamento Financeiro</small>
+      </div>
+    </div>
+
+    <div class="opf-topbar__search" id="globalSearchWrap">
+      <div class="opf-search-input-shell">
+        <svg class="opf-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <circle cx="11" cy="11" r="7"></circle>
+          <path d="M20 20l-3.5-3.5"></path>
+        </svg>
+        <input type="text" id="globalModuleSearch" placeholder="Pesquisar módulo..." autocomplete="off" />
+      </div>
+      <div class="opf-search-dropdown" id="globalSearchDropdown" hidden></div>
+    </div>
+
+    <div class="opf-topbar__actions">
+      <button type="button" class="opf-topbar__action opf-topbar__action--ghost" onclick="window.location.href='https://gaveblue.com'">Home</button>
+      <button type="button" class="opf-topbar__action" onclick="window.location.href='https://gaveblue.com'">Sair</button>
+    </div>
+  </header>
+
   <div class="app-shell">
     <aside class="sidebar no-print">
       <div class="brand-block">
@@ -19,6 +48,7 @@
         <button type="button" class="tab-link is-active" data-tab-target="home">Home</button>
         <button type="button" class="tab-link" data-tab-target="lancamento">Lançamentos</button>
         <button type="button" class="tab-link" data-tab-target="documento">Documento</button>
+        <button type="button" class="tab-link" data-tab-target="relatorios">Relatórios</button>
         <button type="button" class="tab-link" data-tab-target="cadastros">Cadastros</button>
         <button type="button" class="tab-link" data-tab-target="configuracoes">Configurações</button>
       </nav>
@@ -28,9 +58,9 @@
       <section class="tab-panel is-active" data-tab-panel="home">
         <div class="section-heading">
           <div>
-            <span class="section-kicker">Visao geral</span>
+            <span class="section-kicker">Visão geral</span>
             <h2>Home</h2>
-            <p>Consulte rapidamente os documentos ja gerados e retome o fluxo quando precisar.</p>
+            <p>Consulte rapidamente os documentos já gerados e retome o fluxo quando precisar.</p>
           </div>
         </div>
 
@@ -59,17 +89,73 @@
               <p>Use a listagem para consultar o que ja foi emitido.</p>
             </div>
 
+            <div class="cadastro-toolbar home-toolbar">
+              <input type="text" id="homeSearchInput" class="cadastro-search" placeholder="Pesquisar OPF pelo número, emitente ou fornecedor..." />
+            </div>
+
             <div class="saved-list" id="documentosList"></div>
           </section>
         </div>
       </section>
 
+      <section class="tab-panel" data-tab-panel="relatorios">
+        <div class="section-heading">
+          <div>
+            <span class="section-kicker">Consulta</span>
+            <h2>Relatórios</h2>
+            <p>Verifique rapidamente as OPFs emitidas e consulte os totais já gerados.</p>
+          </div>
+        </div>
+
+        <div class="home-grid">
+          <section class="card-panel">
+            <div class="card-panel-head">
+              <h3>Resumo das OPFs</h3>
+              <p>Indicadores consolidados dos documentos emitidos.</p>
+            </div>
+
+            <div class="summary-cards">
+              <div class="summary-card">
+                <span>Total de OPFs</span>
+                <strong id="relatoriosTotalDocumentos">0</strong>
+              </div>
+              <div class="summary-card">
+                <span>Valor total emitido</span>
+                <strong id="relatoriosValorTotal">R$ 0,00</strong>
+              </div>
+            </div>
+          </section>
+
+          <section class="card-panel card-panel-wide">
+            <div class="card-panel-head">
+              <h3>OPFs emitidas</h3>
+              <p>Use a tabela para revisar números, vencimentos e valores gerados.</p>
+            </div>
+
+            <div class="cadastro-table-wrap">
+              <table class="cadastro-table">
+                <thead>
+                  <tr>
+                    <th>Número</th>
+                    <th>Emitente</th>
+                    <th>Fornecedor</th>
+                    <th>Mês de referência</th>
+                    <th>Vencimento</th>
+                    <th>Total</th>
+                  </tr>
+                </thead>
+                <tbody id="relatoriosTableBody"></tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+      </section>
       <section class="tab-panel" data-tab-panel="cadastros">
         <div class="section-heading">
           <div>
             <span class="section-kicker">Base de dados</span>
             <h2>Cadastros</h2>
-            <p>Abra a categoria que deseja manter e gerencie sua base sem misturar tudo em uma unica tela.</p>
+            <p>Abra a categoria que deseja manter e gerencie sua base sem misturar tudo em uma única tela.</p>
           </div>
         </div>
 
@@ -750,4 +836,9 @@
   <script src="assets/js/app.js"></script>
 </body>
 </html>
+
+
+
+
+
 
