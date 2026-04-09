@@ -1,4 +1,4 @@
-﻿const STORAGE_KEY = "opf-financeiro-data-v2";
+const STORAGE_KEY = "opf-financeiro-data-v2";
 const THEME_KEY = "opf-financeiro-theme";
 
 const state = {
@@ -48,6 +48,18 @@ const state = {
   numeroDocumentoAtual: "",
   confirmAction: null
 };
+
+const GLOBAL_MODULES = [
+  { name: "WeRecibos", description: "Gerador de recibos", url: "https://gaveblue.com/recibos" },
+  { name: "WeFrotas", description: "Gestão de frotas", url: "https://gaveblue.com/wefrotas" },
+  { name: "WeTime", description: "Relógio online e painel de horário", url: "https://gaveblue.com/wetime" },
+  { name: "WeConsultas", description: "Consultas empresariais", url: "https://gaveblue.com/weconsultas" },
+  { name: "WeDevs", description: "Ferramentas e utilidades dev", url: "https://gaveblue.com/wedevs" },
+  { name: "WeTasks", description: "Tarefas e organização", url: "https://gaveblue.com/wetasks" },
+  { name: "WeDocs", description: "Gerador de documentos", url: "https://gaveblue.com/wedocs" },
+  { name: "PDV", description: "Ponto de venda e financeiro", url: "https://gaveblue.com/PDV" },
+  { name: "OPF", description: "Ordem de Pagamento Financeiro", url: "https://gaveblue.com/OPF" }
+];
 
 function carregarStorage() {
   const bruto = localStorage.getItem(STORAGE_KEY);
@@ -109,6 +121,45 @@ function salvarStorage() {
 
 function uid() {
   return `${Date.now()}-${Math.random().toString(16).slice(2, 8)}`;
+}
+
+function filtrarModulosGlobais(termo) {
+  const query = String(termo || "").trim().toLowerCase();
+  if (!query) {
+    return GLOBAL_MODULES;
+  }
+
+  return GLOBAL_MODULES.filter((item) => (
+    item.name.toLowerCase().includes(query) ||
+    item.description.toLowerCase().includes(query)
+  ));
+}
+
+function renderizarBuscaGlobal(termo = "") {
+  const dropdown = document.getElementById("globalSearchDropdown");
+  if (!dropdown) {
+    return;
+  }
+
+  const resultados = filtrarModulosGlobais(termo);
+  dropdown.innerHTML = resultados.map((item) => `
+    <a class="opf-search-result" href="${item.url}" target="_self" rel="noopener noreferrer">
+      <div>
+        <strong>${item.name}</strong>
+        <span>${item.description}</span>
+      </div>
+      <div class="opf-search-result-mark">↗</div>
+    </a>
+  `).join("");
+
+  dropdown.hidden = false;
+}
+
+function fecharBuscaGlobal() {
+  const dropdown = document.getElementById("globalSearchDropdown");
+  if (dropdown) {
+    dropdown.hidden = true;
+  }
 }
 
 function formatarMoeda(valor) {
@@ -200,10 +251,19 @@ function gerarNumeroDocumento() {
   const ultimoControlado = Number(state.controle.ultimoNumeroPorAno[ano] || 0);
   const proximaSequencia = Math.max(maiorSequencia, ultimoControlado) + 1;
 
-  state.controle.ultimoNumeroPorAno[ano] = proximaSequencia;
-  salvarStorage();
+    return `OPF-${ano}${String(proximaSequencia).padStart(4, "0")}`;
+}
 
-  return `OPF-${ano}${String(proximaSequencia).padStart(4, "0")}`;
+function reservarNumeroDocumento(numeroDocumento) {
+  const dados = obterSequencialDocumento(numeroDocumento);
+  if (!dados) {
+    return;
+  }
+
+  const atual = Number(state.controle.ultimoNumeroPorAno[dados.ano] || 0);
+  if (dados.sequencia > atual) {
+    state.controle.ultimoNumeroPorAno[dados.ano] = dados.sequencia;
+  }
 }
 
 function preencherDatalist(datalistId, itens) {
@@ -224,13 +284,23 @@ function renderHome() {
   document.getElementById("homeTotalDocumentos").textContent = String(state.documentos.length);
   document.getElementById("homeUltimoDocumento").textContent = state.documentos[0]?.numeroDocumento || "-";
 
+  const termo = String(document.getElementById("homeSearchInput")?.value || "").trim().toLowerCase();
+  const documentos = state.documentos.filter((doc) => {
+    if (!termo) {
+      return true;
+    }
+
+    return [doc.numeroDocumento, doc.emitente?.nome, doc.fornecedor?.nome]
+      .some((valor) => String(valor || "").toLowerCase().includes(termo));
+  });
+
   const container = document.getElementById("documentosList");
-  if (!state.documentos.length) {
-    container.innerHTML = `<div class="saved-empty">Nenhum documento gerado ainda.</div>`;
+  if (!documentos.length) {
+    container.innerHTML = `<div class="saved-empty">Nenhum documento encontrado.</div>`;
     return;
   }
 
-  container.innerHTML = state.documentos.map((doc) => `
+  container.innerHTML = documentos.map((doc) => `
     <div class="saved-item">
       <div>
         <strong>${doc.numeroDocumento}</strong>
@@ -240,6 +310,34 @@ function renderHome() {
       </div>
       <button type="button" class="btn-secondary" data-open-document="${doc.id}">Ver</button>
     </div>
+  `).join("");
+}
+
+function renderRelatorios() {
+  const totalDocumentos = document.getElementById("relatoriosTotalDocumentos");
+  const valorTotal = document.getElementById("relatoriosValorTotal");
+  const body = document.getElementById("relatoriosTableBody");
+  if (!body || !totalDocumentos || !valorTotal) {
+    return;
+  }
+
+  totalDocumentos.textContent = String(state.documentos.length);
+  valorTotal.textContent = formatarMoeda(state.documentos.reduce((acc, item) => acc + Number(item.total || 0), 0));
+
+  if (!state.documentos.length) {
+    body.innerHTML = `<tr><td colspan="6"><div class="saved-empty">Nenhuma OPF emitida ainda.</div></td></tr>`;
+    return;
+  }
+
+  body.innerHTML = state.documentos.map((item) => `
+    <tr>
+      <td>${item.numeroDocumento}</td>
+      <td>${item.emitente?.nome || "-"}</td>
+      <td>${item.fornecedor?.nome || "-"}</td>
+      <td>${item.mesReferencia || "-"}</td>
+      <td>${item.vencimento || "-"}</td>
+      <td class="num">${formatarMoeda(item.total)}</td>
+    </tr>
   `).join("");
 }
 
@@ -1338,6 +1436,7 @@ function upsertDocumento(documento) {
   if (indice >= 0) {
     state.documentos[indice] = documento;
   } else {
+    reservarNumeroDocumento(documento.numeroDocumento);
     state.documentos.unshift(documento);
   }
 
@@ -1348,6 +1447,7 @@ function upsertDocumento(documento) {
   }
   renderHome();
   renderLancamentos();
+  renderRelatorios();
 }
 
 function salvarDocumentoAtual() {
@@ -1361,6 +1461,23 @@ function salvarDocumentoAtual() {
 
 
 function registrarEventos() {
+  const globalSearchInput = document.getElementById("globalModuleSearch");
+  globalSearchInput?.addEventListener("focus", () => renderizarBuscaGlobal(globalSearchInput.value));
+  globalSearchInput?.addEventListener("input", (event) => renderizarBuscaGlobal(event.currentTarget.value));
+  globalSearchInput?.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      fecharBuscaGlobal();
+      return;
+    }
+
+    if (event.key === "Enter") {
+      const primeiro = filtrarModulosGlobais(event.currentTarget.value)[0];
+      if (primeiro) {
+        window.location.href = primeiro.url;
+      }
+    }
+  });
+
   document.querySelectorAll(".tab-link").forEach((botao) => {
     botao.addEventListener("click", () => {
       alternarAba(botao.dataset.tabTarget);
@@ -1377,9 +1494,14 @@ function registrarEventos() {
   });
 
   document.getElementById("cadastroSearch").addEventListener("input", renderCadastros);
+  document.getElementById("homeSearchInput")?.addEventListener("input", renderHome);
 
   document.addEventListener("click", (event) => {
     const alvo = event.target;
+
+    if (!alvo.closest("#globalSearchWrap")) {
+      fecharBuscaGlobal();
+    }
 
     if (alvo.matches(".cadastro-tab")) {
       state.cadastroView = alvo.dataset.cadastroView;
@@ -1693,8 +1815,20 @@ window.addEventListener("load", () => {
   renderCadastros();
   renderHome();
   renderLancamentos();
+  renderRelatorios();
   iniciarFormulario();
   registrarEventos();
   atualizarEstadoPreview({ loading: false, success: false, documento: false });
 });
+
+
+
+
+
+
+
+
+
+
+
 
