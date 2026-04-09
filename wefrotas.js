@@ -2055,15 +2055,34 @@ let allVehicles = [];
           <meta charset="UTF-8">
           <title>${reportTitle}</title>
           <style>
-            * { box-sizing: border-box; font-family: Arial, Helvetica, sans-serif; }
+            * {
+              box-sizing: border-box;
+              font-family: Arial, Helvetica, sans-serif;
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+              color-adjust: exact;
+              -moz-print-color-adjust: exact;
+            }
             body { margin: 24px; color: #111; }
             h1, h2 { margin: 0 0 12px; }
             p { margin: 0 0 20px; color: #444; }
             .report-head { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-bottom: 22px; }
             .report-logo { max-width: ${getReportLogoStyle().width}px; max-height: ${getReportLogoStyle().height}px; object-fit: contain; }
-            table { width: 100%; border-collapse: collapse; margin-bottom: 28px; }
-            th, td { border: 1px solid #222; padding: 8px 10px; font-size: 12px; }
-            th { text-transform: uppercase; background: #f4f4f4; }
+            table { width: 100%; border-collapse: collapse; margin-bottom: 28px; border: 1px solid #000; empty-cells: show; }
+            th, td { border: 1px solid #000; padding: 8px 10px; font-size: 12px; }
+            th { text-transform: uppercase; background: #f4f4f4 !important; }
+            @media print {
+              table, th, td {
+                border-color: #000 !important;
+                border-style: solid !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                -moz-print-color-adjust: exact !important;
+                color-adjust: exact !important;
+              }
+              th, td { border-width: 1pt !important; }
+              table { border-width: 1pt !important; }
+            }
           </style>
         </head>
         <body>
@@ -2795,15 +2814,31 @@ let allVehicles = [];
           <title>OS ${escapeHtml(getOrderNumberLabel(order))}</title>
           <style>
             @page { size: A4; margin: 8mm; }
-            * { box-sizing: border-box; font-family: Arial, Helvetica, sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            * {
+              box-sizing: border-box;
+              font-family: Arial, Helvetica, sans-serif;
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+              color-adjust: exact;
+              -moz-print-color-adjust: exact;
+            }
             html, body { margin: 0; padding: 0; background: #fff; color: #000; }
             body { padding: 8px; }
             .sheet { width: 196mm; max-width: 100%; margin: 0 auto; }
-            table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-            td, th { border: 1px solid #111; padding: 2px 4px; font-size: 10px; vertical-align: middle; }
+            table {
+              width: 100%;
+              table-layout: fixed;
+              border-collapse: collapse;
+              border: 1px solid #000;
+              empty-cells: show;
+            }
+            td, th {
+              border: 1px solid #000;
+              padding: 2px 4px;
+              font-size: 10px;
+              vertical-align: middle;
+            }
             .top-strip td { height: 20px; background: #d9d9d9 !important; }
-            .header-table { border-left: 1px solid #111; border-right: 1px solid #111; border-bottom: 1px solid #111; }
-            .header-table td { border-top: 0; border-left: 0; border-right: 0; }
             .header-logo-cell { width: 22%; padding: 10px 12px 6px 20px; text-align: left; }
             .header-main-cell { width: 56%; text-align: center; padding: 10px 8px 8px; }
             .header-number-cell { width: 22%; text-align: right; padding: 20px 18px 8px 8px; }
@@ -2820,17 +2855,41 @@ let allVehicles = [];
             .block-gap { margin-top: 24px; }
             .desc-title td { height: 40px; text-align: center; font-size: 11px; font-weight: 800; text-transform: uppercase; background: #d9d9d9 !important; }
             .desc-box td { height: 90px; vertical-align: top; padding: 8px; white-space: pre-wrap; line-height: 1.35; }
-            .signature-block { border-left: 1px solid #111; border-right: 1px solid #111; border-top: 1px solid #111; }
-            .signature-block td { height: 74px; border-bottom: 0; }
+            .signature-block td { height: 74px; }
             .sign-wrap { width: 250px; margin: 40px auto 0; text-align: center; }
-            .sign-line { width: 100%; border-top: 1px solid #111; height: 0; }
+            .sign-line { width: 100%; border-top: 1px solid #000; min-height: 1px; display: block; }
             .sign-label { margin-top: 2px; font-size: 11px; font-weight: 800; }
             .finance-table { margin-top: 0; }
-            .finance-table th { height: 46px; background: #d9d9d9 !important; text-align: center; font-size: 10px; font-weight: 800; text-transform: uppercase; line-height: 1.1; }
+            .finance-table th {
+              height: 46px;
+              background: #d9d9d9 !important;
+              text-align: center;
+              font-size: 10px;
+              font-weight: 800;
+              text-transform: uppercase;
+              line-height: 1.1;
+            }
             .finance-table td { height: 15px; font-size: 10px; }
             .money { text-align: right; white-space: nowrap; }
-            .finance-total-spacer { border: 0 !important; }
+            .finance-table td.finance-total-spacer {
+              border-left: none !important;
+              border-bottom: none !important;
+              border-right: none !important;
+              border-top: 1px solid #000 !important;
+            }
             .finance-total-label { text-align: center; font-size: 11px; font-weight: 800; }
+            @media print {
+              table, td, th {
+                border-color: #000 !important;
+                border-style: solid !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                -moz-print-color-adjust: exact !important;
+                color-adjust: exact !important;
+              }
+              td, th { border-width: 1pt !important; }
+              table { border-width: 1pt !important; }
+            }
           </style>
         </head>
         <body>
@@ -2925,7 +2984,7 @@ let allVehicles = [];
                 <tr class="total-row">
                   <td colspan="3" class="finance-total-spacer"></td>
                   <td class="finance-total-label">TOTAL</td>
-                  <td class="money">${escapeHtml(formatCurrency(totalEntries))}</td>
+                  <td class="money">${entries.length ? escapeHtml(formatCurrency(totalEntries)) : 'R$'}</td>
                 </tr>
               </tbody>
             </table>
