@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>11Full Finance</title>
+  <meta name="description" content="11Full Finance e um app web de gestao financeira pessoal com contas, transacoes e relatorios.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">11Full Finance</p>
+        <h1 id="screenTitle">Dashboard financeiro</h1>
+      </div>
+
+      <div class="topbar-actions">
+        <button class="icon-button" id="themeToggle" type="button" aria-label="Alternar tema">
+          <span class="theme-icon theme-icon-sun" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="4.2"></circle>
+              <path d="M12 2.5V5.1M12 18.9V21.5M21.5 12H18.9M5.1 12H2.5M18.72 5.28L16.88 7.12M7.12 16.88L5.28 18.72M18.72 18.72L16.88 16.88M7.12 7.12L5.28 5.28"></path>
+            </svg>
+          </span>
+          <span class="theme-icon theme-icon-moon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M20 14.2A8.5 8.5 0 1 1 9.8 4 6.9 6.9 0 0 0 20 14.2Z"></path>
+            </svg>
+          </span>
+        </button>
+        <button class="profile-chip" type="button">
+          <span>LP</span>
+        </button>
+      </div>
+    </header>
+
+    <main class="app-content">
+      <section class="screen is-active" id="dashboardView" data-view="dashboard">
+        <section class="hero-card panel">
+          <div class="hero-card__header">
+            <div>
+              <p class="section-label">Saldo total</p>
+              <p class="hero-card__amount" id="totalBalance">R$ 0,00</p>
+            </div>
+            <button class="ghost-button ghost-button--icon ghost-button--icon-only" id="toggleBalance" type="button" aria-pressed="false" aria-label="Ocultar saldo">
+              <span class="ghost-button__icon" aria-hidden="true" id="balanceToggleIcon">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M2.5 12S6.2 5.5 12 5.5S21.5 12 21.5 12S17.8 18.5 12 18.5S2.5 12 2.5 12Z"></path>
+                  <circle cx="12" cy="12" r="2.8"></circle>
+                </svg>
+              </span>
+            </button>
+          </div>
+
+          <div class="hero-card__footer">
+            <div>
+              <span class="badge badge-positive" id="balanceTrend">Em dia</span>
+              <p id="balanceMessage">Adicione suas contas para comecar.</p>
+            </div>
+            <div class="hero-card__footer-meta">
+              <span id="lastUpdateLabel">Sem movimentacoes</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="summary-grid">
+          <article class="summary-card panel">
+            <div class="summary-card__icon summary-card__icon--credit">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M12 5V19M5 12H19"></path>
+              </svg>
+            </div>
+            <div>
+              <p class="section-label">Credito</p>
+              <strong id="creditTotal">R$ 0,00</strong>
+            </div>
+          </article>
+
+          <article class="summary-card panel">
+            <div class="summary-card__icon summary-card__icon--debit">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M5 12H19"></path>
+              </svg>
+            </div>
+            <div>
+              <p class="section-label">Debito</p>
+              <strong id="debitTotal">R$ 0,00</strong>
+            </div>
+          </article>
+
+          <article class="summary-card panel">
+            <div class="summary-card__icon">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M5 17L10 12L13 15L19 8"></path>
+              </svg>
+            </div>
+            <div>
+              <p class="section-label">Saldo do mes</p>
+              <strong id="monthBalance">R$ 0,00</strong>
+            </div>
+          </article>
+        </section>
+
+        <section class="section-block">
+          <div class="section-heading">
+            <div>
+              <p class="section-label">Contas bancarias</p>
+              <h2>Suas contas</h2>
+            </div>
+            <button class="text-button" type="button" id="openAccountModalButton">Nova conta</button>
+          </div>
+          <div class="accounts-row" id="accountsRow"></div>
+        </section>
+
+        <section class="insights-grid">
+          <article class="panel chart-card">
+            <div class="section-heading">
+              <div>
+                <p class="section-label">Resumo mensal</p>
+                <h2>Fluxo financeiro</h2>
+              </div>
+              <span class="chip" id="currentMonthLabel">Mes atual</span>
+            </div>
+            <div class="chart" aria-label="Grafico de comparacao entre credito e debito">
+              <div class="chart__bars" id="chartBars"></div>
+              <div class="chart__legend">
+                <span><i class="legend-dot legend-dot--credit"></i> Credito</span>
+                <span><i class="legend-dot legend-dot--debit"></i> Debito</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="panel quick-overview">
+            <div class="section-heading">
+              <div>
+                <p class="section-label">Visao rapida</p>
+                <h2>Status geral</h2>
+              </div>
+            </div>
+            <div class="overview-list">
+              <div class="overview-item">
+                <span>Saldo sobre creditos</span>
+                <strong id="healthRate">0%</strong>
+              </div>
+              <div class="overview-item">
+                <span>Contas conectadas</span>
+                <strong id="connectedAccounts">0</strong>
+              </div>
+              <div class="overview-item">
+                <span>Transacoes hoje</span>
+                <strong id="todayTransactions">0</strong>
+              </div>
+            </div>
+          </article>
+        </section>
+
+        <section class="section-block">
+          <div class="section-heading">
+            <div>
+              <p class="section-label">Ultimas transacoes</p>
+              <h2>Movimentacoes recentes</h2>
+            </div>
+            <button class="text-button" type="button" data-go-view="transactions">Ver tudo</button>
+          </div>
+          <div class="transactions-list panel" id="recentTransactionsList"></div>
+        </section>
+      </section>
+
+      <section class="screen" id="transactionsView" data-view="transactions">
+        <section class="panel content-panel">
+          <div class="section-heading">
+            <div>
+              <p class="section-label">Movimentacoes</p>
+              <h2>Lista completa</h2>
+            </div>
+            <button class="text-button" type="button" id="addTransactionInlineButton">Novo lancamento</button>
+          </div>
+
+          <div class="filters-grid">
+            <label class="field">
+              <span>Buscar</span>
+              <input id="searchInput" type="text" placeholder="Descricao ou categoria">
+            </label>
+            <label class="field">
+              <span>Tipo</span>
+              <select id="filterType">
+                <option value="all">Todos</option>
+                <option value="credit">Credito</option>
+                <option value="debit">Debito</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Conta</span>
+              <select id="filterAccount">
+                <option value="all">Todas</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Mes</span>
+              <select id="filterMonth">
+                <option value="all">Todos</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="transactions-list transactions-list--full" id="allTransactionsList"></div>
+        </section>
+      </section>
+
+      <section class="screen" id="accountsView" data-view="accounts">
+        <section class="panel content-panel">
+          <div class="section-heading">
+            <div>
+              <p class="section-label">Contas</p>
+              <h2>Gerencie suas contas</h2>
+            </div>
+            <button class="text-button" type="button" id="newAccountButton">Adicionar conta</button>
+          </div>
+
+          <div class="stack-list" id="accountsManagerList"></div>
+        </section>
+      </section>
+
+      <section class="screen" id="reportsView" data-view="reports">
+        <section class="panel content-panel">
+          <div class="section-heading">
+            <div>
+              <p class="section-label">Relatorios</p>
+              <h2>Analise do periodo</h2>
+            </div>
+          </div>
+
+          <div class="filters-grid filters-grid--reports">
+            <label class="field">
+              <span>Tipo</span>
+              <select id="reportFilterType">
+                <option value="all">Todos</option>
+                <option value="credit">Credito</option>
+                <option value="debit">Debito</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Situacao</span>
+              <select id="reportFilterStatus">
+                <option value="all">Todas</option>
+                <option value="paid">Quitadas</option>
+                <option value="pending">Em aberto</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Parceiro</span>
+              <select id="reportFilterPartner">
+                <option value="all">Todos</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Empresa</span>
+              <select id="reportFilterCompany">
+                <option value="all">Todas</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Mes</span>
+              <select id="reportFilterMonth">
+                <option value="all">Todos</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Origem</span>
+              <select id="reportFilterOrigin">
+                <option value="all">Todas</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Tipo de titulo</span>
+              <select id="reportFilterTitleType">
+                <option value="all">Todos</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Centro resultado</span>
+              <select id="reportFilterResultCenter">
+                <option value="all">Todos</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Vencimento</span>
+              <select id="reportFilterTiming">
+                <option value="all">Todos</option>
+                <option value="overdue">Vencidos</option>
+                <option value="due-soon">A vencer 7 dias</option>
+                <option value="future">Vence depois</option>
+                <option value="no-due-date">Sem vencimento</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="report-grid">
+            <article class="report-card">
+              <span class="section-label">Volume filtrado</span>
+              <strong id="reportTotalValue">R$ 0,00</strong>
+              <small id="reportTotalCount">0 titulos</small>
+            </article>
+            <article class="report-card">
+              <span class="section-label">Em aberto</span>
+              <strong id="reportPendingValue">R$ 0,00</strong>
+              <small id="reportPendingCount">0 titulos pendentes</small>
+            </article>
+            <article class="report-card">
+              <span class="section-label">Quitadas</span>
+              <strong id="reportPaidValue">R$ 0,00</strong>
+              <small id="reportPaidCount">0 titulos baixados</small>
+            </article>
+            <article class="report-card">
+              <span class="section-label">Parceiro lider</span>
+              <strong id="topPartnerName">Sem dados</strong>
+              <small id="topPartnerValue">R$ 0,00</small>
+            </article>
+            <article class="report-card">
+              <span class="section-label">Empresa lider</span>
+              <strong id="topCompanyName">Sem dados</strong>
+              <small id="topCompanyValue">R$ 0,00</small>
+            </article>
+            <article class="report-card">
+              <span class="section-label">Titulos vencidos</span>
+              <strong id="reportOverdueValue">R$ 0,00</strong>
+              <small id="reportOverdueCount">0 titulos vencidos</small>
+            </article>
+            <article class="report-card">
+              <span class="section-label">A vencer em 7 dias</span>
+              <strong id="reportDueSoonValue">R$ 0,00</strong>
+              <small id="reportDueSoonCount">0 titulos no radar</small>
+            </article>
+            <article class="report-card">
+              <span class="section-label">Ticket medio</span>
+              <strong id="reportAverageValue">R$ 0,00</strong>
+              <small id="reportAverageLabel">Media do filtro atual</small>
+            </article>
+          </div>
+
+          <div class="section-heading">
+            <div>
+              <p class="section-label">Categorias</p>
+              <h2>Maiores grupos</h2>
+            </div>
+          </div>
+
+          <div class="category-breakdown" id="categoryBreakdown"></div>
+
+          <div class="section-heading">
+            <div>
+              <p class="section-label">Parceiros</p>
+              <h2>Concentracao por parceiro</h2>
+            </div>
+          </div>
+
+          <div class="category-breakdown" id="partnerBreakdown"></div>
+
+          <div class="section-heading">
+            <div>
+              <p class="section-label">Titulos filtrados</p>
+              <h2>Leitura detalhada</h2>
+            </div>
+          </div>
+
+          <div class="category-breakdown" id="reportTitlesList"></div>
+
+          <div class="section-heading">
+            <div>
+              <p class="section-label">Ultima importacao</p>
+              <h2>Resumo da carga</h2>
+            </div>
+          </div>
+
+          <div class="category-breakdown" id="importSummary"></div>
+        </section>
+      </section>
+
+      <section class="screen" id="settingsView" data-view="settings">
+        <section class="panel content-panel">
+          <div class="section-heading">
+            <div>
+              <p class="section-label">Configuracoes</p>
+              <h2>Dados e importacao</h2>
+            </div>
+          </div>
+
+          <div class="stack-list">
+            <article class="manager-card">
+              <div class="manager-card__meta">
+                <div>
+                  <h3>Importar planilha</h3>
+                  <small>Carrega dados financeiros diretamente do Excel para o sistema.</small>
+                </div>
+              </div>
+              <div class="manager-card__actions">
+                <button class="primary-button" id="importSpreadsheetButton" type="button">Importar arquivo</button>
+              </div>
+            </article>
+
+            <article class="manager-card">
+              <div class="manager-card__meta">
+                <div>
+                  <h3>Resetar aplicativo</h3>
+                  <small>Apaga contas, transacoes, categorias e a ultima importacao salva neste navegador.</small>
+                </div>
+              </div>
+              <div class="manager-card__actions">
+                <button class="danger-button" id="resetDataButton" type="button">Limpar dados</button>
+              </div>
+            </article>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <input id="spreadsheetInput" type="file" accept=".xls,.xlsx,.xlsm" hidden>
+
+    <button class="fab" id="fabButton" type="button" aria-label="Adicionar movimentacao" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none">
+        <path d="M12 5V19M5 12H19"></path>
+      </svg>
+    </button>
+
+    <nav class="bottom-nav" aria-label="Menu principal">
+      <button class="bottom-nav__item bottom-nav__item--active" type="button" data-view-button="dashboard">
+        <span class="bottom-nav__icon">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M4 11.5L12 4L20 11.5V20H4V11.5Z"></path>
+          </svg>
+        </span>
+        <span>Dashboard</span>
+      </button>
+      <button class="bottom-nav__item" type="button" data-view-button="transactions">
+        <span class="bottom-nav__icon">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M4 7H20M4 12H20M4 17H14"></path>
+          </svg>
+        </span>
+        <span>Transacoes</span>
+      </button>
+      <div class="bottom-nav__spacer" aria-hidden="true"></div>
+      <button class="bottom-nav__item" type="button" data-view-button="accounts">
+        <span class="bottom-nav__icon">
+          <svg viewBox="0 0 24 24" fill="none">
+            <rect x="3.5" y="6" width="17" height="12" rx="3"></rect>
+            <path d="M3.5 10.5H20.5"></path>
+          </svg>
+        </span>
+        <span>Contas</span>
+      </button>
+      <button class="bottom-nav__item" type="button" data-view-button="reports">
+        <span class="bottom-nav__icon">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M5 18V10M12 18V6M19 18V13"></path>
+          </svg>
+        </span>
+        <span>Relatorios</span>
+      </button>
+      <button class="bottom-nav__item" type="button" data-view-button="settings">
+        <span class="bottom-nav__icon">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M12 3.5L14.1 5.1L16.7 4.8L17.7 7.2L20.1 8.3L19.8 10.9L21.5 13L19.8 15.1L20.1 17.7L17.7 18.8L16.7 21.2L14.1 20.9L12 22.5L9.9 20.9L7.3 21.2L6.3 18.8L3.9 17.7L4.2 15.1L2.5 13L4.2 10.9L3.9 8.3L6.3 7.2L7.3 4.8L9.9 5.1L12 3.5Z"></path>
+            <circle cx="12" cy="13" r="3.2"></circle>
+          </svg>
+        </span>
+        <span>Ajustes</span>
+      </button>
+    </nav>
+
+    <div class="quick-menu" id="quickMenu" hidden>
+      <button class="quick-menu__item quick-menu__item--credit" type="button" data-entry-type="credit">
+        <span>+ Credito</span>
+        <small>Adicionar entrada</small>
+      </button>
+      <button class="quick-menu__item quick-menu__item--debit" type="button" data-entry-type="debit">
+        <span>- Debito</span>
+        <small>Adicionar saida</small>
+      </button>
+    </div>
+
+    <div class="modal-backdrop" id="transactionModal" hidden>
+      <section class="entry-modal panel" role="dialog" aria-modal="true" aria-labelledby="transactionModalTitle">
+        <div class="entry-modal__header">
+          <div>
+            <p class="section-label">Movimentacao</p>
+            <h2 id="transactionModalTitle">Novo lancamento</h2>
+          </div>
+          <button class="icon-button icon-button--sm" id="closeTransactionModalButton" type="button" aria-label="Fechar">
+            <span class="ghost-button__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M6 6L18 18M18 6L6 18"></path>
+              </svg>
+            </span>
+          </button>
+        </div>
+
+        <form class="entry-form" id="transactionForm">
+          <input type="hidden" id="transactionId" name="transactionId">
+          <input type="hidden" id="entryType" name="type" value="credit">
+
+          <div class="segmented-control" role="tablist" aria-label="Tipo de lancamento">
+            <button class="segmented-control__item is-active" type="button" data-type-select="credit">Credito</button>
+            <button class="segmented-control__item" type="button" data-type-select="debit">Debito</button>
+          </div>
+
+          <label class="field">
+            <span>Descricao</span>
+            <input id="entryDescription" name="description" type="text" maxlength="60" placeholder="Ex.: salario, mercado, aluguel" required>
+          </label>
+
+          <div class="field-grid">
+            <label class="field">
+              <span>Valor</span>
+              <input id="entryAmount" name="amount" type="number" inputmode="decimal" min="0.01" step="0.01" placeholder="0,00" required>
+            </label>
+
+            <label class="field">
+              <span>Data</span>
+              <input id="entryDate" name="date" type="date" required>
+            </label>
+          </div>
+
+          <div class="field-grid">
+            <label class="field">
+              <span>Conta</span>
+              <select id="entryAccount" name="accountId" required></select>
+            </label>
+
+            <label class="field">
+              <span>Categoria</span>
+              <input id="entryCategory" name="category" type="text" list="categorySuggestions" placeholder="Ex.: alimentacao" required>
+              <datalist id="categorySuggestions"></datalist>
+            </label>
+          </div>
+
+          <div class="entry-form__actions">
+            <button class="ghost-button" id="cancelTransactionButton" type="button">Cancelar</button>
+            <button class="primary-button" type="submit">Salvar lancamento</button>
+          </div>
+        </form>
+      </section>
+    </div>
+
+    <div class="modal-backdrop" id="accountModal" hidden>
+      <section class="entry-modal panel" role="dialog" aria-modal="true" aria-labelledby="accountModalTitle">
+        <div class="entry-modal__header">
+          <div>
+            <p class="section-label">Conta bancaria</p>
+            <h2 id="accountModalTitle">Nova conta</h2>
+          </div>
+          <button class="icon-button icon-button--sm" id="closeAccountModalButton" type="button" aria-label="Fechar">
+            <span class="ghost-button__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M6 6L18 18M18 6L6 18"></path>
+              </svg>
+            </span>
+          </button>
+        </div>
+
+        <form class="entry-form" id="accountForm">
+          <input type="hidden" id="accountId" name="accountId">
+
+          <label class="field">
+            <span>Banco</span>
+            <input id="accountBank" name="bank" type="text" maxlength="40" placeholder="Ex.: Nubank, Itau, Caixa" required>
+          </label>
+
+          <div class="field-grid">
+            <label class="field">
+              <span>Tipo</span>
+              <input id="accountType" name="type" type="text" maxlength="30" placeholder="Ex.: Conta principal" required>
+            </label>
+
+            <label class="field">
+              <span>Saldo inicial</span>
+              <input id="accountOpeningBalance" name="openingBalance" type="number" inputmode="decimal" step="0.01" placeholder="0,00" required>
+            </label>
+          </div>
+
+          <div class="entry-form__actions">
+            <button class="ghost-button" id="cancelAccountButton" type="button">Cancelar</button>
+            <button class="primary-button" type="submit">Salvar conta</button>
+          </div>
+        </form>
+      </section>
+    </div>
+  </div>
+
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
