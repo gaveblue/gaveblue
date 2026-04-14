@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
@@ -31,7 +31,6 @@
     </div>
 
     <div class="opf-topbar__actions">
-      <button type="button" class="opf-topbar__action opf-topbar__action--ghost" onclick="window.location.href='https://gaveblue.com'">Home</button>
       <button type="button" class="opf-topbar__action" onclick="window.location.href='https://gaveblue.com'">Sair</button>
     </div>
   </header>
@@ -45,12 +44,43 @@
       </div>
 
       <nav class="tab-nav">
-        <button type="button" class="tab-link is-active" data-tab-target="home">Home</button>
-        <button type="button" class="tab-link" data-tab-target="lancamento">Lançamentos</button>
-        <button type="button" class="tab-link" data-tab-target="documento">Documento</button>
-        <button type="button" class="tab-link" data-tab-target="relatorios">Relatórios</button>
-        <button type="button" class="tab-link" data-tab-target="cadastros">Cadastros</button>
-        <button type="button" class="tab-link" data-tab-target="configuracoes">Configurações</button>
+        <button type="button" class="tab-link is-active icon-tab-link" data-tab-target="home" aria-label="Home" title="Home">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+            <path d="M3 10.5 12 3l9 7.5"></path>
+            <path d="M5 9.5V21h14V9.5"></path>
+          </svg>
+        </button>
+        <button type="button" class="tab-link icon-tab-link" data-tab-target="documento" aria-label="Documento" title="Documento">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <path d="M14 2v6h6"></path>
+            <path d="M8 13h8"></path>
+            <path d="M8 17h8"></path>
+            <path d="M8 9h2"></path>
+          </svg>
+        </button>
+        <button type="button" class="tab-link icon-tab-link" data-tab-target="relatorios" aria-label="Relatórios" title="Relatórios">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+            <path d="M3 3v18h18"></path>
+            <path d="M7 16V9"></path>
+            <path d="M12 16V5"></path>
+            <path d="M17 16v-4"></path>
+          </svg>
+        </button>
+        <button type="button" class="tab-link icon-tab-link" data-tab-target="cadastros" aria-label="Cadastros" title="Cadastros">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="8.5" cy="7" r="4"></circle>
+            <path d="M20 8v6"></path>
+            <path d="M23 11h-6"></path>
+          </svg>
+        </button>
+        <button type="button" class="tab-link icon-tab-link" data-tab-target="configuracoes" aria-label="Configurações" title="Configurações">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 8.92 4.6H9A1.65 1.65 0 0 0 10 3.09V3a2 2 0 1 1 4 0v.09A1.65 1.65 0 0 0 15 4.6a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.36.2.78.31 1.19.31H21a2 2 0 1 1 0 4h-.09c-.41 0-.83.11-1.19.31Z"></path>
+          </svg>
+        </button>
       </nav>
     </aside>
 
@@ -58,44 +88,25 @@
       <section class="tab-panel is-active" data-tab-panel="home">
         <div class="section-heading">
           <div>
-            <span class="section-kicker">Visão geral</span>
+            <span class="section-kicker">Painel</span>
             <h2>Home</h2>
-            <p>Consulte rapidamente os documentos já gerados e retome o fluxo quando precisar.</p>
+            <p>Esta area vai receber os atalhos e resumos principais do OPF.</p>
           </div>
         </div>
 
-        <div class="home-grid">
-          <section class="card-panel">
-            <div class="card-panel-head">
-              <h3>Resumo rapido</h3>
-              <p>Indicadores dos documentos gerados.</p>
-            </div>
+        <section class="card-panel card-panel-wide">
+          <div class="card-panel-head">
+            <h3>Em construcao</h3>
+            <p>Vamos construir essa tela depois. Por enquanto, a gestao das OPFs fica na aba Documento.</p>
+          </div>
 
-            <div class="summary-cards">
-              <div class="summary-card">
-                <span>Total de documentos</span>
-                <strong id="homeTotalDocumentos">0</strong>
-              </div>
-              <div class="summary-card">
-                <span>Ultimo documento</span>
-                <strong id="homeUltimoDocumento">-</strong>
-              </div>
+          <div class="home-placeholder-shell">
+            <div class="home-placeholder-card">
+              <strong>Espaco reservado para a Home</strong>
+              <span>Quando formos evoluir essa tela, podemos colocar atalhos, indicadores e pendencias aqui.</span>
             </div>
-          </section>
-
-          <section class="card-panel card-panel-wide">
-            <div class="card-panel-head">
-              <h3>Documentos gerados</h3>
-              <p>Use a listagem para consultar o que ja foi emitido.</p>
-            </div>
-
-            <div class="cadastro-toolbar home-toolbar">
-              <input type="text" id="homeSearchInput" class="cadastro-search" placeholder="Pesquisar OPF pelo número, emitente ou fornecedor..." />
-            </div>
-
-            <div class="saved-list" id="documentosList"></div>
-          </section>
-        </div>
+          </div>
+        </section>
       </section>
 
       <section class="tab-panel" data-tab-panel="relatorios">
@@ -236,13 +247,13 @@
         </div>
 
         <form id="lancamentoForm" class="launch-grid" hidden>
-          <section class="card-panel">
+          <section class="card-panel" data-workspace-step-panel="0">
             <div class="card-panel-head row-between">
               <div>
                 <h3>Novo lançamento</h3>
                 <p>Preencha os dados do lançamento e gere o documento quando finalizar.</p>
               </div>
-              <button type="button" class="btn-secondary" data-lancamento-action="voltar-lista">Voltar</button>
+              <button type="button" class="btn-secondary" data-lancamento-action="voltar-lista">Fechar</button>
             </div>
 
             <div class="launch-document-number">
@@ -286,7 +297,7 @@
             </div>
           </section>
 
-          <section class="card-panel">
+          <section class="card-panel" data-workspace-step-panel="1">
             <div class="card-panel-head">
               <h3>Classificação</h3>
             </div>
@@ -310,7 +321,7 @@
             </div>
           </section>
 
-          <section class="card-panel">
+          <section class="card-panel" data-workspace-step-panel="2">
             <div class="card-panel-head">
               <h3>Fiscal / Contábil</h3>
             </div>
@@ -338,7 +349,7 @@
             </div>
           </section>
 
-          <section class="card-panel card-panel-wide">
+          <section class="card-panel card-panel-wide" data-workspace-step-panel="3">
             <div class="card-step">
               <span class="section-kicker">Etapa 2</span>
               <h3>Itens e resumo financeiro</h3>
@@ -369,7 +380,7 @@
             </div>
           </section>
 
-          <section class="card-panel">
+          <section class="card-panel" data-workspace-step-panel="4">
             <div class="card-panel-head">
               <h3>Resumo financeiro</h3>
             </div>
@@ -404,25 +415,170 @@
               </div>
             </div>
 
-            <div class="panel-actions">
-              <button type="button" class="btn-primary" data-action="gerar-documento">Gerar documento</button>
-            </div>
-          </section>
+            </section>
         </form>
       </section>
 
       <section class="tab-panel" data-tab-panel="documento">
         <div class="section-heading">
           <div>
-            <span class="section-kicker">Etapa 3</span>
-            <h2>Pré-visualização</h2>
-            <p>Confira o documento. Se estiver correto, salve e imprima. Se precisar ajustar, volte para edição.</p>
+            <span class="section-kicker">Documentos</span>
+            <h2>Documentos OPF</h2>
+            <p>Consulte as OPFs registradas, abra a visualizacao ou volte para edicao quando precisar.</p>
+          </div>
+        </div>
+
+        <section class="card-panel card-panel-wide no-print">
+          <div class="card-panel-head row-between">
+            <div>
+              <h3>Documentos gerados</h3>
+              <p>Selecione uma OPF para visualizar ou editar.</p>
+            </div>
+            <div class="documento-header-actions">
+              <button type="button" class="btn-primary icon-btn" data-lancamento-action="novo" aria-label="Novo documento" title="Novo documento">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                  <path d="M12 5v14"></path>
+                  <path d="M5 12h14"></path>
+                </svg>
+              </button>
+              <button type="button" class="btn-secondary icon-btn" data-document-toolbar-action="ver" aria-label="Ver documento" title="Ver documento">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                  <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+              </button>
+              <button type="button" class="btn-secondary icon-btn" data-document-toolbar-action="editar" aria-label="Editar documento" title="Editar documento">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                  <path d="M12 20h9"></path>
+                  <path d="M16.5 3.5a2.12 2.12 0 1 1 3 3L7 19l-4 1 1-4Z"></path>
+                </svg>
+              </button>
+              <button type="button" class="btn-secondary icon-btn" data-document-toolbar-action="imprimir" aria-label="Imprimir documento" title="Imprimir documento">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                  <path d="M6 9V2h12v7"></path>
+                  <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                  <path d="M6 14h12v8H6z"></path>
+                </svg>
+              </button>
+              <button type="button" class="delete-btn cadastro-delete icon-btn" data-document-toolbar-action="excluir" aria-label="Excluir documento" title="Excluir documento">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                  <path d="M3 6h18"></path>
+                  <path d="M8 6V4h8v2"></path>
+                  <path d="M19 6l-1 14H6L5 6"></path>
+                  <path d="M10 11v6"></path>
+                  <path d="M14 11v6"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="cadastro-toolbar home-toolbar">
+            <input type="text" id="documentoSearchInput" class="cadastro-search documento-search-input" placeholder="Pesquisar OPF..." />
+            <div class="documento-filter-group">
+              <label class="field field-compact documento-filter-field">
+                <span>Vencimento inicial</span>
+                <input type="date" id="documentoDateStart" />
+              </label>
+              <label class="field field-compact documento-filter-field">
+                <span>Vencimento final</span>
+                <input type="date" id="documentoDateEnd" />
+              </label>
+              <button type="button" class="btn-secondary" id="documentoClearFilters">Limpar</button>
+            </div>
+          </div>
+
+          <div class="cadastro-table-wrap documento-table-wrap">
+            <table class="cadastro-table documento-table">
+              <thead>
+                <tr>
+                  <th>
+                    <button type="button" class="documento-sort-btn" data-document-sort="numeroDocumento">
+                      <span>Numero</span>
+                      <span class="documento-sort-indicator">↕</span>
+                    </button>
+                  </th>
+                  <th>
+                    <button type="button" class="documento-sort-btn" data-document-sort="emitente">
+                      <span>Emitente</span>
+                      <span class="documento-sort-indicator">↕</span>
+                    </button>
+                  </th>
+                  <th>
+                    <button type="button" class="documento-sort-btn" data-document-sort="fornecedor">
+                      <span>Fornecedor</span>
+                      <span class="documento-sort-indicator">↕</span>
+                    </button>
+                  </th>
+                  <th>
+                    <button type="button" class="documento-sort-btn" data-document-sort="vencimento">
+                      <span>Vencimento</span>
+                      <span class="documento-sort-indicator">↕</span>
+                    </button>
+                  </th>
+                  <th>
+                    <button type="button" class="documento-sort-btn" data-document-sort="total">
+                      <span>Total</span>
+                      <span class="documento-sort-indicator">↕</span>
+                    </button>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="documentosList"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <div id="documentoFormHost" class="documento-form-host"></div>
+
+        <div class="modal-backdrop" id="documentoWorkspaceModal" hidden>
+          <div class="modal-card documento-workspace-card">
+            <div class="documento-workspace-head no-print">
+              <div>
+                <span class="section-kicker" id="workspaceModalKicker">Novo documento</span>
+                <h3 id="workspaceModalTitle">Workspace do documento</h3>
+              </div>
+              <button type="button" class="btn-secondary icon-btn" data-workspace-action="close" aria-label="Fechar" title="Fechar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                  <path d="M18 6 6 18"></path>
+                  <path d="m6 6 12 12"></path>
+                </svg>
+              </button>
+            </div>
+
+            <div class="documento-workspace-steps no-print" id="workspaceSteps">
+              <button type="button" class="workspace-step-btn" data-workspace-step="0">Dados</button>
+              <button type="button" class="workspace-step-btn" data-workspace-step="1">Classificação</button>
+              <button type="button" class="workspace-step-btn" data-workspace-step="2">Fiscal</button>
+              <button type="button" class="workspace-step-btn" data-workspace-step="3">Itens</button>
+              <button type="button" class="workspace-step-btn" data-workspace-step="4">Resumo</button>
+            </div>
+
+            <div class="documento-workspace-body">
+              <div id="workspaceFormHost"></div>
+              <div id="workspacePreviewHost"></div>
+            </div>
+
+            <div class="documento-workspace-footer no-print">
+              <div class="documento-workspace-edit-map" id="workspacePreviewEditMap" hidden>
+                <span>Editar:</span>
+                <button type="button" class="btn-secondary" data-workspace-edit-step="0">Dados</button>
+                <button type="button" class="btn-secondary" data-workspace-edit-step="1">Classificação</button>
+                <button type="button" class="btn-secondary" data-workspace-edit-step="2">Fiscal</button>
+                <button type="button" class="btn-secondary" data-workspace-edit-step="3">Itens</button>
+                <button type="button" class="btn-secondary" data-workspace-edit-step="4">Resumo</button>
+              </div>
+
+              <div class="documento-workspace-nav" id="workspaceFormNav">
+                <button type="button" class="btn-secondary" data-workspace-action="prev-step">Anterior</button>
+                <button type="button" class="btn-primary" data-workspace-action="next-step">Proximo</button>
+              </div>
+            </div>
           </div>
         </div>
 
         <div class="empty-state" id="documentoEmptyState">
           <strong>Nenhum documento foi selecionado.</strong>
-          <p>Volte ao lancamento e conclua a geracao do arquivo para visualizar esta area.</p>
+          <p>Escolha uma OPF na lista acima para visualizar o documento ou editar o registro.</p>
         </div>
 
         <div class="preview-loading" id="previewLoading" hidden>
@@ -430,10 +586,30 @@
           <p>Gerando documento...</p>
         </div>
 
-        <div id="documentoPreviewArea" hidden spellcheck="false">
+        <div id="documentoPreviewArea" class="documento-preview-panel" hidden spellcheck="false">
           <div class="preview-actions no-print">
-            <button type="button" class="btn-secondary" data-action="editar-documento">Editar</button>
-            <button type="button" class="btn-primary" data-action="imprimir-documento">Imprimir</button>
+            <button type="button" class="btn-secondary icon-btn" data-action="editar-documento" aria-label="Editar documento" title="Editar documento">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                <path d="M12 20h9"></path>
+                <path d="M16.5 3.5a2.12 2.12 0 1 1 3 3L7 19l-4 1 1-4Z"></path>
+              </svg>
+            </button>
+            <button type="button" class="btn-primary icon-btn" data-action="imprimir-documento" aria-label="Imprimir documento" title="Imprimir documento">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                <path d="M6 9V2h12v7"></path>
+                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                <path d="M6 14h12v8H6z"></path>
+              </svg>
+            </button>
+            <button type="button" class="delete-btn cadastro-delete icon-btn" data-action="excluir-documento" aria-label="Excluir documento" title="Excluir documento">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                <path d="M3 6h18"></path>
+                <path d="M8 6V4h8v2"></path>
+                <path d="M19 6l-1 14H6L5 6"></path>
+                <path d="M10 11v6"></path>
+                <path d="M14 11v6"></path>
+              </svg>
+            </button>
           </div>
 
           <div class="preview-success" id="previewSuccess" hidden>
@@ -836,6 +1012,9 @@
   <script src="assets/js/app.js"></script>
 </body>
 </html>
+
+
+
 
 
 
