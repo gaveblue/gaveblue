@@ -69,6 +69,27 @@
       letter-spacing: -0.06em;
       text-shadow: 0 12px 40px rgba(59, 130, 246, 0.18);
     }
+
+    .chars-panel{position:relative;min-height:460px;overflow:hidden;display:flex;align-items:center;justify-content:center}
+    .char{position:absolute;bottom:80px;transform-origin:bottom center;transition:transform .35s ease;box-shadow:0 20px 40px rgba(0,0,0,.25)}
+    .char.purple{width:110px;height:220px;left:28%;border-radius:28px;background:linear-gradient(180deg,#8b5cf6,#4f46e5)}
+    .char.black{width:90px;height:170px;left:48%;border-radius:24px;background:#020617}
+    .char.yellow{width:85px;height:145px;left:66%;border-radius:60px 60px 20px 20px;background:#facc15}
+    .char.orange{width:170px;height:90px;left:12%;border-radius:100px 100px 10px 10px;background:#f97316}
+
+    .face{position:absolute;top:40px;left:50%;transform:translateX(-50%);display:flex;gap:8px}
+    .eye{width:16px;height:16px;border-radius:50%;background:#fff;position:relative;overflow:hidden}
+    .pupil{width:8px;height:8px;background:#020617;border-radius:50%;position:absolute;left:4px;top:4px;transition:transform .08s linear}
+    .mouth{position:absolute;top:70px;left:50%;transform:translateX(-50%);width:18px;height:4px;border-radius:999px;background:#020617}
+
+    @media (max-width:640px){.chars-panel{min-height:320px}}
+      .monster-wrap {
+        transform: scale(.82);
+      }
+      .monster-label {
+        bottom: 34px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -134,25 +155,27 @@
             </div>
 
             <div>
-              <div class="glass-panel rounded-[1.75rem] p-5 sm:p-6">
-                <p class="text-slate-400 text-xs uppercase tracking-[0.22em] font-semibold mb-3">O que você pode fazer agora</p>
-
-                <div class="space-y-3">
-                  <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
-                    <p class="text-white font-semibold">Confira o endereço digitado</p>
-                    <p class="text-slate-300 text-sm mt-1">Um caractere errado já é suficiente para gerar essa tela.</p>
-                  </div>
-
-                  <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
-                    <p class="text-white font-semibold">Volte ao site principal</p>
-                    <p class="text-slate-300 text-sm mt-1">Use o botão principal para retornar rapidamente para a home da GaveBlue.</p>
-                  </div>
-
-                  <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
-                    <p class="text-white font-semibold">Retome sua navegação</p>
-                    <p class="text-slate-300 text-sm mt-1">Se veio de um link interno, o botão de voltar pode te levar ao ponto anterior.</p>
-                  </div>
+              <div class="glass-panel chars-panel rounded-[1.75rem] p-5 sm:p-6">
+                <div class="char purple">
+                  <div class="face"><span class="eye"><span class="pupil"></span></span><span class="eye"><span class="pupil"></span></span></div>
+                  <span class="mouth"></span>
                 </div>
+                <div class="char black">
+                  <div class="face"><span class="eye"><span class="pupil"></span></span><span class="eye"><span class="pupil"></span></span></div>
+                  <span class="mouth"></span>
+                </div>
+                <div class="char yellow">
+                  <div class="face"><span class="eye"><span class="pupil"></span></span><span class="eye"><span class="pupil"></span></span></div>
+                  <span class="mouth"></span>
+                </div>
+                <div class="char orange">
+                  <div class="face"><span class="eye"><span class="pupil"></span></span><span class="eye"><span class="pupil"></span></span></div>
+                  <span class="mouth"></span>
+                </div>
+              </div>
+            </div>
+
+                <div class="monster-label">Ops... esse link fugiu do mapa.</div>
               </div>
             </div>
           </div>
@@ -187,5 +210,26 @@
       </div>
     </footer>
   </div>
+
+  <script>
+    const pupils = document.querySelectorAll('.pupil');
+    document.addEventListener('mousemove', (event) => {
+      pupils.forEach((pupil) => {
+        const eye = pupil.parentElement;
+        const rect = eye.getBoundingClientRect();
+
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+
+        const angle = Math.atan2(event.clientY - centerY, event.clientX - centerX);
+
+        const moveX = Math.cos(angle) * 4;
+        const moveY = Math.sin(angle) * 3;
+
+        pupil.style.transform = `translate(${moveX}px, ${moveY}px)`;
+      });
+    });
+    });
+  </script>
 </body>
 </html>
