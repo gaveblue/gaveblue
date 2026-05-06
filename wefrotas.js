@@ -2786,7 +2786,7 @@ let allVehicles = [];
       const totalEntries = entries.reduce((sum, item) => sum + getFinanceTotal(item), 0);
       const statusLabel = (order.status || 'aberta').charAt(0).toUpperCase() + (order.status || 'aberta').slice(1);
 
-      const rows = Array.from({ length: Math.max(entries.length, 34) }, (_, index) => {
+      const rows = Array.from({ length: Math.max(entries.length, 24) }, (_, index) => {
         const entry = entries[index];
         return `
           <tr>
@@ -2854,23 +2854,38 @@ let allVehicles = [];
             .gray-cell { background: #d9d9d9 !important; }
             .block-gap { margin-top: 24px; }
             .desc-title td { height: 40px; text-align: center; font-size: 11px; font-weight: 800; text-transform: uppercase; background: #d9d9d9 !important; }
-            .desc-box td { height: 90px; vertical-align: top; padding: 8px; white-space: pre-wrap; line-height: 1.35; }
+            .desc-box td { height: 90px; vertical-align: top; padding: 8px; white-space: pre-wrap; line-height: 1.42; font-size: 13px; }
             .signature-block td { height: 74px; }
             .sign-wrap { width: 250px; margin: 40px auto 0; text-align: center; }
             .sign-line { width: 100%; border-top: 1px solid #000; min-height: 1px; display: block; }
             .sign-label { margin-top: 2px; font-size: 11px; font-weight: 800; }
-            .finance-table { margin-top: 0; }
-            .finance-table th {
-              height: 46px;
-              background: #d9d9d9 !important;
-              text-align: center;
-              font-size: 10px;
-              font-weight: 800;
-              text-transform: uppercase;
-              line-height: 1.1;
+            .finance-table {
+              margin-top: 0;
+              page-break-inside: avoid;
+              break-inside: avoid;
             }
-            .finance-table td { height: 15px; font-size: 10px; }
+            .finance-table th {
+                height: 48px;
+                background: #d9d9d9 !important;
+                text-align: center;
+                font-size: 10px;
+                font-weight: 800;
+                text-transform: uppercase;
+                line-height: 1.1;
+              }
+            .finance-table td {
+              height: 21px;
+              font-size: 10px;
+              page-break-inside: avoid;
+              break-inside: avoid;
+            }
+            .finance-table tr {
+              page-break-inside: avoid;
+              break-inside: avoid;
+            }
             .money { text-align: right; white-space: nowrap; }
+            .money-empty { text-align: left; }
+            .total-row td { height: 28px; }
             .finance-table td.finance-total-spacer {
               border-left: none !important;
               border-bottom: none !important;
@@ -2984,7 +2999,7 @@ let allVehicles = [];
                 <tr class="total-row">
                   <td colspan="3" class="finance-total-spacer"></td>
                   <td class="finance-total-label">TOTAL</td>
-                  <td class="money">${entries.length ? escapeHtml(formatCurrency(totalEntries)) : 'R$'}</td>
+                  <td class="money ${entries.length ? '' : 'money-empty'}">${entries.length ? escapeHtml(formatCurrency(totalEntries)) : 'R$'}</td>
                 </tr>
               </tbody>
             </table>
