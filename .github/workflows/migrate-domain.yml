@@ -1,0 +1,76 @@
+name: Migrar domínio para .com.br
+
+on:
+  push:
+    branches:
+      - migrar-dominio-com-br
+
+permissions:
+  contents: write
+
+jobs:
+  migrate-domain:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar repositório
+        uses: actions/checkout@v4
+        with:
+          ref: migrar-dominio-com-br
+          fetch-depth: 0
+
+      - name: Atualizar URLs do domínio antigo
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          replacements = {
+              "https://www.gaveblue.com": "https://gaveblue.com.br",
+              "http://www.gaveblue.com": "https://gaveblue.com.br",
+              "https://gaveblue.com": "https://gaveblue.com.br",
+              "http://gaveblue.com": "https://gaveblue.com.br",
+          }
+
+          ignored_parts = {".git", "node_modules"}
+          text_extensions = {
+              ".html", ".htm", ".js", ".mjs", ".cjs", ".css", ".json",
+              ".xml", ".txt", ".md", ".yml", ".yaml", ".ts", ".tsx", ".jsx"
+          }
+
+          changed = []
+          for path in Path(".").rglob("*"):
+              if not path.is_file() or any(part in ignored_parts for part in path.parts):
+                  continue
+              if path.suffix.lower() not in text_extensions and path.name not in {"CNAME"}:
+                  continue
+              try:
+                  original = path.read_text(encoding="utf-8")
+              except UnicodeDecodeError:
+                  continue
+              updated = original
+              for old, new in replacements.items():
+                  updated = updated.replace(old, new)
+              if updated != original:
+                  path.write_text(updated, encoding="utf-8")
+                  changed.append(str(path))
+
+          print(f"Arquivos atualizados: {len(changed)}")
+          for item in changed:
+              print(item)
+          PY
+
+      - name: Remover workflow temporário
+        run: rm -f .github/workflows/migrate-domain.yml
+
+      - name: Criar commit com as alterações
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Nenhuma alteração necessária."
+            exit 0
+          fi
+          git commit -m "fix: atualizar URLs para gaveblue.com.br"
+          git push origin HEAD:migrar-dominio-com-br
