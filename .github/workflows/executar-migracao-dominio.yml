@@ -1,0 +1,67 @@
+name: Executar migração do domínio
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/executar-migracao-dominio.yml
+
+permissions:
+  contents: write
+
+jobs:
+  migrar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout da branch de migração
+        uses: actions/checkout@v4
+        with:
+          ref: migrar-dominio-com-br
+          fetch-depth: 0
+
+      - name: Substituir domínio antigo
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          extensoes = {'.html', '.js', '.css', '.txt', '.xml', '.json', '.md'}
+          alterados = []
+
+          for caminho in Path('.').rglob('*'):
+              if not caminho.is_file() or '.git' in caminho.parts:
+                  continue
+              if caminho.suffix.lower() not in extensoes and caminho.name != 'CNAME':
+                  continue
+              try:
+                  original = caminho.read_text(encoding='utf-8')
+              except UnicodeDecodeError:
+                  continue
+
+              atualizado = original.replace('https://gaveblue.com', 'https://gaveblue.com.br')
+              atualizado = atualizado.replace('http://gaveblue.com', 'https://gaveblue.com.br')
+
+              if atualizado != original:
+                  caminho.write_text(atualizado, encoding='utf-8')
+                  alterados.append(str(caminho))
+
+          print(f'{len(alterados)} arquivo(s) atualizado(s):')
+          print('\n'.join(alterados))
+          PY
+
+      - name: Remover automação temporária da branch
+        run: rm -f .github/workflows/migrar-dominio.yml
+
+      - name: Commitar na branch de migração
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Nenhuma alteração encontrada."
+            exit 0
+          fi
+          git commit -m "Atualiza URLs para gaveblue.com.br"
+          git push origin HEAD:migrar-dominio-com-br
