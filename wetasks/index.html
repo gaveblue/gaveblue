@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="pt-BR" class="h-full notranslate">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="google" content="notranslate">
+  <title>WeTasks - gaveblue.com</title>
+  <meta name="description" content="WeTasks - Sua agenda pessoal desenvolvida por gaveblue.com. Organize suas tarefas com facilidade e aumente sua produtividade.">
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="wetasks.css">
+  
+  
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full"><button onclick="openTaskModal()" id="fab-button" style="position:fixed;bottom:24px;right:24px;width:56px;height:56px;border-radius:16px;background:var(--primary);color:#fff;border:none;box-shadow:0 4px 16px rgba(37,99,235,.4);cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:100;transition:all .2s" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'"><i data-lucide="plus" style="width:24px;height:24px"></i></button>
+  <div class="app-wrapper" id="app">
+   <div id="toast-container"></div>
+   <header class="header-shell">
+    <!-- LAYOUT DESKTOP -->
+    <div class="header-desktop">
+     <div class="header-desktop-left">
+      <div class="header-desktop-left-greeting" id="greeting-text-desktop"></div>
+      <div class="header-desktop-left-datetime">
+       <div class="header-desktop-left-date">
+        <i data-lucide="calendar" style="width:16px;height:16px"></i> <span id="header-date-desktop"></span>
+       </div>
+       <div class="header-desktop-left-time">
+        <i data-lucide="clock" style="width:16px;height:16px"></i> <span id="header-time-desktop"></span>
+       </div>
+      </div>
+     </div>
+     <div class="header-desktop-center" id="tutorial-brand-desktop"><img src="https://imgur.com/QVTXWdN.png" alt="Logo" loading="lazy" onerror="console.error('Image failed to load:', this.src); this.style.display='none';">
+     </div>
+     <div class="header-desktop-right">
+      <div class="search-anchor" id="tutorial-search-desktop" style="flex:1;max-width:360px">
+       <div class="global-search" onclick="focusGlobalSearch()"><i data-lucide="search" style="width:18px;height:18px"></i><input id="global-search-input-desktop" type="text" placeholder="Pesquisar módulo..." onfocus="openGlobalSearch()" oninput="renderGlobalSearch(this.value)" onkeydown="handleGlobalSearchKeydown(event)"></div>
+       <div id="global-search-results-desktop" class="search-results"></div>
+      </div>
+      <div class="header-actions" style="display:flex;gap:10px">
+       <button onclick="toggleNotifications()" style="position:relative"><i data-lucide="bell" style="width:20px;height:20px"></i><span id="notification-badge-desktop" style="position:absolute;top:-4px;right:-4px;background:#FF6B6B;color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;display:none"></span></button> <button onclick="toggleSettings()"><i data-lucide="settings" style="width:20px;height:20px"></i></button> <button onclick="goToWebsite()"><i data-lucide="log-out" style="width:20px;height:20px"></i></button>
+      </div>
+     </div>
+    </div><!-- LAYOUT MOBILE -->
+    <div class="header-mobile">
+     <div style="max-width:600px;margin:0 auto">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">
+       <div style="display:flex;flex-direction:column;gap:12px;align-items:flex-start;flex:1;margin-right:24px">
+        <img src="https://imgur.com/QVTXWdN.png" id="tutorial-brand-mobile" alt="Logo" style="height:48px;width:auto;object-fit:contain;margin-left:-8px" loading="lazy" onerror="console.error('Image failed to load:', this.src); this.style.display='none';">
+        <div style="font-size:18px;font-weight:700;letter-spacing:-0.3px" id="greeting-text"></div>
+       </div>
+       <div class="header-actions" style="display:flex;gap:10px;align-items:center;position:relative">
+        <button onclick="openGlobalSearch(true)" id="tutorial-search-mobile"><i data-lucide="search" style="width:20px;height:20px"></i></button> <button onclick="toggleNotifications()" style="position:relative"><i data-lucide="bell" style="width:20px;height:20px"></i><span id="notification-badge-mobile" style="position:absolute;top:-4px;right:-4px;background:#FF6B6B;color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;display:none"></span></button> <button onclick="toggleSettings()" id="tutorial-settings-mobile"><i data-lucide="settings" style="width:20px;height:20px"></i></button> <button onclick="goToWebsite()"><i data-lucide="log-out" style="width:20px;height:20px"></i></button>
+       </div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;font-size:15px;font-weight:700;letter-spacing:-0.3px;margin-top:6px"><i data-lucide="calendar" style="width:18px;height:18px"></i> <span id="header-date"></span> <span style="opacity:.6">•</span> <span id="header-time"></span>
+      </div>
+      <div id="mobile-search-panel" class="search-anchor mobile-search-panel" style="margin-top:14px">
+       <div class="global-search" onclick="focusGlobalSearch()"><i data-lucide="search" style="width:18px;height:18px"></i><input id="global-search-input-mobile" type="text" placeholder="Pesquisar módulo..." onfocus="openGlobalSearch()" oninput="renderGlobalSearch(this.value)" onkeydown="handleGlobalSearchKeydown(event)"></div>
+       <div id="global-search-results-mobile" class="search-results"></div>
+      </div>
+     </div>
+    </div>
+   </header>
+   <div id="global-search-overlay" class="search-overlay" onclick="closeGlobalSearch()"></div>
+   <div style="max-width:600px;margin:16px auto 0;padding:0 16px">
+    <div id="tutorial-main-tabs" style="display:flex;gap:6px;background:var(--surface);border-radius:14px;padding:4px;box-shadow:0 1px 3px rgba(0,0,0,.05)"><button class="tab-btn active" onclick="switchTab('tasks')" id="tab-tasks">Tarefas</button> <button class="tab-btn" onclick="switchTab('calendar')" id="tab-calendar">Calendário</button> <button class="tab-btn" onclick="switchTab('dashboard')" id="tab-dashboard">Dashboard</button>
+    </div>
+   </div>
+   <div id="view-tasks" style="max-width:600px;margin:12px auto 100px;padding:0 16px">
+    <div style="display:flex;gap:8px;margin-bottom:16px;align-items:center"><button onclick="changeTaskDate(-1)" class="btn btn-ghost" style="padding:8px"><i data-lucide="chevron-left" style="width:18px;height:18px"></i></button>
+     <div style="flex:1;text-align:center;font-weight:700;font-size:14px" id="tasks-date-label">
+      Hoje
+     </div><button onclick="changeTaskDate(1)" class="btn btn-ghost" style="padding:8px"><i data-lucide="chevron-right" style="width:18px;height:18px"></i></button>
+    </div>
+    <div id="tutorial-task-filters" style="display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;padding:4px 0;scroll-behavior:smooth;-webkit-overflow-scrolling:touch"><button class="tab-btn active" onclick="filterTasks('all')" data-filter="all" style="font-size:12px;white-space:nowrap">Todas</button> <button class="tab-btn" onclick="filterTasks('pending')" data-filter="pending" style="font-size:12px;white-space:nowrap">Pendentes</button> <button class="tab-btn" onclick="filterTasks('done')" data-filter="done" style="font-size:12px;white-space:nowrap">Concluídas</button> <button class="tab-btn" onclick="filterTasks('urgent')" data-filter="urgent" style="font-size:12px;white-space:nowrap;background:rgba(239,68,68,.1);color:#EF4444">Urgentes</button> <button class="tab-btn" onclick="filterTasks('high')" data-filter="high" style="font-size:12px;white-space:nowrap;background:rgba(255,140,66,.1);color:#FF8C42">Alta</button> <button class="tab-btn" onclick="filterTasks('medium')" data-filter="medium" style="font-size:12px;white-space:nowrap;background:rgba(245,158,11,.1);color:#F59E0B">Média</button> <button class="tab-btn" onclick="filterTasks('low')" data-filter="low" style="font-size:12px;white-space:nowrap;background:rgba(16,185,129,.1);color:#10B981">Baixa</button>
+    </div>
+    <div id="tasks-list"></div>
+   </div>
+   <div id="view-calendar" style="max-width:600px;margin:12px auto 100px;padding:0 16px;display:none">
+    <div style="display:flex;gap:8px;margin-bottom:16px;align-items:center"><button onclick="changeTaskDate(-1)" class="btn btn-ghost" style="padding:8px"><i data-lucide="chevron-left" style="width:18px;height:18px"></i></button>
+     <div style="flex:1;text-align:center;font-weight:700;font-size:14px" id="cal-date-label">
+      Hoje
+     </div><button onclick="changeTaskDate(1)" class="btn btn-ghost" style="padding:8px"><i data-lucide="chevron-right" style="width:18px;height:18px"></i></button>
+    </div>
+    <div class="card" style="padding:20px;margin-bottom:16px">
+     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><button onclick="changeMonth(-1)" class="btn btn-ghost" style="padding:8px"><i data-lucide="chevron-left" style="width:18px;height:18px"></i></button>
+      <h3 style="font-weight:700;font-size:16px" id="cal-month-label"></h3><button onclick="changeMonth(1)" class="btn btn-ghost" style="padding:8px"><i data-lucide="chevron-right" style="width:18px;height:18px"></i></button>
+     </div>
+     <div class="calendar-jump-controls">
+      <button type="button" id="calendar-month-trigger" class="calendar-picker-trigger" onclick="toggleCalendarPicker('month')">
+       <span id="cal-month-trigger-label">Mês</span> <i data-lucide="chevrons-up-down" style="width:16px;height:16px"></i>
+      </button> <button type="button" id="calendar-year-trigger" class="calendar-picker-trigger calendar-year-trigger" onclick="toggleCalendarPicker('year')">
+       <span id="cal-year-trigger-label">Ano</span> <i data-lucide="chevrons-up-down" style="width:16px;height:16px"></i>
+      </button> <button onclick="jumpCalendarToToday()" class="btn btn-ghost calendar-today-btn" style="padding:10px 12px;font-size:12px;font-weight:700;justify-content:center;white-space:nowrap">
+       Hoje
+      </button>
+     </div>
+     <div id="calendar-picker-panel" class="calendar-picker-panel">
+      <div id="calendar-month-options" class="calendar-picker-grid calendar-month-grid"></div>
+      <div class="calendar-year-toolbar">
+       <button type="button" class="btn btn-ghost calendar-year-nav" onclick="shiftCalendarYearRange(-9)">
+        <i data-lucide="chevron-left" style="width:16px;height:16px"></i> Anos
+       </button>
+       <span id="calendar-year-range-label"></span>
+       <button type="button" class="btn btn-ghost calendar-year-nav" onclick="shiftCalendarYearRange(9)">
+        Anos <i data-lucide="chevron-right" style="width:16px;height:16px"></i>
+       </button>
+      </div>
+      <div id="calendar-year-options" class="calendar-picker-grid calendar-year-grid"></div>
+     </div>
+     <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center;margin-bottom:8px"><span style="font-size:11px;font-weight:600;color:var(--secondary);padding:8px 4px">Dom</span> <span style="font-size:11px;font-weight:600;color:var(--secondary);padding:8px 4px">Seg</span> <span style="font-size:11px;font-weight:600;color:var(--secondary);padding:8px 4px">Ter</span> <span style="font-size:11px;font-weight:600;color:var(--secondary);padding:8px 4px">Qua</span> <span style="font-size:11px;font-weight:600;color:var(--secondary);padding:8px 4px">Qui</span> <span style="font-size:11px;font-weight:600;color:var(--secondary);padding:8px 4px">Sex</span> <span style="font-size:11px;font-weight:600;color:var(--secondary);padding:8px 4px">Sáb</span>
+     </div>
+     <div id="cal-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px"></div>
+    </div>
+    <h3 style="font-weight:700;font-size:15px;margin-bottom:10px" id="cal-day-label">Tarefas do dia</h3>
+    <div id="cal-tasks-list"></div>
+   </div>
+   <div id="view-dashboard" style="max-width:600px;margin:12px auto 100px;padding:0 16px;display:none">
+    <h2 style="font-weight:800;font-size:18px;margin-bottom:16px;color:var(--text)">Resumo da Agenda</h2><!-- AVISO DE LIMITE (SEMPRE VISÍVEL) -->
+    <div style="margin-bottom:16px;padding:16px;background:linear-gradient(135deg,#FEF3C7 0%,#FDE68A 100%);border-left:4px solid #F59E0B;border-radius:12px;animation:slideDown .3s ease;box-shadow:0 4px 12px rgba(245,158,11,.15)">
+     <div style="display:flex;gap:12px;align-items:flex-start">
+      <div style="width:40px;height:40px;border-radius:10px;background:#F59E0B;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+       <i data-lucide="alert-triangle" style="width:22px;height:22px;color:#fff"></i>
+      </div>
+      <div style="flex:1">
+       <p style="font-weight:800;color:#B45309;font-size:14px;margin-bottom:6px">Dica de Manutencao</p>
+       <p style="font-size:13px;color:#B45309;margin-bottom:12px;line-height:1.5">Você tem <strong id="warning-count">0</strong> tarefas. Para manter tudo rápido e fluido, recomendamos <strong>limpar tarefas concluídas quando atingir 1.000</strong>. Seu sistema agradece!</p>
+       <div style="display:flex;justify-content:center;width:100%">
+        <button onclick="requestClearCompleted()" class="btn" style="padding:8px 16px;background:#B45309;color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;transition:all .2s;cursor:pointer" onmouseover="this.style.background='#92400e'" onmouseout="this.style.background='#B45309'"><i data-lucide="trash-2" style="width:15px;height:15px"></i> Limpar Concluídas</button>
+       </div>
+      </div>
+     </div>
+    </div><!-- CARDS DE RESUMO -->
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:20px">
+     <div class="card fade-in" style="padding:16px;background:linear-gradient(135deg,#EFF6FF 0%,#DBEAFE 100%);border-left:4px solid var(--primary)">
+      <p style="font-size:12px;font-weight:700;color:var(--primary);margin-bottom:8px;text-transform:uppercase">Total</p>
+      <h3 style="font-size:32px;font-weight:800;color:var(--primary);letter-spacing:-1px" id="stat-total">0</h3>
+      <p style="font-size:11px;color:var(--primary);opacity:.8;margin-top:4px">tarefas criadas</p>
+     </div>
+     <div class="card fade-in" style="padding:16px;background:linear-gradient(135deg,#ECFDF5 0%,#D1FAE5 100%);border-left:4px solid var(--low)">
+      <p style="font-size:12px;font-weight:700;color:var(--low);margin-bottom:8px;text-transform:uppercase">Concluídas</p>
+      <h3 style="font-size:32px;font-weight:800;color:var(--low);letter-spacing:-1px" id="stat-done">0</h3>
+      <p style="font-size:11px;color:var(--low);opacity:.8;margin-top:4px">tarefas finalizadas</p>
+     </div>
+     <div class="card fade-in" style="padding:16px;background:linear-gradient(135deg,#FEF3C7 0%,#FDE68A 100%);border-left:4px solid var(--medium)">
+      <p style="font-size:12px;font-weight:700;color:#B45309;margin-bottom:8px;text-transform:uppercase">Pendentes</p>
+      <h3 style="font-size:32px;font-weight:800;color:#B45309;letter-spacing:-1px" id="stat-pending">0</h3>
+      <p style="font-size:11px;color:#B45309;opacity:.8;margin-top:4px">aguardando conclusão</p>
+     </div>
+     <div class="card fade-in" style="padding:16px;background:linear-gradient(135deg,#FEE2E2 0%,#FECACA 100%);border-left:4px solid var(--urgent)">
+      <p style="font-size:12px;font-weight:700;color:var(--urgent);margin-bottom:8px;text-transform:uppercase">Urgentes</p>
+      <h3 style="font-size:32px;font-weight:800;color:var(--urgent);letter-spacing:-1px" id="stat-urgent">0</h3>
+      <p style="font-size:11px;color:var(--urgent);opacity:.8;margin-top:4px">requer atenção</p>
+     </div>
+    </div><!-- DISTRIBUIÇÃO POR PRIORIDADE -->
+    <h3 style="font-weight:700;font-size:15px;margin-bottom:12px;color:var(--text)">Distribuição por Prioridade</h3>
+    <div class="card fade-in" style="padding:16px;margin-bottom:20px">
+     <div style="display:flex;flex-direction:column;gap:12px" id="priority-dist"><!-- Será renderizado via JS -->
+     </div>
+    </div><!-- ÚLTIMAS TAREFAS -->
+    <h3 style="font-weight:700;font-size:15px;margin-bottom:12px;color:var(--text)">Últimas Tarefas Criadas</h3>
+    <div id="recent-tasks" style="display:flex;flex-direction:column;gap:10px"><!-- Será renderizado via JS -->
+    </div>
+   </div>
+   <div id="settings-panel" class="panel-shell slide-up">
+    <div class="panel-body">
+     <div class="panel-head" style="margin:-20px -20px 20px">
+      <h2 style="font-weight:800;font-size:18px">Configurações</h2><button onclick="toggleSettings()" class="btn btn-ghost" style="padding:8px"><i data-lucide="x" style="width:20px;height:20px"></i></button>
+     </div>
+     <div style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid #F1F5F9">
+      <p style="font-size:12px;font-weight:600;color:var(--secondary);margin-bottom:12px">Tema</p>
+      <div style="display:flex;gap:8px"><button onclick="setTheme('light')" id="theme-light" class="btn" style="flex:1;justify-content:center;border:2px solid #E2E8F0;background:transparent;color:var(--secondary)"><i data-lucide="sun" style="width:16px;height:16px"></i> Claro</button> <button onclick="setTheme('dark')" id="theme-dark" class="btn" style="flex:1;justify-content:center;border:2px solid #E2E8F0;background:transparent;color:var(--secondary)"><i data-lucide="moon" style="width:16px;height:16px"></i> Escuro</button>
+      </div>
+     </div>
+     <div style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid #F1F5F9">
+      <p style="font-size:12px;font-weight:600;color:var(--secondary);margin-bottom:10px">Dados</p>
+      <div style="display:flex;flex-direction:column;gap:8px"><button onclick="exportTasks()" class="btn btn-ghost" style="width:100%;justify-content:center;border:1.5px solid #E2E8F0;font-size:12px;border-radius:12px"><i data-lucide="download" style="width:14px;height:14px"></i> Exportar</button> <button onclick="importTasks()" class="btn btn-ghost" style="width:100%;justify-content:center;border:1.5px solid #E2E8F0;font-size:12px;border-radius:12px"><i data-lucide="upload" style="width:14px;height:14px"></i> Importar</button> <input type="file" id="import-file" accept=".json" style="display:none" onchange="handleImportFile(event)">
+      </div>
+     </div>
+     <div style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid #F1F5F9">
+      <p style="font-size:12px;font-weight:600;color:var(--secondary);margin-bottom:10px">Notificações do dispositivo</p>
+      <p id="browser-notification-status" style="font-size:12px;color:var(--secondary);margin-bottom:10px;line-height:1.5">Verificando disponibilidade...</p>
+      <div style="display:flex;flex-direction:column;gap:8px"><button onclick="enableBrowserNotifications()" class="btn btn-ghost" style="width:100%;justify-content:center;border:1.5px solid #E2E8F0;font-size:12px;border-radius:12px"><i data-lucide="bell-ring" style="width:14px;height:14px"></i> Ativar Notificações</button> <button onclick="testBrowserNotification()" class="btn btn-ghost" style="width:100%;justify-content:center;border:1.5px solid #E2E8F0;font-size:12px;border-radius:12px"><i data-lucide="send" style="width:14px;height:14px"></i> Testar Notificação</button>
+      </div>
+     </div>
+     <div style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid #F1F5F9">
+      <p style="font-size:12px;font-weight:600;color:var(--secondary);margin-bottom:10px">Ajuda e onboarding</p><button onclick="startTutorial(true)" class="btn btn-ghost" style="width:100%;justify-content:center;border:1.5px solid #E2E8F0;font-size:12px;border-radius:12px"><i data-lucide="sparkles" style="width:14px;height:14px"></i> Ver tutorial</button>
+     </div>
+     <div style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid #F1F5F9">
+      <p style="font-size:12px;font-weight:600;color:var(--secondary);margin-bottom:10px">Limpeza</p><button onclick="requestClearAll()" class="btn" style="width:100%;justify-content:center;border:1.5px solid #FEE2E2;background:#FEE2E2;color:var(--urgent);border-radius:12px;font-size:12px;font-weight:600"><i data-lucide="trash" style="width:14px;height:14px"></i> Limpar Tudo</button>
+     </div>
+     <div>
+      <p style="font-size:12px;font-weight:600;color:var(--secondary);margin-bottom:10px">Histórico de notificações</p><button onclick="clearAllNotifications()" class="btn" style="width:100%;justify-content:center;border:1.5px solid #E2E8F0;background:transparent;color:var(--secondary);border-radius:12px;font-size:12px;font-weight:600"><i data-lucide="trash-2" style="width:14px;height:14px"></i> Limpar Notificações</button>
+     </div>
+     <div style="margin-top:20px;padding-top:20px;border-top:1px solid #F1F5F9">
+      <p style="font-size:12px;font-weight:600;color:var(--secondary);margin-bottom:10px">Sobre</p>
+      <div style="display:flex;justify-content:center;margin-bottom:16px">
+       <div style="width:240px;height:80px;border-radius:16px;background:linear-gradient(135deg,#2563EB 0%,#3B82F6 50%,#60A5FA 100%);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(37,99,235,.2)">
+        <img src="https://imgur.com/QVTXWdN.png" alt="Logo WeTasks" style="height:50px;width:auto;object-fit:contain" loading="lazy" onerror="console.error('Image failed to load:', this.src); this.style.display='none';">
+       </div>
+      </div>
+      <p style="font-size:12px;color:var(--secondary);line-height:1.6;margin-bottom:12px;text-align:center">Sua agenda pessoal criada com dedicação e amor. Organizar nunca foi tão fácil.</p>
+      <p style="font-size:11px;color:var(--secondary);margin-bottom:8px;text-align:center"><strong>Desenvolvido e criado por:</strong> <a href="https://gaveblue.com" target="_blank" rel="noopener noreferrer" style="color:var(--primary);text-decoration:none;font-weight:600">gaveblue.com</a></p>
+      <p style="font-size:11px;color:var(--secondary);text-align:center">Desenvolvido com amor para sua produtividade</p>
+     </div>
+    </div>
+   </div>
+   <div id="settings-overlay" class="panel-overlay" onclick="toggleSettings()"></div>
+   <div id="notifications-panel" class="panel-shell slide-up" style="z-index:115">
+    <div class="panel-head">
+     <h2 style="font-weight:800;font-size:18px">Notificações</h2><button onclick="toggleNotifications()" class="btn btn-ghost" style="padding:8px"><i data-lucide="x" style="width:20px;height:20px"></i></button>
+    </div>
+    <div id="notifications-list" class="panel-body" style="display:flex;flex-direction:column;gap:12px"></div>
+   </div>
+   <div id="notifications-overlay" class="panel-overlay" style="z-index:112" onclick="toggleNotifications()"></div>
+   <div id="delete-modal" class="modal-overlay" style="display:none;z-index:220" onclick="if(event.target===this)closeDeleteModal()">
+    <div class="modal-content slide-up" style="max-width:380px;text-align:center">
+     <div style="width:56px;height:56px;border-radius:16px;background:#FEE2E2;display:flex;align-items:center;justify-content:center;margin:0 auto 16px"><i data-lucide="trash-2" style="width:24px;height:24px;color:var(--urgent)"></i>
+     </div>
+     <h3 style="font-weight:700;font-size:17px;margin-bottom:8px">Excluir tarefa?</h3>
+     <p style="font-size:13px;color:var(--secondary);margin-bottom:20px" id="delete-task-name"></p>
+     <div style="display:flex;gap:10px;justify-content:center"><button onclick="closeDeleteModal()" class="btn btn-ghost" style="border-radius:14px">Cancelar</button> <button onclick="confirmDelete()" class="btn btn-danger" style="border-radius:14px"><i data-lucide="trash-2" style="width:14px;height:14px"></i> Excluir</button>
+     </div>
+    </div>
+   </div>
+   <div id="complete-modal" class="modal-overlay" style="display:none;z-index:220" onclick="if(event.target===this)closeCompleteModal()">
+    <div class="modal-content slide-up" style="max-width:380px;text-align:center">
+     <div style="width:56px;height:56px;border-radius:16px;background:#D1FAE5;display:flex;align-items:center;justify-content:center;margin:0 auto 16px"><i data-lucide="check-circle" style="width:24px;height:24px;color:var(--low)"></i>
+     </div>
+     <h3 style="font-weight:700;font-size:17px;margin-bottom:8px" id="complete-modal-title">Concluir tarefa?</h3>
+     <p style="font-size:13px;color:var(--secondary);margin-bottom:20px" id="complete-task-name"></p>
+     <div style="display:flex;gap:10px;justify-content:center"><button onclick="closeCompleteModal()" class="btn btn-ghost" style="border-radius:14px">Cancelar</button> <button onclick="confirmComplete()" class="btn btn-primary" style="border-radius:14px"><i data-lucide="check" style="width:14px;height:14px"></i> Confirmar</button>
+     </div>
+    </div>
+   </div>
+  <div id="justification-modal" class="modal-overlay justification-modal-overlay" style="display:none;z-index:225" onclick="if(event.target===this)closeJustificationModal()">
+    <div class="modal-content slide-up justification-modal-content" style="max-width:420px">
+     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+      <div>
+       <h3 id="justification-title" style="font-weight:800;font-size:18px;letter-spacing:-.2px">Justificativa necessária</h3>
+       <p id="justification-message" style="font-size:13px;color:var(--secondary);margin-top:6px;line-height:1.5"></p>
+      </div>
+      <button onclick="closeJustificationModal()" class="btn btn-ghost" style="padding:8px"><i data-lucide="x" style="width:18px;height:18px"></i></button>
+     </div>
+     <div style="display:flex;flex-direction:column;gap:14px">
+      <textarea id="justification-text" class="justification-textarea" rows="4" placeholder="Explique rapidamente o motivo..." style="border:1.5px solid #E2E8F0;border-radius:14px;padding:14px 16px;font-family:inherit;font-size:14px;width:100%;background:var(--bg);color:var(--text);resize:vertical;transition:all .2s"></textarea>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+       <button onclick="closeJustificationModal()" class="btn btn-ghost" style="border-radius:14px">Cancelar</button>
+       <button onclick="confirmJustification()" class="btn btn-primary" id="justification-confirm-btn" style="border-radius:14px"><i data-lucide="file-text" style="width:14px;height:14px"></i> Salvar justificativa</button>
+      </div>
+     </div>
+   </div>
+  </div>
+   <div id="tutorial-overlay" class="tutorial-overlay" style="display:none">
+    <div id="tutorial-spotlight" class="tutorial-spotlight"></div>
+    <div id="tutorial-card" class="tutorial-card">
+     <div class="tutorial-card-head">
+      <div>
+       <p id="tutorial-step-label" class="tutorial-step-label">Primeiros passos</p>
+       <h3 id="tutorial-title" class="tutorial-title">Bem-vindo ao WeTasks</h3>
+      </div>
+      <button onclick="skipTutorial()" class="tutorial-close" aria-label="Pular tutorial"><i data-lucide="x" style="width:18px;height:18px"></i></button>
+     </div>
+     <p id="tutorial-description" class="tutorial-description"></p>
+     <div class="tutorial-actions">
+      <button onclick="skipTutorial()" class="btn btn-ghost tutorial-skip-btn">Pular tutorial</button>
+      <div style="display:flex;gap:10px">
+       <button onclick="prevTutorialStep()" class="btn btn-ghost tutorial-prev-btn" id="tutorial-prev-btn">Voltar</button>
+       <button onclick="nextTutorialStep()" class="btn btn-primary tutorial-next-btn" id="tutorial-next-btn">Próximo</button>
+      </div>
+     </div>
+    </div>
+   </div>
+   <div id="task-modal" class="modal-overlay" style="display:none;z-index:220" onclick="if(event.target===this)closeTaskModal()">
+    <div class="modal-content slide-up">
+     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+      <h2 style="font-weight:800;font-size:20px;letter-spacing:-.3px" id="modal-title">Nova Tarefa</h2><button onclick="closeTaskModal()" class="btn btn-ghost" style="padding:8px"><i data-lucide="x" style="width:20px;height:20px"></i></button>
+     </div>
+     <form id="task-form" onsubmit="event.preventDefault(); submitForm();"><input type="hidden" id="task-id">
+      <div style="display:flex;flex-direction:column;gap:18px">
+       <!-- TÍTULO -->
+       <div>
+        <label style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px;display:block;letter-spacing:.4px">Título da Tarefa *</label> <input type="text" id="f-title" required placeholder="O que você precisa fazer?" style="border:1.5px solid #E2E8F0;border-radius:14px;padding:14px 16px;font-family:inherit;font-size:15px;width:100%;background:var(--bg);color:var(--text);transition:all .2s" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='#E2E8F0'">
+       </div><!-- DESCRIÇÃO -->
+       <div>
+        <label style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px;display:block;letter-spacing:.4px">Descrição</label> <textarea id="f-desc" rows="3" placeholder="Adicione mais detalhes sobre a tarefa..." style="border:1.5px solid #E2E8F0;border-radius:14px;padding:14px 16px;font-family:inherit;font-size:14px;width:100%;background:var(--bg);color:var(--text);resize:vertical;transition:all .2s" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='#E2E8F0'"></textarea>
+       </div><!-- DATA E HORA -->
+       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div>
+         <label style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px;display:block;letter-spacing:.4px">Data *</label> <input type="date" id="f-date" required style="border:1.5px solid #E2E8F0;border-radius:14px;padding:14px 16px;font-family:inherit;font-size:14px;width:100%;background:var(--bg);color:var(--text);transition:all .2s" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='#E2E8F0'">
+        </div>
+        <div>
+         <label style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px;display:block;letter-spacing:.4px">Horário</label> <input type="time" id="f-time" style="border:1.5px solid #E2E8F0;border-radius:14px;padding:14px 16px;font-family:inherit;font-size:14px;width:100%;background:var(--bg);color:var(--text);transition:all .2s" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='#E2E8F0'">
+        </div>
+       </div><!-- PRIORIDADE -->
+       <div>
+        <label style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px;display:block;letter-spacing:.4px">Nível de Prioridade</label>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px" id="priority-buttons">
+         <button type="button" onclick="setPriority('low')" class="priority-btn" data-priority="low" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:14px 12px;border:2px solid #E2E8F0;border-radius:12px;background:transparent;cursor:pointer;transition:all .2s;font-weight:600;font-size:13px;color:var(--text)">
+          <div style="width:14px;height:14px;border-radius:50%;background:var(--low)"></div><span>Baixa</span> </button> <button type="button" onclick="setPriority('medium')" class="priority-btn" data-priority="medium" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:14px 12px;border:2px solid #E2E8F0;border-radius:12px;background:transparent;cursor:pointer;transition:all .2s;font-weight:600;font-size:13px;color:var(--text)">
+          <div style="width:14px;height:14px;background:var(--medium);clip-path:polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%)"></div><span>Média</span> </button> <button type="button" onclick="setPriority('high')" class="priority-btn" data-priority="high" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:14px 12px;border:2px solid #E2E8F0;border-radius:12px;background:transparent;cursor:pointer;transition:all .2s;font-weight:600;font-size:13px;color:var(--text)">
+          <div style="width:14px;height:14px;background:var(--high)"></div><span>Alta</span> </button> <button type="button" onclick="setPriority('urgent')" class="priority-btn" data-priority="urgent" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:14px 12px;border:2px solid #E2E8F0;border-radius:12px;background:transparent;cursor:pointer;transition:all .2s;font-weight:600;font-size:13px;color:var(--text)">
+          <div style="width:14px;height:14px;border-radius:50%;background:var(--urgent)"></div><span>Urgente</span> </button>
+        </div><input type="hidden" id="f-priority" value="low">
+       </div><!-- OBSERVAÇÕES -->
+       <div>
+        <label style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px;display:block;letter-spacing:.4px">Observações</label> <textarea id="f-notes" rows="2" placeholder="Notas adicionais para lembrar..." style="border:1.5px solid #E2E8F0;border-radius:14px;padding:14px 16px;font-family:inherit;font-size:14px;width:100%;background:var(--bg);color:var(--text);resize:vertical;transition:all .2s" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='#E2E8F0'"></textarea>
+       </div><!-- BOTÕES -->
+       <div id="form-actions" style="display:flex;gap:12px;justify-content:flex-end;padding-top:8px">
+        <button type="button" onclick="closeTaskModal()" class="btn btn-ghost" style="border-radius:12px;padding:12px 24px;font-weight:600;border:1.5px solid #E2E8F0">Cancelar</button> <button type="submit" class="btn btn-primary" id="save-btn" style="border-radius:12px;padding:12px 28px;font-weight:700"><i data-lucide="check" style="width:16px;height:16px"></i> Salvar Tarefa</button>
+       </div>
+      </div>
+     </form>
+    </div>
+   </div>
+  </div>
+    <script src="wetasks.js"></script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9e5de01ac7689aa9',t:'MTc3NTExMjM3Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
+
+
+
+
+
+
+
