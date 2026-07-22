@@ -449,6 +449,26 @@ html, body { height: 100%; margin: 0; box-sizing: border-box; }
       border-color: #f3c9cf;
       box-shadow: none;
     }
+    .module-action-toolbar #group-finance-btn {
+      color: #6c49d8;
+      background: #f4efff;
+      border-color: #d8c8ff;
+    }
+    .module-action-toolbar #ungroup-finance-btn {
+      color: #b06b0f;
+      background: #fff5e7;
+      border-color: #f5d19e;
+    }
+    .module-action-toolbar #view-finance-btn {
+      color: #b77412;
+      background: #fff7ea;
+      border-color: #f6d3a2;
+    }
+    .module-action-toolbar #close-finance-expense-btn {
+      color: #2f58a8;
+      background: #eef4ff;
+      border-color: #c7d6f6;
+    }
     .empty-state {
       min-height: 260px;
       display: flex;
@@ -606,6 +626,23 @@ html, body { height: 100%; margin: 0; box-sizing: border-box; }
       color: #475569;
       font-weight: 700;
       transition: all 0.2s ease;
+    }
+    .finance-entry {
+      position: relative;
+      overflow: hidden;
+    }
+    .finance-entry::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 14px;
+      bottom: 14px;
+      width: 6px;
+      border-radius: 999px;
+      background: #ef4444;
+    }
+    .finance-entry--expense::before {
+      background: #f59e0b;
     }
     .soft-btn:hover {
       transform: translateY(-1px);
