@@ -13,12 +13,12 @@ let allVehicles = [];
     const mobileSearchBackdropEl = document.getElementById('mobile-search-backdrop');
     const mobileSearchModalEl = document.getElementById('mobile-search-modal');
     const ecosystemModules = [
-      { name: 'WeTime', description: 'Relógio online e painel de horário', url: 'https://gaveblue.com/wetime' },
-      { name: 'WeRecibos', description: 'Gerador de recibos', url: 'https://gaveblue.com/recibos' },
-      { name: 'WeConsultas', description: 'Consultas empresariais', url: 'https://gaveblue.com/weconsultas' },
-      { name: 'WeFrotas', description: 'Gestão de frotas', url: 'https://gaveblue.com/wefrotas' },
-      { name: 'WeDevs', description: 'Ferramentas e utilidades dev', url: 'https://gaveblue.com/wedevs' },
-      { name: 'WeTasks', description: 'Tarefas e organização', url: 'https://gaveblue.com/wetasks' }
+      { name: 'WeTime', description: 'Relógio online e painel de horário', url: 'https://gaveblue.com.br/wetime' },
+      { name: 'WeRecibos', description: 'Gerador de recibos', url: 'https://gaveblue.com.br/recibos' },
+      { name: 'WeConsultas', description: 'Consultas empresariais', url: 'https://gaveblue.com.br/weconsultas' },
+      { name: 'WeFrotas', description: 'Gestão de frotas', url: 'https://gaveblue.com.br/wefrotas' },
+      { name: 'WeDevs', description: 'Ferramentas e utilidades dev', url: 'https://gaveblue.com.br/wedevs' },
+      { name: 'WeTasks', description: 'Tarefas e organização', url: 'https://gaveblue.com.br/wetasks' }
     ];
     let selectedVehicles = new Set();
     let selectedDrivers = new Set();
@@ -171,7 +171,7 @@ let allVehicles = [];
 
     function escapeHtml(value) {
       return String(value || '')
-        .replace(/&/g, '&amp;')
+        .replace(/&/g, '&')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
@@ -349,7 +349,7 @@ let allVehicles = [];
 
     function getVehicleLabel(vehicleId) {
       const vehicle = allVehicles.find(item => item.id === vehicleId);
-      return vehicle ? `${vehicle.numeroFrota} • ${vehicle.placa} • ${vehicle.modelo}` : 'Veículo não encontrado';
+      return vehicle ? `${vehicle.numeroFrota}  ${vehicle.placa}  ${vehicle.modelo}` : 'Veículo não encontrado';
     }
 
     function getDriverLabel(driverId) {
@@ -363,6 +363,122 @@ let allVehicles = [];
 
     function getFinanceTotal(entry) {
       return Number(entry.total || 0);
+    }
+
+    function isFuelEntry(entry) {
+      return entry?.entryType === 'combustivel';
+    }
+
+    function isFuelGroupEntry(entry) {
+      return entry?.entryType === 'combustivel_agrupado';
+    }
+
+    function getEntryVehicleId(entry) {
+      if (!entry) return '';
+      if (entry.vehicleId) return entry.vehicleId;
+      const order = allOrders.find(item => item.id === entry.orderId);
+      return order?.vehicleId || '';
+    }
+
+    function getFinanceEntryDate(entry) {
+      return entry?.dataAbastecimento || entry?.dataVencimento || String(entry?.createdAt || '').slice(0, 10) || '';
+    }
+
+    function getFinanceEntryStatus(entry) {
+      if (isFuelEntry(entry) && entry.groupedIntoId) return 'agrupado';
+      if (entry?.workflowStatus) return entry.workflowStatus;
+      if (isFuelGroupEntry(entry)) return entry.orderId ? 'distribuido' : 'pendente';
+      if (isFuelEntry(entry)) return 'pendente';
+      return entry?.orderId ? 'distribuido' : 'pendente';
+    }
+
+    function getFinanceEntryDateLabel(entry) {
+      if (isFuelGroupEntry(entry)) return entry.dataVencimento ? 'Vencimento' : 'Agrupamento';
+      if (isFuelEntry(entry)) return 'Abastecimento';
+      return 'Vencimento';
+    }
+
+    function getFinanceEntryStatusLabel(entry) {
+      const status = getFinanceEntryStatus(entry);
+      switch (status) {
+        case 'agrupado': return 'Agrupado';
+        case 'distribuido': return 'Distribuido';
+        case 'pendente_os': return 'Pendente ate alocar OS';
+        default: return 'Pendente';
+      }
+    }
+
+    function getFinanceEntryFamily(entry) {
+      return isFuelEntry(entry) || isFuelGroupEntry(entry) ? 'fuel' : 'expense';
+    }
+
+    function getFuelGroupChildren(entry) {
+      if (!isFuelGroupEntry(entry)) return [];
+      const groupedIds = Array.isArray(entry.groupedEntryIds) ? entry.groupedEntryIds : [];
+      return groupedIds
+        .map(id => allFinanceEntries.find(item => item.id === id))
+        .filter(Boolean);
+    }
+
+    function getFuelEntriesForVehicle(vehicleId, excludeId = '') {
+      return allFinanceEntries
+        .filter(entry => isFuelEntry(entry) && getEntryVehicleId(entry) === vehicleId && entry.id !== excludeId && entry.km !== '' && getFinanceEntryDate(entry))
+        .sort((a, b) => {
+          const dateCompare = String(getFinanceEntryDate(a)).localeCompare(String(getFinanceEntryDate(b)));
+          if (dateCompare !== 0) return dateCompare;
+          return String(a.createdAt || '').localeCompare(String(b.createdAt || ''));
+        });
+    }
+
+    function validateFuelMileageForVehicle({ vehicleId, date, km, excludeId = '' }) {
+      const kmValue = Number(km || 0);
+      if (!vehicleId || !date || !km) return 'Selecione o veículo, a data de abastecimento e informe o KM.';
+      if (!Number.isFinite(kmValue) || kmValue < 0) return 'Informe um KM valido para o abastecimento.';
+
+      const entries = getFuelEntriesForVehicle(vehicleId, excludeId);
+      const previous = [...entries]
+        .filter(entry => getFinanceEntryDate(entry) <= date)
+        .sort((a, b) => String(getFinanceEntryDate(a)).localeCompare(String(getFinanceEntryDate(b))) || Number(a.km || 0) - Number(b.km || 0))
+        .pop();
+      const next = entries.find(entry => getFinanceEntryDate(entry) > date);
+
+      if (previous && kmValue < Number(previous.km || 0)) {
+        return `O KM informado não pode ser menor que ${previous.km} para esse veículo.`;
+      }
+      if (next && kmValue > Number(next.km || 0)) {
+        return `O KM informado não pode ser maior que ${next.km}, pois já existe abastecimento futuro para esse veículo.`;
+      }
+      return '';
+    }
+
+    function migrateFinanceEntries() {
+      allFinanceEntries = (Array.isArray(allFinanceEntries) ? allFinanceEntries : []).map((entry) => {
+        if (!entry || typeof entry !== 'object') return entry;
+
+        const nextEntry = { ...entry };
+        if (!nextEntry.createdAt) nextEntry.createdAt = new Date().toISOString();
+        if (!nextEntry.kind) nextEntry.kind = 'despesa';
+        if (!nextEntry.kindLabel) nextEntry.kindLabel = nextEntry.kind === 'receita' ? 'Receita' : 'Despesa';
+
+        if (isFuelEntry(nextEntry)) {
+          if (!nextEntry.vehicleId) {
+            const linkedOrder = allOrders.find(item => item.id === nextEntry.orderId);
+            nextEntry.vehicleId = linkedOrder?.vehicleId || '';
+          }
+          if (!nextEntry.dataAbastecimento) {
+            nextEntry.dataAbastecimento = nextEntry.dataVencimento || String(nextEntry.createdAt || '').slice(0, 10);
+          }
+          if (nextEntry.km === undefined || nextEntry.km === null || nextEntry.km === '') {
+            nextEntry.km = nextEntry.kmFinal || nextEntry.kmInicial || '';
+          }
+        }
+
+        if (isFuelGroupEntry(nextEntry) && !Array.isArray(nextEntry.groupedEntryIds)) {
+          nextEntry.groupedEntryIds = [];
+        }
+
+        return nextEntry;
+      });
     }
 
     function saveToLocalStorage() {
@@ -402,6 +518,7 @@ let allVehicles = [];
       customLogoEnabled = savedCustomLogoEnabled === 'true';
       customLogoUrl = savedCustomLogoUrl || '';
       customLogoScale = Number(savedCustomLogoScale) || 60;
+      migrateFinanceEntries();
     }
 
     function showToast(message, options = {}) {
@@ -817,7 +934,7 @@ let allVehicles = [];
       const premiumWhatsAppUrl = 'https://wa.me/5527988790381?text=' + encodeURIComponent('Olá! Quero assinar o WeFrotas Premium por R$ 29,90. Pode me passar os próximos passos?');
 
       kicker.textContent = 'WeFrotas Premium';
-      title.textContent = 'Versão Premium • R$ 29,90';
+      title.textContent = 'Versão Premium  R$ 29,90';
       setModalSubmitState(false);
       setModalActionsVisible(false);
 
@@ -864,10 +981,10 @@ let allVehicles = [];
                 <div class="contents">
                   <div class="p-4 text-sm font-semibold ${isDark ? 'text-slate-200' : 'text-slate-700'} ${index < 8 ? (isDark ? 'border-b border-slate-700' : 'border-b border-slate-200') : ''}">${label}</div>
                   <div class="p-4 flex items-center justify-center border-l ${isDark ? 'border-slate-700' : 'border-slate-200'} ${index < 8 ? (isDark ? 'border-b border-slate-700' : 'border-b border-slate-200') : ''}">
-                    <span class="inline-flex h-8 w-8 items-center justify-center rounded-full ${free ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-500'} text-lg font-extrabold">${free ? '✓' : '×'}</span>
+                    <span class="inline-flex h-8 w-8 items-center justify-center rounded-full ${free ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-500'} text-lg font-extrabold">${free ? '' : ''}</span>
                   </div>
                   <div class="p-4 flex items-center justify-center border-l ${isDark ? 'border-amber-500/30 bg-[#1b2230]' : 'border-amber-200 bg-[#fffdf4]'} ${index < 8 ? (isDark ? 'border-b border-slate-700' : 'border-b border-amber-100') : ''}">
-                    <span class="inline-flex h-8 w-8 items-center justify-center rounded-full ${premium ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-500'} text-lg font-extrabold">${premium ? '✓' : '×'}</span>
+                    <span class="inline-flex h-8 w-8 items-center justify-center rounded-full ${premium ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-500'} text-lg font-extrabold">${premium ? '' : ''}</span>
                   </div>
                 </div>
               `).join('')}
@@ -1029,7 +1146,7 @@ let allVehicles = [];
             <label>${requiredLabel('Veículo')}</label>
             <select class="soft-input w-full" id="order-veiculo" required>
               <option value="">Selecione um veículo</option>
-              ${allVehicles.map(vehicle => `<option value="${vehicle.id}">${escapeHtml(vehicle.numeroFrota)} • ${escapeHtml(vehicle.placa)} • ${escapeHtml(vehicle.modelo)}</option>`).join('')}
+              ${allVehicles.map(vehicle => `<option value="${vehicle.id}">${escapeHtml(vehicle.numeroFrota)}  ${escapeHtml(vehicle.placa)}  ${escapeHtml(vehicle.modelo)}</option>`).join('')}
             </select>
           </div>
           <div class="field-wrap">
@@ -1069,7 +1186,7 @@ let allVehicles = [];
             <div class="grid md:grid-cols-2 gap-4">
               <button type="button" class="soft-btn primary !h-auto py-5 px-5 text-left" onclick="loadFinanceForm('combustivel')">
                 <span class="block text-base font-extrabold">Lançamento de combustível</span>
-                <span class="block text-sm font-medium opacity-90 mt-2">Mostra apenas postos e habilita combustível + KM inicial/final.</span>
+                <span class="block text-sm font-medium opacity-90 mt-2">Seleciona veículo, data de abastecimento, posto, tipo de combustível e KM.</span>
               </button>
               <button type="button" class="soft-btn !h-auto py-5 px-5 text-left" onclick="loadFinanceForm('despesa')">
                 <span class="block text-base font-extrabold">Lançamento de despesa</span>
@@ -1349,7 +1466,7 @@ let allVehicles = [];
         showToast('A importação em lote está disponível apenas para veículos.');
         return;
       }
-      const label = 'veiculos';
+      const label = 'veículos';
       const rows = getBatchTemplateRows(entity);
       if (window.XLSX) {
         const workbook = XLSX.utils.book_new();
@@ -1546,7 +1663,7 @@ let allVehicles = [];
           }
           const summary = importVehiclesFromRows(rows);
           if (summary.created === 0 && summary.updated === 0) {
-            const meta = `Ignorados: ${summary.skipped} • Duplicados: ${summary.duplicates}`;
+            const meta = `Ignorados: ${summary.skipped}  Duplicados: ${summary.duplicates}`;
             openBatchFeedback('error', 'Nenhum registro foi importado', `A planilha de ${summary.label} foi lida, mas não houve novos cadastros nem atualizações válidas.`, meta);
             showToast(`Nenhum ${summary.label} foi importado. Revise o modelo e os dados preenchidos.`);
             return;
@@ -1555,7 +1672,7 @@ let allVehicles = [];
           renderAll();
           toggleSettings(false);
           renderNotifications();
-          const meta = `Novos: ${summary.created} • Atualizados: ${summary.updated} • Ignorados: ${summary.skipped} • Duplicados: ${summary.duplicates}`;
+          const meta = `Novos: ${summary.created}  Atualizados: ${summary.updated}  Ignorados: ${summary.skipped}  Duplicados: ${summary.duplicates}`;
           openBatchFeedback('success', 'Importação concluída com sucesso', `A planilha de ${summary.label} foi processada e os dados válidos já estão disponíveis no sistema.`, meta);
           showToast(`Importação concluída: ${summary.created} novos, ${summary.updated} atualizados, ${summary.skipped} ignorados e ${summary.duplicates} duplicados.`, {
             notify: true,
@@ -1608,14 +1725,21 @@ let allVehicles = [];
 
     function getOrderKmData(orderId) {
       const fuelEntries = allFinanceEntries
-        .filter(entry => entry.orderId === orderId && entry.entryType === 'combustivel')
-        .sort((a, b) => String(a.createdAt || '').localeCompare(String(b.createdAt || '')));
+        .filter(entry => entry.orderId === orderId && (isFuelEntry(entry) || isFuelGroupEntry(entry)))
+        .flatMap(entry => isFuelGroupEntry(entry) ? getFuelGroupChildren(entry) : [entry])
+        .filter(entry => isFuelEntry(entry) && entry.km !== '')
+        .sort((a, b) => {
+          const dateCompare = String(getFinanceEntryDate(a)).localeCompare(String(getFinanceEntryDate(b)));
+          if (dateCompare !== 0) return dateCompare;
+          return Number(a.km || 0) - Number(b.km || 0);
+        });
+
       if (!fuelEntries.length) {
         return { kmInicial: '', kmFinal: '' };
       }
       return {
-        kmInicial: fuelEntries[0].kmInicial || '',
-        kmFinal: fuelEntries[fuelEntries.length - 1].kmFinal || ''
+        kmInicial: fuelEntries[0].km || '',
+        kmFinal: fuelEntries[fuelEntries.length - 1].km || ''
       };
     }
 
@@ -1637,24 +1761,46 @@ let allVehicles = [];
         });
       });
 
+      const vehicleEntriesMap = new Map();
       allFinanceEntries
-        .filter(entry => entry.entryType === 'combustivel')
+        .filter(entry => isFuelEntry(entry))
         .forEach(entry => {
-          const order = allOrders.find(item => item.id === entry.orderId);
-          if (!order || !order.vehicleId) return;
-          if (vehicleId && order.vehicleId !== vehicleId) return;
-          if (start && (!entry.dataVencimento || entry.dataVencimento < start)) return;
-          if (end && (!entry.dataVencimento || entry.dataVencimento > end)) return;
+          const currentVehicleId = getEntryVehicleId(entry);
+          if (!currentVehicleId) return;
+          const entryDate = getFinanceEntryDate(entry);
+          if (vehicleId && currentVehicleId !== vehicleId) return;
+          if (start && (!entryDate || entryDate < start)) return;
+          if (end && (!entryDate || entryDate > end)) return;
 
-          const stats = statsMap.get(order.vehicleId);
+          const stats = statsMap.get(currentVehicleId);
           if (!stats) return;
-
-          const kmInicial = Number(entry.kmInicial || 0);
-          const kmFinal = Number(entry.kmFinal || 0);
           stats.totalCost += Number(entry.total || 0);
-          stats.totalKm += Math.max(0, kmFinal - kmInicial);
           stats.entries += 1;
+
+          if (!vehicleEntriesMap.has(currentVehicleId)) vehicleEntriesMap.set(currentVehicleId, []);
+          vehicleEntriesMap.get(currentVehicleId).push(entry);
         });
+
+      vehicleEntriesMap.forEach((entries, currentVehicleId) => {
+        const stats = statsMap.get(currentVehicleId);
+        if (!stats) return;
+        const sortedEntries = entries
+          .filter(entry => entry.km !== '')
+          .sort((a, b) => {
+            const dateCompare = String(getFinanceEntryDate(a)).localeCompare(String(getFinanceEntryDate(b)));
+            if (dateCompare !== 0) return dateCompare;
+            return Number(a.km || 0) - Number(b.km || 0);
+          });
+
+        let previousKm = null;
+        sortedEntries.forEach((entry) => {
+          const currentKm = Number(entry.km || 0);
+          if (previousKm !== null && currentKm >= previousKm) {
+            stats.totalKm += currentKm - previousKm;
+          }
+          previousKm = currentKm;
+        });
+      });
 
       return Array.from(statsMap.values())
         .filter(item => !vehicleId || item.vehicleId === vehicleId)
@@ -1668,7 +1814,6 @@ let allVehicles = [];
           return a.costPerKm - b.costPerKm;
         });
     }
-
     function getDashboardExpirations() {
       const cnhItems = allDrivers
         .map(driver => ({ ...driver, days: daysUntil(driver.validade) }))
@@ -1730,22 +1875,30 @@ let allVehicles = [];
 
     function getVisibleFinanceEntries() {
       const supplierFilter = document.getElementById('finance-filter-supplier')?.value.trim().toLowerCase() || '';
-      const nfFilter = document.getElementById('finance-filter-nf')?.value.trim().toLowerCase() || '';
-      const osFilter = document.getElementById('finance-filter-os')?.value.trim().toLowerCase() || '';
+      const statusFilter = document.getElementById('finance-filter-status')?.value || '';
+      const vehicleFilter = document.getElementById('finance-filter-vehicle')?.value || '';
       const dateFilter = document.getElementById('finance-filter-date')?.value || '';
+      const valueFilter = document.getElementById('finance-filter-value')?.value.trim().toLowerCase() || '';
 
-      let visibleEntries = allFinanceEntries.filter(entry => {
-        const order = allOrders.find(item => item.id === entry.orderId);
-        return order && order.status !== 'fechada';
-      });
+      let visibleEntries = allFinanceEntries
+        .filter(entry => !entry.groupedIntoId)
+        .sort((a, b) => {
+          const dateCompare = String(getFinanceEntryDate(b)).localeCompare(String(getFinanceEntryDate(a)));
+          if (dateCompare !== 0) return dateCompare;
+          return String(b.createdAt || '').localeCompare(String(a.createdAt || ''));
+        });
 
       if (supplierFilter) visibleEntries = visibleEntries.filter(entry => String(entry.fornecedor || '').toLowerCase().includes(supplierFilter));
-      if (nfFilter) visibleEntries = visibleEntries.filter(entry => String(entry.nf || '').toLowerCase().includes(nfFilter));
-      if (osFilter) visibleEntries = visibleEntries.filter(entry => {
-        const order = allOrders.find(item => item.id === entry.orderId);
-        return order && String(order.numero || '').toLowerCase().includes(osFilter);
-      });
-      if (dateFilter) visibleEntries = visibleEntries.filter(entry => entry.dataVencimento === dateFilter);
+      if (statusFilter) visibleEntries = visibleEntries.filter(entry => getFinanceEntryStatus(entry) === statusFilter);
+      if (vehicleFilter) visibleEntries = visibleEntries.filter(entry => getEntryVehicleId(entry) === vehicleFilter);
+      if (dateFilter) visibleEntries = visibleEntries.filter(entry => getFinanceEntryDate(entry) === dateFilter);
+      if (valueFilter) {
+        const normalizedValue = valueFilter.replace(/[^\d,.-]/g, '').replace(',', '.');
+        visibleEntries = visibleEntries.filter(entry => {
+          const total = Number(entry.total || 0);
+          return String(total).includes(normalizedValue) || formatCurrency(total).toLowerCase().includes(valueFilter);
+        });
+      }
 
       return visibleEntries;
     }
@@ -1771,84 +1924,333 @@ let allVehicles = [];
       const title = document.getElementById('modal-title');
       const supplierOptions = allSuppliers
         .filter(supplier => entryType === 'combustivel' ? supplier.tipo === 'posto' : supplier.tipo !== 'posto')
-        .map(supplier => `<option value="${supplier.id}">${escapeHtml(supplier.nome)} • ${escapeHtml(supplier.tipoLabel)}</option>`)
+        .map(supplier => `<option value="${supplier.id}">${escapeHtml(supplier.nome)}  ${escapeHtml(supplier.tipoLabel)}</option>`)
         .join('');
       const orderOptions = allOrders
         .filter(order => order.status !== 'fechada')
-        .map(order => `<option value="${order.id}">OS ${escapeHtml(getOrderNumberLabel(order))} • ${escapeHtml(getVehicleLabel(order.vehicleId))}</option>`)
+        .map(order => `<option value="${order.id}">OS ${escapeHtml(getOrderNumberLabel(order))}  ${escapeHtml(getVehicleLabel(order.vehicleId))}</option>`)
+        .join('');
+      const vehicleOptions = allVehicles
+        .map(vehicle => `<option value="${vehicle.id}">${escapeHtml(vehicle.numeroFrota)}  ${escapeHtml(vehicle.placa)}  ${escapeHtml(vehicle.modelo)}</option>`)
         .join('');
 
       kicker.textContent = 'Financeiro';
-      title.textContent = entryType === 'combustivel' ? 'Lançamento de combustível' : 'Lançar despesa';
+      title.textContent = entryType === 'combustivel' ? 'Lancamento de combustivel' : 'Lancar despesa';
+
+      if (entryType === 'combustivel') {
+        fields.innerHTML = `
+          <input id="finance-kind" type="hidden" value="despesa">
+          <div class="field-wrap full">
+            <label>${requiredLabel('Veiculo')}</label>
+            <select class="soft-input w-full" id="finance-vehicle-id" required>
+              <option value="">Selecione o veículo</option>
+              ${vehicleOptions}
+            </select>
+          </div>
+          <div class="field-wrap">
+            <label>${requiredLabel('Data de abastecimento')}</label>
+            <input class="soft-input w-full" id="finance-data-abastecimento" type="date" required>
+          </div>
+          <div class="field-wrap">
+            <label>${requiredLabel('Posto de combustivel')}</label>
+            <select class="soft-input w-full" id="finance-supplier-id" onchange="toggleFinanceSpecificFields()" required>
+              <option value="">Selecione um posto</option>
+              ${supplierOptions}
+            </select>
+          </div>
+          <div class="field-wrap">
+            <label>Valor</label>
+            <input class="soft-input w-full" id="finance-total" type="number" min="0" step="0.01" value="0">
+          </div>
+          <div class="field-wrap">
+            <label>QTD em litros</label>
+            <input class="soft-input w-full" id="finance-litros" type="number" min="0" step="0.001" placeholder="Ex: 120.500">
+          </div>
+          <div class="field-wrap" id="finance-fuel-wrap">
+            <label>${requiredLabel('Tipo de combustivel')}</label>
+            <select class="soft-input w-full" id="finance-fuel-type">
+              <option value="">Selecione</option>
+              <option value="Diesel">Diesel</option>
+              <option value="Diesel S10">Diesel S10</option>
+              <option value="Gasolina">Gasolina</option>
+              <option value="Etanol">Etanol</option>
+              <option value="GNV">GNV</option>
+              <option value="Arla 32">Arla 32</option>
+              <option value="Oleo hidraulico">Oleo hidraulico</option>
+              <option value="Oleo de motor">Oleo de motor</option>
+            </select>
+          </div>
+          <div class="field-wrap">
+            <label>${requiredLabel('KM')}</label>
+            <input class="soft-input w-full" id="finance-km" type="number" min="0" step="1" placeholder="Ex: 50500">
+          </div>
+          <div class="field-wrap">
+            <label>Selecionar motorista</label>
+            <select class="soft-input w-full" id="finance-driver-id">
+              <option value="">Selecione um motorista</option>
+              ${allDrivers.map(driver => `<option value="${driver.id}">${escapeHtml(driver.nome)}</option>`).join('')}
+            </select>
+          </div>
+          <div class="field-wrap full">
+            <label>Observacoes</label>
+            <textarea class="soft-input textarea w-full" id="finance-observacoes" placeholder="Observacoes do abastecimento"></textarea>
+          </div>
+        `;
+      } else {
+        fields.innerHTML = `
+          <div class="field-wrap full">
+            <label>Alocar na OS</label>
+            <select class="soft-input w-full" id="finance-order-id">
+              <option value="">Lancar sem OS por enquanto</option>
+              ${orderOptions}
+            </select>
+          </div>
+          <div class="field-wrap">
+            <label>${requiredLabel('Natureza financeira')}</label>
+            <select class="soft-input w-full" id="finance-kind" required>
+              <option value="despesa">Despesa</option>
+              <option value="receita">Receita</option>
+            </select>
+          </div>
+          <div class="field-wrap">
+            <label>${requiredLabel('Data de vencimento')}</label>
+            <input class="soft-input w-full" id="finance-data-vencimento" type="date" required>
+          </div>
+          <div class="field-wrap">
+            <label>${requiredLabel('Fornecedor')}</label>
+            <select class="soft-input w-full" id="finance-supplier-id" onchange="toggleFinanceSpecificFields()" required>
+              <option value="">Selecione um parceiro</option>
+              ${supplierOptions}
+            </select>
+          </div>
+          <div class="field-wrap">
+            <label>NF / referencia</label>
+            <input class="soft-input w-full" id="finance-nf" placeholder="Ex: NF 1542">
+          </div>
+          <div class="field-wrap">
+            <label>KM</label>
+            <input class="soft-input w-full" id="finance-km" type="number" min="0" step="1" placeholder="Ex: 50500">
+          </div>
+          <div class="field-wrap">
+            <label>Valor</label>
+            <input class="soft-input w-full" id="finance-total" type="number" min="0" step="0.01" value="0">
+          </div>
+          <div class="field-wrap full">
+            <label>Observacoes</label>
+            <textarea class="soft-input textarea w-full" id="finance-observacoes" placeholder="Observacoes do lancamento"></textarea>
+          </div>
+        `;
+      }
+
+      setModalSubmitState(true, entryType === 'combustivel' ? 'Salvar abastecimento' : 'Salvar lancamento');
+      toggleFinanceSpecificFields();
+      attachModalInputMasks();
+    }
+
+    function openFuelGroupingModal(editId = null) {
+      openCadastroModal('finance');
+      currentModalType = 'finance-group';
+      currentFinanceEntryType = 'combustivel_agrupado';
+      currentEditingId = editId;
+
+      const existingGroup = editId ? allFinanceEntries.find(item => item.id === editId && isFuelGroupEntry(item)) : null;
+      const selectedEntries = existingGroup
+        ? getFuelGroupChildren(existingGroup)
+        : Array.from(selectedFinance)
+          .map(id => allFinanceEntries.find(item => item.id === id))
+          .filter(entry => entry && isFuelEntry(entry) && !entry.groupedIntoId);
+
+      if (!selectedEntries.length) {
+        closeCadastroModal();
+        showToast('Selecione abastecimentos pendentes para agrupar.');
+        return;
+      }
+      if (!existingGroup && selectedEntries.length < 2) {
+        closeCadastroModal();
+        showToast('Selecione pelo menos dois abastecimentos para agrupar.');
+        return;
+      }
+
+      const vehicleIds = [...new Set(selectedEntries.map(entry => getEntryVehicleId(entry)).filter(Boolean))];
+      if (vehicleIds.length !== 1) {
+        closeCadastroModal();
+        showToast('O agrupamento só pode ser feito com abastecimentos do mesmo veículo.');
+        return;
+      }
+
+      const vehicleId = vehicleIds[0];
+      const vehicle = allVehicles.find(item => item.id === vehicleId);
+      const orderOptions = allOrders
+        .filter(order => order.status !== 'fechada' && order.vehicleId === vehicleId)
+        .map(order => `<option value="${order.id}">OS ${escapeHtml(getOrderNumberLabel(order))}  ${escapeHtml(getVehicleLabel(order.vehicleId))}</option>`)
+        .join('');
+      const totalBase = selectedEntries.reduce((sum, entry) => sum + getFinanceTotal(entry), 0);
+      const fields = document.getElementById('modal-fields');
+      const kicker = document.getElementById('modal-kicker');
+      const title = document.getElementById('modal-title');
+
+      kicker.textContent = 'Financeiro';
+      title.textContent = existingGroup ? 'Editar agrupamento de abastecimentos' : 'Agrupar abastecimentos';
       fields.innerHTML = `
+        <input id="finance-group-entry-ids" type="hidden" value="${selectedEntries.map(entry => entry.id).join(',')}">
         <div class="field-wrap full">
-          <label>${requiredLabel('Alocar na OS')}</label>
-          <select class="soft-input w-full" id="finance-order-id" required>
-            <option value="">Selecione a OS</option>
+          <label>Veiculo do agrupamento</label>
+          <div class="soft-input w-full flex items-center">${escapeHtml(vehicle ? `${vehicle.numeroFrota}  ${vehicle.placa}  ${vehicle.modelo}` : '-')}</div>
+        </div>
+        <div class="field-wrap full">
+          <label>Historico dos abastecimentos</label>
+          <div class="space-y-3 max-h-[220px] overflow-y-auto pr-1">
+            ${selectedEntries.map(entry => `
+              <div class="rounded-2xl border border-slate-200 px-4 py-3 bg-slate-50">
+                <div class="flex items-center justify-between gap-3 flex-wrap">
+                  <strong class="text-slate-800">${escapeHtml(entry.fornecedor || 'Abastecimento')}</strong>
+                  <span class="text-sm font-semibold text-slate-500">${escapeHtml(formatCurrency(getFinanceTotal(entry)))}</span>
+                </div>
+                <div class="mt-2 text-sm text-slate-500 flex gap-3 flex-wrap">
+                  <span>Data: ${escapeHtml(formatDate(getFinanceEntryDate(entry)))}</span>
+                  ${entry.fuelType ? `<span>Combustivel: ${escapeHtml(entry.fuelType)}</span>` : ''}
+                  ${entry.km ? `<span>KM: ${escapeHtml(entry.km)}</span>` : ''}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+        <div class="field-wrap">
+          <label>Data de vencimento</label>
+          <input class="soft-input w-full" id="finance-group-data-vencimento" type="date">
+        </div>
+        <div class="field-wrap">
+          <label>Numero da nota</label>
+          <input class="soft-input w-full" id="finance-group-nf" placeholder="Ex: NF 1542">
+        </div>
+        <div class="field-wrap">
+          <label>Valor do agrupamento</label>
+          <input class="soft-input w-full" id="finance-group-total" type="number" min="0" step="0.01" value="${existingGroup ? Number(existingGroup.total || 0) : Number(totalBase || 0)}">
+        </div>
+        <div class="field-wrap full">
+          <label>Alocar na OS (opcional)</label>
+          <select class="soft-input w-full" id="finance-group-order-id">
+            <option value="">Deixar pendente</option>
             ${orderOptions}
           </select>
         </div>
-        ${entryType === 'despesa' ? `
-        <div class="field-wrap">
-          <label>${requiredLabel('Natureza financeira')}</label>
-          <select class="soft-input w-full" id="finance-kind" required>
-            <option value="despesa">Despesa</option>
-            <option value="receita">Receita</option>
-          </select>
-        </div>
-        ` : `<input id="finance-kind" type="hidden" value="despesa">`}
-        <div class="field-wrap">
-          <label>${requiredLabel('Data de vencimento')}</label>
-          <input class="soft-input w-full" id="finance-data-vencimento" type="date" required>
-        </div>
-        <div class="field-wrap">
-          <label>${requiredLabel(entryType === 'combustivel' ? 'Posto de combustível' : 'Fornecedor')}</label>
-          <select class="soft-input w-full" id="finance-supplier-id" onchange="toggleFinanceSpecificFields()" required>
-            <option value="">Selecione um parceiro</option>
-            ${supplierOptions}
-          </select>
-        </div>
-        <div class="field-wrap">
-          <label>NF / referência</label>
-          <input class="soft-input w-full" id="finance-nf" placeholder="Ex: NF 1542">
-        </div>
-        <div class="field-wrap">
-          <label>Valor</label>
-          <input class="soft-input w-full" id="finance-total" type="number" min="0" step="0.01" value="0">
-        </div>
-        ${entryType === 'combustivel' ? `
-        <div class="field-wrap" id="finance-fuel-wrap">
-          <label>${requiredLabel('Tipo de combustível')}</label>
-          <select class="soft-input w-full" id="finance-fuel-type">
-            <option value="">Selecione</option>
-            <option value="Diesel">Diesel</option>
-            <option value="Diesel S10">Diesel S10</option>
-            <option value="Gasolina">Gasolina</option>
-            <option value="Etanol">Etanol</option>
-            <option value="GNV">GNV</option>
-            <option value="Arla 32">Arla 32</option>
-            <option value="Óleo hidráulico">Óleo hidráulico</option>
-            <option value="Óleo de motor">Óleo de motor</option>
-          </select>
-        </div>
-        <div class="field-wrap">
-          <label>${requiredLabel('KM inicial')}</label>
-          <input class="soft-input w-full" id="finance-km-inicial" type="number" min="0" step="1" placeholder="Ex: 20000">
-        </div>
-        <div class="field-wrap">
-          <label>${requiredLabel('KM final')}</label>
-          <input class="soft-input w-full" id="finance-km-final" type="number" min="0" step="1" placeholder="Ex: 20115">
-        </div>
-        ` : ''}
         <div class="field-wrap full">
-          <label>Observações</label>
-          <textarea class="soft-input textarea w-full" id="finance-observacoes" placeholder="Observações do lançamento"></textarea>
+          <label>Observacoes</label>
+          <textarea class="soft-input textarea w-full" id="finance-group-observacoes" placeholder="Observacoes do agrupamento"></textarea>
         </div>
       `;
 
-      setModalSubmitState(true, entryType === 'combustivel' ? 'Salvar lançamento de combustível' : 'Salvar lançamento');
-      toggleFinanceSpecificFields();
-      attachModalInputMasks();
+      document.getElementById('finance-group-order-id').value = existingGroup?.orderId || '';
+      document.getElementById('finance-group-data-vencimento').value = existingGroup?.dataVencimento || '';
+      document.getElementById('finance-group-nf').value = existingGroup?.nf || '';
+      document.getElementById('finance-group-observacoes').value = existingGroup?.observacoes || '';
+      setModalSubmitState(true, existingGroup ? 'Salvar agrupamento' : 'Criar agrupamento');
+    }
+
+    function undoSelectedFuelGrouping() {
+      if (selectedFinance.size !== 1) {
+        showToast('Selecione um agrupamento para desfazer.');
+        return;
+      }
+      const selectedId = Array.from(selectedFinance)[0];
+      const groupEntry = allFinanceEntries.find(entry => entry.id === selectedId && isFuelGroupEntry(entry));
+      if (!groupEntry) {
+        showToast('Selecione um agrupamento valido para desfazer.');
+        return;
+      }
+
+      const groupedIds = new Set(Array.isArray(groupEntry.groupedEntryIds) ? groupEntry.groupedEntryIds : []);
+      allFinanceEntries = allFinanceEntries
+        .filter(entry => entry.id !== groupEntry.id)
+        .map(entry => groupedIds.has(entry.id)
+          ? { ...entry, groupedIntoId: '' }
+          : entry);
+      selectedFinance.clear();
+      saveToLocalStorage();
+      renderAll();
+      showToast('Agrupamento desfeito com sucesso.');
+    }
+
+    function viewSelectedFinance() {
+      if (selectedFinance.size !== 1) {
+        showToast('Selecione apenas um lançamento para visualizar.');
+        return;
+      }
+      const entry = allFinanceEntries.find(item => item.id === Array.from(selectedFinance)[0]);
+      if (!entry) return;
+      if (isFuelGroupEntry(entry)) {
+        openFuelGroupingModal(entry.id);
+        setModalSubmitState(false);
+        return;
+      }
+      editSelectedFinance();
+      setModalSubmitState(false);
+    }
+
+    function openCloseFuelExpenseModal() {
+      if (selectedFinance.size !== 1) {
+        showToast('Selecione um lançamento para fechar a despesa.');
+        return;
+      }
+      const entry = allFinanceEntries.find(item => item.id === Array.from(selectedFinance)[0]);
+      if (!entry || (!isFuelEntry(entry) && !isFuelGroupEntry(entry))) {
+        showToast('Selecione um abastecimento ou agrupamento vlido.');
+        return;
+      }
+
+      const vehicleId = getEntryVehicleId(entry);
+      const orderOptions = allOrders
+        .filter(order => order.status !== 'fechada' && (!vehicleId || order.vehicleId === vehicleId))
+        .map(order => `<option value="${order.id}">OS ${escapeHtml(getOrderNumberLabel(order))}  ${escapeHtml(getVehicleLabel(order.vehicleId))}</option>`)
+        .join('');
+      const fields = document.getElementById('modal-fields');
+      const kicker = document.getElementById('modal-kicker');
+      const title = document.getElementById('modal-title');
+
+      openCadastroModal('finance');
+      currentModalType = 'finance-close';
+      currentEditingId = entry.id;
+      kicker.textContent = 'Financeiro';
+      title.textContent = 'Fechar despesa';
+      fields.innerHTML = `
+        <div class="field-wrap full">
+          <label>Lanamento selecionado</label>
+          <div class="soft-input w-full flex items-center">${escapeHtml(isFuelGroupEntry(entry) ? 'Agrupamento de abastecimentos' : (entry.fornecedor || 'Abastecimento'))}</div>
+        </div>
+        <div class="field-wrap">
+          <label>NF / numero da nota</label>
+          <input class="soft-input w-full" id="finance-close-nf" placeholder="Ex: NF 1542">
+        </div>
+        <div class="field-wrap">
+          <label>Data de vencimento</label>
+          <input class="soft-input w-full" id="finance-close-data-vencimento" type="date">
+        </div>
+        <div class="field-wrap">
+          <label>Desconto</label>
+          <input class="soft-input w-full" id="finance-close-discount" type="number" min="0" step="0.01" value="${Number(entry.discount || 0)}">
+        </div>
+        <div class="field-wrap">
+          <label>Valor final</label>
+          <input class="soft-input w-full" id="finance-close-total" type="number" min="0" step="0.01" value="${Number(entry.total || 0)}">
+        </div>
+        <div class="field-wrap full">
+          <label>Alocar na OS?</label>
+          <select class="soft-input w-full" id="finance-close-order-id">
+            <option value="">Nao alocar agora</option>
+            ${orderOptions}
+          </select>
+        </div>
+        <div class="field-wrap full">
+          <label>Observacoes</label>
+          <textarea class="soft-input textarea w-full" id="finance-close-observacoes" placeholder="Observacoes do fechamento da despesa"></textarea>
+        </div>
+      `;
+
+      document.getElementById('finance-close-nf').value = entry.nf || '';
+      document.getElementById('finance-close-data-vencimento').value = entry.dataVencimento || '';
+      document.getElementById('finance-close-order-id').value = entry.orderId || '';
+      document.getElementById('finance-close-observacoes').value = entry.observacoes || '';
+      setModalSubmitState(true, 'Fechar despesa');
     }
 
     function renderHomeCards() {
@@ -1871,7 +2273,7 @@ let allVehicles = [];
       if (financeNode) financeNode.textContent = allFinanceEntries.length;
       if (costNode) costNode.textContent = bestVehicle ? formatCurrency(bestVehicle.costPerKm) : formatCurrency(0);
       if (costLabelNode) costLabelNode.textContent = bestVehicle
-        ? `${bestVehicle.placa} • ${bestVehicle.modelo}`
+        ? `${bestVehicle.placa}  ${bestVehicle.modelo}`
         : 'Nenhum abastecimento registrado';
       if (cnhNode) cnhNode.textContent = cnhItems.length;
       if (insuranceNode) insuranceNode.textContent = insuranceItems.length;
@@ -1881,8 +2283,8 @@ let allVehicles = [];
           item => `
             <div class="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 px-4 py-3">
               <div>
-                <p class="font-bold text-slate-800">${escapeHtml(item.placa)} • ${escapeHtml(item.modelo)}</p>
-                <p class="text-xs text-slate-500">Frota ${escapeHtml(item.frota)} • ${item.totalKm} km • ${item.entries} lançamento(s)</p>
+                <p class="font-bold text-slate-800">${escapeHtml(item.placa)}  ${escapeHtml(item.modelo)}</p>
+                <p class="text-xs text-slate-500">Frota ${escapeHtml(item.frota)}  ${item.totalKm} km  ${item.entries} lançamento(s)</p>
               </div>
               <div class="text-right">
                 <p class="font-extrabold text-[#6267d9]">${escapeHtml(formatCurrency(item.costPerKm))}</p>
@@ -1899,7 +2301,7 @@ let allVehicles = [];
             <div class="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 px-4 py-3">
               <div>
                 <p class="font-bold text-slate-800">${escapeHtml(item.nome)}</p>
-                <p class="text-xs text-slate-500">CPF ${escapeHtml(item.cpf || '-')} • CNH ${escapeHtml(item.cnh || '-')}</p>
+                <p class="text-xs text-slate-500">CPF ${escapeHtml(item.cpf || '-')}  CNH ${escapeHtml(item.cnh || '-')}</p>
               </div>
               <div class="text-right">
                 <p class="font-extrabold text-[#6267d9]">${escapeHtml(formatDate(item.validade))}</p>
@@ -1915,7 +2317,7 @@ let allVehicles = [];
           item => `
             <div class="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 px-4 py-3">
               <div>
-                <p class="font-bold text-slate-800">${escapeHtml(item.placa)} • ${escapeHtml(item.modelo)}</p>
+                <p class="font-bold text-slate-800">${escapeHtml(item.placa)}  ${escapeHtml(item.modelo)}</p>
                 <p class="text-xs text-slate-500">Frota ${escapeHtml(item.numeroFrota || '-')}</p>
               </div>
               <div class="text-right">
@@ -1940,7 +2342,7 @@ let allVehicles = [];
 
       const currentValue = select.value;
       select.innerHTML = '<option value="">Todos os veículos</option>' + allVehicles.map(vehicle => `
-        <option value="${vehicle.id}">${escapeHtml(vehicle.placa)} • ${escapeHtml(vehicle.modelo)} • Frota ${escapeHtml(vehicle.numeroFrota || '-')}</option>
+        <option value="${vehicle.id}">${escapeHtml(vehicle.placa)}  ${escapeHtml(vehicle.modelo)}  Frota ${escapeHtml(vehicle.numeroFrota || '-')}</option>
       `).join('');
       if (Array.from(select.options).some(option => option.value === currentValue)) {
         select.value = currentValue;
@@ -1961,8 +2363,8 @@ let allVehicles = [];
         item => `
           <div class="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 px-4 py-3">
             <div>
-              <p class="font-bold text-slate-800">${escapeHtml(item.placa)} • ${escapeHtml(item.modelo)}</p>
-              <p class="text-xs text-slate-500">Frota ${escapeHtml(item.frota)} • ${item.totalKm} km rodados</p>
+              <p class="font-bold text-slate-800">${escapeHtml(item.placa)}  ${escapeHtml(item.modelo)}</p>
+              <p class="text-xs text-slate-500">Frota ${escapeHtml(item.frota)}  ${item.totalKm} km rodados</p>
             </div>
             <div class="text-right">
               <p class="font-extrabold text-[#6267d9]">${escapeHtml(formatCurrency(item.costPerKm))}</p>
@@ -1983,17 +2385,17 @@ let allVehicles = [];
             ? formatDate(String(order.deletedAt || '').slice(0, 10))
             : formatDate(order.dataInicio);
           const statusLabel = filters.type === 'orders_deleted'
-            ? `excluída • ${formatDate(String(order.deletedAt || '').slice(0, 10))}`
+            ? `excluída  ${formatDate(String(order.deletedAt || '').slice(0, 10))}`
             : (order.status || '-');
           return `
             <div class="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 px-4 py-3">
               <div>
-                <p class="font-bold text-slate-800">OS ${escapeHtml(getOrderNumberLabel(order))} • ${escapeHtml(vehicle ? vehicle.placa : '-')}</p>
+                <p class="font-bold text-slate-800">OS ${escapeHtml(getOrderNumberLabel(order))}  ${escapeHtml(vehicle ? vehicle.placa : '-')}</p>
                 <p class="text-xs text-slate-500">${escapeHtml(order.descricao || '-')}</p>
               </div>
               <div class="text-right">
                 <p class="font-extrabold text-[#6267d9]">${escapeHtml(formatCurrency(total))}</p>
-                <p class="text-xs text-slate-500">${escapeHtml(dateLabel)} • ${escapeHtml(statusLabel)}</p>
+                <p class="text-xs text-slate-500">${escapeHtml(dateLabel)}  ${escapeHtml(statusLabel)}</p>
               </div>
             </div>
           `;
@@ -2203,11 +2605,40 @@ let allVehicles = [];
 
     function updateFinanceSelectionUI() {
       pruneSelections();
-      const count = selectedFinance.size;
       const visibleEntries = getVisibleFinanceEntries();
+      const visibleIds = new Set(visibleEntries.map(entry => entry.id));
+      selectedFinance = new Set(Array.from(selectedFinance).filter(id => visibleIds.has(id)));
+      const count = selectedFinance.size;
+      const selectedEntries = Array.from(selectedFinance)
+        .map(id => allFinanceEntries.find(entry => entry.id === id))
+        .filter(Boolean);
       document.getElementById('finance-selected-text').textContent = `${count} selecionado${count === 1 ? '' : 's'}`;
       document.getElementById('select-all-finance').classList.toggle('checked', visibleEntries.length > 0 && visibleEntries.every(entry => selectedFinance.has(entry.id)));
       updateButtonState('edit-finance-btn', 'delete-finance-btn', count);
+
+      const groupButton = document.getElementById('group-finance-btn');
+      const ungroupButton = document.getElementById('ungroup-finance-btn');
+      const viewButton = document.getElementById('view-finance-btn');
+      const closeExpenseButton = document.getElementById('close-finance-expense-btn');
+      const canGroup = selectedEntries.length >= 2
+        && selectedEntries.every(entry => isFuelEntry(entry) && !entry.groupedIntoId)
+        && new Set(selectedEntries.map(entry => getEntryVehicleId(entry))).size === 1;
+      const canUngroup = selectedEntries.length === 1 && isFuelGroupEntry(selectedEntries[0]);
+      const canView = selectedEntries.length === 1;
+      const canCloseExpense = selectedEntries.length === 1
+        && (isFuelEntry(selectedEntries[0]) || isFuelGroupEntry(selectedEntries[0]))
+        && getFinanceEntryStatus(selectedEntries[0]) !== 'agrupado';
+
+      [
+        { node: groupButton, enabled: canGroup },
+        { node: ungroupButton, enabled: canUngroup },
+        { node: viewButton, enabled: canView },
+        { node: closeExpenseButton, enabled: canCloseExpense }
+      ].forEach(({ node, enabled }) => {
+        if (!node) return;
+        node.style.opacity = enabled ? '1' : '0.45';
+        node.style.pointerEvents = enabled ? 'auto' : 'none';
+      });
     }
 
     function toggleVehicleSelection(event, id) {
@@ -2467,20 +2898,64 @@ let allVehicles = [];
       updateOrderSelectionUI();
     }
 
+    function populateFinanceVehicleFilter() {
+      const select = document.getElementById('finance-filter-vehicle');
+      if (!select) return;
+
+      const currentValue = select.value;
+      const options = ['<option value="">Todos os veículos</option>'].concat(
+        allVehicles
+          .slice()
+          .sort((a, b) => `${a.placa || a.plate || ''} ${a.modelo || a.model || ''}`.localeCompare(`${b.placa || b.plate || ''} ${b.modelo || b.model || ''}`, 'pt-BR'))
+          .map(vehicle => `<option value="${vehicle.id}">${vehicle.placa || vehicle.plate || 'Sem placa'}  ${vehicle.modelo || vehicle.model || 'Veiculo'}</option>`)
+      );
+
+      select.innerHTML = options.join('');
+      if (currentValue && allVehicles.some(vehicle => vehicle.id === currentValue)) {
+        select.value = currentValue;
+      }
+    }
+
     function renderFinance() {
+      populateFinanceVehicleFilter();
       const list = document.getElementById('finance-list');
       if (!list) return;
-      let visibleEntries = getVisibleFinanceEntries();
+      const visibleEntries = getVisibleFinanceEntries();
       if (!visibleEntries.length) {
         list.innerHTML = '<div class="empty-state">Nenhum lançamento financeiro cadastrado.</div>';
-        selectedFinance = new Set(Array.from(selectedFinance).filter(id => allFinanceEntries.some(entry => entry.id === id)));
+        selectedFinance.clear();
         updateFinanceSelectionUI();
         return;
       }
       list.innerHTML = visibleEntries.map(entry => {
         const order = allOrders.find(item => item.id === entry.orderId);
+        const vehicle = allVehicles.find(item => item.id === getEntryVehicleId(entry));
+        const groupEntry = entry.groupedIntoId ? allFinanceEntries.find(item => item.id === entry.groupedIntoId) : null;
+        const groupedChildren = isFuelGroupEntry(entry) ? getFuelGroupChildren(entry) : [];
+        const historyHtml = isFuelGroupEntry(entry)
+          ? `
+            <div class="mt-5 rounded-[20px] border border-slate-200 bg-slate-50 px-4 py-4">
+              <p class="text-xs font-extrabold uppercase tracking-[0.2em] text-slate-500 mb-3">Historico das notas agrupadas</p>
+              <div class="space-y-3">
+                ${groupedChildren.map(item => `
+                  <div class="rounded-2xl border border-slate-200 bg-white px-4 py-3">
+                    <div class="flex items-center justify-between gap-3 flex-wrap">
+                      <strong class="text-slate-800">${escapeHtml(item.fornecedor || 'Abastecimento')}</strong>
+                      <span class="text-sm font-semibold text-slate-500">${escapeHtml(formatCurrency(getFinanceTotal(item)))}</span>
+                    </div>
+                    <div class="mt-2 text-sm text-slate-500 flex gap-3 flex-wrap">
+                      <span>Data: ${escapeHtml(formatDate(getFinanceEntryDate(item)))}</span>
+                      ${item.fuelType ? `<span>Combustivel: ${escapeHtml(item.fuelType)}</span>` : ''}
+                      ${item.km ? `<span>KM: ${escapeHtml(item.km)}</span>` : ''}
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          `
+          : '';
         return `
-          <div class="list-card ${selectedFinance.has(entry.id) ? 'selected' : ''}">
+          <div class="list-card finance-entry finance-entry--${getFinanceEntryFamily(entry)} ${selectedFinance.has(entry.id) ? 'selected' : ''}">
             <div class="flex items-start justify-between gap-5 flex-wrap">
               <div class="flex items-start gap-4">
                 <button class="selection-check ${selectedFinance.has(entry.id) ? 'checked' : ''}" onclick="toggleFinanceSelection(event, '${entry.id}')">
@@ -2490,19 +2965,25 @@ let allVehicles = [];
                 </button>
                 <div>
                   <div class="flex items-center gap-3 flex-wrap">
-                    <h3 class="text-2xl font-extrabold text-slate-900">${escapeHtml(entry.fornecedor || 'Lançamento')}</h3>
-                    <span class="mini-badge">OS ${escapeHtml(order ? getOrderNumberLabel(order) : '-')}</span>
+                    <h3 class="text-2xl font-extrabold text-slate-900">${escapeHtml(isFuelGroupEntry(entry) ? 'Agrupamento de abastecimentos' : (entry.fornecedor || 'Lancamento'))}</h3>
                     <span class="mini-badge">${escapeHtml(entry.kindLabel || 'Despesa')}</span>
+                    <span class="mini-badge">${escapeHtml(getFinanceEntryStatusLabel(entry))}</span>
+                    ${order ? `<span class="mini-badge">OS ${escapeHtml(getOrderNumberLabel(order))}</span>` : ''}
                     ${entry.nf ? `<span class="mini-badge">${escapeHtml(entry.nf)}</span>` : ''}
                   </div>
                   <div class="flex gap-3 flex-wrap mt-4 text-sm text-slate-500">
-                    <span>Vencimento: ${formatDate(entry.dataVencimento)}</span>
-                    <span>Tipo: ${escapeHtml(entry.entryType === 'combustivel' ? 'Combustível' : 'Despesa')}</span>
-                    ${entry.fuelType ? `<span>Combustível: ${escapeHtml(entry.fuelType)}</span>` : ''}
-                    ${entry.kmInicial ? `<span>KM inicial: ${escapeHtml(entry.kmInicial)}</span>` : ''}
-                    ${entry.kmFinal ? `<span>KM final: ${escapeHtml(entry.kmFinal)}</span>` : ''}
+                    <span>${escapeHtml(getFinanceEntryDateLabel(entry))}: ${escapeHtml(formatDate(getFinanceEntryDate(entry)))}</span>
+                    <span>Tipo: ${escapeHtml(isFuelGroupEntry(entry) ? 'Agrupamento' : entry.entryType === 'combustivel' ? 'Combustivel' : 'Despesa')}</span>
+                    ${vehicle ? `<span>Veiculo: ${escapeHtml(vehicle.placa)}  ${escapeHtml(vehicle.modelo)}</span>` : ''}
+                    ${entry.driverId ? `<span>Motorista: ${escapeHtml(getDriverLabel(entry.driverId))}</span>` : ''}
+                    ${entry.fuelType ? `<span>Combustivel: ${escapeHtml(entry.fuelType)}</span>` : ''}
+                    ${entry.litros ? `<span>Litros: ${escapeHtml(entry.litros)}</span>` : ''}
+                    ${entry.km ? `<span>KM: ${escapeHtml(entry.km)}</span>` : ''}
+                    ${entry.discount ? `<span>Desconto: ${escapeHtml(formatCurrency(entry.discount))}</span>` : ''}
+                    ${groupEntry ? `<span>Agrupado em: ${escapeHtml(groupEntry.nf || 'grupo sem nota')}</span>` : ''}
                   </div>
                   ${entry.observacoes ? `<p class="text-slate-700 mt-4 leading-7">${escapeHtml(entry.observacoes)}</p>` : ''}
+                  ${historyHtml}
                 </div>
               </div>
               <div class="mini-badge">${formatCurrency(getFinanceTotal(entry))}</div>
@@ -2524,9 +3005,10 @@ let allVehicles = [];
 
     function clearFinanceFilters() {
       document.getElementById('finance-filter-supplier').value = '';
-      document.getElementById('finance-filter-nf').value = '';
-      document.getElementById('finance-filter-os').value = '';
+      document.getElementById('finance-filter-status').value = '';
+      document.getElementById('finance-filter-vehicle').value = '';
       document.getElementById('finance-filter-date').value = '';
+      document.getElementById('finance-filter-value').value = '';
       renderFinance();
     }
 
@@ -2611,33 +3093,48 @@ let allVehicles = [];
 
     function editSelectedFinance() {
       if (selectedFinance.size !== 1) {
-        showToast('Selecione apenas um lançamento para editar.');
+        showToast('Selecione apenas um lancamento para editar.');
         return;
       }
       const id = Array.from(selectedFinance)[0];
       const entry = allFinanceEntries.find(item => item.id === id);
       if (!entry) return;
+      if (isFuelGroupEntry(entry)) {
+        openFuelGroupingModal(id);
+        return;
+      }
       openCadastroModal('finance');
       loadFinanceForm(entry.entryType || 'despesa');
       currentEditingId = id;
-      document.getElementById('finance-order-id').value = entry.orderId || '';
-      document.getElementById('finance-kind').value = entry.kind || 'despesa';
-      document.getElementById('finance-data-vencimento').value = entry.dataVencimento || '';
-      document.getElementById('finance-supplier-id').value = entry.supplierId || '';
-      document.getElementById('finance-nf').value = entry.nf || '';
-      document.getElementById('finance-total').value = entry.total ?? 0;
-      toggleFinanceSpecificFields();
-      if (document.getElementById('finance-fuel-type')) {
-        document.getElementById('finance-fuel-type').value = entry.fuelType || '';
-      }
-      if (document.getElementById('finance-km-inicial')) {
-        document.getElementById('finance-km-inicial').value = entry.kmInicial || '';
-      }
-      if (document.getElementById('finance-km-final')) {
-        document.getElementById('finance-km-final').value = entry.kmFinal || '';
+      if (isFuelEntry(entry)) {
+        document.getElementById('finance-vehicle-id').value = entry.vehicleId || getEntryVehicleId(entry) || '';
+        document.getElementById('finance-data-abastecimento').value = entry.dataAbastecimento || entry.dataVencimento || '';
+        document.getElementById('finance-supplier-id').value = entry.supplierId || '';
+        document.getElementById('finance-total').value = entry.total ?? 0;
+        const litrosField = document.getElementById('finance-litros');
+        if (litrosField) litrosField.value = entry.litros || '';
+        const driverField = document.getElementById('finance-driver-id');
+        if (driverField) driverField.value = entry.driverId || '';
+        toggleFinanceSpecificFields();
+        if (document.getElementById('finance-fuel-type')) {
+          document.getElementById('finance-fuel-type').value = entry.fuelType || '';
+        }
+        if (document.getElementById('finance-km')) {
+          document.getElementById('finance-km').value = entry.km || entry.kmFinal || '';
+        }
+      } else {
+        document.getElementById('finance-order-id').value = entry.orderId || '';
+        document.getElementById('finance-kind').value = entry.kind || 'despesa';
+        document.getElementById('finance-data-vencimento').value = entry.dataVencimento || '';
+        document.getElementById('finance-supplier-id').value = entry.supplierId || '';
+        document.getElementById('finance-nf').value = entry.nf || '';
+        if (document.getElementById('finance-km')) {
+          document.getElementById('finance-km').value = entry.km || '';
+        }
+        document.getElementById('finance-total').value = entry.total ?? 0;
       }
       document.getElementById('finance-observacoes').value = entry.observacoes || '';
-      document.getElementById('modal-title').textContent = 'Editar lançamento';
+      document.getElementById('modal-title').textContent = 'Editar lancamento';
     }
 
     function deleteSelectedVehicles() {
@@ -2721,14 +3218,21 @@ let allVehicles = [];
 
     function deleteSelectedFinance() {
       if (!selectedFinance.size) {
-        showToast('Selecione pelo menos um lançamento para excluir.');
+        showToast('Selecione pelo menos um lancamento para excluir.');
+        return;
+      }
+      const selectedEntries = Array.from(selectedFinance)
+        .map(id => allFinanceEntries.find(entry => entry.id === id))
+        .filter(Boolean);
+      if (selectedEntries.some(entry => isFuelGroupEntry(entry) || entry.groupedIntoId)) {
+        showToast('Desfaca o agrupamento antes de excluir lancamentos agrupados.');
         return;
       }
       allFinanceEntries = allFinanceEntries.filter(entry => !selectedFinance.has(entry.id));
       selectedFinance.clear();
       saveToLocalStorage();
       renderAll();
-      showToast('Lançamento(s) excluído(s) com sucesso.');
+      showToast('Lancamento(s) excluido(s) com sucesso.');
     }
 
     function closeSelectedOrder() {
@@ -2791,7 +3295,7 @@ let allVehicles = [];
         return `
           <tr>
             <td>${entry ? escapeHtml(formatDate(entry.dataVencimento)) : ''}</td>
-            <td>${entry ? escapeHtml([entry.fornecedor, entry.nf, entry.fuelType].filter(Boolean).join(' • ')) : ''}</td>
+            <td>${entry ? escapeHtml([entry.fornecedor, entry.nf, entry.fuelType].filter(Boolean).join('  ')) : ''}</td>
             <td class="money">${entry && entry.kind === 'despesa' ? escapeHtml(formatCurrency(entry.total)) : ''}</td>
             <td class="money">${entry && entry.kind === 'receita' ? escapeHtml(formatCurrency(entry.total)) : ''}</td>
             <td class="money">${entry ? escapeHtml(formatCurrency(getFinanceTotal(entry))) : ''}</td>
@@ -2988,7 +3492,7 @@ let allVehicles = [];
               <thead>
                 <tr>
                   <th style="width: 14%;">DATA<br>VENCIMENTO</th>
-                  <th>FORNECEDOR E NF´S</th>
+                  <th>FORNECEDOR E NFs</th>
                   <th style="width: 17%;">DÉBITO</th>
                   <th style="width: 16%;">CRÉDITO</th>
                   <th style="width: 16%;">TOTAL</th>
@@ -3160,55 +3664,235 @@ let allVehicles = [];
         closeCadastroModal();
       }
 
-      if (currentModalType === 'finance') {
+            if (currentModalType === 'finance') {
         const entryType = currentFinanceEntryType || 'despesa';
-        const orderId = document.getElementById('finance-order-id').value;
         const kind = document.getElementById('finance-kind').value;
-        const dataVencimento = document.getElementById('finance-data-vencimento').value;
         const supplierId = document.getElementById('finance-supplier-id').value;
-        const nf = document.getElementById('finance-nf').value.trim();
         const totalField = document.getElementById('finance-total').value;
         const total = Number(totalField || 0);
         const supplier = allSuppliers.find(item => item.id === supplierId);
-        const linkedOrder = allOrders.find(item => item.id === orderId);
         const fornecedor = supplier ? supplier.nome : '';
         const supplierType = supplier ? supplier.tipo : '';
-        const fuelType = document.getElementById('finance-fuel-type')?.value || '';
-        const kmInicial = document.getElementById('finance-km-inicial')?.value || '';
-        const kmFinal = document.getElementById('finance-km-final')?.value || '';
         const observacoes = document.getElementById('finance-observacoes').value.trim();
-        if (!orderId || !dataVencimento || !supplierId) {
-          showToast('Selecione a OS, o parceiro e a data de vencimento do lançamento.');
+
+        if (entryType === 'combustivel') {
+          const vehicleId = document.getElementById('finance-vehicle-id').value;
+          const dataAbastecimento = document.getElementById('finance-data-abastecimento').value;
+          const fuelType = document.getElementById('finance-fuel-type')?.value || '';
+          const km = document.getElementById('finance-km')?.value || '';
+          const litros = document.getElementById('finance-litros')?.value || '';
+          const driverId = document.getElementById('finance-driver-id')?.value || '';
+          if (!vehicleId || !dataAbastecimento || !supplierId) {
+            showToast('Selecione o veículo, o posto e a data de abastecimento.');
+            return;
+          }
+          if (supplierType !== 'posto') {
+            showToast('Selecione um posto de combustivel valido para o abastecimento.');
+            return;
+          }
+          if (!fuelType) {
+            showToast('Selecione o tipo de combustivel para o abastecimento.');
+            return;
+          }
+          const mileageError = validateFuelMileageForVehicle({ vehicleId, date: dataAbastecimento, km, excludeId: currentEditingId || '' });
+          if (mileageError) {
+            showToast(mileageError);
+            return;
+          }
+
+          const payload = {
+            entryType,
+            vehicleId,
+            orderId: '',
+            kind,
+            kindLabel: 'Despesa',
+            supplierId,
+            supplierType,
+            fornecedor,
+            fuelType,
+            km,
+            litros,
+            driverId,
+            dataAbastecimento,
+            dataVencimento: '',
+            nf: '',
+            total,
+            observacoes,
+            groupedIntoId: '',
+            workflowStatus: 'pendente',
+            closedExpense: false,
+            discount: 0
+          };
+
+          if (currentEditingId) {
+            allFinanceEntries = allFinanceEntries.map(entry => entry.id === currentEditingId ? { ...entry, ...payload } : entry);
+            showToast('Abastecimento atualizado com sucesso.');
+          } else {
+            allFinanceEntries.unshift({ id: generateId(), createdAt: new Date().toISOString(), ...payload });
+            showToast('Abastecimento registrado com sucesso.');
+          }
+          saveToLocalStorage();
+          renderAll();
+          closeCadastroModal();
           return;
         }
-        if (!linkedOrder || linkedOrder.status === 'fechada') {
-          showToast('Não é permitido lançar financeiro em OS fechada.');
+
+        const orderId = document.getElementById('finance-order-id').value;
+        const dataVencimento = document.getElementById('finance-data-vencimento').value;
+        const nf = document.getElementById('finance-nf').value.trim();
+        const km = document.getElementById('finance-km')?.value || '';
+        const linkedOrder = allOrders.find(item => item.id === orderId);
+        if (!dataVencimento || !supplierId) {
+          showToast('Selecione o parceiro e a data de vencimento do lancamento.');
           return;
         }
-        if (entryType === 'despesa' && supplierType === 'posto') {
-          showToast('Postos de combustível não podem ser usados no lançamento de despesas.');
+        if (linkedOrder && linkedOrder.status === 'fechada') {
+          showToast('Nao e permitido lancar financeiro em OS fechada.');
           return;
         }
-        if (supplierType === 'posto' && !fuelType) {
-          showToast('Selecione o tipo de combustível para lançamentos de posto.');
+        if (supplierType === 'posto') {
+          showToast('Postos de combustivel so podem ser usados no fluxo de abastecimento.');
           return;
         }
-        if (entryType === 'combustivel' && (!kmInicial || !kmFinal)) {
-          showToast('Preencha KM inicial e KM final no lançamento de combustível.');
-          return;
-        }
+
+        const payload = {
+          entryType,
+          orderId: orderId || '',
+          vehicleId: linkedOrder?.vehicleId || '',
+          kind,
+          kindLabel: kind === 'receita' ? 'Receita' : 'Despesa',
+          supplierId,
+          supplierType,
+          fornecedor,
+          nf,
+          km,
+          dataVencimento,
+          total,
+          observacoes
+        };
+
         if (currentEditingId) {
-          allFinanceEntries = allFinanceEntries.map(entry => entry.id === currentEditingId
-            ? { ...entry, entryType, orderId, kind, kindLabel: kind === 'receita' ? 'Receita' : 'Despesa', supplierId, supplierType, fornecedor, nf, fuelType, kmInicial, kmFinal, dataVencimento, total, observacoes }
-            : entry);
-          showToast('Lançamento atualizado com sucesso.');
+          allFinanceEntries = allFinanceEntries.map(entry => entry.id === currentEditingId ? { ...entry, ...payload } : entry);
+          showToast('Lancamento atualizado com sucesso.');
         } else {
-          allFinanceEntries.unshift({ id: generateId(), createdAt: new Date().toISOString(), entryType, orderId, kind, kindLabel: kind === 'receita' ? 'Receita' : 'Despesa', supplierId, supplierType, fornecedor, nf, fuelType, kmInicial, kmFinal, dataVencimento, total, observacoes });
-          showToast('Lançamento vinculado à OS com sucesso.');
+          allFinanceEntries.unshift({ id: generateId(), createdAt: new Date().toISOString(), ...payload });
+          showToast(orderId ? 'Lancamento vinculado a OS com sucesso.' : 'Lancamento salvo sem OS. Voce pode alocar depois.');
         }
         saveToLocalStorage();
         renderAll();
         closeCadastroModal();
+        return;
+      }
+
+      if (currentModalType === 'finance-group') {
+        const ids = String(document.getElementById('finance-group-entry-ids')?.value || '')
+          .split(',')
+          .map(value => value.trim())
+          .filter(Boolean);
+        const entries = ids
+          .map(id => allFinanceEntries.find(entry => entry.id === id))
+          .filter(entry => entry && isFuelEntry(entry));
+        if (!entries.length) {
+          showToast('Nao foi possivel localizar os abastecimentos do agrupamento.');
+          return;
+        }
+
+        const vehicleId = getEntryVehicleId(entries[0]);
+        const orderId = document.getElementById('finance-group-order-id').value;
+        const dataVencimento = document.getElementById('finance-group-data-vencimento').value;
+        const nf = document.getElementById('finance-group-nf').value.trim();
+        const total = Number(document.getElementById('finance-group-total').value || 0);
+        const observacoes = document.getElementById('finance-group-observacoes').value.trim();
+        const linkedOrder = orderId ? allOrders.find(item => item.id === orderId) : null;
+        if (linkedOrder && linkedOrder.status === 'fechada') {
+          showToast('Nao e permitido alocar agrupamento em OS fechada.');
+          return;
+        }
+
+        const payload = {
+          entryType: 'combustivel_agrupado',
+          vehicleId,
+          orderId: orderId || '',
+          kind: 'despesa',
+          kindLabel: 'Despesa',
+          supplierId: '',
+          supplierType: 'posto',
+          fornecedor: `Agrupamento de ${entries.length} abastecimento(s)`,
+          nf,
+          dataVencimento,
+          total,
+          observacoes,
+          groupedEntryIds: entries.map(entry => entry.id),
+          workflowStatus: 'pendente',
+          closedExpense: false,
+          discount: 0
+        };
+
+        let targetGroupId = currentEditingId;
+        const isNewGroup = !currentEditingId;
+        if (currentEditingId) {
+          allFinanceEntries = allFinanceEntries.map(entry => entry.id === currentEditingId ? { ...entry, ...payload } : entry);
+          showToast('Agrupamento atualizado com sucesso.');
+        } else {
+          const groupId = generateId();
+          targetGroupId = groupId;
+          allFinanceEntries = allFinanceEntries.map(entry => ids.includes(entry.id) ? { ...entry, groupedIntoId: groupId } : entry);
+          allFinanceEntries.unshift({ id: groupId, createdAt: new Date().toISOString(), ...payload });
+          showToast('Agrupamento criado com sucesso.');
+        }
+        saveToLocalStorage();
+        closeCadastroModal();
+        selectedFinance = targetGroupId ? new Set([targetGroupId]) : new Set();
+        renderAll();
+        if (isNewGroup && targetGroupId) {
+          const shouldCloseExpense = window.confirm('Agrupamento criado. Deseja fechar essa despesa agora?');
+          if (shouldCloseExpense) {
+            openCloseFuelExpenseModal();
+          } else {
+            showToast('Agrupamento mantido como pendente para fechamento posterior.');
+          }
+        }
+        return;
+      }
+
+      if (currentModalType === 'finance-close') {
+        const entry = allFinanceEntries.find(item => item.id === currentEditingId);
+        if (!entry) {
+          showToast('Nao foi possivel localizar a despesa para fechamento.');
+          return;
+        }
+        const orderId = document.getElementById('finance-close-order-id').value;
+        const dataVencimento = document.getElementById('finance-close-data-vencimento').value;
+        const nf = document.getElementById('finance-close-nf').value.trim();
+        const total = Number(document.getElementById('finance-close-total').value || 0);
+        const discount = Number(document.getElementById('finance-close-discount').value || 0);
+        const observacoes = document.getElementById('finance-close-observacoes').value.trim();
+        const linkedOrder = orderId ? allOrders.find(item => item.id === orderId) : null;
+        if (linkedOrder && linkedOrder.status === 'fechada') {
+          showToast('Nao e permitido alocar em OS fechada.');
+          return;
+        }
+
+        const workflowStatus = orderId ? 'distribuido' : 'pendente_os';
+        allFinanceEntries = allFinanceEntries.map(item => item.id === currentEditingId
+          ? {
+              ...item,
+              orderId: orderId || '',
+              dataVencimento,
+              nf,
+              total,
+              discount,
+              observacoes,
+              workflowStatus,
+              closedExpense: true
+            }
+          : item
+        );
+        saveToLocalStorage();
+        renderAll();
+        closeCadastroModal();
+        showToast(orderId ? 'Despesa fechada e distribuida com sucesso.' : 'Despesa fechada, mas pendente de alocacao em OS.');
+        return;
       }
     });
 
@@ -3226,12 +3910,14 @@ let allVehicles = [];
       const node = document.getElementById(id);
       if (node) node.addEventListener(id === 'order-filter-number' ? 'input' : 'change', renderOrders);
     });
-    ['finance-filter-supplier', 'finance-filter-nf', 'finance-filter-os'].forEach(id => {
+    ['finance-filter-supplier', 'finance-filter-value'].forEach(id => {
       const node = document.getElementById(id);
       if (node) node.addEventListener('input', renderFinance);
     });
-    const financeDateFilter = document.getElementById('finance-filter-date');
-    if (financeDateFilter) financeDateFilter.addEventListener('change', renderFinance);
+    ['finance-filter-status', 'finance-filter-vehicle', 'finance-filter-date'].forEach(id => {
+      const node = document.getElementById(id);
+      if (node) node.addEventListener('change', renderFinance);
+    });
     ['report-filter-start', 'report-filter-end'].forEach(id => {
       const node = document.getElementById(id);
       if (node) node.addEventListener('change', renderReports);
