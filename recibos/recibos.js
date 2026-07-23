@@ -1,7 +1,7 @@
-    // Variável global para controlar o zoom
+    // VariÃ¡vel global para controlar o zoom
     let zoomAtual = 100;
 
-    // Função para aumentar zoom
+    // FunÃ§Ã£o para aumentar zoom
     function aumentarZoom() {
       if (zoomAtual < 200) {
         zoomAtual += 10;
@@ -9,7 +9,7 @@
       }
     }
 
-    // Função para diminuir zoom
+    // FunÃ§Ã£o para diminuir zoom
     function diminuirZoom() {
       if (zoomAtual > 50) {
         zoomAtual -= 10;
@@ -17,7 +17,7 @@
       }
     }
 
-    // Função para aplicar zoom
+    // FunÃ§Ã£o para aplicar zoom
     function aplicarZoom() {
       const escala = zoomAtual / 100;
       
@@ -29,10 +29,10 @@
         recibo.style.marginBottom = `${40 * escala}px`;
       });
       
-      // Mostrar toast com o nível de zoom
+      // Mostrar toast com o nÃ­vel de zoom
       mostrarToastZoom();
       
-      // Salvar preferência
+      // Salvar preferÃªncia
       localStorage.setItem('zoomRecibos', zoomAtual);
     }
 
@@ -63,7 +63,7 @@
       }, duracao);
     }
 
-    // Função para mostrar toast de zoom
+    // FunÃ§Ã£o para mostrar toast de zoom
     function mostrarToastZoom() {
       mostrarToastGlobal(`Zoom: ${zoomAtual}%`, 'info', '↔', 1800);
     }
@@ -77,7 +77,7 @@
       }
     });
 
-    // Função para selecionar todos os recibos
+    // FunÃ§Ã£o para selecionar todos os recibos
     function selecionarTodos() {
       const checkboxes = document.querySelectorAll('.checkbox-recibo');
       const todosEstaoSelecionados = Array.from(checkboxes).every(cb => cb.checked);
@@ -94,7 +94,7 @@
       });
     }
 
-    // Função para alternar seleção de recibo
+    // FunÃ§Ã£o para alternar seleÃ§Ã£o de recibo
     function toggleSelecaoRecibo(checkbox) {
       const recibo = checkbox.closest('.recibo');
       if (checkbox.checked) {
@@ -104,7 +104,7 @@
       }
     }
 
-    // Função para abrir popup de confirmação de exclusão
+    // FunÃ§Ã£o para abrir popup de confirmaÃ§Ã£o de exclusÃ£o
     function abrirConfirmacaoExclusao() {
       const selecionados = document.querySelectorAll('.recibo.selecionado');
       if (selecionados.length === 0) {
@@ -113,17 +113,17 @@
       }
       
       const texto = document.getElementById('texto-confirmacao-exclusao');
-      texto.textContent = `Tem certeza que deseja excluir ${selecionados.length} recibo(s) selecionado(s)? Esta ação não poderá ser desfeita.`;
+      texto.textContent = `Tem certeza que deseja excluir ${selecionados.length} recibo(s) selecionado(s)? Esta aÃ§Ã£o nÃ£o poderÃ¡ ser desfeita.`;
       
       document.getElementById('popup-confirmacao').classList.remove('hidden');
     }
 
-    // Função para fechar popup de confirmação
+    // FunÃ§Ã£o para fechar popup de confirmaÃ§Ã£o
     function fecharConfirmacao() {
       document.getElementById('popup-confirmacao').classList.add('hidden');
     }
 
-    // Função para confirmar exclusão
+    // FunÃ§Ã£o para confirmar exclusÃ£o
     function ehReciboPrincipal(recibo) {
       if (!recibo) return false;
       return recibo.id === 'recibo' || recibo.id === 'recibo-completo' || recibo.id === 'recibo-simplificado' || recibo.id === 'recibo-covre';
@@ -230,7 +230,7 @@
       }
     }
 
-    // Função para mostrar toast de exclusão
+    // FunÃ§Ã£o para mostrar toast de exclusÃ£o
     function mostrarToastExclusao() {
       mostrarToastGlobal('Recibos excluídos com sucesso!', 'success', '✓', 2600);
     }
@@ -269,9 +269,9 @@
       return incrementarNumeroSequencial(ultimoValor);
     }
 
-    // Função para adicionar recibo vazio
+    // FunÃ§Ã£o para adicionar recibo vazio
     function adicionarReciboVazio() {
-      // Verificar se os recibos principais estão visíveis
+      // Verificar se os recibos principais estÃ£o visÃ­veis
       const reciboPadrao = document.getElementById('recibo');
       const reciboCompleto = document.getElementById('recibo-completo');
       const reciboSimplificado = document.getElementById('recibo-simplificado');
@@ -281,7 +281,7 @@
                                   (reciboSimplificado && reciboSimplificado.style.display !== 'none') ||
                                   (reciboCovre && reciboCovre.style.display !== 'none');
       
-      // Se não há recibo principal visível, mostrar o recibo do modelo atual
+      // Se nÃ£o hÃ¡ recibo principal visÃ­vel, mostrar o recibo do modelo atual
       if (!algumReciboVisivel) {
         mostrarReciboPrincipal();
         return;
@@ -358,7 +358,7 @@
       }, 100);
     }
 
-    // Função para sair da aplicação
+    // FunÃ§Ã£o para sair da aplicaÃ§Ã£o
     function sairAplicacao() {
       window.location.href = 'https://gaveblue.com.br/';
     }
@@ -372,12 +372,12 @@
     const mobileSearchModalEl = document.getElementById('mobile-search-modal');
     const searchFocusOverlayEl = document.getElementById('search-focus-overlay');
     const ecosystemModules = [
-      { name: 'WeTime', description: 'Relógio online e painel de horário', url: 'https://gaveblue.com.br/wetime' },
+      { name: 'WeTime', description: 'RelÃ³gio online e painel de horÃ¡rio', url: 'https://gaveblue.com.br/wetime' },
       { name: 'WeRecibos', description: 'Gerador de recibos', url: 'https://gaveblue.com.br/recibos' },
       { name: 'WeConsultas', description: 'Consultas empresariais', url: 'https://gaveblue.com.br/weconsultas' },
-      { name: 'WeFrotas', description: 'Gestão de frotas', url: 'https://gaveblue.com.br/wefrotas' },
+      { name: 'WeFrotas', description: 'GestÃ£o de frotas', url: 'https://gaveblue.com.br/wefrotas' },
       { name: 'WeDevs', description: 'Ferramentas e utilidades dev', url: 'https://gaveblue.com.br/wedevs' },
-      { name: 'WeTasks', description: 'Tarefas e organização', url: 'https://gaveblue.com.br/wetasks' }
+      { name: 'WeTasks', description: 'Tarefas e organizaÃ§Ã£o', url: 'https://gaveblue.com.br/wetasks' }
     ];
     let filteredModules = [];
     let highlightedModuleIndex = -1;
@@ -436,7 +436,7 @@
       highlightedModuleIndex = modules.length ? 0 : -1;
 
       if (!modules.length) {
-        resultsEl.innerHTML = '<div class="global-search-empty">Nenhum módulo encontrado.</div>';
+        resultsEl.innerHTML = '<div class="global-search-empty">Nenhum mÃ³dulo encontrado.</div>';
         resultsEl.classList.remove('hidden');
         searchFocusOverlayEl.classList.remove('hidden');
         return;
@@ -618,11 +618,11 @@
     }
 
 
-    // Função para processar data de forma inteligente
+    // FunÃ§Ã£o para processar data de forma inteligente
     function processarDataInteligente(valorData) {
       if (!valorData) return obterDataFormatada();
       
-      const meses = ['JANEIRO', 'FEVEREIRO', 'MARÇO', 'ABRIL', 'MAIO', 'JUNHO', 'JULHO', 'AGOSTO', 'SETEMBRO', 'OUTUBRO', 'NOVEMBRO', 'DEZEMBRO'];
+      const meses = ['JANEIRO', 'FEVEREIRO', 'MARÃ‡O', 'ABRIL', 'MAIO', 'JUNHO', 'JULHO', 'AGOSTO', 'SETEMBRO', 'OUTUBRO', 'NOVEMBRO', 'DEZEMBRO'];
       
       if (typeof valorData === 'number') {
         const dataExcel = XLSX.SSF.parse_date_code(valorData);
@@ -671,7 +671,7 @@
       return obterDataFormatada();
     }
 
-    // Função para processar valor monetário de forma inteligente
+    // FunÃ§Ã£o para processar valor monetÃ¡rio de forma inteligente
     function processarValorInteligente(valorMonetario) {
       if (!valorMonetario) return '';
       
@@ -726,7 +726,7 @@
       return 'R$ ' + valorNumerico.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
 
-    // Variável global para controlar o modelo atual
+    // VariÃ¡vel global para controlar o modelo atual
     let modeloAtual = 'padrao';
 
     function atualizarAssinaturaCompleta() {
@@ -739,7 +739,7 @@
       if (assinaturaCpf) assinaturaCpf.textContent = cpfcnpj ? cpfcnpj.value : '';
     }
 
-    // Função auxiliar para mostrar recibo principal
+    // FunÃ§Ã£o auxiliar para mostrar recibo principal
     function mostrarReciboPrincipal() {
       const reciboPadrao = document.getElementById('recibo');
       const reciboCompleto = document.getElementById('recibo-completo');
@@ -748,7 +748,7 @@
       
       // Debug: Verificar se elementos existem
       if (!reciboPadrao || !reciboCompleto || !reciboSimplificado || !reciboCovre) {
-        console.warn('Um ou mais elementos de recibo não foram encontrados');
+        console.warn('Um ou mais elementos de recibo nÃ£o foram encontrados');
       }
       
       if (modeloAtual === 'completo') {
@@ -773,7 +773,7 @@
         reciboCovre.style.display = 'none';
       }
       
-      // Rolar até o recibo principal
+      // Rolar atÃ© o recibo principal
       const reciboVisivel = modeloAtual === 'completo'
         ? reciboCompleto
         : (modeloAtual === 'simplificado' ? reciboSimplificado : (modeloAtual === 'covre' ? reciboCovre : reciboPadrao));
@@ -782,14 +782,14 @@
       }, 100);
     }
 
-    // Função para alternar entre modelos
+    // FunÃ§Ã£o para alternar entre modelos
     function alternarModelo() {
       const reciboPadrao = document.getElementById('recibo');
       const reciboCompleto = document.getElementById('recibo-completo');
       const reciboSimplificado = document.getElementById('recibo-simplificado');
       const reciboCovre = document.getElementById('recibo-covre');
       
-      // Ciclar entre os quatro modelos: padrão → completo → simplificado → trainer → padrão
+      // Ciclar entre os quatro modelos: padrÃ£o â†’ completo â†’ simplificado â†’ trainer â†’ padrÃ£o
       if (modeloAtual === 'padrao') {
         modeloAtual = 'completo';
         reciboPadrao.style.display = 'none';
@@ -830,12 +830,12 @@
       }, 100);
     }
 
-    // Função para mostrar toast de alternância de modelo
+    // FunÃ§Ã£o para mostrar toast de alternÃ¢ncia de modelo
     function mostrarToastAlternancia(mensagem) {
       mostrarToastGlobal(mensagem, 'info', '↺', 2000);
     }
 
-    // Carregar preferência do modelo ao iniciar
+    // Carregar preferÃªncia do modelo ao iniciar
     window.addEventListener('DOMContentLoaded', function() {
       const modeloSalvo = localStorage.getItem('modeloRecibo');
       const reciboPadrao = document.getElementById('recibo');
@@ -843,7 +843,7 @@
       const reciboSimplificado = document.getElementById('recibo-simplificado');
       const reciboCovre = document.getElementById('recibo-covre');
       
-      // Sempre começar com modelo padrão como padrão
+      // Sempre comeÃ§ar com modelo padrÃ£o como padrÃ£o
       reciboPadrao.style.display = 'block';
       reciboCompleto.style.display = 'none';
       reciboSimplificado.style.display = 'none';
@@ -895,7 +895,7 @@
       }
     }
 
-    // Função para alternar visibilidade do rodapé
+    // FunÃ§Ã£o para alternar visibilidade do rodapÃ©
     function toggleFooter() {
       const footer = document.querySelector('.botoes');
       if (!footer) return;
@@ -906,7 +906,7 @@
       localStorage.setItem('footerHidden', isHidden ? 'true' : 'false');
     }
 
-    // Carregar preferência do rodapé ao iniciar
+    // Carregar preferÃªncia do rodapÃ© ao iniciar
     window.addEventListener('DOMContentLoaded', function() {
       const footerHidden = localStorage.getItem('footerHidden') === 'true';
       const footer = document.querySelector('.botoes');
@@ -922,52 +922,52 @@
       document.getElementById('popup-notificacoes').classList.remove('hidden');
     }
 
-    // Função para fechar central de notificações
+    // FunÃ§Ã£o para fechar central de notificaÃ§Ãµes
     function fecharNotificacoes() {
       document.getElementById('popup-notificacoes').classList.add('hidden');
     }
 
-    // Notificações pré-definidas
+    // NotificaÃ§Ãµes prÃ©-definidas
     const notificacoesPadrao = [
       {
         id: 1,
         titulo: 'Novo recurso: Salvar recibos',
-        descricao: 'Agora você pode salvar seus recibos no histórico com um único clique. Use o botão "Salvar Recibo" na barra de ferramentas para manter seus recibos organizados.',
-        icone: '💾'
+        descricao: 'Agora vocÃª pode salvar seus recibos no histÃ³rico com um Ãºnico clique. Use o botÃ£o "Salvar Recibo" na barra de ferramentas para manter seus recibos organizados.',
+        icone: 'ðŸ’¾'
       },
       {
         id: 2,
-        titulo: 'Histórico de recibos',
-        descricao: 'Acompanhe todos os recibos que você criou. Clique no botão de histórico para visualizar, editar ou restaurar recibos antigos.'
+        titulo: 'HistÃ³rico de recibos',
+        descricao: 'Acompanhe todos os recibos que vocÃª criou. Clique no botÃ£o de histÃ³rico para visualizar, editar ou restaurar recibos antigos.'
       },
       {
         id: 3,
         titulo: 'Download de modelos de planilhas',
-        descricao: 'Baixe modelos prontos para importar múltiplos recibos de uma vez. Disponível em duas versões: Padrão (completo) e Simplificado (básico).'
+        descricao: 'Baixe modelos prontos para importar mÃºltiplos recibos de uma vez. DisponÃ­vel em duas versÃµes: PadrÃ£o (completo) e Simplificado (bÃ¡sico).'
       },
       {
         id: 4,
-        titulo: 'Importação em massa',
-        descricao: 'Importe vários recibos de uma vez usando planilhas Excel. Basta preparar seus dados no formato correto e clicar em "Importar Dados".'
+        titulo: 'ImportaÃ§Ã£o em massa',
+        descricao: 'Importe vÃ¡rios recibos de uma vez usando planilhas Excel. Basta preparar seus dados no formato correto e clicar em "Importar Dados".'
       },
       {
         id: 5,
-        titulo: 'Novo modelo Trainer disponível',
-        descricao: 'Novo modelo de recibo Trainer disponível na barra de ferramentas para alternância rápida entre os formatos.'
+        titulo: 'Novo modelo Trainer disponÃ­vel',
+        descricao: 'Novo modelo de recibo Trainer disponÃ­vel na barra de ferramentas para alternÃ¢ncia rÃ¡pida entre os formatos.'
       },
       {
         id: 6,
-        titulo: 'Personalizações ampliadas',
-        descricao: 'Gerencie seus emitentes e recebedores! Salve informações frequentemente usadas para agilizar o preenchimento de recibos futuros.'
+        titulo: 'PersonalizaÃ§Ãµes ampliadas',
+        descricao: 'Gerencie seus emitentes e recebedores! Salve informaÃ§Ãµes frequentemente usadas para agilizar o preenchimento de recibos futuros.'
       }
     ];
 
-    // Função para inicializar notificações
+    // FunÃ§Ã£o para inicializar notificaÃ§Ãµes
     function inicializarNotificacoes() {
       const notificacoesLidas = JSON.parse(localStorage.getItem('notificacoes-lidas') || '[]');
       const notificacoes = JSON.parse(localStorage.getItem('notificacoes') || JSON.stringify(notificacoesPadrao));
       
-      // Se não houver notificações salvas, usar as padrão
+      // Se nÃ£o houver notificaÃ§Ãµes salvas, usar as padrÃ£o
       if (!localStorage.getItem('notificacoes')) {
         localStorage.setItem('notificacoes', JSON.stringify(notificacoesPadrao));
       }
@@ -975,7 +975,7 @@
       atualizarBadgeNotificacoes();
     }
 
-    // Função para carregar notificações
+    // FunÃ§Ã£o para carregar notificaÃ§Ãµes
     function carregarNotificacoes() {
       const notificacoes = JSON.parse(localStorage.getItem('notificacoes') || JSON.stringify(notificacoesPadrao));
       const notificacoesLidas = JSON.parse(localStorage.getItem('notificacoes-lidas') || '[]');
@@ -983,7 +983,7 @@
       container.innerHTML = '';
 
       if (notificacoes.length === 0) {
-      container.innerHTML = '<div style="text-align: center; padding: 40px 20px; color: #6b7280;">Todas as notificações foram lidas!</div>';
+      container.innerHTML = '<div style="text-align: center; padding: 40px 20px; color: #6b7280;">Todas as notificaÃ§Ãµes foram lidas!</div>';
         return;
       }
 
@@ -995,8 +995,8 @@
         
         item.innerHTML = `
           <p class="notificacao-titulo">
-            ${notificacao.icone || '📢'} ${notificacao.titulo}
-            ${estaLida ? '<span class="notificacao-badge-lida">✓ Lida</span>' : ''}
+            ${notificacao.icone || 'ðŸ“¢'} ${notificacao.titulo}
+            ${estaLida ? '<span class="notificacao-badge-lida">âœ“ Lida</span>' : ''}
           </p>
           <p class="notificacao-descricao">${notificacao.descricao}</p>
         `;
@@ -1005,7 +1005,7 @@
       });
     }
 
-    // Função para marcar notificação como lida
+    // FunÃ§Ã£o para marcar notificaÃ§Ã£o como lida
     function marcarComoLida(notificacaoId) {
       let notificacoesLidas = JSON.parse(localStorage.getItem('notificacoes-lidas') || '[]');
       
@@ -1018,7 +1018,7 @@
       }
     }
 
-    // Função para marcar todas como lidas
+    // FunÃ§Ã£o para marcar todas como lidas
     function marcarTodasLidas() {
       const notificacoes = JSON.parse(localStorage.getItem('notificacoes') || JSON.stringify(notificacoesPadrao));
       const todasLidas = notificacoes.map(n => n.id);
@@ -1026,10 +1026,10 @@
       
       carregarNotificacoes();
       atualizarBadgeNotificacoes();
-      mostrarMensagem('Todas as notificações foram marcadas como lidas!', 'sucesso');
+      mostrarMensagem('Todas as notificaÃ§Ãµes foram marcadas como lidas!', 'sucesso');
     }
 
-    // Função para atualizar badge de notificações
+    // FunÃ§Ã£o para atualizar badge de notificaÃ§Ãµes
     function atualizarBadgeNotificacoes() {
       const notificacoes = JSON.parse(localStorage.getItem('notificacoes') || JSON.stringify(notificacoesPadrao));
       const notificacoesLidas = JSON.parse(localStorage.getItem('notificacoes-lidas') || '[]');
@@ -1046,7 +1046,7 @@
       }
     }
 
-    // Inicializar notificações ao carregar
+    // Inicializar notificaÃ§Ãµes ao carregar
     window.addEventListener('DOMContentLoaded', function() {
       inicializarNotificacoes();
     });
@@ -1055,7 +1055,7 @@
       document.getElementById('popup-ajuda').classList.remove('hidden');
     }
 
-    // Função para fechar ajuda
+    // FunÃ§Ã£o para fechar ajuda
     function fecharAjuda() {
       document.getElementById('popup-ajuda').classList.add('hidden');
     }
@@ -1069,27 +1069,27 @@
       document.getElementById('popup-emitentes').classList.remove('hidden');
     }
 
-    // Função para fechar gerenciador de emitentes
+    // FunÃ§Ã£o para fechar gerenciador de emitentes
     function fecharEmitentes() {
       document.getElementById('popup-emitentes').classList.add('hidden');
       document.getElementById('novo-emitente-nome').value = '';
       document.getElementById('novo-emitente-cpf').value = '';
     }
 
-    // Função para abrir gerenciador de recebedores
+    // FunÃ§Ã£o para abrir gerenciador de recebedores
     function abrirRecebedores() {
       carregarRecebedores();
       document.getElementById('popup-recebedores').classList.remove('hidden');
     }
 
-    // Função para fechar gerenciador de recebedores
+    // FunÃ§Ã£o para fechar gerenciador de recebedores
     function fecharRecebedores() {
       document.getElementById('popup-recebedores').classList.add('hidden');
       document.getElementById('novo-recebedor-nome').value = '';
       document.getElementById('novo-recebedor-cpf').value = '';
     }
 
-    // Função para adicionar recebedor
+    // FunÃ§Ã£o para adicionar recebedor
     function adicionarRecebedor() {
       const nome = document.getElementById('novo-recebedor-nome').value.trim();
       const cpf = document.getElementById('novo-recebedor-cpf').value.trim();
@@ -1102,7 +1102,7 @@
       let recebedores = JSON.parse(localStorage.getItem('recebedores') || '[]');
       
       if (recebedores.some(r => r.cpf === cpf)) {
-        mostrarMensagem('Recebedor com este CPF/CNPJ já existe!', 'erro');
+        mostrarMensagem('Recebedor com este CPF/CNPJ jÃ¡ existe!', 'erro');
         return;
       }
 
@@ -1115,7 +1115,7 @@
       mostrarMensagem('Recebedor adicionado com sucesso!', 'sucesso');
     }
 
-    // Função para carregar recebedores
+    // FunÃ§Ã£o para carregar recebedores
     function carregarRecebedores() {
       const recebedores = JSON.parse(localStorage.getItem('recebedores') || '[]');
       const container = document.getElementById('lista-recebedores');
@@ -1143,7 +1143,7 @@
       });
     }
 
-    // Função para usar recebedor
+    // FunÃ§Ã£o para usar recebedor
     function usarRecebedor(id) {
       const recebedores = JSON.parse(localStorage.getItem('recebedores') || '[]');
       const recebedor = recebedores.find(r => r.id == id);
@@ -1156,9 +1156,9 @@
         const nomeInput = reciboMoyses.querySelector('.nome');
         if (nomeInput) nomeInput.value = recebedor.nome;
       } else {
-        // Formatar como "RAZAO SOCIAL, inscrita(a) sob o CPF/CNPJ nº 123..."
+        // Formatar como "RAZAO SOCIAL, inscrita(a) sob o CPF/CNPJ nÂº 123..."
         const cpfFormatado = formatarCpfCnpj2(recebedor.cpf);
-        const linhaFormatada = `${recebedor.nome}, inscrita(a) sob o CPF/CNPJ nº ${cpfFormatado}`;
+        const linhaFormatada = `${recebedor.nome}, inscrita(a) sob o CPF/CNPJ nÂº ${cpfFormatado}`;
         document.getElementById('recebedor').value = linhaFormatada;
       }
 
@@ -1166,7 +1166,7 @@
       mostrarMensagem('Recebedor carregado!', 'sucesso');
     }
 
-    // Função para deletar recebedor
+    // FunÃ§Ã£o para deletar recebedor
     function deletarRecebedor(id) {
       let recebedores = JSON.parse(localStorage.getItem('recebedores') || '[]');
       recebedores = recebedores.filter(r => r.id != id);
@@ -1175,7 +1175,7 @@
       mostrarMensagem('Recebedor deletado!', 'sucesso');
     }
 
-    // Função auxiliar para formatar CPF/CNPJ sem modificar o input
+    // FunÃ§Ã£o auxiliar para formatar CPF/CNPJ sem modificar o input
     function formatarCpfCnpj2(valor) {
       let cpf = valor.replace(/\D/g, '');
       cpf = cpf.substring(0, 14);
@@ -1194,7 +1194,7 @@
       return cpf;
     }
 
-    // Função para mostrar sugestões de emitente
+    // FunÃ§Ã£o para mostrar sugestÃµes de emitente
     function mostrarSugestoesEmitente(input) {
       const valor = input.value.toLowerCase().trim();
       const container = document.getElementById('sugestoes-emitente');
@@ -1228,7 +1228,7 @@
       container.style.display = 'block';
     }
 
-    // Função para selecionar emitente da sugestão
+    // FunÃ§Ã£o para selecionar emitente da sugestÃ£o
     function selecionarEmitenteSugestao(emitente) {
       document.getElementById('emitente').value = emitente.nome;
       document.getElementById('cpfcnpj').value = emitente.cpf;
@@ -1236,7 +1236,7 @@
       document.getElementById('sugestoes-emitente').style.display = 'none';
     }
 
-    // Função para mostrar sugestões de recebedor
+    // FunÃ§Ã£o para mostrar sugestÃµes de recebedor
     function mostrarSugestoesRecebedor(input) {
       const valor = input.value.toLowerCase().trim();
       const container = document.getElementById('sugestoes-recebedor');
@@ -1270,15 +1270,15 @@
       container.style.display = 'block';
     }
 
-    // Função para selecionar recebedor da sugestão
+    // FunÃ§Ã£o para selecionar recebedor da sugestÃ£o
     function selecionarRecebedorSugestao(recebedor) {
       const cpfFormatado = formatarCpfCnpj2(recebedor.cpf);
-      const linhaFormatada = `${recebedor.nome}, inscrita(a) sob o CPF/CNPJ nº ${cpfFormatado}`;
+      const linhaFormatada = `${recebedor.nome}, inscrita(a) sob o CPF/CNPJ nÂº ${cpfFormatado}`;
       document.getElementById('recebedor').value = linhaFormatada;
       document.getElementById('sugestoes-recebedor').style.display = 'none';
     }
 
-    // Configurar eventos para sugestões ao carregar página
+    // Configurar eventos para sugestÃµes ao carregar pÃ¡gina
     window.addEventListener('DOMContentLoaded', function() {
       const emitenteInput = document.getElementById('emitente');
       const recebedorInput = document.getElementById('recebedor');
@@ -1316,7 +1316,7 @@
       }
     });
 
-    // Função para adicionar emitente
+    // FunÃ§Ã£o para adicionar emitente
     function adicionarEmitente() {
       const nome = document.getElementById('novo-emitente-nome').value.trim();
       const cpf = document.getElementById('novo-emitente-cpf').value.trim();
@@ -1329,7 +1329,7 @@
       let emitentes = JSON.parse(localStorage.getItem('emitentes') || '[]');
       
       if (emitentes.some(e => e.cpf === cpf)) {
-        mostrarMensagem('Emitente com este CPF/CNPJ já existe!', 'erro');
+        mostrarMensagem('Emitente com este CPF/CNPJ jÃ¡ existe!', 'erro');
         return;
       }
 
@@ -1342,7 +1342,7 @@
       mostrarMensagem('Emitente adicionado com sucesso!', 'sucesso');
     }
 
-    // Função para carregar emitentes
+    // FunÃ§Ã£o para carregar emitentes
     function carregarEmitentes() {
       const emitentes = JSON.parse(localStorage.getItem('emitentes') || '[]');
       const container = document.getElementById('lista-emitentes');
@@ -1370,7 +1370,7 @@
       });
     }
 
-    // Função para usar emitente
+    // FunÃ§Ã£o para usar emitente
     function usarEmitente(id) {
       const emitentes = JSON.parse(localStorage.getItem('emitentes') || '[]');
       const emitente = emitentes.find(e => e.id == id);
@@ -1396,7 +1396,7 @@
       mostrarMensagem('Emitente carregado!', 'sucesso');
     }
 
-    // Função para deletar emitente
+    // FunÃ§Ã£o para deletar emitente
     function deletarEmitente(id) {
       let emitentes = JSON.parse(localStorage.getItem('emitentes') || '[]');
       emitentes = emitentes.filter(e => e.id != id);
@@ -1405,18 +1405,18 @@
       mostrarMensagem('Emitente deletado!', 'sucesso');
     }
 
-    // Função para abrir histórico
+    // FunÃ§Ã£o para abrir histÃ³rico
     function abrirHistorico() {
       carregarHistorico();
       document.getElementById('popup-historico').classList.remove('hidden');
     }
 
-    // Função para fechar histórico
+    // FunÃ§Ã£o para fechar histÃ³rico
     function fecharHistorico() {
       document.getElementById('popup-historico').classList.add('hidden');
     }
 
-    // Função para salvar recibo no histórico
+    // FunÃ§Ã£o para salvar recibo no histÃ³rico
     function salvarNoHistorico(dados) {
       let historico = JSON.parse(localStorage.getItem('historico-recibos') || '[]');
       
@@ -1435,14 +1435,14 @@
       localStorage.setItem('historico-recibos', JSON.stringify(historico));
     }
 
-    // Função para carregar histórico
+    // FunÃ§Ã£o para carregar histÃ³rico
     function carregarHistorico() {
       const historico = JSON.parse(localStorage.getItem('historico-recibos') || '[]');
       const container = document.getElementById('lista-historico');
       container.innerHTML = '';
 
       if (historico.length === 0) {
-        container.innerHTML = '<div style="text-align: center; padding: 40px 20px; color: #6b7280;">Nenhum recibo no histórico</div>';
+        container.innerHTML = '<div style="text-align: center; padding: 40px 20px; color: #6b7280;">Nenhum recibo no histÃ³rico</div>';
         return;
       }
 
@@ -1464,7 +1464,7 @@
       });
     }
 
-    // Função para visualizar recibos do histórico
+    // FunÃ§Ã£o para visualizar recibos do histÃ³rico
     function visualizarRecibosHistorico(id) {
       const historico = JSON.parse(localStorage.getItem('historico-recibos') || '[]');
       const item = historico.find(h => h.id == id);
@@ -1543,28 +1543,28 @@
       document.getElementById('recibos-gerados').appendChild(novoRecibo);
       atualizarContador();
       
-      mostrarMensagem('Recibo restaurado do histórico!', 'sucesso');
+      mostrarMensagem('Recibo restaurado do histÃ³rico!', 'sucesso');
     }
 
-    // Função para deletar recibo do histórico
+    // FunÃ§Ã£o para deletar recibo do histÃ³rico
     function deletarRecibosHistorico(id) {
       let historico = JSON.parse(localStorage.getItem('historico-recibos') || '[]');
       historico = historico.filter(h => h.id != id);
       localStorage.setItem('historico-recibos', JSON.stringify(historico));
       carregarHistorico();
-      mostrarMensagem('Recibo deletado do histórico!', 'sucesso');
+      mostrarMensagem('Recibo deletado do histÃ³rico!', 'sucesso');
     }
 
-    // Função para limpar histórico completo
+    // FunÃ§Ã£o para limpar histÃ³rico completo
     function limparHistorico() {
-      if (confirm('Tem certeza que deseja limpar todo o histórico? Esta ação não poderá ser desfeita.')) {
+      if (confirm('Tem certeza que deseja limpar todo o histÃ³rico? Esta aÃ§Ã£o nÃ£o poderÃ¡ ser desfeita.')) {
         localStorage.removeItem('historico-recibos');
         carregarHistorico();
-        mostrarMensagem('Histórico limpo!', 'sucesso');
+        mostrarMensagem('HistÃ³rico limpo!', 'sucesso');
       }
     }
 
-    // Função para salvar recibo atual no histórico
+    // FunÃ§Ã£o para salvar recibo atual no histÃ³rico
     function salvarRecibosAtual() {
       const reciboPadrao = document.getElementById('recibo');
       const reciboCompleto = document.getElementById('recibo-completo');
@@ -1600,7 +1600,7 @@
         const quantia = document.getElementById('campoQuantia-completo').value;
 
         if (!valor && !recebedor && !emitente && !numeroRecibo) {
-          mostrarMensagem('Preencha pelo menos número, valor, recebedor ou emitente!', 'erro');
+          mostrarMensagem('Preencha pelo menos nÃºmero, valor, recebedor ou emitente!', 'erro');
           return;
         }
 
@@ -1648,7 +1648,7 @@
 
       salvarNoHistorico(dadosRecibo);
       
-      // Limpar campos após salvar
+      // Limpar campos apÃ³s salvar
       if (modeloAtual === 'simplificado') {
         document.getElementById('valor-simples').value = '';
         document.getElementById('nome-principal').value = '';
@@ -1670,17 +1670,17 @@
         document.getElementById('assinaturaCpf').textContent = '';
       }
 
-      mostrarMensagem('Recibo salvo no histórico!', 'sucesso');
+      mostrarMensagem('Recibo salvo no histÃ³rico!', 'sucesso');
     }
 
-    // Função para baixar modelo de planilha padrão
+    // FunÃ§Ã£o para baixar modelo de planilha padrÃ£o
     function baixarModeloPadrao() {
       mostrarToastGlobal('Download do modelo padrão iniciado!', 'info', '↓', 2400);
       
       const dados = [
         ['Valor', 'Recebedor', 'Referencia', 'Descricao', 'Emitente', 'CPFCNPJ', 'Data'],
-        ['R$ 1.500,00', 'João Silva', 'Serviços de consultoria', 'Projeto X - Fase 1', 'Maria Santos', '123.456.789-00', '15/01/2024'],
-        ['R$ 2.300,00', 'Pedro Costa', 'Manutenção predial', 'Reparo hidráulico', 'José Oliveira', '987.654.321-00', '20/01/2024']
+        ['R$ 1.500,00', 'JoÃ£o Silva', 'ServiÃ§os de consultoria', 'Projeto X - Fase 1', 'Maria Santos', '123.456.789-00', '15/01/2024'],
+        ['R$ 2.300,00', 'Pedro Costa', 'ManutenÃ§Ã£o predial', 'Reparo hidrÃ¡ulico', 'JosÃ© Oliveira', '987.654.321-00', '20/01/2024']
       ];
 
       const wb = XLSX.utils.book_new();
@@ -1700,14 +1700,14 @@
       XLSX.writeFile(wb, 'modelo_recibos_padrao.xlsx');
     }
 
-    // Função para baixar modelo de planilha completo
+    // FunÃ§Ã£o para baixar modelo de planilha completo
     function baixarModeloCompleto() {
       mostrarToastGlobal('Download do modelo completo iniciado!', 'info', '↓', 2400);
 
       const dados = [
         ['NumeroRecibo', 'Valor', 'Recebedor', 'Referencia', 'Descricao', 'Emitente', 'CPFCNPJ', 'Data'],
-        ['0001', 'R$ 1.500,00', 'João Silva', 'Serviços de consultoria', 'Projeto X - Fase 1', 'Maria Santos', '123.456.789-00', '15/01/2024'],
-        ['0002', 'R$ 2.300,00', 'Pedro Costa', 'Manutenção predial', 'Reparo hidráulico', 'José Oliveira', '987.654.321-00', '20/01/2024']
+        ['0001', 'R$ 1.500,00', 'JoÃ£o Silva', 'ServiÃ§os de consultoria', 'Projeto X - Fase 1', 'Maria Santos', '123.456.789-00', '15/01/2024'],
+        ['0002', 'R$ 2.300,00', 'Pedro Costa', 'ManutenÃ§Ã£o predial', 'Reparo hidrÃ¡ulico', 'JosÃ© Oliveira', '987.654.321-00', '20/01/2024']
       ];
 
       const wb = XLSX.utils.book_new();
@@ -1728,7 +1728,7 @@
       XLSX.writeFile(wb, 'modelo_recibos_completo.xlsx');
     }
 
-    // Função para baixar modelo de planilha simplificado
+    // FunÃ§Ã£o para baixar modelo de planilha simplificado
     function baixarModeloSimplificado() {
       mostrarToastGlobal('Download do modelo simplificado iniciado!', 'info', '↓', 2400);
       
@@ -1752,12 +1752,12 @@
       XLSX.writeFile(wb, 'modelo_recibos_simplificado.xlsx');
     }
 
-    // Manter compatibilidade com nome antigo da função
+    // Manter compatibilidade com nome antigo da funÃ§Ã£o
     function baixarModeloPlanilha() {
       baixarModeloPadrao();
     }
 
-    // Função para atualizar contador
+    // FunÃ§Ã£o para atualizar contador
     function atualizarContador() {
       const recibosGerados = document.querySelectorAll('#recibos-gerados .recibo');
       const total = recibosGerados.length;
@@ -1776,18 +1776,18 @@
       }
     }
 
-    // Função para mostrar toast
+    // FunÃ§Ã£o para mostrar toast
     function mostrarToast() {
       mostrarToastGlobal('Recibos importados com sucesso!', 'success', '✓', 2600);
     }
 
-    // Função auxiliar para mostrar mensagens
+    // FunÃ§Ã£o auxiliar para mostrar mensagens
     function mostrarMensagem(texto, tipo) {
       const ehErro = tipo === 'erro';
       mostrarToastGlobal(texto, ehErro ? 'error' : 'success', ehErro ? '!' : '✓', 2600);
     }
 
-    // Função para converter número para extenso
+    // FunÃ§Ã£o para converter nÃºmero para extenso
     function numeroParaExtenso(valor) {
       if (!valor || isNaN(valor) || valor === 0) return '';
       
@@ -1912,7 +1912,7 @@
       }
     }
 
-    // Função para formatar CPF/CNPJ
+    // FunÃ§Ã£o para formatar CPF/CNPJ
     function formatarCpfCnpj(input) {
       let valor = input.value.replace(/\D/g, '');
       valor = valor.substring(0, 14);
@@ -1975,6 +1975,10 @@
         const valor = document.getElementById('valor-simples').value.trim();
         const nome = document.getElementById('nome-principal').value.trim();
         return valor !== '' || nome !== '';
+      } else if (modeloAtual === 'covre') {
+        const valor = document.getElementById('valor-covre').value.trim();
+        const nome = document.getElementById('nome-covre').value.trim();
+        return valor !== '' || nome !== '';
       } else {
         const valor = document.getElementById('valor').value.trim();
         const recebedor = document.getElementById('recebedor').value.trim();
@@ -1986,7 +1990,238 @@
       }
     }
 
-    // Função para alternar modo escuro
+    function normalizarChaveImportacao(chave) {
+      return String(chave || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/\s+/g, '')
+        .toLowerCase();
+    }
+
+    function obterValorImportado(row, aliases) {
+      const mapa = new Map();
+      Object.keys(row || {}).forEach((key) => {
+        mapa.set(normalizarChaveImportacao(key), row[key]);
+      });
+
+      for (const alias of aliases) {
+        const valor = mapa.get(normalizarChaveImportacao(alias));
+        if (valor !== undefined && valor !== null && String(valor).trim() !== '') {
+          return valor;
+        }
+      }
+
+      return '';
+    }
+
+    function extrairDadosImportados(row) {
+      return {
+        numeroRecibo: obterValorImportado(row, ['NumeroRecibo', 'NúmeroRecibo', 'Numero do Recibo', 'Número do Recibo']),
+        valor: obterValorImportado(row, ['Valor']),
+        recebedor: obterValorImportado(row, ['Recebedor', 'Nome do Recebedor', 'Nome']),
+        referencia: obterValorImportado(row, ['Referencia', 'Referência']),
+        descricao: obterValorImportado(row, ['Descricao', 'Descrição']),
+        emitente: obterValorImportado(row, ['Emitente', 'Favorecido']),
+        cpfcnpj: obterValorImportado(row, ['CPFCNPJ', 'CPF/CNPJ', 'CpfCnpj']),
+        data: obterValorImportado(row, ['Data', 'Data do Recibo'])
+      };
+    }
+
+    function preencherValorEQuantia(recibo, valorBruto) {
+      if (!valorBruto) return;
+
+      const valorInput = recibo.querySelector('.valor, #valor, #valor-completo, #valor-simples, #valor-covre');
+      if (!valorInput) return;
+
+      const valorFormatado = processarValorInteligente(valorBruto);
+      valorInput.value = valorFormatado;
+
+      const campoQuantia = recibo.querySelector('.campoQuantia, #campoQuantia, #campoQuantia-completo, .quantia-simples, #quantia-simples');
+      if (!campoQuantia) return;
+
+      const valorLimpo = valorFormatado.replace(/[^\d,]/g, '').replace(',', '.');
+      const valorNumerico = parseFloat(valorLimpo);
+      if (!isNaN(valorNumerico) && valorNumerico > 0) {
+        campoQuantia.value = numeroParaExtenso(valorNumerico).toUpperCase();
+      }
+    }
+
+    function preencherReciboPrincipalImportado(row) {
+      const dados = extrairDadosImportados(row);
+
+      if (modeloAtual === 'completo') {
+        if (dados.numeroRecibo) {
+          document.getElementById('numero-recibo-completo').value = dados.numeroRecibo;
+        }
+        preencherValorEQuantia(document.getElementById('recibo-completo'), dados.valor);
+        if (dados.recebedor) document.getElementById('recebedor-completo').value = dados.recebedor;
+        if (dados.referencia) document.getElementById('referencia-completo').value = dados.referencia;
+        if (dados.descricao) document.getElementById('descricao-completo').value = dados.descricao;
+        if (dados.emitente) {
+          document.getElementById('emitente-completo').value = dados.emitente;
+          document.getElementById('assinaturaNome-completo').textContent = dados.emitente;
+        }
+        if (dados.cpfcnpj) {
+          const cpfInput = document.getElementById('cpfcnpj-completo');
+          cpfInput.value = dados.cpfcnpj;
+          formatarCpfCnpj(cpfInput);
+          document.getElementById('assinaturaCpf-completo').textContent = cpfInput.value;
+        }
+        if (dados.data) {
+          document.getElementById('data-completo').value = processarDataInteligente(dados.data);
+        }
+        return;
+      }
+
+      if (modeloAtual === 'simplificado') {
+        preencherValorEQuantia(document.getElementById('recibo-simplificado'), dados.valor);
+        const nome = dados.recebedor || dados.emitente;
+        if (nome) {
+          const nomeInput = document.getElementById('nome-principal');
+          nomeInput.value = nome;
+          atualizarAssinaturaSimples(nomeInput);
+        }
+        return;
+      }
+
+      if (modeloAtual === 'covre') {
+        const reciboPrincipal = document.getElementById('recibo-covre');
+        preencherValorEQuantia(reciboPrincipal, dados.valor);
+        const nome = dados.recebedor || dados.emitente;
+        if (nome) {
+          const nomeInput = reciboPrincipal.querySelector('#nome-covre, .nome-covre');
+          if (nomeInput) nomeInput.value = nome;
+        }
+        return;
+      }
+
+      preencherValorEQuantia(document.getElementById('recibo'), dados.valor);
+      if (dados.recebedor) document.getElementById('recebedor').value = dados.recebedor;
+      if (dados.referencia) document.getElementById('referencia').value = dados.referencia;
+      if (dados.descricao) document.getElementById('descricao').value = dados.descricao;
+      if (dados.emitente) {
+        document.getElementById('emitente').value = dados.emitente;
+        document.getElementById('assinaturaNome').textContent = dados.emitente;
+      }
+      if (dados.cpfcnpj) {
+        const cpfInput = document.getElementById('cpfcnpj');
+        cpfInput.value = dados.cpfcnpj;
+        formatarCpfCnpj(cpfInput);
+        document.getElementById('assinaturaCpf').textContent = cpfInput.value;
+      }
+      if (dados.data) {
+        document.getElementById('data').value = processarDataInteligente(dados.data);
+      }
+    }
+
+    function preencherReciboClonadoImportado(novoRecibo, row) {
+      const dados = extrairDadosImportados(row);
+
+      if (modeloAtual === 'padrao' || modeloAtual === 'completo') {
+        const tituloConfig = window.elementSdk && window.elementSdk.config ? window.elementSdk.config.titulo_recibo : 'RECIBO';
+        const titulo = novoRecibo.querySelector('.titulo-modelo');
+        if (titulo) titulo.textContent = tituloConfig || 'RECIBO';
+      }
+
+      if (modeloAtual === 'completo') {
+        if (dados.numeroRecibo) {
+          const numeroInput = novoRecibo.querySelector('.numero-recibo');
+          if (numeroInput) numeroInput.value = dados.numeroRecibo;
+        }
+        preencherValorEQuantia(novoRecibo, dados.valor);
+        if (dados.recebedor) novoRecibo.querySelector('.recebedor').value = dados.recebedor;
+        if (dados.referencia) novoRecibo.querySelector('.referencia').value = dados.referencia;
+        if (dados.descricao) novoRecibo.querySelector('.descricao').value = dados.descricao;
+        if (dados.emitente) {
+          novoRecibo.querySelector('.emitente').value = dados.emitente;
+          novoRecibo.querySelector('.assinaturaNome').textContent = dados.emitente;
+        }
+        if (dados.cpfcnpj) {
+          const cpfInput = novoRecibo.querySelector('.cpfcnpj');
+          cpfInput.value = dados.cpfcnpj;
+          formatarCpfCnpj(cpfInput);
+          novoRecibo.querySelector('.assinaturaCpf').textContent = cpfInput.value;
+        }
+        if (dados.data) {
+          novoRecibo.querySelector('.data').value = processarDataInteligente(dados.data);
+        }
+        return;
+      }
+
+      if (modeloAtual === 'simplificado') {
+        preencherValorEQuantia(novoRecibo, dados.valor);
+        const nome = dados.recebedor || dados.emitente;
+        if (nome) {
+          const nomeInput = novoRecibo.querySelector('.nome-simples');
+          nomeInput.value = nome;
+          atualizarAssinaturaSimples(nomeInput);
+        }
+        return;
+      }
+
+      if (modeloAtual === 'covre') {
+        preencherValorEQuantia(novoRecibo, dados.valor);
+        const nome = dados.recebedor || dados.emitente;
+        if (nome) {
+          const nomeInput = novoRecibo.querySelector('.nome-covre');
+          if (nomeInput) nomeInput.value = nome;
+        }
+        return;
+      }
+
+      preencherValorEQuantia(novoRecibo, dados.valor);
+      if (dados.recebedor) novoRecibo.querySelector('.recebedor').value = dados.recebedor;
+      if (dados.referencia) novoRecibo.querySelector('.referencia').value = dados.referencia;
+      if (dados.descricao) novoRecibo.querySelector('.descricao').value = dados.descricao;
+      if (dados.emitente) {
+        novoRecibo.querySelector('.emitente').value = dados.emitente;
+        novoRecibo.querySelector('.assinaturaNome').textContent = dados.emitente;
+      }
+      if (dados.cpfcnpj) {
+        const cpfInput = novoRecibo.querySelector('.cpfcnpj');
+        cpfInput.value = dados.cpfcnpj;
+        formatarCpfCnpj(cpfInput);
+        novoRecibo.querySelector('.assinaturaCpf').textContent = cpfInput.value;
+      }
+      if (dados.data) {
+        novoRecibo.querySelector('.data').value = processarDataInteligente(dados.data);
+      }
+    }
+
+    function configurarEventosReciboImportado(novoRecibo) {
+      const valorInput = novoRecibo.querySelector('.valor');
+      if (valorInput) {
+        valorInput.oninput = function() { formatarMoeda(this); };
+      }
+
+      if (modeloAtual === 'simplificado') {
+        const nomeSimplesInput = novoRecibo.querySelector('.nome-simples');
+        if (nomeSimplesInput) {
+          nomeSimplesInput.oninput = function() { atualizarAssinaturaSimples(this); };
+          atualizarAssinaturaSimples(nomeSimplesInput);
+        }
+        return;
+      }
+
+      if (modeloAtual === 'padrao' || modeloAtual === 'completo') {
+        const cpfInput = novoRecibo.querySelector('.cpfcnpj');
+        if (cpfInput) {
+          cpfInput.oninput = function() {
+            formatarCpfCnpj(this);
+            atualizarAssinaturaDireto(this);
+          };
+        }
+
+        const emitenteInput = novoRecibo.querySelector('.emitente');
+        if (emitenteInput) {
+          emitenteInput.oninput = function() {
+            atualizarAssinaturaDireto(this);
+          };
+        }
+      }
+    }
+
+    // FunÃ§Ã£o para alternar modo escuro
     function toggleDarkMode() {
       const body = document.body;
       const isDark = body.classList.toggle('dark-mode');
@@ -2005,7 +2240,7 @@
       }
     }
 
-    // Carregar preferências ao iniciar (modo escuro)
+    // Carregar preferÃªncias ao iniciar (modo escuro)
     (function loadDarkMode() {
       const darkMode = localStorage.getItem('darkMode');
       if (darkMode === 'enabled') {
@@ -2031,7 +2266,7 @@
       }
     })();
 
-    // Função para imprimir
+    // FunÃ§Ã£o para imprimir
     function obterRecibosVisiveisParaImpressao() {
       return Array.from(document.querySelectorAll('.recibo')).filter(recibo => {
         const styles = window.getComputedStyle(recibo);
@@ -2101,7 +2336,7 @@
 
     async function baixarRecibosPdfMobile(recibosVisiveis) {
       if (!window.html2canvas || !(window.jspdf && window.jspdf.jsPDF)) {
-        alert('O recurso de PDF não está disponível neste navegador.');
+        alert('O recurso de PDF nÃ£o estÃ¡ disponÃ­vel neste navegador.');
         return;
       }
 
@@ -2210,7 +2445,7 @@
       const recibosVisiveis = obterRecibosVisiveisParaImpressao();
 
       if (!recibosVisiveis.length) {
-        alert('Nenhum recibo visível para imprimir.');
+        alert('Nenhum recibo visÃ­vel para imprimir.');
         return;
       }
 
@@ -2249,7 +2484,7 @@
         <head>
           <meta charset="UTF-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Impressão de Recibos</title>
+          <title>ImpressÃ£o de Recibos</title>
           <style>
             @page {
               size: A4 portrait;
@@ -2566,7 +2801,7 @@
     window.addEventListener('resize', atualizarBotaoImpressao);
     window.addEventListener('DOMContentLoaded', atualizarBotaoImpressao);
 
-    // Função para formatar moeda no modelo simplificado
+    // FunÃ§Ã£o para formatar moeda no modelo simplificado
     function formatarMoedaSimples(input) {
       let valor = input.value.replace(/\D/g, '');
       
@@ -2587,9 +2822,9 @@
       }
     }
 
-    // Função para obter data formatada
+    // FunÃ§Ã£o para obter data formatada
     function obterDataFormatada() {
-      const meses = ['JANEIRO', 'FEVEREIRO', 'MARÇO', 'ABRIL', 'MAIO', 'JUNHO', 'JULHO', 'AGOSTO', 'SETEMBRO', 'OUTUBRO', 'NOVEMBRO', 'DEZEMBRO'];
+      const meses = ['JANEIRO', 'FEVEREIRO', 'MARÃ‡O', 'ABRIL', 'MAIO', 'JUNHO', 'JULHO', 'AGOSTO', 'SETEMBRO', 'OUTUBRO', 'NOVEMBRO', 'DEZEMBRO'];
       const hoje = new Date();
       const dia = String(hoje.getDate()).padStart(2, '0');
       const mes = meses[hoje.getMonth()];
@@ -2640,106 +2875,21 @@
         const container = document.getElementById('recibos-gerados');
         
         event.target.value = '';
-        
-        const reciboPrincipalPreenchido = verificarReciboPrincipalPreenchido();
-        
-        const inicioLoop = reciboPrincipalPreenchido ? 0 : 1;
+        const linhasImportadas = Array.isArray(jsonData)
+          ? jsonData.filter((row) => Object.values(row || {}).some((value) => String(value || '').trim() !== ''))
+          : [];
 
-        jsonData.forEach((row, index) => {
-          if (index === 0 && !reciboPrincipalPreenchido) {
-            if (modeloAtual === 'completo') {
-              if (row.NumeroRecibo || row['NúmeroRecibo'] || row['Número do Recibo']) {
-                const numeroInput = document.getElementById('numero-recibo-completo');
-                if (numeroInput) numeroInput.value = row.NumeroRecibo || row['NúmeroRecibo'] || row['Número do Recibo'] || '';
-              }
-              if (row.Valor) {
-                const valorInput = document.getElementById('valor-completo');
-                const valorFormatado = processarValorInteligente(row.Valor);
-                valorInput.value = valorFormatado;
+        if (!linhasImportadas.length) {
+          mostrarMensagem('A planilha importada está vazia ou sem dados válidos.', 'erro');
+          return;
+        }
 
-                const valorLimpo = valorFormatado.replace(/[^\d,]/g, '').replace(',', '.');
-                const valorNumerico = parseFloat(valorLimpo);
-                if (!isNaN(valorNumerico) && valorNumerico > 0) {
-                  document.getElementById('campoQuantia-completo').value = numeroParaExtenso(valorNumerico).toUpperCase();
-                }
-              }
-              if (row.Recebedor) document.getElementById('recebedor-completo').value = row.Recebedor;
-              if (row.Referencia) document.getElementById('referencia-completo').value = row.Referencia;
-              if (row.Descricao) document.getElementById('descricao-completo').value = row.Descricao;
-              if (row.Emitente) {
-                document.getElementById('emitente-completo').value = row.Emitente;
-                document.getElementById('assinaturaNome-completo').textContent = row.Emitente;
-              }
-              if (row.CPFCNPJ) {
-                const cpfInput = document.getElementById('cpfcnpj-completo');
-                cpfInput.value = row.CPFCNPJ;
-                formatarCpfCnpj(cpfInput);
-                document.getElementById('assinaturaCpf-completo').textContent = cpfInput.value;
-              }
-              if (row.Data) {
-                const dataFormatada = processarDataInteligente(row.Data);
-                document.getElementById('data-completo').value = dataFormatada;
-              }
-            } else if (modeloAtual === 'simplificado') {
-              if (row.Valor) {
-                const valorInput = document.getElementById('valor-simples');
-                const valorFormatado = processarValorInteligente(row.Valor);
-                valorInput.value = valorFormatado;
-                
-                const valorLimpo = valorFormatado.replace(/[^\d,]/g, '').replace(',', '.');
-                const valorNumerico = parseFloat(valorLimpo);
-                if (!isNaN(valorNumerico) && valorNumerico > 0) {
-                  const extenso = numeroParaExtenso(valorNumerico);
-                  document.getElementById('quantia-simples').value = extenso.toUpperCase();
-                }
-              }
-              if (row.Recebedor || row.Emitente) {
-                const nomeInput = document.getElementById('nome-principal');
-                nomeInput.value = row.Recebedor || row.Emitente || '';
-                atualizarAssinaturaSimples(nomeInput);
-              }
-            } else if (modeloAtual === 'covre') {
-              const reciboPrincipal = document.getElementById('recibo-covre');
-              if (row.Valor) {
-                const valorInput = reciboPrincipal.querySelector('.valor');
-                const valorFormatado = processarValorInteligente(row.Valor);
-                valorInput.value = valorFormatado;
-              }
-              if (row.Recebedor || row.Emitente) {
-                const nomeInput = reciboPrincipal.querySelector('.nome-covre');
-                nomeInput.value = row.Recebedor || row.Emitente || '';
-              }
-            } else {
-              if (row.Valor) {
-                const valorInput = document.getElementById('valor');
-                const valorFormatado = processarValorInteligente(row.Valor);
-                valorInput.value = valorFormatado;
-                
-                const valorLimpo = valorFormatado.replace(/[^\d,]/g, '').replace(',', '.');
-                const valorNumerico = parseFloat(valorLimpo);
-                if (!isNaN(valorNumerico) && valorNumerico > 0) {
-                  const extenso = numeroParaExtenso(valorNumerico);
-                  document.getElementById('campoQuantia').value = extenso.toUpperCase();
-                }
-              }
-              if (row.Recebedor) document.getElementById('recebedor').value = row.Recebedor;
-              if (row.Referencia) document.getElementById('referencia').value = row.Referencia;
-              if (row.Descricao) document.getElementById('descricao').value = row.Descricao;
-              if (row.Emitente) {
-                document.getElementById('emitente').value = row.Emitente;
-                document.getElementById('assinaturaNome').textContent = row.Emitente;
-              }
-              if (row.CPFCNPJ) {
-                const cpfInput = document.getElementById('cpfcnpj');
-                cpfInput.value = row.CPFCNPJ;
-                formatarCpfCnpj(cpfInput);
-                document.getElementById('assinaturaCpf').textContent = cpfInput.value;
-              }
-              if (row.Data) {
-                const dataFormatada = processarDataInteligente(row.Data);
-                document.getElementById('data').value = dataFormatada;
-              }
-            }
+        let reciboPrincipalDisponivel = !verificarReciboPrincipalPreenchido();
+
+        linhasImportadas.forEach((row, index) => {
+          if (reciboPrincipalDisponivel) {
+            preencherReciboPrincipalImportado(row);
+            reciboPrincipalDisponivel = false;
             return;
           }
 
@@ -2751,137 +2901,16 @@
           } else if (modeloAtual === 'covre') {
             modeloId = 'modelo-recibo-covre';
           }
-          
+
           const modelo = document.getElementById(modeloId);
+          if (!modelo) return;
+
           const novoRecibo = modelo.cloneNode(true);
-          novoRecibo.id = 'recibo-' + index;
+          novoRecibo.id = 'recibo-' + Date.now() + '-' + index;
           novoRecibo.style.display = 'block';
 
-          if (modeloAtual === 'padrao' || modeloAtual === 'completo') {
-            const tituloConfig = window.elementSdk && window.elementSdk.config ? window.elementSdk.config.titulo_recibo : 'RECIBO';
-            novoRecibo.querySelector('.titulo-modelo').textContent = tituloConfig || 'RECIBO';
-          }
-
-          if (modeloAtual === 'completo') {
-            if (row.NumeroRecibo || row['NúmeroRecibo'] || row['Número do Recibo']) {
-              const numeroInput = novoRecibo.querySelector('.numero-recibo');
-              if (numeroInput) numeroInput.value = row.NumeroRecibo || row['NúmeroRecibo'] || row['Número do Recibo'] || '';
-            }
-            if (row.Valor) {
-              const valorInput = novoRecibo.querySelector('.valor');
-              const valorFormatado = processarValorInteligente(row.Valor);
-              valorInput.value = valorFormatado;
-              const valorLimpo = valorFormatado.replace(/[^\d,]/g, '').replace(',', '.');
-              const valorNumerico = parseFloat(valorLimpo);
-              if (!isNaN(valorNumerico) && valorNumerico > 0) {
-                novoRecibo.querySelector('.campoQuantia').value = numeroParaExtenso(valorNumerico).toUpperCase();
-              }
-            }
-            if (row.Recebedor) novoRecibo.querySelector('.recebedor').value = row.Recebedor;
-            if (row.Referencia) novoRecibo.querySelector('.referencia').value = row.Referencia;
-            if (row.Descricao) novoRecibo.querySelector('.descricao').value = row.Descricao;
-            if (row.Emitente) {
-              novoRecibo.querySelector('.emitente').value = row.Emitente;
-              novoRecibo.querySelector('.assinaturaNome').textContent = row.Emitente;
-            }
-            if (row.CPFCNPJ) {
-              novoRecibo.querySelector('.cpfcnpj').value = row.CPFCNPJ;
-              novoRecibo.querySelector('.assinaturaCpf').textContent = row.CPFCNPJ;
-            }
-            if (row.Data) novoRecibo.querySelector('.data').value = processarDataInteligente(row.Data);
-
-            novoRecibo.querySelector('.valor').oninput = function() { formatarMoeda(this); };
-            novoRecibo.querySelector('.cpfcnpj').oninput = function() { formatarCpfCnpj(this); atualizarAssinaturaDireto(this); };
-            novoRecibo.querySelector('.emitente').oninput = function() { atualizarAssinaturaDireto(this); };
-          } else if (modeloAtual === 'simplificado') {
-            if (row.Valor) {
-              const valorInput = novoRecibo.querySelector('.valor');
-              const valorFormatado = processarValorInteligente(row.Valor);
-              valorInput.value = valorFormatado;
-              
-              const valorLimpo = valorFormatado.replace(/[^\d,]/g, '').replace(',', '.');
-              const valorNumerico = parseFloat(valorLimpo);
-              if (!isNaN(valorNumerico) && valorNumerico > 0) {
-                const extenso = numeroParaExtenso(valorNumerico);
-                novoRecibo.querySelector('.quantia-simples').value = extenso.toUpperCase();
-              }
-            }
-            if (row.Recebedor || row.Emitente) {
-              const nomeInput = novoRecibo.querySelector('.nome-simples');
-              const nome = row.Recebedor || row.Emitente || '';
-              nomeInput.value = nome;
-        atualizarAssinaturaSimples(nomeInput);
-              atualizarAssinaturaSimples(nomeInput);
-            }
-
-            novoRecibo.querySelector('.valor').oninput = function() { formatarMoeda(this); };
-        const nomeSimplesInput = novoRecibo.querySelector('.nome-simples');
-        if (nomeSimplesInput) {
-          nomeSimplesInput.oninput = function() { atualizarAssinaturaSimples(this); };
-          atualizarAssinaturaSimples(nomeSimplesInput);
-        }
-          } else if (modeloAtual === 'covre') {
-            if (row.Valor) {
-              const valorInput = novoRecibo.querySelector('.valor');
-              const valorFormatado = processarValorInteligente(row.Valor);
-              valorInput.value = valorFormatado;
-            }
-            if (row.Recebedor || row.Emitente) {
-              const nomeInput = novoRecibo.querySelector('.nome-covre');
-              const nome = row.Recebedor || row.Emitente || '';
-              nomeInput.value = nome;
-            }
-
-            novoRecibo.querySelector('.valor').oninput = function() { formatarMoeda(this); };
-            const nomeCovreInput = novoRecibo.querySelector('.nome-covre');
-            if (nomeCovreInput) {
-              nomeCovreInput.oninput = function() {};
-            }
-          } else {
-            if (row.Valor) {
-              const valorInput = novoRecibo.querySelector('.valor');
-              const valorFormatado = processarValorInteligente(row.Valor);
-              valorInput.value = valorFormatado;
-              
-              const valorLimpo = valorFormatado.replace(/[^\d,]/g, '').replace(',', '.');
-              const valorNumerico = parseFloat(valorLimpo);
-              if (!isNaN(valorNumerico) && valorNumerico > 0) {
-                const extenso = numeroParaExtenso(valorNumerico);
-                novoRecibo.querySelector('.campoQuantia').value = extenso.toUpperCase();
-              }
-            }
-            if (row.Recebedor) novoRecibo.querySelector('.recebedor').value = row.Recebedor;
-            if (row.Referencia) novoRecibo.querySelector('.referencia').value = row.Referencia;
-            if (row.Descricao) novoRecibo.querySelector('.descricao').value = row.Descricao;
-            if (row.Emitente) {
-              novoRecibo.querySelector('.emitente').value = row.Emitente;
-              novoRecibo.querySelector('.assinaturaNome').textContent = row.Emitente;
-            }
-            if (row.CPFCNPJ) {
-              const cpfInput = novoRecibo.querySelector('.cpfcnpj');
-              cpfInput.value = row.CPFCNPJ;
-              formatarCpfCnpj(cpfInput);
-              novoRecibo.querySelector('.assinaturaCpf').textContent = cpfInput.value;
-            }
-            if (row.Data) {
-              const dataFormatada = processarDataInteligente(row.Data);
-              novoRecibo.querySelector('.data').value = dataFormatada;
-            }
-
-            novoRecibo.querySelector('.valor').oninput = function() { formatarMoeda(this); };
-        const nomeSimplesInput = novoRecibo.querySelector('.nome-simples');
-        if (nomeSimplesInput) {
-          nomeSimplesInput.oninput = function() { atualizarAssinaturaSimples(this); };
-          atualizarAssinaturaSimples(nomeSimplesInput);
-        }
-            novoRecibo.querySelector('.cpfcnpj').oninput = function() { 
-              formatarCpfCnpj(this); 
-              atualizarAssinaturaDireto(this);
-            };
-            novoRecibo.querySelector('.emitente').oninput = function() { 
-              atualizarAssinaturaDireto(this);
-            };
-          }
+          preencherReciboClonadoImportado(novoRecibo, row);
+          configurarEventosReciboImportado(novoRecibo);
 
           const escala = zoomAtual / 100;
           novoRecibo.style.transform = `scale(${escala})`;
@@ -3006,3 +3035,4 @@
 
       applyConfig(window.elementSdk.config || defaultConfig);
     })();
+
