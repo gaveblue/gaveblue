@@ -23,7 +23,7 @@
         <circle cx="11" cy="11" r="7" stroke-width="2"></circle>
         <path d="M20 20L17 17" stroke-width="2" stroke-linecap="round"></path>
       </svg>
-      <input id="mobile-global-search-input" type="text" class="global-search-input text-sm font-medium" placeholder="Pesquisar mdulo..." autocomplete="off" aria-label="Pesquisar mdulo">
+      <input id="mobile-global-search-input" type="text" class="global-search-input text-sm font-medium" placeholder="Pesquisar módulo..." autocomplete="off" aria-label="Pesquisar módulo">
       <div id="mobile-global-search-results" class="global-search-results hidden"></div>
     </div>
   </div>
@@ -37,7 +37,7 @@
           <div class="hidden md:block w-px h-6 bg-slate-700/70"></div>
           <div class="hidden md:block min-w-0">
             <p class="text-slate-400 text-xs uppercase tracking-[0.22em] font-semibold">WeFrotas</p>
-            <h1 class="text-white text-sm sm:text-base font-bold truncate">Gesto de Frotas Inteligente</h1>
+            <h1 class="text-white text-sm sm:text-base font-bold truncate">Gestão de Frotas Inteligente</h1>
           </div>
         </div>
         <div class="flex items-center gap-2 sm:gap-3">
@@ -46,22 +46,22 @@
               <circle cx="11" cy="11" r="7" stroke-width="2"></circle>
               <path d="M20 20L17 17" stroke-width="2" stroke-linecap="round"></path>
             </svg>
-            <input id="global-search-input" type="text" class="global-search-input text-sm font-medium" placeholder="Pesquisar mdulo..." autocomplete="off" aria-label="Pesquisar mdulo">
+            <input id="global-search-input" type="text" class="global-search-input text-sm font-medium" placeholder="Pesquisar módulo..." autocomplete="off" aria-label="Pesquisar módulo">
             <div id="global-search-results" class="global-search-results hidden"></div>
           </div>
-          <button id="mobile-search-btn" class="mobile-search-toggle" type="button" aria-label="Pesquisar mdulo">
+          <button id="mobile-search-btn" class="mobile-search-toggle" type="button" aria-label="Pesquisar módulo">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <circle cx="11" cy="11" r="7" stroke-width="2"></circle>
               <path d="M20 20L17 17" stroke-width="2" stroke-linecap="round"></path>
             </svg>
           </button>
-          <button class="top-action header-utility-btn" type="button" onclick="toggleNotifications()" aria-label="Notificaes">
+          <button class="top-action header-utility-btn" type="button" onclick="toggleNotifications()" aria-label="Notificações">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.4-1.4A2 2 0 0118 14.17V11a6 6 0 10-12 0v3.17c0 .53-.21 1.04-.59 1.43L4 17h5m6 0a3 3 0 11-6 0m6 0H9" />
             </svg>
             <span id="notifications-badge" class="notification-badge hidden">0</span>
           </button>
-          <button class="top-action header-utility-btn" type="button" onclick="toggleSettings()" aria-label="Configuraes">
+          <button class="top-action header-utility-btn" type="button" onclick="toggleSettings()" aria-label="Configurações">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <circle cx="12" cy="12" r="3" stroke-width="2"></circle>
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.01a1.65 1.65 0 0 0 .99-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 .99 1.51h.01a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.01a1.65 1.65 0 0 0 1.51.99H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
@@ -122,7 +122,7 @@
               <circle cx="7" cy="18" r="2"></circle>
               <circle cx="18" cy="18" r="2"></circle>
             </svg>
-            <span class="nav-tooltip">Veculos</span>
+            <span class="nav-tooltip">Veículos</span>
           </button>
 
           <button class="nav-btn" onclick="showModule('motoristas', this)">
@@ -141,20 +141,22 @@
             </svg>
             <span class="nav-tooltip">Fornecedores</span>
           </button>
-
         </div>
       </div>
     </div>
 
-    <main class="flex-1">
-      <div class="max-w-[1280px] mx-auto px-6 py-8">
-        <section id="panel-orders" class="module-panel content-card p-8 sm:p-10">
+    <main class="max-w-[1280px] mx-auto px-6 pb-10 pt-2 w-full">
+      <section id="panel-orders" class="module-panel content-card p-8 sm:p-10">
           <h2 class="text-[2rem] font-extrabold text-slate-900 mb-10">OS</h2>
 
           <div class="filter-card p-6 sm:p-7 mb-10">
-            <div class="grid xl:grid-cols-[1fr_1fr_1fr_1fr_1fr_auto_auto] gap-4 items-end">
+            <div class="grid xl:grid-cols-[1.3fr_1fr_1fr_1fr_1fr_1fr_auto_auto] gap-4 items-end">
               <div>
-                <label class="block text-[13px] font-bold uppercase tracking-wide text-slate-600 mb-3">N da OS</label>
+                <label class="block text-[13px] font-bold uppercase tracking-wide text-slate-600 mb-3">Pesquisa rápida</label>
+                <input id="order-filter-search" class="soft-input w-full" placeholder="Buscar OS, veículo, responsável ou descrição">
+              </div>
+              <div>
+                <label class="block text-[13px] font-bold uppercase tracking-wide text-slate-600 mb-3">Nº da OS</label>
                 <input id="order-filter-number" class="soft-input w-full" placeholder="Ex: 0001">
               </div>
               <div>
@@ -168,25 +170,25 @@
               <div>
                 <label class="block text-[13px] font-bold uppercase tracking-wide text-slate-600 mb-3">Status</label>
                 <select id="order-filter-status" class="soft-input w-full">
-                  <option value="">Todos os Status</option>
+                  <option value="">Todos os status</option>
                   <option value="aberta">Aberta</option>
                   <option value="andamento">Em andamento</option>
                   <option value="fechada">Fechada</option>
                 </select>
               </div>
               <div>
-                <label class="block text-[13px] font-bold uppercase tracking-wide text-slate-600 mb-3">Ordenao</label>
+                <label class="block text-[13px] font-bold uppercase tracking-wide text-slate-600 mb-3">Ordenação</label>
                 <select id="order-filter-sort" class="soft-input w-full">
-                  <option value="recentes">Mais Recentes</option>
-                  <option value="antigas">Mais Antigas</option>
+                  <option value="recentes">Mais recentes</option>
+                  <option value="antigas">Mais antigas</option>
                 </select>
               </div>
-              <button class="icon-action primary" title="Aplicar Filtros" onclick="renderOrders()">
+              <button class="icon-action primary" title="Aplicar filtros" onclick="renderOrders()">
                 <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M4 5h16l-6 7v6l-4-2v-4L4 5z"/>
                 </svg>
               </button>
-              <button class="icon-action bg-white border border-slate-200 text-slate-600" title="Limpar Filtros" onclick="clearOrderFilters()">
+              <button class="icon-action bg-white border border-slate-200 text-slate-600" title="Limpar filtros" onclick="clearOrderFilters()">
                 <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M6 6l12 12M18 6L6 18"/>
                 </svg>
@@ -194,53 +196,59 @@
             </div>
           </div>
 
-          <div class="flex items-center justify-between gap-4 flex-wrap mb-10">
-            <div class="flex items-center gap-4">
-              <button id="select-all-orders" class="selection-check" onclick="toggleSelectAllOrders(event)">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 12l4 4 10-10"/>
-                </svg>
-              </button>
-              <span id="orders-selected-text" class="text-[1.05rem] font-semibold text-slate-700">0 selecionadas</span>
+          <div class="entity-list-shell">
+            <div class="entity-toolbar-sticky mb-6">
+              <div class="flex items-center justify-between gap-4 flex-wrap entity-toolbar-panel">
+                <div class="flex items-center gap-4">
+                  <button id="select-all-orders" class="selection-check" onclick="toggleSelectAllOrders(event)">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 12l4 4 10-10"/>
+                    </svg>
+                  </button>
+                  <span id="orders-selected-text" class="text-[1.05rem] font-semibold text-slate-700">0 selecionadas</span>
+                </div>
+
+                <div class="module-action-toolbar">
+                  <button class="icon-action text-[#8b3dff]" title="Nova OS" onclick="openCadastroModal('order')">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M12 5v14M5 12h14"/>
+                    </svg>
+                  </button>
+                  <button id="edit-order-btn" class="icon-action text-[#81a4ff]" title="Editar" onclick="editSelectedOrder()">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M16.5 4.5l3 3L9 18l-4 1 1-4 10.5-10.5z"/>
+                    </svg>
+                  </button>
+                  <button id="print-order-btn" class="icon-action text-[#bd8dff]" title="Imprimir" onclick="printSelectedOrder()">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M7 8V4h10v4M7 16H5a2 2 0 01-2-2v-3a2 2 0 012-2h14a2 2 0 012 2v3a2 2 0 01-2 2h-2M7 12h10v8H7z"/>
+                    </svg>
+                  </button>
+                  <button id="close-order-btn" class="icon-action text-[#71d08b]" title="Fechar OS" onclick="closeSelectedOrder()">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M5 12l5 5L19 8"/>
+                    </svg>
+                  </button>
+                  <button id="reopen-order-btn" class="icon-action text-[#f59e0b]" title="Reabrir OS" onclick="reopenSelectedOrder()">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M20 11a8 8 0 1 1-2.34-5.66"/>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M20 4v5h-5"/>
+                    </svg>
+                  </button>
+                  <button id="delete-order-btn" class="icon-action text-[#f28787]" title="Excluir" onclick="deleteSelectedOrders()">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M4 7h16M9 7V5h6v2M8 7l1 12h6l1-12"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
             </div>
 
-            <div class="module-action-toolbar">
-              <button class="icon-action text-[#8b3dff]" title="Nova OS" onclick="openCadastroModal('order')">
-                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M12 5v14M5 12h14"/>
-                </svg>
-              </button>
-              <button id="edit-order-btn" class="icon-action text-[#81a4ff]" title="Editar" onclick="editSelectedOrder()">
-                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M16.5 4.5l3 3L9 18l-4 1 1-4 10.5-10.5z"/>
-                </svg>
-              </button>
-              <button id="print-order-btn" class="icon-action text-[#bd8dff]" title="Imprimir" onclick="printSelectedOrder()">
-                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M7 8V4h10v4M7 16H5a2 2 0 01-2-2v-3a2 2 0 012-2h14a2 2 0 012 2v3a2 2 0 01-2 2h-2M7 12h10v8H7z"/>
-                </svg>
-              </button>
-              <button id="close-order-btn" class="icon-action text-[#71d08b]" title="Fechar OS" onclick="closeSelectedOrder()">
-                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M5 12l5 5L19 8"/>
-                </svg>
-              </button>
-              <button id="reopen-order-btn" class="icon-action text-[#f59e0b]" title="Reabrir OS" onclick="reopenSelectedOrder()">
-                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M20 11a8 8 0 1 1-2.34-5.66"/>
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M20 4v5h-5"/>
-                </svg>
-              </button>
-              <button id="delete-order-btn" class="icon-action text-[#f28787]" title="Excluir" onclick="deleteSelectedOrders()">
-                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M4 7h16M9 7V5h6v2M8 7l1 12h6l1-12"/>
-                </svg>
-              </button>
+            <div id="orders-list-shell" class="entity-list-scroll">
+              <div id="orders-list" class="space-y-4">
+                <div class="empty-state">Nenhuma ordem de serviço cadastrada.</div>
+              </div>
             </div>
-          </div>
-
-          <div id="orders-list" class="space-y-4">
-            <div class="empty-state">Nenhuma ordem de serviço cadastrada.</div>
           </div>
         </section>
 
@@ -248,7 +256,7 @@
           <h2 class="text-[2rem] font-extrabold text-slate-900 mb-6">Home</h2>
           <div class="grid md:grid-cols-3 xl:grid-cols-6 gap-5">
             <div class="filter-card p-6">
-              <p class="text-slate-500 text-sm font-semibold mb-2">Veculos</p>
+              <p class="text-slate-500 text-sm font-semibold mb-2">Veículos</p>
               <p id="home-total-vehicles" class="text-4xl font-extrabold text-[#6267d9]">0</p>
             </div>
             <div class="filter-card p-6">
@@ -275,22 +283,28 @@
           </div>
           <div class="grid xl:grid-cols-3 gap-5 mt-6">
             <div class="filter-card p-6 xl:col-span-1">
-              <h3 class="text-lg font-extrabold text-slate-900 mb-4">Custo por KM por veculo</h3>
+              <h3 class="text-lg font-extrabold text-slate-900 mb-4">Custo por KM por veículo</h3>
               <div id="home-cost-table" class="space-y-3 text-sm text-slate-600"></div>
             </div>
             <div class="filter-card p-6 xl:col-span-1">
-              <h3 class="text-lg font-extrabold text-slate-900 mb-4">CNHs prximas a vencer</h3>
+              <h3 class="text-lg font-extrabold text-slate-900 mb-4">CNHs próximas a vencer</h3>
               <div id="home-cnh-table" class="space-y-3 text-sm text-slate-600"></div>
             </div>
             <div class="filter-card p-6 xl:col-span-1">
-              <h3 class="text-lg font-extrabold text-slate-900 mb-4">Seguros prximos a vencer</h3>
+              <h3 class="text-lg font-extrabold text-slate-900 mb-4">Seguros próximos a vencer</h3>
               <div id="home-insurance-table" class="space-y-3 text-sm text-slate-600"></div>
             </div>
+          </div>
+          <div class="filter-card p-6 mt-6">
+            <div class="mb-4">
+              <h3 class="text-lg font-extrabold text-slate-900">Revisões por KM</h3>
+            </div>
+            <div id="home-maintenance-table" class="space-y-3 text-sm text-slate-600"></div>
           </div>
         </section>
 
         <section id="panel-veiculos" class="module-panel content-card p-8 sm:p-10">
-          <h2 class="text-[2rem] font-extrabold text-slate-900 mb-10">Lista de Veculos</h2>
+          <h2 class="text-[2rem] font-extrabold text-slate-900 mb-10">Lista de Veículos</h2>
           <div class="flex items-center justify-between gap-4 flex-wrap mb-10">
             <div class="flex items-center gap-4">
               <button id="select-all-vehicles" class="selection-check" onclick="toggleSelectAllVehicles(event)">
@@ -301,19 +315,19 @@
               <span id="vehicles-selected-text" class="text-[1.05rem] font-semibold text-slate-700">0 selecionados</span>
             </div>
             <div class="module-action-toolbar">
-              <button class="icon-action text-[#8b3dff]" title="Novo Veculo" onclick="openCadastroModal('vehicle')">
+              <button class="icon-action text-[#8b3dff]" title="Novo Veículo" onclick="openCadastroModal('vehicle')">
                 <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M12 5v14M5 12h14"/></svg>
               </button>
-              <button id="edit-vehicle-btn" class="icon-action text-[#81a4ff]" title="Editar Veculo" onclick="editSelectedVehicle()">
+              <button id="edit-vehicle-btn" class="icon-action text-[#81a4ff]" title="Editar Veículo" onclick="editSelectedVehicle()">
                 <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M16.5 4.5l3 3L9 18l-4 1 1-4 10.5-10.5z"/></svg>
               </button>
-              <button id="delete-vehicle-btn" class="icon-action text-[#f28787]" title="Excluir Veculo" onclick="deleteSelectedVehicles()">
+              <button id="delete-vehicle-btn" class="icon-action text-[#f28787]" title="Excluir Veículo" onclick="deleteSelectedVehicles()">
                 <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M4 7h16M9 7V5h6v2M8 7l1 12h6l1-12"/></svg>
               </button>
             </div>
           </div>
           <div id="vehicles-list" class="space-y-4">
-            <div class="empty-state">Nenhum veculo cadastrado. Clique no boto + para comear.</div>
+            <div class="empty-state">Nenhum veículo cadastrado. Clique no botão + para começar.</div>
           </div>
         </section>
 
@@ -341,7 +355,7 @@
             </div>
           </div>
           <div id="drivers-list" class="space-y-4">
-            <div class="empty-state">Nenhum motorista cadastrado. Clique no boto + para comear.</div>
+            <div class="empty-state">Nenhum motorista cadastrado. Clique no botão + para começar.</div>
           </div>
         </section>
 
@@ -372,11 +386,14 @@
             <div class="empty-state">Nenhum fornecedor cadastrado ainda.</div>
           </div>
         </section>
-
         <section id="panel-financeiro" class="module-panel content-card p-8 sm:p-10">
           <h2 class="text-[2rem] font-extrabold text-slate-900 mb-10">Financeiro</h2>
           <div class="filter-card p-6 sm:p-7 mb-10">
-            <div class="grid xl:grid-cols-[1.2fr_1fr_1fr_1fr_1fr_auto_auto] gap-4 items-end">
+            <div class="grid xl:grid-cols-[1.2fr_1.2fr_1fr_1fr_1fr_1fr_auto_auto] gap-4 items-end">
+              <div>
+                <label class="block text-[13px] font-bold uppercase tracking-wide text-slate-600 mb-3">Pesquisa rápida</label>
+                <input id="finance-filter-search" class="soft-input w-full" placeholder="Buscar fornecedor, NF, OS, veículo ou observação">
+              </div>
               <div>
                 <label class="block text-[13px] font-bold uppercase tracking-wide text-slate-600 mb-3">Fornecedor</label>
                 <input id="finance-filter-supplier" class="soft-input w-full" placeholder="Buscar fornecedor">
@@ -392,9 +409,9 @@
                 </select>
               </div>
               <div>
-                <label class="block text-[13px] font-bold uppercase tracking-wide text-slate-600 mb-3">Veculo</label>
+                <label class="block text-[13px] font-bold uppercase tracking-wide text-slate-600 mb-3">Veículo</label>
                 <select id="finance-filter-vehicle" class="soft-input w-full">
-                  <option value="">Todos os veculos</option>
+                  <option value="">Todos os veículos</option>
                 </select>
               </div>
               <div>
@@ -405,53 +422,59 @@
                 <label class="block text-[13px] font-bold uppercase tracking-wide text-slate-600 mb-3">Valor</label>
                 <input id="finance-filter-value" class="soft-input w-full" placeholder="Ex: 1500,00">
               </div>
-              <button class="icon-action primary" title="Aplicar Filtros" onclick="renderFinance()">
+              <button class="icon-action primary" title="Aplicar filtros" onclick="renderFinance()">
                 <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M4 5h16l-6 7v6l-4-2v-4L4 5z"/>
                 </svg>
               </button>
-              <button class="icon-action bg-white border border-slate-200 text-slate-600" title="Limpar Filtros" onclick="clearFinanceFilters()">
+              <button class="icon-action bg-white border border-slate-200 text-slate-600" title="Limpar filtros" onclick="clearFinanceFilters()">
                 <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M6 6l12 12M18 6L6 18"/>
                 </svg>
               </button>
             </div>
           </div>
-          <div class="flex items-center justify-between gap-4 flex-wrap mb-10">
-            <div class="flex items-center gap-4">
-              <button id="select-all-finance" class="selection-check" onclick="toggleSelectAllFinance(event)">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 12l4 4 10-10"/>
-                </svg>
-              </button>
-              <span id="finance-selected-text" class="text-[1.05rem] font-semibold text-slate-700">0 selecionados</span>
+          <div class="entity-list-shell">
+            <div class="entity-toolbar-sticky mb-6">
+              <div class="flex items-center justify-between gap-4 flex-wrap entity-toolbar-panel">
+                <div class="flex items-center gap-4">
+                  <button id="select-all-finance" class="selection-check" onclick="toggleSelectAllFinance(event)">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 12l4 4 10-10"/>
+                    </svg>
+                  </button>
+                  <span id="finance-selected-text" class="text-[1.05rem] font-semibold text-slate-700">0 selecionados</span>
+                </div>
+                <div class="module-action-toolbar">
+                  <button class="icon-action text-[#8b3dff]" title="Novo lançamento" onclick="openCadastroModal('finance')">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M12 5v14M5 12h14"/></svg>
+                  </button>
+                  <button id="group-finance-btn" class="icon-action text-[#5f6ef5]" title="Agrupar abastecimentos" onclick="openFuelGroupingModal()">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M8 7h8M8 12h8M8 17h8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M18 12l2 2 4-4"/></svg>
+                  </button>
+                  <button id="ungroup-finance-btn" class="icon-action text-[#f59e0b]" title="Desfazer agrupamento" onclick="undoSelectedFuelGrouping()">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M4 7h10M4 12h6M4 17h10"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M20 8l-4 4 4 4"/></svg>
+                  </button>
+                  <button id="view-finance-btn" class="icon-action text-[#d39a2f]" title="Visualizar" onclick="viewSelectedFinance()">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M1.5 12s4-7 10.5-7 10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3" stroke-width="1.9"/></svg>
+                  </button>
+                  <button id="close-finance-expense-btn" class="icon-action text-[#3455a6]" title="Fechar despesa" onclick="openCloseFuelExpenseModal()">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M7 11V8a5 5 0 0110 0v3"/><rect x="5" y="11" width="14" height="10" rx="2" ry="2" stroke-width="1.9"/></svg>
+                  </button>
+                  <button id="edit-finance-btn" class="icon-action text-[#81a4ff]" title="Editar lançamento" onclick="editSelectedFinance()">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M16.5 4.5l3 3L9 18l-4 1 1-4 10.5-10.5z"/></svg>
+                  </button>
+                  <button id="delete-finance-btn" class="icon-action text-[#f28787]" title="Excluir lançamento" onclick="deleteSelectedFinance()">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M4 7h16M9 7V5h6v2M8 7l1 12h6l1-12"/></svg>
+                  </button>
+                </div>
+              </div>
             </div>
-            <div class="module-action-toolbar">
-              <button class="icon-action text-[#8b3dff]" title="Novo lançamento" onclick="openCadastroModal('finance')">
-                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M12 5v14M5 12h14"/></svg>
-              </button>
-              <button id="group-finance-btn" class="icon-action text-[#5f6ef5]" title="Agrupar abastecimentos" onclick="openFuelGroupingModal()">
-                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M8 7h8M8 12h8M8 17h8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M18 12l2 2 4-4"/></svg>
-              </button>
-              <button id="ungroup-finance-btn" class="icon-action text-[#f59e0b]" title="Desfazer agrupamento" onclick="undoSelectedFuelGrouping()">
-                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M4 7h10M4 12h6M4 17h10"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M20 8l-4 4 4 4"/></svg>
-              </button>
-              <button id="view-finance-btn" class="icon-action text-[#d39a2f]" title="Visualizar" onclick="viewSelectedFinance()">
-                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M1.5 12s4-7 10.5-7 10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3" stroke-width="1.9"/></svg>
-              </button>
-              <button id="close-finance-expense-btn" class="icon-action text-[#3455a6]" title="Fechar despesa" onclick="openCloseFuelExpenseModal()">
-                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M7 11V8a5 5 0 0110 0v3"/><rect x="5" y="11" width="14" height="10" rx="2" ry="2" stroke-width="1.9"/></svg>
-              </button>
-              <button id="edit-finance-btn" class="icon-action text-[#81a4ff]" title="Editar lançamento" onclick="editSelectedFinance()">
-                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M16.5 4.5l3 3L9 18l-4 1 1-4 10.5-10.5z"/></svg>
-              </button>
-              <button id="delete-finance-btn" class="icon-action text-[#f28787]" title="Excluir lançamento" onclick="deleteSelectedFinance()">
-                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M4 7h16M9 7V5h6v2M8 7l1 12h6l1-12"/></svg>
-              </button>
+            <div id="finance-list-shell" class="entity-list-scroll">
+              <div id="finance-list" class="space-y-4">
+                <div class="empty-state">Nenhum lançamento financeiro cadastrado.</div>
+              </div>
             </div>
-          </div>
-          <div id="finance-list" class="space-y-4">
-            <div class="empty-state">Nenhum lançamento financeiro cadastrado.</div>
           </div>
         </section>
 
@@ -460,20 +483,20 @@
           <div class="filter-card p-6 sm:p-7 mb-8">
             <div class="grid xl:grid-cols-[1fr_1fr_1fr_1fr_auto_auto] gap-4 items-end">
               <div>
-                <label class="block text-[13px] font-bold uppercase tracking-wide text-slate-600 mb-3">Tipo de relatrio</label>
+                <label class="block text-[13px] font-bold uppercase tracking-wide text-slate-600 mb-3">Tipo de relatório</label>
                 <select id="report-filter-type" class="soft-input w-full">
                   <option value="cost">Custo por KM</option>
-                  <option value="orders">OS por veculo</option>
+                  <option value="orders">OS por veículo</option>
                   <option value="orders_open">OS abertas</option>
                   <option value="orders_progress">OS em andamento</option>
                   <option value="orders_closed">OS fechadas</option>
-                  <option value="orders_deleted">OS excludas</option>
+                  <option value="orders_deleted">OS excluídas</option>
                 </select>
               </div>
               <div>
-                <label class="block text-[13px] font-bold uppercase tracking-wide text-slate-600 mb-3">Veculo</label>
+                <label class="block text-[13px] font-bold uppercase tracking-wide text-slate-600 mb-3">Veículo</label>
                 <select id="report-filter-vehicle" class="soft-input w-full">
-                  <option value="">Todos os veculos</option>
+                  <option value="">Todos os veículos</option>
                 </select>
               </div>
               <div>
@@ -484,12 +507,12 @@
                 <label class="block text-[13px] font-bold uppercase tracking-wide text-slate-600 mb-3">Perodo final</label>
                 <input id="report-filter-end" type="date" class="soft-input w-full">
               </div>
-              <button class="icon-action primary" title="Atualizar relatrio" onclick="renderReports()">
+              <button class="icon-action primary" title="Atualizar relatório" onclick="renderReports()">
                 <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M4 5h16l-6 7v6l-4-2v-4L4 5z"/>
                 </svg>
               </button>
-              <button class="icon-action text-[#bd8dff]" title="Imprimir relatrio" onclick="printReport()">
+              <button class="icon-action text-[#bd8dff]" title="Imprimir relatório" onclick="printReport()">
                 <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M7 8V4h10v4M7 16H5a2 2 0 01-2-2v-3a2 2 0 012-2h14a2 2 0 012 2v3a2 2 0 01-2 2h-2M7 12h10v8H7z"/>
                 </svg>
@@ -498,11 +521,11 @@
           </div>
           <div class="grid xl:grid-cols-2 gap-6">
             <div id="report-cost-card" class="filter-card p-6">
-              <h3 class="text-lg font-extrabold text-slate-900 mb-4">Custo por KM por veculo</h3>
+              <h3 class="text-lg font-extrabold text-slate-900 mb-4">Custo por KM por veículo</h3>
               <div id="report-cost-table" class="space-y-3 text-sm text-slate-600"></div>
             </div>
             <div id="report-orders-card" class="filter-card p-6">
-              <h3 id="report-orders-title" class="text-lg font-extrabold text-slate-900 mb-4">OS por veculo</h3>
+              <h3 id="report-orders-title" class="text-lg font-extrabold text-slate-900 mb-4">OS por veículo</h3>
               <div id="report-orders-table" class="space-y-3 text-sm text-slate-600"></div>
             </div>
           </div>
@@ -519,7 +542,7 @@
     <div class="panel-head">
       <div>
         <p class="panel-kicker">WeFrotas</p>
-        <h2 class="panel-title">Configuraes</h2>
+        <h2 class="panel-title">Configurações</h2>
       </div>
       <button class="icon-action bg-white border border-slate-200 text-slate-600" type="button" onclick="toggleSettings(false)" aria-label="Fechar configurações">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -533,7 +556,7 @@
           <button type="button" class="settings-menu-item" onclick="openSettingsScreen('visual')">
             <div>
               <p class="settings-menu-title">Visual</p>
-              <p class="settings-menu-subtitle">Tema e aparncia do sistema</p>
+              <p class="settings-menu-subtitle">Tema e aparência do sistema</p>
             </div>
             <span class="settings-menu-arrow"></span>
           </button>
@@ -547,21 +570,21 @@
           <button type="button" class="settings-menu-item" onclick="openSettingsScreen('backup')">
             <div>
               <p class="settings-menu-title">Backup</p>
-              <p class="settings-menu-subtitle">Exportao e restaurao local</p>
+              <p class="settings-menu-subtitle">Exportação e restauração local</p>
             </div>
             <span class="settings-menu-arrow"></span>
           </button>
           <button type="button" class="settings-menu-item" onclick="openSettingsScreen('import')">
             <div>
-              <p class="settings-menu-title">Importao</p>
-              <p class="settings-menu-subtitle">Planilha de veculos e modelos</p>
+              <p class="settings-menu-title">Importação</p>
+              <p class="settings-menu-subtitle">Planilha de veículos e modelos</p>
             </div>
             <span class="settings-menu-arrow"></span>
           </button>
           <button type="button" class="settings-menu-item" onclick="openSettingsScreen('about')">
             <div>
               <p class="settings-menu-title">Sobre os dados</p>
-              <p class="settings-menu-subtitle">Como o WeFrotas salva informaes</p>
+              <p class="settings-menu-subtitle">Como o WeFrotas salva informações</p>
             </div>
             <span class="settings-menu-arrow"></span>
           </button>
@@ -609,8 +632,8 @@
               <input type="file" id="settings-custom-logo-file" class="settings-text-input" accept="image/png,image/jpeg,image/webp,image/svg+xml">
             </div>
             <div class="settings-logo-preview-shell">
-              <img id="settings-custom-logo-preview" class="settings-logo-preview" src="" alt="Prvia da logo personalizada" hidden>
-              <p id="settings-custom-logo-hint" class="settings-description !mb-0">Envie uma imagem do seu computador. Se a chave estiver desligada, o sistema continua usando a logo padro.</p>
+              <img id="settings-custom-logo-preview" class="settings-logo-preview" src="" alt="Prévia da logo personalizada" hidden>
+              <p id="settings-custom-logo-hint" class="settings-description !mb-0">Envie uma imagem do seu computador. Se a chave estiver desligada, o sistema continua usando a logo padrão.</p>
             </div>
             <div class="settings-field-stack">
               <label class="settings-input-label" for="settings-custom-logo-size">Tamanho da logo</label>
@@ -657,24 +680,24 @@
       <div id="settings-screen-import" class="settings-screen">
         <div class="settings-subhead">
           <button type="button" class="settings-back-btn" onclick="openSettingsScreen('home')"> Voltar</button>
-          <h3 class="settings-subtitle-title">Importao</h3>
+          <h3 class="settings-subtitle-title">Importação</h3>
         </div>
         <section class="settings-block">
-          <p class="settings-label">Importao em lote</p>
+          <p class="settings-label">Importação em lote</p>
           <div class="settings-list">
             <button type="button" class="settings-action-btn full" onclick="triggerBatchImport('vehicle')">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6h11v9H3z"/>
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4l3 3v2h-7z"/>
               </svg>
-              Importar veculos por planilha
+              Importar veículos por planilha
             </button>
           </div>
         </section>
         <section class="settings-block">
           <p class="settings-label">Modelos de planilha</p>
           <div class="settings-list">
-            <button type="button" class="settings-action-btn full" onclick="downloadBatchTemplate('vehicle')">Baixar modelo de veculos</button>
+            <button type="button" class="settings-action-btn full" onclick="downloadBatchTemplate('vehicle')">Baixar modelo de veículos</button>
           </div>
         </section>
       </div>
@@ -686,7 +709,7 @@
         </div>
         <section class="settings-block">
           <p class="settings-label">Armazenamento</p>
-          <p class="settings-description">Todos os cadastros do WeFrotas ficam salvos no <code>localStorage</code> do navegador. Use exportao e importao para manter backups seguros. A importao em lote est ativa apenas para veculos; motoristas e fornecedores seguem com cadastro manual.</p>
+          <p class="settings-description">Todos os cadastros do WeFrotas ficam salvos no <code>localStorage</code> do navegador. Use exportação e importação para manter backups seguros. A importação em lote está ativa apenas para veículos; motoristas e fornecedores seguem com cadastro manual.</p>
         </section>
       </div>
     </div>
@@ -697,7 +720,7 @@
     <div class="panel-head">
       <div>
         <p class="panel-kicker">WeFrotas</p>
-        <h2 class="panel-title">Notificaes</h2>
+        <h2 class="panel-title">Notificações</h2>
       </div>
       <button class="icon-action bg-white border border-slate-200 text-slate-600" type="button" onclick="toggleNotifications(false)" aria-label="Fechar notificações">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -707,7 +730,7 @@
     </div>
     <div class="panel-body space-y-4">
       <div class="flex items-center justify-between gap-3">
-        <p class="settings-label !mb-0">Histrico recente</p>
+        <p class="settings-label !mb-0">Histórico recente</p>
         <button type="button" class="settings-action-btn !h-11 !px-4" onclick="clearAllNotifications()">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7h16M9 7V5h6v2M8 7l1 12h6l1-12"/>
@@ -722,7 +745,12 @@
   <div id="prompt-modal-backdrop" class="prompt-modal-backdrop hidden" onclick="handlePromptBackdrop(event)">
     <div class="prompt-modal-card">
       <div class="prompt-modal-head">
-        <div>
+        <div class="prompt-modal-title-wrap">
+          <div id="prompt-modal-icon" class="prompt-modal-icon" aria-hidden="true">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v4m0 4h.01M4.93 19h14.14c1.54 0 2.5-1.67 1.73-3L13.73 4c-.77-1.33-2.69-1.33-3.46 0L3.2 16c-.77 1.33.19 3 1.73 3z"/>
+            </svg>
+          </div>
           <p class="panel-kicker">WeFrotas</p>
           <h3 id="prompt-modal-title" class="prompt-modal-title">Justificativa</h3>
         </div>
@@ -734,12 +762,12 @@
       </div>
       <div class="prompt-modal-body">
         <p id="prompt-modal-text" class="settings-description">Explique o motivo para continuar.</p>
-        <label class="settings-input-label" for="prompt-modal-input">Justificativa</label>
+        <label id="prompt-modal-input-label" class="settings-input-label" for="prompt-modal-input">Justificativa</label>
         <textarea id="prompt-modal-input" class="prompt-modal-textarea" placeholder="Descreva aqui o motivo"></textarea>
       </div>
       <div class="prompt-modal-actions">
-        <button type="button" class="settings-action-btn" onclick="closePromptModal()">Cancelar</button>
-        <button type="button" class="settings-action-btn active" onclick="confirmPromptModal()">Confirmar</button>
+        <button id="prompt-modal-cancel-btn" type="button" class="settings-action-btn" onclick="closePromptModal()">Cancelar</button>
+        <button id="prompt-modal-confirm-btn" type="button" class="settings-action-btn active" onclick="confirmPromptModal()">Confirmar</button>
       </div>
     </div>
   </div>
@@ -751,7 +779,7 @@
           <span class="batch-feedback-spinner"></span>
         </div>
         <p id="settings-feedback-kicker" class="panel-kicker text-center">WeFrotas</p>
-        <h3 id="settings-feedback-title" class="prompt-modal-title text-center">Salvando personalizao</h3>
+        <h3 id="settings-feedback-title" class="prompt-modal-title text-center">Salvando personalização</h3>
         <p id="settings-feedback-text" class="settings-description text-center">Aguarde enquanto aplicamos a sua logo personalizada.</p>
       </div>
       <div class="prompt-modal-actions justify-center">
@@ -790,7 +818,7 @@
       <div id="batch-feedback-icon" class="batch-feedback-icon loading">
         <span class="batch-feedback-spinner"></span>
       </div>
-      <p id="batch-feedback-kicker" class="batch-feedback-kicker">Importao em andamento</p>
+      <p id="batch-feedback-kicker" class="batch-feedback-kicker">Importação em andamento</p>
       <h3 id="batch-feedback-title" class="batch-feedback-title">Processando planilha...</h3>
       <p id="batch-feedback-text" class="batch-feedback-text">Estamos validando os registros e organizando os dados para entrada no WeFrotas.</p>
       <div id="batch-feedback-meta" class="batch-feedback-meta hidden"></div>
