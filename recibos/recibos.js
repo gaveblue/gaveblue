@@ -9,7 +9,7 @@
       }
     }
 
-    
+    // Função para diminuir zoom
     function diminuirZoom() {
       if (zoomAtual > 50) {
         zoomAtual -= 10;
