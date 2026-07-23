@@ -2,7 +2,7 @@ const pages = {
       inicio: () => `
         <section class="mt-10 sm:mt-16 px-1 sm:px-0">
           <div class="max-w-4xl mx-auto text-center mb-8 sm:mb-10">
-            <span class="inline-flex items-center px-4 py-1.5 rounded-full bg-indigo-500/15 border border-indigo-400/20 text-indigo-200 text-sm font-semibold mb-5">O que você encontra na GaveBlue?</span>
+            <span class="inline-flex items-center px-4 py-1.5 rounded-full bg-indigo-500/15 border border-indigo-400/20 text-indigo-200 text-sm font-semibold mb-5">O que você encontra na GaveBlue</span>
             <h1 id="hero-title" class="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-white leading-tight">
               <span class="block bg-gradient-to-r from-white via-slate-100 to-slate-300 bg-clip-text text-transparent">Ferramentas úteis para</span>
               <span class="block bg-gradient-to-r from-blue-300 via-cyan-300 to-indigo-300 bg-clip-text text-transparent">rotinas mais rápidas e organizadas</span>
@@ -11,7 +11,7 @@ const pages = {
               Desenvolvida para reunir ferramentas úteis em um só lugar, a GaveBlue facilita rotinas operacionais, consultas rápidas, organização de tarefas e testes práticos no dia a dia.
             </p>
             <div class="flex justify-center mt-6 sm:mt-8">
-              <a href="https://gaveblue.com/recibos" target="_self" rel="noopener noreferrer" class="inline-flex px-5 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl font-semibold text-sm sm:text-lg hover:from-blue-600 hover:to-purple-700 transition-all shadow-xl pulse-glow items-center gap-2 w-fit text-center">
+              <a href="https://gaveblue.com.br/recibos/" target="_self" rel="noopener noreferrer" class="inline-flex px-5 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl font-semibold text-sm sm:text-lg hover:from-blue-600 hover:to-purple-700 transition-all shadow-xl pulse-glow items-center gap-2 w-fit text-center">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                 Testar Grátis - Gerador de Recibos
               </a>
@@ -28,7 +28,7 @@ const pages = {
             </div>
           </div>
           <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5">
-            <a href="https://gaveblue.com/recibos" class="group rounded-[1.5rem] sm:rounded-[1.75rem] border border-slate-700/50 bg-white/[0.04] p-5 sm:p-7 hover:bg-white/[0.06] hover:border-blue-400/40 transition-all relative overflow-hidden">
+            <a href="https://gaveblue.com.br/recibos/" class="group rounded-[1.5rem] sm:rounded-[1.75rem] border border-slate-700/50 bg-white/[0.04] p-5 sm:p-7 hover:bg-white/[0.06] hover:border-blue-400/40 transition-all relative overflow-hidden">
               <span class="absolute top-5 right-5 px-3 py-1 rounded-full bg-emerald-500 text-white text-xs font-bold shadow-lg">Grátis</span>
               <div class="w-14 h-14 rounded-2xl bg-blue-500/15 border border-blue-400/20 flex items-center justify-center mb-5">
                 <svg class="w-7 h-7 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
@@ -36,7 +36,7 @@ const pages = {
               <h3 class="text-xl sm:text-2xl font-bold text-white mb-3">WeRecibos</h3>
               <p class="text-slate-300 leading-relaxed">Crie recibos online com rapidez e mais apresentação, ideal para quem precisa emitir documentos de forma prática e profissional.</p>
             </a>
-            <a href="https://gaveblue.com/wefrotas" class="group rounded-[1.5rem] sm:rounded-[1.75rem] border border-slate-700/50 bg-white/[0.04] p-5 sm:p-7 hover:bg-white/[0.06] hover:border-indigo-400/40 transition-all relative overflow-hidden">
+            <a href="https://gaveblue.com.br/wefrotas/" class="group rounded-[1.5rem] sm:rounded-[1.75rem] border border-slate-700/50 bg-white/[0.04] p-5 sm:p-7 hover:bg-white/[0.06] hover:border-indigo-400/40 transition-all relative overflow-hidden">
               <span class="absolute top-5 right-5 px-3 py-1 rounded-full bg-red-500 text-white text-xs font-bold shadow-lg">Novo</span>
               <div class="w-14 h-14 rounded-2xl bg-indigo-500/15 border border-indigo-400/20 flex items-center justify-center mb-5">
                 <svg class="w-7 h-7 text-indigo-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6h11v9H3z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4l3 3v2h-7z"/><circle cx="7" cy="18" r="2"></circle><circle cx="18" cy="18" r="2"></circle></svg>
@@ -44,7 +44,7 @@ const pages = {
               <h3 class="text-xl sm:text-2xl font-bold text-white mb-3">WeFrotas</h3>
               <p class="text-slate-300 leading-relaxed">Gerencie veículos, motoristas, ordens de serviço, financeiro e relatórios em uma central pensada para operações de frota.</p>
             </a>
-            <a href="https://gaveblue.com/wetasks" class="group rounded-[1.5rem] sm:rounded-[1.75rem] border border-slate-700/50 bg-white/[0.04] p-5 sm:p-7 hover:bg-white/[0.06] hover:border-amber-400/40 transition-all relative overflow-hidden">
+            <a href="https://gaveblue.com.br/wetasks/" class="group rounded-[1.5rem] sm:rounded-[1.75rem] border border-slate-700/50 bg-white/[0.04] p-5 sm:p-7 hover:bg-white/[0.06] hover:border-amber-400/40 transition-all relative overflow-hidden">
               <span class="absolute top-5 right-5 px-3 py-1 rounded-full bg-red-500 text-white text-xs font-bold shadow-lg">Novo</span>
               <div class="w-14 h-14 rounded-2xl bg-amber-500/15 border border-amber-400/20 flex items-center justify-center mb-5">
                 <svg class="w-7 h-7 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 6h11M9 12h11M9 18h11M5 6h.01M5 12h.01M5 18h.01" /></svg>
@@ -52,30 +52,43 @@ const pages = {
               <h3 class="text-xl sm:text-2xl font-bold text-white mb-3">WeTasks</h3>
               <p class="text-slate-300 leading-relaxed">Organize tarefas, acompanhe demandas e mantenha a rotina mais clara com um módulo pensado para produtividade diária.</p>
             </a>
-            <a href="https://gaveblue.com/weconsultas" data-update-card="weconsultas" data-update-size="12.4" class="group rounded-[1.5rem] sm:rounded-[1.75rem] border border-slate-700/50 bg-white/[0.04] p-5 sm:p-7 hover:bg-white/[0.06] hover:border-purple-400/40 transition-all relative overflow-hidden">
-              <span data-update-badge class="absolute top-5 right-5 px-3 py-1 rounded-full bg-amber-500 text-slate-950 text-[10px] sm:text-xs font-bold shadow-lg">Atualização disponível</span>
+            <a href="https://gaveblue.com.br/weconsultas/" class="group rounded-[1.5rem] sm:rounded-[1.75rem] border border-slate-700/50 bg-white/[0.04] p-5 sm:p-7 hover:bg-white/[0.06] hover:border-purple-400/40 transition-all relative overflow-hidden">
               <div class="w-14 h-14 rounded-2xl bg-purple-500/15 border border-purple-400/20 flex items-center justify-center mb-5">
                 <svg class="w-7 h-7 text-purple-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
               </div>
               <h3 class="text-xl sm:text-2xl font-bold text-white mb-3">WeConsultas</h3>
               <p class="text-slate-300 leading-relaxed">Consulte CEP, CNPJ e outras informações com mais agilidade para acelerar atendimentos, cadastros e verificações rápidas.</p>
             </a>
-            <a href="https://gaveblue.com/wedevs" data-update-card="wedevs" data-update-size="11.8" class="group rounded-[1.5rem] sm:rounded-[1.75rem] border border-slate-700/50 bg-white/[0.04] p-5 sm:p-7 hover:bg-white/[0.06] hover:border-cyan-400/40 transition-all relative overflow-hidden">
-              <span data-update-badge class="absolute top-5 right-5 px-3 py-1 rounded-full bg-amber-500 text-slate-950 text-[10px] sm:text-xs font-bold shadow-lg">Atualização disponível</span>
+            <a href="https://gaveblue.com.br/wedevs/" class="group rounded-[1.5rem] sm:rounded-[1.75rem] border border-slate-700/50 bg-white/[0.04] p-5 sm:p-7 hover:bg-white/[0.06] hover:border-cyan-400/40 transition-all relative overflow-hidden">
               <div class="w-14 h-14 rounded-2xl bg-cyan-500/15 border border-cyan-400/20 flex items-center justify-center mb-5">
                 <svg class="w-7 h-7 text-cyan-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4m0 0l-4 4m4-4H3" /></svg>
               </div>
               <h3 class="text-xl sm:text-2xl font-bold text-white mb-3">WeDevs</h3>
               <p class="text-slate-300 leading-relaxed">Teste HTML com rapidez em um ambiente simples para validar ideias, trechos de código e ajustes visuais sem complicação.</p>
             </a>
-            <a href="https://gaveblue.com/wetime" data-update-card="wetime" data-update-size="12.1" class="group rounded-[1.5rem] sm:rounded-[1.75rem] border border-slate-700/50 bg-white/[0.04] p-5 sm:p-7 hover:bg-white/[0.06] hover:border-green-400/40 transition-all relative overflow-hidden">
-              <span data-update-badge class="absolute top-5 right-5 px-3 py-1 rounded-full bg-amber-500 text-slate-950 text-[10px] sm:text-xs font-bold shadow-lg">Atualização disponível</span>
+            <a href="https://gaveblue.com.br/wetime/" class="group rounded-[1.5rem] sm:rounded-[1.75rem] border border-slate-700/50 bg-white/[0.04] p-5 sm:p-7 hover:bg-white/[0.06] hover:border-green-400/40 transition-all relative overflow-hidden">
               <div class="w-14 h-14 rounded-2xl bg-green-500/15 border border-green-400/20 flex items-center justify-center mb-5">
                 <svg class="w-7 h-7 text-green-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
               </div>
               <h3 class="text-xl sm:text-2xl font-bold text-white mb-3">WeTime</h3>
               <p class="text-slate-300 leading-relaxed">Acompanhe o horário em tempo real com uma ferramenta leve, útil para rotinas operacionais, conferências e uso rápido no navegador.</p>
             </a>
+            <a href="https://gaveblue.com.br/OPF/" class="group rounded-[1.5rem] sm:rounded-[1.75rem] border border-slate-700/50 bg-white/[0.04] p-5 sm:p-7 hover:bg-white/[0.06] hover:border-rose-400/40 transition-all relative overflow-hidden">
+              <span class="absolute top-5 right-5 px-3 py-1 rounded-full bg-rose-500 text-white text-xs font-bold shadow-lg">Novo</span>
+              <div class="w-14 h-14 rounded-2xl bg-rose-500/15 border border-rose-400/20 flex items-center justify-center mb-5">
+                <svg class="w-7 h-7 text-rose-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+              </div>
+              <h3 class="text-xl sm:text-2xl font-bold text-white mb-3">OPF</h3>
+              <p class="text-slate-300 leading-relaxed">Emita ordens de pagamento financeiro com uma interface centralizada para lançamentos, cadastros e conferência operacional.</p>
+            </a>
+            <div class="rounded-[1.5rem] sm:rounded-[1.75rem] border border-amber-400/25 bg-amber-500/[0.06] p-5 sm:p-7 relative overflow-hidden">
+              <span class="absolute top-5 right-5 px-3 py-1 rounded-full bg-slate-800 text-amber-200 text-xs font-bold shadow-lg border border-amber-400/20">Bloqueado</span>
+              <div class="w-14 h-14 rounded-2xl bg-amber-500/15 border border-amber-400/20 flex items-center justify-center mb-5">
+                <svg class="w-7 h-7 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2h-1V9a5 5 0 00-10 0v2H6a2 2 0 00-2 2v6a2 2 0 002 2zm3-10V9a3 3 0 016 0v2H9z" /></svg>
+              </div>
+              <h3 class="text-xl sm:text-2xl font-bold text-white mb-3">WePeople</h3>
+              <p class="text-slate-300 leading-relaxed">Módulo de departamento pessoal já preparado na estrutura, mas ainda bloqueado até a próxima liberação oficial.</p>
+            </div>
             <div class="rounded-[1.5rem] sm:rounded-[1.75rem] border border-dashed border-slate-600/60 bg-slate-900/30 p-5 sm:p-7">
               <div class="w-14 h-14 rounded-2xl bg-slate-800 border border-slate-700 flex items-center justify-center mb-5">
                 <svg class="w-7 h-7 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
@@ -99,7 +112,7 @@ const pages = {
                 <span class="inline-flex items-center rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-slate-300">Projetos pensados para web, mobile e operação interna</span>
               </div>
             </div>
-            <a href="https://gaveblue.com/postoscredenciados-covreecia" target="_self" rel="noopener noreferrer" class="block rounded-[1.5rem] border border-fuchsia-400/20 bg-white/[0.04] p-3 shadow-xl shadow-fuchsia-950/20 transition hover:border-fuchsia-300/40 hover:bg-white/[0.06]">
+            <a href="https://gaveblue.com.br/postoscredenciados-covreecia/" target="_self" rel="noopener noreferrer" class="block rounded-[1.5rem] border border-fuchsia-400/20 bg-white/[0.04] p-3 shadow-xl shadow-fuchsia-950/20 transition hover:border-fuchsia-300/40 hover:bg-white/[0.06]">
               <div class="overflow-hidden rounded-[1.1rem] border border-white/10 bg-slate-950/70">
                 <img src="https://i.imgur.com/2jRKz0K.png" alt="Material promocional de aplicativo desenvolvido para o Grupo Cover" class="w-full h-auto object-cover" loading="lazy">
               </div>
@@ -157,65 +170,6 @@ const pages = {
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-4 4v-4z" /></svg>
               Quero ser parceiro da GaveBlue
             </a>
-          </div>
-        </section>
-        <section class="mt-12 sm:mt-16 rounded-[1.5rem] sm:rounded-[2rem] border border-slate-700/50 bg-gradient-to-br from-slate-950/90 via-slate-900/85 to-slate-950/90 p-5 sm:p-8 lg:p-10 shadow-2xl shadow-blue-950/20">
-          <div class="max-w-3xl mx-auto text-center mb-10">
-            <span class="inline-flex items-center px-4 py-1.5 rounded-full bg-blue-500/10 border border-blue-400/20 text-blue-300 text-sm font-semibold mb-4">Por que escolher a GaveBlue?</span>
-            <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-4">Mais praticidade do que usar ferramentas soltas</h2>
-            <p class="text-slate-300 leading-relaxed">Em vez de depender de sites genéricos e soluções separadas, a GaveBlue reúne utilidades úteis para a rotina do dia a dia com acesso rápido, visual consistente e foco em produtividade.</p>
-          </div>
-          <div class="overflow-x-auto rounded-[1.75rem] border border-slate-700/50 bg-slate-950/40">
-            <div class="min-w-[760px] grid grid-cols-[1.2fr_0.9fr_1fr] gap-0 items-stretch overflow-hidden">
-              <div class="bg-white/[0.04] border-r border-slate-700/50 p-5 sm:p-7">
-                <div class="h-14 flex items-center text-slate-200 font-semibold text-lg border-b border-slate-700/50">Recursos disponíveis</div>
-                <div class="space-y-0 pt-2">
-                  <div class="h-12 flex items-center text-slate-200">Gerador de recibos online</div>
-                  <div class="h-12 flex items-center text-slate-200">Organização de tarefas</div>
-                  <div class="h-12 flex items-center text-slate-200">Consulta de CEP e CNPJ</div>
-                  <div class="h-12 flex items-center text-slate-200">Teste rápido de HTML</div>
-                  <div class="h-12 flex items-center text-slate-200">Relógio online em tempo real</div>
-                  <div class="h-12 flex items-center text-slate-200">Acesso centralizado</div>
-                  <div class="h-12 flex items-center text-slate-200">Interface padronizada</div>
-                  <div class="h-12 flex items-center text-slate-200">Lançamentos e novos módulos</div>
-                  <div class="h-12 flex items-center text-slate-200">Ferramentas gratuitas no ar</div>
-                </div>
-              </div>
-              <div class="border-r border-slate-700/50 p-5 sm:p-7 bg-slate-900/40">
-                <div class="h-14 flex items-center justify-center text-slate-300 font-semibold text-center border-b border-slate-700/50">Ferramentas genéricas</div>
-                <div class="space-y-0 pt-2 text-center">
-                  <div class="h-12 flex items-center justify-center text-pink-400 text-2xl">×</div>
-                  <div class="h-12 flex items-center justify-center text-pink-400 text-2xl">×</div>
-                  <div class="h-12 flex items-center justify-center text-pink-400 text-2xl">×</div>
-                  <div class="h-12 flex items-center justify-center text-pink-400 text-2xl">×</div>
-                  <div class="h-12 flex items-center justify-center text-pink-400 text-2xl">×</div>
-                  <div class="h-12 flex items-center justify-center text-pink-400 text-2xl">×</div>
-                  <div class="h-12 flex items-center justify-center text-pink-400 text-2xl">×</div>
-                  <div class="h-12 flex items-center justify-center text-pink-400 text-2xl">×</div>
-                  <div class="h-12 flex items-center justify-center text-yellow-300 text-xl">~</div>
-                </div>
-              </div>
-              <div class="relative p-5 sm:p-7 bg-gradient-to-b from-cyan-400/10 via-blue-500/5 to-emerald-400/10">
-                <div class="absolute inset-0 rounded-[1.6rem] border-2 border-cyan-300/70 pointer-events-none"></div>
-                <div class="h-14 flex items-center justify-center text-white font-bold text-center border-b border-cyan-300/20 relative">
-                  <span class="inline-flex items-center gap-2">
-                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_12px_rgba(74,222,128,0.9)]"></span>
-                    GaveBlue
-                  </span>
-                </div>
-                <div class="space-y-0 pt-2 text-center relative">
-                  <div class="h-12 flex items-center justify-center text-emerald-400 text-2xl">✓</div>
-                  <div class="h-12 flex items-center justify-center text-emerald-400 text-2xl">✓</div>
-                  <div class="h-12 flex items-center justify-center text-emerald-400 text-2xl">✓</div>
-                  <div class="h-12 flex items-center justify-center text-emerald-400 text-2xl">✓</div>
-                  <div class="h-12 flex items-center justify-center text-emerald-400 text-2xl">✓</div>
-                  <div class="h-12 flex items-center justify-center text-emerald-400 text-2xl">✓</div>
-                  <div class="h-12 flex items-center justify-center text-emerald-400 text-2xl">✓</div>
-                  <div class="h-12 flex items-center justify-center text-emerald-400 text-2xl">✓</div>
-                  <div class="h-12 flex items-center justify-center text-emerald-400 text-2xl">✓</div>
-                </div>
-              </div>
-            </div>
           </div>
         </section>
       `
@@ -358,145 +312,3 @@ const pages = {
         mapToEditPanelValues
       });
     }
-
-    const updateModal = document.getElementById('update-modal');
-    const updateTitle = document.getElementById('update-title');
-    const updateSubtitle = document.getElementById('update-subtitle');
-    const updateFileLabel = document.getElementById('update-file-label');
-    const updateProgressText = document.getElementById('update-progress-text');
-    const updateProgressBar = document.getElementById('update-progress-bar');
-    const updateSizeText = document.getElementById('update-size-text');
-    const updateNotes = document.getElementById('update-notes');
-    let updateTimer = null;
-    const updateStorageKey = 'gaveblue_module_updates_v1';
-
-    const modulePatchNotes = {
-      weconsultas: [
-        'Download em PDF mais estável no CNPJ',
-        'Ajustes de responsividade no celular',
-        'Refino visual na jornada de consulta'
-      ],
-      wedevs: [
-        'Importação múltipla de arquivos aprimorada',
-        'Pré-visualização mais estável sob demanda',
-        'Melhorias no uso do editor em telas menores'
-      ],
-      wetime: [
-        'Busca global mais fluida',
-        'Melhorias de foco e navegação entre módulos',
-        'Refinos visuais no painel principal'
-      ]
-    };
-
-    function getUpdatedModules() {
-      try {
-        const raw = localStorage.getItem(updateStorageKey);
-        const parsed = raw ? JSON.parse(raw) : {};
-        return parsed && typeof parsed === 'object' ? parsed : {};
-      } catch (error) {
-        return {};
-      }
-    }
-
-    function markModuleAsUpdated(moduleName) {
-      try {
-        const updates = getUpdatedModules();
-        updates[moduleName] = true;
-        localStorage.setItem(updateStorageKey, JSON.stringify(updates));
-      } catch (error) {
-        console.warn('Não foi possível salvar o estado da atualização.', error);
-      }
-    }
-
-    function isModuleUpdated(moduleName) {
-      const updates = getUpdatedModules();
-      return Boolean(updates[moduleName]);
-    }
-
-    function applyModuleUpdateBadge(cardLink) {
-      const moduleName = cardLink.dataset.updateCard;
-      const badge = cardLink.querySelector('[data-update-badge]');
-      if (!moduleName || !badge) return;
-
-      if (isModuleUpdated(moduleName)) {
-        badge.textContent = 'Atualizado';
-        badge.classList.remove('bg-amber-500', 'text-slate-950');
-        badge.classList.add('bg-emerald-500', 'text-white');
-      } else {
-        badge.textContent = 'Atualização disponível';
-        badge.classList.remove('bg-emerald-500', 'text-white');
-        badge.classList.add('bg-amber-500', 'text-slate-950');
-      }
-    }
-
-    function simulateModuleUpdate(link) {
-      const moduleName = link.dataset.updateCard || 'módulo';
-      const sizeMb = Number(link.dataset.updateSize || '12');
-      const targetUrl = link.getAttribute('href');
-      const prettyName = moduleName === 'weconsultas'
-        ? 'WeConsultas'
-        : moduleName === 'wedevs'
-          ? 'WeDevs'
-          : moduleName === 'wetime'
-            ? 'WeTime'
-            : 'Módulo';
-
-      if (!updateModal || !targetUrl) {
-        window.location.href = targetUrl;
-        return;
-      }
-
-      if (isModuleUpdated(moduleName)) {
-        window.location.href = targetUrl;
-        return;
-      }
-
-      clearInterval(updateTimer);
-      updateTitle.textContent = `Atualizando ${prettyName}`;
-      updateSubtitle.textContent = `Baixando a versão mais recente do ${prettyName} para abrir o módulo com os recursos novos.`;
-      updateFileLabel.textContent = `${prettyName}.update`;
-      updateProgressText.textContent = '0%';
-      updateProgressBar.style.width = '0%';
-      updateSizeText.textContent = `0.0 MB / ${sizeMb.toFixed(1)} MB`;
-      if (updateNotes) {
-        const notes = modulePatchNotes[moduleName] || [
-          'Melhorias gerais de estabilidade',
-          'Ajustes visuais no módulo',
-          'Refinos na navegação e desempenho'
-        ];
-        updateNotes.innerHTML = notes.map((note) => `<li>${note}</li>`).join('');
-      }
-      updateModal.classList.remove('hidden');
-      updateModal.classList.add('flex');
-
-      let progress = 0;
-      updateTimer = setInterval(() => {
-        progress += Math.floor(Math.random() * 16) + 8;
-        if (progress >= 100) {
-          progress = 100;
-        }
-
-        const downloaded = ((sizeMb * progress) / 100).toFixed(1);
-        updateProgressText.textContent = `${progress}%`;
-        updateProgressBar.style.width = `${progress}%`;
-        updateSizeText.textContent = `${downloaded} MB / ${sizeMb.toFixed(1)} MB`;
-
-        if (progress === 100) {
-          clearInterval(updateTimer);
-          markModuleAsUpdated(moduleName);
-          applyModuleUpdateBadge(link);
-          updateSubtitle.textContent = `Atualização concluída. Abrindo ${prettyName}...`;
-          setTimeout(() => {
-            window.location.href = targetUrl;
-          }, 700);
-        }
-      }, 420);
-    }
-
-    document.querySelectorAll('[data-update-card]').forEach((cardLink) => {
-      applyModuleUpdateBadge(cardLink);
-      cardLink.addEventListener('click', (event) => {
-        event.preventDefault();
-        simulateModuleUpdate(cardLink);
-      });
-    });
