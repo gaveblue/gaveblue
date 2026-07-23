@@ -360,7 +360,7 @@
 
     // Função para sair da aplicação
     function sairAplicacao() {
-      window.location.href = 'https://gaveblue.com';
+      window.location.href = 'https://gaveblue.com.br/';
     }
 
     const globalSearchInputEl = document.getElementById('global-search-input');
@@ -372,12 +372,12 @@
     const mobileSearchModalEl = document.getElementById('mobile-search-modal');
     const searchFocusOverlayEl = document.getElementById('search-focus-overlay');
     const ecosystemModules = [
-      { name: 'WeTime', description: 'Relógio online e painel de horário', url: 'https://gaveblue.com/wetime' },
-      { name: 'WeRecibos', description: 'Gerador de recibos', url: 'https://gaveblue.com/recibos' },
-      { name: 'WeConsultas', description: 'Consultas empresariais', url: 'https://gaveblue.com/weconsultas' },
-      { name: 'WeFrotas', description: 'Gestão de frotas', url: 'https://gaveblue.com/wefrotas' },
-      { name: 'WeDevs', description: 'Ferramentas e utilidades dev', url: 'https://gaveblue.com/wedevs' },
-      { name: 'WeTasks', description: 'Tarefas e organização', url: 'https://gaveblue.com/wetasks' }
+      { name: 'WeTime', description: 'Relógio online e painel de horário', url: 'https://gaveblue.com.br/wetime' },
+      { name: 'WeRecibos', description: 'Gerador de recibos', url: 'https://gaveblue.com.br/recibos' },
+      { name: 'WeConsultas', description: 'Consultas empresariais', url: 'https://gaveblue.com.br/weconsultas' },
+      { name: 'WeFrotas', description: 'Gestão de frotas', url: 'https://gaveblue.com.br/wefrotas' },
+      { name: 'WeDevs', description: 'Ferramentas e utilidades dev', url: 'https://gaveblue.com.br/wedevs' },
+      { name: 'WeTasks', description: 'Tarefas e organização', url: 'https://gaveblue.com.br/wetasks' }
     ];
     let filteredModules = [];
     let highlightedModuleIndex = -1;
@@ -581,7 +581,7 @@
     }
 
     async function copiarChavePixApoio() {
-      const chave = 'comercial@gaveblue.com';
+      const chave = 'apoio@gaveblue.com.br';
       const botao = document.getElementById('support-copy-btn');
       const textoBotao = botao ? botao.querySelector('.support-copy-btn-text') : null;
 
@@ -975,7 +975,7 @@
       atualizarBadgeNotificacoes();
     }
 
-    // FunÃ§Ã£o para carregar notificaÃ§Ãµes
+    // Função para carregar notificações
     function carregarNotificacoes() {
       const notificacoes = JSON.parse(localStorage.getItem('notificacoes') || JSON.stringify(notificacoesPadrao));
       const notificacoesLidas = JSON.parse(localStorage.getItem('notificacoes-lidas') || '[]');
@@ -995,7 +995,7 @@
         
         item.innerHTML = `
           <p class="notificacao-titulo">
-            ${notificacao.icone || 'ðŸ“¢'} ${notificacao.titulo}
+            ${notificacao.icone || '📢'} ${notificacao.titulo}
             ${estaLida ? '<span class="notificacao-badge-lida">✓ Lida</span>' : ''}
           </p>
           <p class="notificacao-descricao">${notificacao.descricao}</p>
@@ -1005,7 +1005,7 @@
       });
     }
 
-    // FunÃ§Ã£o para marcar notificaÃ§Ã£o como lida
+    // Função para marcar notificação como lida
     function marcarComoLida(notificacaoId) {
       let notificacoesLidas = JSON.parse(localStorage.getItem('notificacoes-lidas') || '[]');
       
@@ -1018,7 +1018,7 @@
       }
     }
 
-    // FunÃ§Ã£o para marcar todas como lidas
+    // Função para marcar todas como lidas
     function marcarTodasLidas() {
       const notificacoes = JSON.parse(localStorage.getItem('notificacoes') || JSON.stringify(notificacoesPadrao));
       const todasLidas = notificacoes.map(n => n.id);
@@ -1029,7 +1029,7 @@
       mostrarMensagem('Todas as notificações foram marcadas como lidas!', 'sucesso');
     }
 
-    // FunÃ§Ã£o para atualizar badge de notificaÃ§Ãµes
+    // Função para atualizar badge de notificações
     function atualizarBadgeNotificacoes() {
       const notificacoes = JSON.parse(localStorage.getItem('notificacoes') || JSON.stringify(notificacoesPadrao));
       const notificacoesLidas = JSON.parse(localStorage.getItem('notificacoes-lidas') || '[]');
@@ -1046,7 +1046,7 @@
       }
     }
 
-    // Inicializar notificaÃ§Ãµes ao carregar
+    // Inicializar notificações ao carregar
     window.addEventListener('DOMContentLoaded', function() {
       inicializarNotificacoes();
     });
@@ -1055,7 +1055,7 @@
       document.getElementById('popup-ajuda').classList.remove('hidden');
     }
 
-    // FunÃ§Ã£o para fechar ajuda
+    // Função para fechar ajuda
     function fecharAjuda() {
       document.getElementById('popup-ajuda').classList.add('hidden');
     }
@@ -1069,27 +1069,27 @@
       document.getElementById('popup-emitentes').classList.remove('hidden');
     }
 
-    // FunÃ§Ã£o para fechar gerenciador de emitentes
+    // Função para fechar gerenciador de emitentes
     function fecharEmitentes() {
       document.getElementById('popup-emitentes').classList.add('hidden');
       document.getElementById('novo-emitente-nome').value = '';
       document.getElementById('novo-emitente-cpf').value = '';
     }
 
-    // FunÃ§Ã£o para abrir gerenciador de recebedores
+    // Função para abrir gerenciador de recebedores
     function abrirRecebedores() {
       carregarRecebedores();
       document.getElementById('popup-recebedores').classList.remove('hidden');
     }
 
-    // FunÃ§Ã£o para fechar gerenciador de recebedores
+    // Função para fechar gerenciador de recebedores
     function fecharRecebedores() {
       document.getElementById('popup-recebedores').classList.add('hidden');
       document.getElementById('novo-recebedor-nome').value = '';
       document.getElementById('novo-recebedor-cpf').value = '';
     }
 
-    // FunÃ§Ã£o para adicionar recebedor
+    // Função para adicionar recebedor
     function adicionarRecebedor() {
       const nome = document.getElementById('novo-recebedor-nome').value.trim();
       const cpf = document.getElementById('novo-recebedor-cpf').value.trim();
@@ -1115,7 +1115,7 @@
       mostrarMensagem('Recebedor adicionado com sucesso!', 'sucesso');
     }
 
-    // FunÃ§Ã£o para carregar recebedores
+    // Função para carregar recebedores
     function carregarRecebedores() {
       const recebedores = JSON.parse(localStorage.getItem('recebedores') || '[]');
       const container = document.getElementById('lista-recebedores');
@@ -1143,7 +1143,7 @@
       });
     }
 
-    // FunÃ§Ã£o para usar recebedor
+    // Função para usar recebedor
     function usarRecebedor(id) {
       const recebedores = JSON.parse(localStorage.getItem('recebedores') || '[]');
       const recebedor = recebedores.find(r => r.id == id);
@@ -1166,7 +1166,7 @@
       mostrarMensagem('Recebedor carregado!', 'sucesso');
     }
 
-    // FunÃ§Ã£o para deletar recebedor
+    // Função para deletar recebedor
     function deletarRecebedor(id) {
       let recebedores = JSON.parse(localStorage.getItem('recebedores') || '[]');
       recebedores = recebedores.filter(r => r.id != id);
@@ -1175,7 +1175,7 @@
       mostrarMensagem('Recebedor deletado!', 'sucesso');
     }
 
-    // FunÃ§Ã£o auxiliar para formatar CPF/CNPJ sem modificar o input
+    // Função auxiliar para formatar CPF/CNPJ sem modificar o input
     function formatarCpfCnpj2(valor) {
       let cpf = valor.replace(/\D/g, '');
       cpf = cpf.substring(0, 14);
@@ -1194,7 +1194,7 @@
       return cpf;
     }
 
-    // FunÃ§Ã£o para mostrar sugestÃµes de emitente
+    // Função para mostrar sugestões de emitente
     function mostrarSugestoesEmitente(input) {
       const valor = input.value.toLowerCase().trim();
       const container = document.getElementById('sugestoes-emitente');
@@ -1228,7 +1228,7 @@
       container.style.display = 'block';
     }
 
-    // FunÃ§Ã£o para selecionar emitente da sugestão
+    // Função para selecionar emitente da sugestão
     function selecionarEmitenteSugestao(emitente) {
       document.getElementById('emitente').value = emitente.nome;
       document.getElementById('cpfcnpj').value = emitente.cpf;
@@ -1236,7 +1236,7 @@
       document.getElementById('sugestoes-emitente').style.display = 'none';
     }
 
-    // FunÃ§Ã£o para mostrar sugestÃµes de recebedor
+    // Função para mostrar sugestões de recebedor
     function mostrarSugestoesRecebedor(input) {
       const valor = input.value.toLowerCase().trim();
       const container = document.getElementById('sugestoes-recebedor');
@@ -1270,7 +1270,7 @@
       container.style.display = 'block';
     }
 
-    // FunÃ§Ã£o para selecionar recebedor da sugestÃ£o
+    // Função para selecionar recebedor da sugestão
     function selecionarRecebedorSugestao(recebedor) {
       const cpfFormatado = formatarCpfCnpj2(recebedor.cpf);
       const linhaFormatada = `${recebedor.nome}, inscrita(a) sob o CPF/CNPJ nº ${cpfFormatado}`;
@@ -1278,7 +1278,7 @@
       document.getElementById('sugestoes-recebedor').style.display = 'none';
     }
 
-    // Configurar eventos para sugestÃµes ao carregar pÃ¡gina
+    // Configurar eventos para sugestões ao carregar página
     window.addEventListener('DOMContentLoaded', function() {
       const emitenteInput = document.getElementById('emitente');
       const recebedorInput = document.getElementById('recebedor');
@@ -1316,7 +1316,7 @@
       }
     });
 
-    // FunÃ§Ã£o para adicionar emitente
+    // Função para adicionar emitente
     function adicionarEmitente() {
       const nome = document.getElementById('novo-emitente-nome').value.trim();
       const cpf = document.getElementById('novo-emitente-cpf').value.trim();
@@ -1342,7 +1342,7 @@
       mostrarMensagem('Emitente adicionado com sucesso!', 'sucesso');
     }
 
-    // FunÃ§Ã£o para carregar emitentes
+    // Função para carregar emitentes
     function carregarEmitentes() {
       const emitentes = JSON.parse(localStorage.getItem('emitentes') || '[]');
       const container = document.getElementById('lista-emitentes');
@@ -1370,7 +1370,7 @@
       });
     }
 
-    // FunÃ§Ã£o para usar emitente
+    // Função para usar emitente
     function usarEmitente(id) {
       const emitentes = JSON.parse(localStorage.getItem('emitentes') || '[]');
       const emitente = emitentes.find(e => e.id == id);
@@ -1396,7 +1396,7 @@
       mostrarMensagem('Emitente carregado!', 'sucesso');
     }
 
-    // FunÃ§Ã£o para deletar emitente
+    // Função para deletar emitente
     function deletarEmitente(id) {
       let emitentes = JSON.parse(localStorage.getItem('emitentes') || '[]');
       emitentes = emitentes.filter(e => e.id != id);
@@ -1405,18 +1405,18 @@
       mostrarMensagem('Emitente deletado!', 'sucesso');
     }
 
-    // FunÃ§Ã£o para abrir histÃ³rico
+    // Função para abrir histórico
     function abrirHistorico() {
       carregarHistorico();
       document.getElementById('popup-historico').classList.remove('hidden');
     }
 
-    // FunÃ§Ã£o para fechar histÃ³rico
+    // Função para fechar histórico
     function fecharHistorico() {
       document.getElementById('popup-historico').classList.add('hidden');
     }
 
-    // FunÃ§Ã£o para salvar recibo no histÃ³rico
+    // Função para salvar recibo no histórico
     function salvarNoHistorico(dados) {
       let historico = JSON.parse(localStorage.getItem('historico-recibos') || '[]');
       
@@ -1435,7 +1435,7 @@
       localStorage.setItem('historico-recibos', JSON.stringify(historico));
     }
 
-    // FunÃ§Ã£o para carregar histÃ³rico
+    // Função para carregar histórico
     function carregarHistorico() {
       const historico = JSON.parse(localStorage.getItem('historico-recibos') || '[]');
       const container = document.getElementById('lista-historico');
@@ -1464,7 +1464,7 @@
       });
     }
 
-    // FunÃ§Ã£o para visualizar recibos do histÃ³rico
+    // Função para visualizar recibos do histórico
     function visualizarRecibosHistorico(id) {
       const historico = JSON.parse(localStorage.getItem('historico-recibos') || '[]');
       const item = historico.find(h => h.id == id);
@@ -1546,7 +1546,7 @@
       mostrarMensagem('Recibo restaurado do histórico!', 'sucesso');
     }
 
-    // FunÃ§Ã£o para deletar recibo do histÃ³rico
+    // Função para deletar recibo do histórico
     function deletarRecibosHistorico(id) {
       let historico = JSON.parse(localStorage.getItem('historico-recibos') || '[]');
       historico = historico.filter(h => h.id != id);
@@ -1555,7 +1555,7 @@
       mostrarMensagem('Recibo deletado do histórico!', 'sucesso');
     }
 
-    // FunÃ§Ã£o para limpar histÃ³rico completo
+    // Função para limpar histórico completo
     function limparHistorico() {
       if (confirm('Tem certeza que deseja limpar todo o histórico? Esta ação não poderá ser desfeita.')) {
         localStorage.removeItem('historico-recibos');
@@ -1564,7 +1564,7 @@
       }
     }
 
-    // FunÃ§Ã£o para salvar recibo atual no histÃ³rico
+    // Função para salvar recibo atual no histórico
     function salvarRecibosAtual() {
       const reciboPadrao = document.getElementById('recibo');
       const reciboCompleto = document.getElementById('recibo-completo');
@@ -1648,7 +1648,7 @@
 
       salvarNoHistorico(dadosRecibo);
       
-      // Limpar campos apÃ³s salvar
+      // Limpar campos após salvar
       if (modeloAtual === 'simplificado') {
         document.getElementById('valor-simples').value = '';
         document.getElementById('nome-principal').value = '';
@@ -1776,18 +1776,18 @@
       }
     }
 
-    // FunÃ§Ã£o para mostrar toast
+    // Função para mostrar toast
     function mostrarToast() {
       mostrarToastGlobal('Recibos importados com sucesso!', 'success', '✓', 2600);
     }
 
-    // FunÃ§Ã£o auxiliar para mostrar mensagens
+    // Função auxiliar para mostrar mensagens
     function mostrarMensagem(texto, tipo) {
       const ehErro = tipo === 'erro';
       mostrarToastGlobal(texto, ehErro ? 'error' : 'success', ehErro ? '!' : '✓', 2600);
     }
 
-    // FunÃ§Ã£o para converter nÃºmero para extenso
+    // Função para converter número para extenso
     function numeroParaExtenso(valor) {
       if (!valor || isNaN(valor) || valor === 0) return '';
       
@@ -2219,9 +2219,21 @@
         return;
       }
 
-      const htmlRecibos = recibosVisiveis
-        .map((recibo) => `<div class="print-item">${clonarReciboParaImpressao(recibo)}</div>`)
-        .join('');
+      const isTrainerBatchPrint = recibosVisiveis.length > 1
+        && recibosVisiveis.every((recibo) => recibo.classList.contains('recibo-moyses'));
+
+      const htmlRecibos = isTrainerBatchPrint
+        ? Array.from({ length: Math.ceil(recibosVisiveis.length / 2) }, (_, pageIndex) => {
+            const pageReceipts = recibosVisiveis.slice(pageIndex * 2, pageIndex * 2 + 2);
+            return `
+              <div class="print-sheet print-sheet--trainer">
+                ${pageReceipts.map((recibo) => `<div class="print-item print-item--trainer">${clonarReciboParaImpressao(recibo)}</div>`).join('')}
+              </div>
+            `;
+          }).join('')
+        : recibosVisiveis
+            .map((recibo) => `<div class="print-item">${clonarReciboParaImpressao(recibo)}</div>`)
+            .join('');
 
       const janelaImpressao = window.open('', '_blank', 'width=900,height=1200');
 
@@ -2266,6 +2278,29 @@
             .print-item + .print-item {
               break-before: page !important;
               page-break-before: always !important;
+            }
+            .print-sheet--trainer {
+              width: 210mm;
+              min-height: 297mm;
+              padding: 8mm 12mm 7mm;
+              display: flex;
+              flex-direction: column;
+              gap: 8mm;
+              break-after: page;
+              page-break-after: always;
+            }
+            .print-sheet--trainer:last-child {
+              break-after: auto;
+              page-break-after: auto;
+            }
+            .trainer-print .print-item + .print-item {
+              break-before: auto !important;
+              page-break-before: auto !important;
+            }
+            .trainer-print .print-item--trainer {
+              flex: 1 1 0;
+              display: flex;
+              align-items: stretch;
             }
             .recibo {
               position: relative;
@@ -2484,6 +2519,19 @@
               -webkit-appearance: none;
               appearance: none;
             }
+            .trainer-print .recibo-moyses {
+              width: 100% !important;
+              max-width: none !important;
+              min-height: 0 !important;
+              height: 100%;
+              padding: 12mm 6mm 10mm !important;
+            }
+            .trainer-print .moyses-corpo-vazio {
+              min-height: 78mm;
+            }
+            .trainer-print .moyses-assinatura-area {
+              padding-top: 4mm;
+            }
             .checkbox-recibo,
             .botoes,
             .loading-overlay,
@@ -2499,7 +2547,7 @@
             }
           </style>
         </head>
-        <body>
+        <body class="${isTrainerBatchPrint ? 'trainer-print' : ''}">
           ${htmlRecibos}
           <script>
             window.onload = function () {
