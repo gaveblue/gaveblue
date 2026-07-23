@@ -31,6 +31,7 @@ let allVehicles = [];
     let systemNotifications = [];
     let pendingBatchImportEntity = null;
     let pendingPromptConfirm = null;
+    let pendingPromptCancel = null;
     let filteredModules = [];
     let highlightedModuleIndex = -1;
     let activeSearchInputEl = null;
@@ -43,7 +44,10 @@ let allVehicles = [];
     let promptModalConfig = {
       allowEmpty: false,
       exactValue: '',
-      confirmLabel: 'Confirmar'
+      confirmLabel: 'Confirmar',
+      cancelLabel: 'Cancelar',
+      mode: 'prompt',
+      closeOnBackdrop: true
     };
 
     function generateId() {
@@ -352,6 +356,95 @@ let allVehicles = [];
       return vehicle ? `${vehicle.numeroFrota}  ${vehicle.placa}  ${vehicle.modelo}` : 'Veículo não encontrado';
     }
 
+    function getNumericOrderValue(value) {
+      const digits = String(value || '').replace(/\D/g, '');
+      return digits ? Number(digits) : Number.MAX_SAFE_INTEGER;
+    }
+
+    function getSortedVehicles() {
+      return allVehicles
+        .slice()
+        .sort((a, b) => {
+          const numberCompare = getNumericOrderValue(a.numeroFrota) - getNumericOrderValue(b.numeroFrota);
+          if (numberCompare !== 0) return numberCompare;
+          return `${a.placa || ''} ${a.modelo || ''}`.localeCompare(`${b.placa || ''} ${b.modelo || ''}`, 'pt-BR');
+        });
+    }
+
+    function getVehicleAutocompleteLabel(vehicle) {
+      return `${vehicle.numeroFrota || '-'} - ${vehicle.placa || '-'} - ${vehicle.modelo || 'Veículo'}`;
+    }
+
+    function getOpenOrdersSorted() {
+      return allOrders
+        .filter(order => order.status !== 'fechada')
+        .slice()
+        .sort((a, b) => getNumericOrderValue(a.numero) - getNumericOrderValue(b.numero));
+    }
+
+    function getOrderAutocompleteLabel(order) {
+      const vehicle = allVehicles.find(item => item.id === order.vehicleId);
+      return `OS ${getOrderNumberLabel(order)} - ${vehicle?.numeroFrota || '-'} - ${vehicle?.placa || '-'} - ${vehicle?.modelo || 'Veículo'}`;
+    }
+
+    function resolveVehicleFromSearch(rawValue, vehicles = getSortedVehicles()) {
+      const normalized = rawValue.trim().toLowerCase();
+      if (!normalized) return null;
+
+      const exactMatch = vehicles.find(vehicle =>
+        getVehicleAutocompleteLabel(vehicle).toLowerCase() === normalized
+        || String(vehicle.numeroFrota || '').toLowerCase() === normalized
+        || String(vehicle.placa || '').toLowerCase() === normalized
+      );
+      if (exactMatch) return exactMatch;
+
+      const matches = vehicles.filter(vehicle =>
+        getVehicleAutocompleteLabel(vehicle).toLowerCase().includes(normalized)
+        || String(vehicle.numeroFrota || '').toLowerCase().includes(normalized)
+        || String(vehicle.placa || '').toLowerCase().includes(normalized)
+      );
+      return matches.length === 1 ? matches[0] : null;
+    }
+
+    function resolveOrderFromSearch(rawValue, orders = getOpenOrdersSorted()) {
+      const normalized = rawValue.trim().toLowerCase();
+      const cleanNormalized = normalized.replace(/^os\s*/i, '');
+      if (!normalized) return null;
+
+      const exactMatch = orders.find(order =>
+        getOrderAutocompleteLabel(order).toLowerCase() === normalized
+        || getOrderNumberLabel(order).toLowerCase() === cleanNormalized
+      );
+      if (exactMatch) return exactMatch;
+
+      const matches = orders.filter(order =>
+        getOrderAutocompleteLabel(order).toLowerCase().includes(normalized)
+        || getOrderNumberLabel(order).toLowerCase().includes(cleanNormalized)
+      );
+      return matches.length === 1 ? matches[0] : null;
+    }
+
+    function bindAutocompleteField({ inputId, hiddenId, items, labelGetter, resolver }) {
+      const input = document.getElementById(inputId);
+      const hidden = document.getElementById(hiddenId);
+      if (!input || !hidden) return;
+
+      const syncValue = () => {
+        const rawValue = input.value.trim();
+        if (!rawValue) {
+          hidden.value = '';
+          return;
+        }
+        const exactMatch = items.find(item => labelGetter(item).toLowerCase() === rawValue.toLowerCase());
+        const resolved = exactMatch || resolver(rawValue, items);
+        hidden.value = resolved ? resolved.id : '';
+      };
+
+      input.addEventListener('input', syncValue);
+      input.addEventListener('change', syncValue);
+      syncValue();
+    }
+
     function getDriverLabel(driverId) {
       const driver = allDrivers.find(item => item.id === driverId);
       return driver ? driver.nome : 'Responsável não encontrado';
@@ -417,7 +510,49 @@ let allVehicles = [];
       const groupedIds = Array.isArray(entry.groupedEntryIds) ? entry.groupedEntryIds : [];
       return groupedIds
         .map(id => allFinanceEntries.find(item => item.id === id))
-        .filter(Boolean);
+        .filter(Boolean)
+        .sort((a, b) => {
+          const dateCompare = String(getFinanceEntryDate(a)).localeCompare(String(getFinanceEntryDate(b)));
+          if (dateCompare !== 0) return dateCompare;
+          return String(a.createdAt || '').localeCompare(String(b.createdAt || ''));
+        });
+    }
+
+    function getFinanceSupplierSummary(entry) {
+      if (!entry) return '';
+      if (!isFuelGroupEntry(entry)) {
+        return [entry.fornecedor, entry.nf, entry.fuelType].filter(Boolean).join('  ');
+      }
+
+      const children = getFuelGroupChildren(entry);
+      const supplierNames = [...new Set(children.map(item => item.fornecedor).filter(Boolean))];
+      const notes = children.map(item => item.nf).filter(Boolean);
+      return [
+        supplierNames.join(', '),
+        entry.nf || '',
+        notes.length ? `Notas: ${notes.join(', ')}` : ''
+      ].filter(Boolean).join('  ');
+    }
+
+    function getOrderGroupedFuelReportRows(orderId) {
+      return allFinanceEntries
+        .filter(entry => entry.orderId === orderId && isFuelGroupEntry(entry))
+        .map(entry => {
+          const children = getFuelGroupChildren(entry)
+            .slice()
+            .sort((a, b) => String(getFinanceEntryDate(a)).localeCompare(String(getFinanceEntryDate(b))));
+          const totalLitros = children.reduce((sum, item) => sum + Number(item.litros || 0), 0);
+          const latestKm = children.reduce((maxKm, item) => Math.max(maxKm, Number(item.km || 0)), 0);
+          return {
+            id: entry.id,
+            supplierSummary: getFinanceSupplierSummary(entry),
+            dates: children.map(item => getFinanceEntryDate(item)).filter(Boolean),
+            total: getFinanceTotal(entry),
+            litros: totalLitros,
+            km: latestKm || '',
+            childCount: children.length
+          };
+        });
     }
 
     function getFuelEntriesForVehicle(vehicleId, excludeId = '') {
@@ -624,52 +759,84 @@ let allVehicles = [];
       document.querySelector('#settings-panel .panel-body')?.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    function openPromptModal({ title, text, placeholder = '', value = '', onConfirm, allowEmpty = false, exactValue = '', confirmLabel = 'Confirmar' }) {
+    function openPromptModal({
+      title,
+      text,
+      placeholder = '',
+      value = '',
+      onConfirm,
+      onCancel = null,
+      allowEmpty = false,
+      exactValue = '',
+      confirmLabel = 'Confirmar',
+      cancelLabel = 'Cancelar',
+      mode = 'prompt',
+      closeOnBackdrop = true
+    }) {
       const backdrop = document.getElementById('prompt-modal-backdrop');
       const titleNode = document.getElementById('prompt-modal-title');
       const textNode = document.getElementById('prompt-modal-text');
       const input = document.getElementById('prompt-modal-input');
-      const confirmButton = document.querySelector('#prompt-modal-backdrop .primary-btn');
-      if (!backdrop || !titleNode || !textNode || !input) return;
+      const inputLabel = document.getElementById('prompt-modal-input-label');
+      const confirmButton = document.getElementById('prompt-modal-confirm-btn');
+      const cancelButton = document.getElementById('prompt-modal-cancel-btn');
+      if (!backdrop || !titleNode || !textNode || !input || !inputLabel || !confirmButton || !cancelButton) return;
       pendingPromptConfirm = typeof onConfirm === 'function' ? onConfirm : null;
-      promptModalConfig = { allowEmpty, exactValue: String(exactValue || ''), confirmLabel };
+      pendingPromptCancel = typeof onCancel === 'function' ? onCancel : null;
+      const shouldHideInput = mode === 'confirm' || (allowEmpty && !exactValue);
+      promptModalConfig = {
+        allowEmpty,
+        exactValue: String(exactValue || ''),
+        confirmLabel,
+        cancelLabel,
+        mode,
+        closeOnBackdrop
+      };
       titleNode.textContent = title || 'Justificativa';
       textNode.textContent = text || '';
       input.placeholder = placeholder || 'Descreva aqui o motivo';
       input.value = value || '';
-      input.style.display = allowEmpty && !exactValue ? 'none' : 'block';
-      if (confirmButton) confirmButton.textContent = confirmLabel;
+      input.style.display = shouldHideInput ? 'none' : 'block';
+      inputLabel.style.display = shouldHideInput ? 'none' : 'block';
+      confirmButton.textContent = confirmLabel;
+      cancelButton.textContent = cancelLabel;
+      backdrop.dataset.mode = mode;
       backdrop.classList.remove('hidden');
-      if (!(allowEmpty && !exactValue)) setTimeout(() => input.focus(), 30);
+      if (!shouldHideInput) setTimeout(() => input.focus(), 30);
     }
 
-    function closePromptModal() {
-      document.getElementById('prompt-modal-backdrop')?.classList.add('hidden');
+    function closePromptModal(triggerCancel = true) {
+      const backdrop = document.getElementById('prompt-modal-backdrop');
+      backdrop?.classList.add('hidden');
+      if (backdrop) delete backdrop.dataset.mode;
       const input = document.getElementById('prompt-modal-input');
       if (input) input.value = '';
-      promptModalConfig = { allowEmpty: false, exactValue: '', confirmLabel: 'Confirmar' };
+      const cancelHandler = pendingPromptCancel;
+      promptModalConfig = { allowEmpty: false, exactValue: '', confirmLabel: 'Confirmar', cancelLabel: 'Cancelar', mode: 'prompt', closeOnBackdrop: true };
       pendingPromptConfirm = null;
+      pendingPromptCancel = null;
+      if (triggerCancel && cancelHandler) cancelHandler();
     }
 
     function handlePromptBackdrop(event) {
-      if (event.target === event.currentTarget) closePromptModal();
+      if (event.target === event.currentTarget && promptModalConfig.closeOnBackdrop) closePromptModal();
     }
 
     function confirmPromptModal() {
       const input = document.getElementById('prompt-modal-input');
       const value = input?.value?.trim() || '';
-      if (!promptModalConfig.allowEmpty && !value) {
+      if (promptModalConfig.mode !== 'confirm' && !promptModalConfig.allowEmpty && !value) {
         showToast('Informe uma justificativa para continuar.');
         input?.focus();
         return;
       }
-      if (promptModalConfig.exactValue && value.toUpperCase() !== promptModalConfig.exactValue.toUpperCase()) {
+      if (promptModalConfig.mode !== 'confirm' && promptModalConfig.exactValue && value.toUpperCase() !== promptModalConfig.exactValue.toUpperCase()) {
         showToast(`Digite ${promptModalConfig.exactValue} para continuar.`);
         input?.focus();
         return;
       }
       const handler = pendingPromptConfirm;
-      closePromptModal();
+      closePromptModal(false);
       if (handler) handler(value);
     }
 
@@ -981,10 +1148,10 @@ let allVehicles = [];
                 <div class="contents">
                   <div class="p-4 text-sm font-semibold ${isDark ? 'text-slate-200' : 'text-slate-700'} ${index < 8 ? (isDark ? 'border-b border-slate-700' : 'border-b border-slate-200') : ''}">${label}</div>
                   <div class="p-4 flex items-center justify-center border-l ${isDark ? 'border-slate-700' : 'border-slate-200'} ${index < 8 ? (isDark ? 'border-b border-slate-700' : 'border-b border-slate-200') : ''}">
-                    <span class="inline-flex h-8 w-8 items-center justify-center rounded-full ${free ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-500'} text-lg font-extrabold">${free ? '' : ''}</span>
+                    <span class="inline-flex h-8 w-8 items-center justify-center rounded-full ${free ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-500'} text-lg font-extrabold">${free ? '✓' : '—'}</span>
                   </div>
                   <div class="p-4 flex items-center justify-center border-l ${isDark ? 'border-amber-500/30 bg-[#1b2230]' : 'border-amber-200 bg-[#fffdf4]'} ${index < 8 ? (isDark ? 'border-b border-slate-700' : 'border-b border-amber-100') : ''}">
-                    <span class="inline-flex h-8 w-8 items-center justify-center rounded-full ${premium ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-500'} text-lg font-extrabold">${premium ? '' : ''}</span>
+                    <span class="inline-flex h-8 w-8 items-center justify-center rounded-full ${premium ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-500'} text-lg font-extrabold">${premium ? '✓' : '—'}</span>
                   </div>
                 </div>
               `).join('')}
@@ -1213,9 +1380,7 @@ let allVehicles = [];
     }
 
     function handleModalBackdrop(event) {
-      if (event.target.id === 'modal-backdrop') {
-        closeCadastroModal();
-      }
+      if (event) event.stopPropagation();
     }
 
     function downloadBlob(filename, blob) {
@@ -1743,6 +1908,92 @@ let allVehicles = [];
       };
     }
 
+    function getVehicleCurrentKm(vehicleId) {
+      const entries = allFinanceEntries
+        .filter(entry => isFuelEntry(entry) && getEntryVehicleId(entry) === vehicleId && entry.km !== '' && getFinanceEntryDate(entry))
+        .sort((a, b) => {
+          const dateCompare = String(getFinanceEntryDate(b)).localeCompare(String(getFinanceEntryDate(a)));
+          if (dateCompare !== 0) return dateCompare;
+          return Number(b.km || 0) - Number(a.km || 0);
+        });
+
+      if (!entries.length) return null;
+      return Number(entries[0].km || 0);
+    }
+
+    function getRevisionDescription(revisionKm) {
+      return `REVISAO DE ${Number(revisionKm || 0).toLocaleString('pt-BR')}KM`;
+    }
+
+    function normalizeRevisionText(value) {
+      return String(value || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^A-Z0-9]/gi, '')
+        .toUpperCase();
+    }
+
+    function findOpenRevisionOrder(vehicleId, revisionKm) {
+      const revisionToken = normalizeRevisionText(getRevisionDescription(revisionKm));
+      return allOrders.find(order =>
+        order.vehicleId === vehicleId
+        && order.status !== 'fechada'
+        && normalizeRevisionText(order.descricao).includes(revisionToken)
+      ) || null;
+    }
+
+    function getVehicleMaintenanceStatus(vehicle) {
+      const currentKm = getVehicleCurrentKm(vehicle.id);
+      if (currentKm === null || Number.isNaN(currentKm)) {
+        return {
+          currentKm: null,
+          nextRevisionKm: null,
+          remainingKm: null,
+          isAlert: false,
+          openOrder: null
+        };
+      }
+
+      const nextRevisionKm = Math.ceil(currentKm / 10000) * 10000 || 10000;
+      const remainingKm = Math.max(nextRevisionKm - currentKm, 0);
+      const openOrder = findOpenRevisionOrder(vehicle.id, nextRevisionKm);
+
+      return {
+        currentKm,
+        nextRevisionKm,
+        remainingKm,
+        isAlert: remainingKm <= 2000,
+        openOrder
+      };
+    }
+
+    function openRevisionOrderForVehicle(vehicleId) {
+      const vehicle = allVehicles.find(item => item.id === vehicleId);
+      if (!vehicle) {
+        showToast('Não foi possível localizar o veículo para abrir a OS.');
+        return;
+      }
+
+      const maintenance = getVehicleMaintenanceStatus(vehicle);
+      if (!maintenance.nextRevisionKm) {
+        showToast('Esse veículo ainda não possui KM atual para gerar a OS de revisão.');
+        return;
+      }
+
+      if (maintenance.openOrder) {
+        showToast(`Já existe uma OS aberta para a revisão de ${maintenance.nextRevisionKm.toLocaleString('pt-BR')} KM.`);
+        return;
+      }
+
+      openCadastroModal('order');
+      document.getElementById('order-veiculo').value = vehicle.id;
+      document.getElementById('order-data-inicio').value = getLocalIsoDate();
+      document.getElementById('order-status').value = 'aberta';
+      document.getElementById('order-descricao').value = getRevisionDescription(maintenance.nextRevisionKm);
+      document.getElementById('modal-title').textContent = 'Abrir OS de revisão';
+      showToast(`OS preparada para revisão de ${maintenance.nextRevisionKm.toLocaleString('pt-BR')} KM.`);
+    }
+
     function getVehicleCostStats(options = {}) {
       const vehicleId = options.vehicleId || '';
       const start = options.start || '';
@@ -1874,6 +2125,7 @@ let allVehicles = [];
     }
 
     function getVisibleFinanceEntries() {
+      const quickSearch = normalizeComparableText(document.getElementById('finance-filter-search')?.value || '');
       const supplierFilter = document.getElementById('finance-filter-supplier')?.value.trim().toLowerCase() || '';
       const statusFilter = document.getElementById('finance-filter-status')?.value || '';
       const vehicleFilter = document.getElementById('finance-filter-vehicle')?.value || '';
@@ -1892,6 +2144,23 @@ let allVehicles = [];
       if (statusFilter) visibleEntries = visibleEntries.filter(entry => getFinanceEntryStatus(entry) === statusFilter);
       if (vehicleFilter) visibleEntries = visibleEntries.filter(entry => getEntryVehicleId(entry) === vehicleFilter);
       if (dateFilter) visibleEntries = visibleEntries.filter(entry => getFinanceEntryDate(entry) === dateFilter);
+      if (quickSearch) {
+        visibleEntries = visibleEntries.filter(entry => {
+          const order = allOrders.find(item => item.id === entry.orderId);
+          const vehicle = allVehicles.find(item => item.id === getEntryVehicleId(entry));
+          const haystack = normalizeComparableText([
+            entry.fornecedor,
+            entry.nf,
+            entry.observacoes,
+            entry.kindLabel,
+            entry.fuelType,
+            entry.km,
+            order ? `OS ${getOrderNumberLabel(order)}` : '',
+            vehicle ? `${vehicle.numeroFrota || ''} ${vehicle.placa || ''} ${vehicle.modelo || ''}` : ''
+          ].join(' '));
+          return haystack.includes(quickSearch);
+        });
+      }
       if (valueFilter) {
         const normalizedValue = valueFilter.replace(/[^\d,.-]/g, '').replace(',', '.');
         visibleEntries = visibleEntries.filter(entry => {
@@ -1926,26 +2195,26 @@ let allVehicles = [];
         .filter(supplier => entryType === 'combustivel' ? supplier.tipo === 'posto' : supplier.tipo !== 'posto')
         .map(supplier => `<option value="${supplier.id}">${escapeHtml(supplier.nome)}  ${escapeHtml(supplier.tipoLabel)}</option>`)
         .join('');
-      const orderOptions = allOrders
-        .filter(order => order.status !== 'fechada')
-        .map(order => `<option value="${order.id}">OS ${escapeHtml(getOrderNumberLabel(order))}  ${escapeHtml(getVehicleLabel(order.vehicleId))}</option>`)
+      const openOrders = getOpenOrdersSorted();
+      const orderOptions = openOrders
+        .map(order => `<option value="${escapeHtml(getOrderAutocompleteLabel(order))}"></option>`)
         .join('');
-      const vehicleOptions = allVehicles
-        .map(vehicle => `<option value="${vehicle.id}">${escapeHtml(vehicle.numeroFrota)}  ${escapeHtml(vehicle.placa)}  ${escapeHtml(vehicle.modelo)}</option>`)
+      const sortedVehicles = getSortedVehicles();
+      const vehicleOptions = sortedVehicles
+        .map(vehicle => `<option value="${escapeHtml(getVehicleAutocompleteLabel(vehicle))}"></option>`)
         .join('');
 
       kicker.textContent = 'Financeiro';
-      title.textContent = entryType === 'combustivel' ? 'Lancamento de combustivel' : 'Lancar despesa';
+      title.textContent = entryType === 'combustivel' ? 'Lançamento de combustível' : 'Lançar despesa';
 
       if (entryType === 'combustivel') {
         fields.innerHTML = `
           <input id="finance-kind" type="hidden" value="despesa">
           <div class="field-wrap full">
-            <label>${requiredLabel('Veiculo')}</label>
-            <select class="soft-input w-full" id="finance-vehicle-id" required>
-              <option value="">Selecione o veículo</option>
-              ${vehicleOptions}
-            </select>
+            <label>${requiredLabel('Veículo')}</label>
+            <input id="finance-vehicle-id" type="hidden">
+            <input class="soft-input w-full" id="finance-vehicle-search" list="finance-vehicle-options" placeholder="Digite frota, placa ou nome do veículo" autocomplete="off" required>
+            <datalist id="finance-vehicle-options">${vehicleOptions}</datalist>
           </div>
           <div class="field-wrap">
             <label>${requiredLabel('Data de abastecimento')}</label>
@@ -1992,18 +2261,20 @@ let allVehicles = [];
             </select>
           </div>
           <div class="field-wrap full">
-            <label>Observacoes</label>
-            <textarea class="soft-input textarea w-full" id="finance-observacoes" placeholder="Observacoes do abastecimento"></textarea>
+            <label>Observações</label>
+            <textarea class="soft-input textarea w-full" id="finance-observacoes" placeholder="Observações do abastecimento"></textarea>
           </div>
         `;
       } else {
         fields.innerHTML = `
           <div class="field-wrap full">
             <label>Alocar na OS</label>
-            <select class="soft-input w-full" id="finance-order-id">
-              <option value="">Lancar sem OS por enquanto</option>
+            <input id="finance-order-id" type="hidden">
+            <input class="soft-input w-full" id="finance-order-search" list="finance-order-options" placeholder="Digite número da OS, frota, placa ou veículo" autocomplete="off">
+            <datalist id="finance-order-options">
+              <option value="Lançar sem OS por enquanto"></option>
               ${orderOptions}
-            </select>
+            </datalist>
           </div>
           <div class="field-wrap">
             <label>${requiredLabel('Natureza financeira')}</label>
@@ -2024,7 +2295,7 @@ let allVehicles = [];
             </select>
           </div>
           <div class="field-wrap">
-            <label>NF / referencia</label>
+            <label>NF / referência</label>
             <input class="soft-input w-full" id="finance-nf" placeholder="Ex: NF 1542">
           </div>
           <div class="field-wrap">
@@ -2036,13 +2307,30 @@ let allVehicles = [];
             <input class="soft-input w-full" id="finance-total" type="number" min="0" step="0.01" value="0">
           </div>
           <div class="field-wrap full">
-            <label>Observacoes</label>
-            <textarea class="soft-input textarea w-full" id="finance-observacoes" placeholder="Observacoes do lancamento"></textarea>
+            <label>Observações</label>
+            <textarea class="soft-input textarea w-full" id="finance-observacoes" placeholder="Observações do lançamento"></textarea>
           </div>
         `;
       }
 
-      setModalSubmitState(true, entryType === 'combustivel' ? 'Salvar abastecimento' : 'Salvar lancamento');
+      setModalSubmitState(true, entryType === 'combustivel' ? 'Salvar abastecimento' : 'Salvar lançamento');
+      if (entryType === 'combustivel') {
+        bindAutocompleteField({
+          inputId: 'finance-vehicle-search',
+          hiddenId: 'finance-vehicle-id',
+          items: sortedVehicles,
+          labelGetter: getVehicleAutocompleteLabel,
+          resolver: resolveVehicleFromSearch
+        });
+      } else {
+        bindAutocompleteField({
+          inputId: 'finance-order-search',
+          hiddenId: 'finance-order-id',
+          items: openOrders,
+          labelGetter: getOrderAutocompleteLabel,
+          resolver: resolveOrderFromSearch
+        });
+      }
       toggleFinanceSpecificFields();
       attachModalInputMasks();
     }
@@ -2080,9 +2368,10 @@ let allVehicles = [];
 
       const vehicleId = vehicleIds[0];
       const vehicle = allVehicles.find(item => item.id === vehicleId);
-      const orderOptions = allOrders
-        .filter(order => order.status !== 'fechada' && order.vehicleId === vehicleId)
-        .map(order => `<option value="${order.id}">OS ${escapeHtml(getOrderNumberLabel(order))}  ${escapeHtml(getVehicleLabel(order.vehicleId))}</option>`)
+      const groupOpenOrders = getOpenOrdersSorted()
+        .filter(order => order.vehicleId === vehicleId);
+      const orderOptions = groupOpenOrders
+        .map(order => `<option value="${escapeHtml(getOrderAutocompleteLabel(order))}"></option>`)
         .join('');
       const totalBase = selectedEntries.reduce((sum, entry) => sum + getFinanceTotal(entry), 0);
       const fields = document.getElementById('modal-fields');
@@ -2094,11 +2383,11 @@ let allVehicles = [];
       fields.innerHTML = `
         <input id="finance-group-entry-ids" type="hidden" value="${selectedEntries.map(entry => entry.id).join(',')}">
         <div class="field-wrap full">
-          <label>Veiculo do agrupamento</label>
+          <label>Veículo do agrupamento</label>
           <div class="soft-input w-full flex items-center">${escapeHtml(vehicle ? `${vehicle.numeroFrota}  ${vehicle.placa}  ${vehicle.modelo}` : '-')}</div>
         </div>
         <div class="field-wrap full">
-          <label>Historico dos abastecimentos</label>
+          <label>Histórico dos abastecimentos</label>
           <div class="space-y-3 max-h-[220px] overflow-y-auto pr-1">
             ${selectedEntries.map(entry => `
               <div class="rounded-2xl border border-slate-200 px-4 py-3 bg-slate-50">
@@ -2108,7 +2397,7 @@ let allVehicles = [];
                 </div>
                 <div class="mt-2 text-sm text-slate-500 flex gap-3 flex-wrap">
                   <span>Data: ${escapeHtml(formatDate(getFinanceEntryDate(entry)))}</span>
-                  ${entry.fuelType ? `<span>Combustivel: ${escapeHtml(entry.fuelType)}</span>` : ''}
+                  ${entry.fuelType ? `<span>Combustível: ${escapeHtml(entry.fuelType)}</span>` : ''}
                   ${entry.km ? `<span>KM: ${escapeHtml(entry.km)}</span>` : ''}
                 </div>
               </div>
@@ -2120,7 +2409,7 @@ let allVehicles = [];
           <input class="soft-input w-full" id="finance-group-data-vencimento" type="date">
         </div>
         <div class="field-wrap">
-          <label>Numero da nota</label>
+          <label>Número da nota</label>
           <input class="soft-input w-full" id="finance-group-nf" placeholder="Ex: NF 1542">
         </div>
         <div class="field-wrap">
@@ -2129,21 +2418,34 @@ let allVehicles = [];
         </div>
         <div class="field-wrap full">
           <label>Alocar na OS (opcional)</label>
-          <select class="soft-input w-full" id="finance-group-order-id">
-            <option value="">Deixar pendente</option>
+          <input id="finance-group-order-id" type="hidden">
+          <input class="soft-input w-full" id="finance-group-order-search" list="finance-group-order-options" placeholder="Digite número da OS, frota, placa ou veículo" autocomplete="off">
+          <datalist id="finance-group-order-options">
+            <option value="Deixar pendente"></option>
             ${orderOptions}
-          </select>
+          </datalist>
         </div>
         <div class="field-wrap full">
-          <label>Observacoes</label>
-          <textarea class="soft-input textarea w-full" id="finance-group-observacoes" placeholder="Observacoes do agrupamento"></textarea>
+          <label>Observações</label>
+          <textarea class="soft-input textarea w-full" id="finance-group-observacoes" placeholder="Observações do agrupamento"></textarea>
         </div>
       `;
 
       document.getElementById('finance-group-order-id').value = existingGroup?.orderId || '';
+      if (document.getElementById('finance-group-order-search')) {
+        const existingOrder = groupOpenOrders.find(order => order.id === existingGroup?.orderId);
+        document.getElementById('finance-group-order-search').value = existingOrder ? getOrderAutocompleteLabel(existingOrder) : '';
+      }
       document.getElementById('finance-group-data-vencimento').value = existingGroup?.dataVencimento || '';
       document.getElementById('finance-group-nf').value = existingGroup?.nf || '';
       document.getElementById('finance-group-observacoes').value = existingGroup?.observacoes || '';
+      bindAutocompleteField({
+        inputId: 'finance-group-order-search',
+        hiddenId: 'finance-group-order-id',
+        items: groupOpenOrders,
+        labelGetter: getOrderAutocompleteLabel,
+        resolver: resolveOrderFromSearch
+      });
       setModalSubmitState(true, existingGroup ? 'Salvar agrupamento' : 'Criar agrupamento');
     }
 
@@ -2199,9 +2501,10 @@ let allVehicles = [];
       }
 
       const vehicleId = getEntryVehicleId(entry);
-      const orderOptions = allOrders
-        .filter(order => order.status !== 'fechada' && (!vehicleId || order.vehicleId === vehicleId))
-        .map(order => `<option value="${order.id}">OS ${escapeHtml(getOrderNumberLabel(order))}  ${escapeHtml(getVehicleLabel(order.vehicleId))}</option>`)
+      const closeOpenOrders = getOpenOrdersSorted()
+        .filter(order => !vehicleId || order.vehicleId === vehicleId);
+      const orderOptions = closeOpenOrders
+        .map(order => `<option value="${escapeHtml(getOrderAutocompleteLabel(order))}"></option>`)
         .join('');
       const fields = document.getElementById('modal-fields');
       const kicker = document.getElementById('modal-kicker');
@@ -2235,21 +2538,34 @@ let allVehicles = [];
         </div>
         <div class="field-wrap full">
           <label>Alocar na OS?</label>
-          <select class="soft-input w-full" id="finance-close-order-id">
-            <option value="">Nao alocar agora</option>
+          <input id="finance-close-order-id" type="hidden">
+          <input class="soft-input w-full" id="finance-close-order-search" list="finance-close-order-options" placeholder="Digite número da OS, frota, placa ou veículo" autocomplete="off">
+          <datalist id="finance-close-order-options">
+            <option value="Não alocar agora"></option>
             ${orderOptions}
-          </select>
+          </datalist>
         </div>
         <div class="field-wrap full">
-          <label>Observacoes</label>
-          <textarea class="soft-input textarea w-full" id="finance-close-observacoes" placeholder="Observacoes do fechamento da despesa"></textarea>
+          <label>Observações</label>
+          <textarea class="soft-input textarea w-full" id="finance-close-observacoes" placeholder="Observações do fechamento da despesa"></textarea>
         </div>
       `;
 
       document.getElementById('finance-close-nf').value = entry.nf || '';
       document.getElementById('finance-close-data-vencimento').value = entry.dataVencimento || '';
       document.getElementById('finance-close-order-id').value = entry.orderId || '';
+      if (document.getElementById('finance-close-order-search')) {
+        const existingOrder = closeOpenOrders.find(order => order.id === entry.orderId);
+        document.getElementById('finance-close-order-search').value = existingOrder ? getOrderAutocompleteLabel(existingOrder) : '';
+      }
       document.getElementById('finance-close-observacoes').value = entry.observacoes || '';
+      bindAutocompleteField({
+        inputId: 'finance-close-order-search',
+        hiddenId: 'finance-close-order-id',
+        items: closeOpenOrders,
+        labelGetter: getOrderAutocompleteLabel,
+        resolver: resolveOrderFromSearch
+      });
       setModalSubmitState(true, 'Fechar despesa');
     }
 
@@ -2264,9 +2580,28 @@ let allVehicles = [];
       const costTableNode = document.getElementById('home-cost-table');
       const cnhTableNode = document.getElementById('home-cnh-table');
       const insuranceTableNode = document.getElementById('home-insurance-table');
+      const maintenanceTableNode = document.getElementById('home-maintenance-table');
       const vehicleStats = getVehicleCostStats().filter(item => item.entries > 0);
       const bestVehicle = vehicleStats[0];
       const { cnhItems, insuranceItems } = getDashboardExpirations();
+      const maintenanceItems = getSortedVehicles()
+        .map(vehicle => ({
+          vehicle,
+          maintenance: getVehicleMaintenanceStatus(vehicle)
+        }))
+        .sort((a, b) => {
+          const aHasKm = a.maintenance.currentKm !== null;
+          const bHasKm = b.maintenance.currentKm !== null;
+          if (aHasKm && !bHasKm) return -1;
+          if (!aHasKm && bHasKm) return 1;
+          if (!aHasKm && !bHasKm) {
+            return getNumericOrderValue(a.vehicle.numeroFrota) - getNumericOrderValue(b.vehicle.numeroFrota);
+          }
+          if (a.maintenance.remainingKm !== b.maintenance.remainingKm) {
+            return a.maintenance.remainingKm - b.maintenance.remainingKm;
+          }
+          return getNumericOrderValue(a.vehicle.numeroFrota) - getNumericOrderValue(b.vehicle.numeroFrota);
+        });
 
       if (vehiclesNode) vehiclesNode.textContent = allVehicles.length;
       if (driversNode) driversNode.textContent = allDrivers.length;
@@ -2328,6 +2663,47 @@ let allVehicles = [];
           `
         );
       }
+      if (maintenanceTableNode) {
+        maintenanceTableNode.innerHTML = renderDashboardTableRows(
+          maintenanceItems,
+          ({ vehicle, maintenance }) => {
+            const currentKmLabel = maintenance.currentKm === null ? 'Sem KM atual' : `${maintenance.currentKm.toLocaleString('pt-BR')} km`;
+            const nextRevisionLabel = maintenance.nextRevisionKm === null ? 'Aguardando KM' : `${maintenance.nextRevisionKm.toLocaleString('pt-BR')} km`;
+            const alertLabel = maintenance.currentKm === null
+              ? 'Registre abastecimentos com KM para ativar o controle.'
+              : maintenance.openOrder
+                ? `OS ${getOrderNumberLabel(maintenance.openOrder)} aberta para ${nextRevisionLabel}.`
+                : maintenance.isAlert
+                  ? `Faltam ${maintenance.remainingKm.toLocaleString('pt-BR')} km para a próxima revisão.`
+                  : `Faltam ${maintenance.remainingKm.toLocaleString('pt-BR')} km para a próxima revisão.`;
+            const badgeClass = maintenance.openOrder
+              ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+              : maintenance.isAlert
+                ? 'bg-amber-50 text-amber-700 border-amber-200'
+                : 'bg-slate-50 text-slate-600 border-slate-200';
+
+            return `
+              <div class="rounded-[24px] border border-slate-200 px-5 py-5">
+                <div class="flex items-start justify-between gap-4 flex-wrap">
+                  <div>
+                    <p class="font-extrabold text-slate-900">${escapeHtml(vehicle.numeroFrota || '-')} - ${escapeHtml(vehicle.placa || '-')} - ${escapeHtml(vehicle.modelo || 'Veículo')}</p>
+                    <p class="text-xs text-slate-500 mt-2">KM atual: ${escapeHtml(currentKmLabel)}  Próxima revisão: ${escapeHtml(nextRevisionLabel)}</p>
+                  </div>
+                  <span class="inline-flex items-center rounded-full border px-3 py-1 text-xs font-bold ${badgeClass}">
+                    ${maintenance.openOrder ? 'OS aberta' : maintenance.isAlert ? 'Agendar revisão' : 'No prazo'}
+                  </span>
+                </div>
+                <div class="mt-4 flex items-center justify-between gap-4 flex-wrap">
+                  <p class="text-sm text-slate-600">${escapeHtml(alertLabel)}</p>
+                  ${maintenance.isAlert && !maintenance.openOrder
+                    ? `<button type="button" class="soft-btn primary" onclick="openRevisionOrderForVehicle('${vehicle.id}')">Abrir OS</button>`
+                    : ''}
+                </div>
+              </div>
+            `;
+          }
+        );
+      }
     }
 
     function renderReports() {
@@ -2381,6 +2757,7 @@ let allVehicles = [];
           const total = typeof order.totalLinked === 'number'
             ? order.totalLinked
             : allFinanceEntries.filter(entry => entry.orderId === order.id).reduce((sum, entry) => sum + getFinanceTotal(entry), 0);
+          const groupedFuelRows = getOrderGroupedFuelReportRows(order.id);
           const dateLabel = filters.type === 'orders_deleted'
             ? formatDate(String(order.deletedAt || '').slice(0, 10))
             : formatDate(order.dataInicio);
@@ -2389,9 +2766,35 @@ let allVehicles = [];
             : (order.status || '-');
           return `
             <div class="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 px-4 py-3">
-              <div>
+              <div class="w-full">
                 <p class="font-bold text-slate-800">OS ${escapeHtml(getOrderNumberLabel(order))}  ${escapeHtml(vehicle ? vehicle.placa : '-')}</p>
                 <p class="text-xs text-slate-500">${escapeHtml(order.descricao || '-')}</p>
+                ${groupedFuelRows.length ? `
+                  <div class="mt-4 overflow-hidden rounded-2xl border border-slate-200">
+                    <table class="w-full text-xs">
+                      <thead class="bg-slate-50 text-slate-500 uppercase">
+                        <tr>
+                          <th class="px-3 py-2 text-left">Data abastecimento</th>
+                          <th class="px-3 py-2 text-left">Fornecedor / NFs</th>
+                          <th class="px-3 py-2 text-right">Valor</th>
+                          <th class="px-3 py-2 text-right">Qtd</th>
+                          <th class="px-3 py-2 text-right">KM</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        ${groupedFuelRows.map(row => `
+                          <tr class="border-t border-slate-200">
+                            <td class="px-3 py-2">${escapeHtml(row.dates.map(date => formatDate(date)).join(', ') || '-')}</td>
+                            <td class="px-3 py-2">${escapeHtml(row.supplierSummary || '-')}</td>
+                            <td class="px-3 py-2 text-right">${escapeHtml(formatCurrency(row.total))}</td>
+                            <td class="px-3 py-2 text-right">${escapeHtml(row.litros ? row.litros.toFixed(3) : '-')}</td>
+                            <td class="px-3 py-2 text-right">${escapeHtml(row.km ? row.km.toLocaleString('pt-BR') : '-')}</td>
+                          </tr>
+                        `).join('')}
+                      </tbody>
+                    </table>
+                  </div>
+                ` : ''}
               </div>
               <div class="text-right">
                 <p class="font-extrabold text-[#6267d9]">${escapeHtml(formatCurrency(total))}</p>
@@ -2433,6 +2836,7 @@ let allVehicles = [];
           : allFinanceEntries
             .filter(entry => entry.orderId === order.id)
             .reduce((sum, entry) => sum + getFinanceTotal(entry), 0);
+        const groupedFuelRows = getOrderGroupedFuelReportRows(order.id);
         const dateLabel = filters.type === 'orders_deleted'
           ? formatDate(String(order.deletedAt || '').slice(0, 10))
           : formatDate(order.dataInicio);
@@ -2446,6 +2850,34 @@ let allVehicles = [];
             <td>${escapeHtml(statusLabel)}</td>
             <td style="text-align:right;">${escapeHtml(formatCurrency(total))}</td>
           </tr>
+          ${groupedFuelRows.length ? `
+            <tr>
+              <td colspan="6" style="padding:0;">
+                <table style="width:100%; border-collapse:collapse; margin:0; border:none;">
+                  <thead>
+                    <tr>
+                      <th style="text-align:left;">Data abastecimento</th>
+                      <th style="text-align:left;">Fornecedor / NFs</th>
+                      <th style="text-align:right;">Valor</th>
+                      <th style="text-align:right;">Qtd</th>
+                      <th style="text-align:right;">KM</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${groupedFuelRows.map(row => `
+                      <tr>
+                        <td>${escapeHtml(row.dates.map(date => formatDate(date)).join(', ') || '-')}</td>
+                        <td>${escapeHtml(row.supplierSummary || '-')}</td>
+                        <td style="text-align:right;">${escapeHtml(formatCurrency(row.total))}</td>
+                        <td style="text-align:right;">${escapeHtml(row.litros ? row.litros.toFixed(3) : '-')}</td>
+                        <td style="text-align:right;">${escapeHtml(row.km ? row.km.toLocaleString('pt-BR') : '-')}</td>
+                      </tr>
+                    `).join('')}
+                  </tbody>
+                </table>
+              </td>
+            </tr>
+          ` : ''}
         `;
       }).join('') || '<tr><td colspan="6">Nenhum dado encontrado.</td></tr>';
 
@@ -2590,17 +3022,29 @@ let allVehicles = [];
       pruneSelections();
       const count = selectedOrders.size;
       const visibleOrders = getFilteredOrders();
+      const selectedOrderRecords = Array.from(selectedOrders)
+        .map(id => allOrders.find(order => order.id === id))
+        .filter(Boolean);
+      const canClose = selectedOrderRecords.length > 0 && selectedOrderRecords.some(order => order.status !== 'fechada');
+      const canReopen = selectedOrderRecords.length > 0 && selectedOrderRecords.some(order => order.status === 'fechada');
       document.getElementById('orders-selected-text').textContent = `${count} selecionada${count === 1 ? '' : 's'}`;
       document.getElementById('select-all-orders').classList.toggle('checked', visibleOrders.length > 0 && visibleOrders.every(order => selectedOrders.has(order.id)));
       updateButtonState('edit-order-btn', 'delete-order-btn', count);
       const printButton = document.getElementById('print-order-btn');
       const closeButton = document.getElementById('close-order-btn');
       const reopenButton = document.getElementById('reopen-order-btn');
-      [printButton, closeButton, reopenButton].forEach(button => {
-        if (!button) return;
-        button.style.opacity = count === 1 ? '1' : '0.45';
-        button.style.pointerEvents = count === 1 ? 'auto' : 'none';
-      });
+      if (printButton) {
+        printButton.style.opacity = count === 1 ? '1' : '0.45';
+        printButton.style.pointerEvents = count === 1 ? 'auto' : 'none';
+      }
+      if (closeButton) {
+        closeButton.style.opacity = canClose ? '1' : '0.45';
+        closeButton.style.pointerEvents = canClose ? 'auto' : 'none';
+      }
+      if (reopenButton) {
+        reopenButton.style.opacity = canReopen ? '1' : '0.45';
+        reopenButton.style.pointerEvents = canReopen ? 'auto' : 'none';
+      }
     }
 
     function updateFinanceSelectionUI() {
@@ -2831,6 +3275,7 @@ let allVehicles = [];
     }
 
     function getFilteredOrders() {
+      const quickSearch = normalizeComparableText(document.getElementById('order-filter-search')?.value || '');
       const number = document.getElementById('order-filter-number')?.value.trim().toLowerCase() || '';
       const start = document.getElementById('order-filter-start')?.value || '';
       const end = document.getElementById('order-filter-end')?.value || '';
@@ -2842,11 +3287,32 @@ let allVehicles = [];
       if (start) items = items.filter(order => !order.dataInicio || order.dataInicio >= start);
       if (end) items = items.filter(order => !order.dataInicio || order.dataInicio <= end);
       if (status) items = items.filter(order => order.status === status);
+      if (quickSearch) {
+        items = items.filter(order => {
+          const vehicle = allVehicles.find(item => item.id === order.vehicleId);
+          const driver = allDrivers.find(item => item.id === order.driverId);
+          const haystack = normalizeComparableText([
+            order.numero,
+            order.status,
+            order.descricao,
+            order.responsavelNome,
+            driver?.nome,
+            vehicle ? `${vehicle.numeroFrota || ''} ${vehicle.placa || ''} ${vehicle.modelo || ''}` : ''
+          ].join(' '));
+          return haystack.includes(quickSearch);
+        });
+      }
       items.sort((a, b) => sort === 'antigas'
         ? String(a.numero).localeCompare(String(b.numero))
         : String(b.numero).localeCompare(String(a.numero))
       );
       return items;
+    }
+
+    function updateEntityListViewport(shellId, count) {
+      const shell = document.getElementById(shellId);
+      if (!shell) return;
+      shell.classList.toggle('is-scrollable', count > 3);
     }
 
     function renderOrders() {
@@ -2856,6 +3322,7 @@ let allVehicles = [];
       if (!filteredOrders.length) {
         list.innerHTML = '<div class="empty-state">Nenhuma ordem de serviço cadastrada.</div>';
         selectedOrders = new Set(Array.from(selectedOrders).filter(id => allOrders.some(order => order.id === id)));
+        updateEntityListViewport('orders-list-shell', 0);
         updateOrderSelectionUI();
         return;
       }
@@ -2895,6 +3362,7 @@ let allVehicles = [];
           </div>
         `;
       }).join('');
+      updateEntityListViewport('orders-list-shell', filteredOrders.length);
       updateOrderSelectionUI();
     }
 
@@ -2907,7 +3375,7 @@ let allVehicles = [];
         allVehicles
           .slice()
           .sort((a, b) => `${a.placa || a.plate || ''} ${a.modelo || a.model || ''}`.localeCompare(`${b.placa || b.plate || ''} ${b.modelo || b.model || ''}`, 'pt-BR'))
-          .map(vehicle => `<option value="${vehicle.id}">${vehicle.placa || vehicle.plate || 'Sem placa'}  ${vehicle.modelo || vehicle.model || 'Veiculo'}</option>`)
+          .map(vehicle => `<option value="${vehicle.id}">${vehicle.placa || vehicle.plate || 'Sem placa'}  ${vehicle.modelo || vehicle.model || 'Veículo'}</option>`)
       );
 
       select.innerHTML = options.join('');
@@ -2924,6 +3392,7 @@ let allVehicles = [];
       if (!visibleEntries.length) {
         list.innerHTML = '<div class="empty-state">Nenhum lançamento financeiro cadastrado.</div>';
         selectedFinance.clear();
+        updateEntityListViewport('finance-list-shell', 0);
         updateFinanceSelectionUI();
         return;
       }
@@ -2935,7 +3404,7 @@ let allVehicles = [];
         const historyHtml = isFuelGroupEntry(entry)
           ? `
             <div class="mt-5 rounded-[20px] border border-slate-200 bg-slate-50 px-4 py-4">
-              <p class="text-xs font-extrabold uppercase tracking-[0.2em] text-slate-500 mb-3">Historico das notas agrupadas</p>
+              <p class="text-xs font-extrabold uppercase tracking-[0.2em] text-slate-500 mb-3">Histórico das notas agrupadas</p>
               <div class="space-y-3">
                 ${groupedChildren.map(item => `
                   <div class="rounded-2xl border border-slate-200 bg-white px-4 py-3">
@@ -2945,7 +3414,7 @@ let allVehicles = [];
                     </div>
                     <div class="mt-2 text-sm text-slate-500 flex gap-3 flex-wrap">
                       <span>Data: ${escapeHtml(formatDate(getFinanceEntryDate(item)))}</span>
-                      ${item.fuelType ? `<span>Combustivel: ${escapeHtml(item.fuelType)}</span>` : ''}
+                      ${item.fuelType ? `<span>Combustível: ${escapeHtml(item.fuelType)}</span>` : ''}
                       ${item.km ? `<span>KM: ${escapeHtml(item.km)}</span>` : ''}
                     </div>
                   </div>
@@ -2965,18 +3434,18 @@ let allVehicles = [];
                 </button>
                 <div>
                   <div class="flex items-center gap-3 flex-wrap">
-                    <h3 class="text-2xl font-extrabold text-slate-900">${escapeHtml(isFuelGroupEntry(entry) ? 'Agrupamento de abastecimentos' : (entry.fornecedor || 'Lancamento'))}</h3>
+                    <h3 class="text-2xl font-extrabold text-slate-900">${escapeHtml(isFuelGroupEntry(entry) ? 'Agrupamento de abastecimentos' : (entry.fornecedor || 'Lançamento'))}</h3>
                     <span class="mini-badge">${escapeHtml(entry.kindLabel || 'Despesa')}</span>
-                    <span class="mini-badge">${escapeHtml(getFinanceEntryStatusLabel(entry))}</span>
+                    <span class="mini-badge mini-badge--status-${getFinanceEntryStatus(entry)}">${escapeHtml(getFinanceEntryStatusLabel(entry))}</span>
                     ${order ? `<span class="mini-badge">OS ${escapeHtml(getOrderNumberLabel(order))}</span>` : ''}
                     ${entry.nf ? `<span class="mini-badge">${escapeHtml(entry.nf)}</span>` : ''}
                   </div>
                   <div class="flex gap-3 flex-wrap mt-4 text-sm text-slate-500">
                     <span>${escapeHtml(getFinanceEntryDateLabel(entry))}: ${escapeHtml(formatDate(getFinanceEntryDate(entry)))}</span>
-                    <span>Tipo: ${escapeHtml(isFuelGroupEntry(entry) ? 'Agrupamento' : entry.entryType === 'combustivel' ? 'Combustivel' : 'Despesa')}</span>
-                    ${vehicle ? `<span>Veiculo: ${escapeHtml(vehicle.placa)}  ${escapeHtml(vehicle.modelo)}</span>` : ''}
+                    <span>Tipo: ${escapeHtml(isFuelGroupEntry(entry) ? 'Agrupamento' : entry.entryType === 'combustivel' ? 'Combustível' : 'Despesa')}</span>
+                    ${vehicle ? `<span>Veículo: ${escapeHtml(vehicle.placa)}  ${escapeHtml(vehicle.modelo)}</span>` : ''}
                     ${entry.driverId ? `<span>Motorista: ${escapeHtml(getDriverLabel(entry.driverId))}</span>` : ''}
-                    ${entry.fuelType ? `<span>Combustivel: ${escapeHtml(entry.fuelType)}</span>` : ''}
+                    ${entry.fuelType ? `<span>Combustível: ${escapeHtml(entry.fuelType)}</span>` : ''}
                     ${entry.litros ? `<span>Litros: ${escapeHtml(entry.litros)}</span>` : ''}
                     ${entry.km ? `<span>KM: ${escapeHtml(entry.km)}</span>` : ''}
                     ${entry.discount ? `<span>Desconto: ${escapeHtml(formatCurrency(entry.discount))}</span>` : ''}
@@ -2991,10 +3460,12 @@ let allVehicles = [];
           </div>
         `;
       }).join('');
+      updateEntityListViewport('finance-list-shell', visibleEntries.length);
       updateFinanceSelectionUI();
     }
 
     function clearOrderFilters() {
+      document.getElementById('order-filter-search').value = '';
       document.getElementById('order-filter-number').value = '';
       document.getElementById('order-filter-start').value = '';
       document.getElementById('order-filter-end').value = '';
@@ -3004,6 +3475,7 @@ let allVehicles = [];
     }
 
     function clearFinanceFilters() {
+      document.getElementById('finance-filter-search').value = '';
       document.getElementById('finance-filter-supplier').value = '';
       document.getElementById('finance-filter-status').value = '';
       document.getElementById('finance-filter-vehicle').value = '';
@@ -3093,7 +3565,7 @@ let allVehicles = [];
 
     function editSelectedFinance() {
       if (selectedFinance.size !== 1) {
-        showToast('Selecione apenas um lancamento para editar.');
+        showToast('Selecione apenas um lançamento para editar.');
         return;
       }
       const id = Array.from(selectedFinance)[0];
@@ -3107,7 +3579,11 @@ let allVehicles = [];
       loadFinanceForm(entry.entryType || 'despesa');
       currentEditingId = id;
       if (isFuelEntry(entry)) {
-        document.getElementById('finance-vehicle-id').value = entry.vehicleId || getEntryVehicleId(entry) || '';
+        const vehicle = allVehicles.find(item => item.id === (entry.vehicleId || getEntryVehicleId(entry) || ''));
+        document.getElementById('finance-vehicle-id').value = vehicle?.id || '';
+        if (document.getElementById('finance-vehicle-search')) {
+          document.getElementById('finance-vehicle-search').value = vehicle ? getVehicleAutocompleteLabel(vehicle) : '';
+        }
         document.getElementById('finance-data-abastecimento').value = entry.dataAbastecimento || entry.dataVencimento || '';
         document.getElementById('finance-supplier-id').value = entry.supplierId || '';
         document.getElementById('finance-total').value = entry.total ?? 0;
@@ -3123,7 +3599,11 @@ let allVehicles = [];
           document.getElementById('finance-km').value = entry.km || entry.kmFinal || '';
         }
       } else {
-        document.getElementById('finance-order-id').value = entry.orderId || '';
+        const order = allOrders.find(item => item.id === (entry.orderId || ''));
+        document.getElementById('finance-order-id').value = order?.id || '';
+        if (document.getElementById('finance-order-search')) {
+          document.getElementById('finance-order-search').value = order ? getOrderAutocompleteLabel(order) : '';
+        }
         document.getElementById('finance-kind').value = entry.kind || 'despesa';
         document.getElementById('finance-data-vencimento').value = entry.dataVencimento || '';
         document.getElementById('finance-supplier-id').value = entry.supplierId || '';
@@ -3134,7 +3614,7 @@ let allVehicles = [];
         document.getElementById('finance-total').value = entry.total ?? 0;
       }
       document.getElementById('finance-observacoes').value = entry.observacoes || '';
-      document.getElementById('modal-title').textContent = 'Editar lancamento';
+      document.getElementById('modal-title').textContent = 'Editar lançamento';
     }
 
     function deleteSelectedVehicles() {
@@ -3218,50 +3698,68 @@ let allVehicles = [];
 
     function deleteSelectedFinance() {
       if (!selectedFinance.size) {
-        showToast('Selecione pelo menos um lancamento para excluir.');
+        showToast('Selecione pelo menos um lançamento para excluir.');
         return;
       }
       const selectedEntries = Array.from(selectedFinance)
         .map(id => allFinanceEntries.find(entry => entry.id === id))
         .filter(Boolean);
       if (selectedEntries.some(entry => isFuelGroupEntry(entry) || entry.groupedIntoId)) {
-        showToast('Desfaca o agrupamento antes de excluir lancamentos agrupados.');
+        showToast('Desfaça o agrupamento antes de excluir lançamentos agrupados.');
         return;
       }
       allFinanceEntries = allFinanceEntries.filter(entry => !selectedFinance.has(entry.id));
       selectedFinance.clear();
       saveToLocalStorage();
       renderAll();
-      showToast('Lancamento(s) excluido(s) com sucesso.');
+      showToast('Lançamento(s) excluído(s) com sucesso.');
     }
 
     function closeSelectedOrder() {
-      if (selectedOrders.size !== 1) {
-        showToast('Selecione uma OS para fechar.');
+      if (!selectedOrders.size) {
+        showToast('Selecione pelo menos uma OS para fechar.');
         return;
       }
-      const id = Array.from(selectedOrders)[0];
-      allOrders = allOrders.map(order => order.id === id
-        ? { ...order, status: 'fechada', dataTermino: order.dataTermino || new Date().toISOString().split('T')[0] }
+      const selectedIds = new Set(selectedOrders);
+      const closableIds = new Set(
+        allOrders
+          .filter(order => selectedIds.has(order.id) && order.status !== 'fechada')
+          .map(order => order.id)
+      );
+      if (!closableIds.size) {
+        showToast('As OS selecionadas já estão fechadas.');
+        return;
+      }
+      allOrders = allOrders.map(order => closableIds.has(order.id)
+        ? { ...order, status: 'fechada', dataTermino: order.dataTermino || getLocalIsoDate() }
         : order);
       saveToLocalStorage();
       renderAll();
-      showToast('OS fechada com sucesso.');
+      showToast(`OS fechada${closableIds.size === 1 ? '' : 's'} com sucesso.`);
     }
 
     function reopenSelectedOrder() {
-      if (selectedOrders.size !== 1) {
-        showToast('Selecione uma OS para reabrir.');
+      if (!selectedOrders.size) {
+        showToast('Selecione pelo menos uma OS para reabrir.');
         return;
       }
-      const id = Array.from(selectedOrders)[0];
+      const selectedIds = new Set(selectedOrders);
+      const reopenableIds = new Set(
+        allOrders
+          .filter(order => selectedIds.has(order.id) && order.status === 'fechada')
+          .map(order => order.id)
+      );
+      if (!reopenableIds.size) {
+        showToast('Selecione ao menos uma OS fechada para reabrir.');
+        return;
+      }
       openPromptModal({
         title: 'Reabrir OS',
         text: 'Informe o motivo da reabertura. Essa justificativa será adicionada à descrição da ordem de serviço.',
         placeholder: 'Ex.: retorno da oficina, ajuste interno, complemento financeiro...',
         onConfirm: (justification) => {
           const today = formatDate(getLocalIsoDate());
-          allOrders = allOrders.map(order => order.id === id
+          allOrders = allOrders.map(order => reopenableIds.has(order.id)
             ? {
                 ...order,
                 status: 'aberta',
@@ -3270,7 +3768,7 @@ let allVehicles = [];
             : order);
           saveToLocalStorage();
           renderAll();
-          showToast('OS reaberta com sucesso.');
+          showToast(`OS reaberta${reopenableIds.size === 1 ? '' : 's'} com sucesso.`);
         }
       });
     }
@@ -3295,7 +3793,7 @@ let allVehicles = [];
         return `
           <tr>
             <td>${entry ? escapeHtml(formatDate(entry.dataVencimento)) : ''}</td>
-            <td>${entry ? escapeHtml([entry.fornecedor, entry.nf, entry.fuelType].filter(Boolean).join('  ')) : ''}</td>
+            <td>${entry ? escapeHtml(getFinanceSupplierSummary(entry)) : ''}</td>
             <td class="money">${entry && entry.kind === 'despesa' ? escapeHtml(formatCurrency(entry.total)) : ''}</td>
             <td class="money">${entry && entry.kind === 'receita' ? escapeHtml(formatCurrency(entry.total)) : ''}</td>
             <td class="money">${entry ? escapeHtml(formatCurrency(getFinanceTotal(entry))) : ''}</td>
@@ -3676,7 +4174,14 @@ let allVehicles = [];
         const observacoes = document.getElementById('finance-observacoes').value.trim();
 
         if (entryType === 'combustivel') {
-          const vehicleId = document.getElementById('finance-vehicle-id').value;
+          const vehicleSearch = document.getElementById('finance-vehicle-search')?.value || '';
+          let vehicleId = document.getElementById('finance-vehicle-id').value;
+          if (!vehicleId && vehicleSearch.trim()) {
+            const resolvedVehicle = resolveVehicleFromSearch(vehicleSearch);
+            vehicleId = resolvedVehicle?.id || '';
+            const hiddenVehicleField = document.getElementById('finance-vehicle-id');
+            if (hiddenVehicleField) hiddenVehicleField.value = vehicleId;
+          }
           const dataAbastecimento = document.getElementById('finance-data-abastecimento').value;
           const fuelType = document.getElementById('finance-fuel-type')?.value || '';
           const km = document.getElementById('finance-km')?.value || '';
@@ -3737,21 +4242,28 @@ let allVehicles = [];
           return;
         }
 
-        const orderId = document.getElementById('finance-order-id').value;
+        const orderSearch = document.getElementById('finance-order-search')?.value || '';
+        let orderId = document.getElementById('finance-order-id').value;
+        if (!orderId && orderSearch.trim() && orderSearch.trim().toLowerCase() !== 'lancar sem os por enquanto') {
+          const resolvedOrder = resolveOrderFromSearch(orderSearch);
+          orderId = resolvedOrder?.id || '';
+          const hiddenOrderField = document.getElementById('finance-order-id');
+          if (hiddenOrderField) hiddenOrderField.value = orderId;
+        }
         const dataVencimento = document.getElementById('finance-data-vencimento').value;
         const nf = document.getElementById('finance-nf').value.trim();
         const km = document.getElementById('finance-km')?.value || '';
         const linkedOrder = allOrders.find(item => item.id === orderId);
         if (!dataVencimento || !supplierId) {
-          showToast('Selecione o parceiro e a data de vencimento do lancamento.');
+          showToast('Selecione o parceiro e a data de vencimento do lançamento.');
           return;
         }
         if (linkedOrder && linkedOrder.status === 'fechada') {
-          showToast('Nao e permitido lancar financeiro em OS fechada.');
+          showToast('Não é permitido lançar financeiro em OS fechada.');
           return;
         }
         if (supplierType === 'posto') {
-          showToast('Postos de combustivel so podem ser usados no fluxo de abastecimento.');
+          showToast('Postos de combustível só podem ser usados no fluxo de abastecimento.');
           return;
         }
 
@@ -3773,10 +4285,10 @@ let allVehicles = [];
 
         if (currentEditingId) {
           allFinanceEntries = allFinanceEntries.map(entry => entry.id === currentEditingId ? { ...entry, ...payload } : entry);
-          showToast('Lancamento atualizado com sucesso.');
+          showToast('Lançamento atualizado com sucesso.');
         } else {
           allFinanceEntries.unshift({ id: generateId(), createdAt: new Date().toISOString(), ...payload });
-          showToast(orderId ? 'Lancamento vinculado a OS com sucesso.' : 'Lancamento salvo sem OS. Voce pode alocar depois.');
+          showToast(orderId ? 'Lançamento vinculado a OS com sucesso.' : 'Lançamento salvo sem OS. Você pode alocar depois.');
         }
         saveToLocalStorage();
         renderAll();
@@ -3793,19 +4305,26 @@ let allVehicles = [];
           .map(id => allFinanceEntries.find(entry => entry.id === id))
           .filter(entry => entry && isFuelEntry(entry));
         if (!entries.length) {
-          showToast('Nao foi possivel localizar os abastecimentos do agrupamento.');
+          showToast('Não foi possível localizar os abastecimentos do agrupamento.');
           return;
         }
 
         const vehicleId = getEntryVehicleId(entries[0]);
-        const orderId = document.getElementById('finance-group-order-id').value;
+        const groupOrderSearch = document.getElementById('finance-group-order-search')?.value || '';
+        let orderId = document.getElementById('finance-group-order-id').value;
+        if (!orderId && groupOrderSearch.trim() && groupOrderSearch.trim().toLowerCase() !== 'deixar pendente') {
+          const resolvedOrder = resolveOrderFromSearch(groupOrderSearch, getOpenOrdersSorted().filter(order => order.vehicleId === vehicleId));
+          orderId = resolvedOrder?.id || '';
+          const hiddenOrderField = document.getElementById('finance-group-order-id');
+          if (hiddenOrderField) hiddenOrderField.value = orderId;
+        }
         const dataVencimento = document.getElementById('finance-group-data-vencimento').value;
         const nf = document.getElementById('finance-group-nf').value.trim();
         const total = Number(document.getElementById('finance-group-total').value || 0);
         const observacoes = document.getElementById('finance-group-observacoes').value.trim();
         const linkedOrder = orderId ? allOrders.find(item => item.id === orderId) : null;
         if (linkedOrder && linkedOrder.status === 'fechada') {
-          showToast('Nao e permitido alocar agrupamento em OS fechada.');
+          showToast('Não é permitido alocar agrupamento em OS fechada.');
           return;
         }
 
@@ -3845,12 +4364,15 @@ let allVehicles = [];
         selectedFinance = targetGroupId ? new Set([targetGroupId]) : new Set();
         renderAll();
         if (isNewGroup && targetGroupId) {
-          const shouldCloseExpense = window.confirm('Agrupamento criado. Deseja fechar essa despesa agora?');
-          if (shouldCloseExpense) {
-            openCloseFuelExpenseModal();
-          } else {
-            showToast('Agrupamento mantido como pendente para fechamento posterior.');
-          }
+          openPromptModal({
+            mode: 'confirm',
+            title: 'Agrupamento criado',
+            text: 'Deseja fechar essa despesa agora? Se preferir, ela pode continuar pendente para fechamento posterior.',
+            confirmLabel: 'Fechar agora',
+            cancelLabel: 'Manter pendente',
+            onConfirm: () => openCloseFuelExpenseModal(),
+            onCancel: () => showToast('Agrupamento mantido como pendente para fechamento posterior.')
+          });
         }
         return;
       }
@@ -3858,10 +4380,17 @@ let allVehicles = [];
       if (currentModalType === 'finance-close') {
         const entry = allFinanceEntries.find(item => item.id === currentEditingId);
         if (!entry) {
-          showToast('Nao foi possivel localizar a despesa para fechamento.');
+          showToast('Não foi possível localizar a despesa para fechamento.');
           return;
         }
-        const orderId = document.getElementById('finance-close-order-id').value;
+        const closeOrderSearch = document.getElementById('finance-close-order-search')?.value || '';
+        let orderId = document.getElementById('finance-close-order-id').value;
+        if (!orderId && closeOrderSearch.trim() && closeOrderSearch.trim().toLowerCase() !== 'não alocar agora') {
+          const resolvedOrder = resolveOrderFromSearch(closeOrderSearch, getOpenOrdersSorted().filter(order => !getEntryVehicleId(entry) || order.vehicleId === getEntryVehicleId(entry)));
+          orderId = resolvedOrder?.id || '';
+          const hiddenOrderField = document.getElementById('finance-close-order-id');
+          if (hiddenOrderField) hiddenOrderField.value = orderId;
+        }
         const dataVencimento = document.getElementById('finance-close-data-vencimento').value;
         const nf = document.getElementById('finance-close-nf').value.trim();
         const total = Number(document.getElementById('finance-close-total').value || 0);
@@ -3869,7 +4398,7 @@ let allVehicles = [];
         const observacoes = document.getElementById('finance-close-observacoes').value.trim();
         const linkedOrder = orderId ? allOrders.find(item => item.id === orderId) : null;
         if (linkedOrder && linkedOrder.status === 'fechada') {
-          showToast('Nao e permitido alocar em OS fechada.');
+          showToast('Não é permitido alocar em OS fechada.');
           return;
         }
 
@@ -3891,7 +4420,7 @@ let allVehicles = [];
         saveToLocalStorage();
         renderAll();
         closeCadastroModal();
-        showToast(orderId ? 'Despesa fechada e distribuida com sucesso.' : 'Despesa fechada, mas pendente de alocacao em OS.');
+        showToast(orderId ? 'Despesa fechada e distribuída com sucesso.' : 'Despesa fechada, mas pendente de alocação em OS.');
         return;
       }
     });
@@ -3906,11 +4435,15 @@ let allVehicles = [];
       const sizeLabel = document.getElementById('settings-custom-logo-size-label');
       if (sizeLabel) sizeLabel.textContent = `${event.target.value}%`;
     });
-    ['order-filter-number', 'order-filter-start', 'order-filter-end', 'order-filter-status', 'order-filter-sort'].forEach(id => {
+    ['order-filter-search', 'order-filter-number'].forEach(id => {
       const node = document.getElementById(id);
-      if (node) node.addEventListener(id === 'order-filter-number' ? 'input' : 'change', renderOrders);
+      if (node) node.addEventListener('input', renderOrders);
     });
-    ['finance-filter-supplier', 'finance-filter-value'].forEach(id => {
+    ['order-filter-start', 'order-filter-end', 'order-filter-status', 'order-filter-sort'].forEach(id => {
+      const node = document.getElementById(id);
+      if (node) node.addEventListener('change', renderOrders);
+    });
+    ['finance-filter-search', 'finance-filter-supplier', 'finance-filter-value'].forEach(id => {
       const node = document.getElementById(id);
       if (node) node.addEventListener('input', renderFinance);
     });
