@@ -84,29 +84,52 @@
      </div>
      <form id="fuel-form" class="px-5 sm:px-6 py-6 space-y-4" onsubmit="submitFuelForm(event)">
       <div>
-       <label class="block text-sm font-semibold text-gray-900 mb-2">Motorista *</label>
-       <input type="text" id="driver-name" required placeholder="Nome do motorista" class="w-full px-3 sm:px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition text-sm">
+       <label class="block text-sm font-semibold text-gray-900 mb-2">Motorista <span class="text-red-500">*</span></label>
+       <div class="select-shell">
+        <select id="driver-name" required class="select-field">
+         <option value="">Selecione um motorista</option>
+        </select>
+        <span class="select-icon" aria-hidden="true">
+         <svg viewBox="0 0 20 20" fill="none" stroke="currentColor">
+          <path d="M5 7.5 10 12.5 15 7.5" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"></path>
+         </svg>
+        </span>
+       </div>
       </div>
       <div>
-       <label class="block text-sm font-semibold text-gray-900 mb-2">Cidade *</label>
-       <select id="fuel-city" required class="w-full px-3 sm:px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition text-sm">
-        <option value="">Selecione uma cidade</option>
-        <option value="Boa Esperan&ccedil;a">Boa Esperan&ccedil;a</option>
-        <option value="Montanha">Montanha</option>
-        <option value="Nova Ven&eacute;cia">Nova Ven&eacute;cia</option>
-        <option value="Pedro Can&aacute;rio">Pedro Can&aacute;rio</option>
-        <option value="Pinheiros">Pinheiros</option>
-        <option value="S&atilde;o Mateus">S&atilde;o Mateus</option>
-       </select>
+       <label class="block text-sm font-semibold text-gray-900 mb-2">Cidade <span class="text-red-500">*</span></label>
+       <div class="select-shell">
+        <select id="fuel-city" required class="select-field">
+         <option value="">Selecione uma cidade</option>
+         <option value="Boa Esperan&ccedil;a">Boa Esperan&ccedil;a</option>
+         <option value="Montanha">Montanha</option>
+         <option value="Nova Ven&eacute;cia">Nova Ven&eacute;cia</option>
+         <option value="Pedro Can&aacute;rio">Pedro Can&aacute;rio</option>
+         <option value="Pinheiros">Pinheiros</option>
+         <option value="S&atilde;o Mateus">S&atilde;o Mateus</option>
+        </select>
+        <span class="select-icon" aria-hidden="true">
+         <svg viewBox="0 0 20 20" fill="none" stroke="currentColor">
+          <path d="M5 7.5 10 12.5 15 7.5" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"></path>
+         </svg>
+        </span>
+       </div>
       </div>
       <div>
-       <label class="block text-sm font-semibold text-gray-900 mb-2">Posto *</label>
-       <select id="fuel-station" required class="w-full px-3 sm:px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition text-sm">
-        <option value="">Selecione uma cidade primeiro</option>
-       </select>
+       <label class="block text-sm font-semibold text-gray-900 mb-2">Posto <span class="text-red-500">*</span></label>
+       <div class="select-shell">
+        <select id="fuel-station" required class="select-field">
+         <option value="">Selecione uma cidade primeiro</option>
+        </select>
+        <span class="select-icon" aria-hidden="true">
+         <svg viewBox="0 0 20 20" fill="none" stroke="currentColor">
+          <path d="M5 7.5 10 12.5 15 7.5" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"></path>
+         </svg>
+        </span>
+       </div>
       </div>
       <div>
-       <label class="block text-sm font-semibold text-gray-900 mb-2">Data *</label>
+       <label class="block text-sm font-semibold text-gray-900 mb-2">Data <span class="text-red-500">*</span></label>
        <input type="date" id="fuel-date" required class="w-full px-3 sm:px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition text-sm">
       </div>
       <div>
@@ -114,7 +137,7 @@
        <input type="number" id="fuel-km" min="0" step="1" placeholder="Informe o KM atual do ve&iacute;culo" class="w-full px-3 sm:px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition text-sm">
       </div>
       <div>
-       <label class="block text-sm font-semibold text-gray-900 mb-3">Comprovante (Foto) *</label>
+       <label class="block text-sm font-semibold text-gray-900 mb-3">Comprovante (Foto) <span class="text-red-500">*</span></label>
        <div id="photo-preview-container" class="hidden mb-4">
         <div class="relative">
          <img id="photo-preview" src="" alt="Preview" class="w-full h-48 object-cover rounded-lg border border-gray-300">
