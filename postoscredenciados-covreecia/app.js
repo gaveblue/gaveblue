@@ -15,6 +15,20 @@ const CLOUDINARY_CLOUD_NAME = 'anh49kkl';
 const CLOUDINARY_UPLOAD_PRESET = 'comprovantes_frota';
 const CLOUDINARY_UPLOAD_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
 const FUEL_WHATSAPP_NUMBER = '5527999884208';
+const DRIVER_NAMES_STORAGE_KEY = 'postoscredenciados-covreecia:driver-names';
+const LAST_FUEL_ENTRY_STORAGE_KEY = 'postoscredenciados-covreecia:last-fuel-entry';
+const OTHER_DRIVER_OPTION = 'OUTRO (ESPECIFICAR)';
+const DEFAULT_DRIVER_NAMES = [
+  'AMANDA P. BONATTO',
+  'ALAN CHRISTIE',
+  'ITALO P. BONATTO',
+  'ELOIS DOS SANTOS',
+  'JO\u00c3O SILVA',
+  'ELICARLOS ZANOTTI',
+  'GLEIDSON LAURENTINO',
+  'RONI VON',
+  OTHER_DRIVER_OPTION
+];
 
 const postosPorCidade = {
   'Boa Esperan\u00e7a': [
@@ -40,22 +54,54 @@ const postosPorCidade = {
   ]
 };
 
+function hideSuggestions(elementId) {
+  const suggestionsEl = document.getElementById(elementId);
+  if (suggestionsEl) {
+    suggestionsEl.classList.add('hidden');
+    suggestionsEl.innerHTML = '';
+  }
+}
+
+function renderSuggestions(elementId, items, dataAttribute) {
+  const suggestionsEl = document.getElementById(elementId);
+  if (!suggestionsEl || items.length === 0) {
+    hideSuggestions(elementId);
+    return;
+  }
+
+  suggestionsEl.innerHTML = items
+    .map(
+      (item) => `
+        <button
+          type="button"
+          class="w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-red-50 transition border-b border-gray-100 last:border-b-0"
+          ${dataAttribute}="${item.replace(/"/g, '&quot;')}"
+        >
+          ${item}
+        </button>
+      `
+    )
+    .join('');
+
+  suggestionsEl.classList.remove('hidden');
+}
+
 document.getElementById('fuel-city').addEventListener('change', function() {
   const selectedCity = this.value;
-  const postoSelect = document.getElementById('fuel-station');
+  const stationSelect = document.getElementById('fuel-station');
 
-  postoSelect.innerHTML = '';
+  stationSelect.innerHTML = '';
 
   if (selectedCity && postosPorCidade[selectedCity]) {
-    postoSelect.innerHTML = '<option value="">Selecione um posto</option>';
+    stationSelect.innerHTML = '<option value="">Selecione um posto</option>';
     postosPorCidade[selectedCity].forEach((posto) => {
       const option = document.createElement('option');
       option.value = posto.nome;
       option.textContent = posto.nome;
-      postoSelect.appendChild(option);
+      stationSelect.appendChild(option);
     });
   } else {
-    postoSelect.innerHTML = '<option value="">Selecione uma cidade primeiro</option>';
+    stationSelect.innerHTML = '<option value="">Selecione uma cidade primeiro</option>';
   }
 });
 
@@ -111,6 +157,111 @@ function setFuelDateToToday() {
   }
 }
 
+function getStoredDriverNames() {
+  try {
+    const storedNames = localStorage.getItem(DRIVER_NAMES_STORAGE_KEY);
+    const parsedNames = storedNames ? JSON.parse(storedNames) : [];
+    const validStoredNames = Array.isArray(parsedNames) ? parsedNames : [];
+    return Array.from(new Set([...DEFAULT_DRIVER_NAMES, ...validStoredNames]));
+  } catch (error) {
+    return [...DEFAULT_DRIVER_NAMES];
+  }
+}
+
+function populateDriverOptions() {
+  const driverSelect = document.getElementById('driver-name');
+  if (!driverSelect) {
+    return;
+  }
+
+  const currentValue = driverSelect.value;
+  const driverNames = getStoredDriverNames();
+  driverSelect.innerHTML = '<option value="">Selecione um motorista</option>';
+
+  driverNames.forEach((driverName) => {
+    const option = document.createElement('option');
+    option.value = driverName;
+    option.textContent = driverName;
+    driverSelect.appendChild(option);
+  });
+
+  if (currentValue && driverNames.includes(currentValue)) {
+    driverSelect.value = currentValue;
+  }
+}
+
+function saveDriverNameSuggestion(driverName) {
+  const normalizedName = driverName.trim().replace(/\s+/g, ' ');
+  if (!normalizedName || normalizedName === OTHER_DRIVER_OPTION) {
+    return;
+  }
+
+  const existingNames = getStoredDriverNames();
+  const filteredNames = existingNames.filter(
+    (storedName) => storedName.toLocaleLowerCase('pt-BR') !== normalizedName.toLocaleLowerCase('pt-BR')
+  );
+
+  filteredNames.unshift(normalizedName);
+  const namesToPersist = filteredNames.slice(0, 25).sort((a, b) => a.localeCompare(b, 'pt-BR'));
+
+  try {
+    localStorage.setItem(DRIVER_NAMES_STORAGE_KEY, JSON.stringify(namesToPersist));
+  } catch (error) {
+    return;
+  }
+  populateDriverOptions();
+}
+
+function getLastFuelEntry() {
+  try {
+    const storedEntry = localStorage.getItem(LAST_FUEL_ENTRY_STORAGE_KEY);
+    const parsedEntry = storedEntry ? JSON.parse(storedEntry) : null;
+    return parsedEntry && typeof parsedEntry === 'object' ? parsedEntry : null;
+  } catch (error) {
+    return null;
+  }
+}
+
+function saveLastFuelEntry(entry) {
+  try {
+    localStorage.setItem(
+      LAST_FUEL_ENTRY_STORAGE_KEY,
+      JSON.stringify({
+        motorista: entry.motorista || '',
+        cidade: entry.cidade || '',
+        posto: entry.posto || ''
+      })
+    );
+  } catch (error) {
+    return;
+  }
+}
+
+function buildFuelReceiptFileName(driverName, dateValue, originalFileName) {
+  const normalizedDriverName = driverName
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, '+')
+    .replace(/[^a-z0-9+_-]/g, '');
+
+  const formattedDate = (dateValue || getTodayLocalDateString()).split('-').reverse().join('.');
+  const extensionMatch = originalFileName.match(/\.[^.]+$/);
+  const extension = extensionMatch ? extensionMatch[0].toLowerCase() : '.jpg';
+  const safeDriverName = normalizedDriverName || 'motorista';
+
+  return `${safeDriverName}+${formattedDate}${extension}`;
+}
+
+function createRenamedFuelReceiptFile(file, driverName, dateValue) {
+  const renamedFileName = buildFuelReceiptFileName(driverName, dateValue, file.name || '');
+  return new File([file], renamedFileName, {
+    type: file.type || 'image/jpeg',
+    lastModified: file.lastModified || Date.now()
+  });
+}
+
 function resetFuelPhotoState() {
   document.getElementById('fuel-photo').value = '';
   document.getElementById('photo-preview-container').classList.add('hidden');
@@ -119,22 +270,29 @@ function resetFuelPhotoState() {
 }
 
 function prepareFuelForm(options = {}) {
-  const { cidade = '', posto = '' } = options;
+  const { cidade = '', posto = '', useLastEntry = false } = options;
   const citySelect = document.getElementById('fuel-city');
   const stationSelect = document.getElementById('fuel-station');
+  const driverInput = document.getElementById('driver-name');
+  const lastFuelEntry = useLastEntry ? getLastFuelEntry() : null;
+  const selectedCity = cidade || lastFuelEntry?.cidade || '';
+  const selectedPosto = posto || lastFuelEntry?.posto || '';
+  const selectedDriver = lastFuelEntry?.motorista || '';
 
   document.getElementById('fuel-form').reset();
-  citySelect.value = cidade;
+  citySelect.value = selectedCity;
+  populateDriverOptions();
+  driverInput.value = selectedDriver;
 
-  if (cidade && postosPorCidade[cidade]) {
+  if (selectedCity && postosPorCidade[selectedCity]) {
     stationSelect.innerHTML = '<option value="">Selecione um posto</option>';
-    postosPorCidade[cidade].forEach((postoItem) => {
+    postosPorCidade[selectedCity].forEach((postoItem) => {
       const option = document.createElement('option');
       option.value = postoItem.nome;
       option.textContent = postoItem.nome;
       stationSelect.appendChild(option);
     });
-    stationSelect.value = posto;
+    stationSelect.value = selectedPosto;
   } else {
     stationSelect.innerHTML = '<option value="">Selecione uma cidade primeiro</option>';
   }
@@ -145,7 +303,7 @@ function prepareFuelForm(options = {}) {
 
 function openFuelFormMenu() {
   document.getElementById('fuel-form-modal').classList.remove('hidden');
-  prepareFuelForm();
+  prepareFuelForm({ useLastEntry: true });
 }
 
 function closeFuelForm() {
@@ -153,6 +311,7 @@ function closeFuelForm() {
   document.getElementById('fuel-form').reset();
   resetFuelPhotoState();
   setFuelDateToToday();
+  populateDriverOptions();
 }
 
 function openWhatsAppDirect(numero, mensagem) {
@@ -173,6 +332,7 @@ async function uploadFuelReceiptToCloudinary(file, metadata) {
   formData.append('file', file);
   formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
   formData.append('folder', 'comprovantes-frota');
+  formData.append('filename_override', file.name.replace(/\.[^.]+$/, ''));
   formData.append(
     'context',
     `motorista=${metadata.motorista}|cidade=${metadata.cidade}|posto=${metadata.posto}|data=${metadata.data}|km=${metadata.km || 'nao informado'}`
@@ -224,13 +384,14 @@ async function submitFuelForm(e) {
 
   const dateObj = new Date(`${data}T00:00:00`);
   const dataFormatada = dateObj.toLocaleDateString('pt-BR');
+  const renamedFile = createRenamedFuelReceiptFile(file, motorista, data);
 
   document.getElementById('loading-modal').classList.remove('hidden');
   document.getElementById('fuel-form-modal').classList.add('hidden');
 
   try {
     const progressPromise = simulateProgress();
-    const uploadResult = await uploadFuelReceiptToCloudinary(file, {
+    const uploadResult = await uploadFuelReceiptToCloudinary(renamedFile, {
       motorista,
       cidade,
       posto,
@@ -256,6 +417,8 @@ async function submitFuelForm(e) {
       document.getElementById('fuel-form').reset();
       document.getElementById('loading-modal').classList.add('hidden');
       resetProgressState();
+      saveDriverNameSuggestion(motorista);
+      saveLastFuelEntry({ motorista, cidade, posto });
       closeFuelForm();
       showSuccessMessage('Comprovante enviado com sucesso.');
     }, 300);
@@ -508,6 +671,7 @@ window.addEventListener('DOMContentLoaded', function() {
   if (header) {
     header.style.zIndex = '20';
   }
+  populateDriverOptions();
 });
 
 async function onConfigChange(newConfig) {
