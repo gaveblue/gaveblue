@@ -3325,6 +3325,10 @@ async function optimizeReceiptFile(file) {
     context.fillStyle = '#ffffff';
     context.fillRect(0, 0, width, height);
     context.drawImage(source.drawable, 0, 0, width, height);
+  } catch (error) {
+    canvas.width = 1;
+    canvas.height = 1;
+    throw error;
   } finally {
     source.release();
   }
@@ -3657,6 +3661,7 @@ function offerCentralFormDraft(formId) {
       if (id === 'fuel-city') field.dispatchEvent(new Event('change', { bubbles: true }));
     }
     if (formId === 'fuel-form') toggleCustomDriverField(); else toggleLooseCustomDriverField();
+    persistCentralFormDraft(formId);
     box.remove();
   };
   box.append(text, button); form.prepend(box);
@@ -5508,6 +5513,7 @@ async function prepareReceiptFile(target, file) {
     updateStatus('Foto otimizada. Clique em Salvar comprovante.', 'neutral');
   } catch (error) {
     console.error('Erro ao preparar comprovante:', error);
+    if (selectionId !== (isLoose ? looseReceiptSelectionId : fuelReceiptSelectionId)) return;
     if (isLoose) {
       resetLoosePhotoState();
     } else {
