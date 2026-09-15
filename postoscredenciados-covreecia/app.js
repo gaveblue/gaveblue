@@ -3221,11 +3221,14 @@ function loadImageFromFile(file) {
 }
 
 async function createReceiptDrawable(file) {
+  const dimensions = await readReceiptDimensions(file);
   if ('createImageBitmap' in window) {
     try {
       const bitmap = await createImageBitmap(file, {
-        resizeWidth: COMPRESSED_RECEIPT_MAX_SIZE,
-        resizeQuality: 'high',
+        ...(dimensions && dimensions.height > dimensions.width
+          ? { resizeHeight: Math.min(dimensions.height, COMPRESSED_RECEIPT_MAX_SIZE) }
+          : { resizeWidth: Math.min(dimensions?.width || COMPRESSED_RECEIPT_MAX_SIZE, COMPRESSED_RECEIPT_MAX_SIZE) }),
+        resizeQuality: 'medium',
         imageOrientation: 'from-image'
       });
       return {
@@ -3239,6 +3242,10 @@ async function createReceiptDrawable(file) {
     }
   }
 
+  // Never fully decode a multi-megapixel camera image on legacy phones.
+  if (!dimensions || dimensions.width * dimensions.height > 2000000) {
+    throw new Error('Este celular precisa de uma foto menor. Use a câmera em baixa resolução (até 2 MP). Os dados preenchidos continuam no formulário.');
+  }
   const image = await loadImageFromFile(file);
   return {
     drawable: image,
@@ -3250,7 +3257,44 @@ async function createReceiptDrawable(file) {
   };
 }
 
-async function compressFuelReceiptIfNeeded(file) {
+async function readReceiptDimensions(file) {
+  const view = new DataView(await file.slice(0, 131072).arrayBuffer());
+  if (view.byteLength >= 24 && view.getUint32(0) === 0x89504e47 && view.getUint32(4) === 0x0d0a1a0a) {
+    const width = view.getUint32(16), height = view.getUint32(20);
+    return width && height ? { width, height } : null;
+  }
+  if (view.byteLength < 4 || view.getUint16(0) !== 0xffd8) return null;
+  let offset = 2;
+  while (offset + 4 <= view.byteLength) {
+    if (view.getUint8(offset++) !== 0xff) return null;
+    while (offset < view.byteLength && view.getUint8(offset) === 0xff) offset++;
+    if (offset + 3 > view.byteLength) return null;
+    const marker = view.getUint8(offset++), length = view.getUint16(offset);
+    if (length < 2 || offset + length > view.byteLength) return null;
+    if ([0xc0,0xc1,0xc2,0xc3,0xc5,0xc6,0xc7,0xc9,0xca,0xcb,0xcd,0xce,0xcf].includes(marker) && length >= 7) {
+      const height = view.getUint16(offset + 3), width = view.getUint16(offset + 5);
+      return width && height ? { width, height } : null;
+    }
+    if (marker === 0xda || marker === 0xd9) return null;
+    offset += length;
+  }
+  return null;
+}
+
+const receiptPreparationCache = new WeakMap();
+let receiptPreparationQueue = Promise.resolve();
+function compressFuelReceiptIfNeeded(file) {
+  if (!file || typeof file !== 'object') return Promise.reject(new Error('Selecione uma foto.'));
+  if (optimizedReceiptFiles.has(file)) return Promise.resolve(file);
+  if (receiptPreparationCache.has(file)) return receiptPreparationCache.get(file);
+  const pending = receiptPreparationQueue.then(() => optimizeReceiptFile(file));
+  receiptPreparationQueue = pending.then(() => undefined, () => undefined);
+  receiptPreparationCache.set(file, pending);
+  pending.catch(() => receiptPreparationCache.delete(file));
+  return pending;
+}
+
+async function optimizeReceiptFile(file) {
   if (!file || !String(file.type || '').startsWith('image/')) {
     throw new Error('Selecione uma imagem v\u00e1lida do comprovante.');
   }
@@ -3521,6 +3565,7 @@ function prepareFuelForm(options = {}) {
 
   setFuelDateToToday();
   resetFuelPhotoState();
+  offerCentralFormDraft('fuel-form');
 }
 
 function openFuelFormMenu(mode = 'rapido') {
@@ -3562,7 +3607,73 @@ function prepareLooseNoteForm() {
   setLooseDateToToday();
   resetLoosePhotoState();
   toggleLooseCustomDriverField();
+  offerCentralFormDraft('loose-note-form');
 }
+
+// Text-only recovery. A draft is never an acknowledgement or an automatic retry.
+function centralFormDraftKey(formId) {
+  const profile = getDriverProfile();
+  if (!centralOrganizationContext.workspaceId || !profile?.driverId) return '';
+  return centralTenantStorageKey(`central-form-draft-v1:${profile.driverId}:${profile.vehicleId || ''}:${formId}`);
+}
+
+function persistCentralFormDraft(formId) {
+  const form = document.getElementById(formId);
+  const key = centralFormDraftKey(formId);
+  if (!form || !key) return false;
+  const fields = {};
+  for (const field of form.querySelectorAll('input[id], select[id], textarea[id]')) {
+    if (['file','password','hidden','submit','button'].includes(field.type)) continue;
+    fields[field.id] = { value: String(field.value || '').slice(0, 4000), checked: field.checked === true };
+  }
+  try {
+    localStorage.setItem(key, JSON.stringify({ fields, mode: currentFuelFormMode, savedAt: Date.now() }));
+    return true;
+  } catch (_) { return false; }
+}
+
+function offerCentralFormDraft(formId) {
+  const form = document.getElementById(formId), key = centralFormDraftKey(formId);
+  form?.querySelector('[data-draft-recovery]')?.remove();
+  if (!form || !key) return;
+  let draft;
+  try { draft = JSON.parse(localStorage.getItem(key) || 'null'); } catch (_) { return; }
+  if (!draft?.fields || Date.now() - draft.savedAt > 7 * 86400000) return;
+  const box = document.createElement('div');
+  box.dataset.draftRecovery = 'true';
+  box.setAttribute('role', 'status');
+  box.style.cssText = 'padding:12px;background:#eff6ff;border-radius:12px;color:#1e3a8a;margin-bottom:12px';
+  const text = document.createElement('p');
+  text.textContent = 'Há um rascunho neste aparelho. Antes de reenviar, confira Meus envios e a fila pendente. Recuperar não envia nada; selecione o comprovante novamente.';
+  const button = document.createElement('button');
+  button.type = 'button'; button.textContent = 'Recuperar preenchimento';
+  button.onclick = () => {
+    if (centralFormDraftKey(formId) !== key) return;
+    if (formId === 'fuel-form') applyFuelFormMode(draft.mode);
+    for (const [id, state] of Object.entries(draft.fields)) {
+      const field = document.getElementById(id);
+      if (!field || !form.contains(field) || field.type === 'file') continue;
+      field.value = state.value; if (['checkbox','radio'].includes(field.type)) field.checked = state.checked;
+      if (id === 'fuel-city') field.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+    if (formId === 'fuel-form') toggleCustomDriverField(); else toggleLooseCustomDriverField();
+    box.remove();
+  };
+  box.append(text, button); form.prepend(box);
+}
+
+function clearConfirmedCentralFormDraft(formId) {
+  try { const key = centralFormDraftKey(formId); if (key) localStorage.removeItem(key); } catch (_) {}
+}
+
+document.addEventListener('input', event => {
+  const formId = event.target?.closest?.('form')?.id;
+  if (['fuel-form','loose-note-form'].includes(formId)) persistCentralFormDraft(formId);
+});
+document.addEventListener('change', event => {
+  const formId = event.target?.closest?.('form')?.id;
+  if (['fuel-form','loose-note-form'].includes(formId)) persistCentralFormDraft(formId);
+});
 
 function openLooseNoteForm() {
   if (!isStoredDriverProfileComplete()) {
@@ -4333,6 +4444,7 @@ function validateLooseNoteReceiptUploadFields(formData) {
 }
 
 async function saveLooseNoteReceiptUpload(options = {}) {
+  persistCentralFormDraft('loose-note-form');
   const { silent = false } = options;
   const formData = getLooseNoteFormData();
 
@@ -4418,6 +4530,7 @@ async function saveLooseNoteReceiptUpload(options = {}) {
 }
 
 async function saveFuelReceiptUpload(options = {}) {
+  persistCentralFormDraft('fuel-form');
   const { silent = false } = options;
   const formData = getFuelFormData();
 
@@ -4964,6 +5077,7 @@ async function submitFuelFormOnce(expectedWorkspaceId) {
     type: currentFuelFormMode === 'completo' ? 'abastecimento' : 'abastecimento_rapido', formData: getFuelFormData(),
     receiptUrl: uploadedFuelReceipt?.result?.secure_url || '', profile: getDriverProfile()
   })) return;
+  clearConfirmedCentralFormDraft('fuel-form');
   document.getElementById('fuel-form').reset();
   document.getElementById('fuel-form-modal').classList.add('hidden');
   resetFuelPhotoState();
@@ -5082,6 +5196,7 @@ async function submitLooseNoteFormOnce(expectedWorkspaceId) {
   });
   if (preserveChangedCentralFormDraft(attempt, { type: 'servico', formData: getLooseNoteFormData(),
     receiptUrl: uploadedLooseNoteReceipt?.result?.secure_url || '', profile: getDriverProfile() })) return;
+  clearConfirmedCentralFormDraft('loose-note-form');
   closeLooseNoteForm();
   centralFormPendingAttempts.delete(attempt.key);
   showSuccessMessage('Registro confirmado na Central. Envie também a mensagem aberta no WhatsApp.');
@@ -5678,6 +5793,7 @@ async function reviewNativeReceiptFile(target, file) {
 }
 
 function openReceiptCamera(target = 'fuel') {
+  persistCentralFormDraft(target === 'loose' ? 'loose-note-form' : 'fuel-form');
   activeReceiptCameraTarget = target === 'loose' ? 'loose' : 'fuel';
   closeReceiptCamera();
   openNativeReceiptCameraFallback(activeReceiptCameraTarget);
