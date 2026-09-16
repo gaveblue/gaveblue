@@ -1,3 +1,17 @@
+/* Lock only the login background, never the authenticated workspace. */
+html:has(body.auth-locked) {
+  overflow: hidden;
+  scrollbar-gutter: auto;
+  overscroll-behavior: none;
+}
+body.auth-locked {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
 .online-auth-backdrop {
   position: fixed;
   inset: 0;
@@ -5,6 +19,9 @@
   display: grid;
   place-items: center;
   overflow: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  overscroll-behavior: contain;
   padding: 28px;
   background: radial-gradient(circle at 12% 16%, rgba(37, 99, 235, 0.12), transparent 32%), linear-gradient(135deg, #f8fbff 0%, #edf4ff 48%, #ffffff 100%);
 }
@@ -26,6 +43,8 @@
   display: grid;
   place-items: center;
   padding: 20px;
+  box-sizing: border-box;
+  overflow: hidden;
   background: rgba(241, 245, 249, 0.76);
   backdrop-filter: blur(6px);
 }
@@ -49,13 +68,32 @@
 }
 
 .online-auth-loading-card {
+  box-sizing: border-box;
   width: min(440px, calc(100vw - 32px));
+  max-width: 100%;
+  max-height: calc(100vh - 40px);
+  max-height: calc(100dvh - 40px);
+  overflow: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  overscroll-behavior: contain;
   padding: 30px 30px 26px;
   border: 1px solid rgba(148, 163, 184, 0.24);
   border-radius: 24px;
   background: rgba(255, 255, 255, 0.97);
   box-shadow: 0 28px 80px rgba(15, 23, 42, 0.2);
   text-align: center;
+}
+
+.online-auth-backdrop::-webkit-scrollbar,
+.online-auth-loading-card::-webkit-scrollbar { display: none; }
+
+@media (max-height: 640px) {
+  .online-auth-loading-card { padding: 16px 20px; }
+  .online-auth-loading-card .online-auth-loading-logo { width: 120px; margin-bottom: 10px; }
+  .online-auth-loading-card .online-auth-loading-icon { width: 42px; height: 42px; margin-bottom: 8px; }
+  .online-auth-loading-card .online-auth-loading-description { min-height: 0; margin-bottom: 10px; }
+  .online-auth-loading-card .online-auth-loading-note { margin-top: 10px; }
 }
 
 .online-auth-loading-logo {
