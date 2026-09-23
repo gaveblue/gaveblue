@@ -1,4 +1,4 @@
-const CENTRAL_RELEASE = '20260915-low-memory-receipt-1';
+const CENTRAL_RELEASE = '20260922-light-media-1';
 const CENTRAL_SCOPE_KEY = new URL(self.registration.scope).pathname.replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '') || 'root';
 const CACHE_PREFIX = `central-registros-static-${CENTRAL_SCOPE_KEY}-v`;
 const CACHE_NAME = `${CACHE_PREFIX}${CENTRAL_RELEASE}`;
@@ -11,8 +11,8 @@ const STATIC_ASSETS = Array.from(new Set([
   CENTRAL_SHELL_URL,
   CENTRAL_SOURCE_SHELL_URL,
   CENTRAL_MANIFEST_URL,
-  './styles.css?v=20260905-central-reconfiguration-1',
-  './app.js?v=20260915-low-memory-receipt-1',
+  './styles.css?v=20260922-light-media-1',
+  './app.js?v=20260922-light-media-1',
   './assets/brand/covre-e-cia.png',
   './assets/home/hero-posto.png',
   './assets/home/hero-revisao-km-desktop.jpeg',
@@ -41,7 +41,8 @@ const STATIC_ASSETS = Array.from(new Set([
   './assets/pwa/icon-central-192.png',
   './assets/pwa/icon-central-512.png',
   './assets/pwa/icon-central-maskable-512.png'
-].map((asset) => /^https?:/i.test(asset) ? asset : centralAssetUrl(asset))));
+].filter(asset => !/\/assets\/(home|cidades)\//.test(asset))
+  .map((asset) => /^https?:/i.test(asset) ? asset : centralAssetUrl(asset))));
 
 const OPTIONAL_REMOTE_ASSETS = [
   'https://cdn.tailwindcss.com/3.4.17',
@@ -275,6 +276,10 @@ self.addEventListener('fetch', (event) => {
   if (request.method !== 'GET') {
     return;
   }
+
+  // Decorative media and remote receipts use the browser's bounded HTTP cache,
+  // not an ever-growing CacheStorage copy. Offline submission data is untouched.
+  if (request.destination === 'image' || /\/assets\/(home|cidades)\//.test(requestUrl.pathname)) return;
 
   if (requestUrl.origin !== self.location.origin) {
     if (!['image', 'script', 'style', 'font'].includes(request.destination)) return;

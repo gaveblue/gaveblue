@@ -1,3 +1,5 @@
+const centralLightweightMode = Number(navigator.deviceMemory || 0) <= 4;
+document.documentElement.classList.toggle('central-lite', centralLightweightMode);
 const defaultConfig = {
   page_title: 'Postos Credenciados',
   background_color: '#f9fafb',
@@ -3222,12 +3224,18 @@ function loadImageFromFile(file) {
 
 async function createReceiptDrawable(file) {
   const dimensions = await readReceiptDimensions(file);
+  const conservative = !navigator.deviceMemory || navigator.deviceMemory <= 4;
+  // A compressed 8 MB photo can still decode to hundreds of MB of pixels.
+  const maxPixels = navigator.deviceMemory && navigator.deviceMemory <= 2 ? 6000000 : conservative ? 12000000 : 24000000;
+  if (!dimensions || dimensions.width * dimensions.height > maxPixels) {
+    throw new Error(`Foto grande demais ou formato não suportado para processar com segurança. Use JPEG/PNG em menor resolução (até ${maxPixels / 1000000} MP). Seu preenchimento foi preservado.`);
+  }
   if ('createImageBitmap' in window) {
     try {
       const bitmap = await createImageBitmap(file, {
-        ...(dimensions && dimensions.height > dimensions.width
-          ? { resizeHeight: Math.min(dimensions.height, COMPRESSED_RECEIPT_MAX_SIZE) }
-          : { resizeWidth: Math.min(dimensions?.width || COMPRESSED_RECEIPT_MAX_SIZE, COMPRESSED_RECEIPT_MAX_SIZE) }),
+        ...(dimensions.height > dimensions.width
+          ? { resizeHeight: Math.min(dimensions.height, conservative ? 1024 : COMPRESSED_RECEIPT_MAX_SIZE) }
+          : { resizeWidth: Math.min(dimensions.width, conservative ? 1024 : COMPRESSED_RECEIPT_MAX_SIZE) }),
         resizeQuality: 'medium',
         imageOrientation: 'from-image'
       });
@@ -6400,6 +6408,17 @@ function getManagedBannerDuration(imageUrl) {
   return Math.min(15000, Math.max(4000, duration));
 }
 
+function getLightweightBannerUrl(value) {
+  try {
+    const url = new URL(value, window.location.href);
+    if (url.hostname === 'res.cloudinary.com' && url.pathname.includes('/image/upload/')) {
+      url.pathname = url.pathname.replace('/image/upload/', '/image/upload/c_limit,w_960,h_960,q_auto,f_auto/');
+      return url.href;
+    }
+  } catch (_) {}
+  return String(value);
+}
+
 async function loadManagedHomeBanners() {
   const slidesContainer = document.querySelector('#home-hero-carousel .home-hero-slides');
   const carousel = document.getElementById('home-hero-carousel');
@@ -6432,11 +6451,12 @@ async function loadManagedHomeBanners() {
       if (mobileVariant) {
         const source = document.createElement('source');
         source.media = '(max-width: 767px)';
-        source.srcset = mobileVariant;
+        source.dataset.srcset = mobileVariant;
         slide.appendChild(source);
       }
       const image = document.createElement('img');
-      image.src = String(banner.imageUrl);
+      image.dataset.src = getLightweightBannerUrl(banner.imageUrl);
+      image.decoding = 'async';
       image.alt = String(banner.title || 'Aviso da Central de Registros');
       image.loading = index === 0 ? 'eager' : 'lazy';
       image.draggable = false;
@@ -6469,13 +6489,6 @@ function initHomeHeroCarousel() {
     return;
   }
 
-  if (allSlides.length === 1) {
-    allSlides[0].classList.add('is-active');
-    carousel.classList.toggle('is-message-slide', !allSlides[0].classList.contains('hero-main'));
-    dotsContainer.innerHTML = '<span class="is-active"></span>';
-    return;
-  }
-
   let currentSlide = 0;
   let autoplayId = null;
   let dragStartX = 0;
@@ -6483,6 +6496,20 @@ function initHomeHeroCarousel() {
   let isDragging = false;
 
   const getActiveSlides = () => allSlides.filter((slide) => mobileQuery.matches || !slide.classList.contains('hero-mobile-only'));
+  const isPaused = () => document.hidden || ['fuel-form-modal','loose-note-modal','receipt-camera-modal'].some(id => {
+    const node = document.getElementById(id); return node && !node.classList.contains('hidden');
+  });
+  const updateImages = () => {
+    allSlides.forEach(slide => {
+      const active = !isPaused() && slide === slides[currentSlide];
+      slide.querySelectorAll('source, img').forEach(image => {
+        const attr = image.tagName === 'SOURCE' ? 'srcset' : 'src';
+        if (!image.dataset[attr] && image.getAttribute(attr)) image.dataset[attr] = image.getAttribute(attr);
+        if (active && image.dataset[attr]) image.setAttribute(attr, image.dataset[attr]);
+        else image.removeAttribute(attr);
+      });
+    });
+  };
 
   const rebuildDots = () => {
     dotsContainer.innerHTML = slides.map(() => '<span></span>').join('');
@@ -6505,12 +6532,15 @@ function initHomeHeroCarousel() {
     currentSlide = (nextIndex + slides.length) % slides.length;
     allSlides.forEach((slide) => slide.classList.remove('is-active'));
     slides[currentSlide]?.classList.add('is-active');
+    updateImages();
     dots.forEach((dot, index) => dot.classList.toggle('is-active', index === currentSlide));
     carousel.classList.toggle('is-message-slide', !slides[currentSlide]?.classList.contains('hero-main'));
   };
 
   const restartAutoplay = () => {
     window.clearTimeout(autoplayId);
+    updateImages();
+    if (isPaused() || slides.length < 2) return;
     const duration = Number(slides[currentSlide]?.dataset.duration || 6000);
     autoplayId = window.setTimeout(() => {
       showSlide(currentSlide + 1);
@@ -6568,6 +6598,12 @@ function initHomeHeroCarousel() {
   });
 
   carousel.setAttribute('tabindex', '0');
+  document.addEventListener('visibilitychange', restartAutoplay);
+  const visibilityObserver = new MutationObserver(restartAutoplay);
+  for (const id of ['fuel-form-modal','loose-note-modal','receipt-camera-modal']) {
+    const node = document.getElementById(id);
+    if (node) visibilityObserver.observe(node, { attributes: true, attributeFilter: ['class'] });
+  }
   refreshSlides();
   mobileQuery.addEventListener('change', () => {
     refreshSlides();

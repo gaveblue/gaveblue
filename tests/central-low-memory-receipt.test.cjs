@@ -5,7 +5,7 @@ const vm = require('node:vm');
 const source = fs.readFileSync(require('node:path').join(__dirname, '../postoscredenciados-covreecia/app.js'), 'utf8');
 const block = (start,end) => source.slice(source.indexOf(start),source.indexOf(end,source.indexOf(start)));
 function context(extra={}) {
-  const c = vm.createContext({DataView,Blob,console,COMPRESSED_RECEIPT_MAX_SIZE:1280,window:{},...extra});
+  const c = vm.createContext({DataView,Blob,console,navigator:{deviceMemory:8},COMPRESSED_RECEIPT_MAX_SIZE:1280,window:{},...extra});
   vm.runInContext(block('async function readReceiptDimensions(', 'const receiptPreparationCache'), c);
   return c;
 }
@@ -50,3 +50,25 @@ test('draft persists text and mode without receipt or password',()=>{const {c,da
 test('draft storage exhaustion never crashes form',()=>assert.equal(draftHarness(true).c.persistCentralFormDraft('fuel-form'),false));
 test('draft keys separate driver and company',()=>{const h=draftHarness(),a=h.c.centralFormDraftKey('fuel-form');h.switchDriver();const b=h.c.centralFormDraftKey('fuel-form');h.switchTenant();assert.notEqual(a,b);assert.notEqual(b,h.c.centralFormDraftKey('fuel-form'));});
 test('confirmation removes only matching form draft',()=>{const {c,data}=draftHarness();c.persistCentralFormDraft('fuel-form');c.persistCentralFormDraft('loose-note-form');c.clearConfirmedCentralFormDraft('fuel-form');assert.equal(data.size,1);assert.match([...data.keys()][0],/loose-note-form/);});
+test('weak phone rejects huge photos before decoder allocation',async()=>{
+  let decoded=false;const c=context({navigator:{deviceMemory:2},window:{createImageBitmap:true},createImageBitmap:()=>{decoded=true;}});
+  vm.runInContext(block('async function createReceiptDrawable(', 'async function readReceiptDimensions('),c);
+  await assert.rejects(c.createReceiptDrawable(png(4000,3000)),/6 MP/);assert.equal(decoded,false);
+});
+test('unknown device uses 1024px long edge',async()=>{
+  let opts;const c=context({navigator:{},window:{createImageBitmap:true},createImageBitmap:async(f,o)=>{opts=o;return {width:768,height:1024,close(){}};}});
+  vm.runInContext(block('async function createReceiptDrawable(', 'async function readReceiptDimensions('),c);
+  await c.createReceiptDrawable(png(3000,4000));assert.equal(opts.resizeHeight,1024);
+});
+test('carousel has no eager static picture sources and releases inactive slides',()=>{
+  const html=fs.readFileSync(require('node:path').join(__dirname,'../postoscredenciados-covreecia/index.html'),'utf8');
+  const hero=html.slice(html.indexOf('<div class="home-hero-slides"'),html.indexOf('<div class="home-hero-overlay"'));
+  assert.doesNotMatch(hero,/\ssrc(?:set)?=/);assert.match(hero,/data-src=/);
+  const carousel=block('function initHomeHeroCarousel()',"window.addEventListener('DOMContentLoaded', async () => {\r\n  await loadCentralOrganizationContext");
+  assert.match(carousel,/image.removeAttribute\(attr\)/);assert.match(carousel,/isPaused\(\) \|\| slides.length < 2/);assert.match(carousel,/document.hidden/);
+});
+test('service worker does not duplicate image cache or precache galleries',()=>{
+  const sw=fs.readFileSync(require('node:path').join(__dirname,'../postoscredenciados-covreecia/sw.js'),'utf8');
+  assert.match(sw,/request.destination === 'image'.*return;/);assert.match(sw,/filter\(asset =>/);
+  assert.doesNotMatch(sw,/indexedDB.deleteDatabase|localStorage.clear/);
+});
