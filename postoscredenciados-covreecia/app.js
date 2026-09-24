@@ -3290,6 +3290,12 @@ async function readReceiptDimensions(file) {
 }
 
 const receiptPreparationCache = new WeakMap();
+const directReceiptFiles = new WeakSet();
+function prepareDirectReceipt(file) {
+  directReceiptFiles.add(file);
+  optimizedReceiptFiles.add(file);
+  return file;
+}
 let receiptPreparationQueue = Promise.resolve();
 function compressFuelReceiptIfNeeded(file) {
   if (!file || typeof file !== 'object') return Promise.reject(new Error('Selecione uma foto.'));
@@ -3315,7 +3321,15 @@ async function optimizeReceiptFile(file) {
     throw new Error('A foto ultrapassa 10 MB. Tire outra foto ou escolha uma imagem menor.');
   }
 
-  const source = await createReceiptDrawable(file);
+  // Upload the binary file directly on modest/unknown devices. No bitmap,
+  // canvas, base64 or local preview may decode the original camera photo.
+  if (!navigator.deviceMemory || navigator.deviceMemory <= 4) return prepareDirectReceipt(file);
+  let dimensions;
+  try { dimensions = await readReceiptDimensions(file); } catch (_) {}
+  if (!dimensions || dimensions.width * dimensions.height > 24000000) return prepareDirectReceipt(file);
+  let source;
+  try { source = await createReceiptDrawable(file); }
+  catch (_) { return prepareDirectReceipt(file); }
   const scale = Math.min(1, COMPRESSED_RECEIPT_MAX_SIZE / Math.max(source.width, source.height));
   const width = Math.max(1, Math.round(source.width * scale));
   const height = Math.max(1, Math.round(source.height * scale));
@@ -4478,7 +4492,7 @@ async function saveLooseNoteReceiptUpload(options = {}) {
   }
 
   setSaveLooseReceiptButtonLoading(true);
-  updateLooseReceiptUploadStatus('Comprimindo e salvando comprovante na nuvem...', 'progress');
+  updateLooseReceiptUploadStatus('Enviando comprovante para a nuvem...', 'progress');
   let preparedOfflineFile = null;
 
   looseNoteReceiptUploadPromise = (async () => {
@@ -4564,7 +4578,7 @@ async function saveFuelReceiptUpload(options = {}) {
   }
 
   setSaveReceiptButtonLoading(true);
-  updateReceiptUploadStatus('Comprimindo e salvando comprovante na nuvem...', 'progress');
+  updateReceiptUploadStatus('Enviando comprovante para a nuvem...', 'progress');
   let preparedOfflineFile = null;
 
   fuelReceiptUploadPromise = (async () => {
@@ -5515,10 +5529,23 @@ async function prepareReceiptFile(target, file) {
       setSaveReceiptButtonVisible(true);
     }
 
-    preview.src = setReceiptPreviewUrl(target, optimizedFile);
+    const direct = directReceiptFiles.has(optimizedFile);
+    releaseReceiptPreviewUrl(target);
+    preview.removeAttribute('src');
+    preview.classList.toggle('hidden', direct);
+    let attachmentLabel = previewContainer.querySelector('[data-receipt-attachment]');
+    if (!attachmentLabel) {
+      attachmentLabel = document.createElement('p');
+      attachmentLabel.dataset.receiptAttachment = 'true';
+      attachmentLabel.setAttribute('role', 'status');
+      previewContainer.prepend(attachmentLabel);
+    }
+    attachmentLabel.hidden = !direct;
+    attachmentLabel.textContent = direct ? `Foto anexada: ${optimizedFile.name || 'comprovante'}. Prévia desativada para economizar memória.` : '';
+    if (!direct) preview.src = setReceiptPreviewUrl(target, optimizedFile);
     previewContainer.classList.remove('hidden');
     photoButtons.classList.add('hidden');
-    updateStatus('Foto otimizada. Clique em Salvar comprovante.', 'neutral');
+    updateStatus(direct ? 'Foto anexada. Clique em Salvar comprovante para enviar sem processar a imagem neste celular.' : 'Foto otimizada. Clique em Salvar comprovante.', 'neutral');
   } catch (error) {
     console.error('Erro ao preparar comprovante:', error);
     if (selectionId !== (isLoose ? looseReceiptSelectionId : fuelReceiptSelectionId)) return;
@@ -5788,6 +5815,11 @@ async function reviewNativeReceiptFile(target, file) {
     return;
   }
 
+  if (!navigator.deviceMemory || navigator.deviceMemory <= 4) {
+    closeReceiptCamera();
+    return prepareReceiptFile(target, file);
+  }
+
   activeReceiptCameraTarget = target === 'loose' ? 'loose' : 'fuel';
   const modal = document.getElementById('receipt-camera-modal');
   const status = document.getElementById('receipt-camera-status');
@@ -5799,6 +5831,10 @@ async function reviewNativeReceiptFile(target, file) {
 
   try {
     const optimizedFile = await compressFuelReceiptIfNeeded(file);
+    if (directReceiptFiles.has(optimizedFile)) {
+      closeReceiptCamera();
+      return prepareReceiptFile(target, optimizedFile);
+    }
     showReceiptCameraReviewMode(optimizedFile, activeReceiptCameraTarget);
   } catch (error) {
     closeReceiptCamera();

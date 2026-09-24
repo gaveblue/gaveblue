@@ -72,3 +72,19 @@ test('service worker does not duplicate image cache or precache galleries',()=>{
   assert.match(sw,/request.destination === 'image'.*return;/);assert.match(sw,/filter\(asset =>/);
   assert.doesNotMatch(sw,/indexedDB.deleteDatabase|localStorage.clear/);
 });
+for (const memory of [undefined,1,2,4,8]) test(`direct binary path avoids decoding large camera files (${memory || 'unknown'} GB)`,async()=>{
+  let decodes=0,reads=0;
+  const c=vm.createContext({navigator:{deviceMemory:memory},optimizedReceiptFiles:new WeakSet(),MAX_RECEIPT_SOURCE_BYTES:10*1024*1024,readReceiptDimensions:async()=>{reads++;return {width:8000,height:6000};},createReceiptDrawable:async()=>{decodes++;throw Error('must not decode');}});
+  vm.runInContext(block('const receiptPreparationCache','function releaseReceiptPreviewUrl('),c);
+  const file={size:5*1024*1024,type:'image/jpeg',name:'camera.jpg'};
+  assert.equal(await c.compressFuelReceiptIfNeeded(file),file);
+  assert.equal(await c.compressFuelReceiptIfNeeded(file),file);
+  assert.equal(decodes,0);assert.equal(reads,memory===8?1:0);
+});
+test('direct attachments are not put into an image element',()=>{
+  const p=block('async function prepareReceiptFile(', 'function updatePhotoPreview(');
+  assert.match(p,/if \(!direct\) preview.src =/);assert.match(p,/preview.removeAttribute\('src'\)/);
+  const camera=block('async function reviewNativeReceiptFile(', 'function openReceiptCamera(');
+  assert.match(camera,/return prepareReceiptFile\(target, file\)/);
+  assert.match(camera,/directReceiptFiles.has\(optimizedFile\)/);
+});
