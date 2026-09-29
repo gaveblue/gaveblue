@@ -4,6 +4,8 @@
   'use strict';
   const el=id=>document.getElementById(id);
   const labels={titulo:'Título do recibo',numero:'Número do recibo',tituloPagador:'Título: pagador',identidadePagador:'Dados do pagador',enderecoPagador:'Endereço do pagador',tituloRecebedor:'Título: recebedor',tituloServico:'Título: serviço',tituloPagamento:'Título: pagamento',tituloAnexo:'Título: anexo',linhaAssinatura:'Linha da assinatura',nome:'Nome do recebedor',documento:'CPF/CNPJ',servico:'Serviço',nota:'Nota fiscal',destino:'Destino',dataServico:'Data do serviço',valorServico:'Valor do serviço',emitente:'Emitente / forma de pagamento',banco:'Banco / titular',agencia:'Agência / chave PIX',conta:'Conta / agência',dataCheque:'Data / conta',cheque:'Número do cheque / tipo de conta',valorCheque:'Valor do pagamento',localData:'Local e data',assinatura:'Assinatura',assinaturaDocumento:'Documento da assinatura'};
+  Object.assign(labels,{linhaPagador:'Linha acima do pagador',linhaRecebedor:'Linha acima do recebedor',linhaServico:'Linha acima do serviço',linhaPagamento:'Linha abaixo do valor / acima do pagamento',linhaAnexo:'Linha acima do anexo'});
+  const lineKeys=new Set(['linhaPagador','linhaRecebedor','linhaServico','linhaPagamento','linhaAnexo']);
   const nameFor=key=>labels[key]||(key.startsWith('declaracao')?'Declaração · linha '+(Number(key.slice(10))+1):key);
   const section=el('layout-settings');
   section.innerHTML=`<div class="section-heading"><div><span class="section-kicker">Configurações</span><h1>Layout de impressão</h1><p>A página abaixo é o próprio PDF. Clique no texto que deseja ajustar.</p></div></div>
@@ -23,6 +25,12 @@
       <details><summary>Posição precisa</summary><label>Horizontal (pt)<input id="layout-x" type="number" min="0" max="595.56" step="1"></label><label>Altura a partir da base (pt)<input id="layout-y" type="number" min="0" max="842.04" step="1"></label></details><button id="layout-reset-item" type="button" class="secondary">Restaurar este texto</button></div>
       <p class="print-layout-hint">Ao salvar, as próximas emissões e edições usarão este layout. PDFs já salvos no histórico mantêm a versão emitida.</p><p class="print-layout-hint">Na impressão, use A4 e escala 100% / tamanho real.</p></aside>
     </div>`;
+  section.querySelector('.section-heading p').textContent='A página abaixo é o próprio PDF. Clique em um texto ou linha para ajustar.';
+  section.querySelector('.print-layout-inspector .section-kicker').textContent='Item selecionado';
+  el('layout-preview').setAttribute('aria-label','PDF editável: selecione um texto ou linha para mover');
+  el('layout-reset-item').textContent='Restaurar este item';
+  const widthLabel=document.createElement('label');widthLabel.hidden=true;widthLabel.innerHTML='Largura da linha (pt)<input id="layout-width" type="number" min="10" max="595.56" step="1">';
+  el('layout-size').closest('label').after(widthLabel);
 
   let tipo='covre',selected=null,rectangles=[],pdfBlob=null,pdfURL=null,revision=0,timer,readerPromise;
   let validPreview=false,renderedRevision=-1;
@@ -35,8 +43,10 @@
     for(const [key,m] of Object.entries(value.fields||{})){
       if(!labels[key]&&!/^declaracao[0-3]$/.test(key))continue;
       if(!m||!['x','y','size'].every(k=>Number.isFinite(m[k])))throw new Error('Configuração de layout inválida. Restaure o original.');
-      if(m.x<0||m.x>595.56||m.y<0||m.y>842.04||m.size<6||m.size>24)throw new Error('Posição ou fonte fora dos limites do papel.');
+      const line=lineKeys.has(key);
+      if(m.x<0||m.x>595.56||m.y<0||m.y>842.04||m.size<(line ? 0.5 : 6)||m.size>(line ? 12 : 24))throw new Error('Posição ou tamanho fora dos limites do papel.');
       const metric={x:m.x,y:m.y,size:m.size};
+      if(line){if(!Number.isFinite(m.width)||m.width<10||m.x+m.width>595.56||m.y+m.size>842.04)throw new Error('A linha divisória ultrapassa a página.');metric.width=m.width;}
       if(['left','center','right'].includes(m.align))metric.align=m.align;
       if(['auto','normal','bold'].includes(m.weight))metric.weight=m.weight;
       if(!value.version&&['localData','assinatura','assinaturaDocumento'].includes(key)&&!m.align){metric.x=base.width/2+(m.x-base.fields[key].x);metric.align='center';}
@@ -64,7 +74,12 @@
     const box=rectangles.find(r=>r.key===selected);
     el('layout-inspector-controls').hidden=!box;
     el('layout-selected-title').textContent=box?nameFor(box.key):'Clique no recibo';
-    el('layout-selected-text').textContent=box?box.text:'Selecione um texto diretamente na página para ajustar sua posição e formatação.';
+    el('layout-selected-text').textContent=box?(box.kind==='line'?'Mova com as setas e ajuste a largura ou a espessura.':box.text):'Selecione um texto ou linha diretamente na página para ajustar.';
+    const isLine=box?.kind==='line';
+    el('layout-size').closest('label').firstChild.textContent=isLine?'Espessura da linha (pt)':'Tamanho da fonte (pt)';
+    el('layout-size').min=isLine?'0.5':'6';el('layout-size').max=isLine?'12':'24';el('layout-size').step=isLine?'0.05':'0.5';
+    widthLabel.hidden=!isLine;el('layout-weight').closest('label').hidden=isLine;el('layout-align').closest('label').hidden=isLine;
+    if(isLine)el('layout-width').value=Number((current().fields[selected]?.width??box.metric.width).toFixed(2));
     if(box){const m={...box.metric,...current().fields[selected]};for(const prop of ['x','y','size'])el('layout-'+prop).value=Number(m[prop].toFixed(2));el('layout-align').value=m.align||'left';el('layout-weight').value=m.weight||'auto';}
     for(const button of el('layout-hitareas').children){button.classList.toggle('selected',button.dataset.field===selected);button.setAttribute('aria-pressed',String(button.dataset.field===selected));}
   }
@@ -87,7 +102,7 @@
       rectangles=boxes;pdfBlob=blob;el('layout-canvas').replaceWith(canvas);hitAreas();
       if(pdfURL)URL.revokeObjectURL(pdfURL);pdfURL=URL.createObjectURL(blob);el('layout-open-pdf').href=pdfURL;
       renderedRevision=request;validPreview=true;el('layout-preview').setAttribute('aria-busy','false');
-      message('PDF atualizado · '+(el('layout-record').value?'dados do recibo selecionado':'dados de exemplo')+' · clique em um texto para editar.');controls();
+      message('PDF atualizado · '+(el('layout-record').value?'dados do recibo selecionado':'dados de exemplo')+' · clique em um texto ou linha para editar.');controls();
     }catch(error){if(request===revision){validPreview=false;el('layout-preview').setAttribute('aria-busy','false');message('Não foi possível atualizar o PDF: '+error.message,true);controls();}}
     finally{if(doc)await doc.destroy();else if(task)await task.destroy();}
   }
@@ -107,6 +122,7 @@
   el('layout-zoom').onchange=()=>{const value=el('layout-zoom').value;el('layout-preview').style.width=value==='fit'?'min(100%, 595.56px)':(595.56*Number(value))+'px';};
   section.addEventListener('keydown',event=>{if(event.target.matches('input,select,textarea')||!selected||section.hidden)return;if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(event.key)){event.preventDefault();move(event.key.slice(5).toLowerCase(),event.shiftKey);}if(event.key==='Escape'){selected=null;selection();}});
   section.querySelectorAll('[data-move]').forEach(button=>button.onclick=event=>move(button.dataset.move,event.shiftKey));
+  el('layout-width').oninput=event=>{if(event.target.value&&event.target.checkValidity())change({width:Number(event.target.value)});};
   for(const prop of ['x','y','size','align','weight'])el('layout-'+prop).oninput=event=>{const input=event.target;if(['x','y','size'].includes(prop)){if(!input.value||!input.checkValidity())return;change({[prop]:Number(input.value)});}else if(prop==='align'){const box=rectangles.find(r=>r.key===selected);if(box)change({align:input.value,x:box.x+(input.value==='center'?box.width/2:input.value==='right'?box.width:0)});}else change({[prop]:input.value});};
   window.receiptLayout={read,open,normalize};
 })();

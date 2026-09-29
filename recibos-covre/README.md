@@ -11,6 +11,11 @@ nenhum dado do perfil é enviado para um banco remoto. A tela Início mostra uma
 estimativa de uso, limite e espaço disponível do armazenamento do site informada
 por `navigator.storage.estimate()`.
 
+No editor do PDF, as linhas divisórias também podem ser selecionadas diretamente
+na página. As setas alteram sua posição; os controles ajustam largura e espessura.
+As medidas são extraídas dos modelos originais e aplicadas pelo mesmo gerador
+na prévia e na emissão. Salvar, desfazer e restaurar funcionam também nas linhas.
+
 ## Fluxo
 
 1. A tela Recibos abre a grade do histórico, com pesquisa, seleção e ações.

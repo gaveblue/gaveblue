@@ -32,5 +32,13 @@ for path in root.glob('*.pdf'):
                            'width': line['x1']-line['x0'], 'height': line['bottom']-line['top']}
             }
         result[path.name] = fields
+        separators = sorted((r for r in page.rects if r['width'] > 400 and 1 < r['height'] < 6), key=lambda r: -r['y0'])
+        for key, rect in zip(['linhaPagador', 'linhaRecebedor', 'linhaServico', 'linhaPagamento', 'linhaAnexo'], separators):
+            fields[key] = {
+                'kind': 'line', 'text': 'Linha divisória',
+                'x': rect['x0'], 'y': rect['y0'], 'size': rect['height'],
+                'width': rect['width'], 'color': rect['non_stroking_color'],
+                'bounds': {'x': rect['x0'], 'y': rect['y0'], 'width': rect['width'], 'height': rect['height']}
+            }
 (root/'static-layout.json').write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding='utf-8')
 print('Extracted text bounds for', len(result), 'templates')

@@ -77,6 +77,81 @@
         "width": 33.767759999999996,
         "height": 9.480000000000018
       }
+    },
+    "linhaPagador": {
+      "kind": "line",
+      "text": "Linha divisória",
+      "x": 55.5,
+      "y": 763.22,
+      "size": 3.5499999999999545,
+      "width": 481.85,
+      "color": 0.329,
+      "bounds": {
+        "x": 55.5,
+        "y": 763.22,
+        "width": 481.85,
+        "height": 3.5499999999999545
+      }
+    },
+    "linhaRecebedor": {
+      "kind": "line",
+      "text": "Linha divisória",
+      "x": 55.4,
+      "y": 690.45,
+      "size": 3.5499999999999545,
+      "width": 481.85,
+      "color": 0.329,
+      "bounds": {
+        "x": 55.4,
+        "y": 690.45,
+        "width": 481.85,
+        "height": 3.5499999999999545
+      }
+    },
+    "linhaServico": {
+      "kind": "line",
+      "text": "Linha divisória",
+      "x": 55.55,
+      "y": 623.45,
+      "size": 3.5499999999999545,
+      "width": 481.84999999999997,
+      "color": 0.329,
+      "bounds": {
+        "x": 55.55,
+        "y": 623.45,
+        "width": 481.84999999999997,
+        "height": 3.5499999999999545
+      }
+    },
+    "linhaPagamento": {
+      "kind": "line",
+      "text": "Linha divisória",
+      "x": 55.5,
+      "y": 514.48,
+      "size": 3.5499999999999545,
+      "width": 481.85,
+      "color": 0.329,
+      "bounds": {
+        "x": 55.5,
+        "y": 514.48,
+        "width": 481.85,
+        "height": 3.5499999999999545
+      }
+    },
+    "linhaAnexo": {
+      "kind": "line",
+      "text": "Linha divisória",
+      "x": 55.35,
+      "y": 219.65,
+      "size": 3.5500000000000114,
+      "width": 481.85,
+      "color": 0.329,
+      "bounds": {
+        "x": 55.35,
+        "y": 219.65,
+        "width": 481.85,
+        "height": 3.5500000000000114
+      }
     }
   },
   "chapa-partners-v2.pdf": {
@@ -169,6 +244,81 @@
         "y": 205.86919999999998,
         "width": 33.767759999999996,
         "height": 9.480000000000018
+      }
+    },
+    "linhaPagador": {
+      "kind": "line",
+      "text": "Linha divisória",
+      "x": 55.5,
+      "y": 763.22,
+      "size": 3.5499999999999545,
+      "width": 481.85,
+      "color": 0.329,
+      "bounds": {
+        "x": 55.5,
+        "y": 763.22,
+        "width": 481.85,
+        "height": 3.5499999999999545
+      }
+    },
+    "linhaRecebedor": {
+      "kind": "line",
+      "text": "Linha divisória",
+      "x": 55.4,
+      "y": 690.45,
+      "size": 3.5499999999999545,
+      "width": 481.85,
+      "color": 0.329,
+      "bounds": {
+        "x": 55.4,
+        "y": 690.45,
+        "width": 481.85,
+        "height": 3.5499999999999545
+      }
+    },
+    "linhaServico": {
+      "kind": "line",
+      "text": "Linha divisória",
+      "x": 55.55,
+      "y": 623.45,
+      "size": 3.5499999999999545,
+      "width": 481.84999999999997,
+      "color": 0.329,
+      "bounds": {
+        "x": 55.55,
+        "y": 623.45,
+        "width": 481.84999999999997,
+        "height": 3.5499999999999545
+      }
+    },
+    "linhaPagamento": {
+      "kind": "line",
+      "text": "Linha divisória",
+      "x": 55.5,
+      "y": 514.48,
+      "size": 3.5499999999999545,
+      "width": 481.85,
+      "color": 0.329,
+      "bounds": {
+        "x": 55.5,
+        "y": 514.48,
+        "width": 481.85,
+        "height": 3.5499999999999545
+      }
+    },
+    "linhaAnexo": {
+      "kind": "line",
+      "text": "Linha divisória",
+      "x": 55.35,
+      "y": 219.65,
+      "size": 3.5500000000000114,
+      "width": 481.85,
+      "color": 0.329,
+      "bounds": {
+        "x": 55.35,
+        "y": 219.65,
+        "width": 481.85,
+        "height": 3.5500000000000114
       }
     }
   },
@@ -314,6 +464,81 @@
         "y": 205.86919999999998,
         "width": 33.767759999999996,
         "height": 9.480000000000018
+      }
+    },
+    "linhaPagador": {
+      "kind": "line",
+      "text": "Linha divisória",
+      "x": 55.5,
+      "y": 763.22,
+      "size": 3.5499999999999545,
+      "width": 481.85,
+      "color": 0.329,
+      "bounds": {
+        "x": 55.5,
+        "y": 763.22,
+        "width": 481.85,
+        "height": 3.5499999999999545
+      }
+    },
+    "linhaRecebedor": {
+      "kind": "line",
+      "text": "Linha divisória",
+      "x": 55.4,
+      "y": 690.45,
+      "size": 3.5499999999999545,
+      "width": 481.85,
+      "color": 0.329,
+      "bounds": {
+        "x": 55.4,
+        "y": 690.45,
+        "width": 481.85,
+        "height": 3.5499999999999545
+      }
+    },
+    "linhaServico": {
+      "kind": "line",
+      "text": "Linha divisória",
+      "x": 55.55,
+      "y": 623.45,
+      "size": 3.5499999999999545,
+      "width": 481.84999999999997,
+      "color": 0.329,
+      "bounds": {
+        "x": 55.55,
+        "y": 623.45,
+        "width": 481.84999999999997,
+        "height": 3.5499999999999545
+      }
+    },
+    "linhaPagamento": {
+      "kind": "line",
+      "text": "Linha divisória",
+      "x": 55.5,
+      "y": 514.48,
+      "size": 3.5499999999999545,
+      "width": 481.85,
+      "color": 0.329,
+      "bounds": {
+        "x": 55.5,
+        "y": 514.48,
+        "width": 481.85,
+        "height": 3.5499999999999545
+      }
+    },
+    "linhaAnexo": {
+      "kind": "line",
+      "text": "Linha divisória",
+      "x": 55.35,
+      "y": 219.65,
+      "size": 3.5500000000000114,
+      "width": 481.85,
+      "color": 0.329,
+      "bounds": {
+        "x": 55.35,
+        "y": 219.65,
+        "width": 481.85,
+        "height": 3.5500000000000114
       }
     }
   },
@@ -473,6 +698,81 @@
         "width": 33.767759999999996,
         "height": 9.480000000000018
       }
+    },
+    "linhaPagador": {
+      "kind": "line",
+      "text": "Linha divisória",
+      "x": 55.5,
+      "y": 763.22,
+      "size": 3.5499999999999545,
+      "width": 481.85,
+      "color": 0.329,
+      "bounds": {
+        "x": 55.5,
+        "y": 763.22,
+        "width": 481.85,
+        "height": 3.5499999999999545
+      }
+    },
+    "linhaRecebedor": {
+      "kind": "line",
+      "text": "Linha divisória",
+      "x": 55.4,
+      "y": 690.45,
+      "size": 3.5499999999999545,
+      "width": 481.85,
+      "color": 0.329,
+      "bounds": {
+        "x": 55.4,
+        "y": 690.45,
+        "width": 481.85,
+        "height": 3.5499999999999545
+      }
+    },
+    "linhaServico": {
+      "kind": "line",
+      "text": "Linha divisória",
+      "x": 55.55,
+      "y": 623.45,
+      "size": 3.5499999999999545,
+      "width": 481.84999999999997,
+      "color": 0.329,
+      "bounds": {
+        "x": 55.55,
+        "y": 623.45,
+        "width": 481.84999999999997,
+        "height": 3.5499999999999545
+      }
+    },
+    "linhaPagamento": {
+      "kind": "line",
+      "text": "Linha divisória",
+      "x": 55.5,
+      "y": 514.48,
+      "size": 3.5499999999999545,
+      "width": 481.85,
+      "color": 0.329,
+      "bounds": {
+        "x": 55.5,
+        "y": 514.48,
+        "width": 481.85,
+        "height": 3.5499999999999545
+      }
+    },
+    "linhaAnexo": {
+      "kind": "line",
+      "text": "Linha divisória",
+      "x": 55.35,
+      "y": 219.65,
+      "size": 3.5500000000000114,
+      "width": 481.85,
+      "color": 0.329,
+      "bounds": {
+        "x": 55.35,
+        "y": 219.65,
+        "width": 481.85,
+        "height": 3.5500000000000114
+      }
     }
   },
   "covre-partners-v2-payment.pdf": {
@@ -552,6 +852,81 @@
         "y": 193.38919999999996,
         "width": 33.767759999999996,
         "height": 9.480000000000018
+      }
+    },
+    "linhaPagador": {
+      "kind": "line",
+      "text": "Linha divisória",
+      "x": 55.5,
+      "y": 763.22,
+      "size": 3.5499999999999545,
+      "width": 481.85,
+      "color": 0.329,
+      "bounds": {
+        "x": 55.5,
+        "y": 763.22,
+        "width": 481.85,
+        "height": 3.5499999999999545
+      }
+    },
+    "linhaRecebedor": {
+      "kind": "line",
+      "text": "Linha divisória",
+      "x": 55.4,
+      "y": 690.45,
+      "size": 3.5499999999999545,
+      "width": 481.85,
+      "color": 0.329,
+      "bounds": {
+        "x": 55.4,
+        "y": 690.45,
+        "width": 481.85,
+        "height": 3.5499999999999545
+      }
+    },
+    "linhaServico": {
+      "kind": "line",
+      "text": "Linha divisória",
+      "x": 55.55,
+      "y": 623.45,
+      "size": 3.5499999999999545,
+      "width": 481.84999999999997,
+      "color": 0.329,
+      "bounds": {
+        "x": 55.55,
+        "y": 623.45,
+        "width": 481.84999999999997,
+        "height": 3.5499999999999545
+      }
+    },
+    "linhaPagamento": {
+      "kind": "line",
+      "text": "Linha divisória",
+      "x": 55.5,
+      "y": 497.01,
+      "size": 3.5500000000000114,
+      "width": 481.85,
+      "color": 0.329,
+      "bounds": {
+        "x": 55.5,
+        "y": 497.01,
+        "width": 481.85,
+        "height": 3.5500000000000114
+      }
+    },
+    "linhaAnexo": {
+      "kind": "line",
+      "text": "Linha divisória",
+      "x": 55.35,
+      "y": 214.61,
+      "size": 3.5500000000000114,
+      "width": 481.85,
+      "color": 0.329,
+      "bounds": {
+        "x": 55.35,
+        "y": 214.61,
+        "width": 481.85,
+        "height": 3.5500000000000114
       }
     }
   },
@@ -645,6 +1020,81 @@
         "y": 193.38919999999996,
         "width": 33.767759999999996,
         "height": 9.480000000000018
+      }
+    },
+    "linhaPagador": {
+      "kind": "line",
+      "text": "Linha divisória",
+      "x": 55.5,
+      "y": 763.22,
+      "size": 3.5499999999999545,
+      "width": 481.85,
+      "color": 0.329,
+      "bounds": {
+        "x": 55.5,
+        "y": 763.22,
+        "width": 481.85,
+        "height": 3.5499999999999545
+      }
+    },
+    "linhaRecebedor": {
+      "kind": "line",
+      "text": "Linha divisória",
+      "x": 55.4,
+      "y": 690.45,
+      "size": 3.5499999999999545,
+      "width": 481.85,
+      "color": 0.329,
+      "bounds": {
+        "x": 55.4,
+        "y": 690.45,
+        "width": 481.85,
+        "height": 3.5499999999999545
+      }
+    },
+    "linhaServico": {
+      "kind": "line",
+      "text": "Linha divisória",
+      "x": 55.55,
+      "y": 623.45,
+      "size": 3.5499999999999545,
+      "width": 481.84999999999997,
+      "color": 0.329,
+      "bounds": {
+        "x": 55.55,
+        "y": 623.45,
+        "width": 481.84999999999997,
+        "height": 3.5499999999999545
+      }
+    },
+    "linhaPagamento": {
+      "kind": "line",
+      "text": "Linha divisória",
+      "x": 55.5,
+      "y": 497.01,
+      "size": 3.5500000000000114,
+      "width": 481.85,
+      "color": 0.329,
+      "bounds": {
+        "x": 55.5,
+        "y": 497.01,
+        "width": 481.85,
+        "height": 3.5500000000000114
+      }
+    },
+    "linhaAnexo": {
+      "kind": "line",
+      "text": "Linha divisória",
+      "x": 55.35,
+      "y": 214.61,
+      "size": 3.5500000000000114,
+      "width": 481.85,
+      "color": 0.329,
+      "bounds": {
+        "x": 55.35,
+        "y": 214.61,
+        "width": 481.85,
+        "height": 3.5500000000000114
       }
     }
   },
@@ -790,6 +1240,81 @@
         "y": 193.38919999999996,
         "width": 33.767759999999996,
         "height": 9.480000000000018
+      }
+    },
+    "linhaPagador": {
+      "kind": "line",
+      "text": "Linha divisória",
+      "x": 55.5,
+      "y": 763.22,
+      "size": 3.5499999999999545,
+      "width": 481.85,
+      "color": 0.329,
+      "bounds": {
+        "x": 55.5,
+        "y": 763.22,
+        "width": 481.85,
+        "height": 3.5499999999999545
+      }
+    },
+    "linhaRecebedor": {
+      "kind": "line",
+      "text": "Linha divisória",
+      "x": 55.4,
+      "y": 690.45,
+      "size": 3.5499999999999545,
+      "width": 481.85,
+      "color": 0.329,
+      "bounds": {
+        "x": 55.4,
+        "y": 690.45,
+        "width": 481.85,
+        "height": 3.5499999999999545
+      }
+    },
+    "linhaServico": {
+      "kind": "line",
+      "text": "Linha divisória",
+      "x": 55.55,
+      "y": 623.45,
+      "size": 3.5499999999999545,
+      "width": 481.84999999999997,
+      "color": 0.329,
+      "bounds": {
+        "x": 55.55,
+        "y": 623.45,
+        "width": 481.84999999999997,
+        "height": 3.5499999999999545
+      }
+    },
+    "linhaPagamento": {
+      "kind": "line",
+      "text": "Linha divisória",
+      "x": 55.5,
+      "y": 497.01,
+      "size": 3.5500000000000114,
+      "width": 481.85,
+      "color": 0.329,
+      "bounds": {
+        "x": 55.5,
+        "y": 497.01,
+        "width": 481.85,
+        "height": 3.5500000000000114
+      }
+    },
+    "linhaAnexo": {
+      "kind": "line",
+      "text": "Linha divisória",
+      "x": 55.35,
+      "y": 214.61,
+      "size": 3.5500000000000114,
+      "width": 481.85,
+      "color": 0.329,
+      "bounds": {
+        "x": 55.35,
+        "y": 214.61,
+        "width": 481.85,
+        "height": 3.5500000000000114
       }
     }
   },
@@ -948,6 +1473,81 @@
         "y": 193.38919999999996,
         "width": 33.767759999999996,
         "height": 9.480000000000018
+      }
+    },
+    "linhaPagador": {
+      "kind": "line",
+      "text": "Linha divisória",
+      "x": 55.5,
+      "y": 763.22,
+      "size": 3.5499999999999545,
+      "width": 481.85,
+      "color": 0.329,
+      "bounds": {
+        "x": 55.5,
+        "y": 763.22,
+        "width": 481.85,
+        "height": 3.5499999999999545
+      }
+    },
+    "linhaRecebedor": {
+      "kind": "line",
+      "text": "Linha divisória",
+      "x": 55.4,
+      "y": 690.45,
+      "size": 3.5499999999999545,
+      "width": 481.85,
+      "color": 0.329,
+      "bounds": {
+        "x": 55.4,
+        "y": 690.45,
+        "width": 481.85,
+        "height": 3.5499999999999545
+      }
+    },
+    "linhaServico": {
+      "kind": "line",
+      "text": "Linha divisória",
+      "x": 55.55,
+      "y": 623.45,
+      "size": 3.5499999999999545,
+      "width": 481.84999999999997,
+      "color": 0.329,
+      "bounds": {
+        "x": 55.55,
+        "y": 623.45,
+        "width": 481.84999999999997,
+        "height": 3.5499999999999545
+      }
+    },
+    "linhaPagamento": {
+      "kind": "line",
+      "text": "Linha divisória",
+      "x": 55.5,
+      "y": 497.01,
+      "size": 3.5500000000000114,
+      "width": 481.85,
+      "color": 0.329,
+      "bounds": {
+        "x": 55.5,
+        "y": 497.01,
+        "width": 481.85,
+        "height": 3.5500000000000114
+      }
+    },
+    "linhaAnexo": {
+      "kind": "line",
+      "text": "Linha divisória",
+      "x": 55.35,
+      "y": 214.61,
+      "size": 3.5500000000000114,
+      "width": 481.85,
+      "color": 0.329,
+      "bounds": {
+        "x": 55.35,
+        "y": 214.61,
+        "width": 481.85,
+        "height": 3.5500000000000114
       }
     }
   }

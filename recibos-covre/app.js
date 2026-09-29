@@ -644,11 +644,19 @@ async function generatePDF(data,options={}) {
   const changed=[];
   for(const [key,m] of Object.entries(staticFields)){
     const settings=customLayout?.fields?.[key];
-    if(settings&&['x','y','size','align','weight'].some(prop=>settings[prop]!==undefined&&settings[prop]!== (m[prop]??(prop==='align'?'left':undefined)))){
+    if(settings&&['x','y','size','width','align','weight'].some(prop=>settings[prop]!==undefined&&settings[prop]!== (m[prop]??(prop==='align'?'left':undefined)))){
       const b=m.bounds;page.drawRectangle({x:b.x-.4,y:b.y-.4,width:b.width+.8,height:b.height+.8,color:PDFLib.rgb(1,1,1)});changed.push([key,m,settings]);
-    }else options.onField?.({key,text:m.text,metric:{x:m.x,y:m.y,size:m.size,align:'left',weight:m.weight},...m.bounds});
+    }else options.onField?.({key,kind:m.kind,text:m.text,metric:{x:m.x,y:m.y,size:m.size,...(m.kind==='line'?{width:m.width}:{align:'left',weight:m.weight})},...m.bounds});
   }
-  for(const [key,m,settings] of changed)await drawLayoutText(pdf,page,key,m.text,{...m,...settings,weight:settings.weight==='auto'?m.weight:settings.weight||m.weight},options);
+  for(const [key,m,settings] of changed){
+    if(m.kind==='line'){
+      const line={x:m.x,y:m.y,size:m.size,width:m.width,...settings};
+      if(![line.x,line.y,line.size,line.width].every(Number.isFinite)||line.size<.5||line.size>12||line.width<10||line.x<0||line.y<0||line.x+line.width>metrics.width||line.y+line.size>metrics.height)throw new Error('A linha divisória ultrapassa a página. Ajuste a posição, a largura ou a espessura.');
+      const color=Array.isArray(m.color)?PDFLib.rgb(...m.color):PDFLib.rgb(m.color,m.color,m.color);
+      page.drawRectangle({x:line.x,y:line.y,width:line.width,height:line.size,color});
+      options.onField?.({key,kind:'line',text:m.text,metric:line,x:line.x,y:line.y,width:line.width,height:line.size});
+    }else await drawLayoutText(pdf,page,key,m.text,{...m,...settings,weight:settings.weight==='auto'?m.weight:settings.weight||m.weight},options);
+  }
   if(method!=='cheque')await drawLayoutText(pdf,page,'tituloPagamento','DADOS DO PAGAMENTO',{x:56.784,y:paymentTitleY,size:9.48,weight:'bold',...customLayout?.fields?.tituloPagamento},options);
   if(data.numero){
     const text='Nº '+data.numero,m={x:metrics.width/2,y:773,size:10,align:'center',weight:'normal',...customLayout?.fields?.numero};
