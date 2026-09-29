@@ -1,0 +1,954 @@
+{
+  "chapa-partners-v2-payment.pdf": {
+    "titulo": {
+      "text": "RECIBO DE PAGAMENTO DE CARGA/DESCARGA",
+      "x": 107.06,
+      "y": 788.16,
+      "size": 15.959999999999923,
+      "weight": "bold",
+      "bounds": {
+        "x": 107.06,
+        "y": 784.8084,
+        "width": 381.15368,
+        "height": 15.959999999999923
+      }
+    },
+    "tituloPagador": {
+      "text": "PAGADOR / CONTRATANTE",
+      "x": 56.784,
+      "y": 751.9,
+      "size": 9.480000000000018,
+      "weight": "bold",
+      "bounds": {
+        "x": 56.784,
+        "y": 749.9091999999999,
+        "width": 127.52144000000001,
+        "height": 9.480000000000018
+      }
+    },
+    "tituloRecebedor": {
+      "text": "PRESTADOR / RECEBEDOR",
+      "x": 56.784,
+      "y": 678.94,
+      "size": 9.480000000000018,
+      "weight": "bold",
+      "bounds": {
+        "x": 56.784,
+        "y": 676.9492,
+        "width": 127.19492000000002,
+        "height": 9.480000000000018
+      }
+    },
+    "tituloServico": {
+      "text": "IDENTIFICAÇÃO DO SERVIÇO",
+      "x": 56.784,
+      "y": 608.62,
+      "size": 9.480000000000018,
+      "weight": "bold",
+      "bounds": {
+        "x": 56.784,
+        "y": 606.6292,
+        "width": 135.52304,
+        "height": 9.480000000000018
+      }
+    },
+    "linhaAssinatura": {
+      "text": "_____________________________________",
+      "x": 200.09,
+      "y": 255.98,
+      "size": 9.480000000000018,
+      "weight": "normal",
+      "bounds": {
+        "x": 200.09,
+        "y": 253.98919999999998,
+        "width": 195.49087999999998,
+        "height": 9.480000000000018
+      }
+    },
+    "tituloAnexo": {
+      "text": "ANEXO",
+      "x": 56.664,
+      "y": 207.86,
+      "size": 9.480000000000018,
+      "weight": "bold",
+      "bounds": {
+        "x": 56.664,
+        "y": 205.86919999999998,
+        "width": 33.767759999999996,
+        "height": 9.480000000000018
+      }
+    }
+  },
+  "chapa-partners-v2.pdf": {
+    "titulo": {
+      "text": "RECIBO DE PAGAMENTO DE CARGA/DESCARGA",
+      "x": 107.06,
+      "y": 788.16,
+      "size": 15.959999999999923,
+      "weight": "bold",
+      "bounds": {
+        "x": 107.06,
+        "y": 784.8084,
+        "width": 381.15368,
+        "height": 15.959999999999923
+      }
+    },
+    "tituloPagador": {
+      "text": "PAGADOR / CONTRATANTE",
+      "x": 56.784,
+      "y": 751.9,
+      "size": 9.480000000000018,
+      "weight": "bold",
+      "bounds": {
+        "x": 56.784,
+        "y": 749.9091999999999,
+        "width": 127.52144000000001,
+        "height": 9.480000000000018
+      }
+    },
+    "tituloRecebedor": {
+      "text": "PRESTADOR / RECEBEDOR",
+      "x": 56.784,
+      "y": 678.94,
+      "size": 9.480000000000018,
+      "weight": "bold",
+      "bounds": {
+        "x": 56.784,
+        "y": 676.9492,
+        "width": 127.19492000000002,
+        "height": 9.480000000000018
+      }
+    },
+    "tituloServico": {
+      "text": "IDENTIFICAÇÃO DO SERVIÇO",
+      "x": 56.784,
+      "y": 608.62,
+      "size": 9.480000000000018,
+      "weight": "bold",
+      "bounds": {
+        "x": 56.784,
+        "y": 606.6292,
+        "width": 135.52304,
+        "height": 9.480000000000018
+      }
+    },
+    "tituloPagamento": {
+      "text": "DADOS DO CHEQUE",
+      "x": 56.784,
+      "y": 503.83,
+      "size": 9.479999999999961,
+      "weight": "bold",
+      "bounds": {
+        "x": 56.784,
+        "y": 501.8392,
+        "width": 92.9514,
+        "height": 9.479999999999961
+      }
+    },
+    "linhaAssinatura": {
+      "text": "_____________________________________",
+      "x": 200.09,
+      "y": 255.98,
+      "size": 9.480000000000018,
+      "weight": "normal",
+      "bounds": {
+        "x": 200.09,
+        "y": 253.98919999999998,
+        "width": 195.49087999999998,
+        "height": 9.480000000000018
+      }
+    },
+    "tituloAnexo": {
+      "text": "ANEXO",
+      "x": 56.664,
+      "y": 207.86,
+      "size": 9.480000000000018,
+      "weight": "bold",
+      "bounds": {
+        "x": 56.664,
+        "y": 205.86919999999998,
+        "width": 33.767759999999996,
+        "height": 9.480000000000018
+      }
+    }
+  },
+  "chapa-v1-payment.pdf": {
+    "titulo": {
+      "text": "RECIBO DE PAGAMENTO DE CARGA/DESCARGA",
+      "x": 107.06,
+      "y": 788.16,
+      "size": 15.959999999999923,
+      "weight": "bold",
+      "bounds": {
+        "x": 107.06,
+        "y": 784.8084,
+        "width": 381.15368,
+        "height": 15.959999999999923
+      }
+    },
+    "tituloPagador": {
+      "text": "PAGADOR / CONTRATANTE",
+      "x": 56.784,
+      "y": 751.9,
+      "size": 9.480000000000018,
+      "weight": "bold",
+      "bounds": {
+        "x": 56.784,
+        "y": 749.9091999999999,
+        "width": 127.52144000000001,
+        "height": 9.480000000000018
+      }
+    },
+    "identidadePagador": {
+      "text": "COVRE & CIA LTDA, inscrita no CNPJ sob nº 28.419.232/0001-06 e I.E. nº 080.989.89-6.",
+      "x": 56.784,
+      "y": 723.46,
+      "size": 9.480000000000018,
+      "weight": "bold",
+      "bounds": {
+        "x": 56.784,
+        "y": 721.4692,
+        "width": 378.91132,
+        "height": 9.480000000000018
+      }
+    },
+    "enderecoPagador": {
+      "text": "Endereço: Av. Agenor Luiz Heringer, 463, Centro, Pinheiros/ES - CEP 29980-000.",
+      "x": 56.784,
+      "y": 710.02,
+      "size": 9.480000000000018,
+      "weight": "bold",
+      "bounds": {
+        "x": 56.784,
+        "y": 708.0292,
+        "width": 346.72528,
+        "height": 9.480000000000018
+      }
+    },
+    "tituloRecebedor": {
+      "text": "PRESTADOR / RECEBEDOR",
+      "x": 56.784,
+      "y": 678.94,
+      "size": 9.480000000000018,
+      "weight": "bold",
+      "bounds": {
+        "x": 56.784,
+        "y": 676.9492,
+        "width": 127.19492000000002,
+        "height": 9.480000000000018
+      }
+    },
+    "tituloServico": {
+      "text": "IDENTIFICAÇÃO DO SERVIÇO",
+      "x": 56.784,
+      "y": 608.62,
+      "size": 9.480000000000018,
+      "weight": "bold",
+      "bounds": {
+        "x": 56.784,
+        "y": 606.6292,
+        "width": 135.52304,
+        "height": 9.480000000000018
+      }
+    },
+    "declaracao0": {
+      "text": "Declaro, para os devidos fins, que recebi da COVRE & CIA LTDA, inscrita no CNPJ nº 28.419.232/0001-06, o",
+      "x": 56.784,
+      "y": 382.61,
+      "size": 9.479999999999961,
+      "weight": "normal",
+      "bounds": {
+        "x": 56.784,
+        "y": 380.61920000000003,
+        "width": 461.836,
+        "height": 9.479999999999961
+      }
+    },
+    "declaracao1": {
+      "text": "valor acima especificado, referente à prestação do serviço de carga/descarga de mercadoria identificado neste",
+      "x": 56.784,
+      "y": 370.13,
+      "size": 9.479999999999961,
+      "weight": "normal",
+      "bounds": {
+        "x": 56.784,
+        "y": 368.1392,
+        "width": 466.85536000000013,
+        "height": 9.479999999999961
+      }
+    },
+    "declaracao2": {
+      "text": "recibo, dando plena quitação exclusivamente quanto ao valor e ao serviço nele discriminados.",
+      "x": 56.784,
+      "y": 357.77,
+      "size": 9.479999999999961,
+      "weight": "normal",
+      "bounds": {
+        "x": 56.784,
+        "y": 355.7792,
+        "width": 395.8089599999998,
+        "height": 9.479999999999961
+      }
+    },
+    "linhaAssinatura": {
+      "text": "_____________________________________",
+      "x": 200.09,
+      "y": 255.98,
+      "size": 9.480000000000018,
+      "weight": "normal",
+      "bounds": {
+        "x": 200.09,
+        "y": 253.98919999999998,
+        "width": 195.49087999999998,
+        "height": 9.480000000000018
+      }
+    },
+    "tituloAnexo": {
+      "text": "ANEXO",
+      "x": 56.664,
+      "y": 207.86,
+      "size": 9.480000000000018,
+      "weight": "bold",
+      "bounds": {
+        "x": 56.664,
+        "y": 205.86919999999998,
+        "width": 33.767759999999996,
+        "height": 9.480000000000018
+      }
+    }
+  },
+  "chapa-v1.pdf": {
+    "titulo": {
+      "text": "RECIBO DE PAGAMENTO DE CARGA/DESCARGA",
+      "x": 107.06,
+      "y": 788.16,
+      "size": 15.959999999999923,
+      "weight": "bold",
+      "bounds": {
+        "x": 107.06,
+        "y": 784.8084,
+        "width": 381.15368,
+        "height": 15.959999999999923
+      }
+    },
+    "tituloPagador": {
+      "text": "PAGADOR / CONTRATANTE",
+      "x": 56.784,
+      "y": 751.9,
+      "size": 9.480000000000018,
+      "weight": "bold",
+      "bounds": {
+        "x": 56.784,
+        "y": 749.9091999999999,
+        "width": 127.52144000000001,
+        "height": 9.480000000000018
+      }
+    },
+    "identidadePagador": {
+      "text": "COVRE & CIA LTDA, inscrita no CNPJ sob nº 28.419.232/0001-06 e I.E. nº 080.989.89-6.",
+      "x": 56.784,
+      "y": 723.46,
+      "size": 9.480000000000018,
+      "weight": "bold",
+      "bounds": {
+        "x": 56.784,
+        "y": 721.4692,
+        "width": 378.91132,
+        "height": 9.480000000000018
+      }
+    },
+    "enderecoPagador": {
+      "text": "Endereço: Av. Agenor Luiz Heringer, 463, Centro, Pinheiros/ES - CEP 29980-000.",
+      "x": 56.784,
+      "y": 710.02,
+      "size": 9.480000000000018,
+      "weight": "bold",
+      "bounds": {
+        "x": 56.784,
+        "y": 708.0292,
+        "width": 346.72528,
+        "height": 9.480000000000018
+      }
+    },
+    "tituloRecebedor": {
+      "text": "PRESTADOR / RECEBEDOR",
+      "x": 56.784,
+      "y": 678.94,
+      "size": 9.480000000000018,
+      "weight": "bold",
+      "bounds": {
+        "x": 56.784,
+        "y": 676.9492,
+        "width": 127.19492000000002,
+        "height": 9.480000000000018
+      }
+    },
+    "tituloServico": {
+      "text": "IDENTIFICAÇÃO DO SERVIÇO",
+      "x": 56.784,
+      "y": 608.62,
+      "size": 9.480000000000018,
+      "weight": "bold",
+      "bounds": {
+        "x": 56.784,
+        "y": 606.6292,
+        "width": 135.52304,
+        "height": 9.480000000000018
+      }
+    },
+    "tituloPagamento": {
+      "text": "DADOS DO CHEQUE",
+      "x": 56.784,
+      "y": 503.83,
+      "size": 9.479999999999961,
+      "weight": "bold",
+      "bounds": {
+        "x": 56.784,
+        "y": 501.8392,
+        "width": 92.9514,
+        "height": 9.479999999999961
+      }
+    },
+    "declaracao0": {
+      "text": "Declaro, para os devidos fins, que recebi da COVRE & CIA LTDA, inscrita no CNPJ nº 28.419.232/0001-06, o",
+      "x": 56.784,
+      "y": 382.61,
+      "size": 9.479999999999961,
+      "weight": "normal",
+      "bounds": {
+        "x": 56.784,
+        "y": 380.61920000000003,
+        "width": 461.836,
+        "height": 9.479999999999961
+      }
+    },
+    "declaracao1": {
+      "text": "valor acima especificado, referente à prestação do serviço de carga/descarga de mercadoria identificado neste",
+      "x": 56.784,
+      "y": 370.13,
+      "size": 9.479999999999961,
+      "weight": "normal",
+      "bounds": {
+        "x": 56.784,
+        "y": 368.1392,
+        "width": 466.85536000000013,
+        "height": 9.479999999999961
+      }
+    },
+    "declaracao2": {
+      "text": "recibo, dando plena quitação exclusivamente quanto ao valor e ao serviço nele discriminados.",
+      "x": 56.784,
+      "y": 357.77,
+      "size": 9.479999999999961,
+      "weight": "normal",
+      "bounds": {
+        "x": 56.784,
+        "y": 355.7792,
+        "width": 395.8089599999998,
+        "height": 9.479999999999961
+      }
+    },
+    "linhaAssinatura": {
+      "text": "_____________________________________",
+      "x": 200.09,
+      "y": 255.98,
+      "size": 9.480000000000018,
+      "weight": "normal",
+      "bounds": {
+        "x": 200.09,
+        "y": 253.98919999999998,
+        "width": 195.49087999999998,
+        "height": 9.480000000000018
+      }
+    },
+    "tituloAnexo": {
+      "text": "ANEXO",
+      "x": 56.664,
+      "y": 207.86,
+      "size": 9.480000000000018,
+      "weight": "bold",
+      "bounds": {
+        "x": 56.664,
+        "y": 205.86919999999998,
+        "width": 33.767759999999996,
+        "height": 9.480000000000018
+      }
+    }
+  },
+  "covre-partners-v2-payment.pdf": {
+    "titulo": {
+      "text": "RECIBO DE PAGAMENTO DE FRETE",
+      "x": 157.82,
+      "y": 788.16,
+      "size": 15.959999999999923,
+      "weight": "bold",
+      "bounds": {
+        "x": 157.82,
+        "y": 784.8084,
+        "width": 279.88748000000004,
+        "height": 15.959999999999923
+      }
+    },
+    "tituloPagador": {
+      "text": "PAGADOR / CONTRATANTE",
+      "x": 56.784,
+      "y": 751.9,
+      "size": 9.480000000000018,
+      "weight": "bold",
+      "bounds": {
+        "x": 56.784,
+        "y": 749.9091999999999,
+        "width": 127.52144000000001,
+        "height": 9.480000000000018
+      }
+    },
+    "tituloRecebedor": {
+      "text": "PRESTADOR / RECEBEDOR",
+      "x": 56.784,
+      "y": 678.94,
+      "size": 9.480000000000018,
+      "weight": "bold",
+      "bounds": {
+        "x": 56.784,
+        "y": 676.9492,
+        "width": 127.19492000000002,
+        "height": 9.480000000000018
+      }
+    },
+    "tituloServico": {
+      "text": "IDENTIFICAÇÃO DO SERVIÇO",
+      "x": 56.784,
+      "y": 608.62,
+      "size": 9.480000000000018,
+      "weight": "bold",
+      "bounds": {
+        "x": 56.784,
+        "y": 606.6292,
+        "width": 135.52304,
+        "height": 9.480000000000018
+      }
+    },
+    "linhaAssinatura": {
+      "text": "_____________________________________",
+      "x": 200.09,
+      "y": 263.45,
+      "size": 9.479999999999961,
+      "weight": "normal",
+      "bounds": {
+        "x": 200.09,
+        "y": 261.4592,
+        "width": 195.49087999999998,
+        "height": 9.480000000000018
+      }
+    },
+    "tituloAnexo": {
+      "text": "ANEXO",
+      "x": 56.664,
+      "y": 195.38,
+      "size": 9.480000000000018,
+      "weight": "bold",
+      "bounds": {
+        "x": 56.664,
+        "y": 193.38919999999996,
+        "width": 33.767759999999996,
+        "height": 9.480000000000018
+      }
+    }
+  },
+  "covre-partners-v2.pdf": {
+    "titulo": {
+      "text": "RECIBO DE PAGAMENTO DE FRETE",
+      "x": 157.82,
+      "y": 788.16,
+      "size": 15.959999999999923,
+      "weight": "bold",
+      "bounds": {
+        "x": 157.82,
+        "y": 784.8084,
+        "width": 279.88748000000004,
+        "height": 15.959999999999923
+      }
+    },
+    "tituloPagador": {
+      "text": "PAGADOR / CONTRATANTE",
+      "x": 56.784,
+      "y": 751.9,
+      "size": 9.480000000000018,
+      "weight": "bold",
+      "bounds": {
+        "x": 56.784,
+        "y": 749.9091999999999,
+        "width": 127.52144000000001,
+        "height": 9.480000000000018
+      }
+    },
+    "tituloRecebedor": {
+      "text": "PRESTADOR / RECEBEDOR",
+      "x": 56.784,
+      "y": 678.94,
+      "size": 9.480000000000018,
+      "weight": "bold",
+      "bounds": {
+        "x": 56.784,
+        "y": 676.9492,
+        "width": 127.19492000000002,
+        "height": 9.480000000000018
+      }
+    },
+    "tituloServico": {
+      "text": "IDENTIFICAÇÃO DO SERVIÇO",
+      "x": 56.784,
+      "y": 608.62,
+      "size": 9.480000000000018,
+      "weight": "bold",
+      "bounds": {
+        "x": 56.784,
+        "y": 606.6292,
+        "width": 135.52304,
+        "height": 9.480000000000018
+      }
+    },
+    "tituloPagamento": {
+      "text": "DADOS DO CHEQUE",
+      "x": 56.784,
+      "y": 486.31,
+      "size": 9.479999999999961,
+      "weight": "bold",
+      "bounds": {
+        "x": 56.784,
+        "y": 484.3192,
+        "width": 92.9514,
+        "height": 9.479999999999961
+      }
+    },
+    "linhaAssinatura": {
+      "text": "_____________________________________",
+      "x": 200.09,
+      "y": 263.45,
+      "size": 9.479999999999961,
+      "weight": "normal",
+      "bounds": {
+        "x": 200.09,
+        "y": 261.4592,
+        "width": 195.49087999999998,
+        "height": 9.480000000000018
+      }
+    },
+    "tituloAnexo": {
+      "text": "ANEXO",
+      "x": 56.664,
+      "y": 195.38,
+      "size": 9.480000000000018,
+      "weight": "bold",
+      "bounds": {
+        "x": 56.664,
+        "y": 193.38919999999996,
+        "width": 33.767759999999996,
+        "height": 9.480000000000018
+      }
+    }
+  },
+  "covre-v1-payment.pdf": {
+    "titulo": {
+      "text": "RECIBO DE PAGAMENTO DE FRETE",
+      "x": 157.82,
+      "y": 788.16,
+      "size": 15.959999999999923,
+      "weight": "bold",
+      "bounds": {
+        "x": 157.82,
+        "y": 784.8084,
+        "width": 279.88748000000004,
+        "height": 15.959999999999923
+      }
+    },
+    "tituloPagador": {
+      "text": "PAGADOR / CONTRATANTE",
+      "x": 56.784,
+      "y": 751.9,
+      "size": 9.480000000000018,
+      "weight": "bold",
+      "bounds": {
+        "x": 56.784,
+        "y": 749.9091999999999,
+        "width": 127.52144000000001,
+        "height": 9.480000000000018
+      }
+    },
+    "identidadePagador": {
+      "text": "COVRE & CIA LTDA, inscrita no CNPJ sob nº 28.419.232/0001-06 e I.E. nº 080.989.89-6.",
+      "x": 56.784,
+      "y": 723.46,
+      "size": 9.480000000000018,
+      "weight": "bold",
+      "bounds": {
+        "x": 56.784,
+        "y": 721.4692,
+        "width": 378.91132,
+        "height": 9.480000000000018
+      }
+    },
+    "enderecoPagador": {
+      "text": "Endereço: Av. Agenor Luiz Heringer, 463, Centro, Pinheiros/ES - CEP 29980-000.",
+      "x": 56.784,
+      "y": 710.02,
+      "size": 9.480000000000018,
+      "weight": "bold",
+      "bounds": {
+        "x": 56.784,
+        "y": 708.0292,
+        "width": 346.72528,
+        "height": 9.480000000000018
+      }
+    },
+    "tituloRecebedor": {
+      "text": "PRESTADOR / RECEBEDOR",
+      "x": 56.784,
+      "y": 678.94,
+      "size": 9.480000000000018,
+      "weight": "bold",
+      "bounds": {
+        "x": 56.784,
+        "y": 676.9492,
+        "width": 127.19492000000002,
+        "height": 9.480000000000018
+      }
+    },
+    "tituloServico": {
+      "text": "IDENTIFICAÇÃO DO SERVIÇO",
+      "x": 56.784,
+      "y": 608.62,
+      "size": 9.480000000000018,
+      "weight": "bold",
+      "bounds": {
+        "x": 56.784,
+        "y": 606.6292,
+        "width": 135.52304,
+        "height": 9.480000000000018
+      }
+    },
+    "declaracao0": {
+      "text": "Declaro, para os devidos fins, que recebi da COVRE & CIA LTDA, inscrita no CNPJ nº 28.419.232/0001-06, o",
+      "x": 56.784,
+      "y": 365.09,
+      "size": 9.479999999999961,
+      "weight": "normal",
+      "bounds": {
+        "x": 56.784,
+        "y": 363.0992,
+        "width": 461.836,
+        "height": 9.479999999999961
+      }
+    },
+    "declaracao1": {
+      "text": "valor acima especificado, referente à prestação do serviço de frete/transporte de mercadoria identificado neste",
+      "x": 56.784,
+      "y": 352.73,
+      "size": 9.479999999999961,
+      "weight": "normal",
+      "bounds": {
+        "x": 56.784,
+        "y": 350.73920000000004,
+        "width": 465.51539999999954,
+        "height": 9.479999999999961
+      }
+    },
+    "declaracao2": {
+      "text": "recibo, dando plena quitação exclusivamente quanto ao valor e ao serviço nele discriminados.",
+      "x": 56.784,
+      "y": 340.25,
+      "size": 9.479999999999961,
+      "weight": "normal",
+      "bounds": {
+        "x": 56.784,
+        "y": 338.2592,
+        "width": 395.8089599999998,
+        "height": 9.479999999999961
+      }
+    },
+    "linhaAssinatura": {
+      "text": "_____________________________________",
+      "x": 200.09,
+      "y": 263.45,
+      "size": 9.479999999999961,
+      "weight": "normal",
+      "bounds": {
+        "x": 200.09,
+        "y": 261.4592,
+        "width": 195.49087999999998,
+        "height": 9.480000000000018
+      }
+    },
+    "tituloAnexo": {
+      "text": "ANEXO",
+      "x": 56.664,
+      "y": 195.38,
+      "size": 9.480000000000018,
+      "weight": "bold",
+      "bounds": {
+        "x": 56.664,
+        "y": 193.38919999999996,
+        "width": 33.767759999999996,
+        "height": 9.480000000000018
+      }
+    }
+  },
+  "covre-v1.pdf": {
+    "titulo": {
+      "text": "RECIBO DE PAGAMENTO DE FRETE",
+      "x": 157.82,
+      "y": 788.16,
+      "size": 15.959999999999923,
+      "weight": "bold",
+      "bounds": {
+        "x": 157.82,
+        "y": 784.8084,
+        "width": 279.88748000000004,
+        "height": 15.959999999999923
+      }
+    },
+    "tituloPagador": {
+      "text": "PAGADOR / CONTRATANTE",
+      "x": 56.784,
+      "y": 751.9,
+      "size": 9.480000000000018,
+      "weight": "bold",
+      "bounds": {
+        "x": 56.784,
+        "y": 749.9091999999999,
+        "width": 127.52144000000001,
+        "height": 9.480000000000018
+      }
+    },
+    "identidadePagador": {
+      "text": "COVRE & CIA LTDA, inscrita no CNPJ sob nº 28.419.232/0001-06 e I.E. nº 080.989.89-6.",
+      "x": 56.784,
+      "y": 723.46,
+      "size": 9.480000000000018,
+      "weight": "bold",
+      "bounds": {
+        "x": 56.784,
+        "y": 721.4692,
+        "width": 378.91132,
+        "height": 9.480000000000018
+      }
+    },
+    "enderecoPagador": {
+      "text": "Endereço: Av. Agenor Luiz Heringer, 463, Centro, Pinheiros/ES - CEP 29980-000.",
+      "x": 56.784,
+      "y": 710.02,
+      "size": 9.480000000000018,
+      "weight": "bold",
+      "bounds": {
+        "x": 56.784,
+        "y": 708.0292,
+        "width": 346.72528,
+        "height": 9.480000000000018
+      }
+    },
+    "tituloRecebedor": {
+      "text": "PRESTADOR / RECEBEDOR",
+      "x": 56.784,
+      "y": 678.94,
+      "size": 9.480000000000018,
+      "weight": "bold",
+      "bounds": {
+        "x": 56.784,
+        "y": 676.9492,
+        "width": 127.19492000000002,
+        "height": 9.480000000000018
+      }
+    },
+    "tituloServico": {
+      "text": "IDENTIFICAÇÃO DO SERVIÇO",
+      "x": 56.784,
+      "y": 608.62,
+      "size": 9.480000000000018,
+      "weight": "bold",
+      "bounds": {
+        "x": 56.784,
+        "y": 606.6292,
+        "width": 135.52304,
+        "height": 9.480000000000018
+      }
+    },
+    "tituloPagamento": {
+      "text": "DADOS DO CHEQUE",
+      "x": 56.784,
+      "y": 486.31,
+      "size": 9.479999999999961,
+      "weight": "bold",
+      "bounds": {
+        "x": 56.784,
+        "y": 484.3192,
+        "width": 92.9514,
+        "height": 9.479999999999961
+      }
+    },
+    "declaracao0": {
+      "text": "Declaro, para os devidos fins, que recebi da COVRE & CIA LTDA, inscrita no CNPJ nº 28.419.232/0001-06, o",
+      "x": 56.784,
+      "y": 365.09,
+      "size": 9.479999999999961,
+      "weight": "normal",
+      "bounds": {
+        "x": 56.784,
+        "y": 363.0992,
+        "width": 461.836,
+        "height": 9.479999999999961
+      }
+    },
+    "declaracao1": {
+      "text": "valor acima especificado, referente à prestação do serviço de frete/transporte de mercadoria identificado neste",
+      "x": 56.784,
+      "y": 352.73,
+      "size": 9.479999999999961,
+      "weight": "normal",
+      "bounds": {
+        "x": 56.784,
+        "y": 350.73920000000004,
+        "width": 465.51539999999954,
+        "height": 9.479999999999961
+      }
+    },
+    "declaracao2": {
+      "text": "recibo, dando plena quitação exclusivamente quanto ao valor e ao serviço nele discriminados.",
+      "x": 56.784,
+      "y": 340.25,
+      "size": 9.479999999999961,
+      "weight": "normal",
+      "bounds": {
+        "x": 56.784,
+        "y": 338.2592,
+        "width": 395.8089599999998,
+        "height": 9.479999999999961
+      }
+    },
+    "linhaAssinatura": {
+      "text": "_____________________________________",
+      "x": 200.09,
+      "y": 263.45,
+      "size": 9.479999999999961,
+      "weight": "normal",
+      "bounds": {
+        "x": 200.09,
+        "y": 261.4592,
+        "width": 195.49087999999998,
+        "height": 9.480000000000018
+      }
+    },
+    "tituloAnexo": {
+      "text": "ANEXO",
+      "x": 56.664,
+      "y": 195.38,
+      "size": 9.480000000000018,
+      "weight": "bold",
+      "bounds": {
+        "x": 56.664,
+        "y": 193.38919999999996,
+        "width": 33.767759999999996,
+        "height": 9.480000000000018
+      }
+    }
+  }
+}

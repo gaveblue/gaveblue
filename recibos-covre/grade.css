@@ -1,0 +1,68 @@
+/* Grades e ações seguem os cadastros e o financeiro do WeFrotas. */
+.filters{padding:14px 16px;margin:0 0 18px;grid-template-columns:minmax(220px,1fr) 230px}
+.filters label{font-size:11px;color:#64748b}.filters input,.filters select{background:#fbfcfe;font-size:13px}
+.orders-table-shell{border:1px solid #ebeff6;border-radius:18px;background:#fff;padding:12px 14px 10px}
+.orders-toolbar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:4px 4px 16px}
+.orders-selection-wrap{display:flex;flex-direction:row;align-items:center;gap:10px;font-size:13px;color:#64748b}
+input[type=checkbox]{width:18px;height:18px;min-height:0;accent-color:#8b3dff;cursor:pointer}
+.module-action-toolbar{display:flex;gap:8px}.icon-action{display:grid;place-items:center;width:40px;height:40px;padding:0;border:1px solid #e5def5;border-radius:10px;background:#f5f0ff;color:#8b3dff;font-size:26px;font-weight:400}
+.icon-action.edit{background:#eff5ff;color:#608beb;border-color:#deebff}.icon-action.danger{background:#fff1f2;color:#dc7474;border-color:#ffe0e3}
+.icon-action:disabled{opacity:.35;cursor:not-allowed}.icon-action:not(:disabled):hover{box-shadow:0 4px 10px #64748b20;transform:translateY(-1px)}
+.orders-table-shell .table-wrap{border:0;border-radius:0}.orders-table-shell th{background:#f8fafc;color:#64748b;font-size:11px;font-weight:700}
+.orders-table-shell td{font-size:12px;padding:17px 14px;border-color:#f1f5f9}.orders-table-shell th:first-child,.orders-table-shell td:first-child{width:42px;padding-inline:8px}
+.orders-table-shell tr.selected{background:#f6f3ff}.orders-table-shell tbody tr:not(:has(.empty)):hover{background:#f8f7ff}
+.grid-link{padding:5px 0;background:none;color:#6366f1;font-size:12px;white-space:nowrap}.grid-count{font-size:11px;color:#94a3b8;margin:14px 0 4px}
+.attachment-yes,.attachment-no{font-weight:800;letter-spacing:.04em}.attachment-yes{color:#15803d}.attachment-no{color:#dc2626}
+.receipt-nav .sidebar-brand{background:transparent;box-shadow:none;padding:16px 0}.sidebar-brand img{filter:brightness(0) saturate(100%) invert(21%) sepia(39%) saturate(1585%) hue-rotate(187deg) brightness(91%) contrast(92%)}
+.dashboard-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin:12px 0 22px}.dashboard-card{padding:22px;border:1px solid #e8edf5;border-radius:18px;background:#fff;box-shadow:0 12px 28px #94a3b812}.dashboard-card span,.dashboard-card small{display:block;color:#64748b;font-size:12px}.dashboard-card strong{display:block;color:#182033;font-size:26px;margin:11px 0 7px}.dashboard-panels{display:grid;grid-template-columns:1.4fr .8fr;gap:18px}.dashboard-panels .panel{min-height:180px}.home-latest{display:grid;gap:6px}.home-latest-item{width:100%;display:grid;grid-template-columns:1fr auto;gap:3px 12px;padding:11px 0;border-bottom:1px solid #edf1f7;background:none;color:#182033;text-align:left;border-radius:0}.home-latest-item:hover{background:#f8f7ff}.home-latest-item strong{font-size:12px}.home-latest-item span{font-size:11px;color:#64748b}.home-latest-item b{grid-row:1/3;grid-column:2;align-self:center;color:#6366f1;font-size:12px}.quick-actions{display:flex;gap:10px;flex-wrap:wrap}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+dialog.form-dialog{width:min(940px,calc(100vw - 40px));height:fit-content;max-height:calc(100dvh - 40px);padding:28px;border:1px solid #e8edf5;border-radius:24px;box-shadow:0 25px 90px #18203335;background:#fff;color:var(--text)}
+dialog.partner-dialog{width:min(780px,calc(100vw - 40px))}.form-dialog::backdrop{background:#18203388;backdrop-filter:blur(3px)}
+.modal-heading{display:flex;align-items:center;justify-content:space-between;gap:16px}.modal-heading h2{font-size:23px;margin:6px 0 0}.modal-heading button{padding:8px 12px}
+.form-dialog .panel{box-shadow:none;padding:20px;border-radius:14px}.form-dialog .panel h2{font-size:15px}.form-dialog label{font-size:12px}.form-dialog input,.form-dialog select{background:#fbfcfe;font-size:13px}
+.form-dialog .steps{margin:18px 0 24px}.form-dialog .steps li{font-size:11px;padding:10px 3px}.form-dialog .steps span{margin-left:4px}
+.form-dialog .form-actions{position:sticky;bottom:-28px;background:#fff;border-top:1px solid #edf1f7;padding:16px 0;margin-top:16px;z-index:2}
+#company-form{border:0;padding:16px 0 0;margin:0}#company-form-title{font-size:22px}
+#receipt-status,#company-status{font-size:13px;color:#6366f1;margin:8px 0 0}#receipt-status:empty,#company-status:empty{display:none}#receipt-status.error,#company-status.error{color:#b91c1c}
+.partner-results{padding:8px;border:1px solid #ddd6fe;border-radius:10px;margin:6px 0 18px;font-size:12px;max-height:180px;overflow:auto;background:#faf9ff}.partner-option{display:block;width:100%;text-align:left;border-radius:6px;background:transparent;color:#334155;padding:10px;font-size:12px}.partner-option:hover{background:#ece9ff}
+.icon-action svg{width:18px;height:18px}.sort-heading{background:none;color:inherit;padding:0;font-size:inherit;text-align:left}.nav-label #company-count,.nav-label #cheque-count{margin-left:8px;font-size:11px}.filter-clear{background:white;border:1px solid #dbe4f0;color:#64748b;align-self:end;height:44px;padding:0 13px}.filters:has(.filter-clear){grid-template-columns:minmax(150px,1fr) 200px auto}
+#payer-results+.fields{margin-top:18px}
+.form-dialog input[aria-invalid=true],.form-dialog select[aria-invalid=true]{border:1px solid #dc2626;background:#fff7f7;outline-color:#fecaca}
+.field-error{display:block;color:#b91c1c;font-size:11px;font-weight:500;line-height:1.5}
+.form-dialog .steps li{min-width:0}.partner-results .partner-option{white-space:normal}
+@media(max-width:650px){.form-dialog .steps li:not(.active) span{display:none}.form-dialog .steps li.active{flex:3}.form-dialog .steps li{flex:1}.form-dialog .steps span{overflow-wrap:anywhere}}
+@media(max-width:650px){.filters,.filters:has(.filter-clear){grid-template-columns:1fr;padding:0}.orders-toolbar{gap:8px;flex-wrap:wrap}.orders-selection-wrap{font-size:11px}.module-action-toolbar{gap:5px}.icon-action{width:36px;height:36px}.orders-table-shell{padding:10px}.form-dialog .fields{grid-template-columns:1fr}.form-dialog .model-grid{grid-template-columns:1fr}.form-dialog .steps span{display:block;margin:5px 0 0}.form-dialog .steps li{font-size:9px}dialog.form-dialog,dialog.partner-dialog{width:calc(100vw - 16px);max-height:calc(100dvh - 16px);padding:16px;border-radius:18px}.form-dialog .form-actions{bottom:-16px;gap:8px}.form-actions button{font-size:12px;padding:11px}.modal-heading h2{font-size:20px}}
+@media(max-width:850px){.dashboard-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.dashboard-panels{grid-template-columns:1fr}}
+@media(max-width:520px){.dashboard-grid{grid-template-columns:1fr}.dashboard-card strong{font-size:22px}}
+/* Compact progress indicator; names remain available to assistive technology. */
+.form-dialog .steps{gap:0;align-items:center;margin:22px 0 28px}
+.form-dialog .steps li,.form-dialog .steps li.active{flex:1;position:relative;border:0;padding:0;display:flex;align-items:center;justify-content:center;height:32px}
+.form-dialog .steps li:not(:last-child):after{content:'';height:2px;background:#e2e8f0;position:absolute;left:calc(50% + 17px);right:calc(-50% + 17px)}
+.form-dialog .steps li.completed:after{background:#86d7ae}
+.form-dialog .steps li .step-dot{display:grid;place-items:center;margin:0;width:26px;height:26px;border:2px solid #dce3ee;border-radius:50%;background:#fff;font-size:16px;line-height:1;font-weight:800;z-index:1}
+.form-dialog .steps li.active .step-dot{border-color:#7060ed;box-shadow:0 0 0 4px #eeebff;background:#7060ed}
+.form-dialog .steps li.completed .step-dot{border-color:#16a36d;background:#16a36d;color:white}
+.form-dialog .steps li:not(.active) .step-dot{display:grid}
+#receipt-dialog{height:640px;overflow:hidden}
+#receipt-dialog[open]{display:flex;flex-direction:column}
+#receipt-dialog>.modal-heading{flex-shrink:0}
+#receipt-dialog #editor{display:flex;flex-direction:column;flex:1;min-height:0;margin:0}
+#receipt-dialog .steps{flex-shrink:0}
+#receipt-form{display:flex;flex-direction:column;flex:1;min-height:0;margin:0}
+#receipt-form>.step{flex:1;min-height:0;overflow-y:auto;padding:2px 3px;scrollbar-gutter:stable;display:grid;align-content:safe center;gap:12px}
+#receipt-form>.step>.panel,#receipt-form>.step>.model-grid{margin-bottom:0}
+#receipt-dialog .fields{gap:14px 20px}
+#receipt-dialog .steps{margin:18px 0 20px}
+#receipt-form>.step[hidden],#receipt-form label[hidden]{display:none}
+#receipt-dialog .form-actions{position:static;flex-shrink:0;margin-top:6px;padding:10px 0 0;flex-wrap:wrap}
+#close-receipt{color:#dc2626;background:#fff1f2;border:1px solid #fecdd3}
+#close-receipt:hover{background:#ffe4e6}
+.form-dialog .steps li.warning .step-dot{background:#fef3c7;border-color:#eab308;color:#92400e}
+.form-dialog .steps li.transitioning .step-dot{animation:step-pulse .5s ease-in-out}
+@keyframes step-pulse{0%{transform:scale(1)}50%{transform:scale(1.2);box-shadow:0 0 0 8px #eeebff}100%{transform:scale(1);background:#16a36d;border-color:#16a36d}}
+dialog.exit-dialog{width:min(540px,calc(100vw - 32px));height:fit-content}
+.exit-dialog h2{font-size:22px;margin:8px 0 14px}.exit-dialog p{line-height:1.6}.exit-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}.exit-actions .danger{color:#b91c1c;background:#fff1f2;border:1px solid #fecdd3}
+@media(max-width:650px){#receipt-dialog{height:min(640px,calc(100dvh - 16px))}#receipt-dialog .steps{margin:16px 0 20px}.exit-actions{flex-direction:column}.exit-actions button{width:100%}}
+@media(prefers-reduced-motion:reduce){.form-dialog .steps li.transitioning .step-dot{animation:none}}
+.fields .partner-results{margin:0;max-height:150px}.payment-methods .model-card{padding:22px 18px}
+

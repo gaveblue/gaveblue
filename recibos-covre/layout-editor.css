@@ -1,0 +1,41 @@
+#layout-settings .section-heading{margin-bottom:20px}
+.print-layout-toolbar{display:flex;align-items:end;gap:14px;padding:18px;background:#fff;border:1px solid #e4eaf3;border-radius:16px}
+.print-layout-toolbar label{flex:1;min-width:140px;display:grid;gap:7px;font-size:11px;color:#64748b}
+.print-layout-toolbar select{width:100%;font-size:12px;background:#fbfcff}
+.print-layout-toolbar button{flex-shrink:0;min-height:44px}
+.print-layout-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:14px 0}
+.print-layout-actions button,.print-layout-actions a{font-size:12px;padding:10px 13px;border-radius:9px;cursor:pointer;text-decoration:none}
+.print-layout-actions [aria-disabled=true]{opacity:.45;cursor:default}
+#layout-dirty{margin-left:auto;font-size:11px;color:#64748b}
+#layout-status{min-height:20px;margin:0 0 12px;font-size:12px;color:#53647b}
+#layout-status.error{color:#b91c1c}
+.print-layout-editor{display:grid;grid-template-columns:minmax(0,1fr) 250px;gap:20px;align-items:start}
+.print-layout-workspace{min-width:0;background:#e9edf3;border:1px solid #dce3ed;border-radius:14px;overflow:hidden}
+.print-layout-caption{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px;background:#f8fafc;border-bottom:1px solid #dce3ed;font-size:11px;color:#64748b}
+.print-layout-caption label{display:flex;align-items:center;gap:8px;font-size:11px}
+.print-layout-caption select{min-height:32px;padding:4px 8px;font-size:11px;width:130px}
+.print-layout-scroll{overflow:auto;padding:24px 18px;max-height:calc(100dvh - 250px);min-height:420px}
+.print-layout-paper{position:relative;width:min(100%,595.56px);aspect-ratio:595.56/842.04;margin:auto;background:#fff;box-shadow:0 6px 25px #1e293b20;outline:none;flex-shrink:0}
+.print-layout-paper canvas{display:block;width:100%;height:auto}
+#layout-hitareas{position:absolute;inset:0;pointer-events:none}
+.print-layout-hit{position:absolute;pointer-events:auto;min-width:0;min-height:0;padding:0;margin:0;border:0;border-radius:1px;background:transparent!important;box-shadow:none;cursor:pointer;color:transparent}
+.print-layout-hit:hover,.print-layout-hit:focus-visible{outline:1px dashed #6366f1;outline-offset:1px;z-index:2}
+.print-layout-hit.selected{outline:1.5px solid #6358e8;outline-offset:2px;z-index:3}
+.print-layout-paper[aria-busy=true]{cursor:progress}
+.print-layout-inspector{position:sticky;top:16px;padding:19px;border:1px solid #e5eaf2;border-radius:14px;background:#fff}
+.print-layout-inspector h2{margin:10px 0;font-size:16px}
+#layout-selected-text{font-size:11px;line-height:1.6;color:#64748b;overflow-wrap:anywhere;max-height:100px;overflow:auto}
+.print-layout-inspector label{display:grid;gap:5px;font-size:11px;color:#64748b;margin-top:12px}
+.print-layout-inspector input,.print-layout-inspector select{min-height:36px;padding:7px 9px;font-size:12px;width:100%}
+.print-layout-inspector details{margin:18px 0;font-size:12px;color:#64748b}
+.print-layout-inspector summary{cursor:pointer}
+.print-layout-hint{font-size:11px;color:#7b879a;line-height:1.6;margin:14px 0}
+.print-layout-arrows{display:grid;grid-template-columns:repeat(3,42px);justify-content:center;gap:5px;margin-top:16px}
+.print-layout-arrows button{height:37px;padding:0;font-size:20px;border-radius:9px}
+.print-layout-arrows button:nth-child(1){grid-column:2}
+.print-layout-arrows button:nth-child(2){grid-column:1;grid-row:2}
+.print-layout-arrows button:nth-child(3){grid-column:2;grid-row:2}
+.print-layout-arrows button:nth-child(4){grid-column:3;grid-row:2}
+#layout-reset-item{font-size:11px;width:100%;padding:10px}
+@media(max-width:1000px){.print-layout-editor{grid-template-columns:minmax(0,1fr) 210px}.print-layout-toolbar{flex-wrap:wrap}.print-layout-toolbar button{margin-left:auto}}
+@media(max-width:700px){.print-layout-editor{grid-template-columns:1fr}.print-layout-inspector{position:static}.print-layout-scroll{padding:12px;max-height:70dvh;min-height:300px}.print-layout-toolbar{padding:12px}.print-layout-toolbar label{min-width:100%}.print-layout-toolbar button{width:100%}#layout-dirty{width:100%;margin:5px 0}.print-layout-caption{padding:10px}}

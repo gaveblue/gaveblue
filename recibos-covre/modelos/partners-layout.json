@@ -1,0 +1,66 @@
+{
+  "covre": {
+    "payer": [
+      {
+        "x": 56.784,
+        "y": 723.43156,
+        "size": 9.480000000000018
+      },
+      {
+        "x": 56.784,
+        "y": 709.9915599999999,
+        "size": 9.480000000000018
+      }
+    ],
+    "declaration": [
+      {
+        "x": 56.784,
+        "y": 365.06156,
+        "size": 9.479999999999961
+      },
+      {
+        "x": 56.784,
+        "y": 352.70156000000003,
+        "size": 9.479999999999961
+      },
+      {
+        "x": 56.784,
+        "y": 340.22156,
+        "size": 9.479999999999961
+      }
+    ],
+    "declarationText": "Declaro, para os devidos fins, que recebi da COVRE & CIA LTDA, inscrita no CNPJ nº 28.419.232/0001-06, o valor acima especificado, referente à prestação do serviço de frete/transporte de mercadoria identificado neste recibo, dando plena quitação exclusivamente quanto ao valor e ao serviço nele discriminados."
+  },
+  "chapa": {
+    "payer": [
+      {
+        "x": 56.784,
+        "y": 723.43156,
+        "size": 9.480000000000018
+      },
+      {
+        "x": 56.784,
+        "y": 709.9915599999999,
+        "size": 9.480000000000018
+      }
+    ],
+    "declaration": [
+      {
+        "x": 56.784,
+        "y": 382.58156,
+        "size": 9.479999999999961
+      },
+      {
+        "x": 56.784,
+        "y": 370.10156,
+        "size": 9.479999999999961
+      },
+      {
+        "x": 56.784,
+        "y": 357.74156,
+        "size": 9.479999999999961
+      }
+    ],
+    "declarationText": "Declaro, para os devidos fins, que recebi da COVRE & CIA LTDA, inscrita no CNPJ nº 28.419.232/0001-06, o valor acima especificado, referente à prestação do serviço de carga/descarga de mercadoria identificado neste recibo, dando plena quitação exclusivamente quanto ao valor e ao serviço nele discriminados."
+  }
+}
