@@ -7,11 +7,13 @@
   const tableStatus=document.createElement('p');tableStatus.id='cheque-withdrawal-status';tableStatus.setAttribute('role','status');el('cheques').append(tableStatus);
   function validDate(value){return typeof value==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(value)&&Number.isFinite(Date.parse(value))&&new Date(value+'T12:00:00Z').toISOString().slice(0,10)===value;}
   function open(record){
+    if(window.receiptFinance){window.receiptFinance.openSettlement(record.id);return;}
     if(saving)return;selected=record;trigger=document.activeElement;tableStatus.textContent='';input.max=today();input.value=record.data.dataSaque||today();input.setCustomValidity('');error.textContent='';
     el('withdrawal-title').textContent=record.data.dataSaque?'Editar saque':'Registrar saque';el('withdrawal-description').textContent='Cheque '+record.data.cheque+' · '+record.data.nome+' · '+money(record.data.valor);
     el('withdrawal-remove').hidden=!record.data.dataSaque;dialog.showModal();input.focus();
   }
   function toggle(record){
+    if(window.receiptFinance){window.receiptFinance.openSettlement(record.id);return;}
     if(saving)return;
     if(!record.data.dataSaque){open(record);return;}
     selected=record;trigger=document.activeElement;tableStatus.textContent='';save(true);

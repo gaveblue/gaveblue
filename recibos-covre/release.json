@@ -1,5 +1,5 @@
 {
-  "version": "2ecd7c6b9508e9fd",
+  "version": "e7b87f43a624fbba",
   "assets": [
     {
       "file": "style.css",
@@ -22,6 +22,10 @@
       "version": "f933c0028c9f52de"
     },
     {
+      "file": "finance.css",
+      "version": "6581fb8ea230f4c2"
+    },
+    {
       "file": "vendor/pdf-lib.min.js",
       "version": "0f9a5cad07941f08"
     },
@@ -35,11 +39,11 @@
     },
     {
       "file": "app.js",
-      "version": "6764708a1c888dc6"
+      "version": "b638310e9a532bc2"
     },
     {
       "file": "cheques.js",
-      "version": "232be93bf2bd1d37"
+      "version": "d03cceb1f6293027"
     },
     {
       "file": "layout-settings.js",
@@ -51,11 +55,15 @@
     },
     {
       "file": "local-files.js",
-      "version": "c2866bcd37375ef9"
+      "version": "223addd50e1d316d"
     },
     {
       "file": "settings.js",
       "version": "a7d883327ab89289"
+    },
+    {
+      "file": "finance.js",
+      "version": "4e57965136c434fb"
     },
     {
       "file": "release.js",

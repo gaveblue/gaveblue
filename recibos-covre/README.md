@@ -16,6 +16,27 @@ na página. As setas alteram sua posição; os controles ajustam largura e espes
 As medidas são extraídas dos modelos originais e aplicadas pelo mesmo gerador
 na prévia e na emissão. Salvar, desfazer e restaurar funcionam também nas linhas.
 
+## Financeiro
+
+O menu Financeiro contém Movimentações (todos os recibos, inicialmente pendentes)
+e Extrato bancário (créditos, débitos e saldo acumulado por conta e período).
+Cadastre uma conta com saldo inicial e sua data. A baixa de um recibo exige conta
+e data, gera um débito integral e, em cheques, sincroniza a situação/data de saque.
+Marcações antigas de saque são preservadas nos registros, mas não geram baixas
+bancárias automaticamente: falta indicar a conta correspondente.
+
+O estorno gera um crédito na conta original, preserva o histórico e devolve o
+recibo para pendente. Recibos com baixa ativa não podem ser editados e recibos
+com histórico financeiro não podem ser excluídos. Os valores são calculados em
+centavos inteiros; o saldo anterior considera movimentações anteriores ao filtro.
+O link do recibo abre sua linha em Recibos. Créditos avulsos podem ser registrados
+no extrato. Não há conexão automática com bancos.
+
+Contas e lançamentos ficam em `config/receipt-finance` no IndexedDB local. Gravações
+são atômicas com os recibos e protegidas contra baixas duplicadas entre abas.
+O backup normal e o backup anterior à migração de arquivos incluem o financeiro;
+a restauração mescla IDs sem duplicar lançamentos e rejeita conflitos integralmente.
+
 ## Pasta local para PDFs e anexos
 
 Após o cadastro inicial, uma tela pergunta onde salvar os arquivos e abre o

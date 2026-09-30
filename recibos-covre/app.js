@@ -122,6 +122,7 @@ function showView(history){
   }
 }
 function setActiveSection(section,title){
+  window.receiptFinance?.sectionChanged(section);
   if(byId('layout-settings'))byId('layout-settings').hidden=section!=='settings';
   byId('editor').hidden=false;byId('history').hidden=section!=='history';
   byId('home').hidden=section!=='home';
@@ -256,11 +257,12 @@ function renderCompanies(){
 let chequePeriod=null;
 function renderCheques(){
   const query=(byId('cheque-search')?.value||'').toLocaleLowerCase('pt-BR'),filter=byId('cheque-filter')?.value||'';
-  const items=records.filter(record=>{const d=record.data;if((d.formaPagamento||'cheque')!=='cheque')return false;const withdrawn=Boolean(d.dataSaque),has=hasReceiptAttachment(record),date=chequePeriod?.type==='saque'?d.dataSaque:(d.dataCheque||d.dataEmissao);return (!chequePeriod||(date&&date>=chequePeriod.from&&date<=chequePeriod.to))&&(!filter||(filter==='sacado'&&withdrawn)||(filter==='pendente'&&!withdrawn)||(filter==='sem-anexo'&&!has))&&[d.cheque,d.nome,d.nota].join(' ').toLocaleLowerCase('pt-BR').includes(query);});
+  const withdrawalDate=record=>window.receiptFinance?window.receiptFinance.settlementFor(record.id)?.date:record.data.dataSaque;
+  const items=records.filter(record=>{const d=record.data;if((d.formaPagamento||'cheque')!=='cheque')return false;const withdrawn=Boolean(withdrawalDate(record)),has=hasReceiptAttachment(record),date=chequePeriod?.type==='saque'?withdrawalDate(record):(d.dataCheque||d.dataEmissao);return (!chequePeriod||(date&&date>=chequePeriod.from&&date<=chequePeriod.to))&&(!filter||(filter==='sacado'&&withdrawn)||(filter==='pendente'&&!withdrawn)||(filter==='sem-anexo'&&!has))&&[d.cheque,d.nome,d.nota].join(' ').toLocaleLowerCase('pt-BR').includes(query);});
   const body=byId('cheque-records');body.replaceChildren();
   if(!items.length){const cell=body.insertRow().insertCell();cell.colSpan=8;cell.className='empty';cell.textContent='Nenhum cheque encontrado.';return;}
   for(const record of items){
-    const d=record.data,has=hasReceiptAttachment(record);const row=body.insertRow();
+    const d={...record.data,dataSaque:withdrawalDate(record)},has=hasReceiptAttachment(record);const row=body.insertRow();
     [d.cheque,dateBR(d.dataCheque||d.dataEmissao),d.nome,money(d.valor)].forEach(value=>row.insertCell().textContent=value);
     const flag=document.createElement('button');flag.type='button';flag.className='cheque-withdrawal';flag.setAttribute('role','switch');flag.setAttribute('aria-checked',String(Boolean(d.dataSaque)));flag.setAttribute('aria-label','Saque do cheque '+d.cheque);flag.title=d.dataSaque?'Marcar cheque '+d.cheque+' como não sacado':'Registrar saque do cheque '+d.cheque;flag.innerHTML='<span class="withdrawal-track" aria-hidden="true"></span><span>'+(d.dataSaque?'SACADO':'NÃO SACADO')+'</span>';flag.onclick=()=>window.chequeWithdrawal.toggle(record);row.insertCell().append(flag);
     const dateCell=row.insertCell();
@@ -301,6 +303,7 @@ async function refresh() {
   companies=await transaction('readonly',s=>s.getAll(),'empresas');
   records.sort((a,b)=>b.createdAt.localeCompare(a.createdAt));
   companies.sort((a,b)=>a.name.localeCompare(b.name,'pt-BR'));
+  if(window.receiptFinance)await window.receiptFinance.reload();
   renderCompanies();renderCheques();renderDashboard();
   renderHistory();
 }
@@ -324,13 +327,16 @@ async function saveNumberedRecord(record){
     if(!editingRecord?.data.numero){record.data={...record.data,numero:await nextReceiptNumber()};record.pdf=await generatePDF(record.data);}
     const persisted=window.receiptFiles?await window.receiptFiles.prepare(record):record;
     await new Promise((resolve,reject)=>{
-      const tx=db.transaction(['recibos','config'],'readwrite'),store=tx.objectStore('recibos');let conflict=false;
+      const tx=db.transaction(['recibos','config'],'readwrite'),store=tx.objectStore('recibos');let conflict=false,financeError='';
       const write=()=>{
-        store.put(persisted);const config=tx.objectStore('config'),request=config.get('receipt-sequence');
-        request.onsuccess=()=>{const previous=BigInt(request.result?.value||'0'),number=BigInt(record.data.numero);config.put({id:'receipt-sequence',value:String(number>previous?number:previous)});};
+        const config=tx.objectStore('config'),financial=config.get('receipt-finance');
+        financial.onsuccess=()=>{
+          try{window.receiptFinance?.assertEditable(financial.result?.value,record.id);}catch(error){financeError=error.message;tx.abort();return;}
+          store.put(persisted);const request=config.get('receipt-sequence');request.onsuccess=()=>{const previous=BigInt(request.result?.value||'0'),number=BigInt(record.data.numero);config.put({id:'receipt-sequence',value:String(number>previous?number:previous)});};
+        };
       };
       if(editingRecord){const request=store.get(record.id);request.onsuccess=()=>{const existing=request.result;if(!existing||(existing.updatedAt||existing.createdAt)!==(editingRecord.updatedAt||editingRecord.createdAt)){conflict=true;tx.abort();}else write();};}else write();
-      tx.oncomplete=resolve;tx.onerror=tx.onabort=()=>reject(new Error(conflict?'Este recibo foi alterado ou excluído em outra aba. Reabra-o antes de salvar.':'Não foi possível salvar o recibo. Nenhum número foi consumido.'));
+      tx.oncomplete=resolve;tx.onerror=tx.onabort=()=>reject(new Error(financeError||(conflict?'Este recibo foi alterado ou excluído em outra aba. Reabra-o antes de salvar.':'Não foi possível salvar o recibo. Nenhum número foi consumido.')));
     });
     return record;
   });
@@ -378,6 +384,7 @@ cancelEdit.type='button';cancelEdit.className='secondary';cancelEdit.textContent
 form.querySelector('.form-actions').prepend(cancelEdit);
 cancelEdit.onclick=()=>closeReceipt();
 async function editRecord(record){
+  try{await window.receiptFinance?.checkEditable(record.id);}catch(error){statusMessage(error.message,true);return;}
   try{if(window.receiptFiles)record=await window.receiptFiles.hydrate(record);}catch(error){statusMessage(error.message,true);return;}
   if(editingRecord&&!confirm('Descartar as alterações atuais e abrir este recibo?'))return;
   resetForm();editingRecord=record;
@@ -400,7 +407,7 @@ async function editRecord(record){
 async function deleteRecord(record){
   if(!confirm('Excluir o recibo de '+record.data.nome+' — '+money(record.data.valor)+'? O PDF também será removido deste histórico.'))return;
   try{
-    await transaction('readwrite',store=>store.delete(record.id));
+    if(window.receiptFinance)await window.receiptFinance.deleteReceipts([record.id]);else await transaction('readwrite',store=>store.delete(record.id));
     if(editingRecord?.id===record.id)resetForm();
     await refresh();statusMessage('Recibo excluído do histórico. Arquivos existentes na pasta do PC foram mantidos.');
   }catch(error){statusMessage(error.message,true);}
@@ -468,7 +475,7 @@ byId('receipts-pdf').onclick=()=>{const record=records.find(r=>selectedReceipts.
 byId('partners-edit').onclick=()=>{const company=companies.find(c=>selectedPartners.has(c.id));if(company)editCompany(company);};
 async function deleteSelection(selected,store,label){
   if(!selected.size||!confirm('Excluir '+selected.size+' '+label+' selecionado(s)?'+(store==='empresas'?' Os recibos emitidos serão mantidos.':' Os PDFs também serão removidos deste histórico.')))return;
-  try{await transaction('readwrite',objectStore=>{for(const id of selected)objectStore.delete(id);},store);selected.clear();await refresh();statusMessage('Exclusão concluída.');}catch(error){statusMessage(error.message,true);}
+  try{if(store==='recibos'&&window.receiptFinance)await window.receiptFinance.deleteReceipts([...selected]);else await transaction('readwrite',objectStore=>{for(const id of selected)objectStore.delete(id);},store);selected.clear();await refresh();statusMessage('Exclusão concluída.');}catch(error){statusMessage(error.message,true);}
 }
 byId('receipts-delete').onclick=()=>deleteSelection(selectedReceipts,'recibos','recibo');
 byId('partners-delete').onclick=()=>deleteSelection(selectedPartners,'empresas','parceiro');
@@ -571,13 +578,16 @@ byId('search').oninput=renderHistory;byId('filter').onchange=renderHistory;
 function blobBase64(blob){return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result.split(',')[1]);r.onerror=reject;r.readAsDataURL(blob);});}
 byId('backup').onclick=async()=>{
   try{
+    await navigator.locks.request('covre-receipt-number',async()=>{
     await refresh();
     const items=await Promise.all(records.map(async source=>{const r=window.receiptFiles?await window.receiptFiles.hydrate(source):source;const {files,fileBackup,filesCopiedAt,...portable}=r;return ({
       ...portable,pdf:await blobBase64(r.pdf),
       ...(Object.hasOwn(r,'attachment')?{attachment:r.attachment?{...r.attachment,bytes:await blobBase64(new Blob([r.attachment.bytes]))}:null}:{}),
       attachmentPDF:r.attachmentPDF?await blobBase64(r.attachmentPDF):null
     });}));
-    downloadBlob(new Blob([JSON.stringify({format:'gaveblue-frete',version:2,records:items,empresas:companies,sequence:String(await sequenceHighWater())})],{type:'application/json'}), 'recibos-covre-'+today()+'.json');
+    const finance=await window.receiptFinance?.exportData();
+    downloadBlob(new Blob([JSON.stringify({format:'gaveblue-frete',version:2,records:items,empresas:companies,sequence:String(await sequenceHighWater()),finance})],{type:'application/json'}), 'recibos-covre-'+today()+'.json');
+    });
     statusMessage('Cópia do histórico exportada.');
   }catch(e){statusMessage(e.message||'Não foi possível exportar o histórico.',true);}
 };
@@ -614,9 +624,7 @@ byId('restore').onchange=async event=>{
     await refresh();const existing=new Set(records.map(r=>r.id));const existingCompanies=new Set(companies.map(company=>company.id));
     const numbered=new Map(records.filter(r=>r.data.numero).map(r=>[String(BigInt(r.data.numero)),r.id]));
     for(const record of imported){if(existing.has(record.id)||!record.data.numero)continue;const number=String(BigInt(record.data.numero));if(numbered.has(number)&&numbered.get(number)!==record.id)throw new Error('O recibo nº '+record.data.numero+' já pertence a outro registro. A importação foi cancelada.');numbered.set(number,record.id);}
-    await transaction('readwrite',store=>{for(const r of imported){if(!existing.has(r.id)){store.add(r);existing.add(r.id);}}});
-    await transaction('readwrite',store=>{for(const company of importedCompanies){if(!existingCompanies.has(company.id)){store.put(company);existingCompanies.add(company.id);}}},'empresas');
-    if(backup.sequence!==undefined){if(!/^\d+$/.test(String(backup.sequence)))throw new Error('Sequência inválida no backup.');await transaction('readwrite',store=>{const r=store.get('receipt-sequence');r.onsuccess=()=>{store.put({id:'receipt-sequence',value:String(BigInt(r.result?.value||'0')>BigInt(backup.sequence)?BigInt(r.result.value):BigInt(backup.sequence))});};},'config');}
+    await window.receiptFinance.restore({imported,companies:importedCompanies,sequence:backup.sequence,finance:backup.finance});
     await refresh();showView(true);statusMessage('Histórico importado. Registros já existentes foram preservados.');
   }catch(e){statusMessage(e.message||'Não foi possível importar o histórico.',true);}
   finally{event.target.value='';}
