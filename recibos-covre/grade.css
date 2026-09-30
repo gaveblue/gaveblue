@@ -1,4 +1,11 @@
 /* Grades e ações seguem os cadastros e o financeiro do WeFrotas. */
+.company-badge{background:#fff;cursor:pointer;max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.company-badge:hover{background:#f5f3ff;border-color:#c4b5fd;color:#6366f1}
+.company-card .nav-label{min-width:0;white-space:normal}.company-card strong{overflow-wrap:anywhere}
+#cheques .cheque-filters{grid-template-columns:minmax(180px,2fr) minmax(130px,1fr) minmax(150px,1fr) minmax(150px,1fr) auto;gap:14px}
+#cheques .cheque-filters label{min-width:0}#cheques .cheque-filters input,#cheques .cheque-filters select{width:100%;min-width:0}
+#cheque-date-error{color:#b42332;font-size:12px;margin:0 16px 18px}#cheques [aria-invalid=true]{border-color:#dc2626}
+@media(max-width:1150px){#cheques .cheque-filters{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:550px){#cheques .cheque-filters{grid-template-columns:minmax(0,1fr)}}
 svg.bi{fill:currentColor;stroke:none}
 .cheque-withdrawal{display:inline-flex;gap:8px;align-items:center;background:transparent;color:#64748b;padding:8px 0;font-size:12px;white-space:nowrap}
 .withdrawal-mark{display:grid;place-items:center;width:21px;height:21px;border:1.5px solid #cbd5e1;border-radius:6px;background:#fff;font-size:14px}

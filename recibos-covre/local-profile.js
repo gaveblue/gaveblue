@@ -13,6 +13,7 @@
   const profileButton=document.createElement('button');profileButton.type='button';profileButton.className='secondary';profileButton.id='edit-local-profile';profileButton.textContent='Editar perfil local';
   document.querySelector('#layout-settings .section-heading').append(profileButton);
   profileButton.onclick=()=>open();
+  document.querySelector('.company-badge').onclick=()=>open();
   document.getElementById('profile-cancel').onclick=()=>{if(profile&&!saving)dialog.close();};
   dialog.addEventListener('cancel',event=>{if(!profile||saving)event.preventDefault();});
   function open(){
