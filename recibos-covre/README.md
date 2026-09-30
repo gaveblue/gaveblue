@@ -18,7 +18,13 @@ na prévia e na emissão. Salvar, desfazer e restaurar funcionam também nas lin
 
 ## Pasta local para PDFs e anexos
 
-Configurações → Pasta dos recibos no PC permite escolher uma pasta com a API
+Após o cadastro inicial, uma tela pergunta onde salvar os arquivos e abre o
+seletor de pastas do computador ao clicar em Escolher pasta no computador.
+A pasta escolhida fica salva; não é necessário criar subpastas manualmente.
+Quem já tem perfil, mas ainda não escolheu uma pasta, também recebe essa tela.
+Escolher depois mantém o armazenamento no navegador e dispensa novos avisos.
+Configurações → Destino dos arquivos permite trocar a pasta. Migração e outras
+opções ficam recolhidas em Arquivos antigos e outras opções. A seleção usa a API
 File System Access no Chrome/Edge de computador. A autorização pertence ao
 navegador. Novos arquivos são gravados em PDFs/ e anexos/cheques/, anexos/pix/
 etc., com revisão única no nome; arquivos anteriores nunca são sobrescritos.
