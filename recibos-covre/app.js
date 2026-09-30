@@ -25,6 +25,7 @@ const documentInputs=()=>document.querySelectorAll('[name=documento],[name=pagad
 documentInputs().forEach(input=>{input.inputMode='numeric';input.value=formatDocument(input.value);input.addEventListener('input',()=>input.value=formatDocument(input.value));input.addEventListener('blur',()=>{if(input.value)fieldError(input,inputError(input));});});
 const receiptNumber=value=>String(value).padStart(4,'0');
 const dateBR = value => value.split('-').reverse().join('/');
+const hasReceiptAttachment=r=>Boolean(r.attachment||r.attachmentPDF||r.files?.attachment||r.files?.attachmentPDF);
 const escapeHTML = value => { const el = document.createElement('span'); el.textContent = String(value ?? ''); return el.innerHTML; };
 let step=0, db, records=[], companies=[], draft, attachment=null, current=null, previewURL, savedURL, busy=false;
 let editingRecord=null, editingCompany=null, preservedAttachmentPDF=null;
@@ -229,7 +230,7 @@ function renderHistory() {
     const row=byId('records').insertRow(),d=r.data;
     selectionCell(row,r.id,selectedReceipts,update,d.nome);
     [dateBR(d.dataEmissao),d.numero||'—',d.nome,modelName(d.tipo)+' · NF '+d.nota,money(d.valor)].forEach(t=>row.insertCell().textContent=t);
-    const attachmentCell=row.insertCell(),hasAttachment=Boolean(r.attachment||r.attachmentPDF);attachmentCell.textContent=hasAttachment?'SIM':'NÃO';attachmentCell.className=hasAttachment?'attachment-yes':'attachment-no';
+    const attachmentCell=row.insertCell(),hasAttachment=hasReceiptAttachment(r);attachmentCell.textContent=hasAttachment?'SIM':'NÃO';attachmentCell.className=hasAttachment?'attachment-yes':'attachment-no';
     const button=document.createElement('button');button.type='button';button.className='grid-link';button.textContent='Abrir PDF';button.onclick=()=>openSaved(r);row.insertCell().append(button);
     row.ondblclick=event=>{if(!event.target.closest('button,input'))editRecord(r);};
   }
@@ -253,11 +254,11 @@ function renderCompanies(){
 
 function renderCheques(){
   const query=(byId('cheque-search')?.value||'').toLocaleLowerCase('pt-BR'),filter=byId('cheque-filter')?.value||'';
-  const items=records.filter(record=>{const d=record.data;if((d.formaPagamento||'cheque')!=='cheque')return false;const status=d.statusCheque||((record.attachment||record.attachmentPDF)?'pago':'emitido'),has=Boolean(record.attachment||record.attachmentPDF);return (!filter||filter===status||(filter==='sem-anexo'&&status==='pago'&&!has))&&[d.cheque,d.emitente,d.nome,d.nota].join(' ').toLocaleLowerCase('pt-BR').includes(query);});
+  const items=records.filter(record=>{const d=record.data;if((d.formaPagamento||'cheque')!=='cheque')return false;const status=d.statusCheque||(hasReceiptAttachment(record)?'pago':'emitido'),has=hasReceiptAttachment(record);return (!filter||filter===status||(filter==='sem-anexo'&&status==='pago'&&!has))&&[d.cheque,d.emitente,d.nome,d.nota].join(' ').toLocaleLowerCase('pt-BR').includes(query);});
   const body=byId('cheque-records');body.replaceChildren();
   if(!items.length){const cell=body.insertRow().insertCell();cell.colSpan=7;cell.className='empty';cell.textContent='Nenhum cheque encontrado.';return;}
   for(const record of items){
-    const d=record.data,status=d.statusCheque||((record.attachment||record.attachmentPDF)?'pago':'emitido'),has=Boolean(record.attachment||record.attachmentPDF);const row=body.insertRow();
+    const d=record.data,status=d.statusCheque||(hasReceiptAttachment(record)?'pago':'emitido'),has=hasReceiptAttachment(record);const row=body.insertRow();
     [d.cheque+' · '+dateBR(d.dataCheque),d.emitente,d.nome,money(d.valor),status==='pago'?'Pago':'Emitido'].forEach(value=>row.insertCell().textContent=value);
     const annex=row.insertCell(),action=row.insertCell();
     if(has){const button=document.createElement('button');button.type='button';button.className='secondary';button.textContent='Ver anexo';button.onclick=()=>openAttachment(record);annex.append(button);}else annex.textContent='Sem anexo';
@@ -296,7 +297,7 @@ async function refresh() {
 function renderDashboard(){
   window.localProfile?.updateStorage();
   byId('home-receipts').textContent=records.length;byId('home-partners-count').textContent=companies.length;
-  byId('home-attachments').textContent=records.filter(r=>r.attachment||r.attachmentPDF).length;
+  byId('home-attachments').textContent=records.filter(hasReceiptAttachment).length;
   byId('home-total').textContent=money(records.reduce((sum,r)=>sum+Number(r.data.valor||0),0));
   const list=byId('home-latest');list.replaceChildren();
   if(!records.length){list.textContent='Nenhum recibo emitido ainda.';return;}
@@ -311,10 +312,11 @@ async function nextReceiptNumber(){return receiptNumber((await sequenceHighWater
 async function saveNumberedRecord(record){
   return navigator.locks.request('covre-receipt-number',async()=>{
     if(!editingRecord?.data.numero){record.data={...record.data,numero:await nextReceiptNumber()};record.pdf=await generatePDF(record.data);}
+    const persisted=window.receiptFiles?await window.receiptFiles.prepare(record):record;
     await new Promise((resolve,reject)=>{
       const tx=db.transaction(['recibos','config'],'readwrite'),store=tx.objectStore('recibos');let conflict=false;
       const write=()=>{
-        store.put(record);const config=tx.objectStore('config'),request=config.get('receipt-sequence');
+        store.put(persisted);const config=tx.objectStore('config'),request=config.get('receipt-sequence');
         request.onsuccess=()=>{const previous=BigInt(request.result?.value||'0'),number=BigInt(record.data.numero);config.put({id:'receipt-sequence',value:String(number>previous?number:previous)});};
       };
       if(editingRecord){const request=store.get(record.id);request.onsuccess=()=>{const existing=request.result;if(!existing||(existing.updatedAt||existing.createdAt)!==(editingRecord.updatedAt||editingRecord.createdAt)){conflict=true;tx.abort();}else write();};}else write();
@@ -328,7 +330,8 @@ async function getFile(url){
   if(!model)throw new Error('Os modelos do recibo não foram carregados. Reabra a página quando o servidor local estiver disponível.');
   return model.json?{json:async()=>structuredClone(model.json)}:{arrayBuffer:async()=>Uint8Array.from(atob(model.base64),char=>char.charCodeAt(0)).buffer};
 }
-function openSaved(record) {
+async function openSaved(record) {
+  try{if(window.receiptFiles)record=await window.receiptFiles.hydrate(record,{pdfOnly:true});}catch(error){statusMessage(error.message,true);return;}
   if(byId('draft-dialog').open)byId('draft-dialog').close();
   current=record;
   if(savedURL)URL.revokeObjectURL(savedURL);
@@ -337,7 +340,8 @@ function openSaved(record) {
   byId('pdf-title').textContent=(record.data.numero?'Nº '+record.data.numero+' · ':'')+modelName(record.data.tipo)+' · '+record.data.nome;
   if(!byId('pdf-dialog').open)byId('pdf-dialog').showModal();
 }
-function openAttachment(record){
+async function openAttachment(record){
+  try{if(window.receiptFiles)record=await window.receiptFiles.hydrate(record);}catch(error){statusMessage(error.message,true);return;}
   const body=byId('attachment-body');body.replaceChildren();byId('attachment-title').textContent='Anexo do cheque '+record.data.cheque+' · '+record.data.nome;
   if(record.attachment){const image=document.createElement('img');image.alt='Comprovante anexado ao cheque '+record.data.cheque;image.src=URL.createObjectURL(new Blob([record.attachment.bytes],{type:record.attachment.type}));body.append(image);}
   else if(record.attachmentPDF){const frame=document.createElement('iframe');frame.title='PDF do anexo';frame.src=URL.createObjectURL(record.attachmentPDF);body.append(frame);}
@@ -363,7 +367,8 @@ const cancelEdit=document.createElement('button');
 cancelEdit.type='button';cancelEdit.className='secondary';cancelEdit.textContent='Cancelar alteração';cancelEdit.hidden=true;
 form.querySelector('.form-actions').prepend(cancelEdit);
 cancelEdit.onclick=()=>closeReceipt();
-function editRecord(record){
+async function editRecord(record){
+  try{if(window.receiptFiles)record=await window.receiptFiles.hydrate(record);}catch(error){statusMessage(error.message,true);return;}
   if(editingRecord&&!confirm('Descartar as alterações atuais e abrir este recibo?'))return;
   resetForm();editingRecord=record;
   for(const [key,value] of Object.entries(record.data)){
@@ -387,7 +392,7 @@ async function deleteRecord(record){
   try{
     await transaction('readwrite',store=>store.delete(record.id));
     if(editingRecord?.id===record.id)resetForm();
-    await refresh();statusMessage('Recibo excluído do histórico.');
+    await refresh();statusMessage('Recibo excluído do histórico. Arquivos existentes na pasta do PC foram mantidos.');
   }catch(error){statusMessage(error.message,true);}
 }
 function resetCompanyForm(){
@@ -509,6 +514,7 @@ async function saveReceipt(exit=false){
   busy=true;byId('issue').disabled=true;
   byId('issue-preview').disabled=true;byId('close-draft').disabled=true;
   try {
+    if(window.receiptFiles)await window.receiptFiles.ensureActiveAccess();
     if(exit){const data=readData();data.numero=editingRecord?.data.numero||await nextReceiptNumber();draft={data,pdf:await generatePDF(data)};}
     if(!draft)return;
     const record={id:editingRecord?.id||crypto.randomUUID(),version:2,createdAt:editingRecord?.createdAt||new Date().toISOString(),updatedAt:new Date().toISOString(),data:draft.data,pdf:draft.pdf,attachment,attachmentPDF:preservedAttachmentPDF};
@@ -555,14 +561,14 @@ function blobBase64(blob){return new Promise((resolve,reject)=>{const r=new File
 byId('backup').onclick=async()=>{
   try{
     await refresh();
-    const items=await Promise.all(records.map(async r=>({
-      ...r,pdf:await blobBase64(r.pdf),
+    const items=await Promise.all(records.map(async source=>{const r=window.receiptFiles?await window.receiptFiles.hydrate(source):source;const {files,fileBackup,filesCopiedAt,...portable}=r;return ({
+      ...portable,pdf:await blobBase64(r.pdf),
       ...(Object.hasOwn(r,'attachment')?{attachment:r.attachment?{...r.attachment,bytes:await blobBase64(new Blob([r.attachment.bytes]))}:null}:{}),
       attachmentPDF:r.attachmentPDF?await blobBase64(r.attachmentPDF):null
-    })));
+    });}));
     downloadBlob(new Blob([JSON.stringify({format:'gaveblue-frete',version:2,records:items,empresas:companies,sequence:String(await sequenceHighWater())})],{type:'application/json'}), 'recibos-covre-'+today()+'.json');
     statusMessage('Cópia do histórico exportada.');
-  }catch(e){statusMessage('Não foi possível exportar o histórico.',true);}
+  }catch(e){statusMessage(e.message||'Não foi possível exportar o histórico.',true);}
 };
 byId('restore').onchange=async event=>{
   const file=event.target.files[0];if(!file)return;
@@ -589,7 +595,8 @@ byId('restore').onchange=async event=>{
         if(new TextDecoder().decode(attachmentBytes.slice(0,5))!=='%PDF-')throw new Error('Anexo inválido na cópia.');
         attachmentPDF=new Blob([attachmentBytes],{type:'application/pdf'});
       }
-      return {...r,pdf:new Blob([bytes],{type:'application/pdf'}),...(Object.hasOwn(r,'attachment')?{attachment:decodedAttachment}:{}),attachmentPDF};
+      const {files,fileBackup,filesCopiedAt,...portable}=r;
+      return {...portable,pdf:new Blob([bytes],{type:'application/pdf'}),...(Object.hasOwn(r,'attachment')?{attachment:decodedAttachment}:{}),attachmentPDF};
     });
     const importedCompanies=(backup.version===2?(backup.empresas||[]):[]).map(company=>{if(!company||typeof company.id!=='string'||typeof company.name!=='string'||typeof company.document!=='string'||!['pagador','recebedor','ambos'].includes(company.role))throw new Error('Cadastro de empresa inválido na cópia.');return company;});
     await refresh();const existing=new Set(records.map(r=>r.id));const existingCompanies=new Set(companies.map(company=>company.id));

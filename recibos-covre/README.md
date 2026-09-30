@@ -16,6 +16,30 @@ na página. As setas alteram sua posição; os controles ajustam largura e espes
 As medidas são extraídas dos modelos originais e aplicadas pelo mesmo gerador
 na prévia e na emissão. Salvar, desfazer e restaurar funcionam também nas linhas.
 
+## Pasta local para PDFs e anexos
+
+Configurações → Pasta dos recibos no PC permite escolher uma pasta com a API
+File System Access no Chrome/Edge de computador. A autorização pertence ao
+navegador. Novos arquivos são gravados em PDFs/ e anexos/cheques/, anexos/pix/
+etc., com revisão única no nome; arquivos anteriores nunca são sobrescritos.
+Os dados, a sequência e as referências continuam no IndexedDB existente.
+Sem configuração, o comportamento anterior de armazenamento é preservado.
+
+Copiar antigos cria primeiro um backup completo em Backups/, dividido em partes
+importáveis de até 100 MB, e verifica SHA-256 de cada arquivo lido após gravar.
+A cópia mantém os blobs originais no navegador. Liberar cópias exige confirmação
+e verifica novamente o backup e a igualdade entre os blobs e os arquivos antes
+de remover os blobs, recibo por recibo. Falhas mantêm as cópias do recibo afetado;
+uma operação parcial pode ser retomada. A sequência não muda na migração.
+
+A emissão em pasta só confirma o registro e consome o número depois da gravação
+verificada; falta de permissão ou de espaço interrompe o salvamento, sem trocar
+silenciosamente para IndexedDB. Abrir, editar, reimprimir, conferir layouts e
+exportar backup leem os arquivos da pasta quando necessário. Backups exportados
+incluem os bytes, sem depender dos identificadores de pasta, e podem ser
+importados pelo fluxo existente. Arquivos ausentes ou alterados geram erro
+sem excluir o histórico. Exclusões no histórico não apagam arquivos do PC.
+
 ## Fluxo
 
 1. A tela Recibos abre a grade do histórico, com pesquisa, seleção e ações.

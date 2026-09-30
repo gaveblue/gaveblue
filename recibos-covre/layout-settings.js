@@ -92,6 +92,8 @@
     let task,doc;
     try{
       const input=previewData(),layout=structuredClone(current()),boxes=[];
+      const source=records.find(r=>r.id===el('layout-record').value&&r.data.tipo===tipo);
+      if(source&&window.receiptFiles){const loaded=await window.receiptFiles.hydrate(source);input.attachment=loaded.attachment||null;input.attachmentPDF=loaded.attachmentPDF||(!Object.hasOwn(loaded,'attachment')?loaded.pdf:null);}
       const blob=await generatePDF(input.data,{layout,attachment:input.attachment,attachmentPDF:input.attachmentPDF,onField:box=>boxes.push(box)});
       const pdfjs=await pdfReader();if(request!==revision)return;
       task=pdfjs.getDocument({data:new Uint8Array(await blob.arrayBuffer()),standardFontDataUrl:new URL('./vendor/pdfjs/standard_fonts/',document.baseURI).href,isEvalSupported:false});doc=await task.promise;
