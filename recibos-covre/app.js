@@ -257,7 +257,7 @@ function renderCompanies(){
 let chequePeriod=null;
 function renderCheques(){
   const query=(byId('cheque-search')?.value||'').toLocaleLowerCase('pt-BR'),filter=byId('cheque-filter')?.value||'';
-  const withdrawalDate=record=>window.receiptFinance?window.receiptFinance.settlementFor(record.id)?.date:record.data.dataSaque;
+  const withdrawalDate=record=>window.receiptFinance?.withdrawalDateFor(record)??record.data.dataSaque;
   const items=records.filter(record=>{const d=record.data;if((d.formaPagamento||'cheque')!=='cheque')return false;const withdrawn=Boolean(withdrawalDate(record)),has=hasReceiptAttachment(record),date=chequePeriod?.type==='saque'?withdrawalDate(record):(d.dataCheque||d.dataEmissao);return (!chequePeriod||(date&&date>=chequePeriod.from&&date<=chequePeriod.to))&&(!filter||(filter==='sacado'&&withdrawn)||(filter==='pendente'&&!withdrawn)||(filter==='sem-anexo'&&!has))&&[d.cheque,d.nome,d.nota].join(' ').toLocaleLowerCase('pt-BR').includes(query);});
   const body=byId('cheque-records');body.replaceChildren();
   if(!items.length){const cell=body.insertRow().insertCell();cell.colSpan=8;cell.className='empty';cell.textContent='Nenhum cheque encontrado.';return;}

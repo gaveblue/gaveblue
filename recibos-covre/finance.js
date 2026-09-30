@@ -4,6 +4,9 @@
   let state=empty(),tab='movements',accountId='',working=false;
   const cents=value=>Math.round(Number(value)*100),cash=value=>money(value/100),dateValid=value=>window.chequeWithdrawal.validDate(value);
   const settled=(ledger,id)=>ledger.entries.find(entry=>entry.kind==='debit'&&entry.receiptId===id&&!ledger.entries.some(other=>other.reversalOf===entry.id));
+  // Existing withdrawal dates remain authoritative until this receipt enters the ledger.
+  function legacyWithdrawal(record){return !state.entries.some(entry=>entry.receiptId===record.id)&&dateValid(record.data.dataSaque)?record.data.dataSaque:'';}
+  function withdrawalDateFor(record){return settled(state,record.id)?.date||legacyWithdrawal(record);}
   function assertEditable(ledger,id){if(settled(ledger||empty(),id))throw new Error('Este recibo tem uma baixa no Financeiro. Estorne a baixa antes de alterar o recibo.');}
   const root=document.createElement('section');root.id='finance';root.hidden=true;
   root.innerHTML=`<div class="section-heading"><div><span class="section-kicker">Contas e pagamentos</span><h1>Financeiro</h1><p>Controle as baixas dos recibos e acompanhe o saldo de cada conta.</p></div><button type="button" id="finance-new-account" class="secondary">＋ Nova conta</button></div>
@@ -61,10 +64,10 @@
     const pending=records.filter(r=>!settled(state,r.id));el('finance-pending-summary').textContent=pending.length+' recibo(s) pendente(s) · '+cash(pending.reduce((sum,r)=>sum+cents(r.data.valor),0));
     const items=records.filter(r=>{const paid=settled(state,r.id);return (!filter||(filter==='settled'?Boolean(paid):!paid))&&[r.data.numero,r.data.nome,r.data.cheque].join(' ').toLocaleLowerCase('pt-BR').includes(query);});
     for(const record of items){
-      const d=record.data,entry=settled(state,record.id),account=state.accounts.find(a=>a.id===entry?.accountId),row=body.insertRow();
+      const d=record.data,entry=settled(state,record.id),legacy=legacyWithdrawal(record),account=state.accounts.find(a=>a.id===entry?.accountId),row=body.insertRow();
       row.insertCell().textContent=dateBR(d.dataEmissao);receiptLink(row.insertCell(),record.id,d.numero);row.insertCell().textContent=d.nome;row.insertCell().textContent=paymentName(d.formaPagamento||'cheque')+((d.formaPagamento||'cheque')==='cheque'?' · '+d.cheque:'');row.insertCell().textContent=money(d.valor);
-      const status=row.insertCell();status.textContent=entry?'Baixado':'Pendente';status.className=entry?'finance-positive':'finance-pending';row.insertCell().textContent=account?.name||'—';row.insertCell().textContent=entry?dateBR(entry.date):'—';
-      const button=document.createElement('button');button.type='button';button.className=entry?'secondary':'finance-settle';button.textContent=entry?'Estornar':'Baixar';button.setAttribute('aria-label',(entry?'Estornar':'Baixar')+' recibo '+d.numero);button.onclick=()=>openSettlement(record.id);row.insertCell().append(button);
+      const status=row.insertCell();status.textContent=entry?'Baixado':legacy?'Saque registrado · falta vincular conta':'Pendente';status.className=entry?'finance-positive':'finance-pending';row.insertCell().textContent=account?.name||'—';row.insertCell().textContent=entry?dateBR(entry.date):legacy?dateBR(legacy)+' (saque)':'—';
+      const button=document.createElement('button');button.type='button';button.className=entry?'secondary':'finance-settle';button.textContent=entry?'Estornar':legacy?'Vincular conta':'Baixar';button.setAttribute('aria-label',(entry?'Estornar':legacy?'Vincular conta ao':'Baixar')+' recibo '+d.numero);button.onclick=()=>openSettlement(record.id);row.insertCell().append(button);
     }
     if(!items.length){const cell=body.insertRow().insertCell();cell.colSpan=9;cell.className='empty';cell.textContent='Nenhum recibo encontrado.';}
   }
@@ -114,7 +117,8 @@
         await mutate((ledger,all,{store})=>{const entry=settled(ledger,id),current=all.find(r=>r.id===id);if(!entry||entry.id!==existing.id||!current)throw new Error('Esta baixa mudou. Feche e reabra a movimentação.');const account=ledger.accounts.find(a=>a.id===entry.accountId);checkedDate(values.date,account);if(values.date<entry.date)throw new Error('O estorno não pode ser anterior à baixa.');ledger.entries.push({id:crypto.randomUUID(),accountId:entry.accountId,kind:'reversal',reversalOf:entry.id,receiptId:id,receiptNumber:entry.receiptNumber,receiver:entry.receiver,cents:entry.cents,date:values.date,createdAt:new Date().toISOString()});const data={...current.data};delete data.dataSaque;store.put({...current,data,updatedAt:new Date().toISOString()});});
       });return;
     }
-    openForm('Baixar recibo',summary+accountField()+dateField((d.formaPagamento||'cheque')==='cheque'?'Data do saque / movimentação':'Data da movimentação'),'Confirmar baixa',async values=>{
+    const legacy=legacyWithdrawal(record);
+    openForm(legacy?'Vincular saque à conta':'Baixar recibo',summary+(legacy?'<p class="finance-help">O saque de '+dateBR(legacy)+' já está salvo. Escolha a conta para incluir esse pagamento no extrato bancário.</p>':'')+accountField()+dateField((d.formaPagamento||'cheque')==='cheque'?'Data do saque / movimentação':'Data da movimentação',legacy||today()),'Confirmar baixa',async values=>{
       await mutate((ledger,all,{store})=>{
         const current=all.find(r=>r.id===id),account=ledger.accounts.find(a=>a.id===values.accountId);
         if(!current||(current.updatedAt||current.createdAt)!==(record.updatedAt||record.createdAt))throw new Error('Este recibo mudou. Feche e reabra a movimentação.');if(settled(ledger,id))throw new Error('Este recibo já foi baixado.');if(!account)throw new Error('Selecione uma conta.');checkedDate(values.date,account);
@@ -148,6 +152,6 @@
   }
   async function deleteReceipts(ids){await mutate((ledger,all,{store})=>{if(ledger.entries.some(e=>ids.includes(e.receiptId)))throw new Error('Há recibos vinculados ao histórico financeiro. Eles devem ser mantidos para consulta.');for(const id of ids)store.delete(id);});}
   async function checkEditable(id){const ledger=await exportData();assertEditable(ledger,id);}
-  window.receiptFinance={reload,show,sectionChanged,openSettlement,settlementFor:id=>settled(state,id),assertEditable,checkEditable,deleteReceipts,exportData,restore,validate};
+  window.receiptFinance={reload,show,sectionChanged,openSettlement,settlementFor:id=>settled(state,id),withdrawalDateFor,assertEditable,checkEditable,deleteReceipts,exportData,restore,validate};
   databaseReady.then(()=>reload()).then(()=>renderCheques()).catch(error=>message(error.message,true));
 })();
