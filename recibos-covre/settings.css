@@ -1,0 +1,22 @@
+#layout-settings{scroll-margin-top:135px}
+#layout-settings [hidden]{display:none!important}
+.settings-menu-list{display:flex;flex-direction:column;gap:10px;max-width:760px}
+#layout-settings .settings-menu-item{display:flex;align-items:center;justify-content:space-between;gap:16px;width:100%;min-height:82px;padding:16px 18px;border-radius:22px;border:1px solid #e2e8f0;background:linear-gradient(180deg,#fff,#f8fafc);text-align:left;box-shadow:0 14px 28px #94a3b81a;transition:transform .2s,box-shadow .2s,border-color .2s}
+#layout-settings .settings-menu-item:hover{transform:translateY(-1px);box-shadow:0 18px 32px #94a3b824;border-color:#818cf847}
+.settings-menu-title{display:block;font-size:15px;font-weight:800;color:#0f172a}
+.settings-menu-subtitle{display:block;margin-top:4px;font-size:13px;font-weight:400;line-height:1.5;color:#64748b}
+.settings-menu-arrow{font-size:26px;line-height:1;color:#94a3b8}
+.settings-subhead{display:flex;align-items:center;gap:14px;margin-bottom:20px}
+.settings-subhead h2{margin:0;font-size:18px;color:#0f172a}
+#layout-settings .settings-back-btn{min-height:38px;padding:0 14px;border-radius:999px;border:1px solid #94a3b847;background:#f8fafc;color:#475569;font-size:13px;font-weight:800;flex-shrink:0}
+.settings-screen:not(#settings-layout) .settings-content{max-width:760px}
+.settings-block{margin-bottom:18px}
+.settings-block h3{font-size:15px;margin:0 0 12px}
+.settings-block p,.settings-description{font-size:13px;line-height:1.65;color:#64748b}
+.settings-description{margin:0 0 20px}
+#settings-profile-summary{display:grid;gap:16px;margin:22px 0}
+#settings-profile-summary dt{font-size:11px;color:#64748b;margin-bottom:5px}
+#settings-profile-summary dd{margin:0;font-size:14px;font-weight:600;overflow-wrap:anywhere}
+#layout-settings button:focus-visible{outline:3px solid #818cf8;outline-offset:3px}
+@media(max-width:600px){.settings-subhead{align-items:flex-start}.settings-subhead h2{padding-top:8px;font-size:16px}.settings-menu-subtitle{font-size:12px}#layout-settings{scroll-margin-top:115px}}
+@media(prefers-reduced-motion:reduce){#layout-settings .settings-menu-item{transition:none}}
