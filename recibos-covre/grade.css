@@ -1,4 +1,10 @@
 /* Grades e ações seguem os cadastros e o financeiro do WeFrotas. */
+svg.bi{fill:currentColor;stroke:none}
+.cheque-withdrawal{display:inline-flex;gap:8px;align-items:center;background:transparent;color:#64748b;padding:8px 0;font-size:12px;white-space:nowrap}
+.withdrawal-mark{display:grid;place-items:center;width:21px;height:21px;border:1.5px solid #cbd5e1;border-radius:6px;background:#fff;font-size:14px}
+.cheque-withdrawal[aria-checked=true]{color:#15803d}.cheque-withdrawal[aria-checked=true] .withdrawal-mark{background:#15803d;color:white;border-color:#15803d}
+dialog.withdrawal-dialog{width:min(510px,calc(100vw - 32px));height:auto;padding:26px}.withdrawal-heading{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}.withdrawal-heading h2{margin:8px 0 16px;font-size:22px}.withdrawal-heading button{color:#dc2626;background:#fff1f2;padding:8px 12px}
+#withdrawal-description{font-size:13px;line-height:1.6;color:#64748b;overflow-wrap:anywhere}.withdrawal-actions{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:10px;margin-top:20px}#withdrawal-error{color:#b42332;font-size:12px;margin-top:10px}#withdrawal-error:empty{display:none}
 .filters{padding:14px 16px;margin:0 0 18px;grid-template-columns:minmax(220px,1fr) 230px}
 .filters label{font-size:11px;color:#64748b}.filters input,.filters select{background:#fbfcfe;font-size:13px}
 .orders-table-shell{border:1px solid #ebeff6;border-radius:18px;background:#fff;padding:12px 14px 10px}

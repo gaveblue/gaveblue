@@ -173,6 +173,7 @@ function readData(){
   for(const key in d)d[key]=String(d[key]).trim();
   d.valor=d.valor.replace(/^R\$\s*/, '');
   d.statusCheque=editingRecord?.data.statusCheque||'emitido';
+  if(d.formaPagamento==='cheque'&&editingRecord?.data.dataSaque)d.dataSaque=editingRecord.data.dataSaque;
   if(!validDocument(d.documento))throw new Error('Informe um CPF com 11 dígitos ou CNPJ com 14 dígitos.');
   if(!validDocument(d.pagadorDocumento))throw new Error('Informe o CPF/CNPJ do pagador com 11 ou 14 dígitos.');
   const paymentRequired={cheque:['emitente','banco','agencia','conta','cheque'],deposito:['depositoTitular','depositoBanco','depositoAgencia','depositoConta'],pix:['pixTipo','pixChave'],dinheiro:[]};
@@ -254,16 +255,23 @@ function renderCompanies(){
 
 function renderCheques(){
   const query=(byId('cheque-search')?.value||'').toLocaleLowerCase('pt-BR'),filter=byId('cheque-filter')?.value||'';
-  const items=records.filter(record=>{const d=record.data;if((d.formaPagamento||'cheque')!=='cheque')return false;const status=d.statusCheque||(hasReceiptAttachment(record)?'pago':'emitido'),has=hasReceiptAttachment(record);return (!filter||filter===status||(filter==='sem-anexo'&&status==='pago'&&!has))&&[d.cheque,d.emitente,d.nome,d.nota].join(' ').toLocaleLowerCase('pt-BR').includes(query);});
+  const items=records.filter(record=>{const d=record.data;if((d.formaPagamento||'cheque')!=='cheque')return false;const withdrawn=Boolean(d.dataSaque),has=hasReceiptAttachment(record);return (!filter||(filter==='sacado'&&withdrawn)||(filter==='pendente'&&!withdrawn)||(filter==='sem-anexo'&&!has))&&[d.cheque,d.nome,d.nota].join(' ').toLocaleLowerCase('pt-BR').includes(query);});
   const body=byId('cheque-records');body.replaceChildren();
   if(!items.length){const cell=body.insertRow().insertCell();cell.colSpan=7;cell.className='empty';cell.textContent='Nenhum cheque encontrado.';return;}
   for(const record of items){
-    const d=record.data,status=d.statusCheque||(hasReceiptAttachment(record)?'pago':'emitido'),has=hasReceiptAttachment(record);const row=body.insertRow();
-    [d.cheque+' · '+dateBR(d.dataCheque),d.emitente,d.nome,money(d.valor),status==='pago'?'Pago':'Emitido'].forEach(value=>row.insertCell().textContent=value);
+    const d=record.data,has=hasReceiptAttachment(record);const row=body.insertRow();
+    [d.cheque+' · '+dateBR(d.dataCheque||d.dataEmissao),d.nome,money(d.valor)].forEach(value=>row.insertCell().textContent=value);
+    const flag=document.createElement('button');flag.type='button';flag.className='cheque-withdrawal';flag.setAttribute('role','checkbox');flag.setAttribute('aria-checked',String(Boolean(d.dataSaque)));flag.setAttribute('aria-label','Saque do cheque '+d.cheque);flag.title=d.dataSaque?'Editar saque do cheque '+d.cheque:'Registrar saque do cheque '+d.cheque;flag.innerHTML='<span class="withdrawal-mark" aria-hidden="true">'+(d.dataSaque?'✓':'')+'</span><span>'+(d.dataSaque?'Sacado':'Registrar')+'</span>';flag.onclick=()=>window.chequeWithdrawal.open(record);row.insertCell().append(flag);
+    row.insertCell().textContent=d.dataSaque?dateBR(d.dataSaque):'—';
     const annex=row.insertCell(),action=row.insertCell();
-    if(has){const button=document.createElement('button');button.type='button';button.className='secondary';button.textContent='Ver anexo';button.onclick=()=>openAttachment(record);annex.append(button);}else annex.textContent='Sem anexo';
-    const button=document.createElement('button');button.type='button';button.textContent='Abrir recibo';button.onclick=()=>openSaved(record);action.append(button);
+    if(has){const button=chequeIconButton('Visualizar anexo do cheque '+d.cheque,'eye');button.onclick=()=>openAttachment(record);annex.append(button);}else annex.textContent='Sem anexo';
+    const button=chequeIconButton('Visualizar recibo do cheque '+d.cheque,'document');button.onclick=()=>openSaved(record);action.append(button);
   }
+}
+function chequeIconButton(label,icon){
+  const button=document.createElement('button');button.type='button';button.className='icon-action cheque-view';button.title=label;button.setAttribute('aria-label',label);
+  const path=icon==='eye'?'<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>':'<path d="M14 2H5v20h14V7l-5-5Z"/><path d="M14 2v5h5M8 12h8M8 16h8"/>';
+  button.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true">'+path+'</svg>';return button;
 }
 function openDatabase() {
   return new Promise((resolve,reject) => {
@@ -581,6 +589,7 @@ byId('restore').onchange=async event=>{
       if(!r||typeof r.id!=='string'||!r.id||typeof r.createdAt!=='string'||!Number.isFinite(Date.parse(r.createdAt))||!r.data||!['covre','chapa'].includes(r.data.tipo)||typeof r.pdf!=='string')throw new Error('Registro inválido na cópia.');
       const required=['nome','documento','nota','dataEmissao',...((r.data.formaPagamento||'cheque')==='cheque'?['cheque']:[])];
       if(r.data.numero!==undefined&&!/^\d+$/.test(r.data.numero))throw new Error('Número de recibo inválido no backup.');
+      if(r.data.dataSaque!==undefined&&r.data.dataSaque!==''&&!window.chequeWithdrawal.validDate(r.data.dataSaque))throw new Error('Data de saque inválida no backup.');
       if(required.some(k=>typeof r.data[k]!=='string'||!r.data[k].trim())||!/^\d{4}-\d{2}-\d{2}$/.test(r.data.dataEmissao)||!Number.isFinite(r.data.valor)||r.data.valor<=0)throw new Error('Dados inválidos na cópia.');
       const bytes=Uint8Array.from(atob(r.pdf),c=>c.charCodeAt(0));
       if(new TextDecoder().decode(bytes.slice(0,5))!=='%PDF-')throw new Error('PDF inválido na cópia.');
