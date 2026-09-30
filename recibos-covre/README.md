@@ -125,6 +125,12 @@ usa o nome do prestador, substituindo o marcador NOME do modelo de frete.
 
 ## Validação
 
+Antes de publicar alterações, execute `node recibos-covre/build-release.cjs` a partir
+da raiz do projeto e inclua `index.html` e `release.json` na publicação. O comando
+versiona os recursos por conteúdo para evitar misturar scripts e estilos antigos.
+Abas que já carregaram o verificador de versão avisam quando houver atualização;
+formulários abertos não são recarregados automaticamente. Nenhum dado local é apagado.
+
 Testes locais em Chrome cobrem ambos os modelos, anexo, geração, persistência
 após recarga, reabertura, busca, backup e restauração em outro contexto,
 deduplicação, recuperação de falha de gravação e largura de tela móvel.

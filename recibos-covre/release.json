@@ -1,0 +1,65 @@
+{
+  "version": "fac526dcde329da2",
+  "assets": [
+    {
+      "file": "style.css",
+      "version": "732c1c96d1216daf"
+    },
+    {
+      "file": "grade.css",
+      "version": "5cc3ac3860781aae"
+    },
+    {
+      "file": "layout-editor.css",
+      "version": "f002eb7a6e13d8ae"
+    },
+    {
+      "file": "local-profile.css",
+      "version": "e7d69325b0b6f6cc"
+    },
+    {
+      "file": "settings.css",
+      "version": "f933c0028c9f52de"
+    },
+    {
+      "file": "vendor/pdf-lib.min.js",
+      "version": "0f9a5cad07941f08"
+    },
+    {
+      "file": "modelos/bundle.js",
+      "version": "514edfbc39fb061a"
+    },
+    {
+      "file": "payment-form.js",
+      "version": "14950d2e1136b18e"
+    },
+    {
+      "file": "app.js",
+      "version": "76687d63ac538bdc"
+    },
+    {
+      "file": "cheques.js",
+      "version": "b8730a40b922208a"
+    },
+    {
+      "file": "layout-settings.js",
+      "version": "f4fb3948613c0a41"
+    },
+    {
+      "file": "local-profile.js",
+      "version": "1129a2652063d6ac"
+    },
+    {
+      "file": "local-files.js",
+      "version": "c2866bcd37375ef9"
+    },
+    {
+      "file": "settings.js",
+      "version": "a7d883327ab89289"
+    },
+    {
+      "file": "release.js",
+      "version": "fabf8b78862af0a1"
+    }
+  ]
+}

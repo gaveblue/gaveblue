@@ -253,14 +253,12 @@ function renderCompanies(){
   }
 }
 
+let chequePeriod=null;
 function renderCheques(){
   const query=(byId('cheque-search')?.value||'').toLocaleLowerCase('pt-BR'),filter=byId('cheque-filter')?.value||'';
-  const from=byId('cheque-date-from').value,to=byId('cheque-date-to').value,invalid=Boolean(from&&to&&from>to);
-  byId('cheque-date-error').hidden=!invalid;byId('cheque-date-error').textContent=invalid?'A data final deve ser igual ou posterior à data inicial.':'';
-  for(const id of ['cheque-date-from','cheque-date-to']){if(invalid)byId(id).setAttribute('aria-invalid','true');else byId(id).removeAttribute('aria-invalid');}
-  const items=invalid?[]:records.filter(record=>{const d=record.data;if((d.formaPagamento||'cheque')!=='cheque')return false;const withdrawn=Boolean(d.dataSaque),has=hasReceiptAttachment(record),date=d.dataCheque||d.dataEmissao;return (!from||(date&&date>=from))&&(!to||(date&&date<=to))&&(!filter||(filter==='sacado'&&withdrawn)||(filter==='pendente'&&!withdrawn)||(filter==='sem-anexo'&&!has))&&[d.cheque,d.nome,d.nota].join(' ').toLocaleLowerCase('pt-BR').includes(query);});
+  const items=records.filter(record=>{const d=record.data;if((d.formaPagamento||'cheque')!=='cheque')return false;const withdrawn=Boolean(d.dataSaque),has=hasReceiptAttachment(record),date=chequePeriod?.type==='saque'?d.dataSaque:(d.dataCheque||d.dataEmissao);return (!chequePeriod||(date&&date>=chequePeriod.from&&date<=chequePeriod.to))&&(!filter||(filter==='sacado'&&withdrawn)||(filter==='pendente'&&!withdrawn)||(filter==='sem-anexo'&&!has))&&[d.cheque,d.nome,d.nota].join(' ').toLocaleLowerCase('pt-BR').includes(query);});
   const body=byId('cheque-records');body.replaceChildren();
-  if(!items.length){const cell=body.insertRow().insertCell();cell.colSpan=8;cell.className='empty';cell.textContent=invalid?'Corrija o período para consultar os cheques.':'Nenhum cheque encontrado.';return;}
+  if(!items.length){const cell=body.insertRow().insertCell();cell.colSpan=8;cell.className='empty';cell.textContent='Nenhum cheque encontrado.';return;}
   for(const record of items){
     const d=record.data,has=hasReceiptAttachment(record);const row=body.insertRow();
     [d.cheque,dateBR(d.dataCheque||d.dataEmissao),d.nome,money(d.valor)].forEach(value=>row.insertCell().textContent=value);
@@ -500,8 +498,7 @@ async function animateStep(){
 byId('close-receipt').onclick=closeReceipt;
 byId('receipt-dialog').addEventListener('cancel',event=>{event.preventDefault();closeReceipt();});
 byId('cheque-search').oninput=renderCheques;byId('cheque-filter').onchange=renderCheques;
-for(const id of ['cheque-date-from','cheque-date-to'])byId(id).oninput=renderCheques;
-byId('cheque-clear').onclick=()=>{for(const id of ['cheque-search','cheque-filter','cheque-date-from','cheque-date-to'])byId(id).value='';renderCheques();};
+byId('cheque-clear').onclick=()=>{for(const id of ['cheque-search','cheque-filter'])byId(id).value='';window.chequeDateFilter.clear();};
 async function nextStep() {
   if(busy||transitioning||attachmentLoading||!validStep())return;
   statusMessage('');

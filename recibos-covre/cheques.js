@@ -40,4 +40,25 @@
   }
   el('withdrawal-form').onsubmit=event=>{event.preventDefault();save();};el('withdrawal-remove').onclick=()=>save(true);
   window.chequeWithdrawal={open,validDate};
+  const periodDialog=document.createElement('dialog');periodDialog.id='cheque-period-dialog';periodDialog.className='form-dialog withdrawal-dialog';periodDialog.setAttribute('aria-labelledby','cheque-period-title');
+  periodDialog.innerHTML='<form id="cheque-period-form"><div class="withdrawal-heading"><div><span class="section-kicker">Filtro de período</span><h2 id="cheque-period-title">Qual data deseja buscar?</h2></div><button type="button" id="cheque-period-close" class="secondary" aria-label="Fechar filtro de período">✕</button></div><fieldset class="period-type"><legend>Buscar por</legend><label><input type="radio" name="period-type" value="emissao" required> Emissão do cheque</label><label><input type="radio" name="period-type" value="saque" required> Data do saque</label></fieldset><div class="period-dates"><label>De<input type="date" id="cheque-date-from" required></label><label>Até<input type="date" id="cheque-date-to" required></label></div><p id="cheque-date-error" role="alert"></p><div class="withdrawal-actions"><button type="button" id="cheque-period-remove" class="secondary">Remover período</button><button type="button" id="cheque-period-cancel" class="secondary">Cancelar</button><button type="submit">Aplicar período</button></div></form>';
+  document.body.append(periodDialog);
+  const periodForm=el('cheque-period-form'),periodButton=el('cheque-period'),from=el('cheque-date-from'),to=el('cheque-date-to');
+  function updatePeriod(){periodButton.textContent=chequePeriod?(chequePeriod.type==='saque'?'Saque':'Emissão')+': '+dateBR(chequePeriod.from)+' a '+dateBR(chequePeriod.to):'Selecionar período';periodButton.title=periodButton.textContent;renderCheques();}
+  function clear(){chequePeriod=null;updatePeriod();}
+  periodButton.onclick=()=>{
+    periodForm.reset();from.value=chequePeriod?.from||'';to.value=chequePeriod?.to||'';
+    if(chequePeriod)periodForm.querySelector('[value="'+chequePeriod.type+'"]').checked=true;
+    el('cheque-date-error').textContent='';to.setCustomValidity('');el('cheque-period-remove').hidden=!chequePeriod;periodDialog.showModal();
+  };
+  el('cheque-period-close').onclick=el('cheque-period-cancel').onclick=()=>periodDialog.close();
+  periodDialog.addEventListener('close',()=>periodButton.focus());
+  el('cheque-period-remove').onclick=()=>{clear();periodDialog.close();};
+  periodForm.oninput=()=>{to.setCustomValidity('');el('cheque-date-error').textContent='';};
+  periodForm.onsubmit=event=>{
+    event.preventDefault();const type=periodForm.querySelector('[name="period-type"]:checked')?.value;
+    if(!type||!validDate(from.value)||!validDate(to.value)||from.value>to.value){el('cheque-date-error').textContent='Escolha o tipo de data e um período válido. A data final deve ser igual ou posterior à inicial.';return;}
+    chequePeriod={type,from:from.value,to:to.value};updatePeriod();periodDialog.close();
+  };
+  window.chequeDateFilter={clear};
 })();
