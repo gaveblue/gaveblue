@@ -262,8 +262,9 @@ function renderCheques(){
   for(const record of items){
     const d=record.data,has=hasReceiptAttachment(record);const row=body.insertRow();
     [d.cheque,dateBR(d.dataCheque||d.dataEmissao),d.nome,money(d.valor)].forEach(value=>row.insertCell().textContent=value);
-    const flag=document.createElement('button');flag.type='button';flag.className='cheque-withdrawal';flag.setAttribute('role','checkbox');flag.setAttribute('aria-checked',String(Boolean(d.dataSaque)));flag.setAttribute('aria-label','Saque do cheque '+d.cheque);flag.title=d.dataSaque?'Editar saque do cheque '+d.cheque:'Registrar saque do cheque '+d.cheque;flag.innerHTML='<span class="withdrawal-mark" aria-hidden="true">'+(d.dataSaque?'✓':'')+'</span><span>'+(d.dataSaque?'Sacado':'Registrar')+'</span>';flag.onclick=()=>window.chequeWithdrawal.open(record);row.insertCell().append(flag);
-    row.insertCell().textContent=d.dataSaque?dateBR(d.dataSaque):'—';
+    const flag=document.createElement('button');flag.type='button';flag.className='cheque-withdrawal';flag.setAttribute('role','switch');flag.setAttribute('aria-checked',String(Boolean(d.dataSaque)));flag.setAttribute('aria-label','Saque do cheque '+d.cheque);flag.title=d.dataSaque?'Marcar cheque '+d.cheque+' como não sacado':'Registrar saque do cheque '+d.cheque;flag.innerHTML='<span class="withdrawal-track" aria-hidden="true"></span><span>'+(d.dataSaque?'SACADO':'NÃO SACADO')+'</span>';flag.onclick=()=>window.chequeWithdrawal.toggle(record);row.insertCell().append(flag);
+    const dateCell=row.insertCell();
+    if(d.dataSaque){const dateButton=document.createElement('button');dateButton.type='button';dateButton.className='cheque-date-edit';dateButton.textContent=dateBR(d.dataSaque);dateButton.title='Editar data do saque';dateButton.setAttribute('aria-label','Editar data do saque do cheque '+d.cheque);dateButton.onclick=()=>window.chequeWithdrawal.open(record);dateCell.append(dateButton);}else dateCell.textContent='—';
     const annex=row.insertCell(),action=row.insertCell();
     if(has){const button=chequeIconButton('Visualizar anexo do cheque '+d.cheque,'eye');button.onclick=()=>openAttachment(record);annex.append(button);}else annex.textContent='Sem anexo';
     const button=chequeIconButton('Visualizar recibo do cheque '+d.cheque,'document');button.onclick=()=>openSaved(record);action.append(button);

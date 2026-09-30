@@ -10,9 +10,13 @@
 @media(max-width:1150px){#cheques .cheque-filters{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:550px){#cheques .cheque-filters{grid-template-columns:minmax(0,1fr)}}
 svg.bi{fill:currentColor;stroke:none}
-.cheque-withdrawal{display:inline-flex;gap:8px;align-items:center;background:transparent;color:#64748b;padding:8px 0;font-size:12px;white-space:nowrap}
-.withdrawal-mark{display:grid;place-items:center;width:21px;height:21px;border:1.5px solid #cbd5e1;border-radius:6px;background:#fff;font-size:14px}
-.cheque-withdrawal[aria-checked=true]{color:#15803d}.cheque-withdrawal[aria-checked=true] .withdrawal-mark{background:#15803d;color:white;border-color:#15803d}
+.cheque-withdrawal{display:inline-flex;gap:8px;align-items:center;background:transparent;color:#b91c1c;padding:8px 0;font-size:11px;font-weight:700;white-space:nowrap}
+.withdrawal-track{position:relative;display:block;flex:none;width:36px;height:22px;border-radius:999px;background:#cbd5e1;transition:background .15s}.withdrawal-track::after{content:'';position:absolute;left:3px;top:3px;width:16px;height:16px;border-radius:50%;background:white;box-shadow:0 1px 3px #0f172a30;transition:transform .15s}
+.cheque-withdrawal[aria-checked=true]{color:#15803d}.cheque-withdrawal[aria-checked=true] .withdrawal-track{background:#15803d}.cheque-withdrawal[aria-checked=true] .withdrawal-track::after{transform:translateX(14px)}
+#cheques table{width:100%;min-width:1050px;table-layout:fixed}#cheques th,#cheques td{padding-inline:12px;overflow-wrap:anywhere}#cheques col:nth-child(1){width:10%}#cheques col:nth-child(2){width:12%}#cheques col:nth-child(3){width:20%}#cheques col:nth-child(4){width:13%}#cheques col:nth-child(5){width:18%}#cheques col:nth-child(6){width:13%}#cheques col:nth-child(7),#cheques col:nth-child(8){width:7%}
+.cheque-date-edit{padding:0;background:transparent;color:inherit;font:inherit;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:4px;white-space:nowrap}.cheque-date-edit:hover{color:#6366f1}
+#cheque-withdrawal-status{color:#b42332;font-size:12px;margin-top:12px}#cheque-withdrawal-status:empty{display:none}
+@media(prefers-reduced-motion:reduce){.withdrawal-track,.withdrawal-track::after{transition:none}}
 dialog.withdrawal-dialog{width:min(510px,calc(100vw - 32px));height:auto;padding:26px}.withdrawal-heading{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}.withdrawal-heading h2{margin:8px 0 16px;font-size:22px}.withdrawal-heading button{color:#dc2626;background:#fff1f2;padding:8px 12px}
 #withdrawal-description{font-size:13px;line-height:1.6;color:#64748b;overflow-wrap:anywhere}.withdrawal-actions{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:10px;margin-top:20px}#withdrawal-error{color:#b42332;font-size:12px;margin-top:10px}#withdrawal-error:empty{display:none}
 .filters{padding:14px 16px;margin:0 0 18px;grid-template-columns:minmax(220px,1fr) 230px}

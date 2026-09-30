@@ -1,5 +1,5 @@
 {
-  "version": "fac526dcde329da2",
+  "version": "2ecd7c6b9508e9fd",
   "assets": [
     {
       "file": "style.css",
@@ -7,7 +7,7 @@
     },
     {
       "file": "grade.css",
-      "version": "5cc3ac3860781aae"
+      "version": "2db3041f236f44d6"
     },
     {
       "file": "layout-editor.css",
@@ -35,11 +35,11 @@
     },
     {
       "file": "app.js",
-      "version": "76687d63ac538bdc"
+      "version": "6764708a1c888dc6"
     },
     {
       "file": "cheques.js",
-      "version": "b8730a40b922208a"
+      "version": "232be93bf2bd1d37"
     },
     {
       "file": "layout-settings.js",
