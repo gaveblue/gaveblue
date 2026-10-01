@@ -9,25 +9,27 @@
   function withdrawalDateFor(record){return settled(state,record.id)?.date||legacyWithdrawal(record);}
   function assertEditable(ledger,id){if(settled(ledger||empty(),id))throw new Error('Este recibo tem uma baixa no Financeiro. Estorne a baixa antes de alterar o recibo.');}
   const root=document.createElement('section');root.id='finance';root.hidden=true;
-  root.innerHTML=`<div class="section-heading"><div><span class="section-kicker">Contas e pagamentos</span><h1>Financeiro</h1><p>Controle as baixas dos recibos e acompanhe o saldo de cada conta.</p></div><button type="button" id="finance-new-account" class="secondary">＋ Nova conta</button></div>
-    <div class="finance-tabs" aria-label="Seções do financeiro"><button type="button" data-finance-tab="statement">Extrato bancário</button><button type="button" data-finance-tab="movements">Movimentações</button></div>
+  root.innerHTML=`<div class="section-heading"><div><span class="section-kicker">Financeiro</span><h1 id="finance-title">Movimentações</h1><p id="finance-description">Controle as baixas dos recibos.</p></div></div>
     <p id="finance-message" role="status"></p>
     <section id="finance-statement" hidden><div class="filters finance-filters"><label>Conta bancária<select id="finance-account"></select></label><label>Movimentação — de<input id="finance-from" type="date"></label><label>Até<input id="finance-to" type="date"></label><button type="button" id="finance-credit">＋ Crédito</button></div><p id="finance-period-error" role="alert" hidden></p><div id="finance-account-empty" class="panel" hidden><h2>Cadastre a primeira conta</h2><p>Informe a conta que receberá as baixas e o saldo inicial. Depois, selecione um recibo em Movimentações para baixar o pagamento.</p><button type="button" id="finance-first-account">Cadastrar conta</button></div><div id="finance-statement-content"><div class="finance-summary"><article><span>Saldo anterior ao período</span><strong id="finance-opening"></strong></article><article><span>Créditos no período</span><strong id="finance-credits"></strong></article><article><span>Débitos no período</span><strong id="finance-debits"></strong></article><article><span>Saldo ao fim do período</span><strong id="finance-closing"></strong></article></div><div class="table-wrap"><table class="finance-statement-table"><thead><tr><th>Data da movimentação</th><th>Recibo</th><th>Descrição / recebedor</th><th>Crédito</th><th>Débito</th><th>Saldo acumulado</th></tr></thead><tbody id="finance-statement-rows"></tbody></table></div></div></section>
     <section id="finance-movements"><div class="filters"><label>Buscar recibo<input id="finance-search" type="search" placeholder="Número, recebedor ou cheque"></label><label>Situação<select id="finance-filter"><option value="">Todos os recibos</option><option value="pending">Pendentes</option><option value="settled">Baixados</option></select></label></div><p id="finance-pending-summary"></p><div class="table-wrap"><table class="finance-movements-table"><thead><tr><th>Emissão</th><th>Recibo</th><th>Recebedor</th><th>Pagamento / cheque</th><th>Valor</th><th>Situação</th><th>Conta da baixa</th><th>Data da baixa</th><th>Ações</th></tr></thead><tbody id="finance-movement-rows"></tbody></table></div></section>`;
   el('status').before(root);
   const nav=document.createElement('button');nav.id='nav-finance';nav.className='nav-btn';nav.type='button';nav.title='Financeiro';nav.setAttribute('aria-controls','finance-subnav');nav.setAttribute('aria-expanded','false');nav.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h18v14H3V7Zm0 0V4l14-2v5M21 11h-6v6h6M17 14h1"/></svg><span class="nav-label">Financeiro</span>';
   el('nav-cheques').after(nav);
+  nav.insertAdjacentHTML('beforeend','<svg class="finance-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m8 10 4 4 4-4"/></svg>');
   const subnav=document.createElement('div');subnav.id='finance-subnav';subnav.className='finance-subnav';subnav.hidden=true;subnav.innerHTML='<button type="button" data-finance-tab="statement" title="Extrato bancário">Extrato bancário</button><button type="button" data-finance-tab="movements" title="Movimentações">Movimentações</button>';nav.after(subnav);
   const month=today().slice(0,7)+'-01';el('finance-from').value=month;el('finance-to').value=today();
   function message(text,error=false){el('finance-message').textContent=text;el('finance-message').classList.toggle('error',error);}
-  function sectionChanged(section){root.hidden=section!=='finance';subnav.hidden=section!=='finance';nav.setAttribute('aria-expanded',String(section==='finance'));}
+  function expandMenu(expanded){subnav.hidden=!expanded;nav.setAttribute('aria-expanded',String(expanded));}
+  function sectionChanged(section){root.hidden=section!=='finance';expandMenu(section==='finance');}
   async function show(next='movements'){
-    tab=next;setActiveSection('finance','Financeiro');statusMessage('');message('');
+    tab=next;const title=tab==='statement'?'Extrato bancário':'Movimentações';setActiveSection('finance',title);statusMessage('');message('');
+    el('finance-title').textContent=title;el('finance-description').textContent=tab==='statement'?'Consulte créditos, débitos e o saldo de cada conta por período.':'Controle as baixas dos recibos e suas contas de pagamento.';
     el('finance-statement').hidden=tab!=='statement';el('finance-movements').hidden=tab!=='movements';
     document.querySelectorAll('[data-finance-tab]').forEach(button=>{button.classList.toggle('active',button.dataset.financeTab===tab);if(button.dataset.financeTab===tab)button.setAttribute('aria-current','page');else button.removeAttribute('aria-current');});
     try{await refresh();}catch(error){message(error.message,true);}
   }
-  nav.onclick=()=>show();document.querySelectorAll('[data-finance-tab]').forEach(button=>button.onclick=()=>show(button.dataset.financeTab));
+  nav.onclick=()=>{if(!root.hidden&&!subnav.hidden){expandMenu(false);return;}show('movements');setCollapsed(false);};document.querySelectorAll('[data-finance-tab]').forEach(button=>button.onclick=()=>show(button.dataset.financeTab));
   async function reload(){state=(await transaction('readonly',s=>s.get(KEY),'config'))?.value||empty();render();}
   function accountOptions(select,selected=accountId){select.replaceChildren(new Option(state.accounts.length?'Selecione a conta':'Nenhuma conta cadastrada',''));for(const account of state.accounts)select.add(new Option(account.name+(account.number?' · '+account.number:''),account.id));select.value=selected;}
   function receiptLink(cell,id,number){const button=document.createElement('button');button.type='button';button.className='grid-link';button.textContent='Nº '+(number||'—');button.title='Ir para o lançamento em Recibos';button.onclick=()=>goToReceipt(id);cell.append(button);}
@@ -37,7 +39,12 @@
   }
   function render(){
     if(!state.accounts.some(a=>a.id===accountId))accountId=state.accounts[0]?.id||'';
-    accountOptions(el('finance-account'));renderStatement();renderMovements();
+    accountOptions(el('finance-account'));renderStatement();renderMovements();renderAccounts();
+  }
+  function renderAccounts(){
+    const list=el('finance-account-list');list.replaceChildren();
+    if(!state.accounts.length){list.textContent='Nenhuma conta cadastrada.';return;}
+    for(const account of state.accounts){const item=document.createElement('article'),title=document.createElement('h3'),details=document.createElement('p'),opening=document.createElement('p');item.className='finance-account-card';title.textContent=account.name;details.textContent=account.bank+' · '+(account.agency?'Agência '+account.agency+' · ':'')+'Conta '+account.number;opening.textContent='Saldo inicial em '+dateBR(account.openingDate)+': '+cash(account.openingCents);item.append(title,details,opening);list.append(item);}
   }
   function signed(entry){return entry.kind==='debit'?-entry.cents:entry.cents;}
   function renderStatement(){
@@ -98,10 +105,11 @@
     openForm('Cadastrar conta bancária','<div class="fields"><label class="wide">Nome da conta<input name="name" maxlength="80" placeholder="Ex.: Conta principal" required></label><label>Banco<input name="bank" maxlength="80" required></label><label>Agência<input name="agency" maxlength="30"></label><label>Conta<input name="number" maxlength="30" required></label><label>Saldo inicial (R$)<input type="number" name="opening" step="0.01" value="0" required></label>'+dateField('Data do saldo inicial')+'</div><p class="finance-help">O saldo é o valor disponível no início dessa data, antes das movimentações que serão registradas. Use um valor negativo se a conta estiver devedora.</p>','Salvar conta',async values=>{
       const opening=cents(values.opening);if(!Number.isSafeInteger(opening)||Math.abs(opening)>99999999999)throw new Error('Informe um saldo inicial válido.');if(!dateValid(values.date)||values.date>today())throw new Error('Informe uma data inicial válida.');if(!values.name.trim()||!values.bank.trim()||!values.number.trim())throw new Error('Preencha nome, banco e conta.');
       const account={id:crypto.randomUUID(),name:values.name.trim(),bank:values.bank.trim(),agency:values.agency.trim(),number:values.number.trim(),openingCents:opening,openingDate:values.date,createdAt:new Date().toISOString()};
-      await mutate(ledger=>ledger.accounts.push(account));accountId=account.id;
+      await mutate(ledger=>ledger.accounts.push(account));accountId=account.id;el('finance-account-status').textContent='Conta cadastrada.';
     });
   }
-  el('finance-new-account').onclick=el('finance-first-account').onclick=newAccount;
+  el('finance-new-account').onclick=newAccount;
+  el('finance-first-account').textContent='Ir para Configurações';el('finance-first-account').onclick=()=>window.receiptSettings.open('accounts');
   el('finance-credit').onclick=()=>{
     openForm('Registrar crédito',accountField()+'<label>Descrição<input name="description" maxlength="160" required></label><label>Valor do crédito (R$)<input name="amount" type="number" min="0.01" step="0.01" required></label>'+dateField('Data da movimentação'),'Salvar crédito',async values=>{
       const amount=cents(values.amount);if(!Number.isSafeInteger(amount)||amount<=0||amount>99999999999||!values.description.trim())throw new Error('Informe descrição e valor válidos.');
@@ -110,7 +118,7 @@
   };
   async function openSettlement(id){
     if(working)return;await show('movements');const record=records.find(r=>r.id===id);if(!record){message('Recibo não encontrado.',true);return;}
-    if(!state.accounts.length){message('Cadastre a conta bancária antes de baixar o recibo.');newAccount();return;}
+    if(!state.accounts.length){window.receiptSettings.open('accounts');el('finance-account-status').textContent='Cadastre uma conta bancária para baixar os recibos.';return;}
     const existing=settled(state,id),d=record.data,summary='<p class="finance-receipt-summary">Recibo nº '+escapeHTML(d.numero||'—')+' · '+escapeHTML(d.nome)+'<strong>'+money(d.valor)+'</strong></p>';
     if(existing){
       openForm('Estornar baixa',summary+'<p>O estorno será registrado como crédito na mesma conta, e o recibo voltará a ficar pendente.</p>'+dateField('Data do estorno'),'Confirmar estorno',async values=>{

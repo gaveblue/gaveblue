@@ -7,6 +7,7 @@
   const layoutNodes=[...root.children].filter(node=>node!==heading&&node!==files);
   const categories=[
     ['profile','Perfil local','Pessoa ou empresa que emite os recibos'],
+    ['accounts','Contas bancárias','Cadastro de contas e saldos iniciais do Financeiro'],
     ['files','Arquivos','Pasta de destino, anexos e recibos antigos'],
     ['layout','Layout de impressão','Posição e formatação dos textos e linhas no PDF'],
     ['backup','Backup','Exportação e restauração do histórico'],
@@ -22,6 +23,7 @@
   content('profile').innerHTML='<section class="panel settings-block"><h3>Dados do emissor</h3><p>Este perfil preenche o pagador e o local de emissão dos novos recibos.</p><dl id="settings-profile-summary"></dl><div id="settings-profile-action"></div></section>';
   el('settings-profile-action').append(profileButton);
   content('files').append(files);
+  content('accounts').innerHTML='<section class="panel settings-block"><h3>Contas do Financeiro</h3><p>Cadastre as contas usadas nas baixas dos recibos e informe o saldo inicial de cada uma.</p><button type="button" id="finance-new-account">＋ Nova conta</button><p id="finance-account-status" role="status"></p><div id="finance-account-list"></div></section>';
   const layoutIntro=document.createElement('p');layoutIntro.className='settings-description';layoutIntro.textContent='A página abaixo é o próprio PDF. Clique em um texto ou linha para ajustar.';
   content('layout').append(layoutIntro,...layoutNodes);
   content('backup').append(el('backup-screen').querySelector('.panel'));
@@ -49,6 +51,7 @@
     shell.querySelectorAll('.settings-screen').forEach(node=>node.hidden=node.id!=='settings-'+screen);
     if(screen==='layout')window.receiptLayout.open();
     if(screen==='profile')updateProfile();
+    if(screen==='accounts')window.receiptFinance?.reload().catch(error=>{el('finance-account-status').textContent=error.message;});
     const focus=screen==='home'?shell.querySelector(`[data-settings-open="${previous==='home'?'profile':previous}"]`):el('settings-title-'+screen);
     focus?.focus({preventScroll:true});root.scrollIntoView({block:'start'});
   }

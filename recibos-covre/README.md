@@ -20,7 +20,9 @@ na prévia e na emissão. Salvar, desfazer e restaurar funcionam também nas lin
 
 O menu Financeiro contém Movimentações (todos os recibos, inicialmente pendentes)
 e Extrato bancário (créditos, débitos e saldo acumulado por conta e período).
-Cadastre uma conta com saldo inicial e sua data. A baixa de um recibo exige conta
+O menu lateral é expansível e abre Movimentações por padrão; o submenu Extrato
+bancário abre a consulta de saldos. Cadastre contas em Configurações → Contas
+bancárias, informando saldo inicial e sua data. A baixa de um recibo exige conta
 e data, gera um débito integral e, em cheques, sincroniza a situação/data de saque.
 Marcações antigas de saque são preservadas nos registros, mas não geram baixas
 bancárias automaticamente: falta indicar a conta correspondente.

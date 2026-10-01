@@ -1,5 +1,5 @@
 {
-  "version": "9cc1d103b96c2030",
+  "version": "61e9627f42e0659d",
   "assets": [
     {
       "file": "style.css",
@@ -23,7 +23,7 @@
     },
     {
       "file": "finance.css",
-      "version": "6581fb8ea230f4c2"
+      "version": "934f387c5e5548a1"
     },
     {
       "file": "vendor/pdf-lib.min.js",
@@ -59,11 +59,11 @@
     },
     {
       "file": "settings.js",
-      "version": "a7d883327ab89289"
+      "version": "dd99325b70e36fef"
     },
     {
       "file": "finance.js",
-      "version": "8375e53ad7178124"
+      "version": "30be0d33c478e967"
     },
     {
       "file": "release.js",
