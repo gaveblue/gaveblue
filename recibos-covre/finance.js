@@ -6,7 +6,8 @@
   const settled=(ledger,id)=>ledger.entries.find(entry=>entry.kind==='debit'&&entry.receiptId===id&&!ledger.entries.some(other=>other.reversalOf===entry.id));
   // Existing withdrawal dates remain authoritative until this receipt enters the ledger.
   function legacyWithdrawal(record){return !state.entries.some(entry=>entry.receiptId===record.id)&&dateValid(record.data.dataSaque)?record.data.dataSaque:'';}
-  function withdrawalDateFor(record){return settled(state,record.id)?.date||legacyWithdrawal(record);}
+  const compensated=(ledger,debitId)=>ledger.entries.find(entry=>entry.kind==='compensation'&&entry.debitId===debitId&&!ledger.entries.some(other=>other.kind==='compensation-reversal'&&other.reversalOf===entry.id));
+  function withdrawalDateFor(record){const debit=settled(state,record.id);return (debit&&compensated(state,debit.id)?.date)||(dateValid(record.data.dataSaque)?record.data.dataSaque:'');}
   function assertEditable(ledger,id){if(settled(ledger||empty(),id))throw new Error('Este recibo tem uma baixa no Financeiro. Estorne a baixa antes de alterar o recibo.');}
   const root=document.createElement('section');root.id='finance';root.hidden=true;
   root.innerHTML=`<div class="section-heading"><div><span class="section-kicker">Financeiro</span><h1 id="finance-title">Movimentações</h1><p id="finance-description">Controle as baixas dos recibos.</p></div></div>
@@ -46,7 +47,7 @@
     if(!state.accounts.length){list.textContent='Nenhuma conta cadastrada.';return;}
     for(const account of state.accounts){const item=document.createElement('article'),title=document.createElement('h3'),details=document.createElement('p'),opening=document.createElement('p');item.className='finance-account-card';title.textContent=account.name;details.textContent=account.bank+' · '+(account.agency?'Agência '+account.agency+' · ':'')+'Conta '+account.number;opening.textContent='Saldo inicial em '+dateBR(account.openingDate)+': '+cash(account.openingCents);item.append(title,details,opening);list.append(item);}
   }
-  function signed(entry){return entry.kind==='debit'?-entry.cents:entry.cents;}
+  function signed(entry){return ['debit','compensation-reversal'].includes(entry.kind)?-entry.cents:entry.cents;}
   function renderStatement(){
     const account=state.accounts.find(a=>a.id===accountId),from=el('finance-from').value,to=el('finance-to').value,invalid=Boolean(from&&to&&from>to);
     el('finance-account-empty').hidden=Boolean(account);el('finance-statement-content').hidden=!account;el('finance-credit').disabled=!account;
@@ -60,7 +61,7 @@
     for(const entry of visible){
       const amount=signed(entry);balance+=amount;if(amount>=0)credits+=amount;else debits-=amount;
       const row=body.insertRow();row.insertCell().textContent=dateBR(entry.date);const link=row.insertCell();if(entry.receiptId)receiptLink(link,entry.receiptId,entry.receiptNumber);else link.textContent='—';
-      row.insertCell().textContent=entry.kind==='debit'?entry.receiver:entry.kind==='reversal'?'Estorno · '+entry.receiver:entry.description;
+      row.insertCell().textContent=entry.kind==='debit'?'Baixa · '+entry.receiver:entry.kind==='reversal'?'Estorno da baixa · '+entry.receiver:entry.kind==='compensation'?'Compensação do cheque · '+entry.receiver:entry.kind==='compensation-reversal'?'Cancelamento da compensação · '+entry.receiver:entry.description;
       row.insertCell().textContent=amount>0?cash(amount):'—';row.cells[3].className='finance-positive';row.insertCell().textContent=amount<0?cash(-amount):'—';row.cells[4].className='finance-negative';row.insertCell().textContent=cash(balance);row.cells[5].className=balance<0?'finance-negative':'finance-balance';
     }
     if(!visible.length){const cell=body.insertRow().insertCell();cell.colSpan=6;cell.className='empty';cell.textContent=invalid?'Corrija o período.':'Nenhuma movimentação neste período.';}
@@ -73,7 +74,8 @@
     for(const record of items){
       const d=record.data,entry=settled(state,record.id),legacy=legacyWithdrawal(record),account=state.accounts.find(a=>a.id===entry?.accountId),row=body.insertRow();
       row.insertCell().textContent=dateBR(d.dataEmissao);receiptLink(row.insertCell(),record.id,d.numero);row.insertCell().textContent=d.nome;row.insertCell().textContent=paymentName(d.formaPagamento||'cheque')+((d.formaPagamento||'cheque')==='cheque'?' · '+d.cheque:'');row.insertCell().textContent=money(d.valor);
-      const status=row.insertCell();status.textContent=entry?'Baixado':legacy?'Saque registrado · falta vincular conta':'Pendente';status.className=entry?'finance-positive':'finance-pending';row.insertCell().textContent=account?.name||'—';row.insertCell().textContent=entry?dateBR(entry.date):legacy?dateBR(legacy)+' (saque)':'—';
+      const cheque=(d.formaPagamento||'cheque')==='cheque',compensation=entry&&compensated(state,entry.id);
+      const status=row.insertCell();status.textContent=entry?(cheque?(compensation?'Compensado':withdrawalDateFor(record)?'Saque registrado · confirmar compensação em Cheques':'Baixado · aguardando compensação'):'Baixado'):legacy?'Saque registrado · falta vincular conta':'Pendente';status.className=entry&&(!cheque||compensation)?'finance-positive':'finance-pending';row.insertCell().textContent=account?.name||'—';row.insertCell().textContent=entry?dateBR(entry.date):legacy?dateBR(legacy)+' (saque)':'—';
       const button=document.createElement('button');button.type='button';button.className=entry?'secondary':'finance-settle';button.textContent=entry?'Estornar':'Baixar';button.setAttribute('aria-label',(entry?'Estornar':'Baixar')+' recibo '+d.numero);button.title=legacy?'Vincular este saque já registrado à conta escolhida':'Baixar este recibo na conta escolhida';button.onclick=()=>openSettlement(record.id);row.insertCell().append(button);
     }
     if(!items.length){const cell=body.insertRow().insertCell();cell.colSpan=9;cell.className='empty';cell.textContent='Nenhum recibo encontrado.';}
@@ -121,28 +123,53 @@
     if(!state.accounts.length){window.receiptSettings.open('accounts');el('finance-account-status').textContent='Cadastre uma conta bancária para baixar os recibos.';return;}
     const existing=settled(state,id),d=record.data,summary='<p class="finance-receipt-summary">Recibo nº '+escapeHTML(d.numero||'—')+' · '+escapeHTML(d.nome)+'<strong>'+money(d.valor)+'</strong></p>';
     if(existing){
+      if(compensated(state,existing.id)){message('Remova o saque na tela de Cheques antes de estornar esta baixa.',true);return;}
       openForm('Estornar baixa',summary+'<p>O estorno será registrado como crédito na mesma conta, e o recibo voltará a ficar pendente.</p>'+dateField('Data do estorno'),'Confirmar estorno',async values=>{
-        await mutate((ledger,all,{store})=>{const entry=settled(ledger,id),current=all.find(r=>r.id===id);if(!entry||entry.id!==existing.id||!current)throw new Error('Esta baixa mudou. Feche e reabra a movimentação.');const account=ledger.accounts.find(a=>a.id===entry.accountId);checkedDate(values.date,account);if(values.date<entry.date)throw new Error('O estorno não pode ser anterior à baixa.');ledger.entries.push({id:crypto.randomUUID(),accountId:entry.accountId,kind:'reversal',reversalOf:entry.id,receiptId:id,receiptNumber:entry.receiptNumber,receiver:entry.receiver,cents:entry.cents,date:values.date,createdAt:new Date().toISOString()});const data={...current.data};delete data.dataSaque;store.put({...current,data,updatedAt:new Date().toISOString()});});
+        await mutate((ledger,all,{store})=>{const entry=settled(ledger,id),current=all.find(r=>r.id===id);if(!entry||entry.id!==existing.id||!current)throw new Error('Esta baixa mudou. Feche e reabra a movimentação.');if(compensated(ledger,entry.id))throw new Error('Remova o saque em Cheques antes de estornar a baixa.');const account=ledger.accounts.find(a=>a.id===entry.accountId);checkedDate(values.date,account);if(values.date<entry.date)throw new Error('O estorno não pode ser anterior à baixa.');ledger.entries.push({id:crypto.randomUUID(),accountId:entry.accountId,kind:'reversal',reversalOf:entry.id,receiptId:id,receiptNumber:entry.receiptNumber,receiver:entry.receiver,cents:entry.cents,date:values.date,createdAt:new Date().toISOString()});store.put({...current,updatedAt:new Date().toISOString()});});
       });return;
     }
     const legacy=legacyWithdrawal(record);
-    openForm(legacy?'Vincular saque à conta':'Baixar recibo',summary+(legacy?'<p class="finance-help">O saque de '+dateBR(legacy)+' já está salvo. Escolha a conta para incluir esse pagamento no extrato bancário.</p>':'')+accountField()+dateField((d.formaPagamento||'cheque')==='cheque'?'Data do saque / movimentação':'Data da movimentação',legacy||today()),'Confirmar baixa',async values=>{
+    openForm('Baixar recibo',summary+'<p class="finance-help">A baixa gera um débito na conta. Para cheques, registre o saque na tela de Cheques para gerar o crédito de compensação.</p>'+accountField()+dateField('Data da baixa',legacy||today()),'Confirmar baixa',async values=>{
       await mutate((ledger,all,{store})=>{
         const current=all.find(r=>r.id===id),account=ledger.accounts.find(a=>a.id===values.accountId);
         if(!current||(current.updatedAt||current.createdAt)!==(record.updatedAt||record.createdAt))throw new Error('Este recibo mudou. Feche e reabra a movimentação.');if(settled(ledger,id))throw new Error('Este recibo já foi baixado.');if(!account)throw new Error('Selecione uma conta.');checkedDate(values.date,account);
         if(ledger.entries.some(e=>e.receiptId===id&&e.kind==='reversal'&&e.date>values.date))throw new Error('A nova baixa não pode ser anterior ao último estorno deste recibo.');
         const amount=cents(current.data.valor);if(!Number.isSafeInteger(amount)||amount<=0)throw new Error('Valor do recibo inválido.');
         ledger.entries.push({id:crypto.randomUUID(),accountId:account.id,kind:'debit',receiptId:id,receiptNumber:current.data.numero||'',receiver:current.data.nome,cents:amount,date:values.date,createdAt:new Date().toISOString()});
-        const data={...current.data};if((data.formaPagamento||'cheque')==='cheque')data.dataSaque=values.date;store.put({...current,data,updatedAt:new Date().toISOString()});
+        store.put({...current,updatedAt:new Date().toISOString()});
       });accountId=values.accountId;
     });accountOptions(el('finance-form-account'));
+  }
+  // Cheques is the only UI that invokes this operation. Debit and credit are separate events.
+  async function saveWithdrawal(snapshot,date){
+    await mutate((ledger,all,{store})=>{
+      const current=all.find(r=>r.id===snapshot.id);
+      if(!current||(current.updatedAt||current.createdAt)!==(snapshot.updatedAt||snapshot.createdAt))throw new Error('Este recibo mudou. Reabra a tela de Cheques antes de salvar.');
+      if((current.data.formaPagamento||'cheque')!=='cheque')throw new Error('Este recibo não é um cheque.');
+      const debit=settled(ledger,current.id),credit=debit&&compensated(ledger,debit.id);
+      if(date){
+        if(!debit)throw new Error('Primeiro baixe este recibo no Financeiro e escolha a conta. Depois registre o saque aqui.');
+        checkedDate(date,ledger.accounts.find(a=>a.id===debit.accountId));
+        if(date<debit.date)throw new Error('A data do saque não pode ser anterior à data da baixa.');
+      }
+      const timestamp=new Date().toISOString();
+      if(credit&&credit.date!==date){
+        // Undo the credit on its original date, preserving the correction in the statement.
+        ledger.entries.push({id:crypto.randomUUID(),kind:'compensation-reversal',reversalOf:credit.id,accountId:credit.accountId,receiptId:current.id,receiptNumber:credit.receiptNumber,receiver:credit.receiver,cents:credit.cents,date:credit.date,createdAt:timestamp});
+      }
+      if(date&&(!credit||credit.date!==date))ledger.entries.push({id:crypto.randomUUID(),kind:'compensation',debitId:debit.id,accountId:debit.accountId,receiptId:current.id,receiptNumber:debit.receiptNumber,receiver:debit.receiver,cents:debit.cents,date,createdAt:timestamp});
+      const data={...current.data};if(date)data.dataSaque=date;else delete data.dataSaque;
+      store.put({...current,data,updatedAt:timestamp});
+    });
   }
   function validate(value){
     if(!value||value.version!==1||!Array.isArray(value.accounts)||!Array.isArray(value.entries))throw new Error('Dados financeiros inválidos.');
     const ids=new Set(),accounts=new Map();for(const a of value.accounts){if(!a||typeof a.id!=='string'||!a.id||ids.has(a.id)||typeof a.name!=='string'||!a.name.trim()||typeof a.bank!=='string'||typeof a.number!=='string'||!dateValid(a.openingDate)||!Number.isSafeInteger(a.openingCents)||Math.abs(a.openingCents)>99999999999)throw new Error('Conta inválida no financeiro.');ids.add(a.id);accounts.set(a.id,a);}
-    const entries=new Map(),reversed=new Set();for(const e of value.entries){if(!e||typeof e.id!=='string'||ids.has(e.id)||!accounts.has(e.accountId)||!['debit','credit','reversal'].includes(e.kind)||!dateValid(e.date)||e.date<accounts.get(e.accountId).openingDate||!Number.isSafeInteger(e.cents)||e.cents<=0||typeof e.createdAt!=='string')throw new Error('Movimentação financeira inválida.');if(e.kind!=='credit'&&(typeof e.receiptId!=='string'||!e.receiptId||typeof e.receiver!=='string'))throw new Error('Recibo vinculado inválido.');if(e.kind==='credit'&&typeof e.description!=='string')throw new Error('Descrição de crédito inválida.');ids.add(e.id);entries.set(e.id,e);}
+    const entries=new Map(),reversed=new Set();for(const e of value.entries){if(!e||typeof e.id!=='string'||ids.has(e.id)||!accounts.has(e.accountId)||!['debit','credit','reversal','compensation','compensation-reversal'].includes(e.kind)||!dateValid(e.date)||e.date<accounts.get(e.accountId).openingDate||!Number.isSafeInteger(e.cents)||e.cents<=0||typeof e.createdAt!=='string')throw new Error('Movimentação financeira inválida.');if(e.kind!=='credit'&&(typeof e.receiptId!=='string'||!e.receiptId||typeof e.receiver!=='string'))throw new Error('Recibo vinculado inválido.');if(e.kind==='credit'&&typeof e.description!=='string')throw new Error('Descrição de crédito inválida.');ids.add(e.id);entries.set(e.id,e);}
     for(const e of value.entries.filter(e=>e.kind==='reversal')){const original=entries.get(e.reversalOf);if(!original||original.kind!=='debit'||original.accountId!==e.accountId||original.receiptId!==e.receiptId||original.cents!==e.cents||e.date<original.date||reversed.has(original.id))throw new Error('Estorno financeiro inválido.');reversed.add(original.id);}
     const active=new Set();for(const e of value.entries.filter(e=>e.kind==='debit'&&!reversed.has(e.id))){if(active.has(e.receiptId))throw new Error('O recibo possui mais de uma baixa ativa.');active.add(e.receiptId);}
+    const cancelled=new Set();for(const e of value.entries.filter(e=>e.kind==='compensation-reversal')){const original=entries.get(e.reversalOf);if(!original||original.kind!=='compensation'||original.accountId!==e.accountId||original.receiptId!==e.receiptId||original.cents!==e.cents||e.date!==original.date||cancelled.has(original.id))throw new Error('Cancelamento de compensação inválido.');cancelled.add(original.id);}
+    const compensatedDebits=new Set();for(const e of value.entries.filter(e=>e.kind==='compensation')){const debit=entries.get(e.debitId);if(!debit||debit.kind!=='debit'||debit.accountId!==e.accountId||debit.receiptId!==e.receiptId||debit.cents!==e.cents||e.date<debit.date)throw new Error('Compensação de cheque inválida.');if(!cancelled.has(e.id)){if(reversed.has(debit.id)||compensatedDebits.has(debit.id))throw new Error('Compensação duplicada ou baixa estornada.');compensatedDebits.add(debit.id);}}
     for(const account of value.accounts){let balance=account.openingCents;for(const entry of value.entries.filter(e=>e.accountId===account.id)){balance+=signed(entry);if(!Number.isSafeInteger(balance))throw new Error('O saldo ultrapassa o limite suportado.');}}
     return value;
   }
@@ -153,13 +180,14 @@
       const known=new Map(all.map(r=>[r.id,r])),numbers=new Map(all.filter(r=>r.data.numero).map(r=>[String(BigInt(r.data.numero)),r.id]));
       for(const record of imported){if(known.has(record.id))continue;const number=record.data.numero&&String(BigInt(record.data.numero));if(number&&numbers.has(number)&&numbers.get(number)!==record.id)throw new Error('Número de recibo já utilizado. A importação foi cancelada.');if(number)numbers.set(number,record.id);known.set(record.id,record);store.add(record);}
       if(finance){for(const key of ['accounts','entries'])for(const item of finance[key]){const existing=ledger[key].find(e=>e.id===item.id);if(existing){if(JSON.stringify(existing)!==JSON.stringify(item))throw new Error('O backup financeiro conflita com dados existentes. Nada foi importado.');}else ledger[key].push(item);}validate(ledger);}
-      for(const entry of ledger.entries.filter(e=>e.kind==='debit')){const record=known.get(entry.receiptId);if(!record)throw new Error('O backup financeiro referencia um recibo ausente.');const active=settled(ledger,record.id);if(active?.id===entry.id){if(cents(record.data.valor)!==entry.cents)throw new Error('O valor do recibo difere da baixa no backup.');if((record.data.formaPagamento||'cheque')==='cheque')store.put({...record,data:{...record.data,dataSaque:entry.date}});}}
+      for(const entry of ledger.entries.filter(e=>e.kind==='debit')){const record=known.get(entry.receiptId);if(!record)throw new Error('O backup financeiro referencia um recibo ausente.');const active=settled(ledger,record.id);if(active?.id===entry.id&&cents(record.data.valor)!==entry.cents)throw new Error('O valor do recibo difere da baixa no backup.');}
+      for(const record of known.values()){const debit=settled(ledger,record.id),credit=debit&&compensated(ledger,debit.id);if(ledger.entries.some(e=>e.receiptId===record.id&&e.kind==='compensation')){if(credit&&(record.data.formaPagamento||'cheque')!=='cheque')throw new Error('Compensação vinculada a um recibo sem cheque.');const data={...record.data};if(credit)data.dataSaque=credit.date;else delete data.dataSaque;store.put({...record,data});}}
       for(const partner of partners){const request=partnerStore.get(partner.id);request.onsuccess=()=>{if(!request.result)partnerStore.put(partner);};}
       const request=config.get('receipt-sequence');request.onsuccess=()=>{let max=BigInt(request.result?.value||'0');for(const number of numbers.keys())if(BigInt(number)>max)max=BigInt(number);if(sequence!==undefined&&BigInt(sequence)>max)max=BigInt(sequence);config.put({id:'receipt-sequence',value:String(max)});};
     });
   }
   async function deleteReceipts(ids){await mutate((ledger,all,{store})=>{if(ledger.entries.some(e=>ids.includes(e.receiptId)))throw new Error('Há recibos vinculados ao histórico financeiro. Eles devem ser mantidos para consulta.');for(const id of ids)store.delete(id);});}
   async function checkEditable(id){const ledger=await exportData();assertEditable(ledger,id);}
-  window.receiptFinance={reload,show,sectionChanged,openSettlement,settlementFor:id=>settled(state,id),withdrawalDateFor,assertEditable,checkEditable,deleteReceipts,exportData,restore,validate};
+  window.receiptFinance={reload,show,sectionChanged,openSettlement,settlementFor:id=>settled(state,id),withdrawalDateFor,saveWithdrawal,assertEditable,checkEditable,deleteReceipts,exportData,restore,validate};
   databaseReady.then(()=>reload()).then(()=>renderCheques()).catch(error=>message(error.message,true));
 })();

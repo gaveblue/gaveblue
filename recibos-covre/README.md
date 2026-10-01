@@ -23,7 +23,14 @@ e Extrato bancário (créditos, débitos e saldo acumulado por conta e período)
 O menu lateral é expansível e abre Movimentações por padrão; o submenu Extrato
 bancário abre a consulta de saldos. Cadastre contas em Configurações → Contas
 bancárias, informando saldo inicial e sua data. A baixa de um recibo exige conta
-e data, gera um débito integral e, em cheques, sincroniza a situação/data de saque.
+e data e gera um débito integral, sem marcar o cheque como sacado.
+Somente a tela Cheques registra o saque e gera um crédito de compensação na mesma
+conta e pelo mesmo valor, usando a data informada. A baixa continua ativa e passa
+a aparecer como compensada. Desmarcar o saque cancela o crédito na data original;
+corrigir sua data cancela o crédito anterior e registra outro na data corrigida.
+Essas correções ficam no extrato. Remova a compensação antes de estornar a baixa.
+Saques antigos são preservados sem gerar créditos automaticamente; confirme sua
+data em Cheques para compensá-los depois de vincular a baixa a uma conta.
 Marcações antigas de saque são preservadas nos registros, mas não geram baixas
 bancárias automaticamente: falta indicar a conta correspondente.
 

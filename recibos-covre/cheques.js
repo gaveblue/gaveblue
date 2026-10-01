@@ -7,13 +7,12 @@
   const tableStatus=document.createElement('p');tableStatus.id='cheque-withdrawal-status';tableStatus.setAttribute('role','status');el('cheques').append(tableStatus);
   function validDate(value){return typeof value==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(value)&&Number.isFinite(Date.parse(value))&&new Date(value+'T12:00:00Z').toISOString().slice(0,10)===value;}
   function open(record){
-    if(window.receiptFinance){window.receiptFinance.openSettlement(record.id);return;}
     if(saving)return;selected=record;trigger=document.activeElement;tableStatus.textContent='';input.max=today();input.value=record.data.dataSaque||today();input.setCustomValidity('');error.textContent='';
     el('withdrawal-title').textContent=record.data.dataSaque?'Editar saque':'Registrar saque';el('withdrawal-description').textContent='Cheque '+record.data.cheque+' · '+record.data.nome+' · '+money(record.data.valor);
+    if(window.receiptFinance)el('withdrawal-description').textContent+=' — Ao salvar, este valor será creditado na mesma conta da baixa, na data do saque. Remover o saque cancela essa compensação.';
     el('withdrawal-remove').hidden=!record.data.dataSaque;dialog.showModal();input.focus();
   }
   function toggle(record){
-    if(window.receiptFinance){window.receiptFinance.openSettlement(record.id);return;}
     if(saving)return;
     if(!record.data.dataSaque){open(record);return;}
     selected=record;trigger=document.activeElement;tableStatus.textContent='';save(true);
@@ -29,6 +28,8 @@
     if(!remove){input.setCustomValidity(validDate(date)&&date<=today()?'':'Informe uma data de saque válida, até hoje.');if(!el('withdrawal-form').reportValidity())return;}
     saving=true;error.textContent='';if(trigger)trigger.disabled=true;dialog.querySelectorAll('button,input').forEach(control=>control.disabled=true);
     try{
+      if(window.receiptFinance)await window.receiptFinance.saveWithdrawal(selected,date);
+      else {
       // Read and update atomically: keep stored PDFs, attachments and file references intact.
       await new Promise((resolve,reject)=>{
         const tx=db.transaction('recibos','readwrite'),store=tx.objectStore('recibos'),request=store.get(selected.id);let failure='';
@@ -41,6 +42,7 @@
         };
         tx.oncomplete=resolve;tx.onerror=tx.onabort=()=>reject(new Error(failure||'Não foi possível salvar o saque. Tente novamente.'));
       });
+      }
       await refresh();dialog.close();
       [...document.querySelectorAll('.cheque-withdrawal')].find(button=>button.getAttribute('aria-label')==='Saque do cheque '+selected.data.cheque)?.focus();
     }catch(e){if(dialog.open)error.textContent=e.message;else tableStatus.textContent=e.message;}
