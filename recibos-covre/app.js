@@ -150,9 +150,6 @@ byId('nav-home').onclick=()=>{refresh().then(()=>setActiveSection('home','Iníci
 byId('home-new').onclick=()=>newReceipt();
 byId('home-partners').onclick=()=>byId('nav-companies').click();
 byId('home-cheques').onclick=()=>byId('nav-cheques').click();
-byId('nav-backup').onclick=()=>{
-  setActiveSection('backup','Backup');
-};
 byId('nav-settings').onclick=()=>{setActiveSection('settings','Configurações');window.receiptLayout?.open();};
 byId('nav-companies').onclick=()=>{refresh().then(()=>setActiveSection('companies','Parceiros')).catch(error=>statusMessage(error.message,true));};
 byId('nav-cheques').onclick=()=>{refresh().then(()=>setActiveSection('cheques','Cheques emitidos')).catch(error=>statusMessage(error.message,true));};

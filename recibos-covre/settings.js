@@ -59,6 +59,5 @@
   shell.querySelectorAll('[data-settings-back]').forEach(button=>button.onclick=()=>open());
   el('profile-dialog').addEventListener('close',()=>{if(active==='profile')updateProfile();});
   el('nav-settings').onclick=()=>open();
-  el('nav-backup').onclick=()=>open('backup');
   window.receiptSettings={open};
 })();

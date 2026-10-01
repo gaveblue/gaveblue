@@ -53,7 +53,8 @@ a restauração mescla IDs sem duplicar lançamentos e rejeita conflitos integra
 
 ## Restaurar sistema
 
-Em Backup, Restaurar sistema apaga apenas o banco local deste gerador, mediante
+O Backup fica disponível apenas em Configurações → Backup, com exportação e importação do histórico.
+Nessa tela, Restaurar sistema apaga apenas o banco local deste gerador, mediante
 confirmação digitando APAGAR. O perfil e a numeração reiniciam no primeiro acesso.
 Arquivos nas pastas do computador e bancos de outros sistemas não são apagados.
 O popup oferece exportar o histórico antes; esse backup guarda recibos, parceiros

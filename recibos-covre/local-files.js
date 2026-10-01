@@ -66,7 +66,7 @@
       if(!loaded.attachment&&loaded.files?.attachment){const ref=loaded.files.attachment,file=await readFile(ref);loaded.attachment={name:ref.name,type:ref.type,bytes:await file.arrayBuffer()};}
       if(!loaded.attachmentPDF&&loaded.files?.attachmentPDF)loaded.attachmentPDF=await readFile(loaded.files.attachmentPDF);
     }
-    if(!(loaded.pdf instanceof Blob))throw new Error('PDF indisponível. Autorize a pasta ou restaure um backup pelo menu Backup.');
+    if(!(loaded.pdf instanceof Blob))throw new Error('PDF indisponível. Autorize a pasta ou restaure um backup em Configurações → Backup.');
     return loaded;
   }
   function stripped(record){
