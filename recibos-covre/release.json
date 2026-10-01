@@ -1,5 +1,5 @@
 {
-  "version": "e387e569821372d1",
+  "version": "dc3911952b7074d5",
   "assets": [
     {
       "file": "style.css",
@@ -23,7 +23,7 @@
     },
     {
       "file": "finance.css",
-      "version": "934f387c5e5548a1"
+      "version": "0e2acb7ddb4002f3"
     },
     {
       "file": "vendor/pdf-lib.min.js",
@@ -63,7 +63,7 @@
     },
     {
       "file": "finance.js",
-      "version": "65def1132c37a65d"
+      "version": "aa202cb0bad2c9a0"
     },
     {
       "file": "release.js",

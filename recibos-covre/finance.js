@@ -15,6 +15,9 @@
     <section id="finance-statement" hidden><div class="filters finance-filters"><label>Conta bancária<select id="finance-account"></select></label><label>Movimentação — de<input id="finance-from" type="date"></label><label>Até<input id="finance-to" type="date"></label><button type="button" id="finance-credit">＋ Crédito</button></div><p id="finance-period-error" role="alert" hidden></p><div id="finance-account-empty" class="panel" hidden><h2>Cadastre a primeira conta</h2><p>Informe a conta que receberá as baixas e o saldo inicial. Depois, selecione um recibo em Movimentações para baixar o pagamento.</p><button type="button" id="finance-first-account">Cadastrar conta</button></div><div id="finance-statement-content"><div class="finance-summary"><article><span>Saldo anterior ao período</span><strong id="finance-opening"></strong></article><article><span>Créditos no período</span><strong id="finance-credits"></strong></article><article><span>Débitos no período</span><strong id="finance-debits"></strong></article><article><span>Saldo ao fim do período</span><strong id="finance-closing"></strong></article></div><div class="table-wrap"><table class="finance-statement-table"><thead><tr><th>Data da movimentação</th><th>Recibo</th><th>Descrição / recebedor</th><th>Crédito</th><th>Débito</th><th>Saldo acumulado</th></tr></thead><tbody id="finance-statement-rows"></tbody></table></div></div></section>
     <section id="finance-movements"><div class="filters"><label>Buscar recibo<input id="finance-search" type="search" placeholder="Número, recebedor ou cheque"></label><label>Situação<select id="finance-filter"><option value="">Todos os recibos</option><option value="pending">Pendentes</option><option value="settled">Baixados</option></select></label></div><p id="finance-pending-summary"></p><div class="table-wrap"><table class="finance-movements-table"><thead><tr><th>Emissão</th><th>Recibo</th><th>Recebedor</th><th>Pagamento / cheque</th><th>Valor</th><th>Situação</th><th>Conta da baixa</th><th>Data da baixa</th><th>Ações</th></tr></thead><tbody id="finance-movement-rows"></tbody></table></div></section>`;
   el('status').before(root);
+  const statementActions=document.createElement('div');statementActions.className='finance-statement-actions';
+  const creditButton=el('finance-credit');creditButton.before(statementActions);statementActions.append(creditButton);creditButton.textContent='+';creditButton.title='Registrar crédito';creditButton.setAttribute('aria-label','Registrar crédito');
+  const printButton=document.createElement('button');printButton.type='button';printButton.id='finance-print';printButton.className='secondary';printButton.textContent='Imprimir';printButton.onclick=printStatement;statementActions.append(printButton);
   const nav=document.createElement('button');nav.id='nav-finance';nav.className='nav-btn';nav.type='button';nav.title='Financeiro';nav.setAttribute('aria-controls','finance-subnav');nav.setAttribute('aria-expanded','false');nav.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h18v14H3V7Zm0 0V4l14-2v5M21 11h-6v6h6M17 14h1"/></svg><span class="nav-label">Financeiro</span>';
   el('nav-cheques').after(nav);
   nav.insertAdjacentHTML('beforeend','<svg class="finance-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m8 10 4 4 4-4"/></svg>');
@@ -48,13 +51,19 @@
     for(const account of state.accounts){const item=document.createElement('article'),title=document.createElement('h3'),details=document.createElement('p'),opening=document.createElement('p');item.className='finance-account-card';title.textContent=account.name;details.textContent=account.bank+' · '+(account.agency?'Agência '+account.agency+' · ':'')+'Conta '+account.number;opening.textContent='Saldo inicial em '+dateBR(account.openingDate)+': '+cash(account.openingCents);item.append(title,details,opening);list.append(item);}
   }
   function signed(entry){return ['debit','compensation-reversal'].includes(entry.kind)?-entry.cents:entry.cents;}
+  function statementEntries(ledger){
+    // Resolve cancellations across the full history before applying the selected period.
+    const cancelled=new Set(ledger.entries.filter(e=>['reversal','compensation-reversal'].includes(e.kind)).map(e=>e.reversalOf));
+    return ledger.entries.filter(e=>['debit','credit','compensation'].includes(e.kind)&&!cancelled.has(e.id)&&!(e.kind==='compensation'&&cancelled.has(e.debitId)));
+  }
   function renderStatement(){
     const account=state.accounts.find(a=>a.id===accountId),from=el('finance-from').value,to=el('finance-to').value,invalid=Boolean(from&&to&&from>to);
     el('finance-account-empty').hidden=Boolean(account);el('finance-statement-content').hidden=!account;el('finance-credit').disabled=!account;
+    printButton.disabled=!account||invalid;
     el('finance-period-error').hidden=!invalid;el('finance-period-error').textContent=invalid?'A data final deve ser igual ou posterior à inicial.':'';
     const body=el('finance-statement-rows');body.replaceChildren();
     if(!account)return;
-    const entries=[{id:'opening-'+account.id,kind:'opening',date:account.openingDate,cents:account.openingCents,description:'Saldo inicial da conta',createdAt:''},...state.entries.filter(e=>e.accountId===account.id)].sort((a,b)=>a.date.localeCompare(b.date)||a.createdAt.localeCompare(b.createdAt));
+    const entries=[{id:'opening-'+account.id,kind:'opening',date:account.openingDate,cents:account.openingCents,description:'Saldo inicial da conta',createdAt:''},...statementEntries(state).filter(e=>e.accountId===account.id)].sort((a,b)=>a.date.localeCompare(b.date)||a.createdAt.localeCompare(b.createdAt));
     let balance=entries.filter(e=>from&&e.date<from).reduce((sum,e)=>sum+signed(e),0),credits=0,debits=0;
     el('finance-opening').textContent=invalid?'—':cash(balance);
     const visible=invalid?[]:entries.filter(e=>(!from||e.date>=from)&&(!to||e.date<=to));
@@ -66,6 +75,17 @@
     }
     if(!visible.length){const cell=body.insertRow().insertCell();cell.colSpan=6;cell.className='empty';cell.textContent=invalid?'Corrija o período.':'Nenhuma movimentação neste período.';}
     el('finance-credits').textContent=invalid?'—':cash(credits);el('finance-debits').textContent=invalid?'—':cash(debits);el('finance-closing').textContent=invalid?'—':cash(balance);el('finance-closing').classList.toggle('finance-negative',balance<0);
+  }
+  function printStatement(){
+    renderStatement();if(printButton.disabled)return;
+    const account=state.accounts.find(a=>a.id===accountId),from=el('finance-from').value,to=el('finance-to').value;
+    const table=el('finance-statement-content').querySelector('table').cloneNode(true);
+    table.querySelectorAll('button').forEach(button=>button.replaceWith(document.createTextNode(button.textContent)));
+    const summary=el('finance-statement-content').querySelector('.finance-summary').cloneNode(true);summary.querySelectorAll('[id]').forEach(node=>node.removeAttribute('id'));
+    el('finance-print-frame')?.remove();const frame=document.createElement('iframe');frame.id='finance-print-frame';frame.title='Impressão do extrato bancário';frame.style.cssText='position:fixed;width:1px;height:1px;left:-10000px;top:0;border:0';frame.setAttribute('aria-hidden','true');
+    frame.onload=()=>{try{frame.contentWindow.focus();frame.contentWindow.print();}catch(error){message('Não foi possível abrir a impressão. Tente novamente.',true);}};
+    frame.srcdoc='<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Extrato bancário — '+escapeHTML(account.name)+'</title><style>@page{size:A4 landscape;margin:12mm}*{box-sizing:border-box}body{font-family:Arial,sans-serif;color:#182033;margin:0;font-size:11px}h1{font-size:22px;margin:0 0 8px}header{margin-bottom:20px}header p{margin:5px 0;overflow-wrap:anywhere}.finance-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:16px 0 20px;break-inside:avoid}.finance-summary article{border:1px solid #cbd5e1;padding:12px}.finance-summary span{display:block;font-size:10px}.finance-summary strong{display:block;font-size:16px;margin-top:8px;overflow-wrap:anywhere}table{border-collapse:collapse;table-layout:fixed;width:100%;font-size:11px}th,td{padding:9px 7px;border-bottom:1px solid #cbd5e1;text-align:left;overflow-wrap:anywhere}th{background:#edf2f8}th:nth-child(1){width:16%}th:nth-child(2){width:9%}th:nth-child(3){width:33%}th:nth-child(n+4){width:14%}td:nth-child(n+4),th:nth-child(n+4){text-align:right}thead{display:table-header-group}tr{break-inside:avoid}.finance-negative{color:#9f1239}.finance-positive{color:#166534}.empty{text-align:center!important;padding:24px}footer{margin-top:16px;font-size:10px;color:#64748b}</style></head><body><header><h1>Extrato bancário</h1><p><strong>'+escapeHTML(account.name)+'</strong> · '+escapeHTML(account.bank)+'</p><p>'+escapeHTML((account.agency?'Agência '+account.agency+' · ':'')+'Conta '+account.number)+'</p><p>Período de movimentação: '+escapeHTML(from?dateBR(from):'Início do histórico')+' até '+escapeHTML(to?dateBR(to):'Fim do histórico')+'</p></header>'+summary.outerHTML+table.outerHTML+'<footer>Recibos Covre · GaveBlue</footer></body></html>';
+    document.body.append(frame);
   }
   function renderMovements(){
     const query=el('finance-search').value.trim().toLocaleLowerCase('pt-BR'),filter=el('finance-filter').value,body=el('finance-movement-rows');body.replaceChildren();

@@ -28,7 +28,12 @@ Somente a tela Cheques registra o saque e gera um crédito de compensação na m
 conta e pelo mesmo valor, usando a data informada. A baixa continua ativa e passa
 a aparecer como compensada. Desmarcar o saque cancela o crédito na data original;
 corrigir sua data cancela o crédito anterior e registra outro na data corrigida.
-Essas correções ficam no extrato. Remova a compensação antes de estornar a baixa.
+O extrato considera apenas lançamentos ativos: baixas estornadas, compensações
+canceladas e seus cancelamentos ficam fora das linhas e dos totais, mesmo quando
+o cancelamento ocorre após o período consultado. Os vínculos permanecem no backup
+para manter essa regra após restauração. Remova a compensação antes de estornar a baixa.
+O botão + registra crédito; Imprimir usa a conta e o período selecionados, com
+saldo anterior, totais e saldo acumulado, em A4 paisagem.
 Saques antigos são preservados sem gerar créditos automaticamente; confirme sua
 data em Cheques para compensá-los depois de vincular a baixa a uma conta.
 Marcações antigas de saque são preservadas nos registros, mas não geram baixas
