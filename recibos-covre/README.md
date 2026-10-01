@@ -51,6 +51,15 @@ são atômicas com os recibos e protegidas contra baixas duplicadas entre abas.
 O backup normal e o backup anterior à migração de arquivos incluem o financeiro;
 a restauração mescla IDs sem duplicar lançamentos e rejeita conflitos integralmente.
 
+## Restaurar sistema
+
+Em Backup, Restaurar sistema apaga apenas o banco local deste gerador, mediante
+confirmação digitando APAGAR. O perfil e a numeração reiniciam no primeiro acesso.
+Arquivos nas pastas do computador e bancos de outros sistemas não são apagados.
+O popup oferece exportar o histórico antes; esse backup guarda recibos, parceiros
+e financeiro, mas o perfil e as preferências precisarão ser configurados novamente.
+Abas abertas fecham suas conexões e recarregam ao concluir a restauração.
+
 ## Pasta local para PDFs e anexos
 
 Após o cadastro inicial, uma tela pergunta onde salvar os arquivos e abre o

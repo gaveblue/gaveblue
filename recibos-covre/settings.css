@@ -11,6 +11,7 @@
 #layout-settings .settings-back-btn{min-height:38px;padding:0 14px;border-radius:999px;border:1px solid #94a3b847;background:#f8fafc;color:#475569;font-size:13px;font-weight:800;flex-shrink:0}
 .settings-screen:not(#settings-layout) .settings-content{max-width:760px}
 .settings-block{margin-bottom:18px}
+.reset-system-panel{margin-top:24px;border-color:#fecdd3}.reset-system-dialog.form-dialog{width:min(600px,calc(100vw - 32px));height:auto}.reset-system-dialog h2{font-size:22px}.reset-system-dialog p{font-size:13px;line-height:1.7}.reset-system-dialog label{display:block;margin-top:22px}.reset-system-dialog input{display:block;width:100%;margin-top:8px}.reset-system-dialog button:disabled{opacity:.5;cursor:not-allowed}.reset-system-dialog .danger{background:#be123c;color:#fff}#reset-system-status:empty{display:none}
 .settings-block h3{font-size:15px;margin:0 0 12px}
 .settings-block p,.settings-description{font-size:13px;line-height:1.65;color:#64748b}
 .settings-description{margin:0 0 20px}

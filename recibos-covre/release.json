@@ -1,5 +1,5 @@
 {
-  "version": "dc3911952b7074d5",
+  "version": "354b75bcb7b389c0",
   "assets": [
     {
       "file": "style.css",
@@ -19,7 +19,7 @@
     },
     {
       "file": "settings.css",
-      "version": "f933c0028c9f52de"
+      "version": "60f22d10ef08d95f"
     },
     {
       "file": "finance.css",
@@ -64,6 +64,10 @@
     {
       "file": "finance.js",
       "version": "aa202cb0bad2c9a0"
+    },
+    {
+      "file": "reset-system.js",
+      "version": "b91332c7df31bfe3"
     },
     {
       "file": "release.js",
