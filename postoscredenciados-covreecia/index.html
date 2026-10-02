@@ -774,10 +774,10 @@
         </div>
        </article>
 
-       <article class="home-overview-card home-last-send-card">
+       <article class="home-overview-card home-last-send-card" role="button" tabindex="0" aria-label="Abrir Meus envios" style="cursor:pointer" onclick="openMySubmissions()" onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openMySubmissions(); }">
         <div class="home-overview-heading">
          <span>&Uacute;ltimo envio</span>
-         <button type="button" onclick="openMySubmissions()">Ver envios <span aria-hidden="true">&rsaquo;</span></button>
+         <span style="color:#2563eb;font-weight:600">Ver envios <span aria-hidden="true">&rsaquo;</span></span>
         </div>
         <div id="home-last-send-empty" class="home-last-send-empty">
          <span class="home-last-send-icon" aria-hidden="true">
@@ -1144,6 +1144,6 @@
     <span>Configura&ccedil;&otilde;es</span>
    </button>
   </nav>
-  <script src="./app.js?v=20260923-direct-receipt-2"></script>
+  <script src="./app.js?v=20261002-local-draft-1"></script>
  </body>
 </html>

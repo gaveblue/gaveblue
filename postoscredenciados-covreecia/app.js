@@ -677,7 +677,7 @@ function refreshCentralStationCityOptions() {
     option.dataset.centralManaged = 'true';
     select.appendChild(option);
   });
-  if (Object.prototype.hasOwnProperty.call(postosPorCidade, selected)) select.value = selected;
+  restoreCentralDraftField(select, { value: selected });
 }
 
 async function loadManagedCentralStations() {
@@ -3658,6 +3658,21 @@ function persistCentralFormDraft(formId) {
   } catch (_) { return false; }
 }
 
+// Restore selects even before the remote directory arrives. Never dispatch change:
+// that would persist a half-restored form and reset dependent selections.
+function restoreCentralDraftField(field, state) {
+  if (!field || !state || ['file','password','hidden','submit','button'].includes(field.type)) return;
+  const value = String(state.value || '');
+  if (field.tagName === 'SELECT' && value && !Array.from(field.options).some(option => option.value === value)) {
+    const option = document.createElement('option');
+    option.value = value;
+    option.textContent = value;
+    field.appendChild(option);
+  }
+  field.value = value;
+  if (['checkbox','radio'].includes(field.type)) field.checked = state.checked === true;
+}
+
 function offerCentralFormDraft(formId) {
   const form = document.getElementById(formId), key = centralFormDraftKey(formId);
   form?.querySelector('[data-draft-recovery]')?.remove();
@@ -3665,26 +3680,38 @@ function offerCentralFormDraft(formId) {
   let draft;
   try { draft = JSON.parse(localStorage.getItem(key) || 'null'); } catch (_) { return; }
   if (!draft?.fields || Date.now() - draft.savedAt > 7 * 86400000) return;
+  if (formId === 'fuel-form') {
+    applyFuelFormMode(draft.mode);
+    const station = document.getElementById('fuel-station');
+    if (station && draft.fields['fuel-city']) {
+      station.innerHTML = '<option value="">Selecione um posto</option>';
+      for (const item of postosPorCidade[draft.fields['fuel-city'].value] || []) {
+        const option = document.createElement('option');
+        option.value = item.nome;
+        option.textContent = item.nome;
+        station.appendChild(option);
+      }
+    }
+  }
+  for (const [id, state] of Object.entries(draft.fields)) {
+    const field = document.getElementById(id);
+    if (!field || !form.contains(field) || field.disabled) continue;
+    restoreCentralDraftField(field, state);
+  }
+  if (formId === 'fuel-form') toggleCustomDriverField(); else toggleLooseCustomDriverField();
   const box = document.createElement('div');
   box.dataset.draftRecovery = 'true';
   box.setAttribute('role', 'status');
   box.style.cssText = 'padding:12px;background:#eff6ff;border-radius:12px;color:#1e3a8a;margin-bottom:12px';
   const text = document.createElement('p');
-  text.textContent = 'Há um rascunho neste aparelho. Antes de reenviar, confira Meus envios e a fila pendente. Recuperar não envia nada; selecione o comprovante novamente.';
+  text.textContent = 'Preenchimento recuperado neste aparelho, sem enviar nada. Para continuar, selecione o comprovante novamente. Rascunhos não aparecem em Meus envios. Se já tentou enviar este registro, confira os envios e a fila pendente antes de reenviar.';
   const button = document.createElement('button');
-  button.type = 'button'; button.textContent = 'Recuperar preenchimento';
+  button.type = 'button'; button.textContent = 'Descartar rascunho e começar novo';
   button.onclick = () => {
     if (centralFormDraftKey(formId) !== key) return;
-    if (formId === 'fuel-form') applyFuelFormMode(draft.mode);
-    for (const [id, state] of Object.entries(draft.fields)) {
-      const field = document.getElementById(id);
-      if (!field || !form.contains(field) || field.type === 'file') continue;
-      field.value = state.value; if (['checkbox','radio'].includes(field.type)) field.checked = state.checked;
-      if (id === 'fuel-city') field.dispatchEvent(new Event('change', { bubbles: true }));
-    }
-    if (formId === 'fuel-form') toggleCustomDriverField(); else toggleLooseCustomDriverField();
-    persistCentralFormDraft(formId);
-    box.remove();
+    if (!window.confirm('Descartar somente este preenchimento salvo no aparelho? Isso não exclui registros enviados nem a fila pendente.')) return;
+    clearConfirmedCentralFormDraft(formId);
+    if (formId === 'fuel-form') prepareFuelForm({ mode: currentFuelFormMode }); else prepareLooseNoteForm();
   };
   box.append(text, button); form.prepend(box);
 }
