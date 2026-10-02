@@ -1455,6 +1455,15 @@
         || normalizeDateForFilter(entry?.createdAt);
     }
 
+    // Payment dates must not change the chronology used by fuel/km calculations.
+    function getFinancePaymentDate(entry) {
+      if (isFuelEntry(entry) && !entry.groupedIntoId) {
+        const due = normalizeDateForFilter(entry.dataVencimento);
+        if (due || entry.closedExpense || entry.orderId) return due;
+      }
+      return getFinanceEntryDate(entry);
+    }
+
     function getFinanceEntryStatus(entry) {
       if (entry?.groupedIntoId) return 'agrupado';
       if (entry?.orderId) return 'distribuido';
@@ -1510,6 +1519,7 @@
 
     function getFinanceEntryDateLabel(entry) {
       if (isFinanceGroupEntry(entry)) return entry.dataVencimento ? 'Vencimento' : 'Agrupamento';
+      if (isFuelEntry(entry) && !entry.groupedIntoId && (normalizeDateForFilter(entry.dataVencimento) || entry.closedExpense || entry.orderId)) return 'Vencimento';
       if (isFuelEntry(entry)) return 'Abastecimento';
       return 'Vencimento';
     }
@@ -7485,15 +7495,17 @@
     }
 
     function getReportFinanceEntries(filters) {
+      const dateOf = ['finance_status', 'supplier_ranking'].includes(filters.type)
+        ? getFinancePaymentDate : getFinanceEntryDate;
       return allFinanceEntries
         .filter(entry => !entry.groupedIntoId)
         .filter(entry => !filters.vehicleId || getEntryLinkedVehicleId(entry) === filters.vehicleId)
         .filter(entry => {
-          const entryDate = getFinanceEntryDate(entry);
+          const entryDate = dateOf(entry);
           if (!filters.start && !filters.end) return true;
           return isDateWithinRange(entryDate, filters.start, filters.end);
         })
-        .sort((a, b) => String(getFinanceEntryDate(b)).localeCompare(String(getFinanceEntryDate(a))) || String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
+        .sort((a, b) => String(dateOf(b)).localeCompare(String(dateOf(a))) || String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
     }
 
     function getReportMaintenanceItems(filters) {
@@ -8170,7 +8182,7 @@
           };
           current.total += getFinanceNetTotal(entry);
           current.count += 1;
-          current.latestDate = [current.latestDate, getFinanceEntryDate(entry)].filter(Boolean).sort().pop() || current.latestDate;
+          current.latestDate = [current.latestDate, getFinancePaymentDate(entry)].filter(Boolean).sort().pop() || current.latestDate;
           if (!current.type) {
             const supplier = allSuppliers.find(item => item.nome === entry.fornecedor);
             current.type = isGroup ? 'Agrupamento' : (supplier?.tipoLabel || entry.kindLabel || '-');
@@ -8448,7 +8460,7 @@
         case 'order':
           return order ? getNumericOrderValue(order.numero) : Number.MAX_SAFE_INTEGER;
         case 'date':
-          return String(getFinanceEntryDate(entry) || '');
+          return String(getFinancePaymentDate(entry) || '');
         case 'dueDate':
           return String(entry.dataVencimento || '');
         case 'value':
@@ -8472,7 +8484,7 @@
         if (financeSortState.key === 'default') {
           const priorityCompare = getFinanceDefaultSortPriority(a.entry) - getFinanceDefaultSortPriority(b.entry);
           if (priorityCompare !== 0) return priorityCompare;
-          const dateCompare = String(getFinanceEntryDate(b.entry)).localeCompare(String(getFinanceEntryDate(a.entry)));
+          const dateCompare = String(getFinancePaymentDate(b.entry)).localeCompare(String(getFinancePaymentDate(a.entry)));
           if (dateCompare !== 0) return dateCompare;
           return String(b.entry.createdAt || '').localeCompare(String(a.entry.createdAt || '')) || a.index - b.index;
         }
@@ -8486,7 +8498,7 @@
           compare = String(aValue || '').localeCompare(String(bValue || ''), 'pt-BR', { numeric: true, sensitivity: 'base' });
         }
         if (compare !== 0) return compare * direction;
-        const dateCompare = String(getFinanceEntryDate(b.entry)).localeCompare(String(getFinanceEntryDate(a.entry)));
+        const dateCompare = String(getFinancePaymentDate(b.entry)).localeCompare(String(getFinancePaymentDate(a.entry)));
         if (dateCompare !== 0) return dateCompare;
         return a.index - b.index;
       });
@@ -8531,8 +8543,8 @@
       } else if (statusFilter) {
         visibleEntries = visibleEntries.filter(entry => getFinanceEntryStatus(entry) === statusFilter);
       }
-      if (startFilter) visibleEntries = visibleEntries.filter(entry => getFinanceEntryDate(entry) >= startFilter);
-      if (endFilter) visibleEntries = visibleEntries.filter(entry => getFinanceEntryDate(entry) <= endFilter);
+      if (startFilter) visibleEntries = visibleEntries.filter(entry => getFinancePaymentDate(entry) >= startFilter);
+      if (endFilter) visibleEntries = visibleEntries.filter(entry => getFinancePaymentDate(entry) <= endFilter);
       if (quickSearch) {
         visibleEntries = visibleEntries.filter(entry => {
           const order = allOrders.find(item => item.id === entry.orderId);
@@ -8552,8 +8564,8 @@
             entry.motorista,
             entry.dataVencimento,
             formatDate(entry.dataVencimento),
-            getFinanceEntryDate(entry),
-            formatDate(getFinanceEntryDate(entry)),
+            getFinancePaymentDate(entry),
+            formatDate(getFinancePaymentDate(entry)),
             getFinanceEntryStatusLabel(entry),
             total,
             formatCurrency(total),
@@ -12885,7 +12897,7 @@
               ${orderBadgeHtml}
             </div>
             <div class="orders-table-cell">
-              <div class="orders-main-text">${escapeHtml(formatDate(getFinanceEntryDate(entry)))}</div>
+              <div class="orders-main-text">${escapeHtml(formatDate(getFinancePaymentDate(entry)))}</div>
               <div class="orders-sub-text">${escapeHtml(getFinanceEntryDateLabel(entry))}</div>
             </div>
             <div class="orders-table-cell">
@@ -13817,7 +13829,7 @@
         if (entry) runningTotal += getFinanceNetTotal(entry);
         return `
           <tr>
-            <td>${entry ? escapeHtml(formatDate(getFinanceEntryDate(entry))) : ''}</td>
+            <td>${entry ? escapeHtml(formatDate(getFinancePaymentDate(entry))) : ''}</td>
             <td>${entry ? escapeHtml(getFinanceSupplierSummary(entry)) : ''}</td>
             <td class="money">${entry && entry.kind === 'despesa' ? escapeHtml(formatCurrency(entry.total)) : ''}</td>
             <td class="money">${entry && entry.kind === 'receita' ? escapeHtml(formatCurrency(entry.total)) : ''}</td>
@@ -13991,7 +14003,7 @@
         }
         return `
           <tr>
-            <td>${entry ? escapeHtml(formatDate(getFinanceEntryDate(entry))) : ''}</td>
+            <td>${entry ? escapeHtml(formatDate(getFinancePaymentDate(entry))) : ''}</td>
             <td>${entry ? escapeHtml(getFinanceSupplierSummary(entry)) : ''}</td>
             <td class="money">${entry && entry.kind === 'despesa' ? escapeHtml(formatCurrency(entry.total)) : ''}</td>
             <td class="money">${entry && entry.kind === 'receita' ? escapeHtml(formatCurrency(entry.total)) : ''}</td>
@@ -14175,7 +14187,7 @@
         }
         return `
           <tr>
-            <td>${entry ? escapeHtml(formatDate(getFinanceEntryDate(entry))) : ''}</td>
+            <td>${entry ? escapeHtml(formatDate(getFinancePaymentDate(entry))) : ''}</td>
             <td>${entry ? escapeHtml(getFinanceSupplierSummary(entry)) : ''}</td>
             <td class="money">${entry && entry.kind === 'despesa' ? escapeHtml(formatCurrency(entry.total)) : ''}</td>
             <td class="money">${entry && entry.kind === 'receita' ? escapeHtml(formatCurrency(entry.total)) : ''}</td>
