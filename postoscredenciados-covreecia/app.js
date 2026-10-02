@@ -229,7 +229,7 @@ document.getElementById('fuel-city').addEventListener('keypress', function(e) {
 
 document.getElementById('fuel-station').addEventListener('keypress', function(e) {
   if (e.key === 'Enter' && this.value) {
-    document.getElementById('driver-name').focus();
+    document.getElementById('fuel-date').focus();
   }
 });
 
@@ -3419,7 +3419,7 @@ function resetFuelPhotoState() {
   selectedFuelReceiptFile = null;
   uploadedFuelReceipt = null;
   fuelReceiptUploadPromise = null;
-  updateReceiptUploadStatus('Salve o comprovante para deixar o envio pelo WhatsApp mais r\u00e1pido.');
+  updateReceiptUploadStatus('Envie o comprovante para continuar.');
   setFuelActionButtonsVisible(false);
   setSaveReceiptButtonVisible(true);
 }
@@ -3440,7 +3440,7 @@ function resetLoosePhotoState() {
   selectedLooseNoteReceiptFile = null;
   uploadedLooseNoteReceipt = null;
   looseNoteReceiptUploadPromise = null;
-  updateLooseReceiptUploadStatus('Salve o comprovante para liberar o envio pelo WhatsApp.');
+  updateLooseReceiptUploadStatus('Envie o comprovante para continuar.');
   setLooseActionButtonsVisible(false);
   setSaveLooseReceiptButtonVisible(true);
 }
@@ -3510,7 +3510,7 @@ function markFuelReceiptUploadDirty() {
   fuelReceiptUploadPromise = null;
   setSaveReceiptButtonVisible(true);
   setFuelActionButtonsVisible(false);
-  updateReceiptUploadStatus('Dados alterados. Salve o comprovante novamente antes de enviar.', 'neutral');
+  updateReceiptUploadStatus('Dados alterados. Toque em Enviar comprovante para continuar.', 'neutral');
 }
 
 function markLooseReceiptUploadDirty() {
@@ -3522,7 +3522,7 @@ function markLooseReceiptUploadDirty() {
   looseNoteReceiptUploadPromise = null;
   setSaveLooseReceiptButtonVisible(true);
   setLooseActionButtonsVisible(false);
-  updateLooseReceiptUploadStatus('Dados alterados. Salve o comprovante novamente antes de enviar.', 'neutral');
+  updateLooseReceiptUploadStatus('Dados alterados. Toque em Enviar comprovante para continuar.', 'neutral');
 }
 
 function applyFuelFormMode(mode = 'rapido') {
@@ -4383,7 +4383,7 @@ function setSaveReceiptButtonLoading(isLoading) {
   button.disabled = isLoading;
   button.classList.toggle('opacity-70', isLoading);
   button.classList.toggle('cursor-wait', isLoading);
-  button.textContent = isLoading ? 'Salvando comprovante...' : 'Salvar comprovante';
+  button.textContent = isLoading ? 'Enviando comprovante...' : 'Enviar comprovante';
 }
 
 function setSaveLooseReceiptButtonLoading(isLoading) {
@@ -4395,7 +4395,7 @@ function setSaveLooseReceiptButtonLoading(isLoading) {
   button.disabled = isLoading;
   button.classList.toggle('opacity-70', isLoading);
   button.classList.toggle('cursor-wait', isLoading);
-  button.textContent = isLoading ? 'Salvando comprovante...' : 'Salvar comprovante';
+  button.textContent = isLoading ? 'Enviando comprovante...' : 'Enviar comprovante';
 }
 
 function setSaveReceiptButtonVisible(isVisible) {
@@ -4466,12 +4466,12 @@ function confirmReceiptValidationModal() {
 function validateFuelReceiptUploadFields(formData) {
   const isComplete = currentFuelFormMode === 'completo';
   if (!formData.motorista || !formData.cidade || !formData.posto || !formData.data) {
-    showErrorMessage('Preencha motorista, cidade, posto e data antes de salvar o comprovante.');
+    showErrorMessage('Confira seu perfil e preencha cidade, posto e data antes de enviar o comprovante.');
     return false;
   }
 
   if (isComplete && (!formData.valor || !formData.litros || !formData.tipoCombustivel)) {
-    showErrorMessage('Preencha valor, litros e combust\u00edvel antes de salvar o comprovante completo.');
+    showErrorMessage('Preencha valor, litros e combust\u00edvel antes de enviar o comprovante completo.');
     return false;
   }
 
@@ -4485,7 +4485,7 @@ function validateFuelReceiptUploadFields(formData) {
 
 function validateLooseNoteReceiptUploadFields(formData) {
   if (!formData.motorista || !formData.fornecedor || !formData.tipoServico || !formData.valor || !formData.data) {
-    showErrorMessage('Preencha motorista, fornecedor, tipo do servi\u00e7o, valor e data antes de salvar o comprovante.');
+    showErrorMessage('Confira seu perfil e preencha fornecedor, tipo do servi\u00e7o, valor e data antes de enviar o comprovante.');
     return false;
   }
 
@@ -4573,7 +4573,7 @@ async function saveLooseNoteReceiptUpload(options = {}) {
     uploadedLooseNoteReceipt = null;
     updateLooseReceiptUploadStatus('N\u00e3o foi poss\u00edvel salvar. Tente novamente antes de enviar.', 'error');
     if (!silent) {
-      showErrorMessage('Erro ao salvar comprovante. Tente novamente.');
+      showErrorMessage('Erro ao enviar comprovante. Tente novamente.');
       return null;
     }
     throw error;
@@ -4662,7 +4662,7 @@ async function saveFuelReceiptUpload(options = {}) {
     uploadedFuelReceipt = null;
     updateReceiptUploadStatus('N\u00e3o foi poss\u00edvel salvar. Tente novamente antes de enviar.', 'error');
     if (!silent) {
-      showErrorMessage('Erro ao salvar comprovante. Tente novamente.');
+      showErrorMessage('Erro ao enviar comprovante. Tente novamente.');
       return null;
     }
     throw error;
@@ -5046,7 +5046,7 @@ async function submitFuelFormOnce(expectedWorkspaceId) {
   }
 
   if (!uploadedFuelReceipt || uploadedFuelReceipt.key !== uploadKey) {
-    showErrorMessage('Salve o comprovante antes de enviar pelo WhatsApp.');
+    showErrorMessage('Envie o comprovante antes de continuar pelo WhatsApp.');
     return;
   }
 
@@ -5173,7 +5173,7 @@ async function submitLooseNoteFormOnce(expectedWorkspaceId) {
   }
 
   if (!uploadedLooseNoteReceipt || uploadedLooseNoteReceipt.key !== uploadKey) {
-    showErrorMessage('Salve o comprovante antes de enviar pelo WhatsApp.');
+    showErrorMessage('Envie o comprovante antes de continuar pelo WhatsApp.');
     return;
   }
 
@@ -5572,7 +5572,7 @@ async function prepareReceiptFile(target, file) {
     if (!direct) preview.src = setReceiptPreviewUrl(target, optimizedFile);
     previewContainer.classList.remove('hidden');
     photoButtons.classList.add('hidden');
-    updateStatus(direct ? 'Foto anexada. Clique em Salvar comprovante para enviar sem processar a imagem neste celular.' : 'Foto otimizada. Clique em Salvar comprovante.', 'neutral');
+    updateStatus('Foto anexada. Toque em Enviar comprovante para continuar.', 'neutral');
   } catch (error) {
     console.error('Erro ao preparar comprovante:', error);
     if (selectionId !== (isLoose ? looseReceiptSelectionId : fuelReceiptSelectionId)) return;
@@ -5838,35 +5838,10 @@ function showReceiptCameraReviewMode(file, target) {
 }
 
 async function reviewNativeReceiptFile(target, file) {
-  if (!file) {
-    return;
-  }
-
-  if (!navigator.deviceMemory || navigator.deviceMemory <= 4) {
-    closeReceiptCamera();
-    return prepareReceiptFile(target, file);
-  }
-
-  activeReceiptCameraTarget = target === 'loose' ? 'loose' : 'fuel';
-  const modal = document.getElementById('receipt-camera-modal');
-  const status = document.getElementById('receipt-camera-status');
-  modal?.classList.remove('hidden');
-  enterReceiptCameraFullscreen();
-  if (status) {
-    status.textContent = 'Otimizando a foto para revis\u00e3o...';
-  }
-
-  try {
-    const optimizedFile = await compressFuelReceiptIfNeeded(file);
-    if (directReceiptFiles.has(optimizedFile)) {
-      closeReceiptCamera();
-      return prepareReceiptFile(target, optimizedFile);
-    }
-    showReceiptCameraReviewMode(optimizedFile, activeReceiptCameraTarget);
-  } catch (error) {
-    closeReceiptCamera();
-    showErrorMessage(error?.message || 'N\u00e3o foi poss\u00edvel preparar a foto.');
-  }
+  if (!file) return;
+  // The native camera already offered OK/retake. Attach without a second dialog.
+  closeReceiptCamera();
+  return prepareReceiptFile(target, file);
 }
 
 function openReceiptCamera(target = 'fuel') {
@@ -6113,8 +6088,8 @@ async function simulateProgress(options = {}) {
     {
       id: 4,
       duration: receiptAlreadyUploaded ? 300 : 900,
-      initialText: receiptAlreadyUploaded ? 'Confirmando comprovante salvo...' : 'Salvando comprovante...',
-      completedText: receiptAlreadyUploaded ? 'Comprovante j\u00e1 salvo' : 'Comprovante salvo',
+      initialText: receiptAlreadyUploaded ? 'Confirmando comprovante enviado...' : 'Enviando comprovante...',
+      completedText: receiptAlreadyUploaded ? 'Comprovante j\u00e1 enviado' : 'Comprovante enviado',
       initialDescription: receiptAlreadyUploaded ? 'Usando o link salvo na nuvem.' : 'Comprimindo e enviando para a nuvem.',
       completedDescription: 'Link do comprovante pronto.'
     },

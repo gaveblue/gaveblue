@@ -19,7 +19,7 @@
   </noscript>
   <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js" defer></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css">
-  <link rel="stylesheet" href="./styles.css?v=20260922-light-media-1">
+  <link rel="stylesheet" href="./styles.css?v=20261002-compact-forms-1">
  </head>
  <body class="h-full flex flex-col">
   <div id="app-container" class="flex flex-col h-full w-full bg-gradient-to-br from-gray-100 via-gray-50 to-gray-200 overflow-hidden">
@@ -118,7 +118,7 @@
       </button>
      </div>
      <form id="fuel-form" class="fuel-form-body px-5 sm:px-6 py-6 space-y-4" onsubmit="submitFuelForm(event)">
-      <div class="form-field">
+      <div class="form-field" hidden>
        <label class="modern-label">Motorista <span class="text-red-500">*</span></label>
        <div class="select-shell form-control-shell">
         <span class="control-leading-icon" aria-hidden="true">
@@ -178,8 +178,9 @@
         </span>
        </div>
       </div>
+      <div class="compact-form-pair">
       <div class="form-field">
-       <label class="modern-label">Data <span class="text-red-500">*</span></label>
+       <label for="fuel-date" class="modern-label">Data <span class="text-red-500">*</span></label>
        <div class="input-shell">
         <span class="control-leading-icon" aria-hidden="true">
          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -188,16 +189,17 @@
        </div>
       </div>
       <div class="form-field">
-       <label class="modern-label">KM Atual do Ve&iacute;culo</label>
+       <label for="fuel-km" class="modern-label">KM atual</label>
        <div class="input-shell">
         <span class="control-leading-icon" aria-hidden="true">
          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 14a8 8 0 0 1 16 0" stroke-width="2" stroke-linecap="round"/><path d="m12 14 4-4" stroke-width="2" stroke-linecap="round"/><path d="M4 14h2M18 14h2M7 9l1.5 1.5M17 9l-1.5 1.5" stroke-width="2" stroke-linecap="round"/></svg>
         </span>
-        <input type="number" id="fuel-km" min="0" step="1" placeholder="Informe o KM atual do ve&iacute;culo" class="modern-input">
+        <input type="number" id="fuel-km" min="0" step="1" placeholder="Ex: 45200" class="modern-input">
        </div>
       </div>
+      </div>
       <div id="fuel-complete-fields" class="hidden space-y-4">
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div class="compact-form-pair">
        <div>
         <label class="block text-sm font-semibold text-gray-900 mb-2">Valor <span class="text-red-500">*</span></label>
         <input type="text" id="fuel-value" inputmode="numeric" placeholder="R$ 0,00" oninput="formatCurrency(this)" class="w-full px-3 sm:px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition text-sm">
@@ -241,9 +243,9 @@
          </button>
         </div>
         <button id="save-receipt-btn" type="button" onclick="saveFuelReceiptUpload()" class="mt-3 w-full px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg transition flex items-center justify-center gap-2 text-sm">
-         Salvar comprovante
+         Enviar comprovante
         </button>
-        <p id="receipt-upload-status" class="mt-2 text-xs font-medium text-gray-500">Salve o comprovante para deixar o envio pelo WhatsApp mais r&aacute;pido.</p>
+        <p id="receipt-upload-status" class="mt-2 text-xs font-medium text-gray-500">Envie o comprovante para continuar.</p>
        </div>
        <div id="photo-buttons" class="receipt-empty-state">
         <div class="receipt-copy">
@@ -294,7 +296,7 @@
       </button>
      </div>
      <form id="loose-note-form" class="fuel-form-body px-5 sm:px-6 py-6 space-y-4" onsubmit="submitLooseNoteForm(event)">
-      <div class="form-field">
+      <div class="form-field" hidden>
        <label class="modern-label">Motorista <span class="text-red-500">*</span></label>
        <div class="select-shell form-control-shell">
         <span class="control-leading-icon" aria-hidden="true">
@@ -354,8 +356,9 @@
         <input id="loose-value" required type="text" inputmode="numeric" placeholder="R$ 0,00" oninput="formatCurrency(this)" class="modern-input">
        </div>
       </div>
+      <div class="compact-form-pair">
       <div class="form-field">
-       <label class="modern-label">Data <span class="text-red-500">*</span></label>
+       <label for="loose-date" class="modern-label">Data <span class="text-red-500">*</span></label>
        <div class="form-control-shell">
         <span class="control-leading-icon" aria-hidden="true">
          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -364,13 +367,14 @@
        </div>
       </div>
       <div class="form-field">
-       <label class="modern-label">KM</label>
+       <label for="loose-km" class="modern-label">KM</label>
        <div class="form-control-shell">
         <span class="control-leading-icon" aria-hidden="true">
          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 19a9 9 0 1 1 14 0M12 13l4-4M9 19h6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </span>
         <input id="loose-km" type="number" inputmode="numeric" min="0" step="1" placeholder="Opcional" class="modern-input">
        </div>
+      </div>
       </div>
       <div class="form-field">
        <label class="modern-label">Observa&ccedil;&otilde;es</label>
@@ -395,9 +399,9 @@
          </button>
         </div>
         <button id="save-loose-receipt-btn" type="button" onclick="saveLooseNoteReceiptUpload()" class="mt-3 w-full px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg transition flex items-center justify-center gap-2 text-sm">
-         Salvar comprovante
+         Enviar comprovante
         </button>
-        <p id="loose-receipt-upload-status" class="mt-2 text-xs font-medium text-gray-500">Salve o comprovante para liberar o envio pelo WhatsApp.</p>
+        <p id="loose-receipt-upload-status" class="mt-2 text-xs font-medium text-gray-500">Envie o comprovante para continuar.</p>
        </div>
        <div id="loose-photo-buttons" class="receipt-empty-state">
         <div class="receipt-copy">
@@ -1144,6 +1148,6 @@
     <span>Configura&ccedil;&otilde;es</span>
    </button>
   </nav>
-  <script src="./app.js?v=20261002-local-draft-1"></script>
+  <script src="./app.js?v=20261002-compact-forms-1"></script>
  </body>
 </html>

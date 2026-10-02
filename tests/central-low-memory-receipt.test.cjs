@@ -86,5 +86,5 @@ test('direct attachments are not put into an image element',()=>{
   assert.match(p,/if \(!direct\) preview.src =/);assert.match(p,/preview.removeAttribute\('src'\)/);
   const camera=block('async function reviewNativeReceiptFile(', 'function openReceiptCamera(');
   assert.match(camera,/return prepareReceiptFile\(target, file\)/);
-  assert.match(camera,/directReceiptFiles.has\(optimizedFile\)/);
+  assert.doesNotMatch(camera,/showReceiptCameraReviewMode|compressFuelReceiptIfNeeded|enterReceiptCameraFullscreen/);
 });
