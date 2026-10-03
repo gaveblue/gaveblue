@@ -3809,13 +3809,13 @@ body.receipt-camera-open .mobile-bottom-nav { display: none !important; }
 }
 /* Avoid large GPU blur/shadow layers on low-memory or unidentified devices. */
 .app-form-modal {
-  position: fixed !important; inset: 0 !important; padding: 0 !important;
+  position: fixed !important; inset: var(--central-header-height, 72px) 0 var(--central-nav-height, 90px) !important; padding: 0 !important;
   background: white !important; backdrop-filter: none !important;
-  display: block; overflow: hidden; z-index: 55;
+  display: block; overflow: hidden; z-index: 40;
 }
 .app-form-modal.hidden { display: none !important; }
 .app-form-modal > div, #loose-note-modal > div {
-  width: 100% !important; max-width: none !important; height: 100dvh; max-height: none !important;
+  width: 100% !important; max-width: none !important; height: 100%; max-height: none !important;
   border: 0 !important; border-radius: 0 !important; box-shadow: none !important;
   display: flex; flex-direction: column; overflow: hidden;
 }
@@ -3841,6 +3841,16 @@ body.receipt-camera-open .mobile-bottom-nav { display: none !important; }
 .app-form-modal [data-draft-recovery] { font-size: 12px; padding: 8px !important; }
 .app-form-modal .receipt-dropzone { padding: 12px; }
 .app-form-modal .receipt-dropzone img { max-height: 140px; }
+.app-form-modal .fuel-form-close, .profile-page-close { display: none !important; }
+.app-form-modal .fuel-form-hero, #loose-note-modal .sticky { min-height: 60px; padding: 10px 20px; border-radius: 0; }
+.app-form-modal .fuel-form-subtitle { display: none; }
+.app-form-modal .fuel-form-hero-icon, .app-form-modal .service-form-icon { width: 36px; height: 36px; }
+body[data-mobile-nav] .mobile-bottom-nav { display: grid; }
+#profile-section { padding-bottom: calc(var(--central-nav-height, 90px) + 24px); }
+.home-hero-slide { transition: none !important; }
+@media (min-width: 768px) {
+  body[data-mobile-nav] .mobile-bottom-nav { left: 50%; right: auto; bottom: 1rem; width: min(720px, calc(100% - 2rem)); transform: translateX(-50%); border-radius: 1.5rem; }
+}
 .compact-form-pair {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);

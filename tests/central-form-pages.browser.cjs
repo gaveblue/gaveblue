@@ -22,10 +22,11 @@ const base = path.join(__dirname, '../postoscredenciados-covreecia');
         for (const id of ['fuel-value','fuel-liters','fuel-type']) document.getElementById(id).required = mode === 'completo';
         window.CentralFormPages.reset(formId);
       }, {mode, formId});
-      await page.locator(`#${formId} .central-form-next`).click();
+      await page.evaluate(id => window.CentralFormPages.validate(id), formId);
       assert.ok(await page.locator(`#${formId} .central-field-invalid`).count(), 'missing fields marked red');
-      assert.match(await page.locator(`#${formId} .central-form-progress`).innerText(), /^1 de/);
-      for (let step = 0; step < (mode === 'rapido' ? 1 : 2); step++) {
+      assert.equal(await page.locator(`#${formId} .central-form-next`).count(), 0);
+      assert.ok(await page.locator(`#${formId} .receipt-dropzone`).isVisible());
+      {
         await page.evaluate(formId => {
           const form = document.getElementById(formId);
           for (const field of form.querySelectorAll('input,select')) {
@@ -35,15 +36,13 @@ const base = path.join(__dirname, '../postoscredenciados-covreecia');
             field.dispatchEvent(new Event('input', {bubbles:true}));
           }
         }, formId);
-        await page.locator(`#${formId} .central-form-next`).click();
+        assert.equal(await page.evaluate(id => window.CentralFormPages.validate(id), formId), true);
       }
-      assert.match(await page.locator(`#${formId} .central-form-progress`).innerText(), /Comprovante/);
       assert.ok(await page.locator(`#${formId} .receipt-dropzone`).isVisible());
       const rect = await page.locator(`#${formId}`).evaluate(form => { const r = form.closest('.app-form-modal').getBoundingClientRect(); return {x:r.x,y:r.y,width:r.width,height:r.height}; });
-      assert.deepEqual(rect, {x:0,y:0,width,height:740});
-      await page.locator(`#${formId} .central-form-navigation button`).first().click();
-      assert.doesNotMatch(await page.locator(`#${formId} .central-form-progress`).innerText(), /Comprovante/);
-      console.log(`PASS ${mode} ${width}px: fullscreen, validation, next/back, receipt`);
+      assert.equal(rect.x, 0); assert.equal(rect.width, width); assert.ok(rect.y > 0); assert.ok(rect.height < 740);
+      assert.equal(await page.locator(`#${formId}`).evaluate(f => [...f.children].some(n=>n.classList.contains('central-step-hidden'))), false);
+      console.log(`PASS ${mode} ${width}px: single screen, validation, receipt`);
     }
   } finally { await browser.close(); }
 })().catch(error => { console.error(error); process.exitCode = 1; });

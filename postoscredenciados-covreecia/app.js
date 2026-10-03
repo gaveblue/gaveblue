@@ -6548,18 +6548,25 @@ function initHomeHeroCarousel() {
   let dragStartX = 0;
   let dragStartY = 0;
   let isDragging = false;
+  let pendingSlide = null;
+  let slideRequest = 0;
 
   const getActiveSlides = () => allSlides.filter((slide) => mobileQuery.matches || !slide.classList.contains('hero-mobile-only'));
   const isPaused = () => document.hidden || ['fuel-form-modal','loose-note-modal','receipt-camera-modal'].some(id => {
     const node = document.getElementById(id); return node && !node.classList.contains('hidden');
   });
   const updateImages = () => {
+    if (isPaused()) { pendingSlide = null; slideRequest++; }
+    const next = pendingSlide || slides[(currentSlide + 1) % slides.length];
     allSlides.forEach(slide => {
-      const active = !isPaused() && slide === slides[currentSlide];
+      const active = !isPaused() && (slide === slides[currentSlide] || slide === next);
       slide.querySelectorAll('source, img').forEach(image => {
         const attr = image.tagName === 'SOURCE' ? 'srcset' : 'src';
         if (!image.dataset[attr] && image.getAttribute(attr)) image.dataset[attr] = image.getAttribute(attr);
-        if (active && image.dataset[attr]) image.setAttribute(attr, image.dataset[attr]);
+        if (active && image.dataset[attr]) {
+          if (image.tagName === 'IMG') image.loading = 'eager';
+          if (image.getAttribute(attr) !== image.dataset[attr]) image.setAttribute(attr, image.dataset[attr]);
+        }
         else image.removeAttribute(attr);
       });
     });
@@ -6578,12 +6585,36 @@ function initHomeHeroCarousel() {
     showSlide(0);
   };
 
-  const showSlide = (nextIndex) => {
+  const showSlide = async (nextIndex) => {
     if (!slides.length) {
       return;
     }
 
-    currentSlide = (nextIndex + slides.length) % slides.length;
+    const targetIndex = (nextIndex + slides.length) % slides.length;
+    const target = slides[targetIndex];
+    const request = ++slideRequest;
+    pendingSlide = target;
+    updateImages();
+    const image = target?.querySelector('img');
+    try {
+      if (image) {
+        if (!image.complete) await new Promise((resolve, reject) => {
+          const finish = (ok) => { clearTimeout(timer); image.removeEventListener('load', loaded); image.removeEventListener('error', failed); ok ? resolve() : reject(new Error('Banner unavailable')); };
+          const loaded = () => finish(true), failed = () => finish(false);
+          const timer = setTimeout(failed, 15000);
+          image.addEventListener('load', loaded, { once: true });
+          image.addEventListener('error', failed, { once: true });
+        });
+        if (!image.naturalWidth) throw new Error('Banner unavailable');
+        if (image.decode) await image.decode();
+      }
+    } catch (_) {
+      if (request === slideRequest) { pendingSlide = null; updateImages(); }
+      return;
+    }
+    if (request !== slideRequest || isPaused()) return;
+    currentSlide = targetIndex;
+    pendingSlide = null;
     allSlides.forEach((slide) => slide.classList.remove('is-active'));
     slides[currentSlide]?.classList.add('is-active');
     updateImages();
@@ -6596,15 +6627,15 @@ function initHomeHeroCarousel() {
     updateImages();
     if (isPaused() || slides.length < 2) return;
     const duration = Number(slides[currentSlide]?.dataset.duration || 6000);
-    autoplayId = window.setTimeout(() => {
-      showSlide(currentSlide + 1);
+    autoplayId = window.setTimeout(async () => {
+      await showSlide(currentSlide + 1);
       restartAutoplay();
     }, Math.min(15000, Math.max(4000, duration)));
   };
 
   const goToSlide = (direction) => {
-    showSlide(currentSlide + direction);
-    restartAutoplay();
+    window.clearTimeout(autoplayId);
+    showSlide(currentSlide + direction).then(restartAutoplay);
   };
 
   const startDrag = (clientX, clientY) => {
