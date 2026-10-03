@@ -3869,6 +3869,34 @@ body[data-mobile-nav] .mobile-bottom-nav { display: grid; }
 .compact-form-pair .input-shell .modern-input { padding-left: 10px; padding-right: 8px; }
 #loose-note-form .compact-form-pair .form-control-shell .modern-input { padding-left: 10px; padding-right: 8px; }
 .fuel-form-body > [hidden] { display: none !important; }
+/* Keep the final receipt controls above the fixed navigation at every breakpoint.
+   Legacy ID-based form rules otherwise override the module's bottom padding. */
+.app-form-modal #fuel-form, .app-form-modal #loose-note-form {
+  padding: 10px 16px calc(var(--central-nav-height, 90px) + 24px) !important;
+  scroll-padding-bottom: calc(var(--central-nav-height, 90px) + 24px);
+  -webkit-overflow-scrolling: touch;
+}
+.app-form-modal :is(#fuel-form, #loose-note-form) > :not([hidden]) ~ :not([hidden]),
+.app-form-modal #fuel-complete-fields > * + * { margin-top: 8px !important; }
+.app-form-modal :is(#fuel-form, #loose-note-form) label,
+.app-form-modal #fuel-complete-fields label { margin-bottom: 4px !important; }
+.app-form-modal :is(#fuel-form, #loose-note-form) input:not([type=file]), .app-form-modal :is(#fuel-form, #loose-note-form) select {
+  min-height: 44px; font-size: 16px !important;
+}
+body[data-mobile-nav="complete"] { --module-header: #fff0df; --module-ink: #9a3412; }
+body[data-mobile-nav="fast"] { --module-header: #fff0f1; --module-ink: #be123c; }
+body[data-mobile-nav="services"] { --module-header: #e9fbf1; --module-ink: #166534; }
+body[data-mobile-nav="complete"] .home-app-header,
+body[data-mobile-nav="fast"] .home-app-header,
+body[data-mobile-nav="services"] .home-app-header { background: var(--module-header); border-bottom-color: transparent; }
+.app-form-modal #fuel-form-header, #loose-note-modal .service-form-hero {
+  min-height: 36px !important; padding: 4px 16px 8px !important;
+  background: var(--module-header, #fff0df) !important;
+  color: var(--module-ink, #9a3412); border-radius: 0 !important;
+}
+.app-form-modal .fuel-form-heading { width: 100%; justify-content: center; text-align: center; }
+.app-form-modal .fuel-form-heading h2 { font-size: 18px !important; line-height: 24px; color: inherit !important; margin: 0; }
+.app-form-modal .fuel-form-hero-icon { display: none; }
 .central-lite *, .central-lite *::before, .central-lite *::after {
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
