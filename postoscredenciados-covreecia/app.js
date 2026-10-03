@@ -4479,6 +4479,11 @@ function confirmReceiptValidationModal() {
 
 function validateFuelReceiptUploadFields(formData) {
   if (window.CentralFormPages && !window.CentralFormPages.validate('fuel-form')) return false;
+  const km = String(formData.km ?? '').trim();
+  if (!km || !Number.isSafeInteger(Number(km)) || Number(km) < 0) {
+    showErrorMessage('Preencha o KM atual com uma quilometragem válida antes de enviar o comprovante.');
+    return false;
+  }
   const isComplete = currentFuelFormMode === 'completo';
   if (!formData.motorista || !formData.cidade || !formData.posto || !formData.data) {
     showErrorMessage('Confira seu perfil e preencha cidade, posto e data antes de enviar o comprovante.');
