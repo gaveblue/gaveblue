@@ -97,6 +97,7 @@
     let financeSortState = { key: 'default', direction: 'desc' };
     let orderSortState = { key: 'default', direction: 'desc' };
     let orderVehicleFilterId = '';
+    let orderDashboardCostSource = '';
     let vehicleSortState = { key: 'fleet', direction: 'asc' };
     let driverSortState = { key: 'name', direction: 'asc' };
     let supplierSortState = { key: 'name', direction: 'asc' };
@@ -5272,13 +5273,17 @@
       renderVehicles();
     }
 
-    function openOrdersForVehicle(vehicleId) {
+    function openOrdersForVehicle(vehicleId, costSource = '') {
+      const period = costSource === 'monthly'
+        ? getMonthRange(document.getElementById('home-monthly-cost-filter')?.value || getCurrentMonthKey())
+        : costSource === 'km' ? getHomeCostPerKmFilters() : { start: '', end: '' };
       const vehicle = allVehicles.find(item => item.id === vehicleId);
       openModuleFromHome('orders');
       orderVehicleFilterId = vehicleId || '';
+      orderDashboardCostSource = costSource;
       setFilterValue('order-filter-search', vehicle ? `${vehicle.numeroFrota || ''} ${vehicle.placa || ''} ${vehicle.modelo || ''}`.trim() : '');
-      setFilterValue('order-filter-start', '');
-      setFilterValue('order-filter-end', '');
+      setFilterValue('order-filter-start', period.start);
+      setFilterValue('order-filter-end', period.end);
       setFilterValue('order-filter-status', 'todos');
       setFilterValue('order-filter-sort', 'recentes');
       renderModuleCompactFilterControls('orders');
@@ -5289,6 +5294,7 @@
     }
 
     function openOrderFromHome(orderId) {
+      orderDashboardCostSource = '';
       const order = allOrders.find(item => item.id === orderId);
       openModuleFromHome('orders');
       orderVehicleFilterId = '';
@@ -7317,7 +7323,7 @@
         const percent = maxValue > 0 ? Math.max((total / maxValue) * 100, total > 0 ? 10 : 3) : 3;
         const vehicleTitle = [vehicle.numeroFrota, vehicle.placa].filter(Boolean).join(' - ') || 'Veículo';
         return `
-          <button type="button" class="home-monthly-bar-item" onclick="openOrdersForVehicle('${vehicle.id}')" title="Ver OS de ${escapeHtml(vehicleTitle)}">
+          <button type="button" class="home-monthly-bar-item" onclick="openOrdersForVehicle('${vehicle.id}', 'monthly')" title="Ver OS no período de ${escapeHtml(vehicleTitle)}">
             <div class="home-monthly-bar-value">${escapeHtml(formatCurrency(total))}</div>
             <div class="home-monthly-bar-track" aria-hidden="true">
               <div class="home-monthly-bar-fill" style="height: ${percent.toFixed(2)}%;"></div>
@@ -9328,7 +9334,7 @@
             const percent = maxCostPerKm > 0 ? Math.max((item.costPerKm / maxCostPerKm) * 100, item.costPerKm > 0 ? 10 : 3) : 3;
             const tone = getCostPerKmTone(item.costPerKm);
             return `
-              <button type="button" class="home-monthly-bar-item home-km-bar-item home-km-bar-item--${tone}" onclick="openOrdersForVehicle('${item.vehicleId}')" title="Ver OS de ${escapeHtml(item.frota)} - ${escapeHtml(item.placa)}">
+              <button type="button" class="home-monthly-bar-item home-km-bar-item home-km-bar-item--${tone}" onclick="openOrdersForVehicle('${item.vehicleId}', 'km')" title="Ver OS com abastecimentos no período de ${escapeHtml(item.frota)} - ${escapeHtml(item.placa)}">
                 <div class="home-monthly-bar-value">${escapeHtml(formatCurrency(item.costPerKm))}</div>
                 <div class="home-monthly-bar-track home-km-bar-track">
                   <div class="home-monthly-bar-fill home-km-bar-fill" style="height:${percent.toFixed(2)}%;"></div>
@@ -12617,8 +12623,17 @@
 
       let items = [...allOrders];
       if (orderVehicleFilterId) items = items.filter(order => order.vehicleId === orderVehicleFilterId);
-      if (start) items = items.filter(order => !order.dataInicio || order.dataInicio >= start);
-      if (end) items = items.filter(order => !order.dataInicio || order.dataInicio <= end);
+      if (orderDashboardCostSource && orderVehicleFilterId) {
+        const contributingIds = new Set(allFinanceEntries
+          .filter(orderDashboardCostSource === 'km' ? isDistributedFuelCostEntry : isDistributedCostEntry)
+          .filter(entry => getEntryLinkedVehicleId(entry) === orderVehicleFilterId)
+          .filter(entry => isFinanceEntryInsideCompetencePeriod(entry, start, end))
+          .map(entry => entry.orderId));
+        items = items.filter(order => contributingIds.has(order.id));
+      } else {
+        if (start) items = items.filter(order => !order.dataInicio || order.dataInicio >= start);
+        if (end) items = items.filter(order => !order.dataInicio || order.dataInicio <= end);
+      }
       if (status === 'ativas') {
         items = items.filter(order => ['aberta', 'andamento'].includes(order.status || 'aberta'));
       } else if (status && status !== 'todos') {
@@ -12919,6 +12934,7 @@
     }
 
     function clearOrderFilters() {
+      orderDashboardCostSource = '';
       orderVehicleFilterId = '';
       document.getElementById('order-filter-search').value = '';
       document.getElementById('order-filter-start').value = '';
