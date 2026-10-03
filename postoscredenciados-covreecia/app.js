@@ -3591,7 +3591,9 @@ function prepareFuelForm(options = {}) {
 
   setFuelDateToToday();
   resetFuelPhotoState();
+  document.getElementById('fuel-form').dataset.draftBaseline = JSON.stringify(centralDraftFields(document.getElementById('fuel-form')));
   offerCentralFormDraft('fuel-form');
+  window.CentralFormPages?.reset('fuel-form');
 }
 
 function openFuelFormMenu(mode = 'rapido') {
@@ -3633,7 +3635,9 @@ function prepareLooseNoteForm() {
   setLooseDateToToday();
   resetLoosePhotoState();
   toggleLooseCustomDriverField();
+  form.dataset.draftBaseline = JSON.stringify(centralDraftFields(form));
   offerCentralFormDraft('loose-note-form');
+  window.CentralFormPages?.reset('loose-note-form');
 }
 
 // Text-only recovery. A draft is never an acknowledgement or an automatic retry.
@@ -3643,17 +3647,23 @@ function centralFormDraftKey(formId) {
   return centralTenantStorageKey(`central-form-draft-v1:${profile.driverId}:${profile.vehicleId || ''}:${formId}`);
 }
 
-function persistCentralFormDraft(formId) {
-  const form = document.getElementById(formId);
-  const key = centralFormDraftKey(formId);
-  if (!form || !key) return false;
+function centralDraftFields(form) {
   const fields = {};
   for (const field of form.querySelectorAll('input[id], select[id], textarea[id]')) {
     if (['file','password','hidden','submit','button'].includes(field.type)) continue;
     fields[field.id] = { value: String(field.value || '').slice(0, 4000), checked: field.checked === true };
   }
+  return fields;
+}
+
+function persistCentralFormDraft(formId) {
+  const form = document.getElementById(formId);
+  const key = centralFormDraftKey(formId);
+  if (!form || !key) return false;
+  const fields = centralDraftFields(form);
+  if (form.dataset?.draftBaseline === JSON.stringify(fields)) return false;
   try {
-    localStorage.setItem(key, JSON.stringify({ fields, mode: currentFuelFormMode, savedAt: Date.now() }));
+    localStorage.setItem(key, JSON.stringify({ fields, mode: currentFuelFormMode, savedAt: Date.now(), edited: true }));
     return true;
   } catch (_) { return false; }
 }
@@ -3680,8 +3690,12 @@ function offerCentralFormDraft(formId) {
   let draft;
   try { draft = JSON.parse(localStorage.getItem(key) || 'null'); } catch (_) { return; }
   if (!draft?.fields || Date.now() - draft.savedAt > 7 * 86400000) return;
+  // Legacy drafts also captured untouched default date/profile/last station.
+  // Keep those copies, but do not announce them as recovered user input.
+  const meaningful = formId === 'fuel-form' ? ['fuel-km', 'fuel-value', 'fuel-liters', 'fuel-type'] : ['loose-supplier', 'loose-value', 'loose-km', 'loose-notes'];
+  if (!draft.edited && !meaningful.some(id => String(draft.fields[id]?.value || '').trim())) return;
   if (formId === 'fuel-form') {
-    applyFuelFormMode(draft.mode);
+    // The mode explicitly selected by the user must win over a saved draft.
     const station = document.getElementById('fuel-station');
     if (station && draft.fields['fuel-city']) {
       station.innerHTML = '<option value="">Selecione um posto</option>';
@@ -3704,7 +3718,7 @@ function offerCentralFormDraft(formId) {
   box.setAttribute('role', 'status');
   box.style.cssText = 'padding:12px;background:#eff6ff;border-radius:12px;color:#1e3a8a;margin-bottom:12px';
   const text = document.createElement('p');
-  text.textContent = 'Preenchimento recuperado neste aparelho, sem enviar nada. Para continuar, selecione o comprovante novamente. Rascunhos não aparecem em Meus envios. Se já tentou enviar este registro, confira os envios e a fila pendente antes de reenviar.';
+  text.textContent = 'Preenchimento recuperado. Anexe a foto novamente. Se já tentou enviar, confira Meus envios antes de repetir.';
   const button = document.createElement('button');
   button.type = 'button'; button.textContent = 'Descartar rascunho e começar novo';
   button.onclick = () => {
@@ -4464,6 +4478,7 @@ function confirmReceiptValidationModal() {
 }
 
 function validateFuelReceiptUploadFields(formData) {
+  if (window.CentralFormPages && !window.CentralFormPages.validate('fuel-form')) return false;
   const isComplete = currentFuelFormMode === 'completo';
   if (!formData.motorista || !formData.cidade || !formData.posto || !formData.data) {
     showErrorMessage('Confira seu perfil e preencha cidade, posto e data antes de enviar o comprovante.');
@@ -4484,6 +4499,7 @@ function validateFuelReceiptUploadFields(formData) {
 }
 
 function validateLooseNoteReceiptUploadFields(formData) {
+  if (window.CentralFormPages && !window.CentralFormPages.validate('loose-note-form')) return false;
   if (!formData.motorista || !formData.fornecedor || !formData.tipoServico || !formData.valor || !formData.data) {
     showErrorMessage('Confira seu perfil e preencha fornecedor, tipo do servi\u00e7o, valor e data antes de enviar o comprovante.');
     return false;

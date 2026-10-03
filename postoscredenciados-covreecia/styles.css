@@ -3808,6 +3808,39 @@ body.receipt-camera-open .mobile-bottom-nav { display: none !important; }
   }
 }
 /* Avoid large GPU blur/shadow layers on low-memory or unidentified devices. */
+.app-form-modal {
+  position: fixed !important; inset: 0 !important; padding: 0 !important;
+  background: white !important; backdrop-filter: none !important;
+  display: block; overflow: hidden; z-index: 55;
+}
+.app-form-modal.hidden { display: none !important; }
+.app-form-modal > div, #loose-note-modal > div {
+  width: 100% !important; max-width: none !important; height: 100dvh; max-height: none !important;
+  border: 0 !important; border-radius: 0 !important; box-shadow: none !important;
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.app-form-modal .fuel-form-hero, #loose-note-modal .sticky {
+  flex: 0 0 auto; min-height: 72px; padding: max(12px, env(safe-area-inset-top)) 20px 12px;
+}
+.app-form-modal .fuel-form-body {
+  flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain;
+  width: 100%; max-width: 680px; align-self: center; box-sizing: border-box;
+  padding: 16px 20px max(16px, env(safe-area-inset-bottom));
+}
+.central-step-hidden { display: none !important; }
+.central-form-navigation { margin-top: 20px; background: white; }
+.central-form-navigation > div { display: flex; gap: 12px; }
+.central-form-navigation button { min-height: 44px; flex: 1; padding: 10px 16px; border-radius: 12px; background: #eef2f7; color: #334155; font-weight: 700; }
+.central-form-navigation button:disabled { opacity: .4; }
+.central-form-navigation .central-form-next { background: #2563eb; color: white; }
+.central-form-navigation [hidden] { display: none !important; }
+.central-form-progress { color: #64748b; font-size: 13px; margin: 0 0 12px; }
+.central-field-invalid { border: 2px solid #dc2626 !important; background-color: #fff7f7 !important; }
+.central-field-error, .central-form-error-summary { display: block; color: #b91c1c; font-size: 13px; margin: 5px 0; }
+.central-field-error[hidden], .central-form-error-summary:empty { display: none; }
+.app-form-modal [data-draft-recovery] { font-size: 12px; padding: 8px !important; }
+.app-form-modal .receipt-dropzone { padding: 12px; }
+.app-form-modal .receipt-dropzone img { max-height: 140px; }
 .compact-form-pair {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);

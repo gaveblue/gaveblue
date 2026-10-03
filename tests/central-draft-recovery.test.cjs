@@ -55,6 +55,24 @@ test('directory refresh preserves restored city absent from remote list', () => 
 test('other driver never receives draft', () => {
   const h = harness(); h.switchDriver(); h.c.offerCentralFormDraft('fuel-form'); assert.equal(h.elements['fuel-value'].value, '');
 });
+test('a quick draft cannot switch the explicitly selected complete mode', () => {
+  const h = harness(); h.c.currentFuelFormMode = 'completo';
+  h.c.applyFuelFormMode = mode => { h.c.currentFuelFormMode = mode; };
+  const draft = JSON.parse(h.storage.get(h.key)); draft.mode = 'rapido'; h.storage.set(h.key, JSON.stringify(draft));
+  h.c.offerCentralFormDraft('fuel-form'); assert.equal(h.c.currentFuelFormMode, 'completo');
+});
+test('legacy defaults alone do not display a recovery message and are not deleted', () => {
+  const h = harness(); const draft = { savedAt: Date.now(), fields: { 'driver-name': { value: 'Driver' }, 'fuel-date': { value: '2026-10-03' }, 'fuel-city': { value: 'Default' } } };
+  h.storage.set(h.key, JSON.stringify(draft)); h.c.offerCentralFormDraft('fuel-form');
+  assert.equal(h.elements['fuel-form'].children.length, 0); assert.ok(h.storage.has(h.key));
+});
+test('untouched baseline does not create a draft when camera/save is clicked', () => {
+  const h = harness(); h.storage.delete(h.key);
+  const form = h.elements['fuel-form']; form.querySelectorAll = () => [h.elements['fuel-city'], h.elements['fuel-value']];
+  form.dataset.draftBaseline = JSON.stringify(h.c.centralDraftFields(form));
+  assert.equal(h.c.persistCentralFormDraft('fuel-form'), false); assert.equal(h.storage.size, 0);
+  h.elements['fuel-value'].value = '100'; assert.equal(h.c.persistCentralFormDraft('fuel-form'), true);
+});
 test('discard requires confirmation and removes only this draft, not queue', () => {
   const h = harness(); h.storage.set('pending-queue', 'preserved'); h.c.offerCentralFormDraft('fuel-form');
   const button = h.elements['fuel-form'].children[0].children[1]; button.onclick(); assert.ok(h.storage.has(h.key));
