@@ -3888,7 +3888,10 @@ body[data-mobile-nav="fast"] { --module-header: #ffe1e5; --module-ink: #be123c; 
 body[data-mobile-nav="services"] { --module-header: #dcf8e9; --module-ink: #166534; --module-accent: #15803d; }
 body[data-mobile-nav="complete"] .home-app-header,
 body[data-mobile-nav="fast"] .home-app-header,
-body[data-mobile-nav="services"] .home-app-header { background: var(--module-header); border-bottom-color: transparent; }
+body[data-mobile-nav="services"] .home-app-header { background: var(--module-accent); border-bottom-color: transparent; }
+body:is([data-mobile-nav="complete"], [data-mobile-nav="fast"], [data-mobile-nav="services"]) #central-brand-logo {
+  background: #fff; border-radius: 8px; padding: 4px 6px; box-sizing: content-box;
+}
 .app-form-modal #fuel-form-header, #loose-note-modal .service-form-hero {
   min-height: 36px !important; padding: 4px 16px 8px !important;
   background: var(--module-accent, #ea580c) !important;
@@ -3902,19 +3905,28 @@ body[data-mobile-nav="services"] .home-app-header { background: var(--module-hea
   color: #fff; background: rgba(255,255,255,.16); box-shadow: none;
 }
 .app-form-modal .fuel-form-hero-icon svg { width: 18px; height: 18px; }
-/* Slim, squared classic scrollbars; native touch scrolling is preserved. */
+/* iOS-like thumb without a visible track; keep native scrolling and keyboard support. */
 .app-form-modal .fuel-form-body, #app-container > .flex-1.overflow-y-auto {
-  scrollbar-width: thin; scrollbar-color: #8b929c #f1f2f4;
+  scrollbar-width: thin; scrollbar-color: rgba(100, 116, 139, .45) transparent;
+}
+@supports selector(::-webkit-scrollbar) {
+  .app-form-modal .fuel-form-body, #app-container > .flex-1.overflow-y-auto {
+    scrollbar-width: auto; scrollbar-color: auto;
+  }
 }
 .app-form-modal .fuel-form-body::-webkit-scrollbar,
-#app-container > .flex-1.overflow-y-auto::-webkit-scrollbar { width: 6px; height: 6px; }
+#app-container > .flex-1.overflow-y-auto::-webkit-scrollbar { width: 4px; height: 4px; background: transparent; }
 .app-form-modal .fuel-form-body::-webkit-scrollbar-track,
-#app-container > .flex-1.overflow-y-auto::-webkit-scrollbar-track { background: #f1f2f4; }
+#app-container > .flex-1.overflow-y-auto::-webkit-scrollbar-track { background: transparent; border: 0; }
 .app-form-modal .fuel-form-body::-webkit-scrollbar-thumb,
 #app-container > .flex-1.overflow-y-auto::-webkit-scrollbar-thumb {
-  background: #8b929c; border: 1px solid #f1f2f4; border-radius: 2px;
+  background: rgba(100, 116, 139, .45); border: 0; border-radius: 999px;
 }
-.app-form-modal .fuel-form-body::-webkit-scrollbar-thumb:hover { background: #626974; }
+.app-form-modal .fuel-form-body::-webkit-scrollbar-button,
+#app-container > .flex-1.overflow-y-auto::-webkit-scrollbar-button { display: none; width: 0; height: 0; }
+.app-form-modal .fuel-form-body::-webkit-scrollbar-corner,
+#app-container > .flex-1.overflow-y-auto::-webkit-scrollbar-corner { background: transparent; }
+.app-form-modal .fuel-form-body::-webkit-scrollbar-thumb:hover { background: rgba(100, 116, 139, .65); }
 .central-lite *, .central-lite *::before, .central-lite *::after {
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
