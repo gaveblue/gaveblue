@@ -2501,7 +2501,7 @@ body.central-reconfiguration-open .mobile-bottom-nav { visibility: hidden; }
 }
 
 body[data-mobile-nav="profile"] .mobile-bottom-nav,
-body[data-mobile-nav="settings"] .mobile-bottom-nav { display: none !important; }
+body[data-mobile-nav="settings"] .mobile-bottom-nav { display: grid; }
 
 @media (max-width: 560px) {
   .profile-page { padding-right: 0.75rem; padding-left: 0.75rem; }
@@ -3809,7 +3809,7 @@ body.receipt-camera-open .mobile-bottom-nav { display: none !important; }
 }
 /* Avoid large GPU blur/shadow layers on low-memory or unidentified devices. */
 .app-form-modal {
-  position: fixed !important; inset: var(--central-header-height, 72px) 0 var(--central-nav-height, 90px) !important; padding: 0 !important;
+  position: fixed !important; inset: var(--central-header-height, 72px) 0 0 !important; padding: 0 !important;
   background: white !important; backdrop-filter: none !important;
   display: block; overflow: hidden; z-index: 40;
 }
@@ -3825,7 +3825,7 @@ body.receipt-camera-open .mobile-bottom-nav { display: none !important; }
 .app-form-modal .fuel-form-body {
   flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain;
   width: 100%; max-width: 680px; align-self: center; box-sizing: border-box;
-  padding: 16px 20px max(16px, env(safe-area-inset-bottom));
+  padding: 16px 20px calc(var(--central-nav-height, 90px) + 20px);
 }
 .central-step-hidden { display: none !important; }
 .central-form-navigation { margin-top: 20px; background: white; }
