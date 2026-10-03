@@ -3888,21 +3888,25 @@ body[data-mobile-nav="fast"] { --module-header: #ffe1e5; --module-ink: #be123c; 
 body[data-mobile-nav="services"] { --module-header: #dcf8e9; --module-ink: #166534; --module-accent: #15803d; }
 body[data-mobile-nav="complete"] .home-app-header,
 body[data-mobile-nav="fast"] .home-app-header,
-body[data-mobile-nav="services"] .home-app-header { background: var(--module-accent); border-bottom-color: transparent; }
+body[data-mobile-nav="services"] .home-app-header {
+  background: rgba(255, 255, 255, .88); border-bottom-color: transparent;
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+}
 body:is([data-mobile-nav="complete"], [data-mobile-nav="fast"], [data-mobile-nav="services"]) #central-brand-logo {
-  background: #fff; border-radius: 8px; padding: 4px 6px; box-sizing: content-box;
+  background: transparent; border-radius: 0; padding: 0; box-sizing: border-box;
 }
 .app-form-modal #fuel-form-header, #loose-note-modal .service-form-hero {
   min-height: 36px !important; padding: 4px 16px 8px !important;
-  background: var(--module-accent, #ea580c) !important;
-  color: #fff; border-radius: 0 !important;
+  background: rgba(255, 255, 255, .88) !important;
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  color: var(--module-ink, #9a3412); border-radius: 0 !important;
 }
 .app-form-modal .fuel-form-heading { width: 100%; justify-content: center; text-align: center; }
 .app-form-modal .fuel-form-heading h2 { font-size: 18px !important; line-height: 24px; color: inherit !important; margin: 0; }
 .app-form-modal .fuel-form-heading { gap: 8px; }
 .app-form-modal .fuel-form-hero-icon {
   display: grid; width: 24px; height: 24px; border-radius: 4px;
-  color: #fff; background: rgba(255,255,255,.16); box-shadow: none;
+  color: var(--module-accent, #ea580c); background: transparent; box-shadow: none;
 }
 .app-form-modal .fuel-form-hero-icon svg { width: 18px; height: 18px; }
 /* iOS-like thumb without a visible track; keep native scrolling and keyboard support. */
