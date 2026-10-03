@@ -46,6 +46,7 @@
     return oldOrders().filter(o => f.type !== 'orders' || !f.situation || o.status === f.situation);
   };
   getReportDateContextLabel = type => {
+    if (type === 'fuel_register' && document.getElementById('report-filter-fuel-view')?.value === 'cost') return oldContext('cost');
     if (type === 'availability') return 'Retrato cadastral atual. O período não reconstrói disponibilidade histórica.';
     if (type === 'deadlines') return 'Datas de vencimento; revisões por km são exibidas somente sem janela de dias.';
     if (type === 'record_audit') return 'Data do envio. Somente registros da Central carregados nesta sessão; não é a auditoria completa do administrador.';
@@ -69,7 +70,7 @@
     if (f.type === 'overview') {
       const buckets = new Map();
       list.forEach(e => {const key = category(e); if (!buckets.has(key)) buckets.set(key, []); buckets.get(key).push(e);});
-      const ranking = selectedVehicles.map(v => ({v, total: net(list.filter(e => getEntryLinkedVehicleId(e) === v.id))})).sort((a,b) => b.total-a.total);
+      const ranking = selectedVehicles.map(v => ({v, total: net(list.filter(e => getEntryImmediateVehicleId(e) === v.id))})).sort((a,b) => b.total-a.total);
       return table(f, ['Categoria','Lançamentos','Custo líquido'], [...buckets].map(([k,l]) => [k,l.length,money(l)]),
         'Inclui lançamentos não agrupados, pendentes e distribuídos; receitas abatem despesas. Não representa pagamentos. Comparação mensal exige períodos equivalentes; não calculada nesta visão.',
         [badge('Custo líquido',money(list),'Pela data principal do lançamento.'),badge('Lançamentos',list.length,'Filhos de agrupamentos não são somados novamente.'),badge('Maior custo',ranking[0]?.v.placa || 'Sem dados',ranking[0] ? formatCurrency(ranking[0].total) : 'Sem valores'),badge('Categorias',buckets.size,'Classificação registrada, sem inferência por descrição.')]);
@@ -87,7 +88,7 @@
     }
     if (f.type === 'vehicle_performance') {
       const stats=getVehicleCostStats(f), orders=oldOrders();
-      return table(f,['Frota','Placa','Km calculados (combustível)','Custo combustível/km','Custo líquido geral','OS','Dias indisponíveis'],selectedVehicles.map(v=>{const s=stats.find(s=>s.vehicleId===v.id);return [v.numeroFrota,v.placa,s?.totalKm || 'Não informado',s?.totalKm>0?formatCurrency(s.costPerKm):'Não informado',money(list.filter(e=>getEntryLinkedVehicleId(e)===v.id)),orders.filter(o=>o.vehicleId===v.id).length,'Não informado'];}),
+      return table(f,['Frota','Placa','Km calculados (combustível)','Custo combustível/km','Custo líquido geral','OS','Dias indisponíveis'],selectedVehicles.map(v=>{const s=stats.find(s=>s.vehicleId===v.id);return [v.numeroFrota,v.placa,s?.totalKm || 'Não informado',s?.costPerKm!=null?formatCurrency(s.costPerKm):'Não informado',money(list.filter(e=>getEntryImmediateVehicleId(e)===v.id)),orders.filter(o=>o.vehicleId===v.id).length,'Não informado'];}),
         'Km e custo/km seguem a base de combustíveis distribuídos em OS. Custos gerais usam lançamentos financeiros. Multas, ocorrências e tempo parado sem base estruturada não são inferidos.');
     }
     if (f.type === 'driver_performance') {
@@ -96,7 +97,7 @@
     }
     if (f.type === 'fines') {
       const fines=list.filter(e=>/^(multa|multas|infracao|infracoes)$/.test(norm(e.categoria || e.serviceType)));
-      return table(f,['Referência','Veículo','Valor','Vencimento','Motorista','Prazo de indicação','Situação'],fines.map(e=>[e.nf,getReportVehicleLabel(getEntryLinkedVehicleId(e)),formatCurrency(e.total),formatDate(e.dataVencimento),getDriverLabel(e.motoristaId || e.driverId),'Não informado',getFinanceEntryStatus(e)]),
+      return table(f,['Referência','Veículo','Valor','Vencimento','Motorista','Prazo de indicação','Situação'],fines.map(e=>[e.nf,getReportVehicleLabel(getEntryImmediateVehicleId(e)),formatCurrency(e.total),formatDate(e.dataVencimento),getDriverLabel(e.motoristaId || e.driverId),'Não informado',getFinanceEntryStatus(e)]),
         'Apenas despesas explicitamente classificadas como multa/infração. Ausência de linhas não comprova ausência de infrações; auto, prazo de indicação e reincidência exigem cadastro específico.');
     }
     if (f.type === 'deadlines') {
@@ -115,12 +116,12 @@
         'Recorte dos registros carregados da Central. Alterações, exclusões, falhas de sincronização e autoria completa permanecem na auditoria administrativa; lista vazia pode significar dados não carregados.');
     }
     if (f.type === 'irregularities') {
-      const fuel=allFinanceEntries.filter(e=>isFuelEntry(e)).filter(e=>!f.vehicleId||getEntryLinkedVehicleId(e)===f.vehicleId);
+      const fuel=allFinanceEntries.filter(e=>isFuelEntry(e)).filter(e=>!f.vehicleId||getEntryImmediateVehicleId(e)===f.vehicleId);
       const sorted=[...fuel].sort((a,b)=>String(a.dataAbastecimento||getFinanceEntryDate(a)).localeCompare(String(b.dataAbastecimento||getFinanceEntryDate(b))));
       const previous=new Map(),seen=new Set(),rows=[];
-      sorted.forEach(e=>{const id=getEntryLinkedVehicleId(e),date=e.dataAbastecimento||getFinanceEntryDate(e),km=Number(e.km),liters=parseDecimalInputValue(e.litros),flags=[];
-        const key=JSON.stringify([id,date,e.km,liters,e.total]);if(seen.has(key))flags.push('Possível duplicidade (mesmos dados)');seen.add(key);
-        if(e.km!==''&&e.km!=null&&Number.isFinite(km)){if(previous.has(id)&&km<previous.get(id))flags.push('Hodômetro menor que anterior');previous.set(id,km);}
+      sorted.forEach(e=>{const id=getEntryImmediateVehicleId(e),date=e.dataAbastecimento||getFinanceEntryDate(e),km=Number(e.km),liters=parseDecimalInputValue(e.litros),flags=[];
+        const key=JSON.stringify([id,date,e.km,liters,e.total]);if(id&&seen.has(key))flags.push('Possível duplicidade (mesmos dados)');if(id)seen.add(key);
+        if(id&&e.km!==''&&e.km!=null&&Number.isFinite(km)){if(previous.has(id)&&km<previous.get(id))flags.push('Hodômetro menor que anterior');previous.set(id,km);}
         if(!e.comprovanteUrl&&!e.receiptUrl&&!e.comprovante)flags.push('Comprovante não identificado nos campos padrão');
         if(flags.length&&(!(f.start||f.end)||isDateWithinRange(date,f.start,f.end)))rows.push([formatDate(date),getReportVehicleLabel(id),e.nf||e.id,flags.join('; ')]);
       });

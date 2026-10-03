@@ -7184,9 +7184,11 @@
         });
       });
 
-      allFinanceEntries
+      const contributingEntries = allFinanceEntries
         .filter(entry => isDistributedFuelCostEntry(entry))
-        .forEach(entry => {
+        .filter(entry => !vehicleId || getEntryLinkedVehicleId(entry) === vehicleId)
+        .filter(entry => isFinanceEntryInsideCompetencePeriod(entry, start, end));
+      contributingEntries.forEach(entry => {
           const currentVehicleId = getEntryLinkedVehicleId(entry);
           if (!currentVehicleId) return;
           const entryDate = getFinanceEntryCompetenceDate(entry);
@@ -7201,27 +7203,22 @@
         });
 
       const vehicleEntriesMap = new Map();
-      allFinanceEntries
-        .filter(entry => !entry.groupedIntoId)
-        .filter(entry => isFuelEntry(entry) || isFuelGroupEntry(entry))
-        .flatMap(entry => isFuelGroupEntry(entry) ? getFuelGroupChildren(entry) : [entry])
-        .filter(entry => entry && entry.km !== undefined && entry.km !== null && String(entry.km).trim() !== '')
-        .forEach((entry) => {
-          const currentVehicleId = getEntryImmediateVehicleId(entry);
-          if (!currentVehicleId) return;
-          if (vehicleId && currentVehicleId !== vehicleId) return;
-          const entryDate = getFinanceEntryDate(entry);
-          if (start && (!entryDate || entryDate < start)) return;
-          if (end && (!entryDate || entryDate > end)) return;
+      // Numerator and denominator share exactly the same distributed expenses
+      // and OS competence period. Group children supply readings, not extra costs.
+      contributingEntries.forEach(parent => {
+          const currentVehicleId = getEntryLinkedVehicleId(parent);
           if (!vehicleEntriesMap.has(currentVehicleId)) vehicleEntriesMap.set(currentVehicleId, []);
-          vehicleEntriesMap.get(currentVehicleId).push(entry);
+          const children = isFuelGroupEntry(parent) ? getFuelGroupChildren(parent) : [parent];
+          vehicleEntriesMap.get(currentVehicleId).push(...(children.length ? children : [parent]));
         });
 
       vehicleEntriesMap.forEach((entries, currentVehicleId) => {
         const stats = statsMap.get(currentVehicleId);
         if (!stats) return;
+        const validKm = entry => entry.km !== undefined && entry.km !== null && String(entry.km).trim() !== '' && Number.isFinite(Number(entry.km)) && Number(entry.km) >= 0;
+        stats.kmIncomplete = entries.some(entry => !validKm(entry));
         const sortedEntries = entries
-          .filter(entry => entry.km !== '')
+          .filter(validKm)
           .sort((a, b) => {
             const dateCompare = String(getFinanceEntryDate(a)).localeCompare(String(getFinanceEntryDate(b)));
             if (dateCompare !== 0) return dateCompare;
@@ -7234,6 +7231,7 @@
           if (previousKm !== null && currentKm >= previousKm) {
             stats.totalKm += currentKm - previousKm;
           }
+          if (previousKm !== null && currentKm < previousKm) stats.kmIncomplete = true;
           previousKm = currentKm;
         });
       });
@@ -7242,11 +7240,13 @@
         .filter(item => !vehicleId || item.vehicleId === vehicleId)
         .map(item => ({
           ...item,
-          costPerKm: item.totalKm > 0 ? item.totalCost / item.totalKm : 0
+          costPerKm: item.totalKm > 0 && !item.kmIncomplete ? item.totalCost / item.totalKm : null
         }))
         .sort((a, b) => {
           if (a.entries === 0 && b.entries !== 0) return 1;
           if (b.entries === 0 && a.entries !== 0) return -1;
+          if (a.costPerKm === null) return b.costPerKm === null ? 0 : 1;
+          if (b.costPerKm === null) return -1;
           return a.costPerKm - b.costPerKm;
         });
     }
@@ -7290,6 +7290,7 @@
     }
 
     function getCostPerKmTone(costPerKm) {
+      if (costPerKm === null || !Number.isFinite(costPerKm)) return 'neutral';
       const value = Number(costPerKm || 0);
       if (value > 1) return 'red';
       if (value > 0.8 && value <= 0.9) return 'yellow';
@@ -7474,6 +7475,7 @@
     }
 
     function getReportDateContextLabel(type) {
+      if (type === 'cost') return 'Custos e KM dos mesmos abastecimentos distribuídos, pela competência de abertura da OS. Sem base suficiente de KM, não há índice.';
       if (['fuel_register', 'fuel_liters_per_km', 'cost'].includes(type)) {
         return 'Data usada: abastecimento dos lançamentos de combustível.';
       }
@@ -7505,7 +7507,7 @@
         ? getFinancePaymentDate : getFinanceEntryDate;
       return allFinanceEntries
         .filter(entry => !entry.groupedIntoId)
-        .filter(entry => !filters.vehicleId || getEntryLinkedVehicleId(entry) === filters.vehicleId)
+        .filter(entry => !filters.vehicleId || getEntryImmediateVehicleId(entry) === filters.vehicleId)
         .filter(entry => {
           const entryDate = dateOf(entry);
           if (!filters.start && !filters.end) return true;
@@ -7839,7 +7841,7 @@
       if (filters.type === 'cost') {
         const totalCost = vehicleStats.reduce((sum, item) => sum + item.totalCost, 0);
         const totalKm = vehicleStats.reduce((sum, item) => sum + item.totalKm, 0);
-        const averageCostPerKm = totalKm > 0 ? totalCost / totalKm : 0;
+        const averageCostPerKm = totalKm > 0 && vehicleStats.every(item => item.costPerKm !== null) ? totalCost / totalKm : null;
         return {
           title,
           meta,
@@ -7847,7 +7849,7 @@
             { label: 'Veículos com custo', value: String(vehicleStats.length), help: 'Unidades com abastecimento distribuído em OS no período.' },
             { label: 'Custo total', value: formatCurrency(totalCost), help: 'Soma de combustíveis vinculados em OS no relatório.' },
             { label: 'KM rodado', value: totalKm.toLocaleString('pt-BR'), help: 'Base calculada pelos lançamentos com KM válido.' },
-            { label: 'Média por KM', value: formatCurrency(averageCostPerKm), help: 'Custo médio geral do período selecionado.' }
+            { label: 'Média por KM', value: averageCostPerKm === null ? 'Sem base de KM' : formatCurrency(averageCostPerKm), help: 'Mesmos abastecimentos e competência da OS; exige KM válido para todos os custos.' }
           ],
           columns: [
             { label: 'Frota' },
@@ -7864,7 +7866,7 @@
               { text: item.modelo || '-' },
               { text: String(item.totalKm || 0), numeric: true },
               { text: formatCurrency(item.totalCost), numeric: true },
-              { text: formatCurrency(item.costPerKm), numeric: true }
+              { text: item.costPerKm === null ? 'Sem base de KM' : formatCurrency(item.costPerKm), numeric: true }
             ]
           })),
           emptyMessage: 'Nenhum custo por KM encontrado para os filtros aplicados.'
@@ -9291,7 +9293,7 @@
       const maintenanceTableNode = document.getElementById('home-maintenance-table');
       const costKmFilters = getHomeCostPerKmFilters();
       const vehicleStats = getVehicleCostStats(costKmFilters).filter(item => item.entries > 0);
-      const bestVehicle = vehicleStats[0];
+      const bestVehicle = vehicleStats.find(item => item.costPerKm !== null);
       const { cnhItems, insuranceItems } = getDashboardExpirations();
       const financeStatusItems = getHomeFinanceStatusItems();
       const maintenanceItems = getSortedVehicles()
@@ -9316,10 +9318,10 @@
       if (vehiclesNode) vehiclesNode.textContent = allVehicles.length;
       if (driversNode) driversNode.textContent = allDrivers.length;
       if (financeNode) financeNode.textContent = allFinanceEntries.length;
-      if (costNode) costNode.textContent = bestVehicle ? formatCurrency(bestVehicle.costPerKm) : formatCurrency(0);
+      if (costNode) costNode.textContent = bestVehicle ? formatCurrency(bestVehicle.costPerKm) : 'Sem base de KM';
       if (costLabelNode) costLabelNode.textContent = bestVehicle
         ? `${bestVehicle.placa}  ${bestVehicle.modelo}`
-        : 'Nenhum abastecimento registrado';
+        : 'Sem leituras suficientes de KM para comparar';
       if (cnhNode) cnhNode.textContent = cnhItems.length;
       if (insuranceNode) insuranceNode.textContent = insuranceItems.length;
       renderStorageDashboard();
@@ -9335,7 +9337,7 @@
             const tone = getCostPerKmTone(item.costPerKm);
             return `
               <button type="button" class="home-monthly-bar-item home-km-bar-item home-km-bar-item--${tone}" onclick="openOrdersForVehicle('${item.vehicleId}', 'km')" title="Ver OS com abastecimentos no período de ${escapeHtml(item.frota)} - ${escapeHtml(item.placa)}">
-                <div class="home-monthly-bar-value">${escapeHtml(formatCurrency(item.costPerKm))}</div>
+                <div class="home-monthly-bar-value">${item.costPerKm === null ? 'Sem base de KM' : escapeHtml(formatCurrency(item.costPerKm))}</div>
                 <div class="home-monthly-bar-track home-km-bar-track">
                   <div class="home-monthly-bar-fill home-km-bar-fill" style="height:${percent.toFixed(2)}%;"></div>
                 </div>
@@ -11681,7 +11683,7 @@
         const tone = getCostPerKmTone(item.costPerKm);
         return `
           <div class="bar-item bar-item--${tone}">
-            <div class="bar-value">${escapeHtml(formatCurrency(item.costPerKm))}</div>
+            <div class="bar-value">${item.costPerKm === null ? 'Sem base de KM' : escapeHtml(formatCurrency(item.costPerKm))}</div>
             <div class="bar-track">
               <div class="bar-fill" style="height:${percent.toFixed(2)}%;"></div>
             </div>
