@@ -9,7 +9,7 @@ for (const target of ['fuel', 'loose']) {
   test(`${target}: native photo attaches once, without extra review or upload`, async () => {
     const calls = [], file = { name: 'receipt.jpg' };
     const c = vm.createContext({ closeReceiptCamera() { calls.push('close'); }, prepareReceiptFile(t, f) { calls.push([t, f]); } });
-    vm.runInContext(source.slice(source.indexOf('async function reviewNativeReceiptFile('), source.indexOf('function openReceiptCamera(')), c);
+    vm.runInContext(source.slice(source.indexOf('async function reviewNativeReceiptFile('), source.indexOf('async function openReceiptCamera(')), c);
     await c.reviewNativeReceiptFile(target, file);
     assert.deepEqual(calls, ['close', [target, file]]);
     calls.length = 0; await c.reviewNativeReceiptFile(target, null); assert.equal(calls.length, 0);

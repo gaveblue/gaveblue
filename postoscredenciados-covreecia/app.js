@@ -112,6 +112,8 @@ let loosePreviewObjectUrl = '';
 let fuelReceiptSelectionId = 0;
 let looseReceiptSelectionId = 0;
 let activeReceiptCameraStream = null;
+let receiptCameraRequestVersion = 0;
+let receiptCameraCaptureBusy = false;
 let activeReceiptCameraTarget = 'fuel';
 let receiptCameraDevices = [];
 let receiptCameraDeviceIndex = 0;
@@ -5679,39 +5681,51 @@ function stopReceiptCameraStream() {
 
 async function requestReceiptCameraStream(deviceId = '') {
   stopReceiptCameraStream();
+  const requestVersion = ++receiptCameraRequestVersion;
+  const lightweight = !navigator.deviceMemory || navigator.deviceMemory <= 4;
+  const bounds = lightweight
+    ? { width: { ideal: 1280, max: 1280 }, height: { ideal: 960, max: 1280 }, frameRate: { ideal: 15, max: 15 } }
+    : { width: { ideal: 1280, max: 1920 }, height: { ideal: 960, max: 1440 } };
   const videoConstraints = deviceId
     ? {
         deviceId: { exact: deviceId },
-        width: { ideal: 1280, max: 1920 },
-        height: { ideal: 960, max: 1440 }
+        ...bounds
       }
     : {
         facingMode: { exact: 'environment' },
-        width: { ideal: 1280, max: 1920 },
-        height: { ideal: 960, max: 1440 }
+        ...bounds
       };
-
+  let stream;
   try {
-    activeReceiptCameraStream = await navigator.mediaDevices.getUserMedia({
+    stream = await navigator.mediaDevices.getUserMedia({
       video: videoConstraints,
       audio: false
     });
   } catch (error) {
-    if (deviceId) {
+    if (deviceId || requestVersion !== receiptCameraRequestVersion || error.name === 'NotAllowedError') {
       throw error;
     }
 
-    activeReceiptCameraStream = await navigator.mediaDevices.getUserMedia({
+    stream = await navigator.mediaDevices.getUserMedia({
       video: {
         facingMode: { ideal: 'environment' },
-        width: { ideal: 1280, max: 1920 },
-        height: { ideal: 960, max: 1440 }
+        ...bounds
       },
       audio: false
     });
   }
 
-  return activeReceiptCameraStream;
+  if (requestVersion !== receiptCameraRequestVersion) {
+    stream.getTracks().forEach(track => track.stop());
+    throw new Error('Câmera encerrada.');
+  }
+  const settings = stream.getVideoTracks()[0]?.getSettings?.() || {};
+  if (lightweight && settings.width * settings.height > 1638400) {
+    stream.getTracks().forEach(track => track.stop());
+    throw new Error('A câmera não aceitou o modo leve.');
+  }
+  activeReceiptCameraStream = stream;
+  return stream;
 }
 
 async function attachReceiptCameraStream(stream) {
@@ -5818,6 +5832,12 @@ function openNativeReceiptCameraFallback(target) {
   input.click();
 }
 
+function useNativeReceiptCamera() {
+  const target = activeReceiptCameraTarget;
+  closeReceiptCamera();
+  openNativeReceiptCameraFallback(target);
+}
+
 function clearReceiptCameraReview() {
   const reviewImage = document.getElementById('receipt-camera-review-image');
   if (reviewImage) {
@@ -5894,14 +5914,37 @@ async function reviewNativeReceiptFile(target, file) {
   return prepareReceiptFile(target, file);
 }
 
-function openReceiptCamera(target = 'fuel') {
+async function openReceiptCamera(target = 'fuel') {
   persistCentralFormDraft(target === 'loose' ? 'loose-note-form' : 'fuel-form');
   activeReceiptCameraTarget = target === 'loose' ? 'loose' : 'fuel';
   closeReceiptCamera();
-  openNativeReceiptCameraFallback(activeReceiptCameraTarget);
+  if ((navigator.deviceMemory && navigator.deviceMemory > 4) || !navigator.mediaDevices?.getUserMedia) {
+    openNativeReceiptCameraFallback(activeReceiptCameraTarget);
+    return;
+  }
+  const modal = document.getElementById('receipt-camera-modal');
+  const status = document.getElementById('receipt-camera-status');
+  modal?.classList.remove('hidden');
+  showReceiptCameraLiveMode();
+  enterReceiptCameraFullscreen();
+  if (status) status.textContent = 'Abrindo câmera leve. Enquadre a nota inteira com boa iluminação.';
+  const opening = requestReceiptCameraStream();
+  const requestVersion = receiptCameraRequestVersion;
+  try {
+    const stream = await opening;
+    await attachReceiptCameraStream(stream);
+    if (requestVersion !== receiptCameraRequestVersion) return;
+    if (status) status.textContent = 'Modo leve: aproxime a nota até os textos ficarem legíveis.';
+  } catch (error) {
+    if (requestVersion !== receiptCameraRequestVersion) return;
+    closeReceiptCamera();
+    showErrorMessage('Câmera leve indisponível. Use Tirar Foto novamente ou Fazer Upload.');
+    openNativeReceiptCameraFallback(activeReceiptCameraTarget);
+  }
 }
 
 function closeReceiptCamera() {
+  receiptCameraRequestVersion++;
   stopReceiptCameraStream();
   clearReceiptCameraReview();
   document.getElementById('receipt-camera-modal')?.classList.add('hidden');
@@ -5932,6 +5975,15 @@ async function switchReceiptCamera() {
 }
 
 async function captureReceiptCamera() {
+  if (receiptCameraCaptureBusy) return;
+  receiptCameraCaptureBusy = true;
+  const requestVersion = receiptCameraRequestVersion;
+  try { await captureReceiptCameraFrame(requestVersion); }
+  catch (_) { showErrorMessage('Não foi possível capturar. Tente novamente ou use Fazer Upload; o formulário foi preservado.'); }
+  finally { receiptCameraCaptureBusy = false; }
+}
+
+async function captureReceiptCameraFrame(requestVersion) {
   const video = document.getElementById('receipt-camera-video');
   if (!video?.videoWidth || !video?.videoHeight) {
     showErrorMessage('Aguarde a c\u00e2mera carregar antes de fotografar.');
@@ -6004,6 +6056,7 @@ async function captureReceiptCamera() {
     type: 'image/jpeg',
     lastModified: Date.now()
   });
+  if (requestVersion !== receiptCameraRequestVersion) return;
   optimizedReceiptFiles.add(file);
   showReceiptCameraReviewMode(file, activeReceiptCameraTarget);
 }
