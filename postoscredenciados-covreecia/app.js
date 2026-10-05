@@ -5789,31 +5789,44 @@ async function toggleReceiptCameraFlash() {
   }
 }
 
+function chooseReceiptCamera(devices, currentId, preferredId = '') {
+  const preferred = devices.find(device => device.deviceId === preferredId);
+  if (preferred) return preferred;
+  const score = device => {
+    const label = device.label || '';
+    if (/front|user|frontal|ultra|0[.,][56]|macro|telephoto|telefoto|depth/i.test(label)) return -1;
+    if (/main|principal|primary|\b1[.,]0x\b|\b1x\b/i.test(label)) return 100;
+    if (/back.*\b0\b|rear.*\b0\b|traseira.*\b0\b/i.test(label)) return 60;
+    return /back|rear|traseira|environment/i.test(label) ? 40 : 0;
+  };
+  const current = devices.find(device => device.deviceId === currentId);
+  const ranked = [...devices].sort((a,b) => score(b)-score(a));
+  return ranked[0] && score(ranked[0]) > Math.max(0, current ? score(current) : -1) ? ranked[0] : current;
+}
+
 async function preferRearReceiptCamera() {
+  const version = receiptCameraRequestVersion;
   receiptCameraDevices = (await navigator.mediaDevices.enumerateDevices())
     .filter((device) => device.kind === 'videoinput');
+  if (version !== receiptCameraRequestVersion) return;
 
   const currentTrack = activeReceiptCameraStream?.getVideoTracks?.()[0];
   const currentSettings = currentTrack?.getSettings?.() || {};
   const currentDeviceId = currentSettings.deviceId || '';
   const currentIndex = receiptCameraDevices.findIndex((device) => device.deviceId === currentDeviceId);
-  const currentLabel = currentIndex >= 0 ? receiptCameraDevices[currentIndex].label || '' : '';
-  const isFrontCamera = currentSettings.facingMode === 'user' || /front|user|frontal/i.test(currentLabel);
-
   receiptCameraDeviceIndex = currentIndex >= 0 ? currentIndex : 0;
-
-  // Preserve the camera selected by facingMode=environment. On multi-lens phones,
-  // replacing it with the first "rear" device often selects the ultra-wide lens.
-  if (isFrontCamera) {
-    const rearIndex = receiptCameraDevices.findIndex((device) => {
-      const label = device.label || '';
-      return RECEIPT_CAMERA_LABEL_PATTERN.test(label)
-        && !/ultra|0[.,]5|0\.5|macro|telephoto|telefoto/i.test(label);
-    });
-
-    if (rearIndex >= 0 && receiptCameraDevices[rearIndex].deviceId !== currentDeviceId) {
-      receiptCameraDeviceIndex = rearIndex;
-      const stream = await requestReceiptCameraStream(receiptCameraDevices[rearIndex].deviceId);
+  let preferredId = '';
+  try { preferredId = localStorage.getItem('central-receipt-camera-preference') || ''; } catch (_) {}
+  const preferred = chooseReceiptCamera(receiptCameraDevices, currentDeviceId, preferredId);
+  if (preferred && preferred.deviceId !== currentDeviceId) {
+    receiptCameraDeviceIndex = receiptCameraDevices.indexOf(preferred);
+    try {
+      const stream = await requestReceiptCameraStream(preferred.deviceId);
+      await attachReceiptCameraStream(stream);
+    } catch (_) {
+      if (receiptCameraRequestVersion !== version + 1) return;
+      receiptCameraDeviceIndex = currentIndex >= 0 ? currentIndex : 0;
+      const stream = await requestReceiptCameraStream(currentDeviceId);
       await attachReceiptCameraStream(stream);
     }
   }
@@ -5934,7 +5947,9 @@ async function openReceiptCamera(target = 'fuel') {
     const stream = await opening;
     await attachReceiptCameraStream(stream);
     if (requestVersion !== receiptCameraRequestVersion) return;
-    if (status) status.textContent = 'Modo leve: aproxime a nota até os textos ficarem legíveis.';
+    try { await preferRearReceiptCamera(); } catch (_) {}
+    if (modal?.classList.contains('hidden')) return;
+    if (status) status.textContent = 'Modo leve: confira a lente. Use Alternar câmera se o enquadramento estiver muito aberto.';
   } catch (error) {
     if (requestVersion !== receiptCameraRequestVersion) return;
     closeReceiptCamera();
@@ -5965,6 +5980,7 @@ async function switchReceiptCamera() {
   try {
     const stream = await requestReceiptCameraStream(receiptCameraDevices[receiptCameraDeviceIndex].deviceId);
     await attachReceiptCameraStream(stream);
+    try { localStorage.setItem('central-receipt-camera-preference', stream.getVideoTracks()[0]?.getSettings?.().deviceId || receiptCameraDevices[receiptCameraDeviceIndex].deviceId); } catch (_) {}
     if (status) {
       status.textContent = 'C\u00e2mera pronta';
     }
