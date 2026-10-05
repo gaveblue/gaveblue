@@ -2,4 +2,4 @@ self.CENTRAL_ASSET_BASE = '/postoscredenciados-covreecia/';
 self.CENTRAL_SHELL_URL = '/central/index.html';
 self.CENTRAL_SOURCE_SHELL_URL = '/postoscredenciados-covreecia/index.html';
 self.CENTRAL_MANIFEST_URL = '/central/manifest.webmanifest';
-importScripts('/postoscredenciados-covreecia/sw.js?v=20261003-required-km-1');
+importScripts('/postoscredenciados-covreecia/sw.js?v=20261005-upload-progress-1');

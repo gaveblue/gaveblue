@@ -1,0 +1,16 @@
+const {test}=require('node:test'),assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs'),path=require('node:path');
+const src=fs.readFileSync(path.join(__dirname,'../postoscredenciados-covreecia/app.js'),'utf8');
+function setup(){
+ let xhr;const timers=new Map(),messages=[];let id=0;
+ class XHR{constructor(){xhr=this;this.upload={};}open(method,url){this.method=method;this.url=url;}send(body){this.body=body;}abort(){this.aborted=true;this.onabort();}}
+ const c=vm.createContext({XMLHttpRequest:XHR,CLOUDINARY_UPLOAD_URL:'https://upload.example.test',window:{setTimeout(fn,ms){timers.set(++id,{fn,ms});return id;},clearTimeout(id){timers.delete(id);}}});
+ vm.runInContext(src.slice(src.indexOf('function sendReceiptUpload('),src.indexOf('async function uploadFuelReceiptToCloudinary(')),c);
+ const body={get:()=>({size:5242880})};const promise=c.sendReceiptUpload(body,m=>messages.push(m));
+ return {xhr,promise,messages,timers,body};
+}
+test('binary request and progress, success only after confirmed URL',async()=>{const h=setup();let done=false;h.promise.then(()=>done=true);assert.equal(h.xhr.body,h.body);assert.equal(h.xhr.timeout,300000);h.xhr.upload.onprogress({loaded:50,total:100,lengthComputable:true});assert.match(h.messages.at(-1),/50%/);h.xhr.upload.onprogress({loaded:100,total:100,lengthComputable:true});await Promise.resolve();assert.equal(done,false);assert.match(h.messages.at(-1),/confirmação/);h.xhr.status=200;h.xhr.responseText='{"secure_url":"https://files.example.test/ok"}';h.xhr.onload();assert.equal((await h.promise).secure_url,'https://files.example.test/ok');assert.equal(h.timers.size,0);});
+test('stalled request rejects and aborts, never reports saved',async()=>{const h=setup();const rejection=assert.rejects(h.promise,e=>e.code==='RECEIPT_UPLOAD_TIMEOUT');const t=[...h.timers.values()][0];assert.equal(t.ms,60000);t.fn();await rejection;assert.equal(h.xhr.aborted,true);assert.equal(h.timers.size,0);});
+test('only increasing byte counts reset inactivity timer',async()=>{const h=setup();h.xhr.upload.onprogress({loaded:1,total:10,lengthComputable:true});const id=[...h.timers.keys()][0];h.xhr.upload.onprogress({loaded:1,total:10,lengthComputable:true});assert.equal([...h.timers.keys()][0],id);h.xhr.upload.onprogress({loaded:2,total:10,lengthComputable:true});assert.notEqual([...h.timers.keys()][0],id);const rejection=assert.rejects(h.promise);h.xhr.ontimeout();await rejection;});
+for(const [status,response]of [[500,'{}'],[200,'{}'],[200,'not json'],[200,'{"secure_url":"http://insecure.test"}']])test(`rejects unconfirmed response ${status} ${response}`,async()=>{const h=setup();const rejection=assert.rejects(h.promise);h.xhr.status=status;h.xhr.responseText=response;h.xhr.onload();await rejection;assert.equal(h.timers.size,0);});
+test('network failure keeps retry possible and cleans timer',async()=>{const h=setup();const rejection=assert.rejects(h.promise,/foto continua anexada/);h.xhr.onerror();await rejection;assert.equal(h.timers.size,0);});
+test('background upload does not need progress observer',async()=>{assert.match(src,/sendReceiptUpload\(formData, metadata.onProgress\)/);assert.doesNotMatch(src.slice(src.indexOf('function sendReceiptUpload('),src.indexOf('async function uploadFuelReceiptToCloudinary(')),/canvas|FileReader|createImageBitmap|base64/);});

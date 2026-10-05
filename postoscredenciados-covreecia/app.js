@@ -4562,7 +4562,8 @@ async function saveLooseNoteReceiptUpload(options = {}) {
       tipoServico: formData.tipoServico,
       valor: formData.valor,
       data: formData.dataFormatada,
-      km: formData.km
+      km: formData.km,
+      onProgress: message => updateLooseReceiptUploadStatus(message, 'progress')
     });
 
     uploadedLooseNoteReceipt = {
@@ -4592,7 +4593,7 @@ async function saveLooseNoteReceiptUpload(options = {}) {
       return result;
     }
     uploadedLooseNoteReceipt = null;
-    updateLooseReceiptUploadStatus('N\u00e3o foi poss\u00edvel salvar. Tente novamente antes de enviar.', 'error');
+    updateLooseReceiptUploadStatus(error.message || 'Não foi possível enviar. A foto continua anexada nesta tela.', 'error');
     if (!silent) {
       showErrorMessage('Erro ao enviar comprovante. Tente novamente.');
       return null;
@@ -4651,7 +4652,8 @@ async function saveFuelReceiptUpload(options = {}) {
       valor: formData.valor,
       litros: formData.litros,
       tipoCombustivel: formData.tipoCombustivel,
-      modo: currentFuelFormMode
+      modo: currentFuelFormMode,
+      onProgress: message => updateReceiptUploadStatus(message, 'progress')
     });
 
     uploadedFuelReceipt = {
@@ -4681,7 +4683,7 @@ async function saveFuelReceiptUpload(options = {}) {
       return result;
     }
     uploadedFuelReceipt = null;
-    updateReceiptUploadStatus('N\u00e3o foi poss\u00edvel salvar. Tente novamente antes de enviar.', 'error');
+    updateReceiptUploadStatus(error.message || 'Não foi possível enviar. A foto continua anexada nesta tela.', 'error');
     if (!silent) {
       showErrorMessage('Erro ao enviar comprovante. Tente novamente.');
       return null;
@@ -4738,6 +4740,51 @@ function handleWhatsAppSendClick() {
   showSuccessMessage('WhatsApp aberto com a mensagem do comprovante.');
 }
 
+function sendReceiptUpload(formData, onProgress) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    let settled = false, idleTimer, lastLoaded = -1, lastPercent = -1;
+    const report = message => { if (typeof onProgress === 'function') onProgress(message); };
+    const finish = (error, result) => {
+      if (settled) return;
+      settled = true;
+      window.clearTimeout(idleTimer);
+      error ? reject(error) : resolve(result);
+    };
+    const timeoutError = () => Object.assign(new Error('O envio ficou sem resposta. A foto continua anexada nesta tela; tente novamente sem fechar o aplicativo.'), { code: 'RECEIPT_UPLOAD_TIMEOUT' });
+    const armIdleTimer = () => {
+      window.clearTimeout(idleTimer);
+      idleTimer = window.setTimeout(() => { finish(timeoutError()); xhr.abort(); }, 60000);
+    };
+    xhr.open('POST', CLOUDINARY_UPLOAD_URL);
+    xhr.timeout = 300000;
+    xhr.upload.onprogress = event => {
+      if (settled || event.loaded <= lastLoaded) return;
+      lastLoaded = event.loaded;
+      armIdleTimer();
+      const percent = event.lengthComputable && event.total > 0 ? Math.min(100, Math.floor(event.loaded / event.total * 100)) : -1;
+      if (percent === lastPercent && percent >= 0) return;
+      lastPercent = percent;
+      report(percent === 100 ? 'Foto transferida. Aguardando confirmação do servidor...' : percent >= 0 ? `Enviando foto: ${percent}%. Mantenha esta tela aberta.` : 'Transferindo foto. Mantenha esta tela aberta.');
+    };
+    xhr.onload = () => {
+      if (xhr.status < 200 || xhr.status >= 300) { finish(new Error('O servidor recusou o comprovante. A foto continua anexada; tente novamente.')); return; }
+      try {
+        const result = JSON.parse(xhr.responseText);
+        if (!result.secure_url || !/^https:\/\//i.test(result.secure_url)) throw new Error('O servidor não confirmou o endereço do comprovante. Tente novamente.');
+        finish(null, result);
+      } catch (error) { finish(error); }
+    };
+    xhr.onerror = () => finish(new Error('Falha de conexão durante o envio. A foto continua anexada nesta tela; tente novamente.'));
+    xhr.ontimeout = () => finish(timeoutError());
+    xhr.onabort = () => finish(new Error('Envio interrompido. A foto continua anexada nesta tela.'));
+    const file = formData.get('file');
+    report(`Iniciando envio${file?.size ? ` (${(file.size / 1048576).toFixed(1)} MB)` : ''}. Fotos grandes podem demorar na rede móvel.`);
+    armIdleTimer();
+    try { xhr.send(formData); } catch (error) { finish(error); }
+  });
+}
+
 async function uploadFuelReceiptToCloudinary(file, metadata) {
   const formData = new FormData();
   formData.append('file', file);
@@ -4749,16 +4796,7 @@ async function uploadFuelReceiptToCloudinary(file, metadata) {
     `modo=${metadata.modo || 'rapido'}|motorista=${metadata.motorista}|cidade=${metadata.cidade}|posto=${metadata.posto}|data=${metadata.data}|km=${metadata.km || 'nao informado'}|valor=${metadata.valor || 'nao informado'}|litros=${metadata.litros || 'nao informado'}|combustivel=${metadata.tipoCombustivel || 'nao informado'}`
   );
 
-  const response = await fetch(CLOUDINARY_UPLOAD_URL, {
-    method: 'POST',
-    body: formData
-  });
-
-  if (!response.ok) {
-    throw new Error('Falha ao enviar comprovante para o Cloudinary.');
-  }
-
-  return response.json();
+  return sendReceiptUpload(formData, metadata.onProgress);
 }
 
 async function uploadLooseNoteReceiptToCloudinary(file, metadata) {
@@ -4772,16 +4810,7 @@ async function uploadLooseNoteReceiptToCloudinary(file, metadata) {
     `motorista=${metadata.motorista}|fornecedor=${metadata.fornecedor}|servico=${metadata.tipoServico}|valor=${metadata.valor}|data=${metadata.data}|km=${metadata.km || 'nao informado'}`
   );
 
-  const response = await fetch(CLOUDINARY_UPLOAD_URL, {
-    method: 'POST',
-    body: formData
-  });
-
-  if (!response.ok) {
-    throw new Error('Falha ao enviar comprovante para o Cloudinary.');
-  }
-
-  return response.json();
+  return sendReceiptUpload(formData, metadata.onProgress);
 }
 
 function resetProgressState() {
