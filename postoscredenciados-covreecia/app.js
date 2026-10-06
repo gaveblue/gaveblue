@@ -4332,7 +4332,7 @@ function applyCentralOrganizationBranding(organization = {}) {
   const companyAddress = String(institutional.address || '').trim() ||
     (organization.workspaceId === CENTRAL_DEFAULT_ORGANIZATION_SLUG ? 'Av. Agenor Luiz Heringer, 463 - Centro, Pinheiros/ES' : '');
   if (legalName) legalName.textContent = String(institutional.legalName || name);
-  if (documentLine) { documentLine.textContent = institutional.document ? `CNPJ/Documento: ${institutional.document}` : ''; documentLine.hidden = !institutional.document; }
+  if (documentLine) { documentLine.textContent = institutional.document ? `CNPJ: ${institutional.document}` : ''; documentLine.hidden = !institutional.document; }
   if (address) { address.textContent = companyAddress; address.hidden = !companyAddress; }
   const contacts = [
     ['central-about-whatsapp', institutional.whatsapp ? `https://wa.me/${String(institutional.whatsapp).replace(/\D/g, '')}` : '', `WhatsApp ${name}`],
@@ -5091,7 +5091,7 @@ function deferCentralBackgroundWork(task) {
 // Local-only diagnostics: no receipt, filename, identity, URL or token.
 function getCentralPerformanceSnapshot() {
   return {
-    release: '20261006-3.00',
+    release: '20261006-3.00-about-2',
     lightweight: centralLightweightMode,
     uploads: (sendReceiptUpload.samples || []).map(sample => ({ ...sample }))
   };

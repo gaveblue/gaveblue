@@ -35,6 +35,9 @@ const station={name:'Posto de teste',city:'Cidade teste',address:'Endereço fict
   assert.match(await page.locator('#central-about-version').textContent(),/Versão 3\.00/);
   assert.match(await page.locator('#central-about-address').textContent(),/Agenor Luiz Heringer, 463/);
   assert.equal(await page.locator('#central-about-address').evaluate(el=>el.hidden),false);
+  assert.equal(await page.locator('#central-about-version').evaluate(el=>Boolean(document.querySelector('.profile-page-about-actions').compareDocumentPosition(el)&Node.DOCUMENT_POSITION_FOLLOWING)),true);
+  await page.evaluate(()=>applyCentralOrganizationBranding({...centralOrganizationContext,institutional:{document:'00.000.000/0001-00'}}));
+  assert.equal(await page.locator('#central-about-document').textContent(),'CNPJ: 00.000.000/0001-00');
   for(const mode of ['rapido','completo','servicos']){
    await page.evaluate(mode=>{
     hideCentralReconfigurationNotice();
