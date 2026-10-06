@@ -32,6 +32,9 @@ const station={name:'Posto de teste',city:'Cidade teste',address:'Endereço fict
   });
   await page.goto('https://central.fixture.test/postoscredenciados-covreecia/index.html',{waitUntil:'load'});
   await page.waitForFunction(()=>centralStartupNavigationReady);
+  assert.match(await page.locator('#central-about-version').textContent(),/Versão 3\.00/);
+  assert.match(await page.locator('#central-about-address').textContent(),/Agenor Luiz Heringer, 463/);
+  assert.equal(await page.locator('#central-about-address').evaluate(el=>el.hidden),false);
   for(const mode of ['rapido','completo','servicos']){
    await page.evaluate(mode=>{
     hideCentralReconfigurationNotice();

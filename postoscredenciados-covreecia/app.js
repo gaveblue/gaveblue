@@ -4329,9 +4329,11 @@ function applyCentralOrganizationBranding(organization = {}) {
   const legalName = document.getElementById('central-about-legal-name');
   const documentLine = document.getElementById('central-about-document');
   const address = document.getElementById('central-about-address');
+  const companyAddress = String(institutional.address || '').trim() ||
+    (organization.workspaceId === CENTRAL_DEFAULT_ORGANIZATION_SLUG ? 'Av. Agenor Luiz Heringer, 463 - Centro, Pinheiros/ES' : '');
   if (legalName) legalName.textContent = String(institutional.legalName || name);
   if (documentLine) { documentLine.textContent = institutional.document ? `CNPJ/Documento: ${institutional.document}` : ''; documentLine.hidden = !institutional.document; }
-  if (address) { address.textContent = String(institutional.address || ''); address.hidden = !institutional.address; }
+  if (address) { address.textContent = companyAddress; address.hidden = !companyAddress; }
   const contacts = [
     ['central-about-whatsapp', institutional.whatsapp ? `https://wa.me/${String(institutional.whatsapp).replace(/\D/g, '')}` : '', `WhatsApp ${name}`],
     ['central-about-email', institutional.supportEmail ? `mailto:${institutional.supportEmail}` : '', `E-mail ${name}`],
@@ -5089,7 +5091,7 @@ function deferCentralBackgroundWork(task) {
 // Local-only diagnostics: no receipt, filename, identity, URL or token.
 function getCentralPerformanceSnapshot() {
   return {
-    release: '20261005-lite-2',
+    release: '20261006-3.00',
     lightweight: centralLightweightMode,
     uploads: (sendReceiptUpload.samples || []).map(sample => ({ ...sample }))
   };
@@ -5833,6 +5835,28 @@ async function requestReceiptCameraStream(deviceId = '') {
     stream.getTracks().forEach(track => track.stop());
     throw new Error('Câmera encerrada.');
   }
+  const isFrontStream = candidate => {
+    const track = candidate.getVideoTracks()[0];
+    return track?.getSettings?.().facingMode === 'user' || /front|frontal|user|selfie|facetime/i.test(track?.label || '');
+  };
+  if (isFrontStream(stream)) {
+    stream.getTracks().forEach(track => track.stop());
+    // Some browsers ignore the ideal rear-facing fallback. Never attach that
+    // front stream or remember it as the default receipt camera.
+    if (!deviceId && navigator.mediaDevices.enumerateDevices) {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      if (requestVersion !== receiptCameraRequestVersion) throw new Error('Câmera encerrada.');
+      const rear = chooseReceiptCamera(devices.filter(device => device.kind === 'videoinput'), '');
+      if (!rear?.deviceId) throw new Error('A câmera traseira não foi identificada. Use a câmera nativa.');
+      stream = await navigator.mediaDevices.getUserMedia({ video: { deviceId: { exact: rear.deviceId }, ...bounds }, audio: false });
+      if (requestVersion !== receiptCameraRequestVersion || isFrontStream(stream)) {
+        stream.getTracks().forEach(track => track.stop());
+        throw new Error('A câmera traseira não pôde ser aberta.');
+      }
+    } else {
+      throw new Error('A câmera traseira não foi identificada. Use a câmera nativa.');
+    }
+  }
   const settings = stream.getVideoTracks()[0]?.getSettings?.() || {};
   if (lightweight && settings.width * settings.height > 1638400) {
     stream.getTracks().forEach(track => track.stop());
@@ -5904,11 +5928,13 @@ async function toggleReceiptCameraFlash() {
 }
 
 function chooseReceiptCamera(devices, currentId, preferredId = '') {
-  const preferred = devices.find(device => device.deviceId === preferredId);
+  const preferred = devices.find(device => device.deviceId === preferredId &&
+    /back|rear|traseira|environment/i.test(device.label || '') &&
+    !/front|user|frontal|selfie|facetime/i.test(device.label || ''));
   if (preferred) return preferred;
   const score = device => {
     const label = device.label || '';
-    if (/front|user|frontal|ultra|0[.,][56]|macro|telephoto|telefoto|depth/i.test(label)) return -1;
+    if (/front|user|frontal|selfie|facetime|ultra|0[.,][56]|macro|telephoto|telefoto|depth/i.test(label)) return -1;
     if (/main|principal|primary|\b1[.,]0x\b|\b1x\b/i.test(label)) return 100;
     if (/back.*\b0\b|rear.*\b0\b|traseira.*\b0\b/i.test(label)) return 60;
     return /back|rear|traseira|environment/i.test(label) ? 40 : 0;
@@ -5921,7 +5947,7 @@ function chooseReceiptCamera(devices, currentId, preferredId = '') {
 async function preferRearReceiptCamera() {
   const version = receiptCameraRequestVersion;
   receiptCameraDevices = (await navigator.mediaDevices.enumerateDevices())
-    .filter((device) => device.kind === 'videoinput');
+    .filter((device) => device.kind === 'videoinput' && !/front|user|frontal|selfie|facetime/i.test(device.label || ''));
   if (version !== receiptCameraRequestVersion) return;
 
   const currentTrack = activeReceiptCameraStream?.getVideoTracks?.()[0];

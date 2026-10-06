@@ -5,6 +5,16 @@ const vm = require('node:vm');
 const path = require('node:path');
 const source = fs.readFileSync(path.join(__dirname, '../postoscredenciados-covreecia/app.js'), 'utf8');
 
+test('Covre address fallback restores About without leaking into another company',()=>{
+  const address={textContent:'',hidden:true};
+  const ctx=vm.createContext({renderCentralHistoryPendingNotice(){},CENTRAL_DEFAULT_ORGANIZATION_SLUG:'covre-e-cia',document:{getElementById:id=>id==='central-about-address'?address:null,querySelector:()=>null}});
+  vm.runInContext(source.slice(source.indexOf('function applyCentralOrganizationBranding('),source.indexOf('async function loadCentralOrganizationContext(')),ctx);
+  ctx.applyCentralOrganizationBranding({workspaceId:'covre-e-cia',institutional:{document:'fixture'}});
+  assert.match(address.textContent,/Agenor Luiz Heringer, 463/);assert.equal(address.hidden,false);
+  ctx.applyCentralOrganizationBranding({workspaceId:'covre-e-cia',institutional:{address:'Endereço atualizado'}});assert.equal(address.textContent,'Endereço atualizado');
+  ctx.applyCentralOrganizationBranding({workspaceId:'another',institutional:{}});assert.equal(address.textContent,'');assert.equal(address.hidden,true);
+});
+
 test('neutral company never inherits Covre logo, while Covre and custom brands are preserved', () => {
   const images = { 'central-brand-logo': { src: 'covre.png', style: {} }, 'central-about-logo': { src: 'covre.png', style: {} } };
   const ctx = { renderCentralHistoryPendingNotice() {}, CENTRAL_DEFAULT_ORGANIZATION_SLUG: 'covre-e-cia', document: {

@@ -6,6 +6,8 @@ test('selects principal rear instead of ultra wide',()=>assert.equal(c.chooseRec
 test('keeps principal when already selected',()=>assert.equal(c.chooseReceiptCamera(devices,'m').deviceId,'m'));
 test('explicit main label wins over generic rear',()=>assert.equal(c.chooseReceiptCamera([...devices,{deviceId:'p',label:'Traseira principal'}],'m').deviceId,'p'));
 test('manual lens preference survives reopening',()=>assert.equal(c.chooseReceiptCamera(devices,'u','m').deviceId,'m'));
+test('saved front preference never overrides principal rear',()=>assert.equal(c.chooseReceiptCamera(devices,'u','f').deviceId,'m'));
+test('unknown saved lens cannot override recognized rear',()=>assert.equal(c.chooseReceiptCamera([...devices,{deviceId:'x',label:''}],'u','x').deviceId,'m'));
 test('stale device preference safely falls back',()=>assert.equal(c.chooseReceiptCamera(devices,'u','gone').deviceId,'m'));
 test('unknown device names retain browser choice, not arbitrary first lens',()=>assert.equal(c.chooseReceiptCamera([{deviceId:'a',label:'camera 1'},{deviceId:'b',label:'camera 2'}],'b').deviceId,'b'));
 test('enumeration must not reopen camera after close',()=>assert.match(src,/if \(version !== receiptCameraRequestVersion\) return;/));
