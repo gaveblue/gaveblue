@@ -683,6 +683,7 @@ function refreshCentralStationCityOptions() {
 }
 
 async function loadManagedCentralStations() {
+  if (deferCentralBackgroundWork(loadManagedCentralStations)) return false;
   try {
     const result = await executeCentralPushFunction({ action: 'stations' });
     const stations = Array.isArray(result?.stations) ? result.stations : [];
@@ -864,6 +865,7 @@ function getCentralDeviceId() {
 }
 
 async function sendCentralDeviceHeartbeat({ force = false } = {}) {
+  if (deferCentralBackgroundWork(sendCentralDeviceHeartbeat)) return false;
   if (!navigator.onLine || document.visibilityState === 'hidden' || centralDeviceHeartbeatInProgress) return false;
   const subscriptionId = getCentralPushSubscriptionId();
   if (!subscriptionId) return false;
@@ -1792,17 +1794,33 @@ async function saveCentralOfflineSubmission(submission) {
   } finally { database.close(); }
 }
 
-async function getCentralOfflineSubmissions() {
+async function getCentralOfflineSubmissions({ receiptId = null } = {}) {
   const database = await openCentralDeviceStateDb();
-  const submissions = await new Promise((resolve, reject) => {
+  const workspaceId = centralOrganizationContext.workspaceId;
+  try { return await new Promise((resolve, reject) => {
     const transaction = database.transaction(CENTRAL_PENDING_UPLOADS_STORE, 'readonly');
-    const request = transaction.objectStore(CENTRAL_PENDING_UPLOADS_STORE).getAll();
-    request.onsuccess = () => resolve((Array.isArray(request.result) ? request.result : [])
-      .filter((item) => String(item?.workspaceId || CENTRAL_DEFAULT_ORGANIZATION_SLUG) === centralOrganizationContext.workspaceId));
+    const store = transaction.objectStore(CENTRAL_PENDING_UPLOADS_STORE);
+    const request = receiptId === null ? store.openCursor() : store.get(receiptId);
+    const submissions = [];
+    request.onsuccess = () => {
+      if (workspaceId !== centralOrganizationContext.workspaceId) {
+        reject(new Error('A empresa mudou durante a leitura da fila.'));
+        return;
+      }
+      const cursor = receiptId === null ? request.result : null;
+      const item = receiptId === null ? cursor?.value : request.result;
+      if (item && String(item.workspaceId || CENTRAL_DEFAULT_ORGANIZATION_SLUG) === workspaceId) {
+        if (receiptId === null) {
+          const { receiptBlob, ...metadata } = item;
+          submissions.push(metadata);
+        } else submissions.push(item);
+      }
+      if (cursor) cursor.continue();
+      else resolve(submissions);
+    };
     request.onerror = () => reject(request.error);
-  });
-  database.close();
-  return submissions;
+    transaction.onabort = () => reject(transaction.error || new Error('Leitura da fila interrompida.'));
+  }); } finally { database.close(); }
 }
 
 async function deleteCentralOfflineSubmission(id, expectedWorkspaceId = centralOrganizationContext.workspaceId) {
@@ -2880,6 +2898,7 @@ function renderMySubmissions() {
 
 async function refreshMySubmissions(options = {}) {
   const { silent = false } = options;
+  if (silent && deferCentralBackgroundWork(refreshCentralHistoryInBackground)) return;
   const list = document.getElementById('my-submissions-list');
   if (!silent && list) list.innerHTML = '<div class="driver-directory-message">Buscando seus envios...</div>';
   centralSubmissionHistoryRefreshFailed = false;
@@ -3611,6 +3630,7 @@ function openFuelFormMenu(mode = 'rapido') {
 }
 
 function closeFuelForm() {
+  flushCentralFormDrafts();
   document.getElementById('fuel-form-modal').classList.add('hidden');
   closeReceiptValidationModal();
   document.getElementById('fuel-form').reset();
@@ -3659,6 +3679,11 @@ function centralDraftFields(form) {
 }
 
 function persistCentralFormDraft(formId) {
+  const pending = persistCentralFormDraft.pending?.get(formId);
+  if (pending) {
+    window.clearTimeout(pending.timer);
+    persistCentralFormDraft.pending.delete(formId);
+  }
   const form = document.getElementById(formId);
   const key = centralFormDraftKey(formId);
   if (!form || !key) return false;
@@ -3733,13 +3758,42 @@ function offerCentralFormDraft(formId) {
 }
 
 function clearConfirmedCentralFormDraft(formId) {
+  const pending = persistCentralFormDraft.pending?.get(formId);
+  if (pending) {
+    window.clearTimeout(pending.timer);
+    persistCentralFormDraft.pending.delete(formId);
+  }
   try { const key = centralFormDraftKey(formId); if (key) localStorage.removeItem(key); } catch (_) {}
 }
 
 document.addEventListener('input', event => {
   const formId = event.target?.closest?.('form')?.id;
-  if (['fuel-form','loose-note-form'].includes(formId)) persistCentralFormDraft(formId);
+  if (['fuel-form','loose-note-form'].includes(formId)) scheduleCentralFormDraft(formId);
 });
+
+function scheduleCentralFormDraft(formId) {
+  const pending = persistCentralFormDraft.pending || (persistCentralFormDraft.pending = new Map());
+  window.clearTimeout(pending.get(formId)?.timer);
+  const key = centralFormDraftKey(formId);
+  const timer = window.setTimeout(() => {
+    pending.delete(formId);
+    if (centralFormDraftKey(formId) === key) persistCentralFormDraft(formId);
+  }, 250);
+  pending.set(formId, { timer, key });
+}
+
+function flushCentralFormDrafts() {
+  for (const [formId, item] of persistCentralFormDraft.pending || []) {
+    window.clearTimeout(item.timer);
+    persistCentralFormDraft.pending.delete(formId);
+    if (centralFormDraftKey(formId) === item.key) persistCentralFormDraft(formId);
+  }
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') flushCentralFormDrafts();
+});
+window.addEventListener('pagehide', flushCentralFormDrafts);
 document.addEventListener('change', event => {
   const formId = event.target?.closest?.('form')?.id;
   if (['fuel-form','loose-note-form'].includes(formId)) persistCentralFormDraft(formId);
@@ -3816,6 +3870,7 @@ async function shareCentralLink() {
 }
 
 function closeLooseNoteForm() {
+  flushCentralFormDrafts();
   document.getElementById('loose-note-modal')?.classList.add('hidden');
   document.getElementById('loose-note-form')?.reset();
   resetLoosePhotoState();
@@ -4325,6 +4380,7 @@ async function loadCentralOrganizationContext() {
 }
 
 async function retryPendingCentralRegistro() {
+  if (deferCentralBackgroundWork(retryPendingCentralRegistro)) return;
   if (centralRetryInProgress || !navigator.onLine) return;
   let queue;
   try { queue = getCentralRetryPayloads(); }
@@ -4743,7 +4799,34 @@ function handleWhatsAppSendClick() {
 }
 
 function sendReceiptUpload(formData, onProgress) {
+  // One transport at a time. Never cancel an in-flight receipt: its result
+  // may already exist remotely. Interactive sends precede queued retries.
+  const queue = sendReceiptUpload.queue || (sendReceiptUpload.queue = []);
   return new Promise((resolve, reject) => {
+    const item = { formData, onProgress, resolve, reject };
+    if (typeof onProgress === 'function') {
+      const background = queue.findIndex(entry => typeof entry.onProgress !== 'function');
+      queue.splice(background < 0 ? queue.length : background, 0, item);
+    } else queue.push(item);
+    if (sendReceiptUpload.active && onProgress) onProgress('Aguardando o comprovante anterior terminar. Sua foto continua anexada.');
+    drainReceiptUploads();
+  });
+}
+
+function drainReceiptUploads() {
+  if (sendReceiptUpload.active) return;
+  const item = sendReceiptUpload.queue?.shift();
+  if (!item) return;
+  sendReceiptUpload.active = true;
+  sendReceiptUploadNow(item.formData, item.onProgress).then(item.resolve, item.reject).finally(() => {
+    sendReceiptUpload.active = false;
+    drainReceiptUploads();
+  });
+}
+
+function sendReceiptUploadNow(formData, onProgress) {
+  return new Promise((resolve, reject) => {
+    const startedAt = Date.now();
     const xhr = new XMLHttpRequest();
     let settled = false, idleTimer, lastLoaded = -1, lastPercent = -1;
     const report = message => { if (typeof onProgress === 'function') onProgress(message); };
@@ -4751,6 +4834,9 @@ function sendReceiptUpload(formData, onProgress) {
       if (settled) return;
       settled = true;
       window.clearTimeout(idleTimer);
+      const samples = sendReceiptUpload.samples || (sendReceiptUpload.samples = []);
+      samples.push({ bytes: Number(formData.get('file')?.size || 0), durationMs: Date.now() - startedAt, ok: !error });
+      if (samples.length > 10) samples.shift();
       error ? reject(error) : resolve(result);
     };
     const timeoutError = () => Object.assign(new Error('O envio ficou sem resposta. A foto continua anexada nesta tela; tente novamente sem fechar o aplicativo.'), { code: 'RECEIPT_UPLOAD_TIMEOUT' });
@@ -4887,14 +4973,17 @@ async function queueCentralOfflineSubmission({ kind, formData, receiptFile, payl
 }
 
 async function processCentralOfflineSubmissions() {
-  if (centralOfflineSyncInProgress || !navigator.onLine) return;
+  if (centralOfflineSyncInProgress || !navigator.onLine || deferCentralBackgroundWork(processCentralOfflineSubmissions)) return;
   centralOfflineSyncInProgress = true;
   updateCentralConnectivityStatus({ syncing: true });
   let synchronized = 0;
   try {
     const submissions = await getCentralOfflineSubmissions();
-    for (const submission of submissions) {
+    for (const metadata of submissions) {
+      if (deferCentralBackgroundWork(processCentralOfflineSubmissions)) break;
       try {
+        const [submission] = await getCentralOfflineSubmissions({ receiptId: metadata.id });
+        if (!submission) continue; // Another worker may have confirmed it.
         const workspaceId = String(submission.workspaceId || submission.payload?.data?.workspaceId || CENTRAL_DEFAULT_ORGANIZATION_SLUG);
         if (workspaceId !== centralOrganizationContext.workspaceId
             || String(submission.payload?.data?.workspaceId || workspaceId) !== workspaceId
@@ -4981,6 +5070,30 @@ async function processCentralOfflineSubmissions() {
 
 const centralFormSubmissionsInProgress = new Set();
 const centralFormPendingAttempts = new Map();
+
+function refreshCentralHistoryInBackground() { return refreshMySubmissions({ silent: true }); }
+
+function deferCentralBackgroundWork(task) {
+  if (!centralFormSubmissionsInProgress.size && !sendReceiptUpload.active) return false;
+  const pending = deferCentralBackgroundWork.pending || (deferCentralBackgroundWork.pending = new Map());
+  if (!pending.has(task)) {
+    pending.set(task, window.setTimeout(() => {
+      pending.delete(task);
+      if (deferCentralBackgroundWork(task)) return;
+      Promise.resolve().then(task).catch(() => {}); // Each task retains its own retry/error handling.
+    }, 1000));
+  }
+  return true;
+}
+
+// Local-only diagnostics: no receipt, filename, identity, URL or token.
+function getCentralPerformanceSnapshot() {
+  return {
+    release: '20261005-lite-2',
+    lightweight: centralLightweightMode,
+    uploads: (sendReceiptUpload.samples || []).map(sample => ({ ...sample }))
+  };
+}
 
 function centralFormAttemptKey(formId, workspaceId = centralOrganizationContext.workspaceId) {
   if (!workspaceId) throw new Error('Confirme a empresa antes de enviar.');
@@ -5537,6 +5650,7 @@ function openCentralNotificationSettings() {
 }
 
 function closeOpenFormsSilently() {
+  flushCentralFormDrafts();
   closeReceiptCamera();
   const fuelModal = document.getElementById('fuel-form-modal');
   const looseModal = document.getElementById('loose-note-modal');
@@ -5620,7 +5734,7 @@ async function prepareReceiptFile(target, file) {
       previewContainer.prepend(attachmentLabel);
     }
     attachmentLabel.hidden = !direct;
-    attachmentLabel.textContent = direct ? `Foto anexada: ${optimizedFile.name || 'comprovante'}. Prévia desativada para economizar memória.` : '';
+    attachmentLabel.textContent = direct ? `Foto anexada (${(optimizedFile.size / 1048576).toFixed(1)} MB). Prévia desativada para economizar memória.${optimizedFile.size > 2 * 1048576 ? ' Para enviar mais rápido, use Tirar Foto na Central para fazer uma versão leve; confira a legibilidade.' : ''}` : '';
     if (!direct) preview.src = setReceiptPreviewUrl(target, optimizedFile);
     previewContainer.classList.remove('hidden');
     photoButtons.classList.add('hidden');
@@ -6361,9 +6475,6 @@ window.addEventListener('DOMContentLoaded', async function() {
   await ensureCentralDeviceStateRestored();
   showCentralReconfigurationNotice();
   populateDriverOptions();
-  if (window.lucide) {
-    lucide.createIcons();
-  }
 
   setupPwaInstallExperience();
   registerServiceWorker();
@@ -6482,12 +6593,12 @@ window.addEventListener('DOMContentLoaded', async () => {
   await ensureCentralDeviceStateRestored();
   renderHomeDriverArea();
   updateCentralConnectivityStatus();
-  restoreManagedCentralStationsCache();
+  const hasCachedStations = restoreManagedCentralStationsCache();
   renderCityImageCards();
-  // A lista fixa existe apenas como fallback offline. Em uma conexão normal,
-  // aguardamos o diretório do WeFrotas antes de liberar a navegação para que
-  // cidades recém-cadastradas não desapareçam até o próximo carregamento.
-  await loadManagedCentralStations();
+  // A validated tenant's saved directory can render immediately. First use
+  // still awaits the server; onboarding and tenant checks remain mandatory.
+  const stationsRefresh = loadManagedCentralStations();
+  if (!hasCachedStations) await stationsRefresh;
   ensureDriverDirectoryLoaded().catch((error) => {
     console.warn('O diretório será carregado novamente quando necessário.', error);
   });
@@ -6728,7 +6839,9 @@ function initHomeHeroCarousel() {
   const restartAutoplay = () => {
     window.clearTimeout(autoplayId);
     updateImages();
-    if (isPaused() || slides.length < 2) return;
+    if (isPaused() || slides.length < 2 ||
+        (typeof centralLightweightMode !== 'undefined' && centralLightweightMode) ||
+        window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
     const duration = Number(slides[currentSlide]?.dataset.duration || 6000);
     autoplayId = window.setTimeout(async () => {
       await showSlide(currentSlide + 1);

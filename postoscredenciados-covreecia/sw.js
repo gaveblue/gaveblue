@@ -1,4 +1,4 @@
-const CENTRAL_RELEASE = '20261005-main-camera-1';
+const CENTRAL_RELEASE = '20261005-lite-2';
 const CENTRAL_SCOPE_KEY = new URL(self.registration.scope).pathname.replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '') || 'root';
 const CACHE_PREFIX = `central-registros-static-${CENTRAL_SCOPE_KEY}-v`;
 const CACHE_NAME = `${CACHE_PREFIX}${CENTRAL_RELEASE}`;
@@ -11,9 +11,10 @@ const STATIC_ASSETS = Array.from(new Set([
   CENTRAL_SHELL_URL,
   CENTRAL_SOURCE_SHELL_URL,
   CENTRAL_MANIFEST_URL,
-  './styles.css?v=20261003-date-fit-1',
+  './styles.css?v=20261005-lite-2',
+  './utilities.css?v=20261005-lite-2',
   './form-pages.js?v=20261003-app-shell-1',
-  './app.js?v=20261005-main-camera-1',
+  './app.js?v=20261005-lite-2',
   './assets/brand/covre-e-cia.png',
   './assets/home/hero-posto.png',
   './assets/home/hero-revisao-km-desktop.jpeg',
@@ -46,9 +47,6 @@ const STATIC_ASSETS = Array.from(new Set([
   .map((asset) => /^https?:/i.test(asset) ? asset : centralAssetUrl(asset))));
 
 const OPTIONAL_REMOTE_ASSETS = [
-  'https://cdn.tailwindcss.com/3.4.17',
-  'https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js',
-  'https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css',
   'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap'
 ];
 

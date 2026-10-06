@@ -1,0 +1,13 @@
+{
+  "name": "central-validation-tools",
+  "private": true,
+  "version": "1.0.0",
+  "devDependencies": {
+    "tailwindcss": "3.4.17",
+    "fake-indexeddb": "6.2.4",
+    "playwright": "1.58.2"
+  },
+  "scripts": {
+    "build": "node node_modules/tailwindcss/lib/cli.js -c ../central-tailwind.config.cjs -i ../central-tailwind.input.css -o ../../postoscredenciados-covreecia/utilities.css --minify"
+  }
+}

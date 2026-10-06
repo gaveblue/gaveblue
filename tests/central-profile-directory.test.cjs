@@ -7,7 +7,7 @@ const source = fs.readFileSync(path.join(__dirname, '../postoscredenciados-covre
 
 test('neutral company never inherits Covre logo, while Covre and custom brands are preserved', () => {
   const images = { 'central-brand-logo': { src: 'covre.png', style: {} }, 'central-about-logo': { src: 'covre.png', style: {} } };
-  const ctx = { CENTRAL_DEFAULT_ORGANIZATION_SLUG: 'covre-e-cia', document: {
+  const ctx = { renderCentralHistoryPendingNotice() {}, CENTRAL_DEFAULT_ORGANIZATION_SLUG: 'covre-e-cia', document: {
     getElementById: id => images[id] || null, querySelector: () => null
   } };
   vm.createContext(ctx);

@@ -36,6 +36,7 @@ function harness(options = {}) {
     getItem: key => storage.get(key) ?? null, setItem: (key, value) => { if (state.storageError) throw state.storageError; storage.set(key, String(value)); }, removeItem: key => storage.delete(key) };
   const context = vm.createContext({ Error, console: { error() {}, warn() {}, info() {} }, document: { getElementById: id => nodes[id] || null },
     navigator: { onLine: options.online !== false }, localStorage,
+    sendReceiptUpload: { active: false }, window: { setTimeout: () => 1 },
     CENTRAL_CLOUD_ENABLED: true, CENTRAL_CLOUD_ORIGIN: 'fixture', CENTRAL_DEFAULT_ORGANIZATION_SLUG: 'fixture-company',
     CENTRAL_PENDING_RECORDS_KEY: 'fixture-queue', centralOrganizationContext: { workspaceId: 'fixture-company', slug: 'fixture-company' },
     centralRetryInProgress: false, centralTenantStorageKey: key => `${key}:${context.centralOrganizationContext.workspaceId}`,

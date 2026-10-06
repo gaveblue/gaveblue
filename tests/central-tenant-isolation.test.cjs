@@ -14,7 +14,7 @@ const admin = fs.readFileSync(path.join(root, 'admin/admin.js'), 'utf8');
 
 function organizationHarness(pathname, search = '', stored = '') {
   const storageStart = app.indexOf('function centralTenantStorageKey');
-  const storageEnd = app.indexOf("const CENTRAL_APPWRITE_ORIGIN", storageStart);
+  const storageEnd = app.indexOf("const CENTRAL_CLOUD_ORIGIN", storageStart);
   const requestStart = app.indexOf('function getRequestedCentralOrganizationSlug');
   const requestEnd = app.indexOf('function applyCentralOrganizationBranding', requestStart);
   const functions = `${app.slice(storageStart, storageEnd)}\n${app.slice(requestStart, requestEnd)}`;
@@ -61,7 +61,8 @@ test('tenant is loaded before device state and driver options', () => {
 
 test('offline queue and notification history are filtered by workspace', () => {
   assert.match(app, /workspaceId:\s*centralOrganizationContext\.workspaceId/);
-  assert.match(app, /item\?\.workspaceId \|\| CENTRAL_DEFAULT_ORGANIZATION_SLUG\) === centralOrganizationContext\.workspaceId/);
+  assert.match(app, /item\.workspaceId \|\| CENTRAL_DEFAULT_ORGANIZATION_SLUG\) === workspaceId/);
+  assert.match(app, /workspaceId !== centralOrganizationContext\.workspaceId/);
   assert.match(app, /record\?\.workspaceId \|\| CENTRAL_DEFAULT_ORGANIZATION_SLUG\) === centralOrganizationContext\.workspaceId/);
   assert.match(app, /centralTenantStorageKey\(DRIVER_NAMES_STORAGE_KEY\)/);
   assert.match(app, /centralTenantStorageKey\(LAST_FUEL_ENTRY_STORAGE_KEY\)/);

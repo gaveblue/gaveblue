@@ -16,6 +16,7 @@ function harness(options = {}) {
     removeItem: (key) => values.delete(key)
   };
   const ctx = {
+    deferCentralBackgroundWork: () => false,
     localStorage, Map, Set, JSON, Error, Object, Date, String, Array, encodeURIComponent,
     CENTRAL_CLOUD_ENABLED: options.cloudEnabled !== false,
     CENTRAL_DEFAULT_ORGANIZATION_SLUG: 'covre-e-cia', CENTRAL_PENDING_RECORDS_KEY: KEY,
