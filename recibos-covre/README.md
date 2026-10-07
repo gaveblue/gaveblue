@@ -5,6 +5,14 @@ para esta área para evitar links quebrados. O gerador fica separado do
 WeRecibos geral porque atende somente os pagamentos esporádicos da Covre.
 Aplicação estática, sem instalação de dependências no servidor.
 
+O campo Nota fiscal aceita texto livre, números e quebras de linha, sem limite de
+caracteres, nos três modelos. Continua obrigatório em Frete e Carga / descarga,
+e opcional em Prestação de serviço. O PDF quebra as linhas e desloca o conteúdo
+abaixo da nota até o espaço reservado antes da assinatura; relações maiores
+continuam em páginas numeradas do mesmo documento, sem truncar o texto. A prévia
+de layout permite selecionar essas páginas. Os dados completos são mantidos no
+histórico, na edição e no backup, mesmo quando a grade mostra só um resumo.
+
 O modelo Prestação de serviço usa título e declaração próprios, descrição do
 serviço, data e valor, com nota fiscal opcional e sem destino. Mantém cheque,
 depósito, PIX e dinheiro, a numeração e o fluxo de anexos. Também está disponível

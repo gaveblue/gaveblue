@@ -73,6 +73,12 @@ dialog.partner-dialog{width:min(780px,calc(100vw - 40px))}.form-dialog::backdrop
 #receipt-form>.step>.panel,#receipt-form>.step>.model-grid{margin-bottom:0}
 #receipt-form .receipt-models{grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr))}
 #receipt-dialog .fields{gap:14px 20px}
+#receipt-form textarea{width:100%;min-height:90px;padding:12px 14px;resize:vertical;border:1px solid #cbd5e1;background:#fbfcff;border-radius:9px;font:inherit;line-height:1.5;color:var(--text)}
+#receipt-form textarea:focus{outline:3px solid #bdd3f4;border-color:var(--primary)}
+#receipt-form textarea[aria-invalid=true]{border-color:#ef4444}
+#invoice-help{font-weight:400;color:var(--muted)}
+.receipt-reference{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;max-width:340px;overflow:hidden;overflow-wrap:anywhere;white-space:pre-wrap}
+.receipt-invoice-summary{grid-column:1/-1;min-width:0}.receipt-invoice-summary strong{white-space:pre-wrap;overflow-wrap:anywhere}
 #receipt-dialog .steps{margin:18px 0 20px}
 #receipt-form>.step[hidden],#receipt-form label[hidden]{display:none}
 #receipt-dialog .form-actions{position:static;flex-shrink:0;margin-top:6px;padding:10px 0 0;flex-wrap:wrap}

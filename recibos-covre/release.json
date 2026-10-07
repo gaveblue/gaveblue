@@ -1,5 +1,5 @@
 {
-  "version": "54a50dcc419c7691",
+  "version": "34157bd5081e023a",
   "assets": [
     {
       "file": "style.css",
@@ -7,11 +7,11 @@
     },
     {
       "file": "grade.css",
-      "version": "7734ac4ca33b5454"
+      "version": "3b0937dfe503d81d"
     },
     {
       "file": "layout-editor.css",
-      "version": "f002eb7a6e13d8ae"
+      "version": "926f746ddf3fb6be"
     },
     {
       "file": "local-profile.css",
@@ -38,8 +38,12 @@
       "version": "14950d2e1136b18e"
     },
     {
+      "file": "invoice-text.js",
+      "version": "0318bde6afb3ed43"
+    },
+    {
       "file": "app.js",
-      "version": "0585b93e5ebddeb5"
+      "version": "e0649a5bb11732e4"
     },
     {
       "file": "cheques.js",
@@ -47,7 +51,7 @@
     },
     {
       "file": "layout-settings.js",
-      "version": "223e2b209b6fa19f"
+      "version": "9c808f8f5230fd27"
     },
     {
       "file": "local-profile.js",

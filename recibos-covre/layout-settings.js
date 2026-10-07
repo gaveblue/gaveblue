@@ -26,6 +26,8 @@
       <p class="print-layout-hint">Ao salvar, as próximas emissões e edições usarão este layout. PDFs já salvos no histórico mantêm a versão emitida.</p><p class="print-layout-hint">Na impressão, use A4 e escala 100% / tamanho real.</p></aside>
     </div>`;
   section.querySelector('.section-heading p').textContent='A página abaixo é o próprio PDF. Clique em um texto ou linha para ajustar.';
+  const pageLabel=document.createElement('label');pageLabel.id='layout-page-label';pageLabel.hidden=true;pageLabel.innerHTML='Página<select id="layout-page"><option value="1">1</option></select>';
+  section.querySelector('.print-layout-caption').append(pageLabel);
   section.querySelector('.print-layout-inspector .section-kicker').textContent='Item selecionado';
   el('layout-preview').setAttribute('aria-label','PDF editável: selecione um texto ou linha para mover');
   el('layout-reset-item').textContent='Restaurar este item';
@@ -80,7 +82,7 @@
     el('layout-size').min=isLine?'0.5':'6';el('layout-size').max=isLine?'12':'24';el('layout-size').step=isLine?'0.05':'0.5';
     widthLabel.hidden=!isLine;el('layout-weight').closest('label').hidden=isLine;el('layout-align').closest('label').hidden=isLine;
     if(isLine)el('layout-width').value=Number((current().fields[selected]?.width??box.metric.width).toFixed(2));
-    if(box){const m={...box.metric,...current().fields[selected]};for(const prop of ['x','y','size'])el('layout-'+prop).value=Number(m[prop].toFixed(2));el('layout-align').value=m.align||'left';el('layout-weight').value=m.weight||'auto';}
+    if(box){const m={...box.metric,...current().fields[selected]};for(const prop of ['x','y','size'])el('layout-'+prop).value=Number((m[prop]-(prop==='y'?(box.flowOffset||0):0)).toFixed(2));el('layout-align').value=m.align||'left';el('layout-weight').value=m.weight||'auto';}
     for(const button of el('layout-hitareas').children){button.classList.toggle('selected',button.dataset.field===selected);button.setAttribute('aria-pressed',String(button.dataset.field===selected));}
   }
   function hitAreas(){
@@ -97,14 +99,16 @@
       const blob=await generatePDF(input.data,{layout,attachment:input.attachment,attachmentPDF:input.attachmentPDF,onField:box=>boxes.push(box)});
       const pdfjs=await pdfReader();if(request!==revision)return;
       task=pdfjs.getDocument({data:new Uint8Array(await blob.arrayBuffer()),standardFontDataUrl:new URL('./vendor/pdfjs/standard_fonts/',document.baseURI).href,isEvalSupported:false});doc=await task.promise;
-      const page=await doc.getPage(1),viewport=page.getViewport({scale:2});
+      const pageNumber=Math.min(Number(el('layout-page').value)||1,doc.numPages);
+      const page=await doc.getPage(pageNumber),viewport=page.getViewport({scale:2});
       const canvas=document.createElement('canvas');canvas.id='layout-canvas';canvas.width=Math.ceil(viewport.width);canvas.height=Math.ceil(viewport.height);
       await page.render({canvasContext:canvas.getContext('2d'),viewport}).promise;
       if(request!==revision)return;
-      rectangles=boxes;pdfBlob=blob;el('layout-canvas').replaceWith(canvas);hitAreas();
+      el('layout-page').replaceChildren(...Array.from({length:doc.numPages},(_,i)=>new Option((i+1)+' de '+doc.numPages,String(i+1))));el('layout-page').value=String(pageNumber);pageLabel.hidden=doc.numPages===1;
+      rectangles=pageNumber===1?boxes:[];pdfBlob=blob;el('layout-canvas').replaceWith(canvas);hitAreas();
       if(pdfURL)URL.revokeObjectURL(pdfURL);pdfURL=URL.createObjectURL(blob);el('layout-open-pdf').href=pdfURL;
       renderedRevision=request;validPreview=true;el('layout-preview').setAttribute('aria-busy','false');
-      message('PDF atualizado · '+(el('layout-record').value?'dados do recibo selecionado':'dados de exemplo')+' · clique em um texto ou linha para editar.');controls();
+      message('PDF atualizado · página '+pageNumber+' de '+doc.numPages+' · '+(pageNumber===1?'clique em um texto ou linha para editar.':'continuação das notas fiscais.'));controls();
     }catch(error){if(request===revision){validPreview=false;el('layout-preview').setAttribute('aria-busy','false');message('Não foi possível atualizar o PDF: '+error.message,true);controls();}}
     finally{if(doc)await doc.destroy();else if(task)await task.destroy();}
   }
@@ -112,8 +116,9 @@
   function change(patch){const box=rectangles.find(r=>r.key===selected);if(!box)return;remember();current().fields[selected]={...box.metric,...current().fields[selected],...patch};delete current().fields[selected].text;delete current().fields[selected].bounds;schedule();selection();}
   function move(direction,large=false){const box=rectangles.find(r=>r.key===selected);if(!box)return;const m={...box.metric,...current().fields[selected]},step=large?10:1;change({x:Math.max(0,Math.min(595.56,m.x+(direction==='left'?-step:direction==='right'?step:0))),y:Math.max(0,Math.min(842.04,m.y+(direction==='up'?step:direction==='down'?-step:0)))});}
   async function open(){try{await databaseReady;await refresh();tipo=el('layout-model').value;if(!drafts.has(tipo)){const saved=await read(tipo)||{version:2,fields:{}};drafts.set(tipo,saved);baselines.set(tipo,JSON.stringify(saved));}populateRecords();selected=null;schedule();}catch(error){message(error.message,true);}}
-  el('layout-model').onchange=open;
-  el('layout-record').onchange=()=>{el('layout-payment-label').hidden=Boolean(el('layout-record').value);selected=null;schedule();};
+  el('layout-model').onchange=()=>{el('layout-page').value='1';open();};
+  el('layout-page').onchange=()=>{selected=null;schedule();};
+  el('layout-record').onchange=()=>{el('layout-page').value='1';el('layout-payment-label').hidden=Boolean(el('layout-record').value);selected=null;schedule();};
   el('layout-payment').onchange=()=>{selected=null;schedule();};
   el('layout-save').onclick=async()=>{if(!validPreview||renderedRevision!==revision)return;const type=tipo,savedRevision=revision;el('layout-save').disabled=true;try{const value=normalize(structuredClone(current()),type);await transaction('readwrite',s=>s.put({id:configKey(type),value}),'config');baselines.set(type,JSON.stringify(value));if(tipo===type&&revision===savedRevision){drafts.set(tipo,value);message('Layout salvo. O PDF de cada nova emissão usará estas posições e fontes.');}}catch(error){message(error.message,true);}finally{controls();}};
   el('layout-reset').onclick=()=>{remember();drafts.set(tipo,{version:2,fields:{}});schedule();};
@@ -125,6 +130,6 @@
   section.addEventListener('keydown',event=>{if(event.target.matches('input,select,textarea')||!selected||section.hidden||el('settings-layout')?.hidden)return;if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(event.key)){event.preventDefault();move(event.key.slice(5).toLowerCase(),event.shiftKey);}if(event.key==='Escape'){selected=null;selection();}});
   section.querySelectorAll('[data-move]').forEach(button=>button.onclick=event=>move(button.dataset.move,event.shiftKey));
   el('layout-width').oninput=event=>{if(event.target.value&&event.target.checkValidity())change({width:Number(event.target.value)});};
-  for(const prop of ['x','y','size','align','weight'])el('layout-'+prop).oninput=event=>{const input=event.target;if(['x','y','size'].includes(prop)){if(!input.value||!input.checkValidity())return;change({[prop]:Number(input.value)});}else if(prop==='align'){const box=rectangles.find(r=>r.key===selected);if(box)change({align:input.value,x:box.x+(input.value==='center'?box.width/2:input.value==='right'?box.width:0)});}else change({[prop]:input.value});};
+  for(const prop of ['x','y','size','align','weight'])el('layout-'+prop).oninput=event=>{const input=event.target;if(['x','y','size'].includes(prop)){if(!input.value||!input.checkValidity())return;const box=rectangles.find(r=>r.key===selected);change({[prop]:Number(input.value)+(prop==='y'?(box?.flowOffset||0):0)});}else if(prop==='align'){const box=rectangles.find(r=>r.key===selected);if(box)change({align:input.value,x:box.x+(input.value==='center'?box.width/2:input.value==='right'?box.width:0)});}else change({[prop]:input.value});};
   window.receiptLayout={read,open,normalize};
 })();

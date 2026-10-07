@@ -32,15 +32,16 @@ let editingRecord=null, editingCompany=null, preservedAttachmentPDF=null;
 let attachmentLoading=false,transitioning=false;
 function clearFieldError(input){
   input.removeAttribute('aria-invalid');input.removeAttribute('aria-describedby');
+  if(input.name==='nota')input.setAttribute('aria-describedby','invoice-help');
   input.closest('label')?.querySelector('.field-error')?.remove();
 }
 function clearErrors(container){
-  container.querySelectorAll('input,select').forEach(input=>{clearFieldError(input);delete input.dataset.uploadError;});
+  container.querySelectorAll('input,select,textarea').forEach(input=>{clearFieldError(input);delete input.dataset.uploadError;});
 }
 function fieldError(input,message){
   clearFieldError(input);if(!message)return;
   const error=document.createElement('span');error.className='field-error';error.id='error-'+(input.name||input.id);
-  error.textContent=message;input.setAttribute('aria-invalid','true');input.setAttribute('aria-describedby',error.id);input.closest('label')?.append(error);
+  error.textContent=message;input.setAttribute('aria-invalid','true');input.setAttribute('aria-describedby',(input.name==='nota'?'invoice-help ':'')+error.id);input.closest('label')?.append(error);
 }
 function numericValue(value){return Number(value.replace(/^R\$\s*/,'').replaceAll('.','').replace(',','.'));}
 function inputError(input){
@@ -53,7 +54,7 @@ function inputError(input){
   if(input.maxLength>0&&value.length>input.maxLength)return 'Use até '+input.maxLength+' caracteres.';
   if(['documento','pagadorDocumento','companyDocument'].includes(name)&&(!/^[\d./\s-]+$/.test(value)||![11,14].includes(value.replace(/\D/g,'').length)))return 'Informe CPF com 11 dígitos ou CNPJ com 14 dígitos.';
   if(['documento','pagadorDocumento','companyDocument'].includes(name)&&!validDocument(value))return 'CPF/CNPJ inválido. Confira os dígitos informados.';
-  if(['nota','cheque'].includes(name)&&!/^\d+$/.test(value))return 'Use somente números.';
+  if(name==='cheque'&&!/^\d+$/.test(value))return 'Use somente números.';
   if(name==='valor'&&(!/^R\$\s*\d{1,3}(\.\d{3})*,\d{2}$/.test(value)||numericValue(value)<=0||numericValue(value)>999999999.99))return 'Informe um valor entre R$ 0,01 e R$ 999.999.999,99.';
   if(input.type==='date'&&!/^\d{4}-\d{2}-\d{2}$/.test(value))return 'Informe uma data válida.';
   if(name==='pixChave'){
@@ -73,7 +74,7 @@ function inputError(input){
       const date=new Date(field('dataEmissao').value+'T12:00:00');
       if(!Number.isNaN(date.getTime()))line=value+', '+date.toLocaleDateString('pt-BR',{day:'numeric',month:'long',year:'numeric'});
     }
-    if(line&&ctx.measureText(line).width>480)return 'O texto excede a largura do recibo. Abrevie o preenchimento.';
+    if(name!=='nota'&&line&&ctx.measureText(line).width>480)return 'O texto excede a largura do recibo. Abrevie o preenchimento.';
     if(name==='pagadorNome'){
       const suffix=', inscrito(a) no CNPJ sob nº '+field('pagadorDocumento').value+(field('pagadorIE').value?' e I.E. nº '+field('pagadorIE').value:'')+'.';
       ctx.font='bold 9.48px Arial';const width=ctx.measureText(value).width;ctx.font='9.48px Arial';
@@ -85,8 +86,8 @@ function inputError(input){
 }
 function validateFields(container){
   let first;
-  container.querySelectorAll('input,select').forEach(clearFieldError);
-  container.querySelectorAll('input,select').forEach(input=>{const message=inputError(input);if(!message)return;const target=input.dataset.partnerDetail?field(input.name.startsWith('pagador')?'pagadorNome':'nome'):input;fieldError(target,input.dataset.partnerDetail?'Revise os dados complementares no cadastro do parceiro: '+message:message);if(!first)first=target;});
+  container.querySelectorAll('input,select,textarea').forEach(clearFieldError);
+  container.querySelectorAll('input,select,textarea').forEach(input=>{const message=inputError(input);if(!message)return;const target=input.dataset.partnerDetail?field(input.name.startsWith('pagador')?'pagadorNome':'nome'):input;fieldError(target,input.dataset.partnerDetail?'Revise os dados complementares no cadastro do parceiro: '+message:message);if(!first)first=target;});
   if(first){first.focus();first.scrollIntoView({block:'center',behavior:'smooth'});return false;}
   return true;
 }
@@ -94,7 +95,7 @@ field('valor').addEventListener('input',event=>{
   const digits=event.target.value.replace(/\D/g,'');event.target.value=digits?money(Number(digits)/100):'';
 });
 for(const container of [form,byId('company-form')]){
-  container.addEventListener('input',event=>{if(event.target.matches('input,select')&&event.target.hasAttribute('aria-invalid'))fieldError(event.target,inputError(event.target));});
+  container.addEventListener('input',event=>{if(event.target.matches('input,select,textarea')&&event.target.hasAttribute('aria-invalid'))fieldError(event.target,inputError(event.target));});
 }
 const statusMessage = (message,error=false) => {
   for(const id of ['status','receipt-status','company-status']){byId(id).textContent=message;byId(id).classList.toggle('error',error);}
@@ -107,7 +108,7 @@ function updatePayment(){
   const method=field('formaPagamento').value;
   for(const key of ['cheque','deposito','pix','dinheiro']){
     const panel=byId('payment-'+key);panel.hidden=key!==method;
-    panel.querySelectorAll('input,select').forEach(input=>{input.disabled=key!==method;if(input.disabled)clearFieldError(input);});
+    panel.querySelectorAll('input,select,textarea').forEach(input=>{input.disabled=key!==method;if(input.disabled)clearFieldError(input);});
   }
 }
 document.querySelectorAll('[name=formaPagamento]').forEach(input=>input.onchange=updatePayment);
@@ -194,7 +195,7 @@ function configureGrid(section,prefix,keys,render){
     if(!key)return;const th=headers[index],label=th.textContent,button=document.createElement('button');button.type='button';button.className='sort-heading';button.textContent=label+' ↕';th.replaceChildren(button);
     button.onclick=()=>{const state=gridSort[prefix];state.direction=state.key===key?-state.direction:1;state.key=key;headers.forEach(header=>header.removeAttribute('aria-sort'));th.setAttribute('aria-sort',state.direction===1?'ascending':'descending');render();};
   });
-  const filters=byId(section).querySelector('.filters'),clear=document.createElement('button');clear.type='button';clear.className='filter-clear';clear.textContent='Limpar';clear.title='Limpar filtros';clear.onclick=()=>{filters.querySelectorAll('input,select').forEach(input=>input.value='');render();};filters.append(clear);
+  const filters=byId(section).querySelector('.filters'),clear=document.createElement('button');clear.type='button';clear.className='filter-clear';clear.textContent='Limpar';clear.title='Limpar filtros';clear.onclick=()=>{filters.querySelectorAll('input,select,textarea').forEach(input=>input.value='');render();};filters.append(clear);
 }
 configureGrid('history','receipts',['','dataEmissao','numero','nome','tipo','valor','',''],renderHistory);
 configureGrid('companies','partners',['','name','role','document','address','city'],renderCompanies);
@@ -228,7 +229,7 @@ function renderHistory() {
   for(const r of items){
     const row=byId('records').insertRow(),d=r.data;
     selectionCell(row,r.id,selectedReceipts,update,d.nome);
-    [dateBR(d.dataEmissao),d.numero||'—',d.nome,modelName(d.tipo)+(d.nota?' · NF '+d.nota:''),money(d.valor)].forEach(t=>row.insertCell().textContent=t);
+    [dateBR(d.dataEmissao),d.numero||'—',d.nome,modelName(d.tipo)+(d.nota?' · NF '+d.nota:''),money(d.valor)].forEach((t,index)=>{const cell=row.insertCell();if(index===3){const text=document.createElement('span');text.className='receipt-reference';text.textContent=t;cell.append(text);}else cell.textContent=t;});
     const attachmentCell=row.insertCell(),hasAttachment=hasReceiptAttachment(r);attachmentCell.textContent=hasAttachment?'SIM':'NÃO';attachmentCell.className=hasAttachment?'attachment-yes':'attachment-no';
     const button=document.createElement('button');button.type='button';button.className='grid-link';button.textContent='Abrir PDF';button.onclick=()=>openSaved(r);row.insertCell().append(button);
     row.ondblclick=event=>{if(!event.target.closest('button,input'))editRecord(r);};
@@ -490,7 +491,7 @@ byId('exit-save').onclick=async()=>{
 function validateReceipt(){
   for(let n=0;n<LAST_STEP;n++){
     const section=form.querySelector('.step[data-step="'+n+'"]');
-    if([...section.querySelectorAll('input,select')].some(input=>inputError(input))){showStep(n);validateFields(section);return false;}
+    if([...section.querySelectorAll('input,select,textarea')].some(input=>inputError(input))){showStep(n);validateFields(section);return false;}
   }
   return true;
 }
@@ -518,7 +519,7 @@ async function nextStep() {
     byId('summary').replaceChildren();
     for(const [label,value] of [['Número',data.numero],['Modelo',modelName(data.tipo)],['Prestador',data.nome],['Documento',data.documento],['Nota fiscal',data.nota],['Valor',money(data.valor)],['Pagamento',paymentName(data.formaPagamento)]]){
       const item=document.createElement('div'),title=document.createElement('span'),text=document.createElement('strong');
-      title.textContent=label;text.textContent=value||'Não informada';item.append(title,text);byId('summary').append(item);
+      title.textContent=label;text.textContent=value||'Não informada';if(label==='Nota fiscal')item.className='receipt-invoice-summary';item.append(title,text);byId('summary').append(item);
     }
     showStep(LAST_STEP);openDraft();
   } catch(error){statusMessage(error.message,true);}
@@ -551,7 +552,7 @@ function updateType() {
   if(!freight)clearFieldError(field('destino'));
   byId('service-label').textContent=freight?'Tipo de entrega':service?'Descrição do serviço':'Tipo de serviço';
   field('servico').placeholder=freight?'Ex.: Venda':service?'Ex.: Manutenção de equipamentos':'Ex.: Descarga de mercadoria de compra';
-  field('nota').required=!service;byId('invoice-label').textContent=service?'Nº da nota fiscal (opcional)':'Nº da nota fiscal';
+  field('nota').required=!service;byId('invoice-label').textContent=service?'Nota fiscal (opcional)':'Nota fiscal';
   clearFieldError(field('nota'));
 }
 function resetForm() {
@@ -601,6 +602,7 @@ byId('restore').onchange=async event=>{
     const imported=backup.records.map(r=>{
       if(!r||typeof r.id!=='string'||!r.id||typeof r.createdAt!=='string'||!Number.isFinite(Date.parse(r.createdAt))||!r.data||!['covre','chapa','servico'].includes(r.data.tipo)||typeof r.pdf!=='string')throw new Error('Registro inválido na cópia.');
       const required=['nome','documento','dataEmissao',...(r.data.tipo==='servico'?[]:['nota']),...((r.data.formaPagamento||'cheque')==='cheque'?['cheque']:[])];
+      if(r.data.nota!==undefined&&typeof r.data.nota!=='string')throw new Error('Nota fiscal inválida na cópia.');
       if(r.data.numero!==undefined&&!/^\d+$/.test(r.data.numero))throw new Error('Número de recibo inválido no backup.');
       if(r.data.dataSaque!==undefined&&r.data.dataSaque!==''&&!window.chequeWithdrawal.validDate(r.data.dataSaque))throw new Error('Data de saque inválida no backup.');
       if(required.some(k=>typeof r.data[k]!=='string'||!r.data[k].trim())||!/^\d{4}-\d{2}-\d{2}$/.test(r.data.dataEmissao)||!Number.isFinite(r.data.valor)||r.data.valor<=0)throw new Error('Dados inválidos na cópia.');
@@ -653,11 +655,13 @@ byId('attachment').onchange=async event=>{
 const databaseReady=openDatabase().then(async result=>{db=result;await refresh();});
 databaseReady.catch(error=>{statusMessage(error.message,true);byId('issue').disabled=true;});
 async function generatePDF(data,options={}) {
-  const customLayout=Object.hasOwn(options,'layout')?options.layout:await window.receiptLayout?.read(data.tipo);
+  const savedLayout=Object.hasOwn(options,'layout')?options.layout:await window.receiptLayout?.read(data.tipo);
+  const customLayout=structuredClone(savedLayout||{version:2,fields:{}});
   const pdfAttachment=Object.hasOwn(options,'attachment')?options.attachment:attachment;
   const pdfAttachmentSource=Object.hasOwn(options,'attachmentPDF')?options.attachmentPDF:preservedAttachmentPDF;
   const layout=await (await getFile('./modelos/layout.json')).json();
   const metrics=layout[data.tipo];
+  const originalFields=structuredClone(metrics.fields);
   const paymentTitleY=metrics.fields.emitente.y+10.92;
   for(const key of ['localData','assinatura','assinaturaDocumento'])Object.assign(metrics.fields[key],{x:metrics.width/2,align:'center'});
   if(customLayout)for(const [key,settings] of Object.entries(customLayout.fields||{}))if(metrics.fields[key])Object.assign(metrics.fields[key],settings);
@@ -668,6 +672,21 @@ async function generatePDF(data,options={}) {
   const pdf=await PDFLib.PDFDocument.load(await (await getFile('./modelos/'+template)).arrayBuffer());
   const page=pdf.getPages()[0];
   const staticFields=(await (await getFile('./modelos/static-layout.json')).json())[template];
+  const invoice=window.receiptInvoice.plan(data,metrics,staticFields,customLayout,originalFields);
+  if(invoice?.shift){
+    const partnerLayout=(await (await getFile('./modelos/partners-layout.json')).json())[data.tipo];
+    for(const key of window.receiptInvoice.following){
+      let base=metrics.fields[key]||staticFields[key];
+      if(!base&&key==='tituloPagamento')base={x:56.784,y:paymentTitleY,size:9.48,weight:'bold'};
+      if(!base&&key.startsWith('declaracao'))base={...partnerLayout.declaration[0],y:partnerLayout.declaration[0].y-Number(key.slice(10))*12.42};
+      if(!base)continue;
+      const effective={...base,...customLayout.fields[key]};
+      customLayout.fields[key]={...customLayout.fields[key],y:effective.y-invoice.shift};
+      if(metrics.fields[key])metrics.fields[key].y=effective.y-invoice.shift;
+    }
+    const onField=options.onField;
+    options={...options,onField:box=>onField?.(window.receiptInvoice.following.has(box.key)?{...box,flowOffset:invoice.shift,metric:{...box.metric,y:box.metric.y+invoice.shift}}:box)};
+  }
   const changed=[];
   for(const [key,m] of Object.entries(staticFields)){
     const settings=customLayout?.fields?.[key];
@@ -712,6 +731,7 @@ async function generatePDF(data,options={}) {
     if(method==='pix')Object.assign(values,{banco:'Tipo de chave: '+({cpf:'CPF',cnpj:'CNPJ',email:'E-mail',telefone:'Telefone',aleatoria:'Aleatória'}[data.pixTipo]),agencia:'Chave: '+data.pixChave});
   }
   for(const [key,m] of Object.entries(metrics.fields)) {
+    if(key==='nota')continue;
     if(!values[key])continue;
     const text=values[key],boldLine=m.weight==='bold'||((!m.weight||m.weight==='auto')&&['assinatura','valorCheque'].includes(key));
     const splitBold=(!m.weight||m.weight==='auto')&&['nome','valorServico','cheque'].includes(key);
@@ -775,6 +795,7 @@ async function generatePDF(data,options={}) {
     const scale=Math.min(box.width/image.width,box.height/image.height);
     page.drawImage(image,{x:box.x+(box.width-image.width*scale)/2,y:box.y+box.height-image.height*scale,width:image.width*scale,height:image.height*scale});
   }
+  await window.receiptInvoice.draw(pdf,page,data,invoice,options);
   pdf.setTitle('Recibo '+(data.numero||'')+' de '+modelName(data.tipo)+' - '+data.nome);
   pdf.setAuthor(data.pagadorNome||'COVRE & CIA LTDA');pdf.setSubject('Pagamento');
   return new Blob([await pdf.save()],{type:'application/pdf'});
