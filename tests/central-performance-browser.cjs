@@ -4,10 +4,11 @@ const {chromium}=require(process.env.CENTRAL_TEST_TOOLS ? path.join(process.env.
 const root=path.resolve(__dirname,'..');
 const station={name:'Posto de teste',city:'Cidade teste',address:'Endereço fictício',active:true};
 (async()=>{
- const browser=await chromium.launch({executablePath:process.env.CENTRAL_TEST_BROWSER || 'C:/Program Files/Google/Chrome/Application/chrome.exe',headless:true});
+ const cameraStress=process.env.CENTRAL_CAMERA_STRESS==='1';
+ const browser=await chromium.launch({executablePath:process.env.CENTRAL_TEST_BROWSER || 'C:/Program Files/Google/Chrome/Application/chrome.exe',headless:true,args:cameraStress?['--use-fake-device-for-media-stream','--use-fake-ui-for-media-stream']:[]});
  try {
  for(const viewport of [{width:320,height:568},{width:375,height:667},{width:768,height:1024}]){
-  const context=await browser.newContext({viewport,serviceWorkers:'block'});
+  const context=await browser.newContext({viewport,serviceWorkers:'block',permissions:cameraStress?['camera']:[]});
   const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
   await context.route('**/*',async route=>{
    const u=new URL(route.request().url());
@@ -58,6 +59,29 @@ const station={name:'Posto de teste',city:'Cidade teste',address:'Endereço fict
    const valid=await page.evaluate(id=>window.CentralFormPages.validate(id),id);assert.equal(valid,false);
    const camera=page.locator(`#${id} button`).filter({hasText:'Tirar Foto'}).first();await camera.scrollIntoViewIfNeeded();
    assert.ok(await camera.isVisible());
+   if(cameraStress){
+    const cdp=await context.newCDPSession(page);await cdp.send('Emulation.setCPUThrottlingRate',{rate:4});
+    await page.evaluate(()=>{
+     if(!window.cameraStressOriginalToBlob){
+      window.cameraStressOriginalToBlob=HTMLCanvasElement.prototype.toBlob;
+      HTMLCanvasElement.prototype.toBlob=function(callback,...args){window.cameraStressOriginalToBlob.call(this,blob=>setTimeout(()=>callback(blob),300),...args);};
+     }
+    });
+    for(let cycle=0;cycle<8;cycle++){
+     await page.evaluate(target=>openReceiptCamera(target),mode==='servicos'?'loose':'fuel');
+     const cameraState=await page.evaluate(()=>({phase:receiptCameraPhase,status:document.getElementById('receipt-camera-status').textContent,width:document.getElementById('receipt-camera-video').videoWidth}));
+     assert.equal(cameraState.phase,'live',JSON.stringify(cameraState));
+     await page.waitForFunction(()=>receiptCameraPhase==='live'&&document.getElementById('receipt-camera-video').videoWidth>0);
+     await page.evaluate(()=>{void captureReceiptCamera();void captureReceiptCamera();void switchReceiptCamera();});
+     await page.waitForFunction(()=>receiptCameraPhase==='review');
+     assert.equal(await page.locator('.receipt-camera-confirm').isEnabled(),true);
+     await page.locator('.receipt-camera-confirm').click();
+     await page.waitForFunction(()=>receiptCameraPhase==='closed');
+     assert.ok(await page.evaluate(target=>(target==='loose'?selectedLooseNoteReceiptFile:selectedFuelReceiptFile)?.size>0,mode==='servicos'?'loose':'fuel'));
+    }
+    console.log(JSON.stringify({viewport,mode,cameraCycles:8,cpuSlowdown:4,encodingDelayMs:300,result:'PASS'}));
+    await cdp.send('Emulation.setCPUThrottlingRate',{rate:1});await cdp.detach();
+   }
    if(process.env.CENTRAL_TEST_SCREENSHOTS)await page.screenshot({path:path.join(process.env.CENTRAL_TEST_SCREENSHOTS,`central-${viewport.width}-${mode}.png`)});
    console.log(JSON.stringify({viewport,mode,result:'PASS'}));
   }

@@ -3466,6 +3466,7 @@ body.receipt-camera-open .mobile-bottom-nav { display: none !important; }
 }
 
 .receipt-camera-icon-button svg { width: 1.55rem; height: 1.55rem; }
+.receipt-camera-controls button:disabled { opacity: .45; cursor: wait; }
 
 .receipt-camera-icon-button .fa-camera-rotate {
   font-size: 1.5rem;

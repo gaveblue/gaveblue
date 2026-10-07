@@ -114,6 +114,8 @@ let looseReceiptSelectionId = 0;
 let activeReceiptCameraStream = null;
 let receiptCameraRequestVersion = 0;
 let receiptCameraCaptureBusy = false;
+let receiptCameraPhase = 'closed';
+let receiptCameraSession = 0;
 let activeReceiptCameraTarget = 'fuel';
 let receiptCameraDevices = [];
 let receiptCameraDeviceIndex = 0;
@@ -5091,7 +5093,7 @@ function deferCentralBackgroundWork(task) {
 // Local-only diagnostics: no receipt, filename, identity, URL or token.
 function getCentralPerformanceSnapshot() {
   return {
-    release: '20261006-3.00-about-2',
+    release: '20261007-camera-lifecycle-1',
     lightweight: centralLightweightMode,
     uploads: (sendReceiptUpload.samples || []).map(sample => ({ ...sample }))
   };
@@ -5741,6 +5743,7 @@ async function prepareReceiptFile(target, file) {
     previewContainer.classList.remove('hidden');
     photoButtons.classList.add('hidden');
     updateStatus('Foto anexada. Toque em Enviar comprovante para continuar.', 'neutral');
+    return true;
   } catch (error) {
     console.error('Erro ao preparar comprovante:', error);
     if (selectionId !== (isLoose ? looseReceiptSelectionId : fuelReceiptSelectionId)) return;
@@ -5750,6 +5753,7 @@ async function prepareReceiptFile(target, file) {
       resetFuelPhotoState();
     }
     showErrorMessage(error?.message || 'N\u00e3o foi poss\u00edvel preparar a foto. Tente novamente.');
+    return false;
   }
 }
 
@@ -5867,6 +5871,10 @@ async function requestReceiptCameraStream(deviceId = '') {
 }
 
 async function attachReceiptCameraStream(stream) {
+  if (activeReceiptCameraStream !== stream) {
+    stream.getTracks().forEach(track => track.stop());
+    throw new Error('Câmera encerrada.');
+  }
   const video = document.getElementById('receipt-camera-video');
   if (!video) {
     throw new Error('Visualizador da c\u00e2mera indispon\u00edvel.');
@@ -5874,6 +5882,10 @@ async function attachReceiptCameraStream(stream) {
 
   video.srcObject = stream;
   await video.play();
+  if (activeReceiptCameraStream !== stream) {
+    stream.getTracks().forEach(track => track.stop());
+    throw new Error('Câmera encerrada.');
+  }
   updateReceiptCameraFlashAvailability();
 }
 
@@ -6067,10 +6079,32 @@ async function reviewNativeReceiptFile(target, file) {
   return prepareReceiptFile(target, file);
 }
 
+function setReceiptCameraPhase(phase, message = '') {
+  receiptCameraPhase = phase;
+  const modal = document.getElementById('receipt-camera-modal');
+  if (!modal) return;
+  modal.setAttribute('aria-busy', String(['opening', 'capturing', 'attaching'].includes(phase)));
+  const allowed = {
+    'captureReceiptCamera()': phase === 'live',
+    'switchReceiptCamera()': phase === 'live',
+    'toggleReceiptCameraFlash()': phase === 'live',
+    'retakeReceiptCamera()': phase === 'review',
+    'confirmReceiptCamera()': phase === 'review',
+    'useNativeReceiptCamera()': ['opening', 'live', 'review', 'error'].includes(phase)
+  };
+  for (const button of modal.querySelectorAll('button[onclick]')) {
+    const action = button.getAttribute('onclick');
+    if (action in allowed) button.disabled = !allowed[action];
+  }
+  if (message) document.getElementById('receipt-camera-status').textContent = message;
+}
+
 async function openReceiptCamera(target = 'fuel') {
+  if (receiptCameraPhase !== 'closed') return;
   persistCentralFormDraft(target === 'loose' ? 'loose-note-form' : 'fuel-form');
   activeReceiptCameraTarget = target === 'loose' ? 'loose' : 'fuel';
   closeReceiptCamera();
+  const session = receiptCameraSession;
   if ((navigator.deviceMemory && navigator.deviceMemory > 4) || !navigator.mediaDevices?.getUserMedia) {
     openNativeReceiptCameraFallback(activeReceiptCameraTarget);
     return;
@@ -6080,25 +6114,27 @@ async function openReceiptCamera(target = 'fuel') {
   modal?.classList.remove('hidden');
   showReceiptCameraLiveMode();
   enterReceiptCameraFullscreen();
-  if (status) status.textContent = 'Abrindo câmera leve. Enquadre a nota inteira com boa iluminação.';
+  setReceiptCameraPhase('opening', 'Abrindo câmera leve. Aguarde a imagem ficar pronta.');
   const opening = requestReceiptCameraStream();
-  const requestVersion = receiptCameraRequestVersion;
   try {
     const stream = await opening;
     await attachReceiptCameraStream(stream);
-    if (requestVersion !== receiptCameraRequestVersion) return;
+    if (session !== receiptCameraSession) return;
     try { await preferRearReceiptCamera(); } catch (_) {}
-    if (modal?.classList.contains('hidden')) return;
+    if (session !== receiptCameraSession || modal?.classList.contains('hidden')) return;
+    if (!activeReceiptCameraStream) throw new Error('A câmera não ficou pronta.');
+    setReceiptCameraPhase('live');
     if (status) status.textContent = 'Modo leve: confira a lente. Use Alternar câmera se o enquadramento estiver muito aberto.';
   } catch (error) {
-    if (requestVersion !== receiptCameraRequestVersion) return;
-    closeReceiptCamera();
-    showErrorMessage('Câmera leve indisponível. Use Tirar Foto novamente ou Fazer Upload.');
-    openNativeReceiptCameraFallback(activeReceiptCameraTarget);
+    if (session !== receiptCameraSession) return;
+    stopReceiptCameraStream();
+    setReceiptCameraPhase('error', 'Não foi possível abrir a câmera leve. Toque em Usar câmera do celular. Seu preenchimento foi mantido.');
   }
 }
 
 function closeReceiptCamera() {
+  receiptCameraSession++;
+  setReceiptCameraPhase('closed');
   receiptCameraRequestVersion++;
   stopReceiptCameraStream();
   clearReceiptCameraReview();
@@ -6107,11 +6143,14 @@ function closeReceiptCamera() {
 }
 
 async function switchReceiptCamera() {
+  if (receiptCameraPhase !== 'live') return;
   if (receiptCameraDevices.length < 2) {
     return;
   }
 
   receiptCameraDeviceIndex = (receiptCameraDeviceIndex + 1) % receiptCameraDevices.length;
+  const session = receiptCameraSession;
+  setReceiptCameraPhase('opening');
   const status = document.getElementById('receipt-camera-status');
   if (status) {
     status.textContent = 'Alternando c\u00e2mera...';
@@ -6120,23 +6159,31 @@ async function switchReceiptCamera() {
   try {
     const stream = await requestReceiptCameraStream(receiptCameraDevices[receiptCameraDeviceIndex].deviceId);
     await attachReceiptCameraStream(stream);
+    if (session !== receiptCameraSession) return;
+    setReceiptCameraPhase('live');
     try { localStorage.setItem('central-receipt-camera-preference', stream.getVideoTracks()[0]?.getSettings?.().deviceId || receiptCameraDevices[receiptCameraDeviceIndex].deviceId); } catch (_) {}
     if (status) {
       status.textContent = 'C\u00e2mera pronta';
     }
   } catch (error) {
+    if (session !== receiptCameraSession) return;
+    setReceiptCameraPhase('error', 'Não foi possível alternar. Use a câmera do celular ou feche para tentar novamente.');
     console.error('N\u00e3o foi poss\u00edvel alternar a c\u00e2mera:', error);
     showErrorMessage('N\u00e3o foi poss\u00edvel alternar a c\u00e2mera.');
   }
 }
 
 async function captureReceiptCamera() {
-  if (receiptCameraCaptureBusy) return;
+  if (receiptCameraCaptureBusy || receiptCameraPhase !== 'live') return;
   receiptCameraCaptureBusy = true;
+  setReceiptCameraPhase('capturing', 'Capturando foto… Aguarde, não precisa tocar novamente.');
   const requestVersion = receiptCameraRequestVersion;
   try { await captureReceiptCameraFrame(requestVersion); }
-  catch (_) { showErrorMessage('Não foi possível capturar. Tente novamente ou use Fazer Upload; o formulário foi preservado.'); }
-  finally { receiptCameraCaptureBusy = false; }
+  catch (_) { if (requestVersion === receiptCameraRequestVersion) showErrorMessage('Não foi possível capturar. Tente novamente ou use Fazer Upload; o formulário foi preservado.'); }
+  finally {
+    receiptCameraCaptureBusy = false;
+    if (requestVersion === receiptCameraRequestVersion && receiptCameraPhase === 'capturing') setReceiptCameraPhase('live', 'Câmera pronta. Tente capturar novamente.');
+  }
 }
 
 async function captureReceiptCameraFrame(requestVersion) {
@@ -6215,9 +6262,15 @@ async function captureReceiptCameraFrame(requestVersion) {
   if (requestVersion !== receiptCameraRequestVersion) return;
   optimizedReceiptFiles.add(file);
   showReceiptCameraReviewMode(file, activeReceiptCameraTarget);
+  setReceiptCameraPhase('review');
 }
 
 async function retakeReceiptCamera() {
+  if (receiptCameraPhase !== 'review') return;
+  const session = receiptCameraSession;
+  const previousFile = pendingReceiptCameraFile;
+  const target = activeReceiptCameraTarget;
+  setReceiptCameraPhase('opening', 'Reabrindo câmera…');
   const status = document.getElementById('receipt-camera-status');
   showReceiptCameraLiveMode();
   if (status) {
@@ -6228,26 +6281,36 @@ async function retakeReceiptCamera() {
     const selectedDevice = receiptCameraDevices[receiptCameraDeviceIndex];
     const stream = await requestReceiptCameraStream(selectedDevice?.deviceId || '');
     await attachReceiptCameraStream(stream);
+    if (session !== receiptCameraSession) return;
+    setReceiptCameraPhase('live');
     if (status) {
       status.textContent = 'C\u00e2mera pronta';
     }
   } catch (error) {
+    if (session !== receiptCameraSession) return;
     console.error('N\u00e3o foi poss\u00edvel reabrir a c\u00e2mera:', error);
-    closeReceiptCamera();
-    openNativeReceiptCameraFallback(activeReceiptCameraTarget);
+    showReceiptCameraReviewMode(previousFile, target);
+    setReceiptCameraPhase('review', 'Não foi possível reabrir. Sua foto anterior foi mantida; você pode confirmar com OK.');
   }
 }
 
 async function confirmReceiptCamera() {
-  if (!pendingReceiptCameraFile) {
+  if (!pendingReceiptCameraFile || receiptCameraPhase !== 'review') {
     return;
   }
 
   const file = pendingReceiptCameraFile;
   const target = activeReceiptCameraTarget;
-  pendingReceiptCameraFile = null;
-  closeReceiptCamera();
-  await prepareReceiptFile(target, file);
+  const session = receiptCameraSession;
+  setReceiptCameraPhase('attaching', 'Anexando foto… Aguarde.');
+  try {
+    const attached = await prepareReceiptFile(target, file);
+    if (session !== receiptCameraSession) return;
+    if (attached) closeReceiptCamera();
+    else setReceiptCameraPhase('review', 'A foto continua aqui. Toque em OK para tentar anexar novamente.');
+  } catch (_) {
+    if (session === receiptCameraSession) setReceiptCameraPhase('review', 'A foto foi preservada. Toque em OK para tentar novamente.');
+  }
 }
 
 function deletePhoto() {
