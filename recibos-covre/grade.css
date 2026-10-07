@@ -71,6 +71,7 @@ dialog.partner-dialog{width:min(780px,calc(100vw - 40px))}.form-dialog::backdrop
 #receipt-form{display:flex;flex-direction:column;flex:1;min-height:0;margin:0}
 #receipt-form>.step{flex:1;min-height:0;overflow-y:auto;padding:2px 3px;scrollbar-gutter:stable;display:grid;align-content:safe center;gap:12px}
 #receipt-form>.step>.panel,#receipt-form>.step>.model-grid{margin-bottom:0}
+#receipt-form .receipt-models{grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr))}
 #receipt-dialog .fields{gap:14px 20px}
 #receipt-dialog .steps{margin:18px 0 20px}
 #receipt-form>.step[hidden],#receipt-form label[hidden]{display:none}

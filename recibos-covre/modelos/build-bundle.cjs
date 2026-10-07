@@ -1,7 +1,7 @@
 // Run with Node after changing a PDF template or its coordinate files.
 const fs=require('node:fs'),path=require('node:path');
 const bundle={};
-for(const name of ['layout.json','partners-layout.json','static-layout.json','covre-v1.pdf','chapa-v1.pdf','covre-partners-v2.pdf','chapa-partners-v2.pdf','covre-v1-payment.pdf','chapa-v1-payment.pdf','covre-partners-v2-payment.pdf','chapa-partners-v2-payment.pdf']){
+for(const name of ['layout.json','partners-layout.json','static-layout.json',...['covre','chapa','servico'].flatMap(type=>['-v1','-partners-v2','-v1-payment','-partners-v2-payment'].map(variant=>type+variant+'.pdf'))]){
   const bytes=fs.readFileSync(path.join(__dirname,name));
   bundle[name]=name.endsWith('.pdf')?{base64:bytes.toString('base64')}:{json:JSON.parse(bytes.toString('utf8'))};
 }

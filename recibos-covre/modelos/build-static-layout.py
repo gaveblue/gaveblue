@@ -1,11 +1,13 @@
 """Extract exact text bounds from the existing PDF templates for the visual editor."""
 import json
+import sys
 from pathlib import Path
 import pdfplumber
 
 root = Path(__file__).parent
-result = {}
-for path in root.glob('*.pdf'):
+result = json.loads((root/'static-layout.json').read_text(encoding='utf-8')) if len(sys.argv) > 1 else {}
+paths = [root/name for name in sys.argv[1:]] if len(sys.argv) > 1 else root.glob('*.pdf')
+for path in paths:
     with pdfplumber.open(path) as document:
         page = document.pages[0]
         fields = {}

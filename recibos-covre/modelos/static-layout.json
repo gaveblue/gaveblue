@@ -1550,5 +1550,781 @@
         "height": 3.5500000000000114
       }
     }
+  },
+  "servico-v1.pdf": {
+    "titulo": {
+      "text": "RECIBO DE PRESTAÇÃO DE SERVIÇO",
+      "x": 149.6863,
+      "y": 788.16,
+      "size": 15.960000000000036,
+      "weight": "bold",
+      "bounds": {
+        "x": 149.6863,
+        "y": 784.801230768,
+        "width": 296.187365376,
+        "height": 15.960000000000036
+      }
+    },
+    "tituloPagador": {
+      "text": "PAGADOR / CONTRATANTE",
+      "x": 56.784,
+      "y": 751.9,
+      "size": 9.480000000000018,
+      "weight": "bold",
+      "bounds": {
+        "x": 56.784,
+        "y": 749.904941584,
+        "width": 128.50306658399998,
+        "height": 9.480000000000018
+      }
+    },
+    "identidadePagador": {
+      "text": "COVRE & CIA LTDA, inscrita no CNPJ sob nº 28.419.232/0001-06 e I.E. nº 080.989.89-6.",
+      "x": 56.784,
+      "y": 723.46,
+      "size": 9.480000000000018,
+      "weight": "bold",
+      "bounds": {
+        "x": 56.784,
+        "y": 721.464941584,
+        "width": 387.860663508,
+        "height": 9.480000000000018
+      }
+    },
+    "enderecoPagador": {
+      "text": "Endereço: Av. Agenor Luiz Heringer, 463, Centro, Pinheiros/ES - CEP 29980-000.",
+      "x": 56.784,
+      "y": 710.02,
+      "size": 9.480000000000018,
+      "weight": "bold",
+      "bounds": {
+        "x": 56.784,
+        "y": 708.024941584,
+        "width": 361.9295341320001,
+        "height": 9.480000000000018
+      }
+    },
+    "tituloRecebedor": {
+      "text": "PRESTADOR / RECEBEDOR",
+      "x": 56.784,
+      "y": 678.94,
+      "size": 9.480000000000018,
+      "weight": "bold",
+      "bounds": {
+        "x": 56.784,
+        "y": 676.944941584,
+        "width": 127.99388820000001,
+        "height": 9.480000000000018
+      }
+    },
+    "tituloServico": {
+      "text": "IDENTIFICAÇÃO DO SERVIÇO",
+      "x": 56.784,
+      "y": 608.62,
+      "size": 9.480000000000018,
+      "weight": "bold",
+      "bounds": {
+        "x": 56.784,
+        "y": 606.624941584,
+        "width": 136.41386683200002,
+        "height": 9.480000000000018
+      }
+    },
+    "tituloPagamento": {
+      "text": "DADOS DO CHEQUE",
+      "x": 56.784,
+      "y": 503.83,
+      "size": 9.480000000000018,
+      "weight": "bold",
+      "bounds": {
+        "x": 56.784,
+        "y": 501.834941584,
+        "width": 94.28156344799999,
+        "height": 9.480000000000018
+      }
+    },
+    "declaracao0": {
+      "text": "Declaro, para os devidos fins, que recebi da COVRE & CIA LTDA, inscrita no CNPJ nº 28.419.232/0001-06, o",
+      "x": 56.784,
+      "y": 382.61,
+      "size": 9.480000000000018,
+      "weight": "normal",
+      "bounds": {
+        "x": 56.784,
+        "y": 380.614941584,
+        "width": 460.8492558360002,
+        "height": 9.480000000000018
+      }
+    },
+    "declaracao1": {
+      "text": "valor acima especificado, referente à prestação do serviço descrito neste recibo, dando plena quitação",
+      "x": 56.784,
+      "y": 370.19,
+      "size": 9.480000000000018,
+      "weight": "normal",
+      "bounds": {
+        "x": 56.784,
+        "y": 368.194941584,
+        "width": 431.06686982400004,
+        "height": 9.480000000000018
+      }
+    },
+    "declaracao2": {
+      "text": "exclusivamente quanto ao valor e ao serviço nele discriminados.",
+      "x": 56.784,
+      "y": 357.77,
+      "size": 9.480000000000018,
+      "weight": "normal",
+      "bounds": {
+        "x": 56.784,
+        "y": 355.774941584,
+        "width": 270.85117831200006,
+        "height": 9.480000000000018
+      }
+    },
+    "linhaAssinatura": {
+      "text": "_____________________________________",
+      "x": 200.09,
+      "y": 255.98,
+      "size": 9.47999999999999,
+      "weight": "normal",
+      "bounds": {
+        "x": 200.09,
+        "y": 253.984941584,
+        "width": 195.07598074799992,
+        "height": 9.479999999999905
+      }
+    },
+    "tituloAnexo": {
+      "text": "ANEXO",
+      "x": 56.664,
+      "y": 207.86,
+      "size": 9.480000000000018,
+      "weight": "bold",
+      "bounds": {
+        "x": 56.664,
+        "y": 205.864941584,
+        "width": 33.712324752,
+        "height": 9.480000000000018
+      }
+    },
+    "linhaPagador": {
+      "kind": "line",
+      "text": "Linha divisória",
+      "x": 55.5,
+      "y": 763.22,
+      "size": 3.5499999999999545,
+      "width": 481.85,
+      "color": 0.329,
+      "bounds": {
+        "x": 55.5,
+        "y": 763.22,
+        "width": 481.85,
+        "height": 3.5499999999999545
+      }
+    },
+    "linhaRecebedor": {
+      "kind": "line",
+      "text": "Linha divisória",
+      "x": 55.4,
+      "y": 690.45,
+      "size": 3.5499999999999545,
+      "width": 481.85,
+      "color": 0.329,
+      "bounds": {
+        "x": 55.4,
+        "y": 690.45,
+        "width": 481.85,
+        "height": 3.5499999999999545
+      }
+    },
+    "linhaServico": {
+      "kind": "line",
+      "text": "Linha divisória",
+      "x": 55.55,
+      "y": 623.45,
+      "size": 3.5499999999999545,
+      "width": 481.84999999999997,
+      "color": 0.329,
+      "bounds": {
+        "x": 55.55,
+        "y": 623.45,
+        "width": 481.84999999999997,
+        "height": 3.5499999999999545
+      }
+    },
+    "linhaPagamento": {
+      "kind": "line",
+      "text": "Linha divisória",
+      "x": 55.5,
+      "y": 514.48,
+      "size": 3.5499999999999545,
+      "width": 481.85,
+      "color": 0.329,
+      "bounds": {
+        "x": 55.5,
+        "y": 514.48,
+        "width": 481.85,
+        "height": 3.5499999999999545
+      }
+    },
+    "linhaAnexo": {
+      "kind": "line",
+      "text": "Linha divisória",
+      "x": 55.35,
+      "y": 219.65,
+      "size": 3.5500000000000114,
+      "width": 481.85,
+      "color": 0.329,
+      "bounds": {
+        "x": 55.35,
+        "y": 219.65,
+        "width": 481.85,
+        "height": 3.5500000000000114
+      }
+    }
+  },
+  "servico-partners-v2.pdf": {
+    "titulo": {
+      "text": "RECIBO DE PRESTAÇÃO DE SERVIÇO",
+      "x": 149.6863,
+      "y": 788.16,
+      "size": 15.960000000000036,
+      "weight": "bold",
+      "bounds": {
+        "x": 149.6863,
+        "y": 784.801230768,
+        "width": 296.187365376,
+        "height": 15.960000000000036
+      }
+    },
+    "tituloPagador": {
+      "text": "PAGADOR / CONTRATANTE",
+      "x": 56.784,
+      "y": 751.9,
+      "size": 9.480000000000018,
+      "weight": "bold",
+      "bounds": {
+        "x": 56.784,
+        "y": 749.904941584,
+        "width": 128.50306658399998,
+        "height": 9.480000000000018
+      }
+    },
+    "tituloRecebedor": {
+      "text": "PRESTADOR / RECEBEDOR",
+      "x": 56.784,
+      "y": 678.94,
+      "size": 9.480000000000018,
+      "weight": "bold",
+      "bounds": {
+        "x": 56.784,
+        "y": 676.944941584,
+        "width": 127.99388820000001,
+        "height": 9.480000000000018
+      }
+    },
+    "tituloServico": {
+      "text": "IDENTIFICAÇÃO DO SERVIÇO",
+      "x": 56.784,
+      "y": 608.62,
+      "size": 9.480000000000018,
+      "weight": "bold",
+      "bounds": {
+        "x": 56.784,
+        "y": 606.624941584,
+        "width": 136.41386683200002,
+        "height": 9.480000000000018
+      }
+    },
+    "tituloPagamento": {
+      "text": "DADOS DO CHEQUE",
+      "x": 56.784,
+      "y": 503.83,
+      "size": 9.480000000000018,
+      "weight": "bold",
+      "bounds": {
+        "x": 56.784,
+        "y": 501.834941584,
+        "width": 94.28156344799999,
+        "height": 9.480000000000018
+      }
+    },
+    "linhaAssinatura": {
+      "text": "_____________________________________",
+      "x": 200.09,
+      "y": 255.98,
+      "size": 9.47999999999999,
+      "weight": "normal",
+      "bounds": {
+        "x": 200.09,
+        "y": 253.984941584,
+        "width": 195.07598074799992,
+        "height": 9.479999999999905
+      }
+    },
+    "tituloAnexo": {
+      "text": "ANEXO",
+      "x": 56.664,
+      "y": 207.86,
+      "size": 9.480000000000018,
+      "weight": "bold",
+      "bounds": {
+        "x": 56.664,
+        "y": 205.864941584,
+        "width": 33.712324752,
+        "height": 9.480000000000018
+      }
+    },
+    "linhaPagador": {
+      "kind": "line",
+      "text": "Linha divisória",
+      "x": 55.5,
+      "y": 763.22,
+      "size": 3.5499999999999545,
+      "width": 481.85,
+      "color": 0.329,
+      "bounds": {
+        "x": 55.5,
+        "y": 763.22,
+        "width": 481.85,
+        "height": 3.5499999999999545
+      }
+    },
+    "linhaRecebedor": {
+      "kind": "line",
+      "text": "Linha divisória",
+      "x": 55.4,
+      "y": 690.45,
+      "size": 3.5499999999999545,
+      "width": 481.85,
+      "color": 0.329,
+      "bounds": {
+        "x": 55.4,
+        "y": 690.45,
+        "width": 481.85,
+        "height": 3.5499999999999545
+      }
+    },
+    "linhaServico": {
+      "kind": "line",
+      "text": "Linha divisória",
+      "x": 55.55,
+      "y": 623.45,
+      "size": 3.5499999999999545,
+      "width": 481.84999999999997,
+      "color": 0.329,
+      "bounds": {
+        "x": 55.55,
+        "y": 623.45,
+        "width": 481.84999999999997,
+        "height": 3.5499999999999545
+      }
+    },
+    "linhaPagamento": {
+      "kind": "line",
+      "text": "Linha divisória",
+      "x": 55.5,
+      "y": 514.48,
+      "size": 3.5499999999999545,
+      "width": 481.85,
+      "color": 0.329,
+      "bounds": {
+        "x": 55.5,
+        "y": 514.48,
+        "width": 481.85,
+        "height": 3.5499999999999545
+      }
+    },
+    "linhaAnexo": {
+      "kind": "line",
+      "text": "Linha divisória",
+      "x": 55.35,
+      "y": 219.65,
+      "size": 3.5500000000000114,
+      "width": 481.85,
+      "color": 0.329,
+      "bounds": {
+        "x": 55.35,
+        "y": 219.65,
+        "width": 481.85,
+        "height": 3.5500000000000114
+      }
+    }
+  },
+  "servico-v1-payment.pdf": {
+    "titulo": {
+      "text": "RECIBO DE PRESTAÇÃO DE SERVIÇO",
+      "x": 149.6863,
+      "y": 788.16,
+      "size": 15.960000000000036,
+      "weight": "bold",
+      "bounds": {
+        "x": 149.6863,
+        "y": 784.801230768,
+        "width": 296.187365376,
+        "height": 15.960000000000036
+      }
+    },
+    "tituloPagador": {
+      "text": "PAGADOR / CONTRATANTE",
+      "x": 56.784,
+      "y": 751.9,
+      "size": 9.480000000000018,
+      "weight": "bold",
+      "bounds": {
+        "x": 56.784,
+        "y": 749.904941584,
+        "width": 128.50306658399998,
+        "height": 9.480000000000018
+      }
+    },
+    "identidadePagador": {
+      "text": "COVRE & CIA LTDA, inscrita no CNPJ sob nº 28.419.232/0001-06 e I.E. nº 080.989.89-6.",
+      "x": 56.784,
+      "y": 723.46,
+      "size": 9.480000000000018,
+      "weight": "bold",
+      "bounds": {
+        "x": 56.784,
+        "y": 721.464941584,
+        "width": 387.860663508,
+        "height": 9.480000000000018
+      }
+    },
+    "enderecoPagador": {
+      "text": "Endereço: Av. Agenor Luiz Heringer, 463, Centro, Pinheiros/ES - CEP 29980-000.",
+      "x": 56.784,
+      "y": 710.02,
+      "size": 9.480000000000018,
+      "weight": "bold",
+      "bounds": {
+        "x": 56.784,
+        "y": 708.024941584,
+        "width": 361.9295341320001,
+        "height": 9.480000000000018
+      }
+    },
+    "tituloRecebedor": {
+      "text": "PRESTADOR / RECEBEDOR",
+      "x": 56.784,
+      "y": 678.94,
+      "size": 9.480000000000018,
+      "weight": "bold",
+      "bounds": {
+        "x": 56.784,
+        "y": 676.944941584,
+        "width": 127.99388820000001,
+        "height": 9.480000000000018
+      }
+    },
+    "tituloServico": {
+      "text": "IDENTIFICAÇÃO DO SERVIÇO",
+      "x": 56.784,
+      "y": 608.62,
+      "size": 9.480000000000018,
+      "weight": "bold",
+      "bounds": {
+        "x": 56.784,
+        "y": 606.624941584,
+        "width": 136.41386683200002,
+        "height": 9.480000000000018
+      }
+    },
+    "declaracao0": {
+      "text": "Declaro, para os devidos fins, que recebi da COVRE & CIA LTDA, inscrita no CNPJ nº 28.419.232/0001-06, o",
+      "x": 56.784,
+      "y": 382.61,
+      "size": 9.480000000000018,
+      "weight": "normal",
+      "bounds": {
+        "x": 56.784,
+        "y": 380.614941584,
+        "width": 460.8492558360002,
+        "height": 9.480000000000018
+      }
+    },
+    "declaracao1": {
+      "text": "valor acima especificado, referente à prestação do serviço descrito neste recibo, dando plena quitação",
+      "x": 56.784,
+      "y": 370.19,
+      "size": 9.480000000000018,
+      "weight": "normal",
+      "bounds": {
+        "x": 56.784,
+        "y": 368.194941584,
+        "width": 431.06686982400004,
+        "height": 9.480000000000018
+      }
+    },
+    "declaracao2": {
+      "text": "exclusivamente quanto ao valor e ao serviço nele discriminados.",
+      "x": 56.784,
+      "y": 357.77,
+      "size": 9.480000000000018,
+      "weight": "normal",
+      "bounds": {
+        "x": 56.784,
+        "y": 355.774941584,
+        "width": 270.85117831200006,
+        "height": 9.480000000000018
+      }
+    },
+    "linhaAssinatura": {
+      "text": "_____________________________________",
+      "x": 200.09,
+      "y": 255.98,
+      "size": 9.47999999999999,
+      "weight": "normal",
+      "bounds": {
+        "x": 200.09,
+        "y": 253.984941584,
+        "width": 195.07598074799992,
+        "height": 9.479999999999905
+      }
+    },
+    "tituloAnexo": {
+      "text": "ANEXO",
+      "x": 56.664,
+      "y": 207.86,
+      "size": 9.480000000000018,
+      "weight": "bold",
+      "bounds": {
+        "x": 56.664,
+        "y": 205.864941584,
+        "width": 33.712324752,
+        "height": 9.480000000000018
+      }
+    },
+    "linhaPagador": {
+      "kind": "line",
+      "text": "Linha divisória",
+      "x": 55.5,
+      "y": 763.22,
+      "size": 3.5499999999999545,
+      "width": 481.85,
+      "color": 0.329,
+      "bounds": {
+        "x": 55.5,
+        "y": 763.22,
+        "width": 481.85,
+        "height": 3.5499999999999545
+      }
+    },
+    "linhaRecebedor": {
+      "kind": "line",
+      "text": "Linha divisória",
+      "x": 55.4,
+      "y": 690.45,
+      "size": 3.5499999999999545,
+      "width": 481.85,
+      "color": 0.329,
+      "bounds": {
+        "x": 55.4,
+        "y": 690.45,
+        "width": 481.85,
+        "height": 3.5499999999999545
+      }
+    },
+    "linhaServico": {
+      "kind": "line",
+      "text": "Linha divisória",
+      "x": 55.55,
+      "y": 623.45,
+      "size": 3.5499999999999545,
+      "width": 481.84999999999997,
+      "color": 0.329,
+      "bounds": {
+        "x": 55.55,
+        "y": 623.45,
+        "width": 481.84999999999997,
+        "height": 3.5499999999999545
+      }
+    },
+    "linhaPagamento": {
+      "kind": "line",
+      "text": "Linha divisória",
+      "x": 55.5,
+      "y": 514.48,
+      "size": 3.5499999999999545,
+      "width": 481.85,
+      "color": 0.329,
+      "bounds": {
+        "x": 55.5,
+        "y": 514.48,
+        "width": 481.85,
+        "height": 3.5499999999999545
+      }
+    },
+    "linhaAnexo": {
+      "kind": "line",
+      "text": "Linha divisória",
+      "x": 55.35,
+      "y": 219.65,
+      "size": 3.5500000000000114,
+      "width": 481.85,
+      "color": 0.329,
+      "bounds": {
+        "x": 55.35,
+        "y": 219.65,
+        "width": 481.85,
+        "height": 3.5500000000000114
+      }
+    }
+  },
+  "servico-partners-v2-payment.pdf": {
+    "titulo": {
+      "text": "RECIBO DE PRESTAÇÃO DE SERVIÇO",
+      "x": 149.6863,
+      "y": 788.16,
+      "size": 15.960000000000036,
+      "weight": "bold",
+      "bounds": {
+        "x": 149.6863,
+        "y": 784.801230768,
+        "width": 296.187365376,
+        "height": 15.960000000000036
+      }
+    },
+    "tituloPagador": {
+      "text": "PAGADOR / CONTRATANTE",
+      "x": 56.784,
+      "y": 751.9,
+      "size": 9.480000000000018,
+      "weight": "bold",
+      "bounds": {
+        "x": 56.784,
+        "y": 749.904941584,
+        "width": 128.50306658399998,
+        "height": 9.480000000000018
+      }
+    },
+    "tituloRecebedor": {
+      "text": "PRESTADOR / RECEBEDOR",
+      "x": 56.784,
+      "y": 678.94,
+      "size": 9.480000000000018,
+      "weight": "bold",
+      "bounds": {
+        "x": 56.784,
+        "y": 676.944941584,
+        "width": 127.99388820000001,
+        "height": 9.480000000000018
+      }
+    },
+    "tituloServico": {
+      "text": "IDENTIFICAÇÃO DO SERVIÇO",
+      "x": 56.784,
+      "y": 608.62,
+      "size": 9.480000000000018,
+      "weight": "bold",
+      "bounds": {
+        "x": 56.784,
+        "y": 606.624941584,
+        "width": 136.41386683200002,
+        "height": 9.480000000000018
+      }
+    },
+    "linhaAssinatura": {
+      "text": "_____________________________________",
+      "x": 200.09,
+      "y": 255.98,
+      "size": 9.47999999999999,
+      "weight": "normal",
+      "bounds": {
+        "x": 200.09,
+        "y": 253.984941584,
+        "width": 195.07598074799992,
+        "height": 9.479999999999905
+      }
+    },
+    "tituloAnexo": {
+      "text": "ANEXO",
+      "x": 56.664,
+      "y": 207.86,
+      "size": 9.480000000000018,
+      "weight": "bold",
+      "bounds": {
+        "x": 56.664,
+        "y": 205.864941584,
+        "width": 33.712324752,
+        "height": 9.480000000000018
+      }
+    },
+    "linhaPagador": {
+      "kind": "line",
+      "text": "Linha divisória",
+      "x": 55.5,
+      "y": 763.22,
+      "size": 3.5499999999999545,
+      "width": 481.85,
+      "color": 0.329,
+      "bounds": {
+        "x": 55.5,
+        "y": 763.22,
+        "width": 481.85,
+        "height": 3.5499999999999545
+      }
+    },
+    "linhaRecebedor": {
+      "kind": "line",
+      "text": "Linha divisória",
+      "x": 55.4,
+      "y": 690.45,
+      "size": 3.5499999999999545,
+      "width": 481.85,
+      "color": 0.329,
+      "bounds": {
+        "x": 55.4,
+        "y": 690.45,
+        "width": 481.85,
+        "height": 3.5499999999999545
+      }
+    },
+    "linhaServico": {
+      "kind": "line",
+      "text": "Linha divisória",
+      "x": 55.55,
+      "y": 623.45,
+      "size": 3.5499999999999545,
+      "width": 481.84999999999997,
+      "color": 0.329,
+      "bounds": {
+        "x": 55.55,
+        "y": 623.45,
+        "width": 481.84999999999997,
+        "height": 3.5499999999999545
+      }
+    },
+    "linhaPagamento": {
+      "kind": "line",
+      "text": "Linha divisória",
+      "x": 55.5,
+      "y": 514.48,
+      "size": 3.5499999999999545,
+      "width": 481.85,
+      "color": 0.329,
+      "bounds": {
+        "x": 55.5,
+        "y": 514.48,
+        "width": 481.85,
+        "height": 3.5499999999999545
+      }
+    },
+    "linhaAnexo": {
+      "kind": "line",
+      "text": "Linha divisória",
+      "x": 55.35,
+      "y": 219.65,
+      "size": 3.5500000000000114,
+      "width": 481.85,
+      "color": 0.329,
+      "bounds": {
+        "x": 55.35,
+        "y": 219.65,
+        "width": 481.85,
+        "height": 3.5500000000000114
+      }
+    }
   }
 }

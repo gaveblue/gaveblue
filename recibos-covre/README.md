@@ -5,6 +5,14 @@ para esta área para evitar links quebrados. O gerador fica separado do
 WeRecibos geral porque atende somente os pagamentos esporádicos da Covre.
 Aplicação estática, sem instalação de dependências no servidor.
 
+O modelo Prestação de serviço usa título e declaração próprios, descrição do
+serviço, data e valor, com nota fiscal opcional e sem destino. Mantém cheque,
+depósito, PIX e dinheiro, a numeração e o fluxo de anexos. Também está disponível
+no filtro do histórico e no editor de layout, com configurações independentes.
+Os modelos PDF desse recibo são gerados por `modelos/build-service-model.py`;
+depois, atualize `static-layout.json` com `build-static-layout.py`, o bundle com
+`build-bundle.cjs` e a versão com `build-release.cjs`.
+
 No primeiro acesso, o perfil do pagador é cadastrado localmente neste navegador.
 Esse cadastro preenche novos recibos e pode ser alterado pelo menu Configurações;
 nenhum dado do perfil é enviado para um banco remoto. A tela Início mostra uma

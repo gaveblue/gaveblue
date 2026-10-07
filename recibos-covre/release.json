@@ -1,5 +1,5 @@
 {
-  "version": "493227526ad9c304",
+  "version": "54a50dcc419c7691",
   "assets": [
     {
       "file": "style.css",
@@ -7,7 +7,7 @@
     },
     {
       "file": "grade.css",
-      "version": "2db3041f236f44d6"
+      "version": "7734ac4ca33b5454"
     },
     {
       "file": "layout-editor.css",
@@ -31,7 +31,7 @@
     },
     {
       "file": "modelos/bundle.js",
-      "version": "514edfbc39fb061a"
+      "version": "f21b9ed7fdb3ff7c"
     },
     {
       "file": "payment-form.js",
@@ -39,7 +39,7 @@
     },
     {
       "file": "app.js",
-      "version": "b9f6d982c0a90376"
+      "version": "0585b93e5ebddeb5"
     },
     {
       "file": "cheques.js",
@@ -47,7 +47,7 @@
     },
     {
       "file": "layout-settings.js",
-      "version": "f4fb3948613c0a41"
+      "version": "223e2b209b6fa19f"
     },
     {
       "file": "local-profile.js",

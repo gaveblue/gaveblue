@@ -64,7 +64,7 @@ function inputError(input){
     if(type==='aleatoria'&&!/^[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}$/i.test(value))return 'Informe a chave aleatória no formato UUID.';
   }
   if(input.form===form){
-    const prefixes={nome:'Nome: ',documento:'CPF/CNPJ: ',servico:field('tipo').value==='covre'?'Tipo de entrega: ':'Tipo de serviço: ',nota:'Nº Nota Fiscal: ',destino:'Destino: ',emitente:'Emitente: ',banco:'Banco: ',agencia:'Agência: ',conta:'Conta: ',cheque:'Nº Cheque: '};
+    const prefixes={nome:'Nome: ',documento:'CPF/CNPJ: ',servico:field('tipo').value==='covre'?'Tipo de entrega: ':field('tipo').value==='servico'?'Serviço: ':'Tipo de serviço: ',nota:'Nº Nota Fiscal: ',destino:'Destino: ',emitente:'Emitente: ',banco:'Banco: ',agencia:'Agência: ',conta:'Conta: ',cheque:'Nº Cheque: '};
     const ctx=document.createElement('canvas').getContext('2d');ctx.font=(['nome','cheque','valor'].includes(name)?'bold ':'')+'9.48px Arial';
     let line=name in prefixes?prefixes[name]+value:'';
     const paymentPrefixes={depositoTitular:'Titular: ',depositoBanco:'Banco: ',depositoAgencia:'Agência: ',depositoConta:'Conta: ',pixChave:'Chave: '};
@@ -101,7 +101,7 @@ const statusMessage = (message,error=false) => {
 };
 const today = () => {const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');};
 ['dataEmissao','dataServico','dataCheque'].forEach(n=>field(n).value=today());
-const modelName = tipo=>tipo==='covre'?'Frete':'Carga / descarga';
+const modelName = tipo=>({covre:'Frete',chapa:'Carga / descarga',servico:'Prestação de serviço'}[tipo]||tipo);
 const paymentName=method=>({cheque:'Cheque',deposito:'Depósito bancário',pix:'PIX',dinheiro:'Dinheiro'}[method||'cheque']||'Cheque');
 function updatePayment(){
   const method=field('formaPagamento').value;
@@ -175,7 +175,7 @@ function readData(){
   if(!validDocument(d.documento))throw new Error('Informe um CPF com 11 dígitos ou CNPJ com 14 dígitos.');
   if(!validDocument(d.pagadorDocumento))throw new Error('Informe o CPF/CNPJ do pagador com 11 ou 14 dígitos.');
   const paymentRequired={cheque:['emitente','banco','agencia','conta','cheque'],deposito:['depositoTitular','depositoBanco','depositoAgencia','depositoConta'],pix:['pixTipo','pixChave'],dinheiro:[]};
-  if(['nome','local','servico','nota',...(paymentRequired[d.formaPagamento]||[])].some(k=>!d[k]))throw new Error('Preencha todos os campos obrigatórios.');
+  if(['nome','local','servico',...(d.tipo==='servico'?[]:['nota']),...(paymentRequired[d.formaPagamento]||[])].some(k=>!d[k]))throw new Error('Preencha todos os campos obrigatórios.');
   if(!/^\d{1,3}(\.\d{3})*,\d{2}$|^\d+(,\d{1,2})?$/.test(d.valor))throw new Error('Informe o valor em reais, por exemplo 1.250,00.');
   d.valor=Number(d.valor.replaceAll('.','').replace(',','.'));
   if(d.valor<=0||d.valor>999999999.99)throw new Error('Informe um valor entre R$ 0,01 e R$ 999.999.999,99.');
@@ -228,7 +228,7 @@ function renderHistory() {
   for(const r of items){
     const row=byId('records').insertRow(),d=r.data;
     selectionCell(row,r.id,selectedReceipts,update,d.nome);
-    [dateBR(d.dataEmissao),d.numero||'—',d.nome,modelName(d.tipo)+' · NF '+d.nota,money(d.valor)].forEach(t=>row.insertCell().textContent=t);
+    [dateBR(d.dataEmissao),d.numero||'—',d.nome,modelName(d.tipo)+(d.nota?' · NF '+d.nota:''),money(d.valor)].forEach(t=>row.insertCell().textContent=t);
     const attachmentCell=row.insertCell(),hasAttachment=hasReceiptAttachment(r);attachmentCell.textContent=hasAttachment?'SIM':'NÃO';attachmentCell.className=hasAttachment?'attachment-yes':'attachment-no';
     const button=document.createElement('button');button.type='button';button.className='grid-link';button.textContent='Abrir PDF';button.onclick=()=>openSaved(r);row.insertCell().append(button);
     row.ondblclick=event=>{if(!event.target.closest('button,input'))editRecord(r);};
@@ -518,7 +518,7 @@ async function nextStep() {
     byId('summary').replaceChildren();
     for(const [label,value] of [['Número',data.numero],['Modelo',modelName(data.tipo)],['Prestador',data.nome],['Documento',data.documento],['Nota fiscal',data.nota],['Valor',money(data.valor)],['Pagamento',paymentName(data.formaPagamento)]]){
       const item=document.createElement('div'),title=document.createElement('span'),text=document.createElement('strong');
-      title.textContent=label;text.textContent=value;item.append(title,text);byId('summary').append(item);
+      title.textContent=label;text.textContent=value||'Não informada';item.append(title,text);byId('summary').append(item);
     }
     showStep(LAST_STEP);openDraft();
   } catch(error){statusMessage(error.message,true);}
@@ -546,10 +546,13 @@ form.addEventListener('submit',async event=>{
   if(validateReceipt())await saveReceipt();
 });
 function updateType() {
-  const freight=field('tipo').value==='covre';
+  const freight=field('tipo').value==='covre',service=field('tipo').value==='servico';
   byId('destination-field').hidden=!freight;field('destino').disabled=!freight;
-  byId('service-label').textContent=freight?'Tipo de entrega':'Tipo de serviço';
-  field('servico').placeholder=freight?'Ex.: Venda':'Ex.: Descarga de mercadoria de compra';
+  if(!freight)clearFieldError(field('destino'));
+  byId('service-label').textContent=freight?'Tipo de entrega':service?'Descrição do serviço':'Tipo de serviço';
+  field('servico').placeholder=freight?'Ex.: Venda':service?'Ex.: Manutenção de equipamentos':'Ex.: Descarga de mercadoria de compra';
+  field('nota').required=!service;byId('invoice-label').textContent=service?'Nº da nota fiscal (opcional)':'Nº da nota fiscal';
+  clearFieldError(field('nota'));
 }
 function resetForm() {
   form.reset();clearErrors(form);byId('receiver-search').value='';closePartnerResults('receiver');byId('payer-results').hidden=true;byId('payer-search').setAttribute('aria-expanded','false');attachment=null;draft=null;editingRecord=null;preservedAttachmentPDF=null;
@@ -596,8 +599,8 @@ byId('restore').onchange=async event=>{
     if(backup.sequence!==undefined&&!/^\d+$/.test(String(backup.sequence)))throw new Error('Sequência inválida no backup.');
     if(backup.format!=='gaveblue-frete'||![1,2].includes(backup.version)||!Array.isArray(backup.records)||backup.records.length>2000)throw new Error('Arquivo de histórico inválido.');
     const imported=backup.records.map(r=>{
-      if(!r||typeof r.id!=='string'||!r.id||typeof r.createdAt!=='string'||!Number.isFinite(Date.parse(r.createdAt))||!r.data||!['covre','chapa'].includes(r.data.tipo)||typeof r.pdf!=='string')throw new Error('Registro inválido na cópia.');
-      const required=['nome','documento','nota','dataEmissao',...((r.data.formaPagamento||'cheque')==='cheque'?['cheque']:[])];
+      if(!r||typeof r.id!=='string'||!r.id||typeof r.createdAt!=='string'||!Number.isFinite(Date.parse(r.createdAt))||!r.data||!['covre','chapa','servico'].includes(r.data.tipo)||typeof r.pdf!=='string')throw new Error('Registro inválido na cópia.');
+      const required=['nome','documento','dataEmissao',...(r.data.tipo==='servico'?[]:['nota']),...((r.data.formaPagamento||'cheque')==='cheque'?['cheque']:[])];
       if(r.data.numero!==undefined&&!/^\d+$/.test(r.data.numero))throw new Error('Número de recibo inválido no backup.');
       if(r.data.dataSaque!==undefined&&r.data.dataSaque!==''&&!window.chequeWithdrawal.validDate(r.data.dataSaque))throw new Error('Data de saque inválida no backup.');
       if(required.some(k=>typeof r.data[k]!=='string'||!r.data[k].trim())||!/^\d{4}-\d{2}-\d{2}$/.test(r.data.dataEmissao)||!Number.isFinite(r.data.valor)||r.data.valor<=0)throw new Error('Dados inválidos na cópia.');
@@ -694,9 +697,9 @@ async function generatePDF(data,options={}) {
   const amount=money(data.valor)+' ('+extenso(data.valor).toUpperCase()+')';
   const values={
     nome:'Nome: '+data.nome,documento:'CPF/CNPJ: '+data.documento,
-    servico:(data.tipo==='covre'?'Tipo de entrega: ':'Tipo de serviço: ')+data.servico,
-    nota:'Nº Nota Fiscal: '+data.nota,destino:'Destino: '+data.destino,
-    dataServico:(data.tipo==='covre'?'Data do frete: ':'Data: ')+dateBR(data.dataServico),
+    servico:(data.tipo==='covre'?'Tipo de entrega: ':data.tipo==='servico'?'Serviço: ':'Tipo de serviço: ')+data.servico,
+    nota:data.nota?'Nº Nota Fiscal: '+data.nota:'',destino:'Destino: '+data.destino,
+    dataServico:(data.tipo==='covre'?'Data do frete: ':data.tipo==='servico'?'Data do serviço: ':'Data: ')+dateBR(data.dataServico),
     valorServico:'Valor: '+amount,emitente:'Emitente: '+data.emitente,
     banco:'Banco: '+data.banco,agencia:'Agência: '+data.agencia,conta:'Conta: '+data.conta,
     dataCheque:'Data: '+dateBR(data.dataCheque||data.dataEmissao),cheque:'Nº Cheque: '+data.cheque,
