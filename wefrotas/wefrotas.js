@@ -9519,6 +9519,7 @@
     }
 
     function renderReports() {
+      renderModuleCompactFilterControls('relatorios');
       const select = document.getElementById('report-filter-vehicle');
       const typeSelect = document.getElementById('report-filter-type');
       const titleNode = document.getElementById('report-results-title');
@@ -13253,7 +13254,7 @@
         calendar.setAttribute('aria-hidden', 'true');
       });
       document.querySelectorAll('.module-compact-date-button[aria-expanded="true"]').forEach(button => button.setAttribute('aria-expanded', 'false'));
-      document.querySelectorAll('.orders-sticky-table-header.has-open-calendar').forEach(header => header.classList.remove('has-open-calendar'));
+      document.querySelectorAll('.orders-sticky-table-header.has-open-calendar, .report-filter-card.has-open-calendar').forEach(header => header.classList.remove('has-open-calendar'));
       document.body.classList.remove('central-calendar-open');
       moduleCompactCalendarState.module = '';
     }
@@ -13281,7 +13282,7 @@
       calendar.classList.add('is-open');
       calendar.setAttribute('aria-hidden', 'false');
       button.setAttribute('aria-expanded', 'true');
-      button.closest('.orders-sticky-table-header')?.classList.add('has-open-calendar');
+      button.closest('.orders-sticky-table-header, .report-filter-card')?.classList.add('has-open-calendar');
       document.body.classList.add('central-calendar-open');
       renderModuleCompactCalendar(module);
     }

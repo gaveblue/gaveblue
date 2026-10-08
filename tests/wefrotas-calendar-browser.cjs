@@ -29,6 +29,11 @@ await page.addStyleTag({content:'#panel-relatorios{display:block!important}'});
 await page.addScriptTag({content:`var moduleCompactCalendarState={};var moduleCompactFilterConfigs={relatorios:{startInputId:'report-filter-start',endInputId:'report-filter-end',statuses:[['','Todos']]}};var moduleFilterRenderActions={relatorios:()=>{window.applied=true}};function toggleCentralPendingCalendar(){};function formatCentralPendingCalendarDate(x){return x||''};`+
 ['parseCentralPendingCalendarDate','centralPendingCalendarIso','getModuleCompactFilterValue','renderModuleCompactFilterControls','renderModuleCompactCalendar','closeModuleCompactCalendars','toggleModuleCompactCalendar','selectModuleCompactCalendarDate','clearModuleCompactDateRange','applyModuleCompactDateRange'].map(n=>block(n).split('    Object.assign(window,')[0]).join('\n')});
 await page.locator('#module-compact-date-button-relatorios').click();
+assert.equal(await page.locator('#report-filter-start').isVisible(),false);
+assert.equal(await page.locator('#report-filter-end').isVisible(),false);
+const calendarBounds=await page.locator('#module-compact-calendar-relatorios').boundingBox();
+assert.ok(calendarBounds.x>=0 && calendarBounds.x+calendarBounds.width<=width, 'calendar must remain horizontally inside viewport');
+assert.ok(calendarBounds.y>=0 && calendarBounds.y+calendarBounds.height<=850, 'calendar must remain vertically inside viewport');
 await page.locator('#module-compact-calendar-relatorios input').nth(0).fill('01/09/2026');
 await page.locator('#module-compact-calendar-relatorios input').nth(1).fill('30/09/2026');
 await page.locator('#module-compact-calendar-relatorios').getByRole('button',{name:'Filtrar',exact:true}).click();

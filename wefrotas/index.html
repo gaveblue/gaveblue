@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./wefrotas.css?v=20261008-session-warning-1">
+  <link rel="stylesheet" href="./wefrotas.css?v=20261008-report-period-2">
   <link rel="stylesheet" href="./wefrotas-login.css?v=20260915-fixed-login-1">
   <link rel="stylesheet" href="./wefrotas-db-capacity.css?v=20260906-db-capacity-1">
   <style>
@@ -1177,24 +1177,18 @@
                   <option value="">Todos os veículos</option>
                 </select>
               </div>
-              <div>
-                <label for="report-filter-start" class="block text-[11px] font-bold uppercase tracking-wide text-slate-500 mb-2">Data inicial</label>
-                <input id="report-filter-start" type="date" class="soft-input w-full">
-              </div>
-              <div>
-                <label for="report-filter-end" class="block text-[11px] font-bold uppercase tracking-wide text-slate-500 mb-2">Data final</label>
-                <input id="report-filter-end" type="date" class="soft-input w-full">
-              </div>
-            </div>
-            <div class="report-filter-footer">
               <div class="central-pending-date-range module-compact-date-range">
-                <button id="module-compact-date-button-relatorios" type="button" class="central-pending-date-range-button module-compact-date-button" aria-haspopup="dialog" aria-expanded="false" onclick="toggleModuleCompactCalendar('relatorios')">Selecionar período</button>
+                <input id="report-filter-start" type="hidden">
+                <input id="report-filter-end" type="hidden">
+                <button id="module-compact-date-button-relatorios" type="button" class="central-pending-date-range-button module-compact-date-button" aria-haspopup="dialog" aria-expanded="false" onclick="toggleModuleCompactCalendar('relatorios')"><span>Período</span><strong id="module-compact-date-label-relatorios">Todas as datas</strong><svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M7 3v3M17 3v3M4 8h16M6 5h12a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V7a2 2 0 012-2z"/></svg></button>
                 <div id="module-compact-calendar-relatorios" class="central-pending-calendar module-compact-calendar" role="dialog" aria-label="Período do relatório" aria-hidden="true">
                   <div class="central-pending-calendar-head"><button type="button" aria-label="Mês anterior" onclick="moveModuleCompactCalendar('relatorios', -1)">‹</button><strong>Selecionar período</strong><button type="button" aria-label="Próximo mês" onclick="moveModuleCompactCalendar('relatorios', 1)">›</button></div>
                   <div id="module-compact-calendar-months-relatorios" class="central-pending-calendar-months"></div>
                   <div class="central-pending-calendar-footer"><span id="module-compact-calendar-hint-relatorios"></span><div class="central-pending-calendar-footer-actions"><button type="button" onclick="clearModuleCompactDateRange('relatorios')">Limpar</button><button type="button" class="is-primary" onclick="applyModuleCompactDateRange('relatorios')">Filtrar</button></div></div>
                 </div>
               </div>
+            </div>
+            <div class="report-filter-footer">
               <p id="report-filter-date-context" class="report-filter-context">A data usada depende do relatório selecionado.</p>
               <button type="button" class="report-filter-apply" onclick="applyReportFilters()">Aplicar filtros</button>
             </div>
@@ -1840,7 +1834,7 @@
   <script src="./wefrotas-supabase-core.js?v=20260904-supabase-auth-isolation-3"></script>
   <script src="./wefrotas-supabase-backend.js?v=20260906-db-capacity-1"></script>
   <script src="./wefrotas-db-capacity.js?v=20260906-db-capacity-1"></script>
-  <script src="./wefrotas.js?v=20261008-session-warning-1"></script>
+  <script src="./wefrotas.js?v=20261008-report-period-2"></script>
   <script src="./wefrotas-reports-v2.js?v=20261008-reports-mileage-1"></script>
   <script src="./wefrotas-presence.js?v=20260904-contingency-2"></script>
   <script src="./wefrotas-batch-orders.js?v=20260802-1"></script>

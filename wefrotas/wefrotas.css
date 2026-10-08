@@ -2599,6 +2599,11 @@ body { height: 100%; margin: 0; box-sizing: border-box; }
     #panel-relatorios .report-filter-grid > div[hidden] { display: none; }
     #panel-relatorios .soft-input { min-height: 44px; font-size: 14px; }
     #panel-relatorios .report-filter-footer { flex-wrap: wrap; }
+    #panel-relatorios .report-filter-card { position: relative; }
+    #panel-relatorios .report-filter-card.has-open-calendar { z-index: 75; }
+    #panel-relatorios .module-compact-date-range { grid-column: auto; }
+    #panel-relatorios .module-compact-date-button { width: 100%; min-width: 0; }
+    body.central-calendar-open #panel-relatorios { transform: none; animation: none; overflow: visible; }
     .calendar-typed-range { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 12px; }
     .calendar-typed-range label, .standard-date-picker-manual { display: grid; gap: 6px; font-size: 12px; color: #475569; }
     .standard-date-picker-manual { padding: 12px 16px; }
