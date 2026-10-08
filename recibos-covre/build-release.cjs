@@ -1,7 +1,8 @@
 // Run before publishing: node recibos-covre/build-release.cjs
 const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
 const root=__dirname,indexPath=path.join(root,'index.html');
-const hash=value=>crypto.createHash('sha256').update(value).digest('hex').slice(0,16);
+// Git may normalize Windows line endings when publishing these text assets.
+const hash=value=>crypto.createHash('sha256').update(String(value).replace(/^\uFEFF/,'').replace(/\r\n/g,'\n')).digest('hex').slice(0,16);
 let html=fs.readFileSync(indexPath,'utf8').replace(/(<meta name="app-release" content=")[^"]+(">)/,'$1development$2');
 const assets=[];
 html=html.replace(/((?:src|href)="\.\/)([^"?]+\.(?:js|css))(?:\?v=[a-f0-9]+)?(")/g,(match,prefix,file,suffix)=>{

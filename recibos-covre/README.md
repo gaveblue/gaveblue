@@ -189,8 +189,13 @@ usa o nome do prestador, substituindo o marcador NOME do modelo de frete.
 Antes de publicar alterações, execute `node recibos-covre/build-release.cjs` a partir
 da raiz do projeto e inclua `index.html` e `release.json` na publicação. O comando
 versiona os recursos por conteúdo para evitar misturar scripts e estilos antigos.
-Abas que já carregaram o verificador de versão avisam quando houver atualização;
-formulários abertos não são recarregados automaticamente. Nenhum dado local é apagado.
+Abas que já carregaram o verificador de versão avisam quando houver atualização.
+Ao clicar em Atualizar agora, o sistema baixa a página e os arquivos da versão,
+mostra o progresso por arquivos concluídos e confirma antes de recarregar. O download
+verifica os hashes dos arquivos; falhas de conexão ou publicação incompleta permitem
+tentar novamente. Formulários abertos, inclusive durante o download, impedem a recarga
+até serem salvos ou cancelados. Nenhum dado local é apagado. A animação respeita a
+preferência do navegador por movimento reduzido.
 
 Testes locais em Chrome cobrem ambos os modelos, anexo, geração, persistência
 após recarga, reabertura, busca, backup e restauração em outro contexto,
