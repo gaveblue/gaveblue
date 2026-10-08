@@ -116,17 +116,15 @@
         'Recorte dos registros carregados da Central. Alterações, exclusões, falhas de sincronização e autoria completa permanecem na auditoria administrativa; lista vazia pode significar dados não carregados.');
     }
     if (f.type === 'irregularities') {
-      const fuel=allFinanceEntries.filter(e=>isFuelEntry(e)).filter(e=>!f.vehicleId||getEntryImmediateVehicleId(e)===f.vehicleId);
-      const sorted=[...fuel].sort((a,b)=>String(a.dataAbastecimento||getFinanceEntryDate(a)).localeCompare(String(b.dataAbastecimento||getFinanceEntryDate(b))));
-      const previous=new Map(),seen=new Set(),rows=[];
-      sorted.forEach(e=>{const id=getEntryImmediateVehicleId(e),date=e.dataAbastecimento||getFinanceEntryDate(e),km=Number(e.km),liters=parseDecimalInputValue(e.litros),flags=[];
+      const seen=new Set(),rows=[];
+      getFuelMileageAudit().filter(item=>!f.vehicleId||item.vehicleId===f.vehicleId).forEach(item=>{
+        const {entry:e,vehicleId:id,date,previous}=item, liters=parseDecimalInputValue(e.litros),flags=[...item.flags];
         const key=JSON.stringify([id,date,e.km,liters,e.total]);if(id&&seen.has(key))flags.push('Possível duplicidade (mesmos dados)');if(id)seen.add(key);
-        if(id&&e.km!==''&&e.km!=null&&Number.isFinite(km)){if(previous.has(id)&&km<previous.get(id))flags.push('Hodômetro menor que anterior');previous.set(id,km);}
         if(!e.comprovanteUrl&&!e.receiptUrl&&!e.comprovante)flags.push('Comprovante não identificado nos campos padrão');
-        if(flags.length&&(!(f.start||f.end)||isDateWithinRange(date,f.start,f.end)))rows.push([formatDate(date),getReportVehicleLabel(id),e.nf||e.id,flags.join('; ')]);
+        if(flags.length&&(!(f.start||f.end)||isDateWithinRange(date,f.start,f.end)))rows.push([formatDate(date),id?getReportVehicleLabel(id):'Veículo não identificado',e.nf||e.id,item.km??'Não informado',previous?.km??'Sem referência',previous?formatDate(previous.date):'—',previous?(previous.entry.nf||previous.entry.id):'—',flags.join('; ')]);
       });
-      return table(f,['Data','Veículo','Referência','Indícios para revisão'],rows,
-        'Indícios, não conclusões. Anexos podem existir em agrupamentos. Capacidade de tanque e limites de preço/consumo precisam ser configurados antes de gerar esses alertas.');
+      return table(f,['Data','Veículo','Referência','KM lançado','KM anterior de referência','Data anterior','Referência anterior','Indícios para revisão'],rows,
+        'Compara o histórico carregado, inclusive antes do período selecionado e filhos de agrupamentos. Sem horário, não presume a ordem no mesmo dia. Revise os dois comprovantes antes de corrigir; nenhum KM é alterado automaticamente. Anexos podem existir em agrupamentos.',[badge('Lançamentos para revisar',rows.length,'Use todas as datas para examinar o histórico completo disponível.')]);
     }
   };
   document.addEventListener('DOMContentLoaded',()=>{

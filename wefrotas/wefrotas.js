@@ -1606,22 +1606,23 @@
     }
 
     function validateFuelMileageForVehicle({ vehicleId, date, km, excludeId = '' }) {
-      const kmValue = Number(km || 0);
-      if (!vehicleId || !date || !km) return 'Selecione o veículo, a data de abastecimento e informe o KM.';
-      if (!Number.isFinite(kmValue) || kmValue < 0) return 'Informe um KM válido para o abastecimento.';
+      const kmValue = Number(km);
+      if (!vehicleId || !date || km == null || String(km).trim() === '') return 'Selecione o veículo, a data de abastecimento e informe o KM.';
+      if (!Number.isSafeInteger(kmValue) || kmValue < 0) return 'Informe um KM inteiro e não negativo para o abastecimento.';
 
-      const entries = getFuelEntriesForVehicle(vehicleId, excludeId);
+      const entries = getFuelEntriesForVehicle(vehicleId, excludeId).filter(entry => entry.km != null && String(entry.km).trim() !== '' && Number.isSafeInteger(Number(entry.km)) && Number(entry.km) >= 0);
       const previous = [...entries]
-        .filter(entry => getFinanceEntryDate(entry) <= date)
-        .sort((a, b) => String(getFinanceEntryDate(a)).localeCompare(String(getFinanceEntryDate(b))) || Number(a.km || 0) - Number(b.km || 0))
+        .filter(entry => getFinanceEntryDate(entry).slice(0, 10) < date.slice(0, 10))
+        .sort((a, b) => Number(a.km) - Number(b.km))
         .pop();
-      const next = entries.find(entry => getFinanceEntryDate(entry) > date);
+      // Date-only records cannot establish ordering within the same day.
+      const next = entries.filter(entry => getFinanceEntryDate(entry).slice(0, 10) > date.slice(0, 10)).sort((a, b) => Number(a.km) - Number(b.km))[0];
 
       if (previous && kmValue < Number(previous.km || 0)) {
-        return `O KM informado não pode ser menor que ${previous.km} para esse veículo.`;
+        return `KM ${kmValue} menor que ${previous.km}, registrado em ${formatDate(getFinanceEntryDate(previous))} (referência ${previous.nf || previous.id}). Revise o lançamento e o histórico do veículo.`;
       }
       if (next && kmValue > Number(next.km || 0)) {
-        return `O KM informado não pode ser maior que ${next.km}, pois já existe abastecimento futuro para esse veículo.`;
+        return `KM ${kmValue} maior que ${next.km}, registrado depois, em ${formatDate(getFinanceEntryDate(next))} (referência ${next.nf || next.id}). Revise as datas e o histórico do veículo.`;
       }
       return '';
     }
@@ -1637,6 +1638,27 @@
         && String(entry.dataAbastecimento || entry.dataVencimento || '') === String(dataAbastecimento || '')
         && Number(entry.total || 0).toFixed(2) === normalizedTotal
       ) || null;
+    }
+
+    function getFuelMileageAudit() {
+      const entries = allFinanceEntries.filter(isFuelEntry).slice().sort((a, b) => String(getFinanceEntryDate(a)).localeCompare(String(getFinanceEntryDate(b))));
+      const history = new Map();
+      return entries.map(entry => {
+        const vehicleId = getEntryVehicleId(entry), date = String(getFinanceEntryDate(entry) || '').slice(0, 10);
+        const km = Number(entry.km), flags = [];
+        const validKm = entry.km != null && String(entry.km).trim() !== '' && Number.isSafeInteger(km) && km >= 0;
+        if (!validKm) flags.push('KM ausente ou inválido');
+        if (!date) flags.push('Data ausente: não foi possível comparar a sequência');
+        if (!vehicleId) flags.push('Veículo não identificado');
+        const prior = (history.get(vehicleId) || []).filter(item => item.date < date).sort((a,b) => b.km - a.km)[0];
+        if (validKm && date && prior && km < prior.km) flags.push('Hodômetro menor que registro anterior; revisar ambos os lançamentos');
+        if (entry.kmInicial != null && String(entry.kmInicial).trim() !== '' && entry.kmFinal != null && String(entry.kmFinal).trim() !== '' && Number(entry.kmFinal) < Number(entry.kmInicial)) flags.push('KM final menor que KM inicial');
+        if (vehicleId && date && validKm) {
+          const list = history.get(vehicleId) || [];
+          list.push({entry, date, km}); history.set(vehicleId, list);
+        }
+        return {entry, vehicleId, date, km: validKm ? km : null, previous: prior || null, flags};
+      });
     }
 
     function migrateFinanceEntries() {
@@ -1972,7 +1994,7 @@
     async function finishOnlineAuthChecking() {
       setOnlineAuthStage('done');
       window.clearTimeout(onlineAuthSlowTimer);
-      await new Promise((resolve) => window.setTimeout(resolve, 380));
+      // Authentication and server synchronization have already completed.
     }
 
     function toggleOnlineLogin(show, errorMessage = '') {
@@ -2003,15 +2025,18 @@
     function translateOnlineAuthError(error) {
       const rawMessage = String(error?.message || error?.type || '').trim();
       const normalized = rawMessage.toLowerCase();
-      const code = Number(error?.code || 0);
+      const code = Number(error?.status || error?.code || 0);
 
       if (!rawMessage) return 'Não foi possível entrar. Tente novamente.';
-      if (code === 401 || /invalid credentials|invalid email or password|user_invalid_credentials|password.*invalid|email.*invalid/i.test(rawMessage)) {
+      if (code === 401 || /invalid(?: login)? credentials|invalid_credentials|invalid email or password|user_invalid_credentials|password.*invalid|email.*invalid/i.test(rawMessage)) {
         return 'E-mail ou senha incorretos. Confira os dados e tente novamente.';
       }
       if (code === 429 || normalized.includes('rate limit') || normalized.includes('too many requests')) {
         return 'Muitas tentativas em sequência. Aguarde um pouco e tente novamente.';
       }
+      if (/email.*not.*confirmed|email_not_confirmed/.test(normalized)) return 'Confirme seu e-mail antes de entrar.';
+      if (/timeout|timed out/.test(normalized)) return 'O servidor demorou a responder. Tente novamente em instantes.';
+      if (code >= 500) return 'O serviço de acesso está temporariamente indisponível. Tente novamente em instantes.';
       if (normalized.includes('network') || normalized.includes('failed to fetch') || normalized.includes('load failed')) {
         return 'Não foi possível conectar ao servidor. Verifique sua internet e tente novamente.';
       }
@@ -2028,10 +2053,8 @@
         return 'A senha precisa ter pelo menos 8 caracteres.';
       }
 
-      return rawMessage
-        .replace(/Invalid credentials\.?/i, 'E-mail ou senha incorretos.')
-        .replace(/Network request failed\.?/i, 'Falha de conexão com o servidor.')
-        .replace(/Failed to fetch\.?/i, 'Falha ao conectar com o servidor.');
+      if (/não|usuário|empresa|acesso|licença|sincronização|confirme|informe/i.test(rawMessage)) return rawMessage;
+      return 'Não foi possível concluir o acesso. Tente novamente ou fale com o administrador.';
     }
 
     function setupOnlinePasswordToggle() {
@@ -10302,6 +10325,11 @@
     function renderCentralPendingCalendar() {
       const months = document.getElementById('central-pending-calendar-months');
       if (!months) return;
+      ensureCalendarTyping(months, centralPendingDraftDateStart, centralPendingDraftDateEnd, (start, end, selected) => {
+        centralPendingDraftDateStart = start; centralPendingDraftDateEnd = end;
+        if (selected) centralPendingCalendarMonth = parseCentralPendingCalendarDate(selected);
+        centralPendingCalendarView = 'days'; renderCentralPendingCalendar();
+      });
       if (!(centralPendingCalendarMonth instanceof Date)) {
         const selected = parseCentralPendingCalendarDate(centralPendingDateStart) || new Date();
         centralPendingCalendarMonth = new Date(selected.getFullYear(), selected.getMonth(), 1);
@@ -10412,6 +10440,7 @@
     }
 
     function applyCentralPendingDateRange() {
+      if (!validateCalendarTyping(document.getElementById('central-pending-calendar-months'))) return;
       centralPendingDateStart = centralPendingDraftDateStart;
       centralPendingDateEnd = centralPendingDraftDateEnd || centralPendingDraftDateStart;
       saveCentralPendingFilters();
@@ -10756,6 +10785,10 @@
         showToast('Informe um valor maior que zero para salvar o lançamento.');
         return false;
       }
+      if (isFuelEntry(payload)) {
+        const mileageError = validateFuelMileageForVehicle({ vehicleId: payload.vehicleId, date: payload.dataAbastecimento, km: payload.km, excludeId: currentEditingId || '' });
+        if (mileageError) { showToast(mileageError); return false; }
+      }
       const organizationId = String(window.WeFrotasBackend?.getOrganizationContext?.()?.id || '');
       const record = source ? centralPendingRecords.find(item => getCentralPendingRecordId(item) === source.recordId) : null;
       if (source && (!source.organizationId || source.organizationId !== organizationId || !record)) {
@@ -10876,6 +10909,14 @@
         dataVencimento: '', nf: '', total, observacoes: imported.cidade ? `Cidade informada na Central: ${imported.cidade}` : '', groupedIntoId: '', workflowStatus: 'pendente', closedExpense: false, discount: 0
       };
 
+      if (!isService) {
+        const mileageError = validateFuelMileageForVehicle({ vehicleId: entry.vehicleId, date: entry.dataAbastecimento, km: entry.km, excludeId: entry.id });
+        if (mileageError) {
+          prepareCentralPendingRecord(rowId);
+          showToast(mileageError);
+          return;
+        }
+      }
       centralApprovalInProgress.add(rowId);
       try {
         await persistApprovedCentralFinance(record, entry);
@@ -12970,6 +13011,7 @@
       documentos: clearCentralPendingFilters
     };
     const moduleFilterRenderActions = {
+      relatorios: () => applyReportFilters(),
       orders: renderOrders,
       financeiro: renderFinance,
       veiculos: renderVehicles,
@@ -13005,6 +13047,7 @@
     window.clearModuleFilters = clearModuleFilters;
 
     const moduleCompactFilterConfigs = {
+      relatorios: { startInputId: 'report-filter-start', endInputId: 'report-filter-end', dateLabel: 'Período', statuses: [['', 'Todos']] },
       orders: {
         statusInputId: 'order-filter-status', startInputId: 'order-filter-start', endInputId: 'order-filter-end', dateLabel: 'Abertura',
         statuses: [['todos', 'Todos'], ['ativas', 'Abertas e em andamento'], ['aberta', 'Abertas'], ['andamento', 'Em andamento'], ['fechada', 'Fechadas']]
@@ -13070,10 +13113,43 @@
       moduleFilterRenderActions[module]?.();
     }
 
+    function ensureCalendarTyping(months, start, end, update) {
+      let fields = months.parentElement.querySelector('.calendar-typed-range');
+      if (!fields) {
+        fields = document.createElement('div'); fields.className = 'calendar-typed-range';
+        fields.innerHTML = '<label>Data inicial<input type="text" inputmode="numeric" placeholder="dd/mm/aaaa" maxlength="10" aria-label="Data inicial digitada"></label><label>Data final<input type="text" inputmode="numeric" placeholder="dd/mm/aaaa" maxlength="10" aria-label="Data final digitada"></label>';
+        months.before(fields);
+        fields.addEventListener('input', event => {
+          const inputs = [...fields.querySelectorAll('input')];
+          const values = inputs.map(input => input.value.trim() ? window.WeFrotasDatePicker.parseTypedDate(input.value, 'date') : '');
+          inputs.forEach((input, index) => { input.setCustomValidity(values[index] === null ? 'Digite uma data válida: dd/mm/aaaa.' : ''); input.setAttribute('aria-invalid', String(values[index] === null)); });
+          if (values.includes(null)) return;
+          fields.update(values[0], values[1], values[inputs.indexOf(event.target)]);
+        });
+      }
+      fields.update = update;
+      [...fields.querySelectorAll('input')].forEach((input, index) => {
+        if (document.activeElement !== input) { input.value = [start,end][index]?.split('-').reverse().join('/') || ''; input.setCustomValidity(''); }
+      });
+    }
+
+    function validateCalendarTyping(months) {
+      const inputs = [...(months?.parentElement.querySelectorAll('.calendar-typed-range input') || [])];
+      for (const input of inputs) if (!input.reportValidity()) return false;
+      const values = inputs.map(input => input.value.trim() ? window.WeFrotasDatePicker.parseTypedDate(input.value, 'date') : '');
+      if (values[0] && values[1] && values[0] > values[1]) { showToast('A data final deve ser igual ou posterior à data inicial.'); return false; }
+      return true;
+    }
+
     function renderModuleCompactCalendar(module) {
       const state = moduleCompactCalendarState;
       const months = document.getElementById(`module-compact-calendar-months-${module}`);
       if (!months || state.module !== module) return;
+      ensureCalendarTyping(months, state.draftStart, state.draftEnd, (start, end, selected) => {
+        state.draftStart = start; state.draftEnd = end;
+        if (selected) state.month = parseCentralPendingCalendarDate(selected);
+        state.view = 'days'; renderModuleCompactCalendar(module);
+      });
       if (!(state.month instanceof Date)) state.month = new Date();
       const todayIso = centralPendingCalendarIso(new Date());
       const weekdays = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
@@ -13207,6 +13283,7 @@
     function applyModuleCompactDateRange(module) {
       const config = moduleCompactFilterConfigs[module];
       if (!config || moduleCompactCalendarState.module !== module) return;
+      if (!validateCalendarTyping(document.getElementById(`module-compact-calendar-months-${module}`))) return;
       const start = moduleCompactCalendarState.draftStart;
       const end = moduleCompactCalendarState.draftEnd || start;
       const startField = document.getElementById(config.startInputId);

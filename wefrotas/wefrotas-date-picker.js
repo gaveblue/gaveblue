@@ -18,7 +18,33 @@
     const match = String(value || '').match(/^(\d{4})-(\d{2})(?:-(\d{2}))?$/);
     if (!match) return null;
     const date = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3] || 1));
-    return Number.isNaN(date.getTime()) ? null : date;
+    return Number.isNaN(date.getTime()) || date.getFullYear() !== Number(match[1]) || date.getMonth() !== Number(match[2]) - 1 || date.getDate() !== Number(match[3] || 1) ? null : date;
+  }
+
+  function parseTypedDate(value, type) {
+    const text = String(value || '').trim();
+    const match = type === 'month' ? text.match(/^(\d{2})\/(\d{4})$/) : text.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+    const iso = match ? (type === 'month' ? `${match[2]}-${match[1]}` : `${match[3]}-${match[2]}-${match[1]}`) : text;
+    if (!(type === 'month' ? /^\d{4}-\d{2}$/ : /^\d{4}-\d{2}-\d{2}$/).test(iso)) return null;
+    return parseIsoDate(iso) ? iso : null;
+  }
+
+  function readTypedDate() {
+    const field = document.getElementById('standard-date-picker-typed');
+    const raw = field.value.trim();
+    const value = raw ? parseTypedDate(raw, state.type) : '';
+    const valid = value !== null && isWithinBounds(value);
+    field.setCustomValidity(valid ? '' : 'Informe uma data válida dentro do intervalo permitido.');
+    field.setAttribute('aria-invalid', String(!valid));
+    if (!valid) return false;
+    state.draft = value;
+    if (value) {
+      const date = parseIsoDate(value);
+      state.month = new Date(date.getFullYear(), date.getMonth(), 1);
+      state.view = state.type === 'month' ? 'months' : 'days';
+    }
+    render();
+    return true;
   }
 
   function formatValue(value, type) {
@@ -44,6 +70,9 @@
               <button id="standard-date-picker-title" class="standard-date-picker-title" type="button"></button>
               <button id="standard-date-picker-next" type="button" aria-label="Próximo">›</button>
             </header>
+            <label class="standard-date-picker-manual">Digite a data
+              <input id="standard-date-picker-typed" type="text" inputmode="numeric" autocomplete="off" aria-label="Digitar data">
+            </label>
             <div id="standard-date-picker-content" class="standard-date-picker-content"></div>
             <footer class="standard-date-picker-footer">
               <span id="standard-date-picker-hint">Escolha uma data.</span>
@@ -61,6 +90,10 @@
     document.getElementById('standard-date-picker-title').addEventListener('click', toggleView);
     document.getElementById('standard-date-picker-clear').addEventListener('click', clearValue);
     document.getElementById('standard-date-picker-apply').addEventListener('click', applyValue);
+    document.getElementById('standard-date-picker-typed').addEventListener('input', readTypedDate);
+    document.getElementById('standard-date-picker-typed').addEventListener('keydown', event => {
+      if (event.key === 'Enter') { event.preventDefault(); applyValue(); }
+    });
     document.getElementById('standard-date-picker-current').addEventListener('click', closePicker);
     document.getElementById('standard-date-picker-backdrop').addEventListener('click', event => {
       if (event.target.id === 'standard-date-picker-backdrop') closePicker();
@@ -120,6 +153,7 @@
   }
 
   function applyValue() {
+    if (!readTypedDate()) { document.getElementById('standard-date-picker-typed').reportValidity(); return; }
     if (state.draft && !isWithinBounds(state.draft)) return;
     commit(state.draft);
   }
@@ -212,6 +246,14 @@
     const current = document.getElementById('standard-date-picker-current');
     const hint = document.getElementById('standard-date-picker-hint');
     const apply = document.getElementById('standard-date-picker-apply');
+    const typed = document.getElementById('standard-date-picker-typed');
+    typed.placeholder = state.type === 'month' ? 'mm/aaaa' : 'dd/mm/aaaa';
+    typed.maxLength = state.type === 'month' ? 7 : 10;
+    if (document.activeElement !== typed) {
+      typed.value = state.draft ? (state.type === 'month' ? state.draft.split('-').reverse().join('/') : formatValue(state.draft, state.type)) : '';
+      typed.setCustomValidity('');
+      typed.setAttribute('aria-invalid', 'false');
+    }
     current.innerHTML = `<span>${escapeHtml(getFieldLabel(state.input))}</span><strong>${escapeHtml(formatValue(state.draft, state.type))}</strong><svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3v3M17 3v3M4 8h16M6 5h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z" stroke-width="1.9" stroke-linecap="round"/></svg>`;
     hint.textContent = state.type === 'month' ? 'Escolha o mês.' : 'Escolha uma data.';
     apply.textContent = 'Aplicar';
@@ -240,6 +282,10 @@
       // native date input and both calendars are displayed at once.
       event.preventDefault();
       event.stopPropagation();
+      if (['report-filter-start', 'report-filter-end'].includes(input.id) && typeof window.toggleModuleCompactCalendar === 'function') {
+        window.toggleModuleCompactCalendar('relatorios', true);
+        return;
+      }
       openPicker(input);
     });
     shell.appendChild(trigger);
@@ -259,7 +305,7 @@
     observer.observe(document.body, { childList: true, subtree: true });
   }
 
-  window.WeFrotasDatePicker = { scan, open: input => openPicker(input), close: closePicker };
+  window.WeFrotasDatePicker = { scan, parseTypedDate, open: input => openPicker(input), close: closePicker };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once: true });
   else init();
 })();

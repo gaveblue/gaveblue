@@ -6,6 +6,7 @@ function setup(){
  normalizeDateForFilter:x=>String(x||'').slice(0,10),isFuelEntry:e=>e.entryType==='combustivel',isFuelGroupEntry:e=>e.entryType==='combustivel_agrupado',
  getFuelGroupChildren:e=>e.children||[],isDateWithinRange:(d,s,e)=>(!s||d>=s)&&(!e||d<=e)});
  for(const [a,b] of [['getFinanceTotal','normalizeFinanceNoteLabel'],['getEntryLinkedOrder','isFinanceEntryInsidePeriod'],['getOrderCompetenceDate','getVehicleDistributedCostTotal'],['getFinanceEntryDate','getFinanceEntryStatus'],['getReportFinanceEntries','getReportMaintenanceItems'],['getVehicleCostStats','getDashboardExpirations'],['getCostPerKmTone','renderMonthlyVehicleCostChart']])vm.runInContext(src.slice(src.indexOf(`    function ${a}(`),src.indexOf(`    function ${b}(`)),c);
+ for(const [a,b] of [['getEntryVehicleId','getEntryLinkedOrder'],['getFuelMileageAudit','migrateFinanceEntries']])vm.runInContext(src.slice(src.indexOf(`    function ${a}(`),src.indexOf(`    function ${b}(`)),c);
  return c;
 }
 const fuel=(id,km,total=100)=>({id,vehicleId:'a',orderId:'os',entryType:'combustivel',dataAbastecimento:`2026-10-${id==='one'?'01':'10'}`,total,km});

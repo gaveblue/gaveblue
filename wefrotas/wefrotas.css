@@ -1997,7 +1997,8 @@ body { height: 100%; margin: 0; box-sizing: border-box; }
     #panel-veiculos,
     #panel-motoristas,
     #panel-fornecedores,
-    #panel-financeiro {
+    #panel-financeiro,
+    #panel-relatorios {
       border: 0;
       border-radius: 0;
       box-shadow: none;
@@ -2577,6 +2578,23 @@ body { height: 100%; margin: 0; box-sizing: border-box; }
     .report-results-card {
       position: relative;
     }
+    #panel-relatorios .report-filter-card,
+    #panel-relatorios .report-results-card {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      box-shadow: none;
+    }
+    #panel-relatorios .report-filter-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; }
+    #panel-relatorios .report-filter-grid > div[hidden] { display: none; }
+    #panel-relatorios .soft-input { min-height: 44px; font-size: 14px; }
+    #panel-relatorios .report-filter-footer { flex-wrap: wrap; }
+    .calendar-typed-range { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 12px; }
+    .calendar-typed-range label, .standard-date-picker-manual { display: grid; gap: 6px; font-size: 12px; color: #475569; }
+    .standard-date-picker-manual { padding: 12px 16px; }
+    .calendar-typed-range input, .standard-date-picker-manual input { min-width: 0; width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 10px; background: #fff; color: #172033; font-size: 16px; }
+    .calendar-typed-range input[aria-invalid="true"], .standard-date-picker-manual input[aria-invalid="true"] { border-color: #dc2626; }
+    body.dark-mode #panel-relatorios .report-filter-card, body.dark-mode #panel-relatorios .report-results-card { background: #182233; border-color: #334155; }
     .report-results-toolbar-sticky {
       position: static;
     }
@@ -4816,9 +4834,9 @@ body.central-calendar-open::before {
 .standard-date-input-trigger {
   position: absolute;
   z-index: 2;
-  inset: 0;
+  inset: 0 0 0 auto;
   display: flex;
-  width: 100%;
+  width: 42px;
   height: 100%;
   align-items: center;
   justify-content: flex-end;
