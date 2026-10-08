@@ -2575,6 +2575,16 @@ body { height: 100%; margin: 0; box-sizing: border-box; }
       font-size: 11px;
       color: #64748b;
     }
+    .online-session-controls { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #475569; white-space: nowrap; }
+    .online-session-controls[hidden] { display: none; }
+    .online-session-controls strong { font-variant-numeric: tabular-nums; }
+    .online-session-controls button { color: #2455db; border: 1px solid #dbe3ef; border-radius: 10px; padding: 8px; background: #fff; }
+    .online-idle-warning { position: fixed; inset: 0; z-index: 2147483000; display: grid; place-items: center; padding: 20px; background: rgba(15,23,42,.55); }
+    .online-idle-warning section { width: min(100%,420px); border-radius: 22px; padding: 28px; background: #fff; color: #172033; box-shadow: 0 20px 70px #0003; }
+    .online-idle-warning h2 { font-size: 24px; font-weight: 800; margin-bottom: 12px; }
+    .online-idle-warning p { margin-bottom: 16px; }
+    .online-idle-warning button { width: 100%; padding: 14px; border-radius: 12px; background: #2455db; color: #fff; font-weight: 700; }
+    @media(max-width:600px) { .online-session-controls { font-size: 10px; gap: 4px; } .online-session-controls button { padding: 6px; } }
     .report-results-card {
       position: relative;
     }

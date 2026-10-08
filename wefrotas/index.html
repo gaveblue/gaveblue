@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./wefrotas.css?v=20261008-reports-mileage-1">
+  <link rel="stylesheet" href="./wefrotas.css?v=20261008-session-warning-1">
   <link rel="stylesheet" href="./wefrotas-login.css?v=20260915-fixed-login-1">
   <link rel="stylesheet" href="./wefrotas-db-capacity.css?v=20260906-db-capacity-1">
   <style>
@@ -176,6 +176,10 @@
           </div>
 
           <div class="app-topbar-actions">
+            <div id="online-session-controls" class="online-session-controls" hidden>
+              <span>Sessão <strong id="online-session-clock" role="timer" aria-label="Tempo da sessão">10:00</strong></span>
+              <button id="online-session-renew" type="button" onclick="renewOnlineSession()" title="Renovar por mais 10 minutos">Renovar</button>
+            </div>
             <div class="global-search">
               <svg class="global-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                 <circle cx="11" cy="11" r="7" stroke-width="2"></circle>
@@ -1836,7 +1840,7 @@
   <script src="./wefrotas-supabase-core.js?v=20260904-supabase-auth-isolation-3"></script>
   <script src="./wefrotas-supabase-backend.js?v=20260906-db-capacity-1"></script>
   <script src="./wefrotas-db-capacity.js?v=20260906-db-capacity-1"></script>
-  <script src="./wefrotas.js?v=20261008-reports-mileage-1"></script>
+  <script src="./wefrotas.js?v=20261008-session-warning-1"></script>
   <script src="./wefrotas-reports-v2.js?v=20261008-reports-mileage-1"></script>
   <script src="./wefrotas-presence.js?v=20260904-contingency-2"></script>
   <script src="./wefrotas-batch-orders.js?v=20260802-1"></script>

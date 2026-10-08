@@ -216,9 +216,9 @@ test('vehicle, banner and city uploads grant only the authenticated organization
 
 test('idle logout is coordinated across tabs before deleting the shared session', () => {
   assert.match(ui, /ONLINE_LAST_ACTIVITY_STORAGE_KEY\s*=\s*'wefrotas_online_last_activity_v1'/);
-  assert.match(ui, /localStorage\.setItem\(ONLINE_LAST_ACTIVITY_STORAGE_KEY, String\(activityAt\)\)/);
+  assert.match(ui, /localStorage\.setItem\(onlineSessionStorageKey\(\), String\(activityAt\)\)/);
   assert.match(ui, /inactiveForMs < ONLINE_IDLE_TIMEOUT_MS/);
-  assert.match(ui, /scheduleOnlineIdleLogout\(\{ touch: false, delayMs: ONLINE_IDLE_TIMEOUT_MS - inactiveForMs \}\)/);
+  assert.match(ui, /scheduleOnlineIdleLogout\(\{ touch: false \}\)/);
 });
 
 test('a delayed response cannot be applied to a different company', async () => {

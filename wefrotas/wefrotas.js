@@ -150,9 +150,14 @@
     let customLogoUrl = '';
     let customLogoScale = 60;
     let receiptViewerZoomLevel = 1;
-    const ONLINE_IDLE_TIMEOUT_MS = 10 * 60 * 1000;
+    const ONLINE_IDLE_TIMEOUT_MS = 5 * 60 * 1000;
+    const ONLINE_SESSION_DURATION_MS = 10 * 60 * 1000;
+    const ONLINE_IDLE_WARNING_MS = 30 * 1000;
     const ONLINE_LAST_ACTIVITY_STORAGE_KEY = 'wefrotas_online_last_activity_v1';
     let onlineIdleTimer = null;
+    let onlineActivityMemory = 0;
+    let onlineSessionDeadline = 0;
+    let onlineWarningOpen = false;
     let onlineIdleListenersRegistered = false;
     let onlineLoginInProgress = false;
     let onlineLogoutInProgress = false;
@@ -2095,38 +2100,87 @@
     function stopOnlineIdleTimer() {
       window.clearTimeout(onlineIdleTimer);
       onlineIdleTimer = null;
+      onlineSessionDeadline = 0; onlineActivityMemory = 0;
+      document.getElementById('online-session-controls')?.setAttribute('hidden', '');
+      document.getElementById('online-idle-warning')?.remove();
+      onlineWarningOpen = false;
+    }
+
+    function onlineSessionStorageKey(suffix = '') {
+      const user = window.WeFrotasBackend?.getUser?.();
+      return `${ONLINE_LAST_ACTIVITY_STORAGE_KEY}:${user?.id || user?.$id || 'anonymous'}${suffix}`;
     }
 
     function readOnlineLastActivityAt() {
       try {
-        const value = Number(localStorage.getItem(ONLINE_LAST_ACTIVITY_STORAGE_KEY));
-        return Number.isFinite(value) && value > 0 ? value : 0;
+        const value = Number(localStorage.getItem(onlineSessionStorageKey()));
+        return Math.max(onlineActivityMemory, Number.isFinite(value) && value > 0 ? value : 0);
       } catch (error) {
-        return 0;
+        return onlineActivityMemory;
       }
     }
 
     function markOnlineActivity() {
       const activityAt = Date.now();
+      onlineActivityMemory = activityAt;
       try {
-        localStorage.setItem(ONLINE_LAST_ACTIVITY_STORAGE_KEY, String(activityAt));
+        localStorage.setItem(onlineSessionStorageKey(), String(activityAt));
       } catch (error) {}
       return activityAt;
     }
 
-    function scheduleOnlineIdleLogout({ touch = true, delayMs = ONLINE_IDLE_TIMEOUT_MS } = {}) {
-      stopOnlineIdleTimer();
+    function scheduleOnlineIdleLogout({ touch = true } = {}) {
       if (!window.WeFrotasBackend?.getUser() || document.body.classList.contains('auth-locked')) return;
       if (touch) markOnlineActivity();
-      onlineIdleTimer = window.setTimeout(expireOnlineSessionByInactivity, Math.max(250, Number(delayMs) || ONLINE_IDLE_TIMEOUT_MS));
+      if (!onlineSessionDeadline) renewOnlineSession();
+      if (!onlineIdleTimer) updateOnlineSessionClock();
+    }
+
+    function renewOnlineSession() {
+      if (onlineLogoutInProgress || !window.WeFrotasBackend?.getUser?.() || document.body.classList.contains('auth-locked')) return;
+      markOnlineActivity();
+      onlineSessionDeadline = Date.now() + ONLINE_SESSION_DURATION_MS;
+      try { localStorage.setItem(onlineSessionStorageKey(':deadline'), String(onlineSessionDeadline)); } catch (_) {}
+      onlineWarningOpen = false;
+      document.getElementById('online-idle-warning')?.remove();
+      document.getElementById('online-session-renew')?.focus();
+      updateOnlineSessionClock();
+    }
+
+    function updateOnlineSessionClock() {
+      window.clearTimeout(onlineIdleTimer); onlineIdleTimer = null;
+      if (onlineLogoutInProgress || !window.WeFrotasBackend?.getUser?.() || document.body.classList.contains('auth-locked')) { stopOnlineIdleTimer(); return; }
+      const now = Date.now(), inactiveForMs = now - readOnlineLastActivityAt();
+      try { onlineSessionDeadline = Math.max(onlineSessionDeadline, Number(localStorage.getItem(onlineSessionStorageKey(':deadline'))) || 0); } catch (_) {}
+      if (inactiveForMs >= ONLINE_IDLE_TIMEOUT_MS + ONLINE_IDLE_WARNING_MS) { expireOnlineSessionByInactivity(); return; }
+      if (inactiveForMs < ONLINE_IDLE_TIMEOUT_MS) {
+        document.getElementById('online-idle-warning')?.remove(); onlineWarningOpen = false;
+        if (now >= onlineSessionDeadline) {
+          onlineSessionDeadline = now + ONLINE_SESSION_DURATION_MS;
+          try { localStorage.setItem(onlineSessionStorageKey(':deadline'), String(onlineSessionDeadline)); } catch (_) {}
+        }
+      } else {
+        if (!onlineWarningOpen) {
+          onlineWarningOpen = true;
+          document.body.insertAdjacentHTML('beforeend', '<div id="online-idle-warning" class="online-idle-warning"><section role="alertdialog" aria-modal="true" aria-labelledby="online-idle-title" aria-describedby="online-idle-description"><h2 id="online-idle-title">Você ainda está aí?</h2><p id="online-idle-description">Já se passaram 5 minutos sem atividade. Para continuar, renove sua sessão.</p><p>Sua sessão será encerrada em <strong id="online-idle-countdown">30</strong> segundos.</p><button type="button" onclick="renewOnlineSession()">Sim, continuar conectado</button></section></div>');
+          document.querySelector('#online-idle-warning button')?.focus();
+        }
+        const countdown = document.getElementById('online-idle-countdown');
+        if (countdown) countdown.textContent = String(Math.max(0, Math.ceil((ONLINE_IDLE_TIMEOUT_MS + ONLINE_IDLE_WARNING_MS - inactiveForMs) / 1000)));
+      }
+      const remaining = Math.max(0, Math.ceil((onlineSessionDeadline - now) / 1000));
+      document.getElementById('online-session-controls')?.removeAttribute('hidden');
+      const clock = document.getElementById('online-session-clock');
+      if (clock) clock.textContent = `${String(Math.floor(remaining / 60)).padStart(2,'0')}:${String(remaining % 60).padStart(2,'0')}`;
+      onlineIdleTimer = window.setTimeout(updateOnlineSessionClock, 1000);
     }
 
     async function expireOnlineSessionByInactivity() {
       if (onlineLogoutInProgress || !window.WeFrotasBackend?.getUser()) return;
       const lastActivityAt = readOnlineLastActivityAt();
       const inactiveForMs = lastActivityAt > 0 ? Date.now() - lastActivityAt : ONLINE_IDLE_TIMEOUT_MS;
-      if (inactiveForMs < ONLINE_IDLE_TIMEOUT_MS) {
-        scheduleOnlineIdleLogout({ touch: false, delayMs: ONLINE_IDLE_TIMEOUT_MS - inactiveForMs });
+      if (inactiveForMs < ONLINE_IDLE_TIMEOUT_MS + ONLINE_IDLE_WARNING_MS) {
+        scheduleOnlineIdleLogout({ touch: false });
         return;
       }
       onlineLogoutInProgress = true;
@@ -2139,7 +2193,8 @@
       } finally {
         toggleOnlinePlatformLoading(false);
         onlineLogoutInProgress = false;
-        toggleOnlineLogin(true, 'Sua sessão foi encerrada após 10 minutos sem atividade.');
+        onlineSessionDeadline = 0; onlineActivityMemory = 0;
+        toggleOnlineLogin(true, 'Sua sessão foi encerrada após 5 minutos de inatividade e 30 segundos sem confirmação.');
       }
     }
 
@@ -2147,9 +2202,20 @@
       if (onlineIdleListenersRegistered) return;
       onlineIdleListenersRegistered = true;
       ['pointerdown', 'keydown', 'scroll', 'touchstart'].forEach((eventName) => {
-        window.addEventListener(eventName, scheduleOnlineIdleLogout, { passive: true });
+        window.addEventListener(eventName, (event) => {
+          if (!event.isTrusted || onlineWarningOpen || document.visibilityState === 'hidden') return;
+          if (Date.now() - onlineActivityMemory < 1000) return;
+          scheduleOnlineIdleLogout();
+        }, { passive: true });
+      });
+      window.addEventListener('storage', event => { if (event.key?.startsWith(onlineSessionStorageKey())) updateOnlineSessionClock(); });
+      document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') updateOnlineSessionClock(); });
+      document.addEventListener('keydown', event => {
+        if (onlineWarningOpen && event.key === 'Tab') { event.preventDefault(); document.querySelector('#online-idle-warning button')?.focus(); }
       });
     }
+
+    window.renewOnlineSession = renewOnlineSession;
 
     async function applyRemoteStorageSnapshot(snapshot) {
       const migratedStorage = applyStorageSnapshot(snapshot);
