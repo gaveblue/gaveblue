@@ -1,6 +1,7 @@
 /* Read-only reporting: never mutates operational records. */
 (() => {
   const titles = {
+    vehicle_expenses: 'Despesas por veículo — detalhado', vehicle_indicators: 'Indicadores de custo e consumo por veículo',
     overview: 'Visão geral de custos', monthly_vehicle_cost: 'Custos por veículo',
     fuel_register: 'Abastecimentos e consumo', irregularities: 'Irregularidades de abastecimento',
     orders: 'Ordens de serviço', maintenance_comparison: 'Manutenção preventiva × corretiva',
@@ -39,6 +40,37 @@
   const money = list => formatCurrency(net(list));
   const category = e => isFuelEntry(e) || isFuelGroupEntry(e) ? 'Combustível' : String(e.categoria || e.serviceType || 'Despesas gerais / não classificadas');
   const badge = (label, value, help) => ({label, value: String(value), help});
+  function detailRows(filters) {
+    const children = new Map(), parents = new Map(allFinanceEntries.map(e=>[e.id,e]));
+    allFinanceEntries.forEach(e=>{if(e.groupedIntoId && parents.has(e.groupedIntoId)){const list=children.get(e.groupedIntoId)||[];list.push(e);children.set(e.groupedIntoId,list);}});
+    const rows=[];
+    allFinanceEntries.filter(e=>!e.groupedIntoId || !parents.has(e.groupedIntoId)).forEach(parent=>{
+      const list=children.get(parent.id)||[parent];
+      const totalCents=Math.round(getFinanceNetTotal(parent)*100);
+      const weights=list.map(e=>Math.abs(getFinanceNetTotal(e))),sum=weights.reduce((a,b)=>a+b,0);
+      let allocated=0;
+      list.forEach((entry,index)=>{
+        const cents=index===list.length-1?totalCents-allocated:Math.round(totalCents*(sum?weights[index]/sum:1/list.length));allocated+=cents;
+        if(entry.kind==='receita'||parent.kind==='receita')return;
+        const vehicleId=getEntryImmediateVehicleId(entry)||getEntryImmediateVehicleId(parent);
+        const date=getFinanceEntryDate(entry)||getFinanceEntryDate(parent);
+        if(filters.vehicleId&&vehicleId!==filters.vehicleId)return;
+        if((filters.start||filters.end)&&!isDateWithinRange(date,filters.start,filters.end))return;
+        rows.push({entry,parent,vehicleId,date,total:cents/100,allocated:list[0]!==parent});
+      });
+    });
+    return rows.sort((a,b)=>String(a.date).localeCompare(String(b.date))||String(a.entry.id).localeCompare(String(b.entry.id)));
+  }
+  function vehicleIndicators(vehicle, rows) {
+    const readings=rows.filter(r=>r.vehicleId===vehicle.id&&isFuelEntry(r.entry)).sort((a,b)=>String(a.date).localeCompare(String(b.date))||Number(a.entry.km)-Number(b.entry.km));
+    const valid=readings.length>=2&&readings.every((r,i)=>r.entry.km!=null&&String(r.entry.km).trim()!==''&&Number.isSafeInteger(Number(r.entry.km))&&Number(r.entry.km)>=0&&(!i||Number(r.entry.km)>=Number(readings[i-1].entry.km)));
+    const first=valid?Number(readings[0].entry.km):null,last=valid?Number(readings.at(-1).entry.km):null;
+    const distance=valid&&last>first?last-first:null;
+    const liters=readings.slice(1).map(r=>parseDecimalInputValue(r.entry.litros));
+    const volume=distance&&liters.every(l=>Number.isFinite(l)&&l>0)?liters.reduce((a,b)=>a+b,0):null;
+    const costs=rows.filter(r=>r.vehicleId===vehicle.id).reduce((sum,r)=>sum+r.total,0);
+    return {first,last,distance,costs,perKm:distance?costs/distance:null,consumption:volume?distance/volume:null};
+  }
   getReportTitleByType = type => titles[type] || (type === 'fuel_liters_per_km' ? 'Consumo médio (km/L)' : type === 'cost' ? 'Custo por km' : oldTitle(type));
   getReportFilters = () => ({...oldFilters(), type: document.getElementById('report-filter-type')?.value || 'overview', situation: document.getElementById('report-filter-situation')?.value || '', horizon: document.getElementById('report-filter-horizon')?.value || ''});
   getFilteredReportOrders = () => {
@@ -46,6 +78,7 @@
     return oldOrders().filter(o => f.type !== 'orders' || !f.situation || o.status === f.situation);
   };
   getReportDateContextLabel = type => {
+    if (['vehicle_expenses','vehicle_indicators'].includes(type)) return 'Abastecimentos pela data do abastecimento; outras despesas pela data principal do lançamento. Agrupamentos são rateados sem duplicar totais.';
     if (type === 'fuel_register' && document.getElementById('report-filter-fuel-view')?.value === 'cost') return oldContext('cost');
     if (type === 'availability') return 'Retrato cadastral atual. O período não reconstrói disponibilidade histórica.';
     if (type === 'deadlines') return 'Datas de vencimento; revisões por km são exibidas somente sem janela de dias.';
@@ -57,6 +90,17 @@
 
   buildReportData = filters => {
     const f = filters;
+    if(f.type==='vehicle_expenses') {
+      const rows=detailRows(f);
+      return table(f,['Data','Veículo','Propriedade','Categoria','Fornecedor','Referência','OS','Valor líquido','Agrupamento'],rows.map(r=>{
+        const v=allVehicles.find(v=>v.id===r.vehicleId),order=allOrders.find(o=>o.id===(r.entry.orderId||r.parent.orderId));
+        return [formatDate(r.date),r.vehicleId?getReportVehicleLabel(r.vehicleId):'Sem veículo vinculado',v?.locado===true?'Locado':v?.locado===false?'Próprio':'Não informado',category(r.entry),r.entry.fornecedor||r.parent.fornecedor,r.entry.nf||r.entry.id,order?.numero||'Sem OS',formatCurrency(r.total),r.allocated?`Rateio do grupo ${r.parent.nf||r.parent.id}`:'Avulso'];
+      }), 'Despesas linha por linha, inclusive serviços e combustível. Receitas excluídas. Filhos substituem o agrupamento; valor final do grupo rateado proporcionalmente, com ajuste de centavos. Registros sem vínculo ficam explicitamente separados.',[badge('Total de despesas',formatCurrency(rows.reduce((s,r)=>s+r.total,0)),'Sem duplicar agrupamentos.'),badge('Lançamentos',rows.length,'No período selecionado.')]);
+    }
+    if(f.type==='vehicle_indicators') {
+      const rows=detailRows(f),number=n=>n===null?'Sem base suficiente':n.toLocaleString('pt-BR',{maximumFractionDigits:2});
+      return table(f,['Veículo','Propriedade','Custo total','KM inicial','KM final','KM rodado','Custo médio por km (R$/km)','Consumo estimado (km/L)'],vehicles(f).map(v=>{const s=vehicleIndicators(v,rows);return [getReportVehicleLabel(v.id),v.locado===true?'Locado':v.locado===false?'Próprio':'Não informado',formatCurrency(s.costs),number(s.first),number(s.last),number(s.distance),s.perKm===null?'Sem base suficiente':formatCurrency(s.perKm),number(s.consumption)];}), 'KM entre a primeira e a última leitura de abastecimento do período, não toda a quilometragem do veículo. Custo por km = despesas do período ÷ KM observado. Consumo estimado exclui os litros do primeiro registro; exige leituras crescentes e litros válidos, mas não comprova tanque cheio. KM inválido ou regressivo impede os índices. Custo por km e média por km são o mesmo indicador.');
+    }
     if (['monthly_vehicle_cost','fuel_register','orders','finance_status','supplier_ranking'].includes(f.type)) {
       const fuelView = document.getElementById('report-filter-fuel-view')?.value || 'fuel_register';
       const result = oldBuild(f.type === 'fuel_register' ? {...f,type:fuelView} : f); result.title = f.type === 'fuel_register' && fuelView !== 'fuel_register' ? `${titles[f.type]} — ${getReportTitleByType(fuelView)}` : titles[f.type];

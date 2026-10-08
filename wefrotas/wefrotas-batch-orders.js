@@ -476,6 +476,7 @@
           return `
             <div class="batch-order-row" data-batch-row="${escapeHtml(vehicle.id)}">
               <p class="batch-order-row-title">${escapeHtml(getVehicleLabel(vehicle))}</p>
+              <p>Motorista: ${escapeHtml(vehicle.motoristaNome || 'Sem motorista vinculado')}</p>
               <div class="batch-order-grid">
                 <div class="batch-order-field">
                   <label>Tipo</label>

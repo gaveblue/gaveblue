@@ -1,0 +1,7 @@
+# Pedidos de cliente — veículos e relatórios
+
+- OS em lote resolve motorista pela lista oficial `vehicleIds`, com compatibilidade para vínculos antigos. Motoristas inativos não são selecionados. Havendo mais de um vínculo ativo, solicita revisão antes de criar o lote. Nenhuma OS antiga é modificada.
+- Cadastro e edição de veículos persistem o booleano `locado`. Registros anteriores sem esse campo são mostrados como “Não informado” nos novos relatórios; não inferimos propriedade pelo modelo ou descrição.
+- Despesas por veículo detalhadas: combustível, serviços e demais despesas, com veículo direto ou vinculado à OS; receitas excluídas. Filhos substituem o grupo, cujo total final é distribuído proporcionalmente entre as linhas com ajuste residual de centavos. Os filtros de data são aplicados após o rateio. Registros sem vínculo são identificados, não atribuídos arbitrariamente.
+- Indicadores: custo total, KM inicial/final observado no período, distância observada, custo médio por KM, consumo estimado km/L. Distância usa leituras de abastecimento, não rastreamento. Consumo exclui litros do primeiro abastecimento e não comprova tanque cheio. Leituras ausentes, inválidas, regressivas ou sem distância impedem os índices. Custo por KM e média por KM não são duplicados, pois representam a mesma divisão.
+- 25 testes direcionados passaram, incluindo regressões de custos existentes, vínculos, rateios entre veículos, datas, KM e preservação do histórico. Não foram criados lançamentos ou OS reais para teste.

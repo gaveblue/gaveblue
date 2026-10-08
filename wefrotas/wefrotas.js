@@ -3328,6 +3328,17 @@
         .filter(Boolean);
     }
 
+    function getVehicleLinkedDrivers(vehicle) {
+      if (!vehicle) return [];
+      return allDrivers.filter(driver => isEntityActive(driver) && getDriverVehicleIds(driver).includes(String(vehicle.id)));
+    }
+
+    function getBatchVehicleDriverId(vehicle) {
+      const drivers = getVehicleLinkedDrivers(vehicle);
+      if (drivers.length > 1) throw new Error(`O veículo ${vehicle.placa || vehicle.id} tem mais de um motorista vinculado. Revise o cadastro antes de abrir a OS em lote.`);
+      return drivers[0]?.id || '';
+    }
+
     function setSelectedDriverVehicleIds(vehicleIds = []) {
       const list = document.getElementById('driver-vehicles');
       if (!list) return;
@@ -5831,6 +5842,10 @@
               <option value="">Selecione um motorista</option>
               ${getSortedDrivers().map(driver => `<option value="${driver.id}" ${isEntityActive(driver) ? '' : 'disabled'}>${escapeHtml(driver.nome)}${isEntityActive(driver) ? '' : ' (inativo)'}</option>`).join('')}
             </select>
+          </div>
+          <div class="field-wrap full">
+            <label><input id="vehicle-rented" type="checkbox"> Veículo locado</label>
+            <small>Marque quando o veículo pertencer a uma locadora.</small>
           </div>
           <div class="field-wrap full">
             <label>Chassi</label>
@@ -13424,7 +13439,9 @@
       document.getElementById('vehicle-ano').value = vehicle.ano;
       document.getElementById('vehicle-cor').value = vehicle.cor || '';
       document.getElementById('vehicle-seguro').value = vehicle.seguroVencimento || '';
-      document.getElementById('vehicle-motorista').value = vehicle.motoristaId || '';
+      const linkedDrivers = getVehicleLinkedDrivers(vehicle);
+      document.getElementById('vehicle-motorista').value = linkedDrivers.length === 1 ? linkedDrivers[0].id : vehicle.motoristaId || '';
+      document.getElementById('vehicle-rented').checked = vehicle.locado === true;
       syncCustomSelectById('vehicle-motorista');
       document.getElementById('vehicle-chassi').value = vehicle.chassi || '';
       document.getElementById('vehicle-active').checked = isEntityActive(vehicle);
@@ -14835,6 +14852,7 @@
 
         validItems.push({
           vehicle,
+          driverId: getBatchVehicleDriverId(vehicle),
           tipoOs,
           dataInicio,
           dataTermino,
@@ -14850,7 +14868,7 @@
 
       const firstNumber = getNextOrderCounterValue();
       const createdOrders = validItems.map((item, index) => {
-        const driverId = item.vehicle.motoristaId || '';
+        const driverId = item.driverId;
         return {
           id: generateId(),
           numero: String(firstNumber + index),
@@ -14883,7 +14901,8 @@
         numeroFrota: vehicle.numeroFrota || '',
         placa: vehicle.placa || '',
         modelo: vehicle.modelo || '',
-        motoristaId: vehicle.motoristaId || '',
+        motoristaId: getVehicleLinkedDrivers(vehicle).length === 1 ? getVehicleLinkedDrivers(vehicle)[0].id : '',
+        motoristaNome: getVehicleLinkedDrivers(vehicle).map(driver => driver.nome).join(', ') || 'Sem motorista vinculado',
         currentKm: getVehicleCurrentKm(vehicle.id)
       })),
       getAdministrations: () => getAdministrationOptions(),
@@ -14910,6 +14929,7 @@
         const cor = document.getElementById('vehicle-cor').value.trim();
         const seguroVencimento = document.getElementById('vehicle-seguro').value.trim();
         const motoristaId = document.getElementById('vehicle-motorista').value.trim();
+        const locado = document.getElementById('vehicle-rented')?.checked === true;
         const chassi = document.getElementById('vehicle-chassi').value.trim();
         const ativo = document.getElementById('vehicle-active')?.checked !== false;
         const vehicleImageInput = document.getElementById('vehicle-image-file');
@@ -14949,12 +14969,12 @@
         const vehicleWasEdited = Boolean(currentEditingId);
         if (currentEditingId) {
           allVehicles = allVehicles.map(vehicle => vehicle.id === currentEditingId
-            ? { ...vehicle, numeroFrota, placa, modelo, ano, cor, seguroVencimento, motoristaId, chassi, ativo, vehicleImageUrl, vehicleImageFileId }
+            ? { ...vehicle, numeroFrota, placa, modelo, ano, cor, seguroVencimento, motoristaId, locado, chassi, ativo, vehicleImageUrl, vehicleImageFileId }
             : vehicle);
           syncDriversWithVehicle(currentEditingId, motoristaId);
         } else {
           const newVehicleId = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-          allVehicles.unshift({ id: newVehicleId, createdAt: new Date().toISOString(), numeroFrota, placa, modelo, ano, cor, seguroVencimento, motoristaId, chassi, ativo, vehicleImageUrl, vehicleImageFileId });
+          allVehicles.unshift({ id: newVehicleId, createdAt: new Date().toISOString(), numeroFrota, placa, modelo, ano, cor, seguroVencimento, motoristaId, locado, chassi, ativo, vehicleImageUrl, vehicleImageFileId });
           syncDriversWithVehicle(newVehicleId, motoristaId);
         }
         renderAll();
