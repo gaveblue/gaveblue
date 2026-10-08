@@ -29,6 +29,8 @@ await page.addStyleTag({content:'#panel-relatorios{display:block!important}'});
 await page.addScriptTag({content:`var moduleCompactCalendarState={};var moduleCompactFilterConfigs={relatorios:{startInputId:'report-filter-start',endInputId:'report-filter-end',statuses:[['','Todos']]}};var moduleFilterRenderActions={relatorios:()=>{window.applied=true}};function toggleCentralPendingCalendar(){};function formatCentralPendingCalendarDate(x){return x||''};`+
 ['parseCentralPendingCalendarDate','centralPendingCalendarIso','getModuleCompactFilterValue','renderModuleCompactFilterControls','renderModuleCompactCalendar','closeModuleCompactCalendars','toggleModuleCompactCalendar','selectModuleCompactCalendarDate','clearModuleCompactDateRange','applyModuleCompactDateRange'].map(n=>block(n).split('    Object.assign(window,')[0]).join('\n')});
 await page.locator('#module-compact-date-button-relatorios').click();
+assert.equal(await page.locator('#panel-relatorios .report-filter-card').evaluate(el=>getComputedStyle(el).zIndex),'auto');
+assert.equal(await page.locator('#panel-relatorios .module-compact-date-range').evaluate(el=>getComputedStyle(el).zIndex),'75');
 assert.equal(await page.locator('#report-filter-start').isVisible(),false);
 assert.equal(await page.locator('#report-filter-end').isVisible(),false);
 const calendarBounds=await page.locator('#module-compact-calendar-relatorios').boundingBox();

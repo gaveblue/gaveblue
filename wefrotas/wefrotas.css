@@ -2600,7 +2600,8 @@ body { height: 100%; margin: 0; box-sizing: border-box; }
     #panel-relatorios .soft-input { min-height: 44px; font-size: 14px; }
     #panel-relatorios .report-filter-footer { flex-wrap: wrap; }
     #panel-relatorios .report-filter-card { position: relative; }
-    #panel-relatorios .report-filter-card.has-open-calendar { z-index: 75; }
+    #panel-relatorios .report-filter-card.has-open-calendar { z-index: auto; }
+    #panel-relatorios .report-filter-card.has-open-calendar .module-compact-date-range { z-index: 75; }
     #panel-relatorios .module-compact-date-range { grid-column: auto; }
     #panel-relatorios .module-compact-date-button { width: 100%; min-width: 0; }
     body.central-calendar-open #panel-relatorios { transform: none; animation: none; overflow: visible; }
