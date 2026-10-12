@@ -12035,6 +12035,8 @@
       const visibleIds = new Set(visibleVehicles.map(vehicle => vehicle.id));
       selectedVehicles = new Set(Array.from(selectedVehicles).filter(id => visibleIds.has(id)));
       const count = selectedVehicles.size;
+      const viewButton = document.getElementById('view-vehicle-btn');
+      if (viewButton) { viewButton.disabled = count !== 1; viewButton.title = count === 1 ? 'Visualizar veículo' : 'Selecione um veículo para visualizar'; }
       document.getElementById('vehicles-selected-text').textContent = `${count} selecionado${count === 1 ? '' : 's'}`;
       document.getElementById('select-all-vehicles').classList.toggle('checked', visibleVehicles.length > 0 && visibleVehicles.every(vehicle => selectedVehicles.has(vehicle.id)));
       updateButtonState('edit-vehicle-btn', 'delete-vehicle-btn', count, {
@@ -12257,7 +12259,12 @@
       if (event) event.stopPropagation();
       if (selectedVehicles.has(id)) selectedVehicles.delete(id);
       else selectedVehicles.add(id);
-      renderVehicles();
+      document.querySelectorAll('#vehicles-list [data-vehicle-profile]').forEach(row => {
+        const selected = selectedVehicles.has(row.dataset.vehicleProfile);
+        row.classList.toggle('selected', selected);
+        row.querySelector('.selection-check')?.classList.toggle('checked', selected);
+      });
+      updateVehicleSelectionUI();
     }
 
     function handleVehicleRowSelectionKey(event, id) {
@@ -12604,7 +12611,7 @@
         const currentKm = getVehicleCurrentKm(vehicle.id);
         const totalCost = getVehicleDistributedCostTotal(vehicle.id);
         return `
-        <div class="orders-table-row entity-table-row--vehicles ${selectedVehicles.has(vehicle.id) ? 'selected' : ''} ${isEntityActive(vehicle) ? '' : 'entity-is-inactive'}" role="button" tabindex="0" onclick="toggleVehicleSelection(event, '${vehicle.id}')" onkeydown="handleVehicleRowSelectionKey(event, '${vehicle.id}')">
+        <div class="orders-table-row entity-table-row--vehicles ${selectedVehicles.has(vehicle.id) ? 'selected' : ''} ${isEntityActive(vehicle) ? '' : 'entity-is-inactive'}" role="button" tabindex="0" data-vehicle-profile="${escapeHtml(vehicle.id)}" ondblclick="window.WeFrotasVehicleProfile.open(this.dataset.vehicleProfile)" onclick="toggleVehicleSelection(event, '${vehicle.id}')" onkeydown="handleVehicleRowSelectionKey(event, '${vehicle.id}')">
             <div class="orders-table-cell orders-table-cell--check">
               <button class="selection-check ${selectedVehicles.has(vehicle.id) ? 'checked' : ''}" onclick="toggleVehicleSelection(event, '${vehicle.id}')">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -12614,7 +12621,6 @@
             </div>
             <div class="orders-table-cell">
               <div class="orders-main-text orders-os-number">${escapeHtml(vehicle.placa || '-')}</div>
-              <button type="button" class="vehicle-profile-open" data-vehicle-profile="${escapeHtml(vehicle.id)}" onclick="event.stopPropagation(); window.WeFrotasVehicleProfile.open(this.dataset.vehicleProfile)">Visualizar veículo →</button>
               <div class="orders-sub-text">${escapeHtml(vehicle.chassi || 'Sem chassi')}</div>
             </div>
             <div class="orders-table-cell">

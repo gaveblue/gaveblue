@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./wefrotas.css?v=20261008-report-period-3">
-  <link rel="stylesheet" href="./wefrotas-vehicle-profile.css?v=20261012-vehicles-1">
+  <link rel="stylesheet" href="./wefrotas-vehicle-profile.css?v=20261012-sources-2">
   <link rel="stylesheet" href="./wefrotas-login.css?v=20260915-fixed-login-1">
   <link rel="stylesheet" href="./wefrotas-db-capacity.css?v=20260906-db-capacity-1">
   <style>
@@ -463,6 +463,9 @@
               <div class="module-action-toolbar module-action-toolbar--table">
                 <button class="icon-action text-[#8b3dff]" title="Novo Veículo" onclick="openCadastroModal('vehicle')">
                   <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M12 5v14M5 12h14"/></svg>
+                </button>
+                <button id="view-vehicle-btn" type="button" class="icon-action text-[#81a4ff]" title="Selecione um veículo para visualizar" aria-label="Visualizar veículo" disabled onclick="if(selectedVehicles.size===1)window.WeFrotasVehicleProfile.open([...selectedVehicles][0])">
+                  <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-width="1.8" d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3" stroke-width="1.8"/></svg>
                 </button>
                 <button id="edit-vehicle-btn" class="icon-action text-[#81a4ff]" title="Editar Veículo" onclick="editSelectedVehicle()">
                   <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M16.5 4.5l3 3L9 18l-4 1 1-4 10.5-10.5z"/></svg>
@@ -1837,12 +1840,12 @@
   <script src="./wefrotas-supabase-core.js?v=20260904-supabase-auth-isolation-3"></script>
   <script src="./wefrotas-supabase-backend.js?v=20260906-db-capacity-1"></script>
   <script src="./wefrotas-db-capacity.js?v=20260906-db-capacity-1"></script>
-  <script src="./wefrotas.js?v=20261012-vehicles-1"></script>
+  <script src="./wefrotas.js?v=20261012-sources-2"></script>
   <script src="./wefrotas-reports-v2.js?v=20261012-vehicles-1"></script>
   <script src="./wefrotas-presence.js?v=20260904-contingency-2"></script>
   <script src="./wefrotas-batch-orders.js?v=20261008-vehicle-reports-1"></script>
   <script src="./wefrotas-date-picker.js?v=20261008-reports-mileage-1"></script>
-  <script src="./wefrotas-vehicle-profile.js?v=20261012-vehicles-1"></script>
+  <script src="./wefrotas-vehicle-profile.js?v=20261012-sources-2"></script>
 </body>
 </html>
 

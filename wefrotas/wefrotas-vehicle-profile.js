@@ -35,7 +35,7 @@
     const sums=new Map();rows.forEach(r=>{if(!/^\d{4}-\d{2}/.test(r.date||''))return;const month=r.date.slice(0,7);const n=kind==='km'?Number(r.entry.km):r.total;if(!Number.isFinite(n))return;sums.set(month,kind==='km'?Math.max(sums.get(month)??0,n):(sums.get(month)||0)+n);});
     const points=[...sums].sort(([a],[b])=>a.localeCompare(b)).slice(-8),max=Math.max(...points.map(([,n])=>n),1);
     if(!points.length)return '<p class="vp-empty">Sem dados para o gráfico.</p>';
-    return `<div class="vp-chart" role="img" aria-label="${esc(kind==='km'?'Maior KM observado por mês':'Despesas por mês')}">${points.map(([month,n])=>`<div><span>${esc(kind==='km'?number(n):money(n))}</span><i style="height:${Math.max(2,n/max*100)}px"></i><small>${esc(month.split('-').reverse().join('/'))}</small></div>`).join('')}</div>`;
+    return `<div class="vp-chart" role="group" aria-label="${esc(kind==='km'?'Maior KM observado por mês':'Despesas por mês')}">${points.map(([month,n])=>`<button type="button" data-source-month="${esc(month)}" data-source-kind="${kind}" title="Ver registros de origem"><span>${esc(kind==='km'?number(n):money(n))}</span><i style="height:${Math.max(2,n/max*100)}px"></i><small>${esc(month.split('-').reverse().join('/'))}</small></button>`).join('')}</div>`;
   }
   function content(m) {
     const {vehicle:v,metrics:s}=m;
@@ -59,6 +59,22 @@
     panel.classList.add('vp-open');
     const v=m.vehicle,s=m.metrics,image=safeImage(v.vehicleImageUrl||v.imageUrl||'');
     root.innerHTML=`<div class="vp-breadcrumb"><button data-action="back">← Veículos</button><span>Visualizar veículo</span></div><header class="vp-heading">${image?`<img src="${esc(image)}" alt="Foto do veículo" loading="lazy">`:'<div class="vp-photo-empty">Sem foto</div>'}<div><span class="vp-badge">${isEntityActive(v)?'Cadastro ativo':'Cadastro inativo'}</span><h2 tabindex="-1">${esc(v.placa)}</h2><p>${esc(v.modelo)} · Frota ${esc(v.numeroFrota)}</p></div><button data-action="edit">Editar cadastro</button></header><div class="vp-stats">${card('Consumo estimado',s.consumption==null?'Sem base suficiente':number(s.consumption)+' km/L','Não comprova tanque cheio.')}${card('Custo médio por km',s.perKm==null?'Sem base suficiente':money(s.perKm)+'/km','Despesas ÷ distância observada.')}${card('KM inicial / final',s.first==null?'Sem base suficiente':number(s.first)+' / '+number(s.last),'Leituras no período selecionado.')}${card('Último abastecimento no período',date(m.fuel.at(-1)?.date))}</div><nav class="vp-tabs" aria-label="Seções do veículo">${Object.entries(tabs).map(([key,label])=>`<button data-tab="${key}" aria-current="${state.tab===key?'page':'false'}">${label}</button>`).join('')}</nav><div class="vp-filters"><label>Data inicial<input id="vp-start" type="date" value="${esc(state.start)}"></label><label>Data final<input id="vp-end" type="date" value="${esc(state.end)}"></label><button data-action="clear">Todas as datas</button><span>Combustível por abastecimento · OS por abertura · outras despesas por lançamento.</span></div><div class="vp-content">${content(m)}</div>`;
+    const sourceLists={fuel:m.fuel.slice().reverse().map(r=>r.entry),costs:m.rows.slice().reverse().map(r=>r.entry),maintenance:m.orders,mileage:m.readings.slice().reverse().map(r=>r.entry),notes:m.rows.filter(r=>r.entry.observacoes).map(r=>r.entry)};
+    const sources=sourceLists[state.tab]||[];
+    const sourceTable=root.querySelector('.vp-content table');
+    if(sourceTable){
+      const heading=document.createElement('th');heading.textContent='Visualizar';sourceTable.querySelector('thead tr').append(heading);
+      sourceTable.querySelectorAll('tbody tr').forEach((row,index)=>{
+        const source=sources[(state.page-1)*25+index];if(!source)return;
+        const cell=document.createElement('td'),button=document.createElement('button');
+        button.type='button';button.className='settings-action-btn';button.dataset.sourceId=source.id;
+        button.dataset.sourceType=state.tab==='maintenance'?'order':'finance';
+        button.setAttribute('aria-label',state.tab==='maintenance'?'Visualizar OS':'Visualizar lançamento');
+        button.title=button.getAttribute('aria-label');
+        button.innerHTML='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>';
+        cell.append(button);row.append(cell);
+      });
+    }
     // Reuse the exact range selector used by Reports and Finance, including typed dates.
     const periodSource=document.getElementById('module-compact-date-button-relatorios')?.closest('.module-compact-date-range');
     if(periodSource){
@@ -76,6 +92,17 @@
   }
   function click(event) {
     const button=event.target.closest('button');if(!button)return;
+    if(button.dataset.sourceMonth){
+      const month=button.dataset.sourceMonth,first=month+'-01',last=month+'-'+new Date(Number(month.slice(0,4)),Number(month.slice(5)),0).getDate();
+      state.start=state.start&&state.start>first?state.start:first;state.end=state.end&&state.end<last?state.end:last;
+      state.tab=button.dataset.sourceKind==='km'?'mileage':'costs';state.page=1;render();return;
+    }
+    if(button.dataset.sourceId){
+      const id=button.dataset.sourceId;
+      if(button.dataset.sourceType==='order'){const previous=selectedOrders;try{selectedOrders=new Set([id]);viewSelectedOrder();}finally{selectedOrders=previous;}}
+      else{const previous=selectedFinance;try{viewFinanceEntryById(id);}finally{selectedFinance=previous;}}
+      return;
+    }
     if(button.dataset.tab){state.tab=button.dataset.tab;state.page=1;render();return;}
     if(button.dataset.page){state.page+=Number(button.dataset.page);render();return;}
     if(button.dataset.action==='back')close();
