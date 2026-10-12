@@ -1,0 +1,8 @@
+.vehicle-list-controls{margin-bottom:18px;padding:16px;border:1px solid #e7edf5;border-radius:16px;background:var(--surface,#fff)}
+.vehicle-list-tools{display:flex;align-items:center;gap:14px;flex-wrap:wrap}.vehicle-list-tools>div:first-child{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-right:auto}.vehicle-list-tools strong{font-size:13px}.vehicle-list-note{font-size:11px;color:#64748b;line-height:1.5;margin:12px 0 0}
+.vehicle-list-controls.has-open-calendar .module-compact-date-range{z-index:75}.vehicle-list-columns{position:relative}.vehicle-list-columns summary{cursor:pointer}.vehicle-list-columns>div{position:absolute;right:0;top:100%;z-index:45;background:white;border:1px solid #e7edf5;border-radius:12px;box-shadow:0 10px 25px #33415522;padding:15px;width:250px}.vehicle-list-columns label{display:flex;gap:9px;padding:6px;font-size:12px}
+#vehicles-list-shell .vehicle-list-row,#vehicles-list-shell .entity-table-head--vehicles{width:max-content;min-width:100%;column-gap:12px}
+.vehicle-list-photo{width:48px;height:40px;object-fit:contain;border-radius:7px}.vehicle-list-no-photo{font-size:10px;color:#64748b}.vehicle-list-row .orders-main-text{white-space:normal;overflow-wrap:anywhere}.vehicle-list-row .orders-table-cell{min-width:0}
+#vehicle-list-pagination{flex-wrap:wrap}#vehicle-list-pagination label{display:flex;align-items:center;gap:8px;font-size:12px}
+body.dark-mode .vehicle-list-controls,body.dark-mode .vehicle-list-columns>div{background:#182233;border-color:#334155}
+@media(max-width:600px){.vehicle-list-tools{gap:8px}.vehicle-list-controls{padding:12px}.vehicle-list-columns>div{right:auto;left:0}}

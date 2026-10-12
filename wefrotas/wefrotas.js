@@ -12031,7 +12031,7 @@
 
     function updateVehicleSelectionUI() {
       pruneSelections();
-      const visibleVehicles = getVisibleVehicles();
+      const visibleVehicles = window.WeFrotasVehicleList ? window.WeFrotasVehicleList.pageVehicles() : getVisibleVehicles();
       const visibleIds = new Set(visibleVehicles.map(vehicle => vehicle.id));
       selectedVehicles = new Set(Array.from(selectedVehicles).filter(id => visibleIds.has(id)));
       const count = selectedVehicles.size;
@@ -12327,7 +12327,7 @@
 
     function toggleSelectAllVehicles(event) {
       if (event) event.stopPropagation();
-      const visibleVehicles = getVisibleVehicles();
+      const visibleVehicles = window.WeFrotasVehicleList ? window.WeFrotasVehicleList.pageVehicles() : getVisibleVehicles();
       const allVisibleSelected = visibleVehicles.length > 0 && visibleVehicles.every(vehicle => selectedVehicles.has(vehicle.id));
       if (allVisibleSelected) visibleVehicles.forEach(vehicle => selectedVehicles.delete(vehicle.id));
       else visibleVehicles.forEach(vehicle => selectedVehicles.add(vehicle.id));
@@ -12596,6 +12596,7 @@
     }
 
     function renderVehicles() {
+      if (window.WeFrotasVehicleList) return window.WeFrotasVehicleList.render();
       const list = document.getElementById('vehicles-list');
       if (!list) return;
       const visibleVehicles = getVisibleVehicles();
@@ -13149,6 +13150,7 @@
     window.clearModuleFilters = clearModuleFilters;
 
     const moduleCompactFilterConfigs = {
+      vehicleList: { startInputId: 'vehicle-list-start', endInputId: 'vehicle-list-end', dateLabel: 'Indicadores', statuses: [['', 'Todos']] },
       vehicleProfile: { startInputId: 'vp-start', endInputId: 'vp-end', dateLabel: 'Período', statuses: [['', 'Todos']] },
       relatorios: { startInputId: 'report-filter-start', endInputId: 'report-filter-end', dateLabel: 'Período', statuses: [['', 'Todos']] },
       orders: {
@@ -13395,6 +13397,7 @@
       if (endField) endField.value = end;
       renderModuleCompactFilterControls(module);
       if (module === 'vehicleProfile') window.WeFrotasVehicleProfile?.applyPeriod();
+      if (module === 'vehicleList') window.WeFrotasVehicleList?.applyPeriod();
       moduleFilterRenderActions[module]?.();
       closeModuleCompactCalendars();
     }
@@ -13412,6 +13415,7 @@
     });
 
     function clearVehicleFilters() {
+      window.WeFrotasVehicleList?.resetPeriod();
       document.getElementById('vehicle-filter-search').value = '';
       document.getElementById('vehicle-filter-status').value = 'todos';
       document.getElementById('vehicle-filter-start').value = '';
