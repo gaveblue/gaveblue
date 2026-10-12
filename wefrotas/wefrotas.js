@@ -3328,6 +3328,14 @@
         .filter(Boolean);
     }
 
+    function selectVehicleOwnership(input) {
+      if (!input.checked) return;
+      ['vehicle-owned','vehicle-rented','vehicle-borrowed'].forEach(id => {
+        const field = document.getElementById(id);
+        if (field && field !== input) field.checked = false;
+      });
+    }
+
     function getVehicleLinkedDrivers(vehicle) {
       if (!vehicle) return [];
       return allDrivers.filter(driver => isEntityActive(driver) && getDriverVehicleIds(driver).includes(String(vehicle.id)));
@@ -5844,8 +5852,13 @@
             </select>
           </div>
           <div class="field-wrap full">
-            <label><input id="vehicle-rented" type="checkbox"> Veículo locado</label>
-            <small>Marque quando o veículo pertencer a uma locadora.</small>
+            <span>Propriedade do veículo</span>
+            <div role="group" aria-label="Propriedade do veículo" style="display:flex;flex-wrap:wrap;gap:18px">
+              <label><input id="vehicle-owned" type="checkbox" onchange="selectVehicleOwnership(this)"> Próprio</label>
+              <label><input id="vehicle-rented" type="checkbox" onchange="selectVehicleOwnership(this)"> Locado</label>
+              <label><input id="vehicle-borrowed" type="checkbox" onchange="selectVehicleOwnership(this)"> Emprestado</label>
+            </div>
+            <small>Marque apenas uma opção. Sem marcação: não informado.</small>
           </div>
           <div class="field-wrap full">
             <label>Chassi</label>
@@ -12601,6 +12614,7 @@
             </div>
             <div class="orders-table-cell">
               <div class="orders-main-text orders-os-number">${escapeHtml(vehicle.placa || '-')}</div>
+              <button type="button" class="vehicle-profile-open" data-vehicle-profile="${escapeHtml(vehicle.id)}" onclick="event.stopPropagation(); window.WeFrotasVehicleProfile.open(this.dataset.vehicleProfile)">Visualizar veículo →</button>
               <div class="orders-sub-text">${escapeHtml(vehicle.chassi || 'Sem chassi')}</div>
             </div>
             <div class="orders-table-cell">
@@ -13129,6 +13143,7 @@
     window.clearModuleFilters = clearModuleFilters;
 
     const moduleCompactFilterConfigs = {
+      vehicleProfile: { startInputId: 'vp-start', endInputId: 'vp-end', dateLabel: 'Período', statuses: [['', 'Todos']] },
       relatorios: { startInputId: 'report-filter-start', endInputId: 'report-filter-end', dateLabel: 'Período', statuses: [['', 'Todos']] },
       orders: {
         statusInputId: 'order-filter-status', startInputId: 'order-filter-start', endInputId: 'order-filter-end', dateLabel: 'Abertura',
@@ -13373,6 +13388,7 @@
       if (startField) startField.value = start;
       if (endField) endField.value = end;
       renderModuleCompactFilterControls(module);
+      if (module === 'vehicleProfile') window.WeFrotasVehicleProfile?.applyPeriod();
       moduleFilterRenderActions[module]?.();
       closeModuleCompactCalendars();
     }
@@ -13441,7 +13457,9 @@
       document.getElementById('vehicle-seguro').value = vehicle.seguroVencimento || '';
       const linkedDrivers = getVehicleLinkedDrivers(vehicle);
       document.getElementById('vehicle-motorista').value = linkedDrivers.length === 1 ? linkedDrivers[0].id : vehicle.motoristaId || '';
-      document.getElementById('vehicle-rented').checked = vehicle.locado === true;
+      document.getElementById('vehicle-rented').checked = vehicle.propriedade === 'locado' || (!vehicle.propriedade && vehicle.locado === true);
+      document.getElementById('vehicle-owned').checked = vehicle.propriedade === 'proprio';
+      document.getElementById('vehicle-borrowed').checked = vehicle.propriedade === 'emprestado';
       syncCustomSelectById('vehicle-motorista');
       document.getElementById('vehicle-chassi').value = vehicle.chassi || '';
       document.getElementById('vehicle-active').checked = isEntityActive(vehicle);
@@ -14798,6 +14816,7 @@
     }
 
     function renderAll() {
+      // The profile is read-only and refreshed after the existing module renders.
       syncAllocatedOrderStatuses();
       renderHomeCards();
       renderVehicles();
@@ -14929,7 +14948,10 @@
         const cor = document.getElementById('vehicle-cor').value.trim();
         const seguroVencimento = document.getElementById('vehicle-seguro').value.trim();
         const motoristaId = document.getElementById('vehicle-motorista').value.trim();
-        const locado = document.getElementById('vehicle-rented')?.checked === true;
+        const ownershipChoices = [['vehicle-owned','proprio'],['vehicle-rented','locado'],['vehicle-borrowed','emprestado']].filter(([id])=>document.getElementById(id)?.checked);
+        if (ownershipChoices.length > 1) { showToast('Selecione apenas uma opção de propriedade do veículo.'); return; }
+        const propriedade = ownershipChoices[0]?.[1] || '';
+        const locado = propriedade === 'locado';
         const chassi = document.getElementById('vehicle-chassi').value.trim();
         const ativo = document.getElementById('vehicle-active')?.checked !== false;
         const vehicleImageInput = document.getElementById('vehicle-image-file');
@@ -14969,12 +14991,12 @@
         const vehicleWasEdited = Boolean(currentEditingId);
         if (currentEditingId) {
           allVehicles = allVehicles.map(vehicle => vehicle.id === currentEditingId
-            ? { ...vehicle, numeroFrota, placa, modelo, ano, cor, seguroVencimento, motoristaId, locado, chassi, ativo, vehicleImageUrl, vehicleImageFileId }
+            ? { ...vehicle, numeroFrota, placa, modelo, ano, cor, seguroVencimento, motoristaId, locado, chassi, ativo, propriedade, vehicleImageUrl, vehicleImageFileId }
             : vehicle);
           syncDriversWithVehicle(currentEditingId, motoristaId);
         } else {
           const newVehicleId = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-          allVehicles.unshift({ id: newVehicleId, createdAt: new Date().toISOString(), numeroFrota, placa, modelo, ano, cor, seguroVencimento, motoristaId, locado, chassi, ativo, vehicleImageUrl, vehicleImageFileId });
+          allVehicles.unshift({ id: newVehicleId, createdAt: new Date().toISOString(), numeroFrota, placa, modelo, ano, cor, seguroVencimento, motoristaId, locado, chassi, ativo, propriedade, vehicleImageUrl, vehicleImageFileId });
           syncDriversWithVehicle(newVehicleId, motoristaId);
         }
         renderAll();

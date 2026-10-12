@@ -1,0 +1,37 @@
+#panel-veiculos.vp-open > :not(#vehicle-profile){display:none!important}
+#vehicle-profile{color:#24314c;--vp-line:#e6ebf4;--vp-accent:#6645ed;font:14px/1.5 'Plus Jakarta Sans',system-ui,sans-serif}
+#vehicle-profile *{box-sizing:border-box}
+.vehicle-profile-open{cursor:pointer}
+.vehicle-profile-open{display:block;margin-top:5px;font-size:11px;padding:3px 7px}
+#vehicle-profile button:focus-visible{outline:3px solid #927cfa;outline-offset:2px}
+#vehicle-profile button:disabled{opacity:.4;cursor:default}
+.vp-breadcrumb{display:flex;align-items:center;gap:18px;margin-bottom:16px;color:#7b869e}
+.vp-heading{display:flex;align-items:center;gap:20px;padding:22px;background:white;border:1px solid var(--vp-line);border-radius:16px;margin-bottom:16px}
+.vp-heading img,.vp-photo-empty{width:110px;height:88px;object-fit:cover;border-radius:12px;background:#f0edff}
+.vp-photo-empty{display:grid;place-items:center;color:#8579b7}
+.vp-heading h2{font-size:26px;line-height:1.2;margin:8px 0;color:#17213a}
+.vp-heading p{margin:0;color:#748098}
+.vp-heading>button{margin-left:auto}
+.vp-badge{display:inline-block;border-radius:20px;background:#e9faef;color:#21854d;font-size:11px;font-weight:700;padding:3px 9px}
+.vp-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:16px 0}
+.vp-stat{display:flex;flex-direction:column;gap:6px;min-width:0}
+.vp-stat strong{overflow-wrap:anywhere}
+.vp-tabs{display:flex;gap:4px;overflow-x:auto;background:white;border:1px solid var(--vp-line);border-radius:12px;padding:6px}
+#vehicle-profile .vp-tabs button{border:0;white-space:nowrap;color:#6c7891;border-radius:7px}
+#vehicle-profile .vp-tabs button[aria-current=page]{background:#f1edff;color:#6241e8;box-shadow:inset 0 -2px #7957fa}
+.vp-filters{display:flex;align-items:end;gap:12px;flex-wrap:wrap;margin:16px 0;padding:15px;background:white;border:1px solid var(--vp-line);border-radius:12px}
+.vp-filters.has-open-calendar .module-compact-date-range{z-index:75}
+.vp-filters>span{flex:1;min-width:190px;font-size:11px;color:#7b869e}
+.vp-overview{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.vp-card.content-card{padding:18px;min-width:0;min-height:0}
+.vp-card h3{font-size:14px;margin:0 0 20px;color:#25294d}
+.vp-card p,.vp-note{font-size:12px;color:#79859b;line-height:1.6}
+.vp-card dl{margin:0}.vp-card dl div{display:flex;gap:12px;justify-content:space-between;border-bottom:1px solid #f0f2f7;padding:7px 0;font-size:12px}.vp-card dt{color:#7a8599}.vp-card dd{margin:0;text-align:right;overflow-wrap:anywhere}
+.vp-chart{height:210px;display:flex;gap:10px;align-items:end;overflow-x:auto;padding:12px 0}
+.vp-chart>div{flex:1;min-width:45px;display:flex;flex-direction:column;align-items:center;gap:8px}.vp-chart span{font-size:9px;white-space:nowrap}.vp-chart i{display:block;width:75%;max-width:42px;border-radius:5px 5px 0 0;background:linear-gradient(#a491ff,#7351ed)}.vp-chart small{font-size:10px;color:#7a8599}
+.vp-table-scroll{overflow:auto;border:1px solid var(--vp-line);border-radius:12px;background:white}
+.vp-table-scroll table{width:100%;border-collapse:collapse;text-align:left;font-size:12px}.vp-table-scroll th{background:#f7f8fc;color:#78839b;font-weight:600;white-space:nowrap}.vp-table-scroll td,.vp-table-scroll th{padding:15px;border-bottom:1px solid #edf0f7}.vp-table-scroll td{max-width:350px;overflow-wrap:anywhere}.vp-table-scroll tbody tr:hover{background:#faf9ff}
+.vp-pagination{display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:15px;font-size:12px;color:#7c879c}.vp-pagination span{margin-right:auto}
+.vp-empty{padding:40px;text-align:center;background:white;border:1px dashed #dce2ef;border-radius:12px;color:#7d889e}
+@media(max-width:1000px){.vp-overview{grid-template-columns:1fr 1fr}.vp-overview>.vp-card:first-child{grid-column:1/-1}.vp-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:550px){.vp-heading{gap:12px;padding:14px;flex-wrap:wrap}.vp-heading img,.vp-photo-empty{width:68px;height:68px}.vp-heading h2{font-size:21px}.vp-heading>button{width:100%;margin:0}.vp-overview{grid-template-columns:1fr}.vp-stat{padding:12px}.vp-stat strong{font-size:17px}.vp-filters label{min-width:0;flex:1}.vp-filters input{width:100%;min-width:0}.vp-pagination{flex-wrap:wrap;padding:12px 0}}

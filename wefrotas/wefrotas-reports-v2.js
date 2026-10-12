@@ -40,6 +40,7 @@
   const money = list => formatCurrency(net(list));
   const category = e => isFuelEntry(e) || isFuelGroupEntry(e) ? 'Combustível' : String(e.categoria || e.serviceType || 'Despesas gerais / não classificadas');
   const badge = (label, value, help) => ({label, value: String(value), help});
+  function ownership(v) { return ({proprio:'Próprio',locado:'Locado',emprestado:'Emprestado'})[v?.propriedade] || (v?.locado===true?'Locado':'Não informado'); }
   function detailRows(filters) {
     const children = new Map(), parents = new Map(allFinanceEntries.map(e=>[e.id,e]));
     allFinanceEntries.forEach(e=>{if(e.groupedIntoId && parents.has(e.groupedIntoId)){const list=children.get(e.groupedIntoId)||[];list.push(e);children.set(e.groupedIntoId,list);}});
@@ -88,18 +89,19 @@
     return oldContext(type);
   };
 
+  if (typeof window !== 'undefined') window.WeFrotasVehicleReports = { detailRows, vehicleIndicators, ownership };
   buildReportData = filters => {
     const f = filters;
     if(f.type==='vehicle_expenses') {
       const rows=detailRows(f);
       return table(f,['Data','Veículo','Propriedade','Categoria','Fornecedor','Referência','OS','Valor líquido','Agrupamento'],rows.map(r=>{
         const v=allVehicles.find(v=>v.id===r.vehicleId),order=allOrders.find(o=>o.id===(r.entry.orderId||r.parent.orderId));
-        return [formatDate(r.date),r.vehicleId?getReportVehicleLabel(r.vehicleId):'Sem veículo vinculado',v?.locado===true?'Locado':v?.locado===false?'Próprio':'Não informado',category(r.entry),r.entry.fornecedor||r.parent.fornecedor,r.entry.nf||r.entry.id,order?.numero||'Sem OS',formatCurrency(r.total),r.allocated?`Rateio do grupo ${r.parent.nf||r.parent.id}`:'Avulso'];
+        return [formatDate(r.date),r.vehicleId?getReportVehicleLabel(r.vehicleId):'Sem veículo vinculado',ownership(v),category(r.entry),r.entry.fornecedor||r.parent.fornecedor,r.entry.nf||r.entry.id,order?.numero||'Sem OS',formatCurrency(r.total),r.allocated?`Rateio do grupo ${r.parent.nf||r.parent.id}`:'Avulso'];
       }), 'Despesas linha por linha, inclusive serviços e combustível. Receitas excluídas. Filhos substituem o agrupamento; valor final do grupo rateado proporcionalmente, com ajuste de centavos. Registros sem vínculo ficam explicitamente separados.',[badge('Total de despesas',formatCurrency(rows.reduce((s,r)=>s+r.total,0)),'Sem duplicar agrupamentos.'),badge('Lançamentos',rows.length,'No período selecionado.')]);
     }
     if(f.type==='vehicle_indicators') {
       const rows=detailRows(f),number=n=>n===null?'Sem base suficiente':n.toLocaleString('pt-BR',{maximumFractionDigits:2});
-      return table(f,['Veículo','Propriedade','Custo total','KM inicial','KM final','KM rodado','Custo médio por km (R$/km)','Consumo estimado (km/L)'],vehicles(f).map(v=>{const s=vehicleIndicators(v,rows);return [getReportVehicleLabel(v.id),v.locado===true?'Locado':v.locado===false?'Próprio':'Não informado',formatCurrency(s.costs),number(s.first),number(s.last),number(s.distance),s.perKm===null?'Sem base suficiente':formatCurrency(s.perKm),number(s.consumption)];}), 'KM entre a primeira e a última leitura de abastecimento do período, não toda a quilometragem do veículo. Custo por km = despesas do período ÷ KM observado. Consumo estimado exclui os litros do primeiro registro; exige leituras crescentes e litros válidos, mas não comprova tanque cheio. KM inválido ou regressivo impede os índices. Custo por km e média por km são o mesmo indicador.');
+      return table(f,['Veículo','Propriedade','Custo total','KM inicial','KM final','KM rodado','Custo médio por km (R$/km)','Consumo estimado (km/L)'],vehicles(f).map(v=>{const s=vehicleIndicators(v,rows);return [getReportVehicleLabel(v.id),ownership(v),formatCurrency(s.costs),number(s.first),number(s.last),number(s.distance),s.perKm===null?'Sem base suficiente':formatCurrency(s.perKm),number(s.consumption)];}), 'KM entre a primeira e a última leitura de abastecimento do período, não toda a quilometragem do veículo. Custo por km = despesas do período ÷ KM observado. Consumo estimado exclui os litros do primeiro registro; exige leituras crescentes e litros válidos, mas não comprova tanque cheio. KM inválido ou regressivo impede os índices. Custo por km e média por km são o mesmo indicador.');
     }
     if (['monthly_vehicle_cost','fuel_register','orders','finance_status','supplier_ranking'].includes(f.type)) {
       const fuelView = document.getElementById('report-filter-fuel-view')?.value || 'fuel_register';
