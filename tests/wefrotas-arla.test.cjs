@@ -1,0 +1,22 @@
+const {test}=require('node:test');
+const assert=require('node:assert/strict');
+const fs=require('node:fs'),vm=require('node:vm');
+const main=fs.readFileSync(__dirname+'/../wefrotas/wefrotas.js','utf8');
+const reports=fs.readFileSync(__dirname+'/../wefrotas/wefrotas-reports-v2.js','utf8');
+const helper=main.slice(main.indexOf('    function isArlaEntry('),main.indexOf('    function isFuelGroupEntry('));
+const metric=reports.slice(reports.indexOf('  function vehicleIndicators('),reports.indexOf('  getReportTitleByType ='));
+const ctx={isFuelEntry:e=>e.entryType==='combustivel',parseDecimalInputValue:Number};
+vm.createContext(ctx);vm.runInContext(helper+metric,ctx);
+const row=(km,litros,total,fuelType='Diesel S10',date='2026-07-01')=>({vehicleId:'a',date,total,entry:{km,litros,fuelType,entryType:'combustivel'}});
+test('ARLA excluded from consumption, expenses and cost denominator retained',()=>{
+ const rows=[row(900,10,50,'Arla 32'),row(1000,40,240),row(1200,12,60,'ARLA 32'),row(1400,40,240),row(1500,10,50,'Arla 32')];
+ const before=JSON.stringify(rows),r=ctx.vehicleIndicators({id:'a'},rows);
+ assert.equal(r.consumption,10);assert.equal(r.costs,640);assert.equal(r.distance,600);assert.equal(r.perKm,640/600);assert.equal(JSON.stringify(rows),before);
+});
+test('only ARLA does not produce fuel consumption',()=>{const r=ctx.vehicleIndicators({id:'a'},[row(1000,10,50,'Arla 32'),row(1200,10,50,'ARLA')]);assert.equal(r.consumption,null);assert.equal(r.perKm,.5);});
+test('one fuel reading is insufficient even with ARLA readings',()=>{assert.equal(ctx.vehicleIndicators({id:'a'},[row(1000,10,50,'Arla 32'),row(1200,40,240)]).consumption,null);});
+test('ordinary fuel metrics unchanged',()=>{const r=ctx.vehicleIndicators({id:'a'},[row(1000,40,240),row(1400,40,240)]);assert.equal(r.consumption,10);assert.equal(r.perKm,1.2);});
+test('missing fuel liters still invalidates consumption',()=>{assert.equal(ctx.vehicleIndicators({id:'a'},[row(1000,40,240),row(1400,'',240)]).consumption,null);});
+test('regressive fuel readings remain invalid',()=>{assert.equal(ctx.vehicleIndicators({id:'a'},[row(1400,40,240),row(1000,40,240,'Diesel','2026-07-02')]).consumption,null);});
+test('ARLA recognition tolerates casing and spaces',()=>{for(const type of ['ARLA 32',' arla 32 ','Arla'])assert.equal(ctx.isArlaEntry({fuelType:type}),true);assert.equal(ctx.isArlaEntry({fuelType:'Diesel S10'}),false);});
+test('legacy consumption report retains all financial rows and separate fuel intervals',()=>{const block=main.slice(main.indexOf("if (filters.type === 'fuel_liters_per_km')"),main.indexOf("if (filters.type === 'fuel_liters_per_km')")+5500);assert.match(block,/previousFuelKmByVehicle/);assert.match(block,/totalValue = reportRows.reduce/);assert.match(block,/totalLiters = reportRows.reduce\(\(sum, row\) => sum \+ row.consumptionLiters/);});

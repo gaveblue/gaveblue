@@ -1302,6 +1302,11 @@
       return entry?.entryType === 'combustivel';
     }
 
+    // ARLA remains an operating expense, but is not burned as fuel.
+    function isArlaEntry(entry) {
+      return /\barla(?:\s*32)?\b/i.test(String(entry?.fuelType || '').normalize('NFD').replace(/[\u0300-\u036f]/g, ''));
+    }
+
     function isFuelGroupEntry(entry) {
       return entry?.entryType === 'combustivel_agrupado';
     }
@@ -8104,19 +8109,27 @@
           });
 
         const previousKmByVehicle = new Map();
+        const previousFuelKmByVehicle = new Map();
         const reportRows = sourceRows
           .map(row => {
             const initialKm = previousKmByVehicle.get(row.vehicleId) || null;
             previousKmByVehicle.set(row.vehicleId, row.km);
             const kmDriven = initialKm && row.km > initialKm ? row.km - initialKm : 0;
-            const litersPerKm = kmDriven > 0 ? row.liters / kmDriven : 0;
-            const kmPerLiter = row.liters > 0 && kmDriven > 0 ? kmDriven / row.liters : 0;
+            const fuelInitialKm = previousFuelKmByVehicle.get(row.vehicleId);
+            const arla = isArlaEntry(row.entry);
+            const consumptionKm = !arla && fuelInitialKm != null && row.km > fuelInitialKm ? row.km - fuelInitialKm : 0;
+            if (!arla) previousFuelKmByVehicle.set(row.vehicleId, row.km);
+            const consumptionLiters = consumptionKm > 0 ? row.liters : 0;
+            const litersPerKm = consumptionKm > 0 ? consumptionLiters / consumptionKm : 0;
+            const kmPerLiter = consumptionLiters > 0 ? consumptionKm / consumptionLiters : 0;
             const costPerKm = kmDriven > 0 ? row.total / kmDriven : 0;
             return {
               ...row,
               initialKm,
               finalKm: row.km,
               kmDriven,
+              consumptionKm,
+              consumptionLiters,
               litersPerKm,
               kmPerLiter,
               costPerKm
@@ -8125,11 +8138,12 @@
           .filter(row => isDateWithinRange(row.entryDate, filters.start, filters.end))
           .sort((a, b) => String(b.entryDate).localeCompare(String(a.entryDate)) || b.finalKm - a.finalKm);
 
-        const totalLiters = reportRows.reduce((sum, row) => sum + row.liters, 0);
+        const totalLiters = reportRows.reduce((sum, row) => sum + row.consumptionLiters, 0);
+        const consumptionKm = reportRows.reduce((sum, row) => sum + row.consumptionKm, 0);
         const totalKm = reportRows.reduce((sum, row) => sum + row.kmDriven, 0);
         const totalValue = reportRows.reduce((sum, row) => sum + row.total, 0);
-        const averageLitersPerKm = totalKm ? totalLiters / totalKm : 0;
-        const averageKmPerLiter = totalLiters ? totalKm / totalLiters : 0;
+        const averageLitersPerKm = consumptionKm ? totalLiters / consumptionKm : 0;
+        const averageKmPerLiter = totalLiters ? consumptionKm / totalLiters : 0;
         const missingIntervals = reportRows.filter(row => !row.kmDriven).length;
 
         return {
@@ -8138,7 +8152,7 @@
           summary: [
             { label: 'Abastecimentos', value: String(reportRows.length), help: 'Registros de abastecimento encontrados no período.' },
             { label: 'Litros por KM', value: averageLitersPerKm ? `${averageLitersPerKm.toLocaleString('pt-BR', { minimumFractionDigits: 4, maximumFractionDigits: 4 })} L/km` : '-', help: 'Litros totais divididos pelo KM rodado calculado.' },
-            { label: 'KM por litro', value: averageKmPerLiter ? `${averageKmPerLiter.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} km/L` : '-', help: 'Indicador complementar de consumo médio.' },
+            { label: 'KM por litro', value: averageKmPerLiter ? `${averageKmPerLiter.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} km/L` : '-', help: 'Consumo entre leituras de combustível, sem ARLA. O custo por km mantém todas as despesas de abastecimento, inclusive ARLA.' },
             { label: 'Custo por KM', value: totalKm ? formatCurrency(totalValue / totalKm) : '-', help: 'Valor total dividido pelo KM rodado calculado.' }
           ],
           columns: [

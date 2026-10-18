@@ -67,10 +67,13 @@
     const valid=readings.length>=2&&readings.every((r,i)=>r.entry.km!=null&&String(r.entry.km).trim()!==''&&Number.isSafeInteger(Number(r.entry.km))&&Number(r.entry.km)>=0&&(!i||Number(r.entry.km)>=Number(readings[i-1].entry.km)));
     const first=valid?Number(readings[0].entry.km):null,last=valid?Number(readings.at(-1).entry.km):null;
     const distance=valid&&last>first?last-first:null;
-    const liters=readings.slice(1).map(r=>parseDecimalInputValue(r.entry.litros));
-    const volume=distance&&liters.every(l=>Number.isFinite(l)&&l>0)?liters.reduce((a,b)=>a+b,0):null;
+    const fuelReadings=readings.filter(r=>!isArlaEntry(r.entry));
+    const fuelValid=fuelReadings.length>=2&&fuelReadings.every((r,i)=>r.entry.km!=null&&String(r.entry.km).trim()!==''&&Number.isSafeInteger(Number(r.entry.km))&&Number(r.entry.km)>=0&&(!i||Number(r.entry.km)>=Number(fuelReadings[i-1].entry.km)));
+    const fuelDistance=fuelValid?Number(fuelReadings.at(-1).entry.km)-Number(fuelReadings[0].entry.km):null;
+    const liters=fuelReadings.slice(1).map(r=>parseDecimalInputValue(r.entry.litros));
+    const volume=fuelDistance>0&&liters.every(l=>Number.isFinite(l)&&l>0)?liters.reduce((a,b)=>a+b,0):null;
     const costs=rows.filter(r=>r.vehicleId===vehicle.id).reduce((sum,r)=>sum+r.total,0);
-    return {first,last,distance,costs,perKm:distance?costs/distance:null,consumption:volume?distance/volume:null};
+    return {first,last,distance,costs,perKm:distance?costs/distance:null,consumption:volume?fuelDistance/volume:null};
   }
   getReportTitleByType = type => titles[type] || (type === 'fuel_liters_per_km' ? 'Consumo médio (km/L)' : type === 'cost' ? 'Custo por km' : oldTitle(type));
   getReportFilters = () => ({...oldFilters(), type: document.getElementById('report-filter-type')?.value || 'overview', situation: document.getElementById('report-filter-situation')?.value || '', horizon: document.getElementById('report-filter-horizon')?.value || ''});
