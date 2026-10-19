@@ -54,5 +54,15 @@ const data=await page.evaluate(()=>WeFrotasVehicleList.exportData());assert.equa
 await page.evaluate(()=>{document.getElementById('vehicle-filter-search').value='DOES NOT EXIST';renderVehicles();});assert.equal(await page.locator('.vehicle-list-row').count(),0);assert.equal(await page.evaluate(()=>WeFrotasVehicleList.exportData().rows.length),0);
 await page.evaluate(()=>{document.getElementById('vehicle-filter-search').value='';renderVehicles();});assert.equal(await page.locator('.vehicle-list-row').count(),25);
 assert.deepEqual(errors,[]);console.log('PASS '+width+'px: pages, selection, double click, columns, filtered export, period, missing basis, empty state');
+await page.addScriptTag({content:'function getVehicleLinkedDrivers(){return [];}'});
+await page.addScriptTag({path:path.join(root,'wefrotas/wefrotas-vehicle-profile.js')});
+await page.evaluate(()=>WeFrotasVehicleProfile.open('v0'));
+assert.equal(await page.locator('.vp-tabs .vp-tab-icon').count(),6);
+assert.equal(await page.locator('.vp-monthly-indicators .vp-card').count(),2);
+assert.match(await page.locator('.vp-monthly-indicators').innerText(),/Sem base suficiente/);
+await page.screenshot({path:path.join(shots,`profile-${width}.png`),fullPage:true});
+await page.locator('[data-source-kind="consumption"]').first().click();
+assert.equal(await page.locator('[data-tab="fuel"]').getAttribute('aria-current'),'page');
+assert.deepEqual(errors,[]);
 await page.close();
 }}finally{await browser.close();}})().catch(e=>{console.error(e);process.exitCode=1;});

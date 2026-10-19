@@ -7,6 +7,9 @@ const helper=main.slice(main.indexOf('    function isArlaEntry('),main.indexOf('
 const metric=reports.slice(reports.indexOf('  function vehicleIndicators('),reports.indexOf('  getReportTitleByType ='));
 const ctx={isFuelEntry:e=>e.entryType==='combustivel',parseDecimalInputValue:Number};
 vm.createContext(ctx);vm.runInContext(helper+metric,ctx);
+const profile=fs.readFileSync(__dirname+'/../wefrotas/wefrotas-vehicle-profile.js','utf8');
+ctx.window={WeFrotasVehicleReports:{vehicleIndicators:ctx.vehicleIndicators}};
+vm.runInContext(profile.slice(profile.indexOf('  function monthlyMetrics('),profile.indexOf('  function indicatorChart(')),ctx);
 const row=(km,litros,total,fuelType='Diesel S10',date='2026-07-01')=>({vehicleId:'a',date,total,entry:{km,litros,fuelType,entryType:'combustivel'}});
 test('ARLA excluded from consumption, expenses and cost denominator retained',()=>{
  const rows=[row(900,10,50,'Arla 32'),row(1000,40,240),row(1200,12,60,'ARLA 32'),row(1400,40,240),row(1500,10,50,'Arla 32')];
@@ -19,4 +22,10 @@ test('ordinary fuel metrics unchanged',()=>{const r=ctx.vehicleIndicators({id:'a
 test('missing fuel liters still invalidates consumption',()=>{assert.equal(ctx.vehicleIndicators({id:'a'},[row(1000,40,240),row(1400,'',240)]).consumption,null);});
 test('regressive fuel readings remain invalid',()=>{assert.equal(ctx.vehicleIndicators({id:'a'},[row(1400,40,240),row(1000,40,240,'Diesel','2026-07-02')]).consumption,null);});
 test('ARLA recognition tolerates casing and spaces',()=>{for(const type of ['ARLA 32',' arla 32 ','Arla'])assert.equal(ctx.isArlaEntry({fuelType:type}),true);assert.equal(ctx.isArlaEntry({fuelType:'Diesel S10'}),false);});
+test('monthly charts isolate months and retain ARLA costs without its liters',()=>{
+ const rows=[row(1000,40,240,'Diesel','2026-07-01'),row(1200,10,50,'Arla 32','2026-07-05'),row(1400,40,240,'Diesel','2026-07-10'),row(2000,40,240,'Diesel','2026-08-01')];
+ const before=JSON.stringify(rows),points=ctx.monthlyMetrics({vehicle:{id:'a'},rows});
+ assert.equal(points.length,2);assert.equal(points[0].metrics.consumption,10);assert.equal(points[0].metrics.perKm,530/400);assert.equal(points[1].metrics.consumption,null);assert.equal(points[1].metrics.perKm,null);assert.equal(JSON.stringify(rows),before);
+});
+test('empty monthly chart has no invented months',()=>assert.equal(ctx.monthlyMetrics({vehicle:{id:'a'},rows:[]}).length,0));
 test('legacy consumption report retains all financial rows and separate fuel intervals',()=>{const block=main.slice(main.indexOf("if (filters.type === 'fuel_liters_per_km')"),main.indexOf("if (filters.type === 'fuel_liters_per_km')")+5500);assert.match(block,/previousFuelKmByVehicle/);assert.match(block,/totalValue = reportRows.reduce/);assert.match(block,/totalLiters = reportRows.reduce\(\(sum, row\) => sum \+ row.consumptionLiters/);});

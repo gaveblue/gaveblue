@@ -67,6 +67,17 @@
     if(!points.length)return '<p class="vp-empty">Sem dados para o gráfico.</p>';
     return `<div class="vp-chart" role="group" aria-label="${esc(kind==='km'?'Maior KM observado por mês':'Despesas por mês')}">${points.map(([month,n])=>`<button type="button" data-source-month="${esc(month)}" data-source-kind="${kind}" title="Ver registros de origem"><span>${esc(kind==='km'?number(n):money(n))}</span><i style="height:${Math.max(2,n/max*100)}px"></i><small>${esc(month.split('-').reverse().join('/'))}</small></button>`).join('')}</div>`;
   }
+  function monthlyMetrics(m) {
+    const groups=new Map();
+    m.rows.forEach(r=>{if(!/^\d{4}-\d{2}-\d{2}$/.test(r.date||''))return;const month=r.date.slice(0,7);if(!groups.has(month))groups.set(month,[]);groups.get(month).push(r);});
+    return [...groups].sort(([a],[b])=>a.localeCompare(b)).slice(-8).map(([month,rows])=>({month,metrics:window.WeFrotasVehicleReports.vehicleIndicators(m.vehicle,rows)}));
+  }
+  function indicatorChart(points,kind) {
+    if(!points.length)return '<p class="vp-empty">Sem dados para o gráfico.</p>';
+    const max=Math.max(1,...points.map(p=>p.metrics[kind]??0));
+    const label=kind==='consumption'?'Consumo mensal em km/L':'Custo mensal por km';
+    return `<div class="vp-chart" role="group" aria-label="${label}">${points.map(p=>{const n=p.metrics[kind],text=n==null?'Sem base suficiente':kind==='consumption'?number(n)+' km/L':money(n)+'/km';return `<button type="button" data-source-month="${esc(p.month)}" data-source-kind="${kind}" title="${esc(text)} — ver registros de origem"><span>${esc(text)}</span>${n==null?'<i class="vp-chart-no-base" style="height:2px"></i>':`<i style="height:${Math.max(2,n/max*100)}px"></i>`}<small>${esc(p.month.split('-').reverse().join('/'))}</small></button>`;}).join('')}</div>`;
+  }
   function content(m) {
     const {vehicle:v,metrics:s}=m;
     if(state.tab==='overview') {
@@ -93,6 +104,11 @@
     root.querySelectorAll('.vp-tabs [data-tab]').forEach(button=>{
       button.insertAdjacentHTML('afterbegin',`<svg class="vp-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${tabIcons[button.dataset.tab]}</svg>`);
     });
+    if(state.tab==='overview'){
+      const points=monthlyMetrics(m),charts=document.createElement('div');charts.className='vp-monthly-indicators';
+      charts.innerHTML=`<article class="vp-card"><h3>Consumo por mês</h3>${indicatorChart(points,'consumption')}<p>Consumo estimado entre leituras de combustível do mês; ARLA excluído. Não comprova tanque cheio. Leituras estimadas do cadastro continuam estimadas.</p></article><article class="vp-card"><h3>Custo por km por mês</h3>${indicatorChart(points,'perKm')}<p>Todas as despesas do mês, incluindo ARLA, divididas pela distância observada no mês. Até 8 meses com registros, respeitando o período selecionado. Clique no mês para ver as fontes.</p></article>`;
+      root.querySelector('.vp-overview').after(charts);
+    }
     const nextImage=root.querySelector('.vp-heading img');
     if(nextImage)nextImage.dataset.vehiclePhotoSource=safeImage(v.vehicleImageUrl||v.imageUrl||'');
     if(previousImage&&nextImage&&previousImage.dataset.vehiclePhotoSource===nextImage.dataset.vehiclePhotoSource)nextImage.replaceWith(previousImage);
@@ -136,7 +152,7 @@
     if(button.dataset.sourceMonth){
       const month=button.dataset.sourceMonth,first=month+'-01',last=month+'-'+new Date(Number(month.slice(0,4)),Number(month.slice(5)),0).getDate();
       state.start=state.start&&state.start>first?state.start:first;state.end=state.end&&state.end<last?state.end:last;
-      state.tab=button.dataset.sourceKind==='km'?'mileage':'costs';state.page=1;render();return;
+      state.tab=button.dataset.sourceKind==='km'?'mileage':button.dataset.sourceKind==='consumption'?'fuel':'costs';state.page=1;render();return;
     }
     if(button.dataset.sourceId){
       const id=button.dataset.sourceId;
