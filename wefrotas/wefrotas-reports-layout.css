@@ -1,0 +1,49 @@
+/* Reports use the same compact cards/actions as Finance. No calculation changes. */
+#panel-relatorios{padding:0;background:transparent;border:0;box-shadow:none;min-width:0}
+#panel-relatorios *,#panel-relatorios *::before,#panel-relatorios *::after{box-sizing:border-box}
+#panel-relatorios button,#panel-relatorios select{font:inherit;cursor:pointer}
+#panel-relatorios .report-filter-card,#panel-relatorios .report-results-card{background:var(--surface,#fff);border:1px solid #e7edf5;border-radius:16px;box-shadow:none;padding:20px;margin:0 0 18px;min-width:0}
+#panel-relatorios .report-filter-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
+#panel-relatorios .report-filter-heading strong{font-size:15px;color:#18243b}
+#panel-relatorios .report-filter-grid{display:grid;grid-template-columns:minmax(240px,1.5fr) repeat(auto-fit,minmax(180px,1fr));gap:14px;align-items:end}
+#panel-relatorios .report-filter-grid{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+#panel-relatorios .report-filter-grid>div{min-width:0}
+#panel-relatorios .report-filter-grid>div[hidden]{display:none}
+#panel-relatorios .report-filter-grid label{display:block;font-size:11px;font-weight:700;color:#64748b;letter-spacing:.025em;margin-bottom:7px;text-transform:uppercase}
+#panel-relatorios .soft-input{width:100%;height:42px;min-height:42px;border:1px solid #dbe3ef;background:#fbfcfe;color:#18243b;border-radius:10px;font-size:13px;padding:9px 12px;box-shadow:none}
+#panel-relatorios .module-compact-date-button{min-height:42px;border-radius:10px}
+#panel-relatorios .report-filter-footer{display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:16px;margin-top:14px;padding-top:12px;border-top:1px solid #eef2f7}
+#panel-relatorios .report-filter-context{font-size:12px;line-height:1.5;color:#64748b;margin:0;max-width:75%}
+#panel-relatorios .report-filter-clear,#panel-relatorios .report-filter-apply{width:auto;min-height:38px;padding:8px 14px;border-radius:10px;font-size:12px;box-shadow:none;flex-shrink:0}
+#panel-relatorios .report-filter-apply{background:#7047eb;color:white;border:1px solid #7047eb}
+#panel-relatorios .report-filter-clear{background:#fff;border:1px solid #dbe3ef;color:#64748b}
+#panel-relatorios .report-results-toolbar-sticky{position:static;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;background:transparent;padding:0 0 16px;border-bottom:1px solid #eef2f7;box-shadow:none;margin:0 0 16px}
+#panel-relatorios .report-results-toolbar-sticky>div:first-child{flex:1 1 250px;min-width:0}
+#panel-relatorios #report-results-title{font-size:18px;font-weight:750;line-height:1.35;color:#18243b;margin:0}
+#panel-relatorios #report-results-meta{font-size:12px;line-height:1.6;color:#64748b;margin-top:6px;overflow-wrap:anywhere}
+#panel-relatorios .report-toolbar{display:flex;align-items:center;gap:8px;flex-shrink:0}
+#panel-relatorios .report-toolbar .icon-action{width:38px;height:38px;border:1px solid #e7edf5;background:#f8fafc;color:#7047eb;border-radius:10px;box-shadow:none}
+#panel-relatorios .report-toolbar svg{width:18px;height:18px}
+#panel-relatorios .report-summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin:0 0 18px}
+#panel-relatorios .report-summary-grid:empty{display:none}
+#panel-relatorios .report-summary-card{padding:14px 16px;background:#f8fafc;border:1px solid #e7edf5;border-radius:12px;box-shadow:none;min-width:0}
+#panel-relatorios .report-summary-label{color:#64748b;font-size:11px;letter-spacing:.03em}
+#panel-relatorios .report-summary-value{color:#18243b;font-size:22px;line-height:1.35;overflow-wrap:anywhere}
+#panel-relatorios .report-summary-help{font-size:11px;color:#64748b;line-height:1.5}
+#panel-relatorios .report-summary-card>:is(span,strong,small){display:block;margin:0 0 5px}
+#panel-relatorios .report-results-shell{border:1px solid #e7edf5;border-radius:12px;box-shadow:none;max-width:100%;min-width:0}
+#panel-relatorios .report-results-scroll{max-height:65vh;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin}
+#panel-relatorios .report-results-table{min-width:100%;width:100%;font-variant-numeric:tabular-nums}
+#panel-relatorios .report-results-table th{position:sticky;top:0;z-index:1;background:#f8fafc;font-size:11px;color:#64748b;padding:12px 14px}
+#panel-relatorios .report-results-table td{font-size:13px;padding:13px 14px;line-height:1.5;max-width:360px;white-space:normal;overflow-wrap:break-word;min-width:100px}
+#panel-relatorios .report-results-table td.report-cell--numeric{white-space:nowrap}
+#panel-relatorios .report-results-table tbody tr:hover{background:#f7f5ff}
+#panel-relatorios .report-results-note{font-size:12px;line-height:1.6}
+#panel-relatorios .report-results-empty{padding:36px 20px;text-align:center;color:#64748b}
+#panel-relatorios :is(button,select,summary):focus-visible{outline:2px solid #7957fa;outline-offset:3px}
+body.dark-mode #panel-relatorios .report-summary-card,body.dark-mode #panel-relatorios .report-toolbar .icon-action,body.dark-mode #panel-relatorios .report-results-table th{background:#1e293b;border-color:#334155}
+body.dark-mode #panel-relatorios :is(.report-summary-value,#report-results-title,.report-filter-heading strong,.report-results-table td){color:#e2e8f0}
+body.dark-mode #panel-relatorios :is(.report-results-shell,.report-summary-card){background:#182233;border-color:#334155}
+body.dark-mode #panel-relatorios .report-results-table tbody tr:hover{background:#273449}
+@media(max-width:640px){#panel-relatorios .report-filter-card,#panel-relatorios .report-results-card{padding:14px!important;border-radius:12px}#panel-relatorios .report-filter-grid{grid-template-columns:minmax(0,1fr)}#panel-relatorios .report-filter-heading{flex-direction:row;align-items:center}#panel-relatorios .report-filter-footer{flex-direction:column;align-items:stretch}#panel-relatorios .report-filter-context{max-width:none}#panel-relatorios .report-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}#panel-relatorios .report-summary-value{font-size:18px}}
+@media print{#panel-relatorios .report-results-scroll{max-height:none;overflow:visible}#panel-relatorios .report-results-table th{position:static}#panel-relatorios .report-results-table td{font-size:10px}}
