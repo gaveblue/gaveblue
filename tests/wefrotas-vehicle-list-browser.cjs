@@ -17,6 +17,7 @@ function getVisibleVehicles(){const q=document.getElementById('vehicle-filter-se
 function getFinanceNetTotal(e){return e.total;}function getFinanceEntryDate(e){return e.data;}
 function getEntryImmediateVehicleId(e){return e.vehicleId;}function parseDecimalInputValue(v){return Number(v);}
 function isFuelEntry(e){return e.entryType==='combustivel';}
+function isArlaEntry(e){return /arla/i.test(e.fuelType||'');}
 function isDateWithinRange(d,s,e){return (!s||d>=s)&&(!e||d<=e);}
 function buildReportData(){}function getReportTitleByType(){}function getReportFilters(){return {};}function getFilteredReportOrders(){return [];}function getReportDateContextLabel(){}
 function pruneSelections(){}function updateButtonState(){}function updateEntityListViewport(){}function updateSimpleSortIndicators(){}function renderModuleCompactFilterControls(){}
@@ -32,6 +33,10 @@ const reportStart=html.indexOf('<section id="panel-relatorios"'),reportEnd=html.
 await page.evaluate(markup=>{document.querySelector('.module-compact-date-range').remove();document.body.insertAdjacentHTML('beforeend',markup);document.getElementById('panel-relatorios').style.display='none';},html.slice(reportStart,reportEnd+10));
 await page.addScriptTag({content:"var moduleCompactCalendarState={};var moduleCompactFilterConfigs={vehicleList:{startInputId:'vehicle-list-start',endInputId:'vehicle-list-end',statuses:[['','Todos']]}};var moduleFilterRenderActions={};function toggleCentralPendingCalendar(){};function formatCentralPendingCalendarDate(x){return x||''};"+['parseCentralPendingCalendarDate','centralPendingCalendarIso','ensureCalendarTyping','validateCalendarTyping','getModuleCompactFilterValue','renderModuleCompactFilterControls','renderModuleCompactCalendar','closeModuleCompactCalendars','toggleModuleCompactCalendar','selectModuleCompactCalendarDate','clearModuleCompactDateRange','applyModuleCompactDateRange'].map(n=>fn(n).split('    Object.assign(window,')[0]).join('\n')});
 await page.evaluate(()=>renderVehicles());assert.equal(await page.locator('.vehicle-list-row').count(),10);
+assert.equal(await page.locator('.orders-toolbar #vehicle-list-controls').count(),1);
+assert.equal(await page.locator('.vehicle-list-note').count(),0);
+const shots=path.resolve(root,'../artifacts/vehicle-toolbar-20261018');fs.mkdirSync(shots,{recursive:true});
+await page.screenshot({path:path.join(shots,`toolbar-${width}.png`),fullPage:false});
 await page.locator('#module-compact-date-button-vehicleList').click();await page.getByLabel('Data inicial digitada').fill('01/09/2026');await page.getByLabel('Data final digitada').fill('31/10/2026');await page.locator('#module-compact-calendar-vehicleList').getByRole('button',{name:'Filtrar',exact:true}).click();assert.match(await page.locator('#module-compact-date-label-vehicleList').innerText(),/2026-09-01/);
 const out=path.resolve(root,'../artifacts/vehicle-list');fs.mkdirSync(out,{recursive:true});await page.screenshot({path:path.join(out,'list-'+width+'.png'),fullPage:true});
 assert.equal(await page.evaluate(()=>WeFrotasVehicleList.exportData().rows.length),26);

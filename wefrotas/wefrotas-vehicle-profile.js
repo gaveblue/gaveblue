@@ -2,6 +2,14 @@
 (() => {
   'use strict';
   const tabs = {overview:'Visão geral',fuel:'Abastecimentos',maintenance:'Manutenções / OS',costs:'Custos',mileage:'Histórico de KM',notes:'Observações'};
+  const tabIcons = {
+    overview:'<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',
+    fuel:'<path d="M4 21V4a1 1 0 0 1 1-1h7a1 1 0 0 1 1 1v17M3 21h11M4 10h9M13 12h2a2 2 0 0 1 2 2v3a2 2 0 0 0 4 0V9l-4-4M19 7v3h2"/>',
+    maintenance:'<path d="M14 6a5 5 0 0 0-6 6L3 17a3 3 0 0 0 4 4l5-5a5 5 0 0 0 6-6l-3 3-4-4 3-3Z"/>',
+    costs:'<path d="M12 2v20M17 6H9a4 4 0 0 0 0 8h6a3 3 0 0 1 0 6H6"/>',
+    mileage:'<path d="M3 17a9 9 0 1 1 18 0M12 13l5-5M5 17h2M6 8l2 2M12 4v3M17 17h2"/><circle cx="12" cy="15" r="2"/>',
+    notes:'<path d="M5 3h14v18H5zM8 7h8M8 11h8M8 15h5"/>'
+  };
   const state = {id:'',tab:'overview',start:'',end:'',page:1};
   const esc = value => escapeHtml(String(value ?? ''));
   const value = v => v == null || v === '' ? 'Não informado' : String(v);
@@ -82,6 +90,9 @@
     const previousImage=root.querySelector('.vp-heading img');
     const v=m.vehicle,s=m.metrics,image=photoSource(v.vehicleImageUrl||v.imageUrl||'');
     root.innerHTML=`<div class="vp-breadcrumb"><button data-action="back">← Veículos</button><span>Visualizar veículo</span></div><header class="vp-heading">${image?`<img src="${esc(image)}" alt="Foto do veículo" width="110" height="88" loading="eager" fetchpriority="high" decoding="async">`:'<div class="vp-photo-empty">Sem foto</div>'}<div><span class="vp-badge">${isEntityActive(v)?'Cadastro ativo':'Cadastro inativo'}</span><h2 tabindex="-1">${esc(v.placa)}</h2><p>${esc(v.modelo)} · Frota ${esc(v.numeroFrota)}</p></div><button data-action="edit">Editar cadastro</button></header><div class="vp-stats">${card('Consumo estimado',s.consumption==null?'Sem base suficiente':number(s.consumption)+' km/L','Não comprova tanque cheio.')}${card('Custo médio por km',s.perKm==null?'Sem base suficiente':money(s.perKm)+'/km','Despesas ÷ distância observada.')}${card('KM inicial / final',s.first==null?'Sem base suficiente':number(s.first)+' / '+number(s.last),'Leituras no período selecionado.')}${card('Último abastecimento no período',date(m.fuel.at(-1)?.date))}</div><nav class="vp-tabs" aria-label="Seções do veículo">${Object.entries(tabs).map(([key,label])=>`<button data-tab="${key}" aria-current="${state.tab===key?'page':'false'}">${label}</button>`).join('')}</nav><div class="vp-filters"><label>Data inicial<input id="vp-start" type="date" value="${esc(state.start)}"></label><label>Data final<input id="vp-end" type="date" value="${esc(state.end)}"></label><button data-action="clear">Todas as datas</button><span>Combustível por abastecimento · OS por abertura · outras despesas por lançamento.</span></div><div class="vp-content">${content(m)}</div>`;
+    root.querySelectorAll('.vp-tabs [data-tab]').forEach(button=>{
+      button.insertAdjacentHTML('afterbegin',`<svg class="vp-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${tabIcons[button.dataset.tab]}</svg>`);
+    });
     const nextImage=root.querySelector('.vp-heading img');
     if(nextImage)nextImage.dataset.vehiclePhotoSource=safeImage(v.vehicleImageUrl||v.imageUrl||'');
     if(previousImage&&nextImage&&previousImage.dataset.vehiclePhotoSource===nextImage.dataset.vehiclePhotoSource)nextImage.replaceWith(previousImage);

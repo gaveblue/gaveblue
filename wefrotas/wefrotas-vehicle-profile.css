@@ -17,7 +17,8 @@
 .vp-stat{display:flex;flex-direction:column;gap:6px;min-width:0}
 .vp-stat strong{overflow-wrap:anywhere}
 .vp-tabs{display:flex;gap:4px;overflow-x:auto;background:white;border:1px solid var(--vp-line);border-radius:12px;padding:6px}
-#vehicle-profile .vp-tabs button{border:0;white-space:nowrap;color:#6c7891;border-radius:7px}
+#vehicle-profile .vp-tabs button{border:0;white-space:nowrap;color:#6c7891;border-radius:7px;display:inline-flex;align-items:center;gap:7px}
+.vp-tab-icon{width:18px;height:18px;flex:none}
 #vehicle-profile .vp-tabs button[aria-current=page]{background:#f1edff;color:#6241e8;box-shadow:inset 0 -2px #7957fa}
 .vp-filters{display:flex;align-items:end;gap:12px;flex-wrap:wrap;margin:16px 0;padding:15px;background:white;border:1px solid var(--vp-line);border-radius:12px}
 .vp-filters.has-open-calendar .module-compact-date-range{z-index:75}

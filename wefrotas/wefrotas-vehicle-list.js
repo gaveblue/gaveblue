@@ -22,11 +22,14 @@
   }
   function controls(panel) {
     if(document.getElementById('vehicle-list-controls'))return;
-    const box=document.createElement('div');box.id='vehicle-list-controls';box.className='vehicle-list-controls report-filter-card';
+    const box=document.createElement('div');box.id='vehicle-list-controls';box.className='vehicle-list-controls';
     const source=document.getElementById('module-compact-date-button-relatorios')?.closest('.module-compact-date-range');
     const calendar=source?source.outerHTML.replaceAll('relatorios','vehicleList').replaceAll('report-filter-start','vehicle-list-start').replaceAll('report-filter-end','vehicle-list-end'):'';
     box.innerHTML=`<div class="vehicle-list-tools"><div><strong>Indicadores por período</strong>${calendar}</div><details class="vehicle-list-columns"><summary class="settings-action-btn">Colunas</summary><div>${columns.filter(([key])=>key!=='plate').map(([key,label])=>`<label><input type="checkbox" data-column="${key}" ${state.hidden.has(key)?'':'checked'}> ${label}</label>`).join('')}</div></details><button type="button" class="settings-action-btn" data-export>Exportar XLSX</button></div><p class="vehicle-list-note">Período aplicado às despesas, consumo e custo/km. KM atual é cadastral/histórico. Consumo estimado entre leituras; não comprova tanque cheio. O filtro Seguro continua independente. Exportação inclui todos os veículos filtrados, não apenas esta página.</p>`;
-    panel.querySelector('.orders-table-shell').before(box);
+    box.querySelector('.vehicle-list-tools>div>strong')?.remove();
+    const note=box.querySelector('.vehicle-list-note');
+    box.title=note.textContent;note.remove();
+    panel.querySelector('.orders-toolbar .module-action-toolbar').before(box);
     box.addEventListener('change',event=>{const key=event.target.dataset.column;if(!key)return;event.target.checked?state.hidden.delete(key):state.hidden.add(key);renderVehicles();});
     box.querySelector('[data-export]').addEventListener('click',exportRows);
     const footer=document.createElement('div');footer.id='vehicle-list-pagination';footer.className='vp-pagination';panel.querySelector('.orders-table-shell').after(footer);
