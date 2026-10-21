@@ -1,4 +1,4 @@
-﻿    // VariÃ¡vel global para controlar o zoom
+    // VariÃ¡vel global para controlar o zoom
     let zoomAtual = 100;
 
     // FunÃ§Ã£o para aumentar zoom
@@ -2809,6 +2809,64 @@
     // Eventos do recibo COVRE
     document.getElementById('valor-covre').oninput = function() { formatarMoeda(this); };
 
+    // null indica o formato antigo; [] indica uma tabela de produção sem colaboradores.
+    function lerProducaoTrainer(linhas) {
+      const nomesAceitos = new Set([
+        'nomescolaboradores', 'nomesdoscolaboradores', 'nomecolaborador',
+        'nomedocolaborador', 'nomecolaborar', 'nomedocolaborar'
+      ]);
+      const registros = [];
+      let encontrouCabecalho = false;
+      let colunas = null;
+
+      linhas.forEach((linha, indice) => {
+        const chaves = linha.map(normalizarChaveImportacao);
+        const nomeColuna = chaves.findIndex(chave => nomesAceitos.has(chave));
+        if (nomeColuna >= 0) {
+          encontrouCabecalho = true;
+          const totalColuna = chaves.indexOf('total');
+          if (totalColuna < 0) {
+            throw new Error(`Coluna TOTAL não encontrada no cabeçalho da linha ${indice + 1}.`);
+          }
+          colunas = { nome: nomeColuna, total: totalColuna };
+          return;
+        }
+        if (!colunas) return;
+        const nome = String(linha[colunas.nome] ?? '').trim();
+        const chaveNome = normalizarChaveImportacao(nome);
+        // O bloco de empreiteiro não pertence à lista de colaboradores.
+        if (/^empreiteir[oa]s?$/.test(chaveNome) || /^total(?:geral|doscolaboradores)?$/.test(chaveNome)) {
+          colunas = null;
+          return;
+        }
+        if (!nome) return;
+
+        const bruto = linha[colunas.total];
+        let valor = typeof bruto === 'number' ? bruto : NaN;
+        if (typeof bruto === 'string') {
+          const texto = bruto.replace(/R\$/gi, '').replace(/\s/g, '');
+          // Valores textuais seguem a notação brasileira; números Excel já são numéricos.
+          if (/^-?(?:\d+|\d{1,3}(?:\.\d{3})+)(?:,\d{1,2})?$/.test(texto)) {
+            valor = Number(texto.replace(/\./g, '').replace(',', '.'));
+          }
+        }
+        if (!Number.isFinite(valor) || valor < 0) {
+          throw new Error(`TOTAL inválido para ${nome} na linha ${indice + 1}. Confira o valor e salve a planilha novamente no Excel.`);
+        }
+        registros.push({ Nome: nome, Valor: valor.toFixed(2).replace('.', ',') });
+      });
+      return encontrouCabecalho ? registros : null;
+    }
+
+    function lerLinhasPlanilhaRecibos(planilha, modelo) {
+      if (modelo === 'covre') {
+        const linhas = XLSX.utils.sheet_to_json(planilha, { header: 1, defval: '', blankrows: true });
+        const producao = lerProducaoTrainer(linhas);
+        if (producao !== null) return producao;
+      }
+      return XLSX.utils.sheet_to_json(planilha);
+    }
+
     // Importar Excel
     function importarExcel(event) {
       const file = event.target.files[0];
@@ -2816,10 +2874,17 @@
 
       const reader = new FileReader();
       reader.onload = function(e) {
-        const data = new Uint8Array(e.target.result);
-        const workbook = XLSX.read(data, { type: 'array' });
-        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-        const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+        let jsonData;
+        try {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+          jsonData = lerLinhasPlanilhaRecibos(firstSheet, modeloAtual);
+        } catch (erro) {
+          event.target.value = '';
+          mostrarMensagem(erro.message || 'Não foi possível ler a planilha.', 'erro');
+          return;
+        }
 
         const container = document.getElementById('recibos-gerados');
         
