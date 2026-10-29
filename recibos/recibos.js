@@ -2920,20 +2920,21 @@
 
     // null indica o formato antigo; [] indica uma tabela de produção sem colaboradores.
     function lerProducaoTrainer(linhas) {
-      const nomesAceitos = new Set([
-        'nomescolaboradores', 'nomesdoscolaboradores', 'nomecolaborador',
-        'nomedocolaborador', 'nomecolaborar', 'nomedocolaborar'
-      ]);
       const registros = [];
       let encontrouCabecalho = false;
       let colunas = null;
 
       linhas.forEach((linha, indice) => {
         const chaves = linha.map(normalizarChaveImportacao);
-        const nomeColuna = chaves.findIndex(chave => nomesAceitos.has(chave));
+        const nomeColuna = chaves.findIndex(chave => chave.includes('nome'));
         if (nomeColuna >= 0) {
           encontrouCabecalho = true;
-          const totalColuna = chaves.indexOf('total');
+          const totalExato = chaves.indexOf('total');
+          const totalColuna = totalExato >= 0
+            ? totalExato
+            : chaves.findIndex(chave => chave.startsWith('total')) >= 0
+              ? chaves.findIndex(chave => chave.startsWith('total'))
+              : chaves.findIndex(chave => chave.includes('total'));
           if (totalColuna < 0) {
             throw new Error(`Coluna TOTAL não encontrada no cabeçalho da linha ${indice + 1}.`);
           }
@@ -2944,7 +2945,7 @@
         const nome = String(linha[colunas.nome] ?? '').trim();
         const chaveNome = normalizarChaveImportacao(nome);
         // O bloco de empreiteiro não pertence à lista de colaboradores.
-        if (/^empreiteir[oa]s?$/.test(chaveNome) || /^total(?:geral|doscolaboradores)?$/.test(chaveNome)) {
+        if (/^empreiteir[oa]s?$/.test(chaveNome) || /^total/.test(chaveNome)) {
           colunas = null;
           return;
         }
