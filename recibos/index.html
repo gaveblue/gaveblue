@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./recibos.css?v=20260813-2">
+  <link rel="stylesheet" href="./recibos.css?v=20261029-print-settings-1">
   <style>@view-transition { navigation: auto; }</style>
   <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
   <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
@@ -231,6 +231,33 @@
     </div>
     <div style="text-align: center; padding-top: 20px; border-top: 2px solid #e5e7eb; margin-top: 20px;"><button onclick="limparHistorico()" style="background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%); color: white; border: none; padding: 10px 30px; border-radius: 25px; cursor: pointer; font-weight: bold; margin-right: 10px;">Limpar Histórico</button> <button class="popup-btn" onclick="fecharHistorico()">Fechar</button>
     </div>
+   </div>
+  </div><!-- Popup de Ajuda -->
+  <div class="popup-overlay hidden" id="popup-configuracoes-impressao" role="dialog" aria-modal="true" aria-labelledby="titulo-configuracoes-impressao">
+   <div class="popup-content popup-configuracoes-impressao-content">
+    <button class="popup-close" type="button" onclick="fecharConfiguracoesImpressao()" aria-label="Fechar configurações">×</button>
+    <div class="configuracoes-impressao-cabecalho">
+     <div class="configuracoes-impressao-icone" aria-hidden="true"><i data-lucide="printer"></i></div>
+     <div>
+      <span>Configurações</span>
+      <h2 id="titulo-configuracoes-impressao">Impressão de recibos</h2>
+     </div>
+    </div>
+    <p class="configuracoes-impressao-intro">Defina como os recibos serão organizados ao imprimir ou salvar em PDF.</p>
+    <fieldset class="opcoes-impressao" id="opcoes-impressao">
+     <legend>Recibos por página A4</legend>
+     <label class="opcao-impressao">
+      <input type="radio" name="recibos-por-pagina" value="1">
+      <span class="opcao-impressao-ilustracao opcao-impressao-uma" aria-hidden="true"><i></i></span>
+      <span><strong>1 recibo por página</strong><small>Maior tamanho e mais espaço para leitura.</small></span>
+     </label>
+     <label class="opcao-impressao">
+      <input type="radio" name="recibos-por-pagina" value="2">
+      <span class="opcao-impressao-ilustracao opcao-impressao-duas" aria-hidden="true"><i></i><i></i></span>
+      <span><strong>2 recibos por página</strong><small>Dois recibos organizados verticalmente na mesma folha.</small></span>
+     </label>
+    </fieldset>
+    <div class="configuracoes-impressao-acoes"><button type="button" class="popup-btn popup-btn-secundario" onclick="fecharConfiguracoesImpressao()">Cancelar</button><button type="button" class="popup-btn" onclick="salvarConfiguracoesImpressao()">Salvar configuração</button></div>
    </div>
   </div><!-- Popup de Ajuda -->
   <div class="popup-overlay hidden" id="popup-ajuda">
@@ -658,6 +685,9 @@
      <button class="btn imprimir-pdf" id="print-receipts-btn" onclick="imprimirPDF()" data-name="Imprimir" data-tooltip="Imprimir">
       <i data-lucide="printer"></i>
      </button>
+     <button class="btn help-btn" type="button" onclick="abrirConfiguracoesImpressao()" data-name="Configurações de impressão" data-tooltip="Configurações de impressão" aria-label="Configurações de impressão">
+      <i data-lucide="settings-2"></i>
+     </button>
      <button class="btn help-btn" onclick="salvarRecibosAtual()" data-name="Salvar Recibo" data-tooltip="Salvar Recibo">
       <i data-lucide="save"></i>
      </button>
@@ -703,11 +733,9 @@
    </a>
   </div>
   </div>
-  <script src="./recibos.js?v=20261021-trainer-producao"></script>
+  <script src="./recibos.js?v=20261029-print-settings-1"></script>
  <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9db7bb98574bf1e3',t:'MTc3MzM3MDI0NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
-
-
 
 
 

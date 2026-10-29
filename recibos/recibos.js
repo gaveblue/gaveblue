@@ -1,4 +1,4 @@
-    // VariÃ¡vel global para controlar o zoom
+﻿    // VariÃ¡vel global para controlar o zoom
     let zoomAtual = 100;
 
     // FunÃ§Ã£o para aumentar zoom
@@ -2263,6 +2263,38 @@
       }
     })();
 
+    const CHAVE_RECIBOS_POR_PAGINA = 'weRecibos.recibosPorPagina';
+
+    function obterRecibosPorPagina() {
+      return localStorage.getItem(CHAVE_RECIBOS_POR_PAGINA) === '2' ? 2 : 1;
+    }
+
+    function fecharConfiguracoesImpressao() {
+      document.getElementById('popup-configuracoes-impressao')?.classList.add('hidden');
+    }
+
+    function abrirConfiguracoesImpressao() {
+      const popup = document.getElementById('popup-configuracoes-impressao');
+      if (!popup) return;
+      const opcao = popup.querySelector(`[name="recibos-por-pagina"][value="${obterRecibosPorPagina()}"]`);
+      if (opcao) opcao.checked = true;
+      popup.classList.remove('hidden');
+      if (window.lucide?.createIcons) window.lucide.createIcons();
+      requestAnimationFrame(() => opcao?.focus());
+    }
+
+    function salvarConfiguracoesImpressao() {
+      const opcao = document.querySelector('[name="recibos-por-pagina"]:checked');
+      const recibosPorPagina = opcao?.value === '2' ? '2' : '1';
+      localStorage.setItem(CHAVE_RECIBOS_POR_PAGINA, recibosPorPagina);
+      fecharConfiguracoesImpressao();
+      mostrarMensagem(`Impressão configurada para ${recibosPorPagina} recibo${recibosPorPagina === '2' ? 's' : ''} por página.`, 'sucesso');
+    }
+
+    window.abrirConfiguracoesImpressao = abrirConfiguracoesImpressao;
+    window.fecharConfiguracoesImpressao = fecharConfiguracoesImpressao;
+    window.salvarConfiguracoesImpressao = salvarConfiguracoesImpressao;
+
     // FunÃ§Ã£o para imprimir
     function obterRecibosVisiveisParaImpressao() {
       return Array.from(document.querySelectorAll('.recibo')).filter(recibo => {
@@ -2369,6 +2401,8 @@
         const margin = 10;
         const usableWidth = pageWidth - margin * 2;
         const usableHeight = pageHeight - margin * 2;
+        const recibosPorPagina = obterRecibosPorPagina();
+        const imprimirDuasVias = recibosPorPagina === 2;
 
         for (let index = 0; index < renderedClones.length; index += 1) {
           const holder = renderedClones[index];
@@ -2383,6 +2417,20 @@
 
           const imageData = canvas.toDataURL('image/jpeg', 0.98);
           const imageHeight = (canvas.height * usableWidth) / canvas.width;
+
+          if (imprimirDuasVias) {
+            const via = index % 2;
+            if (index > 0 && via === 0) pdf.addPage();
+            const gap = 6;
+            const alturaVia = (usableHeight - gap) / 2;
+            const escala = Math.min(usableWidth / canvas.width, alturaVia / canvas.height);
+            const larguraVia = canvas.width * escala;
+            const alturaImagem = canvas.height * escala;
+            const x = (pageWidth - larguraVia) / 2;
+            const y = margin + via * (alturaVia + gap) + (alturaVia - alturaImagem) / 2;
+            pdf.addImage(imageData, 'JPEG', x, y, larguraVia, alturaImagem);
+            continue;
+          }
 
           if (index > 0) {
             pdf.addPage();
@@ -2451,9 +2499,22 @@
         return;
       }
 
-      const htmlRecibos = recibosVisiveis
-        .map((recibo) => `<div class="print-item">${clonarReciboParaImpressao(recibo)}</div>`)
-        .join('');
+      const recibosPorPagina = obterRecibosPorPagina();
+      const imprimirDuasVias = recibosPorPagina === 2;
+      const apenasTrainer = recibosVisiveis.every((recibo) => recibo.classList.contains('recibo-moyses'));
+
+      const htmlRecibos = imprimirDuasVias
+        ? Array.from({ length: Math.ceil(recibosVisiveis.length / 2) }, (_, pageIndex) => {
+            const pageReceipts = recibosVisiveis.slice(pageIndex * 2, pageIndex * 2 + 2);
+            return `
+              <div class="print-sheet print-sheet--duas-vias${apenasTrainer ? ' print-sheet--trainer' : ''}">
+                ${pageReceipts.map((recibo) => `<div class="print-item print-item--duas-vias${recibo.classList.contains('recibo-moyses') ? ' print-item--trainer' : ''}">${clonarReciboParaImpressao(recibo)}</div>`).join('')}
+              </div>
+            `;
+          }).join('')
+        : recibosVisiveis
+            .map((recibo) => `<div class="print-item">${clonarReciboParaImpressao(recibo)}</div>`)
+            .join('');
 
       const janelaImpressao = window.open('', '_blank', 'width=900,height=1200');
 
@@ -2498,6 +2559,41 @@
             .print-item + .print-item {
               break-before: page !important;
               page-break-before: always !important;
+            }
+            .print-sheet--duas-vias {
+              width: 210mm;
+              height: 297mm;
+              padding: 8mm 12mm 7mm;
+              display: grid;
+              grid-template-rows: repeat(2, minmax(0, 1fr));
+              gap: 6mm;
+              overflow: hidden;
+              break-after: page !important;
+              page-break-after: always;
+            }
+            .print-sheet--duas-vias:last-child {
+              break-after: auto;
+              page-break-after: auto;
+            }
+            .duas-vias-print .print-item + .print-item {
+              break-before: auto !important;
+              page-break-before: auto !important;
+            }
+            .duas-vias-print .print-item--duas-vias {
+              min-height: 0;
+              overflow: hidden;
+              display: flex;
+              justify-content: center;
+              align-items: flex-start;
+            }
+            .duas-vias-print .print-item--duas-vias:not(.print-item--trainer) .recibo {
+              zoom: 0.62;
+              flex: 0 0 auto;
+            }
+            .trainer-print .print-item--trainer {
+              flex: 1 1 0;
+              display: flex;
+              align-items: stretch;
             }
             .recibo {
               position: relative;
@@ -2716,6 +2812,19 @@
               -webkit-appearance: none;
               appearance: none;
             }
+            .trainer-print .recibo-moyses {
+              width: 100% !important;
+              max-width: none !important;
+              min-height: 0 !important;
+              height: 100%;
+              padding: 12mm 6mm 10mm !important;
+            }
+            .trainer-print .moyses-corpo-vazio {
+              min-height: 78mm;
+            }
+            .trainer-print .moyses-assinatura-area {
+              padding-top: 4mm;
+            }
             .checkbox-recibo,
             .botoes,
             .loading-overlay,
@@ -2731,7 +2840,7 @@
             }
           </style>
         </head>
-        <body>
+        <body class="${imprimirDuasVias ? 'duas-vias-print' : ''}${apenasTrainer && imprimirDuasVias ? ' trainer-print' : ''}">
           ${htmlRecibos}
           <script>
             window.onload = function () {

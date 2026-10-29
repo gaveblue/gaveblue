@@ -2852,4 +2852,53 @@
         color: #000 !important;
       }
     }
+/* Configurações de impressão */
+.popup-configuracoes-impressao-content {
+  width: min(520px, calc(100vw - 32px));
+  padding: 30px;
+  text-align: left;
+}
+
+.configuracoes-impressao-cabecalho {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+.configuracoes-impressao-icone {
+  display: grid;
+  width: 52px;
+  height: 52px;
+  place-items: center;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #e0e7ff, #ede9fe);
+  color: #5b5ce2;
+}
+
+.configuracoes-impressao-icone svg { width: 25px; height: 25px; }
+.configuracoes-impressao-cabecalho span { color: #6366f1; font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+.configuracoes-impressao-cabecalho h2 { margin: 4px 0 0; color: #182033; font-size: 22px; }
+.configuracoes-impressao-intro { margin: 0 0 22px; color: #64748b; line-height: 1.65; }
+
+.opcoes-impressao { margin: 0; padding: 0; border: 0; display: grid; gap: 12px; }
+.opcoes-impressao legend { margin-bottom: 12px; color: #334155; font-size: 13px; font-weight: 800; }
+.opcao-impressao { display: grid; grid-template-columns: 20px 54px minmax(0, 1fr); align-items: center; gap: 12px; min-height: 84px; padding: 14px; border: 1px solid #dbe4f0; border-radius: 15px; cursor: pointer; transition: border-color .2s ease, background .2s ease, box-shadow .2s ease; }
+.opcao-impressao:has(input:checked) { border-color: #7168ec; background: #f5f4ff; box-shadow: 0 8px 22px rgba(99, 102, 241, .12); }
+.opcao-impressao input { width: 18px !important; height: 18px; min-height: 0; margin: 0; accent-color: #6561e9; }
+.opcao-impressao strong,.opcao-impressao small { display: block; }
+.opcao-impressao strong { color: #1e293b; font-size: 14px; }
+.opcao-impressao small { margin-top: 5px; color: #64748b; font-size: 12px; line-height: 1.45; }
+.opcao-impressao-ilustracao { display: flex; flex-direction: column; justify-content: center; gap: 4px; width: 54px; height: 54px; padding: 7px 8px; border: 1px solid #c7d2fe; border-radius: 10px; background: #fff; }
+.opcao-impressao-ilustracao i { display: block; flex: 1; border: 1px solid #818cf8; border-radius: 2px; background: linear-gradient(180deg,#fff,#eef2ff); }
+.opcao-impressao-uma { padding: 6px 9px; }
+.configuracoes-impressao-acoes { display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; }
+.configuracoes-impressao-acoes .popup-btn { margin: 0; }
+.popup-btn-secundario { background: #eef2f7 !important; color: #475569 !important; }
+
+@media (max-width: 560px) {
+  .popup-configuracoes-impressao-content { padding: 24px 18px; }
+  .configuracoes-impressao-acoes { display: grid; grid-template-columns: 1fr; }
+  .configuracoes-impressao-acoes .popup-btn { width: 100%; }
+}
   </style>
