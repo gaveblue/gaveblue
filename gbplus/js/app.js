@@ -1,11 +1,11 @@
 import {uid,today,money,dateLabel,cents,generateTitles,addPayment,transfer,updateTitle,pending,flow,within} from './domain.js';
-import {LocalRepository,KEY,INDICATORS,defaultPanel,parseBackup,backupText} from './store.js';
+import {KEY,INDICATORS,defaultPanel,parseBackup,backupText} from './store.js';
 import {esc,icon,button,field,formFooter,download,csv,titleTable} from './ui.js';
 import {routes,dashboard,titlesView,partnersView,accountsView,categoriesView,flowView,reportsView,settingsView,filteredTitles,reportData} from './views.js';
 import {titleForm,partnerForm,accountForm,categoryForm,paymentForm,transferForm,titleDetail,customizeForm,accountDetail} from './forms.js';
 import {SupabaseRepository} from '../integrations/supabase/repository.js';
-import {initializeAuth,authClient,currentUser,onlineSelected,accountCard,showAuth,isRecovery} from './auth.js';
-let repository=new LocalRepository();let db;let busy=false;let pendingGeneration=null;let confirmAction=null;let installPrompt=null;
+import {initializeAuth,authClient,currentUser,accountCard,showAuth,isRecovery} from './auth.js';
+let repository=null;let db;let busy=false;let pendingGeneration=null;let confirmAction=null;let installPrompt=null;
 const state={route:'dashboard',period:'month',range:{},query:'',status:'',type:'',partner:'',category:'',partnerQuery:'',granularity:'month',report:'payable',reportPartner:''};
 const modal=document.querySelector('#modal');
 function toast(message){const el=document.querySelector('#toast');el.textContent=message;el.classList.add('visible');clearTimeout(toast.timer);toast.timer=setTimeout(()=>el.classList.remove('visible'),4500);}
@@ -52,6 +52,7 @@ const actions={
   search:()=>{state.query='';location.hash='titles';if(state.route==='titles')render();requestAnimationFrame(()=>document.querySelector('#title-search')?.focus());},
   notifications:()=>{state.status='late';state.period='all';state.range=rangeFor('all');location.hash='titles';if(state.route==='titles')render();},
   'mobile-menu':()=>openModal('Seu financeiro',`<nav class="menu-grid">${routes.map(([key,label,ico])=>`<a href="#${key}" data-action="close">${icon(ico)}${label}</a>`).join('')}</nav><div class="local-note">${icon('info')} ${currentUser()?'Conta online · use o mesmo login em seus dispositivos.':'Dados locais, sem sincronização entre dispositivos.'}</div>`),
+  'legacy-backup':()=>{if(!currentUser())return;const raw=localStorage.getItem(KEY);if(!raw){toast('Não há registros locais antigos neste navegador.');return;}download('gb-plus-local-original.json',raw,'application/json');toast('Cópia local exportada. Seus dados online não foram alterados.');},
   backup:()=>{download(`gb-plus-backup-${today()}.json`,backupText(db),'application/json');toast('Backup exportado. Guarde-o em um local seguro.');},
   restore:()=>document.querySelector('#backup-input').click(),
   'export-titles':()=>{const rows=filteredTitles(db,state);download(`gb-plus-titulos-${today()}.csv`,csv([['Descrição','Tipo','Parceiro','Categoria','Documento','Emissão','Vencimento','Valor (R$)','Pendente (R$)'],...rows.map(t=>[t.description,t.type==='income'?'Receita':'Despesa',db.partners.find(p=>p.id===t.partnerId)?.name||'',db.categories.find(c=>c.id===t.categoryId)?.name,t.document,dateLabel(t.issue),dateLabel(t.due),(t.amount/100).toFixed(2).replace('.',','),(pending(db,t)/100).toFixed(2).replace('.',',')])]),'text/csv;charset=utf-8');},
@@ -88,8 +89,9 @@ window.addEventListener('storage',e=>{if(e.key===KEY&&!currentUser())toast('Dado
 modal.addEventListener('cancel',()=>{pendingGeneration=null;confirmAction=null;});
 
 function clearAccount(){
-  db=null;repository.dispose?.();closeModal();
-  const authDialog=document.querySelector('#auth-modal');if(authDialog){authDialog.close();authDialog.innerHTML='';}
+  db=null;repository?.dispose?.();closeModal();
+  document.body.classList.add('auth-locked');
+  showAuth('signin');
   document.querySelector('#main').innerHTML='<section class="panel recovery"><h1>Atualizando sua sessão…</h1></section>';
   document.querySelector('#navigation').innerHTML='';
   document.querySelector('#mobile-navigation').innerHTML='';
@@ -102,7 +104,7 @@ function updateConnection(){
   access.textContent=online?'Minha conta':'Entrar';access.title=online?currentUser().email:'Entrar na conta online';
 }
 async function refreshOnline(manual=false){
-  if(!currentUser()||!db||busy||!navigator.onLine||document.hidden||document.querySelector('#auth-modal')?.open)return;
+  if(!currentUser()||!db||busy||!navigator.onLine||document.hidden||document.body.classList.contains('auth-locked'))return;
   if(modal.open){if(manual)toast('Feche o formulário antes de atualizar os dados online.');return;}
   busy=true;
   try{
@@ -128,20 +130,16 @@ async function init(){
   document.querySelector('#main').insertAdjacentHTML('beforebegin','<div id="sync-alert" class="auth-notice sync-alert" role="alert" hidden>A gravação online precisa ser conferida. Feche o formulário, atualize os dados e refaça a alteração. <button class="button small" data-auth-action="refresh">Atualizar dados online</button></div>');
   try{
     const user=await initializeAuth(clearAccount);
-    repository=user?new SupabaseRepository(authClient(),user.id):new LocalRepository();
-    db=await repository.read();state.range=rangeFor('month');route();
-    if(isRecovery())showAuth('recovery');
+    if(!user){showAuth('signin');return;}
+    if(isRecovery()){showAuth('recovery');return;}
+    repository=new SupabaseRepository(authClient(),user.id);
+    db=await repository.read();state.range=rangeFor('month');
+    document.querySelector('#auth-gate').hidden=true;
+    document.body.classList.remove('auth-locked');route();
   }catch(error){
-    const cloud=!!currentUser()||onlineSelected();
-    document.querySelector('#main').innerHTML='<section class="panel recovery"><h1>'+ (cloud?'Acesse sua conta online':'Não foi possível abrir o GB+')+'</h1><p>'+esc(error.message)+'</p><p>Nenhum registro foi substituído.</p><div class="button-stack"><button class="button primary" data-auth-action="signin">Entrar na conta online</button><button class="button" onclick="location.reload()">Tentar novamente</button><button class="button" data-auth-action="local">Abrir registros locais</button>'+(!cloud?'<button class="button" id="recover-raw">Exportar conteúdo local original</button>':'')+'</div></section>';
-    const raw=document.querySelector('#recover-raw');if(raw)raw.onclick=()=>download('gb-plus-recuperacao.txt',localStorage.getItem(KEY)||'Armazenamento vazio','text/plain');
-    if(isRecovery())showAuth('recovery');
+    showAuth(isRecovery()?'recovery':'signin',error.message);
   }
   updateConnection();setInterval(()=>refreshOnline(),60000);
-  if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').then(reg=>{
-    const notifyUpdate=()=>toast('Uma atualização está pronta. Feche as abas do GB+ e abra novamente para usar a nova versão.');
-    if(reg.waiting)notifyUpdate();
-    reg.addEventListener('updatefound',()=>reg.installing?.addEventListener('statechange',()=>{if(reg.waiting&&navigator.serviceWorker.controller)notifyUpdate();}));
-  }).catch(()=>toast('O modo offline não pôde ser ativado.'));
+
 }
 init();

@@ -8,13 +8,15 @@
   <link rel="manifest" href="./manifest.webmanifest"><link rel="icon" href="./icons/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="./icons/icon-192.png">
   <link rel="stylesheet" href="./styles.css">
 </head>
-<body>
+<body class="auth-locked">
+  <main id="auth-gate" aria-label="Acesso ao GB+"><section class="auth-page"><div class="auth-card"><header class="auth-brand"><div class="auth-wordmark">GB<span>+</span></div><p>Gestão Financeira</p></header><p class="auth-description" role="status">Preparando seu acesso…</p><noscript>Ative o JavaScript para entrar no GB+.</noscript></div></section></main>
   <a class="skip" href="#main">Pular para o conteúdo</a>
-  <aside class="sidebar" id="sidebar"><a class="brand" href="#dashboard" aria-label="GB+ início"><strong>GB<span>+</span></strong><span>Gestão Financeira</span></a><div class="nav-label">SEU FINANCEIRO</div><nav id="navigation" aria-label="Navegação principal"></nav><div class="sidebar-bottom"><div class="local-mark"><span class="status-dot"></span> Armazenamento local<small>Seus dados, neste navegador.</small></div><button class="theme-button" data-action="theme"></button><div class="version">GB+ <span>Versão 1.1</span></div></div></aside>
+  <aside class="sidebar" id="sidebar"><a class="brand" href="#dashboard" aria-label="GB+ início"><strong>GB<span>+</span></strong><span>Gestão Financeira</span></a><div class="nav-label">SEU FINANCEIRO</div><nav id="navigation" aria-label="Navegação principal"></nav><div class="sidebar-bottom"><div class="local-mark"><span class="status-dot"></span> Armazenamento local<small>Seus dados, neste navegador.</small></div><button class="theme-button" data-action="theme"></button><div class="version">GB+ <span>Versão 1.2</span></div></div></aside>
   <div class="workspace"><header class="topbar"><span class="breadcrumb">Workspace <span>/</span> <b id="breadcrumb">Visão geral</b></span><a class="mobile-brand" href="#dashboard">GB+</a><div class="top-actions"><span id="connection" class="connection">Disponível offline</span><button class="icon-button" data-action="search" aria-label="Pesquisar lançamentos"></button><button class="icon-button" data-action="notifications" aria-label="Ver títulos vencidos"></button><span class="avatar" title="Meu financeiro">GB</span></div></header><main id="main" tabindex="-1"></main><footer class="desktop-footer">Uma visão clara. Decisões melhores.<span>GB+ · Gestão Financeira</span></footer></div>
   <nav class="mobile-nav" id="mobile-navigation" aria-label="Navegação móvel"></nav>
   <dialog id="modal"><div id="modal-content"></div></dialog><div id="toast" role="status" aria-live="polite"></div>
   <noscript>Ative o JavaScript para usar o GB+. Os dados são armazenados neste navegador.</noscript>
+  <script src="./js/update.js"></script>
   <script src="./vendor/supabase-2.118.0.js"></script>
   <script type="module" src="./js/app.js"></script>
 </body>
