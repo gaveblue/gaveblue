@@ -1,4 +1,4 @@
-const CACHE='gb-plus-shell-v3';
+const CACHE='gb-plus-shell-v4';
 const ASSETS=['./','./index.html','./styles.css','./js/app.js','./js/domain.js','./js/store.js','./js/ui.js','./js/views.js','./js/forms.js','./js/auth.js','./js/cloud-config.js','./vendor/supabase-2.118.0.js','./integrations/supabase/client.js','./integrations/supabase/repository.js','./manifest.webmanifest','./icons/icon.svg','./icons/icon-192.png','./icons/icon-512.png','./icons/maskable-512.png'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS))));
 self.addEventListener('activate',event=>event.waitUntil(Promise.all([caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('gb-plus-shell-')&&k!==CACHE).map(k=>caches.delete(k)))),self.clients.claim()])));
