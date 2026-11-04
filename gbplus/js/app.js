@@ -119,6 +119,26 @@ async function refreshOnline(manual=false){
   }catch(error){document.querySelector('#connection').textContent='Online · atualização pendente';if(manual)fail(error);}
   finally{busy=false;}
 }
+// AI Lab bridge: writes only after explicit preview confirmation in the embedded chat.
+// No generic commands, arbitrary mutations, or payments are accepted.
+window.addEventListener('message',async event=>{
+ const frame=document.querySelector('.gb-ai-widget iframe');
+ if(event.origin!==location.origin||event.source!==frame?.contentWindow)return;
+ const msg=event.data;if(!msg||msg.kind!=='gbplus-ai-create-title'||typeof msg.requestId!=='string')return;
+ const respond=(ok,message)=>event.source.postMessage({kind:'gbplus-ai-create-result',requestId:msg.requestId,ok,message},event.origin);
+ if(!db||!currentUser()||!repository){respond(false,'Entre na conta GB+ antes de gravar.');return;}
+ const p=msg.proposal;
+ if(!p||!['income','expense'].includes(p.type)||!['single','recurring','installment'].includes(p.mode)||!Number.isSafeInteger(p.amountCents)||p.amountCents<=0||typeof p.description!=='string'||!p.description.trim()||p.description.length>300||typeof p.due!=='string'||!/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(p.due)||!Number.isInteger(p.count)||p.count<1||p.count>120){respond(false,'Prévia inválida. Confira todos os campos.');return;}
+ const category=db.categories.find(x=>x.type===p.type&&x.name.toLocaleLowerCase('pt-BR')===p.description.toLocaleLowerCase('pt-BR'))||db.categories.find(x=>x.type===p.type&&/outras despesas|outras receitas/i.test(x.name))||db.categories.find(x=>x.type===p.type);
+ if(!category){respond(false,'Cadastre uma categoria adequada antes de gravar.');return;}
+ const partnerId=p.partner?db.partners.find(x=>x.name.toLocaleLowerCase('pt-BR')===p.partner.toLocaleLowerCase('pt-BR'))?.id||'':'';
+ if(p.partner&&!partnerId){respond(false,'Parceiro não encontrado. Cadastre-o primeiro para evitar vinculação incorreta.');return;}
+ try{
+  const generated=generateTitles({type:p.type,description:p.description.trim(),categoryId:category.id,partnerId,document:'',issue:today(),due:p.due,amount:p.amountCents,accountId:'',notes:'Criado pelo GB+ AI com confirmação do usuário.'},p.mode,p.mode==='single'?1:p.count);
+  await commit(d=>{d.titles.push(...generated);},'Lançamento criado pelo GB+ AI.');
+  respond(true,generated.length+' título(s) gravado(s) na sua conta GB+.');
+ }catch(error){respond(false,error.message||'Falha ao salvar. Atualize e confira os dados antes de tentar novamente.');}
+});
 window.addEventListener('gbplus-refresh',()=>refreshOnline(true));
 window.addEventListener('gbplus-message',event=>toast(event.detail));
 window.addEventListener('focus',()=>refreshOnline());
