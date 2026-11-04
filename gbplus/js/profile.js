@@ -49,6 +49,7 @@ export function profileView(user){
     field('E-mail de acesso','email',user.email||'','email','autocomplete="email" inputmode="email" maxlength="254" required')+
     '<div class="profile-form-actions"><span id="profile-email-message" role="status" aria-live="polite"></span><button type="submit" class="button">'+icon('arrow')+' Solicitar alteração</button></div>'+
    '</form>'+
+   '<div class="profile-signout"><div><h3>Encerrar sessão</h3><p>Saia da sua conta neste dispositivo. Seus dados financeiros permanecem salvos no GB+.</p></div><button type="button" class="button profile-signout-button" data-auth-action="signout">'+icon('arrow')+' Sair da conta</button></div>'+
   '</section>'+
  '</div>';
 }
