@@ -1,12 +1,12 @@
 {
-  "version": "2.0.3",
-  "build": 29,
+  "version": "2.0.4",
+  "build": 30,
   "published_at": "2026-11-04",
-  "title": "Correção da verificação de atualizações",
+  "title": "GB+ AI — Chat mais limpo",
   "notes": [
-    "Verificação independente no GitHub evita informar que tudo está atualizado quando o site ainda serve uma versão antiga.",
-    "O GB+ informa quando há uma atualização aguardando publicação e oferece recuperação segura dos arquivos.",
-    "O cache do PWA não fornece mais um arquivo antigo de versões como se fosse uma resposta online válida."
+    "Removido o rodapé informativo com 'Conta GB+ conectada', 'Conectar IA' e status de consultas.",
+    "Campo de mensagem, microfone e envio permanecem no chat.",
+    "Histórico e Novo chat continuam disponíveis e não há alteração nos registros financeiros."
   ],
   "assets": [
     "./index.html",
