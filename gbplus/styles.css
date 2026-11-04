@@ -143,3 +143,74 @@ html,body{background-color:var(--bg);min-height:100%;min-height:100dvh}
  .mobile-title-footer>small{font-size:9px}
  .title-filters{padding:11px}
 }
+
+/* GB+ account editor and notifications — inherit the current light/dark palette. */
+[data-action="notifications"]{position:relative}
+.notification-dot{position:absolute;right:4px;top:4px;width:7px;height:7px;border-radius:50%;background:var(--ink);border:1px solid var(--surface)}
+.notification-overview{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:18px}
+.notification-overview>span{display:flex;align-items:center;justify-content:center;gap:9px;border:1px solid var(--border);background:var(--surface);border-radius:14px;min-height:60px;padding:12px;color:var(--muted);font-size:12px}
+.notification-overview .icon{width:18px;height:18px;flex:none;color:var(--ink)}
+.notification-overview b{color:var(--ink);font-size:17px}
+.notification-groups{display:grid;gap:17px}
+.notification-group{padding:0;overflow:hidden}
+.notification-group-heading{padding:17px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid var(--border)}
+.notification-group-heading h2{display:flex;align-items:center;gap:9px;font-size:15px;line-height:1.4;margin:0}
+.notification-group-heading .icon{width:18px;height:18px}
+.notification-group-heading .badge{font-size:11px}
+.notification-items{display:grid}
+.notification-item{display:flex;align-items:center;gap:12px;min-width:0;width:100%;text-align:left;padding:16px 20px;border:0;border-bottom:1px solid var(--border);background:var(--surface);color:var(--ink)}
+.notification-item:last-child{border-bottom:0}
+.notification-item:hover,.notification-item:focus-visible{background:var(--soft)}
+.notification-item>.icon{height:16px;width:16px;transform:rotate(-90deg);color:var(--muted);flex:none}
+.notification-direction{display:grid;place-items:center;width:38px;height:38px;border-radius:11px;border:1px solid var(--border);background:var(--soft);flex:none}
+.notification-direction .icon{height:20px;width:20px}
+.notification-description{display:flex;flex-direction:column;gap:4px;min-width:0;flex:1}
+.notification-description strong{font-size:13px;line-height:1.35;overflow-wrap:anywhere}
+.notification-description small{font-size:11px;color:var(--muted);line-height:1.4;overflow-wrap:anywhere}
+.notification-amount{font-size:13px;font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums}
+.notification-empty{color:var(--muted);font-size:12px;padding:19px 20px;margin:0}
+.notification-help{color:var(--muted);font-size:11px;line-height:1.7;margin:19px 2px 0}
+.profile-layout{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(240px,1fr);gap:19px;align-items:start}
+.profile-card{padding:24px;min-width:0}
+.profile-intro{display:flex;align-items:center;gap:15px;margin-bottom:28px}
+.profile-avatar{display:grid;place-items:center;width:57px;height:57px;flex:none;border-radius:17px;background:var(--soft);border:1px solid var(--border)}
+.profile-avatar .icon{width:27px;height:27px}
+.profile-intro h2{font-size:22px;letter-spacing:-.6px;margin:7px 0 4px}
+.profile-intro p,.profile-section-heading p{font-size:12px;color:var(--muted);line-height:1.6;margin:5px 0 0}
+.profile-section-heading{margin:19px 0 13px}
+.profile-section-heading h3{font-size:14px;letter-spacing:-.2px;margin:0}
+.profile-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px 14px}
+.profile-fields>.field{margin:0;min-width:0;font-size:12px;gap:7px}
+.profile-fields>.field:first-child{grid-column:1/-1}
+.profile-fields .field input,.profile-email-card .field input{border:1px solid var(--border);background:var(--surface);color:var(--ink);border-radius:11px;min-width:0;width:100%;height:45px;min-height:45px;padding:10px 12px;font-size:14px}
+.profile-fields .field input:focus-visible,.profile-email-card .field input:focus-visible{outline:2px solid var(--subtle);outline-offset:1px}
+.profile-email-card .field{display:flex;flex-direction:column;gap:8px;font-size:12px}
+.profile-privacy{display:flex;align-items:flex-start;gap:7px;background:var(--soft);border:1px solid var(--border);border-radius:12px;padding:12px;margin-top:22px;color:var(--muted);font-size:11px;line-height:1.6}
+.profile-privacy .icon{width:17px;height:17px;flex:none;margin-top:1px}
+.profile-form-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:18px;flex-wrap:wrap}
+.profile-form-actions [role="status"]{min-width:0;flex:1;color:var(--muted);font-size:12px;line-height:1.4}
+.profile-form-actions .button{min-height:42px;font-size:12px}
+.profile-form-actions .button:disabled{opacity:.5;cursor:progress}
+@media(max-width:1050px){.profile-layout{grid-template-columns:1fr}.profile-card{max-width:100%}}
+@media(max-width:760px){
+ .notification-overview{gap:8px}
+ .notification-overview>span{flex-wrap:wrap;gap:5px 6px;text-align:center;padding:12px 6px;font-size:10px;min-height:70px}
+ .notification-overview .icon{height:15px;width:15px}
+ .notification-overview b{font-size:15px}
+ .notification-group-heading{padding:14px 13px}
+ .notification-group-heading h2{font-size:13px}
+ .notification-item{padding:13px 11px;gap:8px}
+ .notification-direction{width:32px;height:32px}
+ .notification-direction .icon{height:17px;width:17px}
+ .notification-description strong{font-size:12px}
+ .notification-description small{font-size:10px}
+ .notification-amount{font-size:11px}
+ .profile-card{padding:16px;border-radius:17px}
+ .profile-intro{gap:11px;margin-bottom:21px}
+ .profile-avatar{width:48px;height:48px;border-radius:14px}
+ .profile-intro h2{font-size:19px}
+ .profile-fields{gap:13px 11px}
+ .profile-fields .field input,.profile-email-card .field input{font-size:16px;min-height:45px}
+ .profile-form-actions .button{width:100%;min-height:46px}
+}
+@media(max-width:355px){.profile-fields{grid-template-columns:1fr}.notification-amount{font-size:10px}.notification-item>.icon{display:none}}
