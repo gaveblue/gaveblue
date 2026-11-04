@@ -11,7 +11,7 @@
 <form id="chat-form" class="composer"><input id="message" aria-label="Sua mensagem" placeholder="Mensagem para GB+ AI..." autocomplete="off" required><button id="mic" type="button" aria-label="Falar" title="Reconhecimento de voz">🎙</button><button class="primary" type="submit" aria-label="Enviar">↑</button></form>
 <div id="ai-connect" style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:10px;flex-wrap:wrap"><span id="ai-state" class="muted">Modo local de demonstração</span><button id="ai-login" type="button" style="border:1px solid #ddd;border-radius:99px;padding:7px 12px;background:#fff;font-size:12px">Conectar IA</button></div><p id="voice-status" class="footnote" role="status">Ambiente de testes · Dados fictícios · Gravação somente após confirmação</p>
 </div></main></div><script type="module">
-import {interpret,formatBRL,fixture} from './engine.js';
+import {interpret,formatBRL,fixture} from './engine.js?v=20261103-2310';
 const $=s=>document.querySelector(s),log=$('#messages'),input=$('#message');let proposal=null,context=null,live=false,session=null,history=[];
 const supabaseUrl='https://layrxmkosyqurpobzmku.supabase.co';const publishableKey='sb_publishable_AaQyS_d5doh7RtrkLucHUQ_d8KR07Gg';
 async function getSession(){const raw=localStorage.getItem('gbplus-auth-v1');if(!raw)return null;try{const v=JSON.parse(raw);const token=v?.access_token||v?.currentSession?.access_token;return token||null;}catch{return null;}}
