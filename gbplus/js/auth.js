@@ -53,6 +53,35 @@ export function showAuth(mode='signin',error=''){
   const password=gate.querySelector('[name=password]');if(password&&mode!=='signin')password.minLength=8;
 }
 
+// Edit only the active Supabase Auth identity; the financial repository is untouched.
+// Note: Auth user metadata is available to the signed-in client and must not be
+// mistaken for a document-vault or a server-verified CPF identity.
+export async function updatePersonalProfile(profile){
+ if(!user?.id)throw Error('É necessário entrar na sua conta para editar o perfil.');
+ if(!navigator.onLine)throw Error('Conecte-se à internet para salvar as informações do perfil.');
+ const {data,error}=await getClient().auth.updateUser({
+  data:{full_name:profile.full_name,gbplus_profile:profile}
+ });
+ if(error)throw Error(authError(error));
+ if(!data?.user||data.user.id!==user.id)throw Error('Não foi possível confirmar a atualização do perfil.');
+ user=data.user;
+ return user;
+}
+
+export async function requestProfileEmail(email){
+ if(!user?.id)throw Error('Entre na sua conta para alterar o e-mail.');
+ if(!navigator.onLine)throw Error('Conecte-se à internet para solicitar a alteração do e-mail.');
+ if(user.email?.toLowerCase()===email.toLowerCase())return {unchanged:true};
+ const currentId=user.id;
+ const {data,error}=await getClient().auth.updateUser(
+  {email},{emailRedirectTo:cloudConfig.siteUrl}
+ );
+ if(error)throw Error(authError(error));
+ if(data?.user?.id&&data.user.id!==currentId)throw Error('A resposta de alteração de e-mail não corresponde à sua conta.');
+ if(data?.user)user=data.user;
+ return {unchanged:false,pending:user.email?.toLowerCase()!==email.toLowerCase()};
+}
+
 export function accountCard(){
   return `<section class="panel settings-card account-card"><span class="eyebrow">SUA CONTA GB+</span><h2>Seu financeiro online</h2><p>Conectado como <strong>${esc(user?.email)}</strong>. Use o mesmo login no computador e no celular. Cada conta tem seus próprios registros.</p><div class="button-stack">${action('Atualizar dados online','refresh','button')}${action('Sair da conta','signout','button')}</div><small>Atualização automática a cada minuto, sem interromper formulários. Gravações exigem conexão.</small><small>Se você usou a versão local, seus registros anteriores continuam neste navegador. Exporte uma cópia e use Restaurar backup para importá-la, com confirmação.</small><div class="button-stack"><button class="button" data-action="legacy-backup">Exportar registros locais antigos</button></div></section>`;
 }
