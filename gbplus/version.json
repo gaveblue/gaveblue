@@ -1,12 +1,12 @@
 {
-  "version": "2.1.0",
-  "build": 31,
+  "version": "2.1.1",
+  "build": 32,
   "published_at": "2026-11-04",
-  "title": "Acesso ao GB+ — Cadastro, Google e recuperação",
+  "title": "Configurações redesenhadas",
   "notes": [
-    "Novo fluxo de confirmação de e-mail com reenvio, validações e mensagens claras de recuperação.",
-    "Login com Google informa cancelamento, falta de configuração e erros de retorno.",
-    "Melhor tratamento de sessão e prevenção de recarregamentos duplicados, preservando seus dados."
+    "Nova tela de Configurações inspirada nas definições de celulares: perfil, grupos, ícones coloridos e busca.",
+    "Aparência, atalhos, backup, atualização e suporte organizados em opções que abrem as funções existentes.",
+    "Modo claro/escuro preservado; exclusão de conta abre solicitação segura sem apagar dados automaticamente."
   ],
   "assets": [
     "./index.html",
@@ -35,6 +35,7 @@
     "./recuperar.html",
     "./js/setup-ui.js",
     "./ai-lab/chat-history.js",
-    "./js/auth-flow.js"
+    "./js/auth-flow.js",
+    "./settings-page.css"
   ]
 }
