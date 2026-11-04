@@ -44,11 +44,11 @@ export function answerFromDb(db,query){
  if(/(?:venciment|proximas contas|proximos titulos|vai vencer|a vencer)/.test(s))return list(db,open.filter(t=>t.due>=day),'Próximos vencimentos');
  if(/(quais sao meus clientes|quais clientes tenho|quantos clientes|listar clientes)/.test(s)){
   const clients=db.partners.filter(p=>p.roles?.includes('Cliente'));
-  return clients.length?'Clientes cadastrados: '+clients.length+'.\n'+clients.slice(0,12).map(p=>'• '+p.name).join('\\n')+(clients.length>12?'\\n… e mais '+(clients.length-12)+' clientes.':''):'Não há clientes cadastrados na sua conta GB+.';
+  return clients.length?'Clientes cadastrados: '+clients.length+'.\n'+clients.slice(0,12).map(p=>'• '+p.name).join('\n')+(clients.length>12?'\n… e mais '+(clients.length-12)+' clientes.':''):'Não há clientes cadastrados na sua conta GB+.';
  }
  if(/(quais sao meus fornecedores|quantos fornecedores|listar fornecedores)/.test(s)){
   const suppliers=db.partners.filter(p=>p.roles?.includes('Fornecedor'));
-  return suppliers.length?'Fornecedores cadastrados: '+suppliers.length+'.\\n'+suppliers.slice(0,12).map(p=>'• '+p.name).join('\\n')+(suppliers.length>12?'\\n… e mais '+(suppliers.length-12)+' fornecedores.':''):'Não há fornecedores cadastrados na sua conta GB+.';
+  return suppliers.length?'Fornecedores cadastrados: '+suppliers.length+'.\n'+suppliers.slice(0,12).map(p=>'• '+p.name).join('\n')+(suppliers.length>12?'\n… e mais '+(suppliers.length-12)+' fornecedores.':''):'Não há fornecedores cadastrados na sua conta GB+.';
  }
  const partnerMention=db.partners.find(p=>p.name&&normalize(p.name).length>=4&&s.includes(normalize(p.name)));
  if(partnerMention&&/(quanto|valor|saldo|devo|devendo|a pagar|receber|pendencias|pendente)/.test(s)){
