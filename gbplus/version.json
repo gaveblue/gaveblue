@@ -1,12 +1,12 @@
 {
-  "version": "2.1.4",
-  "build": 35,
+  "version": "2.1.5",
+  "build": 36,
   "published_at": "2026-11-04",
-  "title": "Meu perfil e CPF protegido",
+  "title": "Minha Conta mais compacta e organizada",
   "notes": [
-    "Minha Conta reorganizada no padrão da referência: dados pessoais, segurança, salvar e endereço recolhível.",
-    "CPF pode ser cadastrado pela primeira vez; validação matemática dos 11 dígitos, CPF único e bloqueio após registro.",
-    "CPF protegido no Supabase em tabela com regras de acesso por usuário; registros financeiros preservados."
+    "Endereço reposicionado logo após Dados pessoais, mantendo seu preenchimento e salvamento.",
+    "Cartões, campos e espaçamentos compactados para melhorar a hierarquia visual no celular.",
+    "Removidos os atalhos redundantes Sair da conta e Voltar às configurações do rodapé de Minha Conta."
   ],
   "assets": [
     "./index.html",
