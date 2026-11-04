@@ -9,7 +9,11 @@
   <link rel="stylesheet" href="./styles.css">
 <style>
 .gb-ai-widget{position:fixed;right:18px;bottom:20px;z-index:9999;font-family:system-ui,sans-serif}
-.gb-ai-widget>summary{list-style:none;cursor:pointer;border-radius:99px;background:#181818;color:white;padding:14px 18px;box-shadow:0 8px 24px #0003;font-size:13px;font-weight:650}
+.gb-ai-widget>summary{list-style:none;cursor:pointer;display:grid;place-items:center;width:52px;height:52px;border-radius:50%;background:#181818;color:white;box-shadow:0 0 0 3px #ffffffbb,0 0 19px #a98fff88,0 8px 24px #0003;font-size:27px;font-weight:500;transition:transform .2s,box-shadow .2s;animation:gb-ai-glow 3s ease-in-out infinite}
+.gb-ai-widget>summary:hover{transform:scale(1.07)}
+.gb-ai-widget>summary:focus-visible{outline:3px solid #7b9cff;outline-offset:4px}
+@keyframes gb-ai-glow{0%,100%{box-shadow:0 0 0 3px #ffffffbb,0 0 12px #a98fff66,0 8px 24px #0003}50%{box-shadow:0 0 0 3px #ffffffbb,0 0 27px #a98fffb0,0 8px 24px #0003}}
+@media(prefers-reduced-motion:reduce){.gb-ai-widget>summary{animation:none;transition:none}}
 .gb-ai-widget>summary::-webkit-details-marker{display:none}
 .gb-ai-widget[open]{bottom:18px}
 .gb-ai-widget iframe{display:block;position:absolute;right:0;bottom:58px;width:min(410px,calc(100vw - 24px));height:min(620px,calc(100dvh - 130px));border:1px solid #ddd;border-radius:18px;background:#fff;box-shadow:0 12px 45px #0003}
@@ -21,7 +25,7 @@ body.auth-locked .gb-ai-widget{display:none}
   <a class="skip" href="#main">Pular para o conteúdo</a>
   <aside class="sidebar" id="sidebar"><a class="brand" href="#dashboard" aria-label="GB+ início"><strong>GB<span>+</span></strong><span>Gestão Financeira</span></a><div class="nav-label">SEU FINANCEIRO</div><nav id="navigation" aria-label="Navegação principal"></nav><div class="sidebar-bottom"><div class="local-mark"><span class="status-dot"></span> Armazenamento local<small>Seus dados, neste navegador.</small></div><button class="theme-button" data-action="theme"></button><div class="version">GB+ <span>Versão 1.2</span></div></div></aside>
   <div class="workspace"><header class="topbar"><span class="breadcrumb">Workspace <span>/</span> <b id="breadcrumb">Visão geral</b></span><a class="mobile-brand" href="#dashboard">GB+</a><div class="top-actions"><span id="connection" class="connection">Disponível offline</span><button class="icon-button" data-action="search" aria-label="Pesquisar lançamentos"></button><button class="icon-button" data-action="notifications" aria-label="Ver títulos vencidos"></button><span class="avatar" title="Meu financeiro">GB</span></div></header><main id="main" tabindex="-1"></main><footer class="desktop-footer">Uma visão clara. Decisões melhores.<span>GB+ · Gestão Financeira</span></footer></div>
-  <details class="gb-ai-widget"><summary aria-label="Abrir ou fechar GB+ AI">✦ GB+ AI</summary><iframe title="Assistente financeiro GB+ AI" src="./ai-lab/" loading="lazy"></iframe></details>
+  <details class="gb-ai-widget"><summary aria-label="Abrir ou fechar assistente financeiro">✦</summary><iframe title="Assistente financeiro GB+ AI" src="./ai-lab/" loading="lazy"></iframe></details>
   <nav class="mobile-nav" id="mobile-navigation" aria-label="Navegação móvel"></nav>
   <dialog id="modal"><div id="modal-content"></div></dialog><div id="toast" role="status" aria-live="polite"></div>
   <noscript>Ative o JavaScript para usar o GB+. Os dados são armazenados neste navegador.</noscript>
