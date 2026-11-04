@@ -1,6 +1,6 @@
-// GB+ PWA network-first release v25: do not block installation on network requests,
+// GB+ PWA network-first release v26: do not block installation on network requests,
 // automatically redirect app windows, or reload open financial forms.
-const CACHE='gb-plus-shell-v25';
+const CACHE='gb-plus-shell-v26';
 const CORE=['./','./index.html','./styles.css','./js/app.js','./js/update.js','./recuperar.html'];
 const scope=new URL(self.registration.scope);
 const inScope=url=>url.origin===scope.origin&&url.pathname.startsWith(scope.pathname);
