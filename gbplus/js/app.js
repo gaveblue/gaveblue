@@ -164,25 +164,59 @@ window.addEventListener('gbplus-message',event=>toast(event.detail));
 window.addEventListener('focus',()=>refreshOnline());
 window.addEventListener('online',()=>{updateConnection();refreshOnline();});
 window.addEventListener('offline',updateConnection);
-async function init(){
-  document.querySelector('.avatar').outerHTML='<button type="button" class="icon-button account-button" id="account-access" aria-label="Minha conta" title="Minha conta">'+icon('user')+'</button>';
-  document.querySelector('#account-access').onclick=()=>{if(currentUser()&&db){location.hash='profile';}else showAuth();};
-  document.querySelector('#main').insertAdjacentHTML('beforebegin','<div id="sync-alert" class="auth-notice sync-alert" role="alert" hidden>A gravação online precisa ser conferida. Feche o formulário, atualize os dados e refaça a alteração. <button class="button small" data-auth-action="refresh">Atualizar dados online</button></div>');
-  try{
-    const user=await initializeAuth(clearAccount);
-    if(!user){showAuth('signin');return;}
-    if(isRecovery()){showAuth('recovery');return;}
-    repository=new SupabaseRepository(authClient(),user.id);
-    db=await repository.read();state.range=rangeFor('month');
-    document.querySelector('#auth-gate').hidden=true;
-    document.body.classList.remove('auth-locked');route();window.dispatchEvent(new Event('gbplus-ai-ready'));
-  }catch(error){
-    showAuth(isRecovery()?'recovery':'signin',error.message);
-  }
-  updateConnection();setInterval(()=>refreshOnline(),60000);
-
+// Startup is read-only. If network/auth initialization stalls, display a recovery
+// choice rather than leaving the financial PWA on its logo indefinitely.
+function startupLimit(operation,ms){
+ let timer;
+ return Promise.race([
+  operation,
+  new Promise((_,reject)=>{timer=setTimeout(()=>{
+   const error=new Error('O acesso está demorando além do esperado. Seus registros não foram alterados.');
+   error.code='GBPLUS_STARTUP_TIMEOUT';reject(error);
+  },ms);})
+ ]).finally(()=>clearTimeout(timer));
 }
-init();
+function startupRecovery(message){
+ const gate=document.querySelector('#auth-gate');
+ if(!gate)return;
+ document.body.classList.add('auth-locked');
+ gate.hidden=false;
+ gate.innerHTML='<section class="auth-page"><div class="auth-card"><header class="auth-brand"><div class="auth-wordmark">GB<span>+</span></div><p>Gestão Financeira</p></header>'+
+ '<p class="auth-description" role="alert"></p>'+
+ '<a class="auth-primary" href="./recuperar.html" style="display:flex;align-items:center;justify-content:center;text-decoration:none;min-height:48px">Recuperar abertura do GB+</a>'+
+ '<button type="button" id="gbplus-try-again" class="auth-forgot" style="margin-top:16px">Tentar novamente</button>'+
+ '<p class="auth-description" style="margin-top:16px">Nenhum título, conta ou dado financeiro foi excluído.</p></div></section>';
+ gate.querySelector('[role="alert"]').textContent=message||'Não foi possível concluir o carregamento. Confira sua conexão.';
+ gate.querySelector('#gbplus-try-again').addEventListener('click',()=>location.reload());
+}
+async function init(){
+ try{
+  const avatar=document.querySelector('.avatar');
+  if(avatar)avatar.outerHTML='<button type="button" class="icon-button account-button" id="account-access" aria-label="Minha conta" title="Minha conta">'+icon('user')+'</button>';
+  const account=document.querySelector('#account-access');
+  if(account)account.onclick=()=>{if(currentUser()&&db){location.hash='profile';}else showAuth();};
+  const main=document.querySelector('#main');
+  if(main&&!document.querySelector('#sync-alert'))main.insertAdjacentHTML('beforebegin','<div id="sync-alert" class="auth-notice sync-alert" role="alert" hidden>A gravação online precisa ser conferida. Feche o formulário, atualize os dados e refaça a alteração. <button class="button small" data-auth-action="refresh">Atualizar dados online</button></div>');
+  const user=await startupLimit(initializeAuth(clearAccount),16000);
+  if(!user){showAuth('signin');return;}
+  if(isRecovery()){showAuth('recovery');return;}
+  repository=new SupabaseRepository(authClient(),user.id);
+  db=await startupLimit(repository.read(),16000);
+  state.range=rangeFor('month');
+  document.querySelector('#auth-gate').hidden=true;
+  document.body.classList.remove('auth-locked');
+  route();window.dispatchEvent(new Event('gbplus-ai-ready'));
+  updateConnection();setInterval(()=>refreshOnline(),60000);
+ }catch(error){
+  if(error?.code==='GBPLUS_STARTUP_TIMEOUT'||!document.querySelector('#account-access')){
+   startupRecovery(error?.message);
+  }else{
+   // A real authentication error still uses the usual sign-in form.
+   showAuth(isRecovery()?'recovery':'signin',error?.message||'Não foi possível abrir o GB+.');
+  }
+ }
+}
+init().catch(error=>startupRecovery(error?.message));
 // Importing the AI integration must never block the financial application.
 import('./ai-bridge.js?v=20261104-v3').then(({installAiBridge})=>{
  installAiBridge({getDb:()=>db,getUser:currentUser,getRepository:()=>repository,commit,openEditor:titleId=>{
