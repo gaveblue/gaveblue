@@ -4,7 +4,7 @@ import {esc,icon,button,field,formFooter,download,csv,titleTable} from './ui.js'
 import {routes,dashboard,titlesView,partnersView,accountsView,categoriesView,flowView,reportsView,settingsView,notificationsView,filteredTitles,reportData} from './views.js';
 import {titleForm,partnerForm,accountForm,categoryForm,paymentForm,transferForm,titleDetail,customizeForm,accountDetail} from './forms.js';
 import {SupabaseRepository} from '../integrations/supabase/repository.js';
-import {initializeAuth,authClient,currentUser,accountCard,showAuth,isRecovery,updatePersonalProfile,requestProfileEmail,consumeAuthReturnMessage} from './auth.js?v=20261104-32';
+import {initializeAuth,authClient,currentUser,showAuth,isRecovery,updatePersonalProfile,requestProfileEmail,consumeAuthReturnMessage} from './auth.js?v=20261104-32';
 import {profileView,validateProfile,validateEmail} from './profile.js?v=20261104-27';
 import {firstSetupView,customMobileNavForm,shortcutsPreview,readMobileNav} from './setup-ui.js';
 let repository=null;let db;let busy=false;let pendingGeneration=null;let confirmAction=null;let installPrompt=null;
@@ -72,7 +72,25 @@ function render(){if(!db)return;updateSystemAppearance(db.settings.theme);docume
  const custom=effectiveMobileNav(db.settings);
  const slots=[['dashboard','Início','home'],renderMobileShortcut(custom[0]),['new','Novo','plus'],renderMobileShortcut(custom[1]),renderMobileShortcut(custom[2])];
  return slots.map(([key,label,ico])=>key==='new'||key==='menu'?`<button type="button" data-action="${key==='new'?'new-title':'mobile-menu'}" class="${key==='new'?'mobile-new':''}" aria-label="${label}">${icon(ico)}<span>${label}</span></button>`:`<a href="#${key}" class="${state.route===key?'active':''}" ${state.route===key?'aria-current="page"':''}>${icon(ico)}<span>${label}</span></a>`).join('');
-})();const views={dashboard:()=>dashboard(db,state,!!currentUser(),currentUser()),titles:()=>titlesView(db,state),payable:()=>titlesView(db,state),receivable:()=>titlesView(db,state),partners:()=>partnersView(db,state),accounts:()=>accountsView(db),categories:()=>categoriesView(db),flow:()=>flowView(db,state),provisions:()=>flowView(db,state),reports:()=>reportsView(db,state),settings:()=>settingsView(db,!!installPrompt,!!currentUser()),notifications:()=>notificationsView(db),profile:()=>profileView(currentUser())};document.querySelector('#main').innerHTML=(views[state.route]||views.dashboard)();if(state.route==='settings')document.querySelector('.settings-grid').insertAdjacentHTML('afterbegin',accountCard());updateConnection();if(state.route==='dashboard')applyPanel();}
+})();const views={dashboard:()=>dashboard(db,state,!!currentUser(),currentUser()),titles:()=>titlesView(db,state),payable:()=>titlesView(db,state),receivable:()=>titlesView(db,state),partners:()=>partnersView(db,state),accounts:()=>accountsView(db),categories:()=>categoriesView(db),flow:()=>flowView(db,state),provisions:()=>flowView(db,state),reports:()=>reportsView(db,state),settings:()=>settingsView(db,!!installPrompt,!!currentUser(),currentUser()),notifications:()=>notificationsView(db),profile:()=>profileView(currentUser())};document.body.classList.toggle('gb-settings-page',state.route==='settings');document.querySelector('#main').innerHTML=(views[state.route]||views.dashboard)();updateConnection();if(state.route==='dashboard')applyPanel();}
+
+function filterSettings(value){
+ const search=String(value||'').trim().toLocaleLowerCase('pt-BR');
+ let matches=0;
+ document.querySelectorAll('.gb-cfg-group').forEach(group=>{
+  let groupMatches=0;
+  group.querySelectorAll('.gb-cfg-row').forEach(row=>{
+   const show=!search||row.dataset.settingsKeywords.toLocaleLowerCase('pt-BR').includes(search);
+   row.hidden=!show;if(show){groupMatches++;matches++;}
+  });
+  group.hidden=groupMatches===0;
+ });
+ const profile=document.querySelector('.gb-cfg-profile');
+ if(profile){const name=profile.textContent.toLocaleLowerCase('pt-BR');profile.hidden=!!search&&!('perfil minha conta dados segurança '+name).includes(search);}
+ const remove=document.querySelector('.gb-cfg-delete');
+ if(remove){remove.hidden=!!search&&!remove.dataset.settingsKeywords.includes(search);if(!remove.hidden)matches++;}
+ const empty=document.querySelector('#gb-cfg-no-results');if(empty)empty.hidden=matches>0||(profile&&!profile.hidden);
+}
 function applyPanel(){const device=matchMedia('(max-width: 760px)').matches?'mobile':'desktop';document.querySelectorAll('[data-indicator]').forEach(el=>{el.hidden=!db.settings.panel[device][el.dataset.indicator];});document.querySelectorAll('.dashboard-middle,.results-grid,.stats-grid').forEach(el=>el.hidden=![...el.children].some(x=>!x.hidden));}
 function route(){if(!db)return;const next=location.hash.slice(1);if(next==='main'&&document.querySelector('#main').childElementCount)return;state.route=next==='profile'||routes.some(r=>r[0]===next)?next:'dashboard';state.type=state.route==='payable'?'expense':state.route==='receivable'?'income':'';closeModal();render();window.scrollTo(0,0);}
 function formValues(form){return Object.fromEntries(new FormData(form));}
@@ -84,8 +102,8 @@ const actions={
   confirm:async()=>{const fn=confirmAction;if(fn&&!busy){confirmAction=null;try{await fn();}catch(e){confirmAction=fn;throw e;}}},
   theme:()=>commit(d=>{d.settings.theme=d.settings.theme==='light'?'dark':'light';},'Tema atualizado.'),
   'top-theme':()=>commit(d=>{d.settings.theme=d.settings.theme==='light'?'dark':'light';},'Tema atualizado.'),
-  'check-updates':()=>window.dispatchEvent(new Event('gbplus-check-updates')),
-  'preview-update':()=>window.dispatchEvent(new Event('gbplus-preview-update')),
+  'check-updates':()=>{closeModal();window.dispatchEvent(new Event('gbplus-check-updates'));},
+  'preview-update':()=>{closeModal();window.dispatchEvent(new Event('gbplus-preview-update'));},
   'toggle-title-filters':()=>{state.moreFilters=!state.moreFilters;render();},
   'clear-title-filters':()=>{state.query='';state.status='';state.partner='';state.category='';state.type=state.route==='payable'?'expense':state.route==='receivable'?'income':'';state.period='month';state.range=rangeFor('month');state.moreFilters=false;render();},
   'set-theme':el=>commit(d=>{d.settings.theme=el.dataset.value;},'Tema atualizado.'),
@@ -102,6 +120,47 @@ const actions={
   'new-category':()=>openModal('Nova categoria',categoryForm()),
   'edit-category':el=>openModal('Editar categoria',categoryForm(db.categories.find(c=>c.id===el.dataset.id))),
   'new-transfer':()=>openModal('Transferir entre contas',transferForm(db)),
+
+  'settings-search':el=>{
+    const search=document.querySelector('#gb-cfg-search'),input=document.querySelector('#settings-search-input');
+    if(!search||!input)return;
+    const opening=search.hidden;search.hidden=!opening;el.setAttribute('aria-expanded',String(opening));
+    if(opening)input.focus();else{input.value='';filterSettings('');}
+  },
+  'settings-appearance':()=>openModal('Aparência',
+    '<p class="muted">Escolha como deseja visualizar seu financeiro. A preferência é aplicada ao GB+ inteiro.</p>'+
+    '<div class="segmented" style="margin-top:18px">'+
+    ['light','dark'].map(t=>button(icon(t==='light'?'sun':'moon')+(t==='light'?'Modo claro':'Modo escuro'),'set-theme',db.settings.theme===t?'primary':'','data-value="'+t+'"')).join('')+
+    '</div>'),
+  'settings-backup':()=>openModal('Backup e restauração',
+    '<p class="muted">Exporte uma cópia dos seus registros financeiros. A restauração substitui os registros atuais e exige confirmação antes de salvar.</p>'+
+    '<div class="button-stack" style="margin-top:20px">'+
+    button(icon('download')+' Exportar backup JSON','backup','primary')+
+    button(icon('upload')+' Restaurar backup','restore')+'</div>'),
+  'settings-data':()=>openModal('Dados da conta',
+    '<p class="muted">'+(currentUser()?'Seus registros financeiros são protegidos pelo login conectado e sincronizados quando há conexão.':'Seus registros são armazenados neste navegador.')+'</p>'+
+    '<p style="margin-top:16px"><strong>'+db.titles.length+'</strong> lançamento(s) cadastrados · <strong>'+db.accounts.length+'</strong> conta(s) financeira(s).</p>'+
+    '<div class="button-stack" style="margin-top:22px">'+button(icon('refresh')+' Atualizar dados online','refresh-settings',currentUser()?'primary':'',currentUser()?'':'disabled')+button(icon('download')+' Exportar backup','backup')+'</div>'+
+    '<p class="form-hint" style="margin-top:16px">Seus registros financeiros não são apagados ao sair do aplicativo.</p>'),
+  'refresh-settings':()=>{closeModal();window.dispatchEvent(new Event('gbplus-refresh'));},
+  'settings-updates':()=>openModal('Atualizações do GB+',
+    '<p class="muted">Versão instalada: <strong>GB+ '+esc(document.querySelector('meta[name="gbplus-version"]')?.content||'')+'</strong>. Verifique novas versões ou veja uma simulação do processo.</p>'+
+    '<div class="button-stack" style="margin-top:20px">'+button(icon('refresh')+' Verificar atualizações','check-updates','primary')+
+    button(icon('eye')+' Prévia da atualização','preview-update')+'</div>'),
+  'settings-help':()=>openModal('Ajuda e suporte',
+    '<p>Precisa de ajuda com o GB+? Descreva sua dúvida, informe a versão do aplicativo e, se necessário, anexe uma captura da tela. Nunca envie senhas ou códigos de acesso.</p>'+
+    '<p style="margin-top:16px"><a class="button primary" href="mailto:contato.lucaspimenteloliveira@gmail.com?subject=Suporte%20GB%2B">'+icon('arrow')+' Entrar em contato</a></p>'+
+    '<p style="margin-top:18px"><a href="./privacidade.html" class="button">Política de Privacidade</a></p>'),
+  'settings-about':()=>openModal('Sobre o GB+',
+    '<p><strong>GB+ · Gestão Financeira</strong></p>'+
+    '<p class="muted" style="margin-top:10px">Versão '+esc(document.querySelector('meta[name="gbplus-version"]')?.content||'')+'. Um aplicativo para organizar seu financeiro.</p>'+
+    '<p style="margin-top:18px"><a href="./privacidade.html" class="button">Política de Privacidade</a></p>'),
+  'settings-delete':()=>openModal('Excluir conta',
+    '<p><strong>Esta ação pode remover permanentemente seu acesso e seus dados financeiros.</strong></p>'+
+    '<p style="margin-top:12px" class="muted">A exclusão automática ainda não está disponível nesta versão. Para proteger sua conta, a solicitação é atendida após confirmação de titularidade. Nada será excluído ao abrir esta opção.</p>'+
+    '<div class="button-stack" style="margin-top:20px">'+
+    button(icon('download')+' Fazer backup antes','backup')+
+    '<a class="button danger" href="mailto:contato.lucaspimenteloliveira@gmail.com?subject=Solicita%C3%A7%C3%A3o%20de%20exclus%C3%A3o%20da%20conta%20GB%2B">Solicitar exclusão de conta</a></div>'),
   customize:()=>openModal('Personalizar painel',customizeForm(db)),
   'customize-mobile-nav':()=>openModal('Personalizar barra de ações',customMobileNavForm(db)),
   'reset-mobile-nav':()=>{
@@ -236,7 +295,7 @@ document.addEventListener('change',async e=>{if(!db)return;const el=e.target;try
   if(el.id==='report-partner'){state.reportPartner=el.value;render();}
   if(el.id==='backup-input'&&el.files[0]){const file=el.files[0];el.value='';if(file.size>15*1024*1024)throw Error('O backup deve ter no máximo 15 MB.');const restored=parseBackup(await file.text());confirm('Restaurar backup?',`Este arquivo contém ${restored.titles.length} títulos, ${restored.partners.length} parceiros e ${restored.accounts.length} contas. Os registros atuais serão substituídos. Exporte um backup antes de continuar, se necessário.`,()=>commit(d=>{Object.keys(d).forEach(k=>delete d[k]);Object.assign(d,restored);},'Backup restaurado com sucesso.'));}
 }catch(error){fail(error);}});
-document.addEventListener('input',e=>{if(!['title-search','partner-search'].includes(e.target.id))return;const el=e.target;const pos=el.selectionStart;state[el.id==='title-search'?'query':'partnerQuery']=el.value;render();const next=document.getElementById(el.id);next.focus();next.setSelectionRange(pos,pos);});
+document.addEventListener('input',e=>{if(e.target.id==='settings-search-input'){filterSettings(e.target.value);return;}if(!['title-search','partner-search'].includes(e.target.id))return;const el=e.target;const pos=el.selectionStart;state[el.id==='title-search'?'query':'partnerQuery']=el.value;render();const next=document.getElementById(el.id);next.focus();next.setSelectionRange(pos,pos);});
 window.addEventListener('hashchange',route);
 matchMedia('(max-width: 760px)').addEventListener('change',()=>{if(db&&state.route==='dashboard')applyPanel();});
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPrompt=e;if(db&&state.route==='settings')render();});
