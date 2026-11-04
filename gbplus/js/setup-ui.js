@@ -1,4 +1,4 @@
-import {esc,icon,button,field,select} from './ui.js';
+import {esc,icon,button,field,select} from './ui.js?v=20261104-35';
 import {money} from './domain.js';
 import {MOBILE_SHORTCUTS,defaultMobileNav,effectiveMobileNav} from './store.js';
 
