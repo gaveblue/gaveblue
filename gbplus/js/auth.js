@@ -1,7 +1,7 @@
 import {createGbplusClient} from '../integrations/supabase/client.js';
 import {cloudConfig} from './cloud-config.js';
 import {esc,icon} from './ui.js';
-import {loginRedirectMessage,clearLoginErrorUrl,safeAuthEmail} from './auth-flow.js';
+import {loginRedirectMessage,clearLoginErrorUrl,safeAuthEmail} from './auth-flow.js?v=20261104-31';
 
 let client,user=null,recovery=false,working=false,startup=true,pendingEmail='',lastResend=0;
 let onChange=()=>{},reloadScheduled=false;
