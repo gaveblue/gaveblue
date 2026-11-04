@@ -475,3 +475,51 @@ html::-webkit-scrollbar-thumb, .table-wrap::-webkit-scrollbar-thumb, .modal-body
   .setup-step .form-footer{flex-wrap:wrap}
 }
 @media(prefers-reduced-motion:reduce){.setup-progress-track i{transition:none}}
+
+
+/* GB+ 2.0.0 — Full-bleed splash and strict mobile menu visibility.
+   #auth-gate is a <main>, so it must override global main padding/max-width.
+   Keep login/first-paint white regardless of saved dashboard color. */
+html[data-boot="auth"]{background:#fff!important;color-scheme:light}
+html[data-boot="auth"] body,
+body.auth-locked{
+  background:#fff!important;
+  color-scheme:light;
+  margin:0!important;
+}
+#auth-gate{
+  position:fixed;
+  inset:0;
+  margin:0!important;
+  padding:0!important;
+  width:100%!important;
+  max-width:none!important;
+  height:100dvh;
+  min-height:100svh;
+  display:block;
+  background:#fff;
+  overflow-x:hidden;
+  overflow-y:auto;
+  z-index:50;
+}
+#auth-gate[hidden]{display:none!important}
+#auth-gate>.auth-page{
+  display:grid;
+  width:100%;
+  min-height:100dvh;
+  max-width:none;
+  margin:0;
+  box-sizing:border-box;
+}
+body.auth-locked .gb-ai-widget,
+body.auth-locked .mobile-nav-fade{display:none!important}
+/* Desktop-only. The mobile "Mais" shortcut remains separate from this control. */
+#sidebar-toggle{display:none!important}
+@media(min-width:1025px) and (hover:hover) and (pointer:fine){
+  body:not(.auth-locked) #sidebar-toggle{display:inline-flex!important}
+}
+@media(max-width:1024px), (any-pointer:coarse){
+  #sidebar-toggle{display:none!important}
+}
+/* Handsets should never show this desktop breadcrumb/hamburger container. */
+@media(max-width:760px){.topbar-start{display:none!important}}
