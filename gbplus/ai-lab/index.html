@@ -324,7 +324,9 @@ async function submit(text){
   add(explanations[lastTopic]||'Posso explicar saldos, lançamentos, vencimentos, baixas e recorrências. Qual informação deseja entender?');return;
  }
  if(editPending&&/^(cancelar|cancela|deixa pra la|sair|esquece)$/.test(s)){editPending=null;add('Tudo bem, cancelei a busca para edição. Nenhum lançamento foi alterado.');return;}
- const edit=editCommand(s);
+ const correctingPreview=!!context?.proposal&&/(corrig|muda|altera|nao falei|na verdade|troca)/.test(s);
+ const edit=correctingPreview?null:editCommand(s);
+ if(editPending&&!edit&&/(?:saldo|data de hoje|que dia e hoje|vencimentos|a pagar|a receber|criar|lancar|bom dia|resumo)/.test(s))editPending=null;
  if(edit||editPending){
   if(edit)editPending={type:edit.type,term:edit.term};
   const term=edit?edit.term:s;
