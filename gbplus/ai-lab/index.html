@@ -71,12 +71,23 @@
 :root[data-theme="dark"] .voice-bar{background:#aaa1fa}
 :root[data-theme="dark"] .voice-panel .voice-minor{color:#d4d4df}
 :root[data-theme="dark"] .voice-panel .voice-finish{background:#efeff4;color:#18181b}
+
+/* Title choices are a navigation aid, not automatic financial modifications. */
+.edit-result-list{display:grid;gap:9px;margin:0 0 14px 38px;max-width:690px}
+.edit-result-button{display:flex;flex-direction:column;align-items:flex-start;gap:5px;width:100%;text-align:left;border:1px solid #dedee4;border-radius:15px;padding:13px 15px;background:#fafafa;color:#25252a}
+.edit-result-name{font-size:14px;font-weight:650;line-height:1.4;overflow-wrap:anywhere}
+.edit-result-button small{font-size:12px;color:#666974}
+.edit-result-button strong{font-size:12px;text-decoration:underline;margin-top:4px}
+.edit-result-button:disabled{opacity:.6}
+:root[data-theme="dark"] .edit-result-button{background:#202126;border-color:#3a3c44;color:#f2f2f5}
+:root[data-theme="dark"] .edit-result-button small{color:#afb0bb}
+@media(max-width:600px){.edit-result-list{margin-left:35px}.edit-result-button{padding:12px}}
 </style></head><body><div class="wrap">
 <header><div class="brand"><span class="logo">GB+</span><span class="brand-meta"><strong>GB+ AI</strong><span class="muted">Assistente financeiro</span></span></div><span class="pill" id="mode-pill">● Modo local</span></header>
 <main class="workspace">
 <div id="messages" class="messages" role="log" aria-live="polite">
 <div id="welcome" class="welcome"><div class="welcome-icon">GB+</div><h1 id="welcome-title">Como posso ajudar?</h1><p>Seu assistente financeiro do GB+. Faça perguntas, simule lançamentos ou experimente comandos por voz.</p>
-<div class="chips"><button data-example="Lança uma conta de energia de 450 reais para dia 15 e repete por seis meses">Criar uma despesa mensal</button><button data-example="Quanto tenho disponível para gastar?">Quanto posso gastar?</button><button data-example="Quais contas vencem este mês?">Próximos vencimentos</button><button data-example="Divide 1200 reais em quatro parcelas">Parcelar um valor</button></div></div></div>
+<div class="chips"><button data-example="Lança uma conta de energia de 450 reais para dia 15 e repete por seis meses">Criar uma despesa mensal</button><button data-example="Editar despesa">Editar uma despesa</button><button data-example="Quanto tenho disponível para gastar?">Quanto posso gastar?</button><button data-example="Quais contas vencem este mês?">Próximos vencimentos</button><button data-example="Divide 1200 reais em quatro parcelas">Parcelar um valor</button></div></div></div>
 <div class="bottom">
 <details id="details" class="details hidden"><summary>Ver interpretação e prévia da operação</summary><div class="detail-content"><div class="grid"><div><strong style="font-size:13px">Interpretação</strong><div id="interpretation" class="hint">Aguardando solicitação.</div></div><div><strong style="font-size:13px">Prévia para confirmação</strong><div id="preview" class="hint">Nenhuma operação preparada.</div><div class="actions"><button id="confirm" class="primary" disabled>Confirmar e gravar no GB+</button><button id="discard" disabled>Descartar</button></div></div></div></div></details>
 <section id="voice-panel" class="voice-panel" hidden aria-label="Gravação de voz em andamento">
@@ -88,7 +99,7 @@
 <form id="chat-form" class="composer"><input id="message" aria-label="Sua mensagem" placeholder="Mensagem para GB+ AI..." autocomplete="off" required><button id="mic" class="voice-trigger" type="button" aria-pressed="false" aria-label="Iniciar gravação de voz" title="Gravar mensagem de voz"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="13" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 17v5m-4 0h8"/></svg></button><button id="send" class="primary" type="submit" aria-label="Enviar mensagem"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 14-7-5 14-3-6-6-1z"/><path d="m11 13 8-8"/></svg></button></form>
 <div id="ai-connect" style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:10px;flex-wrap:wrap"><span id="ai-state" class="muted">Conectando ao GB+…</span><button id="ai-login" type="button" style="border:1px solid #ddd;border-radius:99px;padding:7px 12px;background:#fff;font-size:12px">Conectar IA</button></div><p id="voice-status" class="footnote" role="status">Aguardando conexão com seu financeiro GB+</p>
 </div></main></div><script type="module">
-import {interpret,formatBRL,fixture} from './engine.js?v=20261103-v8';
+import {interpret,formatBRL,fixture} from './engine.js?v=20261104-v18';
 import {setupVoice} from './voice.js?v=20261103-v9';
 const $=s=>document.querySelector(s),log=$('#messages'),input=$('#message');let proposal=null,context=null,live=false,session=null,history=[];
 
@@ -131,7 +142,7 @@ $('#ai-login').addEventListener('click',async()=>{
 });
 async function askLive(text){history.push({role:'user',content:text});const messages=history.slice(-12);try{const res=await fetch(supabaseUrl+'/functions/v1/gbplus-ai-lab',{method:'POST',headers:{'Content-Type':'application/json','apikey':publishableKey,'Authorization':'Bearer '+session},body:JSON.stringify({messages})});const body=await res.json();if(!res.ok)throw Error(body.error||'Não foi possível acessar a IA.');history.push({role:'assistant',content:body.answer});add(body.answer);}catch(err){history.pop();add(err.message+' Você pode voltar ao modo local para continuar os testes.');}}
 let typingQueue=Promise.resolve();
-let firstName='',bridge={realData:false,writeEnabled:false},lastAnswer='',lastTopic='';
+let firstName='',bridge={realData:false,writeEnabled:false},lastAnswer='',lastTopic='',editPending=null;
 function greeting(){const hour=new Date().getHours();return hour<12?'Bom dia':hour<18?'Boa tarde':'Boa noite';}
 function greetingText(){return greeting()+(firstName?', '+firstName:'')+'!';}
 function updateGreeting(){const title=$('#welcome-title');if(title)title.textContent=greetingText(); }
@@ -223,6 +234,70 @@ function realAnswer(data){
   }
  }
 }
+function askBridgeOperation(kind,resultKind,extra){
+ return new Promise((resolve,reject)=>{
+  if(window.parent===window){reject(Error('Abra o assistente dentro do GB+ para usar esse recurso.'));return;}
+  const requestId=crypto.randomUUID();
+  const timeout=setTimeout(()=>{window.removeEventListener('message',handler);reject(Error('O GB+ não respondeu. Feche e reabra o assistente.'));},9500);
+  function handler(event){
+   if(event.origin!==location.origin||event.source!==window.parent||event.data?.kind!==resultKind||event.data.requestId!==requestId)return;
+   clearTimeout(timeout);window.removeEventListener('message',handler);
+   if(event.data.ok)resolve(event.data);
+   else reject(Error(event.data.message||'A ação não pôde ser concluída.'));
+  }
+  window.addEventListener('message',handler);
+  window.parent.postMessage({kind,requestId,...extra},location.origin);
+ });
+}
+function editCommand(s){
+ if(/^(como|onde|por que|porque|o que|qual)/.test(s))return null;
+ const match=s.match(/(?:^|\s)(?:editar|edita|altere|alterar|altera|mudar|muda|corrigir|corrige|ajustar|ajusta)\s+(.+)$/);
+ if(!match)return null;
+ let remainder=match[1].replace(/^(?:(?:a|o|um|uma|minha|meu|as|os)\s+)+/,'');
+ let type=null;
+ const target=remainder.match(/^(despesas?|receitas?|contas?|titulos?|lancamentos?)\b/);
+ if(target){
+  if(/^despesa/.test(target[1]))type='expense';
+  else if(/^receita/.test(target[1]))type='income';
+  remainder=remainder.slice(target[0].length).trim();
+ }
+ remainder=remainder.replace(/^(?:o|a|um|uma|de|da|do|dos|das|referente a)\s+/,'').trim();
+ remainder=remainder.replace(/^(?:valor|vencimento|data|descricao)\s+(?:da|do|de)\s+/,'').trim();
+ return {type,term:remainder};
+}
+function showEditChoices(items){
+ const row=document.createElement('div');row.className='edit-result-list';row.setAttribute('aria-label','Títulos encontrados');
+ for(const item of items){
+  const button=document.createElement('button');button.type='button';button.className='edit-result-button';
+  const label=document.createElement('span');label.className='edit-result-name';label.textContent=item.description+(item.partner?' · '+item.partner:'');
+  const details=document.createElement('small');details.textContent=(item.type==='income'?'Receita':'Despesa')+' · '+formatBRL(item.amount)+' · vence '+new Date(item.due+'T12:00:00').toLocaleDateString('pt-BR')+(item.cancelled?' · Cancelado':'');
+  const action=document.createElement('strong');action.textContent='Abrir edição';
+  button.append(label,details,action);
+  button.addEventListener('click',async()=>{
+   button.disabled=true;action.textContent='Abrindo…';
+   try{
+    await askBridgeOperation('gbplus-ai-open-title','gbplus-ai-open-title-result',{titleId:item.id});
+    editPending=null;
+   }catch(error){add(error.message);button.disabled=false;action.textContent='Abrir edição';}
+  });
+  row.append(button);
+ }
+ log.append(row);log.scrollTop=log.scrollHeight;
+}
+async function lookupForEditing(term,type){
+ if(!bridge.realData){
+  requestBridge();
+  add('Para localizar e editar títulos reais, entre na sua conta GB+ e reabra o assistente.');
+  return;
+ }
+ if(term.length<2){add('Qual lançamento você quer editar? Informe parte do nome, fornecedor ou número do documento. Ex.: “energia elétrica”.');return;}
+ try{
+  const result=await askBridgeOperation('gbplus-ai-find-title','gbplus-ai-find-title-result',{search:term,type});
+  if(!result.items?.length){add(result.message||'Não encontrei esse lançamento. Tente outro nome, fornecedor ou documento.');return;}
+  add(result.total===1?'Encontrei este lançamento. Toque em “Abrir edição” para alterar os dados no formulário do GB+.': 'Encontrei '+result.total+' lançamentos. Escolha o correto para abrir o formulário de edição. Nenhum dado será alterado automaticamente.');
+  showEditChoices(result.items);
+ }catch(error){add(error.message);}
+}
 function askReal(text){
  return new Promise((resolve,reject)=>{
   if(window.parent===window){reject(Error('Abra o assistente dentro do GB+ para acessar dados reais.'));return;}
@@ -241,12 +316,23 @@ function askReal(text){
 async function submit(text){
  add(text,'user');
  const s=normalized(text);
- if(/^(que dia e hoje|qual e a data de hoje|qual data e hoje|hoje e que dia|qual dia e hoje)$/.test(s)){
+ if(/(?:^| )(?:que dia e hoje|qual e a data de hoje|qual data e hoje|hoje e que dia|qual dia e hoje)(?:$| )/.test(s)&&!/(?:vence|vencem|vencimento|boletos|contas)\b/.test(s)){
   lastTopic='date';add('Hoje é '+new Intl.DateTimeFormat('pt-BR',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(new Date())+'.');return;
  }
  if(/^(como assim|nao entendi|pode explicar|explique melhor|o que quer dizer)$/.test(s)){
   const explanations={balance:'O saldo é o valor das contas bancárias do GB+. Uma despesa só altera o saldo após sua baixa.',available:'A disponibilidade estima quanto sobraria após pagar os títulos em aberto. Confira também os vencimentos.',payable:'Contas a pagar são compromissos ainda pendentes.',receivable:'Valores a receber não são dinheiro já no banco.',date:'A data vem do relógio do dispositivo.'};
   add(explanations[lastTopic]||'Posso explicar saldos, lançamentos, vencimentos, baixas e recorrências. Qual informação deseja entender?');return;
+ }
+ if(editPending&&/^(cancelar|cancela|deixa pra la|sair|esquece)$/.test(s)){editPending=null;add('Tudo bem, cancelei a busca para edição. Nenhum lançamento foi alterado.');return;}
+ const edit=editCommand(s);
+ if(edit||editPending){
+  if(edit)editPending={type:edit.type,term:edit.term};
+  const term=edit?edit.term:s;
+  lastTopic='edit';
+  proposal=null;context=null;$('#details').classList.add('hidden');
+  if(!term){add('Claro! Qual '+(editPending.type==='income'?'receita':editPending.type==='expense'?'despesa':'lançamento')+' você quer editar? Diga o nome, fornecedor ou documento.');return;}
+  await lookupForEditing(term,editPending.type);
+  return;
  }
  const wantsCreate=/(lan[cç]|criar|crie|registre|registrar|cadastrar|dividir|divide|parcela|repete|repetir|recorrente)/.test(s)&&!/^(como|posso|qual a diferenca|por que|porque|onde)/.test(s);
  const isCorrection=!!context?.proposal&&/(corrig|muda|altera|nao falei|na verdade|troca)/.test(s);
