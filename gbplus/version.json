@@ -1,12 +1,12 @@
 {
-  "version": "2.0.2",
-  "build": 28,
+  "version": "2.0.3",
+  "build": 29,
   "published_at": "2026-11-04",
-  "title": "Histórico de conversas do GB+ AI",
+  "title": "Correção da verificação de atualizações",
   "notes": [
-    "Restaurados os botões Novo chat e Histórico de chats no cabeçalho da GB+ AI.",
-    "Conversas salvas neste navegador, separadas por conta; abrir, continuar e excluir chats.",
-    "Mantidas as consultas, comandos de edição e confirmações financeiras do assistente."
+    "Verificação independente no GitHub evita informar que tudo está atualizado quando o site ainda serve uma versão antiga.",
+    "O GB+ informa quando há uma atualização aguardando publicação e oferece recuperação segura dos arquivos.",
+    "O cache do PWA não fornece mais um arquivo antigo de versões como se fosse uma resposta online válida."
   ],
   "assets": [
     "./index.html",
