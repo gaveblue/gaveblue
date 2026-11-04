@@ -547,3 +547,11 @@ body.auth-locked .mobile-nav-fade{display:none!important}
 @media(max-width:760px){
   .gb-ai-widget:not([open]){max-width:52px;max-height:52px}
 }
+
+/* GB+ 2.0.1 — Sign out from My Account */
+.profile-signout{display:flex;flex-direction:column;align-items:flex-start;gap:14px;margin-top:24px;padding-top:20px;border-top:1px solid var(--border)}
+.profile-signout h3{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:5px}
+.profile-signout p{font-size:12px;line-height:1.6;color:var(--muted)}
+.profile-signout-button{display:inline-flex;gap:9px;align-items:center;border-color:color-mix(in srgb,#df5e5e 45%,var(--border));color:#c34343;min-height:42px}
+.profile-signout-button:hover{background:color-mix(in srgb,#df5e5e 9%,var(--surface))}
+:root[data-theme=dark] .profile-signout-button{color:#ff9292}
