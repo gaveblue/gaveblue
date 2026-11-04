@@ -94,7 +94,7 @@ export function accountCard(){
 }
 
 export function authError(error){
-  const messages={invalid_credentials:'E-mail ou senha incorretos.',email_not_confirmed:'Confirme seu e-mail antes de entrar.',over_email_send_rate_limit:'Limite de envio atingido. Aguarde antes de solicitar outro e-mail.',over_request_rate_limit:'Muitas tentativas. Aguarde um momento e tente novamente.',email_address_not_authorized:'O envio de e-mails ainda precisa ser ativado pelo administrador do GB+.',user_already_exists:'Já existe uma conta para este e-mail.',weak_password:'Use uma senha mais forte, com pelo menos 8 caracteres.',otp_expired:'O link expirou. Solicite um novo link.',provider_disabled:'O login com Google ainda está sendo configurado.',email_provider_disabled:'O cadastro por e-mail não está disponível neste momento.'};
+  const messages={invalid_credentials:'E-mail ou senha incorretos.',email_not_confirmed:'Confirme seu e-mail antes de entrar. Você pode reenviar a confirmação.',over_email_send_rate_limit:'Limite de envio atingido. Aguarde antes de solicitar outro e-mail.',over_request_rate_limit:'Muitas tentativas. Aguarde um momento e tente novamente.',email_address_not_authorized:'O envio de e-mails ainda precisa ser ativado pelo administrador do GB+.',user_already_exists:'Já existe uma conta para este e-mail.',weak_password:'Use uma senha mais forte, com pelo menos 8 caracteres.',otp_expired:'O link expirou. Solicite um novo link.',provider_disabled:'O login com Google ainda está sendo configurado.',email_provider_disabled:'O cadastro por e-mail não está disponível neste momento.',bad_code_verifier:'O link foi aberto em outro navegador ou expirou. Recomece a recuperação no mesmo navegador.',flow_state_not_found:'Não foi possível validar o retorno do login. Inicie novamente neste navegador.',validation_failed:'Verifique os dados informados.',signup_disabled:'O cadastro de novas contas está temporariamente desativado.'};
   return messages[error?.code]||'Não foi possível concluir. Verifique sua conexão e tente novamente. Se o problema continuar, contate o administrador do GB+.';
 }
 function feedback(text,error=true){
@@ -102,16 +102,38 @@ function feedback(text,error=true){
   if(target)target.textContent=text;
 }
 function setWorking(value){
-  working=value;document.querySelectorAll('#auth-gate button').forEach(el=>el.disabled=value);
-  document.querySelector('#auth-form')?.setAttribute('aria-busy',String(value));
+ working=value;
+ document.querySelectorAll('#auth-gate button').forEach(el=>el.disabled=value);
+ const form=document.querySelector('#auth-form');
+ form?.setAttribute('aria-busy',String(value));
+ if(form){
+  const submit=form.querySelector('button[type="submit"]');
+  if(submit){
+   if(value){submit.dataset.label=submit.textContent;submit.textContent='Aguarde…';}
+   else if(submit.dataset.label){submit.textContent=submit.dataset.label;delete submit.dataset.label;}
+  }
+ }
 }
 export async function startGoogle(){
-  // Check the provider before navigating, so incomplete server setup is explicit.
-  const response=await fetch(`${cloudConfig.url}/auth/v1/settings`,{headers:{apikey:cloudConfig.publishableKey},cache:'no-store'});
-  if(!response.ok)throw Error('Não foi possível conectar ao serviço de login.');
-  if(!(await response.json()).external?.google)throw Error('O login com Google ainda precisa ser ativado pelo administrador do GB+.');
-  const {error}=await getClient().auth.signInWithOAuth({provider:'google',options:{redirectTo:cloudConfig.siteUrl,queryParams:{prompt:'select_account'}}});
-  if(error)throw Error(authError(error));
+ if(!navigator.onLine)throw Error('Você está sem internet. Conecte-se para entrar com o Google.');
+ const abort=new AbortController(),timer=setTimeout(()=>abort.abort(),9000);
+ let settings;
+ try{
+  const response=await fetch(cloudConfig.url+'/auth/v1/settings',{headers:{apikey:cloudConfig.publishableKey},cache:'no-store',signal:abort.signal});
+  if(!response.ok)throw Error('O serviço de login não respondeu. Tente novamente.');
+  settings=await response.json();
+ }catch(error){
+  if(error.name==='AbortError')throw Error('O Google demorou para responder. Confira a conexão e tente novamente.');
+  if(error.message.includes('serviço de login'))throw error;
+  throw Error('Não foi possível conectar ao serviço de login. Tente novamente.');
+ }finally{clearTimeout(timer);}
+ if(!settings?.external?.google)throw Error('O login com Google ainda não está habilitado no Supabase.');
+ // PKCE requires the return to be opened in the SAME browser/storage context.
+ // Do not use a new tab or a different domain for the OAuth redirect.
+ const {error}=await getClient().auth.signInWithOAuth({
+  provider:'google',options:{redirectTo:cloudConfig.siteUrl,queryParams:{prompt:'select_account'}}
+ });
+ if(error)throw Error(authError(error));
 }
 
 document.addEventListener('click',async event=>{
