@@ -1,4 +1,4 @@
-const CACHE='gb-plus-shell-v6';
+const CACHE='gb-plus-shell-v7';
 const ASSETS=['./','./index.html','./styles.css','./js/app.js','./js/update.js','./js/domain.js','./js/store.js','./js/ui.js','./js/views.js','./js/forms.js','./js/auth.js','./js/cloud-config.js','./vendor/supabase-2.118.0.js','./integrations/supabase/client.js','./integrations/supabase/repository.js','./manifest.webmanifest','./icons/icon.svg','./icons/icon-192.png','./icons/icon-512.png','./icons/maskable-512.png'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(async cache=>{
   // Fetch a coherent release, bypassing previously cached HTTP responses.
@@ -23,4 +23,11 @@ self.addEventListener('activate',event=>event.waitUntil((async()=>{
     return client.navigate(url.href).catch(()=>{});
   }));
 })()));
+// The chatbot evolves independently from the app shell: always fetch current modules.
+// Never serve stale AI rules or a stale chat page from the app's cache.
+self.addEventListener('fetch',event=>{
+ const url=new URL(event.request.url);
+ if(event.request.method!=='GET'||url.origin!==self.location.origin||!url.pathname.startsWith(new URL(self.registration.scope).pathname+'ai-lab/'))return;
+ event.respondWith(fetch(event.request,{cache:'no-store'}).catch(()=>new Response('Chat indisponível offline. Reabra com internet.',{status:503,headers:{'Content-Type':'text/plain;charset=utf-8'}})));
+});
 self.addEventListener('fetch',event=>{if(event.request.method!=='GET'||new URL(event.request.url).origin!==self.location.origin||!new URL(event.request.url).pathname.startsWith(new URL(self.registration.scope).pathname))return;event.respondWith(caches.open(CACHE).then(cache=>cache.match(event.request).then(cached=>cached||fetch(event.request).catch(()=>event.request.mode==='navigate'?cache.match('./index.html'):Response.error()))));});
