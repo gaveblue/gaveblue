@@ -11,6 +11,13 @@ export function interpret(message,context=null,data=fixture){
   const response=greeting.includes('bom dia')?'Bom dia!':greeting.includes('boa tarde')?'Boa tarde!':greeting.includes('boa noite')?'Boa noite!':'Olá!';
   return {intent:'saudacao',status:'answered',answer:response+' Como posso ajudar com suas finanças no GB+? Posso consultar saldos, contas a pagar e a receber ou preparar lançamentos para você.'};
  }
+ const direct=lower(message.trim()).replace(/[!?.,;:]+/g,' ').replace(/\s+/g,' ').trim();
+ if(/^(?:que dia e hoje|qual e a data de hoje|qual data e hoje|hoje e que dia|qual dia e hoje)$/.test(direct)){
+  return {intent:'consultar_data',status:'answered',answer:'Hoje é '+new Intl.DateTimeFormat('pt-BR',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(new Date())+'.'};
+ }
+ if(/^(?:como assim|nao entendi|pode explicar|explique melhor)$/.test(direct)){
+  return {intent:'explicar',status:'answered',answer:'Claro. Posso explicar saldos, vencimentos, baixas, parcelas e recorrências. Diga qual informação ficou confusa que tento esclarecer.'};
+ }
  const faq=answerFAQ(message,data);if(faq)return faq;
  const s=lower(message.trim()),amountMatch=s.match(/(?:r\$\s*)?([\d.]+(?:,\d{1,2})?)\s*(?:reais|real)?/),value=amountMatch?n(amountMatch[1]):null;
  const day=s.match(/(?:dia|vencimento(?:\s+(?:para|no|em))?)\s*(\d{1,2})(?!\d)/);
@@ -36,8 +43,8 @@ export function interpret(message,context=null,data=fixture){
   const partner=s.match(/(?:fornecedor|cliente|parceiro)\s+([\p{L}\d .-]+)/u)?.[1]?.trim()||null;
   const proposal={type,description,amountCents:value,due:day?dateFromDay(day[1]):null,mode,count:qty,partner};
   if(proposal.due===null&&!missing.includes('dia do vencimento'))missing.push('data de vencimento válida');
-  if(missing.length)return {intent:'preparar_lancamento',status:'needs_clarification',missing,context:{proposal},reason:'Não há gravação; o protótipo não completa dados ausentes por suposição.',answer:'Entendi que você quer preparar um lançamento, mas faltam: '+missing.join(', ')+'. Pode informar esses dados?'};
-  return {intent:'preparar_lancamento',status:'ready',proposal,answer:'Preparei uma prévia fictícia. Confira os campos antes de confirmar a simulação. Nenhum dado será gravado.'};
+  if(missing.length)return {intent:'preparar_lancamento',status:'needs_clarification',missing,context:{proposal},reason:'Sem uma prévia válida e sua confirmação, nenhum título é gravado.',answer:'Entendi que você quer preparar um lançamento, mas faltam: '+missing.join(', ')+'. Pode informar esses dados?'};
+  return {intent:'preparar_lancamento',status:'ready',proposal,answer:'Preparei a prévia do lançamento. Confira valor, vencimento e quantidade. A gravação na sua conta GB+ só é solicitada depois que você confirmar.'};
  }
- return {intent:'nao_identificada',status:'unsupported',reason:'Interpretador local experimental, sem modelo de linguagem conectado.',answer:'Ainda não consigo interpretar essa solicitação. Este é o teste local; a versão com modelo de IA deverá entender variações mais livres, respeitando as funções do GB+.'};
+ return {intent:'nao_identificada',status:'unsupported',reason:'Interpretador local experimental, sem modelo de linguagem conectado.',answer:'Não reconheci esse pedido no modo local. Tente perguntar sobre saldo, contas a pagar e a receber, vencimentos ou diga, por exemplo: “Lançar energia de 250 reais para dia 15”.'};
 }
