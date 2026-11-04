@@ -9,7 +9,7 @@ export const MOBILE_SHORTCUTS=[
  ['partners','Parceiros','people'],['accounts','Contas','wallet'],
  ['categories','Categorias','category'],['reports','Relatórios','chart'],
  ['notifications','Notificações','bell'],['settings','Configurações','settings'],
- ['profile','Meu perfil','user'],['menu','Menu','menu']
+ ['profile','Meu perfil','user'],['menu','Mais','more']
 ];
 export const defaultMobileNav=()=>['titles','partners','menu'];
 export const validMobileNav=values=>Array.isArray(values)&&values.length===3&&new Set(values).size===3&&values.every(value=>MOBILE_SHORTCUTS.some(([key])=>key===value));
