@@ -1,12 +1,12 @@
 {
-  "version": "2.0.1",
-  "build": 27,
+  "version": "2.0.2",
+  "build": 28,
   "published_at": "2026-11-04",
-  "title": "Minha Conta — Sair da conta",
+  "title": "Histórico de conversas do GB+ AI",
   "notes": [
-    "Adicionado botão Sair da conta em Minha Conta, usando o mecanismo de encerramento de sessão já existente.",
-    "Sua sessão é encerrada neste dispositivo sem excluir títulos, saldos ou registros financeiros.",
-    "Visual da ação ajustado aos modos claro e escuro."
+    "Restaurados os botões Novo chat e Histórico de chats no cabeçalho da GB+ AI.",
+    "Conversas salvas neste navegador, separadas por conta; abrir, continuar e excluir chats.",
+    "Mantidas as consultas, comandos de edição e confirmações financeiras do assistente."
   ],
   "assets": [
     "./index.html",
@@ -33,6 +33,7 @@
     "./sw.js",
     "./js/ai-drag.js",
     "./recuperar.html",
-    "./js/setup-ui.js"
+    "./js/setup-ui.js",
+    "./ai-lab/chat-history.js"
   ]
 }
