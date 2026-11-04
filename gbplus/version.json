@@ -1,12 +1,12 @@
 {
-  "version": "2.0.4",
-  "build": 30,
+  "version": "2.1.0",
+  "build": 31,
   "published_at": "2026-11-04",
-  "title": "GB+ AI — Chat mais limpo",
+  "title": "Acesso ao GB+ — Cadastro, Google e recuperação",
   "notes": [
-    "Removido o rodapé informativo com 'Conta GB+ conectada', 'Conectar IA' e status de consultas.",
-    "Campo de mensagem, microfone e envio permanecem no chat.",
-    "Histórico e Novo chat continuam disponíveis e não há alteração nos registros financeiros."
+    "Novo fluxo de confirmação de e-mail com reenvio, validações e mensagens claras de recuperação.",
+    "Login com Google informa cancelamento, falta de configuração e erros de retorno.",
+    "Melhor tratamento de sessão e prevenção de recarregamentos duplicados, preservando seus dados."
   ],
   "assets": [
     "./index.html",
@@ -34,6 +34,7 @@
     "./js/ai-drag.js",
     "./recuperar.html",
     "./js/setup-ui.js",
-    "./ai-lab/chat-history.js"
+    "./ai-lab/chat-history.js",
+    "./js/auth-flow.js"
   ]
 }
