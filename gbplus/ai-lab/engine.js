@@ -11,6 +11,7 @@ export function interpret(message,context=null,data=fixture){
   const response=greeting.includes('bom dia')?'Bom dia!':greeting.includes('boa tarde')?'Boa tarde!':greeting.includes('boa noite')?'Boa noite!':'Olá!';
   return {intent:'saudacao',status:'answered',answer:response+' Como posso ajudar com suas finanças no GB+? Posso consultar saldos, contas a pagar e a receber ou preparar lançamentos para você.'};
  }
+ const faq=answerFAQ(message,data);if(faq)return faq;
  const s=lower(message.trim()),amountMatch=s.match(/(?:r\$\s*)?([\d.]+(?:,\d{1,2})?)\s*(?:reais|real)?/),value=amountMatch?n(amountMatch[1]):null;
  const day=s.match(/(?:dia|vencimento(?:\s+(?:para|no|em))?)\s*(\d{1,2})(?!\d)/);
  const count=s.match(/(?:por|durante|em|repete|repetir|divide|dividir|parcela(?:do)?\s+em)\s*(\d{1,3})\s*(meses|vezes|parcelas)?/);
@@ -27,7 +28,6 @@ export function interpret(message,context=null,data=fixture){
  if(/quanto.*receber|contas? a receber/.test(s))return {intent:'consultar_recebiveis',status:'answered',answer:'No cenário fictício, há '+formatBRL(data.receivable)+' a receber. Não são valores já disponíveis no banco.'};
  if(/quanto.*pagar|contas? a pagar/.test(s))return {intent:'consultar_pagaveis',status:'answered',answer:'No cenário fictício, há '+formatBRL(data.payable)+' em contas a pagar.'};
  if(/venc|proximas contas/.test(s)&&!/lan[cç]|cria|cadastra|registra/.test(s))return {intent:'consultar_vencimentos',status:'unsupported',reason:'Os dados fictícios incluem apenas totais, sem títulos e datas individuais.',answer:'Ainda não tenho uma lista de vencimentos neste laboratório. Não vou inventar datas.'};
- const faq=answerFAQ(message,data);if(faq)return faq;
  if(/lan[cç]|cria|cadastra|registra|despesa|receita|parcela|divide/.test(s)){
   const type=/receita|receber|entrada/.test(s)?'income':'expense';
   const description=/energia|luz/.test(s)?'Energia elétrica':/manuten[cç]/.test(s)?'Manutenção':/internet/.test(s)?'Internet':/aluguel/.test(s)?'Aluguel':'Lançamento informado por mensagem';
