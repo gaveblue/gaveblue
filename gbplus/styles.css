@@ -365,3 +365,113 @@ html::-webkit-scrollbar-thumb, .table-wrap::-webkit-scrollbar-thumb, .modal-body
 @media(pointer:coarse){
   #sidebar-toggle{display:none!important}
 }
+
+
+/* GB+ 1.9.0 — First-run setup and customizable mobile action bar. */
+.mobile-nav>a span,.mobile-nav>button span{
+  display:block;
+  max-width:100%;
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+}
+.mobile-nav>a,.mobile-nav>button{min-width:0}
+.mobile-nav-config .shortcut-fields,.setup-step .shortcut-fields{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+  margin:18px 0;
+}
+.shortcut-fields .field{
+  min-width:0;
+  font-size:12px;
+  color:var(--muted);
+}
+.shortcut-fields .field select{
+  width:100%;
+  max-width:100%;
+  min-height:44px;
+  color:var(--ink);
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:11px;
+  padding:10px 13px;
+  font-size:13px;
+}
+.shortcut-fixed{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:12px 13px;
+  min-height:60px;
+  background:var(--soft);
+  border:1px dashed var(--border);
+  border-radius:12px;
+  color:var(--ink);
+  font-size:12px;
+}
+.shortcut-fixed .icon{width:18px;height:18px;flex:none}
+.shortcut-fixed small{margin-left:auto;color:var(--muted);font-size:10px}
+.shortcut-preview-heading{font-size:13px;margin:22px 0 12px;color:var(--ink)}
+.shortcut-preview{
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  align-items:center;
+  gap:5px;
+  background:color-mix(in srgb,var(--surface) 82%,transparent);
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:16px 7px;
+  -webkit-backdrop-filter:blur(16px);
+  backdrop-filter:blur(16px);
+}
+.shortcut-preview-item{
+  display:flex;
+  min-width:0;
+  align-items:center;
+  flex-direction:column;
+  justify-content:center;
+  gap:7px;
+  color:var(--muted);
+  font-size:10px;
+  text-align:center;
+}
+.shortcut-preview-item svg{width:23px;height:23px;flex:none}
+.shortcut-preview-item span,.shortcut-preview-item b{
+  display:block;
+  max-width:100%;
+  text-overflow:ellipsis;
+  overflow:hidden;
+  white-space:nowrap;
+}
+.shortcut-preview-item b{color:var(--ink)}
+.mobile-nav-config .form-error,.setup-step .form-error{margin-top:14px}
+.setup-progress{margin-bottom:22px}
+.setup-progress>span{font-size:10px;font-weight:700;letter-spacing:1.6px;color:var(--muted)}
+.setup-progress-track{height:5px;background:var(--hover);border-radius:999px;overflow:hidden;margin-top:9px}
+.setup-progress-track i{display:block;height:100%;border-radius:999px;background:var(--ink);transition:width .18s}
+.setup-question{font-size:21px;font-weight:700;letter-spacing:-.6px;margin:0 0 8px}
+.setup-description{font-size:13px;color:var(--muted);line-height:1.7;margin:0 0 16px}
+.setup-benefits{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:24px 0}
+.setup-benefits>div{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;border:1px solid var(--border);border-radius:13px;padding:16px 10px;font-size:11px}
+.setup-benefits svg{width:22px;height:22px}
+.setup-step .form-grid{margin:20px 0}
+.setup-step .form-footer{margin-top:22px}
+.setup-review{display:grid;gap:1px;background:var(--border);border-radius:13px;overflow:hidden}
+.setup-review>div{background:var(--surface);display:flex;align-items:center;justify-content:space-between;gap:15px;padding:13px 14px}
+.setup-review small{color:var(--muted);font-size:11px}
+.setup-review strong{text-align:right;font-size:12px;overflow-wrap:anywhere}
+.profile-settings-link{margin:0 0 18px;max-width:max-content}
+@media(max-width:760px){
+  .mobile-nav-config .shortcut-fields,.setup-step .shortcut-fields{grid-template-columns:1fr;gap:9px}
+  .shortcut-fixed{min-height:46px}
+  .shortcut-preview{padding:14px 4px;gap:2px}
+  .shortcut-preview-item{font-size:9px}
+  .shortcut-preview-item svg{width:21px;height:21px}
+  .setup-question{font-size:19px}
+  .setup-benefits{gap:6px}
+  .setup-benefits>div{font-size:10px;padding:12px 6px}
+  .setup-review>div{padding:12px}
+  .setup-step .form-footer{flex-wrap:wrap}
+}
+@media(prefers-reduced-motion:reduce){.setup-progress-track i{transition:none}}
