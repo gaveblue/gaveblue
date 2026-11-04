@@ -1,4 +1,4 @@
-import {esc,icon} from './ui.js';
+import {esc,icon} from './ui.js?v=20261104-35';
 import {today} from './domain.js';
 
 // Profile fields are attached to the signed-in user's Supabase Auth identity.
