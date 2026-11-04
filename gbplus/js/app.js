@@ -54,7 +54,7 @@ function updateMobileNavPreview(form){
  if(message)message.textContent=validMobileNav(current)?'':'Selecione três atalhos diferentes, sem repetições.';
 }
 function renderMobileShortcut(key){
- if(key==='menu')return ['menu','Menu','menu'];
+ if(key==='menu')return ['menu','Mais','more'];
  const item=MOBILE_SHORTCUTS.find(([id])=>id===key);
  return item||['titles','Títulos','transfer'];
 }
@@ -321,6 +321,7 @@ async function init(){
   state.range=rangeFor('month');
   document.querySelector('#auth-gate').hidden=true;
   document.body.classList.remove('auth-locked');
+  document.documentElement.removeAttribute('data-boot');
   route();window.dispatchEvent(new Event('gbplus-ai-ready'));
   if(shouldOfferSetup(db))startSetupWizard();
   updateConnection();setInterval(()=>refreshOnline(),60000);
