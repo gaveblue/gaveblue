@@ -67,7 +67,10 @@
   if(active)return;
   if(!force&&dismissedVersion===info.version)return;
   manifest=info;preview=false;downloadReady=false;
-  show('Atualização disponível','GB+ '+installed+' → '+info.version,'Uma versão nova foi publicada. Baixe os arquivos e depois escolha quando reiniciar.');
+  const isMajor=Number(info.version.split('.')[0])>Number(installed.split('.')[0]);
+  show(isMajor?'Grande atualização disponível':'Atualização disponível',
+   'GB+ '+installed+' → '+info.version,
+   isMajor?'Uma nova geração do GB+: configuração inicial guiada, barra personalizável e experiência móvel aprimorada. Baixe e escolha quando reiniciar.':'Uma versão nova foi publicada. Baixe os arquivos e depois escolha quando reiniciar.');
   notes(info.notes);
   els.primary.hidden=false;els.primary.dataset.next='download';
   put(els.later,'Depois');put(els.primary,'Baixar atualização');
