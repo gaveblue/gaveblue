@@ -26,7 +26,7 @@ export function profileView(user,cpfStatus={ready:false,cpf:'',error:''}){
   '<header class="gb-account-page-heading"><h1>Minha conta</h1></header>'+
   '<form id="profile-form" autocomplete="on">'+
    '<section class="gb-account-card" aria-labelledby="gb-account-personal-title">'+
-    '<header class="gb-account-card-heading"><span class="gb-account-card-icon">'+icon('user')+'</span><div><h2 id="gb-account-personal-title">Dados pessoais</h2><p>Alguns dados sensíveis não podem ser editados nesta tela.</p></div></header>'+
+    '<header class="gb-account-card-heading"><span class="gb-account-card-icon">'+icon('user')+'</span><div><h2 id="gb-account-personal-title">Dados pessoais</h2><p>'+(registeredCpf?'CPF cadastrado e protegido contra alterações.':'Informe seus dados e cadastre seu CPF uma única vez.')+'</p></div></header>'+
     '<div class="gb-account-fields">'+
      accountField('Nome completo','full_name',fullName,'text','autocomplete="name" maxlength="120" required placeholder="Seu nome completo"')+
      accountField('Celular','phone',p.phone||'','tel','autocomplete="tel" inputmode="tel" maxlength="20" placeholder="(00) 00000-0000"')+
@@ -51,7 +51,6 @@ export function profileView(user,cpfStatus={ready:false,cpf:'',error:''}){
     '</div>'+
    '</section>'+
    '<div class="gb-account-save-area"><span id="profile-message" role="status" aria-live="polite"></span><button type="submit" id="profile-save" class="gb-account-save" disabled>'+icon('check')+' Salvar alterações</button></div>'+
-  '</form>'+
   '<details class="gb-account-address"><summary>'+icon('map-pin')+'<span><strong>Endereço</strong><small>Visualizar ou atualizar dados de endereço</small></span>'+icon('chevron')+'</summary>'+
     '<div class="gb-account-address-grid">'+
      addressField('CEP','postal_code',address.postal_code||'','inputmode="numeric" autocomplete="postal-code" maxlength="9" placeholder="00000-000"')+
@@ -62,8 +61,8 @@ export function profileView(user,cpfStatus={ready:false,cpf:'',error:''}){
      addressField('Cidade','city',address.city||'','autocomplete="address-level2" maxlength="100"')+
      addressField('Estado (UF)','state',address.state||'','autocomplete="address-level1" maxlength="2" placeholder="ES"')+
     '</div>'+
-   '</details>'+
-
+   '</details>'+ 
+  '</form>'+ 
   '<div class="gb-account-bottom"><button type="button" class="gb-account-signout" data-auth-action="signout">'+icon('arrow')+' Sair da conta</button><a href="#settings">'+icon('settings')+' Voltar às configurações</a></div>'+
  '</div>';
 }
