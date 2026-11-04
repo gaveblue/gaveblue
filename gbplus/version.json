@@ -1,12 +1,12 @@
 {
-  "version": "1.7.1",
-  "build": 17,
+  "version": "1.8.0",
+  "build": 18,
   "published_at": "2026-11-04",
   "title": "Atualizações do GB+",
   "notes": [
-    "Saudação automática no início: bom dia, boa tarde ou boa noite.",
-    "Primeiro nome do perfil aparece quando estiver preenchido.",
-    "Ajustes visuais no título da tela inicial."
+    "GB+ AI entende perguntas de data em linguagem natural e oferece edição guiada de despesas e receitas.",
+    "Busca títulos reais pelo nome, documento ou parceiro e abre o formulário existente, sem alterações automáticas.",
+    "Aparência do sistema Android sincronizada antes da primeira renderização para reduzir a barra clara no modo escuro."
   ],
   "assets": [
     "./index.html",
@@ -29,6 +29,7 @@
     "./ai-lab/engine.js",
     "./ai-lab/faq.js",
     "./ai-lab/voice.js",
-    "./manifest.webmanifest"
+    "./manifest.webmanifest",
+    "./sw.js"
   ]
 }
