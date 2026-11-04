@@ -145,7 +145,7 @@ async function init(){
 }
 init();
 // Importing the AI integration must never block the financial application.
-import('./ai-bridge.js?v=20261104-v1').then(({installAiBridge})=>{
+import('./ai-bridge.js?v=20261104-v2').then(({installAiBridge})=>{
  installAiBridge({getDb:()=>db,getUser:currentUser,getRepository:()=>repository,commit});
  window.dispatchEvent(new Event('gbplus-ai-ready'));
 }).catch(error=>console.error('Assistente GB+ indisponível; financeiro preservado.',error));
