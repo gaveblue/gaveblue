@@ -103,6 +103,42 @@ const actions={
   'edit-category':el=>openModal('Editar categoria',categoryForm(db.categories.find(c=>c.id===el.dataset.id))),
   'new-transfer':()=>openModal('Transferir entre contas',transferForm(db)),
   customize:()=>openModal('Personalizar painel',customizeForm(db)),
+  'customize-mobile-nav':()=>openModal('Personalizar barra de ações',customMobileNavForm(db)),
+  'reset-mobile-nav':()=>{
+   const form=modal.querySelector('#mobile-nav-form');
+   if(!form)return;
+   defaultMobileNav().forEach((value,i)=>{form.elements.namedItem('slot'+i).value=value;});
+   updateMobileNavPreview(form);
+  },
+  'restart-setup':startSetupWizard,
+  'setup-begin':()=>nextSetupStep('account-choice'),
+  'setup-account-yes':()=>{if(!setupDraft)return;setupDraft.createAccount=true;nextSetupStep('account-details');},
+  'setup-account-no':()=>{if(!setupDraft)return;setupDraft.createAccount=false;setupDraft.initial=0;nextSetupStep('preferences');},
+  'setup-balance-yes':()=>nextSetupStep('balance-details'),
+  'setup-balance-no':()=>{if(!setupDraft)return;setupDraft.initial=0;nextSetupStep('preferences');},
+  'setup-back':()=>{if(!setupDraft)return;setupDraft.step=setupDraft.history.pop()||'welcome';showSetupWizard();},
+  'setup-later':async()=>{
+   if(!setupDraft)return;
+   await commit(d=>{d.settings.setupCompleted=true;},'Configuração inicial adiada. Você pode reabri-la em Configurações.');
+   setupDraft=null;
+  },
+  'setup-finish':async()=>{
+   if(!setupDraft||busy)return;
+   const draft=structuredClone(setupDraft);
+   if(!['dark','light'].includes(draft.theme)||!validMobileNav(draft.mobileNav))throw Error('Revise as preferências e escolha atalhos diferentes.');
+   if(draft.createAccount&&(!draft.name.trim()||draft.name.length>120))throw Error('Informe um nome válido para a conta.');
+   if(!Number.isSafeInteger(draft.initial)||Math.abs(draft.initial)>1e12)throw Error('Saldo inicial inválido.');
+   await commit(d=>{
+    if(draft.createAccount){
+     if(d.accounts.some(a=>a.name.trim().toLocaleLowerCase('pt-BR')===draft.name.trim().toLocaleLowerCase('pt-BR')))throw Error('Já existe uma conta com esse nome. Escolha outro para evitar duplicidade.');
+     d.accounts.push({id:uid(),name:draft.name.trim(),bank:draft.bank.trim(),branch:draft.branch.trim(),number:draft.number.trim(),initial:draft.initial,active:true});
+    }
+    d.settings.theme=draft.theme;
+    d.settings.mobileNav=[...draft.mobileNav];
+    d.settings.setupCompleted=true;
+   },'Configuração inicial concluída. Seu GB+ está pronto!');
+   setupDraft=null;
+  },
   'reset-panel':()=>{modal.querySelectorAll('input[type="checkbox"]').forEach(el=>el.checked=true);},
   'delete-title':el=>{const t=getTitle(el.dataset.id);if(db.payments.some(p=>p.titleId===t.id))throw Error('Estorne as baixas antes de excluir este título.');confirm('Excluir título?',`O lançamento “${t.description}” será removido. Os outros títulos da série serão mantidos.`,()=>commit(d=>{d.titles=d.titles.filter(x=>x.id!==t.id);},'Título excluído.'));},
   'delete-partner':el=>{const id=el.dataset.id;if(db.titles.some(t=>t.partnerId===id))throw Error('Este parceiro possui títulos. Altere sua situação para inativo para preservar o histórico.');confirm('Excluir parceiro?','O cadastro será removido.',()=>commit(d=>{d.partners=d.partners.filter(p=>p.id!==id);},'Parceiro excluído.'));},
@@ -151,6 +187,35 @@ document.addEventListener('submit',async e=>{e.preventDefault();if(busy||!db)ret
    return;
   }
   const v=formValues(form),id=form.dataset.id;try{
+  if(form.id==='mobile-nav-form'){
+   const shortcuts=readMobileNav(form);
+   if(!validMobileNav(shortcuts))throw Error('Escolha três atalhos diferentes para a barra inferior.');
+   await commit(d=>{d.settings.mobileNav=[...shortcuts];},'Barra inferior personalizada. Abra o celular para conferir.');
+   return;
+  }
+  if(form.id==='setup-account-form'){
+   if(!setupDraft)return;
+   const name=String(v.name||'').trim(),bank=String(v.bank||'').trim(),branch=String(v.branch||'').trim(),number=String(v.number||'').trim();
+   if(!name||name.length>120||bank.length>120||branch.length>80||number.length>80)throw Error('Confira o nome e os dados da conta.');
+   Object.assign(setupDraft,{createAccount:true,name,bank,branch,number});
+   nextSetupStep('balance-choice');
+   return;
+  }
+  if(form.id==='setup-balance-form'){
+   if(!setupDraft)return;
+   setupDraft.initial=cents(v.initial);
+   nextSetupStep('preferences');
+   return;
+  }
+  if(form.id==='setup-preferences-form'){
+   if(!setupDraft)return;
+   const nav=readMobileNav(form),theme=String(v.theme||'');
+   if(!validMobileNav(nav))throw Error('Selecione três atalhos diferentes para a barra inferior.');
+   if(!['light','dark'].includes(theme))throw Error('Selecione um tema válido.');
+   setupDraft.mobileNav=[...nav];setupDraft.theme=theme;
+   nextSetupStep('review');
+   return;
+  }
   if(form.id==='title-form'){const input={type:v.type,description:v.description.trim(),categoryId:v.categoryId,partnerId:v.partnerId,document:v.document.trim(),issue:v.issue,due:v.due,amount:cents(v.amount),accountId:v.accountId,notes:v.notes.trim()};if(id){await commit(d=>updateTitle(d,id,{...input,cancelled:v.cancelled==='true'},v.scope==='future'));return;}const generated=generateTitles(input,v.mode,v.mode==='single'?1:Number(v.count));const clone=form.cloneNode(true);form.querySelectorAll('input,select,textarea').forEach((el,i)=>{const dest=clone.querySelectorAll('input,select,textarea')[i];if(el.tagName==='SELECT')[...dest.options].forEach(o=>o.toggleAttribute('selected',o.value===el.value));else if(el.tagName==='TEXTAREA')dest.textContent=el.value;else dest.setAttribute('value',el.value);});generated.formHTML=clone.outerHTML;pendingGeneration=generated;openModal('Revise antes de confirmar',`<div class="preview-summary"><span>${generated.length} título(s) · ${v.mode==='installment'?'Parcelado':v.mode==='recurring'?'Recorrente':'Único'}</span><strong>${money(generated.reduce((s,t)=>s+t.amount,0))}</strong><p>Valor total da operação</p></div><div class="preview-list">${generated.map(t=>`<div><span>${esc(t.description)} ${t.count>1?`${t.sequence}/${t.count}`:''}<small>${dateLabel(t.due)}</small></span><b>${money(t.amount)}</b></div>`).join('')}</div><div class="form-error" role="alert"></div><div class="form-footer">${button('Voltar','back-generation')}${button('Confirmar geração','save-generation','primary')}</div>`);}
   else if(form.id==='partner-form'){const roles=new FormData(form).getAll('roles');if(!roles.length)throw Error('Selecione ao menos uma classificação.');const row={...v,id:id||uid(),name:v.name.trim(),active:v.active==='true',roles};await commit(d=>{if(row.document&&d.partners.some(p=>p.id!==row.id&&p.document.replace(/\D/g,'')===row.document.replace(/\D/g,'')))throw Error('Já existe um parceiro com este CPF/CNPJ.');upsert(d.partners,row);});}
   else if(form.id==='account-form'){await commit(d=>upsert(d.accounts,{...v,id:id||uid(),name:v.name.trim(),initial:cents(v.initial),active:v.active==='true'}));}
