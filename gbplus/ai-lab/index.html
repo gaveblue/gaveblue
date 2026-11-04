@@ -22,6 +22,19 @@
 .actions button:disabled{opacity:.45}
 @media(max-width:600px){.bottom{padding-bottom:max(8px,env(safe-area-inset-bottom));}.composer{border-radius:21px}.voice-panel{gap:5px;padding:9px}.voice-panel button{padding:9px 8px}}
 @media(prefers-reduced-motion:reduce){.voice-bar,.composer button{transition:none}}
+
+/* SpeechRecognition uses the mic alone on Android. Wave follows speech activity events. */
+.voice-panel{flex-wrap:wrap;gap:8px}
+.voice-panel .voice-wave{flex:0 0 100%;min-width:0;height:28px}
+.voice-panel .voice-hint{position:static;clip-path:none;width:auto;height:auto;min-width:0;flex:1;overflow:hidden;font-size:12px;line-height:1.35;color:#52525c;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2}
+.voice-wave.is-listening .voice-bar{animation:voice-idle 1.4s ease-in-out infinite}
+.voice-wave.is-speaking .voice-bar{animation:voice-speech .6s ease-in-out infinite}
+.voice-wave .voice-bar:nth-child(3n){animation-delay:-.34s}
+.voice-wave .voice-bar:nth-child(3n + 1){animation-delay:-.16s}
+.voice-wave .voice-bar:nth-child(5n){animation-delay:-.48s}
+@keyframes voice-idle{0%,100%{height:4px;opacity:.5}50%{height:9px;opacity:.85}}
+@keyframes voice-speech{0%,100%{height:5px;opacity:.75}50%{height:24px;opacity:1}}
+@media(prefers-reduced-motion:reduce){.voice-wave .voice-bar{animation:none!important;height:7px}}
 </style></head><body><div class="wrap">
 <header><div class="brand"><span class="logo">GB+</span><span class="brand-meta"><strong>GB+ AI</strong><span class="muted">Assistente financeiro</span></span></div><span class="pill" id="mode-pill">● Modo local</span></header>
 <main class="workspace">
@@ -40,7 +53,7 @@
 <div id="ai-connect" style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:10px;flex-wrap:wrap"><span id="ai-state" class="muted">Modo local de demonstração</span><button id="ai-login" type="button" style="border:1px solid #ddd;border-radius:99px;padding:7px 12px;background:#fff;font-size:12px">Conectar IA</button></div><p id="voice-status" class="footnote" role="status">Ambiente de testes · Dados fictícios · Gravação somente após confirmação</p>
 </div></main></div><script type="module">
 import {interpret,formatBRL,fixture} from './engine.js?v=20261103-v8';
-import {setupVoice} from './voice.js?v=20261103-v8';
+import {setupVoice} from './voice.js?v=20261103-v9';
 const $=s=>document.querySelector(s),log=$('#messages'),input=$('#message');let proposal=null,context=null,live=false,session=null,history=[];
 const supabaseUrl='https://layrxmkosyqurpobzmku.supabase.co';const publishableKey='sb_publishable_AaQyS_d5doh7RtrkLucHUQ_d8KR07Gg';
 async function getSession(){const raw=localStorage.getItem('gbplus-auth-v1');if(!raw)return null;try{const v=JSON.parse(raw);const token=v?.access_token||v?.currentSession?.access_token;return token||null;}catch{return null;}}
