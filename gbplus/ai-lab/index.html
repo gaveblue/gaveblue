@@ -27,7 +27,7 @@ function add(text,who='assistant'){
  if(who==='user'||window.matchMedia('(prefers-reduced-motion: reduce)').matches){el.textContent=text;scroll();return;}
  // Only presentation is animated. The financial answer itself is never modified.
  el.setAttribute('aria-label',text);el.setAttribute('aria-live','off');
- const chars=Array.from(String(text));const duration=Math.min(2400,Math.max(550,chars.length*17));
+ const chars=Array.from(String(text));const duration=Math.min(950,Math.max(180,chars.length*5));
  const animate=()=>new Promise(resolve=>{
   let started=null;
   const frame=now=>{if(started===null)started=now;const progress=Math.min(1,(now-started)/duration);
