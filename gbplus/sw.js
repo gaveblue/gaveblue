@@ -1,4 +1,4 @@
-const CACHE='gb-plus-shell-v8';
+const CACHE='gb-plus-shell-v9';
 const ASSETS=['./','./index.html','./styles.css','./js/app.js','./js/update.js','./js/domain.js','./js/store.js','./js/ui.js','./js/views.js','./js/forms.js','./js/auth.js','./js/cloud-config.js','./vendor/supabase-2.118.0.js','./integrations/supabase/client.js','./integrations/supabase/repository.js','./manifest.webmanifest','./icons/icon.svg','./icons/icon-192.png','./icons/icon-512.png','./icons/maskable-512.png'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(async cache=>{
   // Fetch a coherent release, bypassing previously cached HTTP responses.
