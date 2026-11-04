@@ -1,7 +1,7 @@
 // GB+ PWA release 2026-11-04 — network-first prevents stale financial UI and AI.
-const CACHE='gb-plus-shell-v10';
-const VERSION='v10';
-const ASSETS=['./','./index.html','./styles.css','./js/app.js','./js/ai-bridge.js','./js/update.js','./js/domain.js','./js/store.js','./js/ui.js','./js/views.js','./js/forms.js','./js/auth.js','./js/cloud-config.js','./vendor/supabase-2.118.0.js','./integrations/supabase/client.js','./integrations/supabase/repository.js','./manifest.webmanifest','./icons/icon.svg','./icons/icon-192.png','./icons/icon-512.png','./icons/maskable-512.png','./ai-lab/','./ai-lab/index.html','./ai-lab/engine.js','./ai-lab/faq.js','./ai-lab/voice.js'];
+const CACHE='gb-plus-shell-v11';
+const VERSION='v11';
+const ASSETS=['./','./index.html','./styles.css','./js/app.js','./js/ai-bridge.js','./js/update.js','./js/domain.js','./js/store.js','./js/ui.js','./js/views.js','./js/forms.js','./js/auth.js','./js/cloud-config.js','./vendor/supabase-2.118.0.js','./integrations/supabase/client.js','./integrations/supabase/repository.js','./manifest.webmanifest','./icons/icon.svg','./icons/icon-192.png','./icons/icon-512.png','./icons/maskable-512.png','./ai-lab/','./ai-lab/index.html','./ai-lab/engine.js','./ai-lab/faq.js','./ai-lab/voice.js','./ai-lab/chat-history.js'];
 const scope=new URL(self.registration.scope);
 const inScope=url=>url.origin===scope.origin&&url.pathname.startsWith(scope.pathname);
 self.addEventListener('install',event=>event.waitUntil((async()=>{
