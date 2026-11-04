@@ -4,7 +4,7 @@ import {esc,icon,button,field,formFooter,download,csv,titleTable} from './ui.js'
 import {routes,dashboard,titlesView,partnersView,accountsView,categoriesView,flowView,reportsView,settingsView,notificationsView,filteredTitles,reportData} from './views.js';
 import {titleForm,partnerForm,accountForm,categoryForm,paymentForm,transferForm,titleDetail,customizeForm,accountDetail} from './forms.js';
 import {SupabaseRepository} from '../integrations/supabase/repository.js';
-import {initializeAuth,authClient,currentUser,accountCard,showAuth,isRecovery,updatePersonalProfile,requestProfileEmail,consumeAuthReturnMessage} from './auth.js?v=20261104-31';
+import {initializeAuth,authClient,currentUser,accountCard,showAuth,isRecovery,updatePersonalProfile,requestProfileEmail,consumeAuthReturnMessage} from './auth.js?v=20261104-32';
 import {profileView,validateProfile,validateEmail} from './profile.js?v=20261104-27';
 import {firstSetupView,customMobileNavForm,shortcutsPreview,readMobileNav} from './setup-ui.js';
 let repository=null;let db;let busy=false;let pendingGeneration=null;let confirmAction=null;let installPrompt=null;
