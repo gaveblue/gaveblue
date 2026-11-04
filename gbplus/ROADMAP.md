@@ -53,3 +53,13 @@ Este arquivo separa o que já entrou no código do que ainda depende de implemen
 - [ ] Testes automatizados de regressão antes de cada publicação
 
 **Regra:** alterações financeiras exigem confirmação e persistência validada. Não apagar dados do usuário para corrigir interface, cache ou atualização.
+
+## Arquitetura de longo prazo — GB+ Pessoal e GB+ Empresas
+
+- [x] Projeto de arquitetura definido e documentado em [ARQUITETURA-PF-PJ.md](./ARQUITETURA-PF-PJ.md)
+- [ ] Criar perfis PF em tabela própria, CPF único e bloqueio no servidor após confirmação
+- [ ] Implementar ambientes financeiros (workspaces) independentes, sem alterar visual de usuários PF
+- [ ] Implantar cadastro PJ, CNPJ, matriz, filiais e vínculos de equipe por permissão
+- [ ] Evoluir o financeiro para segregação por empresa/filial, com consolidados e trilhas de auditoria
+
+> Plano futuro: o documento é preparatório; não autoriza migração, atualização do banco ou mudança de cadastro sem revisão e testes.
