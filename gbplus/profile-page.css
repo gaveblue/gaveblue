@@ -137,3 +137,56 @@ html[data-theme=dark] .gb-account-lock-indicator span{background:#393942;color:#
  .gb-account-save{min-height:62px;font-size:16px}
  .gb-account-address{margin-top:18px}
 }
+
+/* GB+ 2.1.5 — compact profile with a coherent sequence: personal, address, security, save. */
+.gb-account-page{padding-bottom:12px}
+.gb-account-page-heading{margin:1px 0 14px}
+.gb-account-page-heading h1{font-size:clamp(25px,4vw,30px);letter-spacing:-.75px}
+.gb-account-card{padding:19px 18px 20px;margin-bottom:12px;border-radius:19px}
+.gb-account-card-heading{gap:12px;margin-bottom:15px}
+.gb-account-card-heading h2{font-size:18px;letter-spacing:-.3px}
+.gb-account-card-heading p{font-size:11px;line-height:1.4;margin-top:3px}
+.gb-account-card-icon{width:43px;height:43px;border-radius:13px}
+.gb-account-card-icon .icon{width:23px;height:23px}
+.gb-account-fields{gap:8px}
+.gb-account-field{min-height:60px;padding:9px 13px;border-radius:12px}
+.gb-account-field-caption{font-size:10.5px;margin-bottom:2px}
+.gb-account-field input{font-size:15px;line-height:1.4}
+.gb-account-locked-value{font-size:13px}
+.gb-account-action{min-height:58px;padding:10px 14px;gap:12px;border-radius:12px}
+.gb-account-action strong{font-size:13px}
+.gb-account-action-danger{margin-top:3px}
+.gb-account-address{margin:0 0 12px;border-radius:18px}
+.gb-account-address>summary{min-height:62px;padding:12px 17px;gap:12px}
+.gb-account-address>summary strong{font-size:14px}
+.gb-account-address>summary small{font-size:10.5px}
+.gb-account-address-grid{gap:10px;padding:0 17px 16px}
+.gb-account-address-field{gap:5px}
+.gb-account-address-field input{height:42px;min-height:42px}
+.gb-account-save-area{margin:16px 0 0;gap:6px}
+.gb-account-save{min-height:54px;font-size:15px;border-radius:13px}
+.gb-account-save-area [role=status]:empty{display:none}
+.gb-account-cpf-hint{font-size:10.5px}
+@media(max-width:760px){
+ .gb-account-page{padding-bottom:8px}
+ .gb-account-page-heading{margin:1px 0 13px}
+ .gb-account-page-heading h1{font-size:26px}
+ .gb-account-card{padding:16px 14px 17px;margin-bottom:11px;border-radius:18px}
+ .gb-account-card-heading{gap:11px;margin-bottom:13px}
+ .gb-account-card-heading h2{font-size:17px}
+ .gb-account-card-heading p{font-size:10.5px;line-height:1.4}
+ .gb-account-card-icon{width:40px;height:40px;border-radius:12px}
+ .gb-account-card-icon .icon{width:22px;height:22px}
+ .gb-account-fields{gap:7px}
+ .gb-account-field{min-height:57px;padding:8px 12px;border-radius:12px}
+ .gb-account-field-caption{font-size:10px}
+ .gb-account-field input{font-size:14px;min-height:22px}
+ .gb-account-locked-value{font-size:12.5px}
+ .gb-account-lock-indicator span{padding:3px 7px}
+ .gb-account-action{min-height:54px;padding:9px 12px}
+ .gb-account-address{margin:0 0 11px;border-radius:17px}
+ .gb-account-address>summary{min-height:60px;padding:11px 14px}
+ .gb-account-address-grid{padding:0 14px 15px;gap:9px}
+ .gb-account-save-area{margin:15px 0 0}
+ .gb-account-save{min-height:52px;font-size:14px;border-radius:13px}
+}
