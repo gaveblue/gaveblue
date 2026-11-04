@@ -44,7 +44,19 @@ import {setupVoice} from './voice.js?v=20261103-v8';
 const $=s=>document.querySelector(s),log=$('#messages'),input=$('#message');let proposal=null,context=null,live=false,session=null,history=[];
 const supabaseUrl='https://layrxmkosyqurpobzmku.supabase.co';const publishableKey='sb_publishable_AaQyS_d5doh7RtrkLucHUQ_d8KR07Gg';
 async function getSession(){const raw=localStorage.getItem('gbplus-auth-v1');if(!raw)return null;try{const v=JSON.parse(raw);const token=v?.access_token||v?.currentSession?.access_token;return token||null;}catch{return null;}}
-$('#ai-login').addEventListener('click',async()=>{if(live){live=false;session=null;history=[];$('#ai-state').textContent='Modo local de demonstração';$('#ai-login').textContent='Conectar IA';add('Voltei ao modo local.');return;}const token=await getSession();if(!token){add('Para usar a IA real, entre primeiro na sua conta pelo GB+ e volte ao laboratório. O modo de demonstração continua disponível.');return;}session=token;live=true;$('#ai-state').textContent='IA conectada · Respostas em tempo real';$('#ai-login').textContent='Voltar ao modo local';add('Modo IA ativado. Estou pronto para conversar sobre as funcionalidades financeiras do GB+. Os dados continuam fictícios e não farei lançamentos reais.');});
+$('#ai-login').addEventListener('click',async()=>{
+ const button=$('#ai-login');
+ if(live){live=false;session=null;history=[];$('#ai-state').textContent=bridge.realData?'Conta GB+ conectada · Consultas reais':'Modo local de demonstração';button.textContent='Conectar IA';add('Voltei ao assistente local.');return;}
+ const token=await getSession();if(!token){add('A IA generativa precisa de uma sessão GB+ ativa. Continue com o modo local para consultas e lançamentos.');return;}
+ button.disabled=true;button.textContent='Verificando…';
+ try{
+  const response=await fetch(supabaseUrl+'/functions/v1/gbplus-ai-lab',{method:'POST',headers:{'Content-Type':'application/json',apikey:publishableKey,Authorization:'Bearer '+token},body:JSON.stringify({messages:[{role:'user',content:'Olá!'}]})});
+  const body=await response.json().catch(()=>({}));
+  if(!response.ok||typeof body.answer!=='string')throw Error(body.error||'O serviço de IA ainda não está disponível no Supabase.');
+  session=token;live=true;history=[{role:'user',content:'Olá!'},{role:'assistant',content:body.answer}];$('#ai-state').textContent='IA generativa ativa · Dados fictícios';button.textContent='Voltar ao modo local';add('Conexão com a IA generativa verificada. Atenção: ela ainda não recebe os dados reais do GB+.');
+ }catch(error){session=null;live=false;button.textContent='Conectar IA';add('A IA generativa não está ativa: '+error.message+' O assistente local continua funcionando.');}
+ finally{button.disabled=false;}
+});
 async function askLive(text){history.push({role:'user',content:text});const messages=history.slice(-12);try{const res=await fetch(supabaseUrl+'/functions/v1/gbplus-ai-lab',{method:'POST',headers:{'Content-Type':'application/json','apikey':publishableKey,'Authorization':'Bearer '+session},body:JSON.stringify({messages})});const body=await res.json();if(!res.ok)throw Error(body.error||'Não foi possível acessar a IA.');history.push({role:'assistant',content:body.answer});add(body.answer);}catch(err){history.pop();add(err.message+' Você pode voltar ao modo local para continuar os testes.');}}
 let typingQueue=Promise.resolve();
 let firstName='',bridge={realData:false,writeEnabled:false},lastAnswer='',lastTopic='';
