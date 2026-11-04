@@ -134,12 +134,14 @@
    ]);
    const hosted=results[0].status==='fulfilled'?results[0].value:null;
    const source=results[1].status==='fulfilled'?results[1].value:null;
-   // Check public source against the hosted manifest before claiming "up to date".
+   // Install only versions actually available on the GB+ host; a newer
+   // GitHub-only build is not ready for the app downloader yet.
+   if(hosted&&compare(hosted.version,installed)>0){available(hosted,manual);return;}
+   // Check public source against hosted version before claiming "up to date".
    if(source&&(!hosted||compare(source.version,hosted.version)>0)){
     publicationPending(source,hosted);return;
    }
    if(!hosted)throw Error('Não foi possível obter a versão publicada no site.');
-   if(compare(hosted.version,installed)>0){available(hosted,manual);return;}
    if(manual){
     if(source)current();
     else unverified();
