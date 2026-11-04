@@ -34,7 +34,7 @@ self.addEventListener('fetch',event=>{
   const cache=await caches.open(CACHE);
   try{
    const response=await fetch(request,{cache:'no-store'});
-   if(response.ok&&response.type==='basic')event.waitUntil(cache.put(request,response.clone()).catch(()=>{}));
+   if(response.ok&&response.type==='basic')await cache.put(request,response.clone()).catch(()=>{});
    return response;
   }catch(error){
    const previous=await cache.match(request,{ignoreSearch:true});
