@@ -161,6 +161,35 @@ const actions={
   'settings-updates':()=>openModal('Atualizações do GB+',
     '<p class="muted">Versão instalada: <strong>GB+ '+esc(document.querySelector('meta[name="gbplus-version"]')?.content||'')+'</strong>. Confira se há uma versão nova para baixar e instalar.</p>'+
     '<div class="button-stack" style="margin-top:20px">'+button(icon('refresh')+' Verificar atualizações','check-updates','primary')+'</div>'),
+  'invite-friend':()=>openModal('Convidar um amigo',
+    '<p>Compartilhe o GB+ com alguém que queira organizar melhor suas finanças.</p>'+
+    '<label class="field" style="margin-top:18px">Link de convite<input id="gb-invite-link" type="url" value="'+esc(inviteLink)+'" readonly aria-label="Link do GB+"></label>'+
+    '<div class="button-stack" style="margin-top:20px">'+button(icon('copy')+' Copiar link','copy-invite','primary')+
+    (typeof navigator.share==='function'?button(icon('share')+' Compartilhar','share-invite'):'')+'</div>'),
+  'copy-invite':async()=>{
+    const field=document.querySelector('#gb-invite-link');
+    try{
+      if(navigator.clipboard?.writeText)await navigator.clipboard.writeText(inviteLink);
+      else if(field){field.focus();field.select();if(!document.execCommand?.('copy'))throw Error('COPY_UNAVAILABLE');}
+      else throw Error('COPY_UNAVAILABLE');
+      toast('Link de convite copiado!');
+    }catch{field?.focus();field?.select();toast('Selecione e copie o link de convite acima.');}
+  },
+  'share-invite':async()=>{
+    if(typeof navigator.share!=='function')return actions['copy-invite']();
+    try{await navigator.share({title:'GB+ · Gestão Financeira',text:'Conheça o GB+ e organize suas finanças:',url:inviteLink});}
+    catch(e){if(e?.name!=='AbortError')toast('Não foi possível compartilhar. Use Copiar link.');}
+  },
+  'profile-change-password':()=>{
+    const email=currentUser()?.email;
+    if(!email)throw Error('Não foi possível identificar seu e-mail de acesso.');
+    confirm('Alterar senha','Vamos enviar um link de redefinição de senha para o e-mail da sua conta. Deseja continuar?',async()=>{
+      if(!navigator.onLine)throw Error('Conecte-se à internet para solicitar a alteração de senha.');
+      const response=await authClient().auth.resetPasswordForEmail(email,{redirectTo:new URL('./',document.baseURI).href});
+      if(response.error)throw Error('Não foi possível enviar o e-mail. Tente novamente em instantes.');
+      closeModal();toast('Se o e-mail estiver cadastrado, você receberá um link para alterar sua senha.');
+    });
+  },
   'settings-help':()=>openModal('Ajuda e suporte',
     '<p>Precisa de ajuda com o GB+? Descreva sua dúvida, informe a versão do aplicativo e, se necessário, anexe uma captura da tela. Nunca envie senhas ou códigos de acesso.</p>'+
     '<p style="margin-top:16px"><a class="button primary" href="mailto:contato@gaveblue.com.br?subject=Suporte%20GB%2B">'+icon('arrow')+' Entrar em contato</a></p>'+
@@ -230,7 +259,7 @@ const actions={
   'export-titles':()=>{const rows=filteredTitles(db,state);download(`gb-plus-titulos-${today()}.csv`,csv([['Descrição','Tipo','Parceiro','Categoria','Documento','Emissão','Vencimento','Valor (R$)','Pendente (R$)'],...rows.map(t=>[t.description,t.type==='income'?'Receita':'Despesa',db.partners.find(p=>p.id===t.partnerId)?.name||'',db.categories.find(c=>c.id===t.categoryId)?.name,t.document,dateLabel(t.issue),dateLabel(t.due),(t.amount/100).toFixed(2).replace('.',','),(pending(db,t)/100).toFixed(2).replace('.',',')])]),'text/csv;charset=utf-8');},
   'export-flow':()=>download(`gb-plus-fluxo-${today()}.csv`,csv([['Período','Entradas previstas','Saídas previstas','Entradas realizadas','Saídas realizadas'],...flow(db,state.range,state.granularity).map(r=>[dateLabel(r.date),...[r.expectedIn,r.expectedOut,r.actualIn,r.actualOut].map(v=>(v/100).toFixed(2).replace('.',','))])]),'text/csv;charset=utf-8'),
   'export-report':()=>download(`gb-plus-relatorio-${state.report}-${today()}.csv`,csv(reportData(db,state)),'text/csv;charset=utf-8'),
-  install:async()=>{if(installPrompt){await installPrompt.prompt();installPrompt=null;render();}else openModal('Instalar o GB+',`<p>No <b>iPhone</b>, abra no Safari, toque em Compartilhar e selecione “Adicionar à Tela de Início”.</p><p>No <b>Android ou computador</b>, use “Instalar aplicativo” no menu do navegador, quando disponível.</p><p class="form-hint">A instalação e o modo offline precisam de HTTPS ou localhost. No modo local, os dados ficam neste navegador. No modo online, ficam vinculados ao seu login e exigem conexão.</p>`);}
+  install:async()=>{if(isInstalledApp()){toast('GB+ já está instalado neste dispositivo.');return;}if(installPrompt){const prompt=installPrompt;installPrompt=null;await prompt.prompt();const choice=await prompt.userChoice;installedInSession=choice?.outcome==='accepted';render();}else openModal('Instalar o GB+',`<p>No <b>iPhone</b>, abra no Safari, toque em Compartilhar e selecione “Adicionar à Tela de Início”.</p><p>No <b>Android ou computador</b>, use “Instalar aplicativo” no menu do navegador, quando disponível.</p><p class="form-hint">A instalação e o modo offline precisam de HTTPS ou localhost. No modo local, os dados ficam neste navegador. No modo online, ficam vinculados ao seu login e exigem conexão.</p>`);}
 };
 document.addEventListener('click',async e=>{const el=e.target.closest('[data-action]');if(!el||!db)return;if(el.tagName==='BUTTON')e.preventDefault();try{await actions[el.dataset.action]?.(el);}catch(error){fail(error);}});
 document.addEventListener('submit',async e=>{e.preventDefault();if(busy||!db)return;const form=e.target;
