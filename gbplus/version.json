@@ -1,12 +1,12 @@
 {
-  "version": "2.1.1",
-  "build": 32,
+  "version": "2.1.2",
+  "build": 33,
   "published_at": "2026-11-04",
-  "title": "Configurações redesenhadas",
+  "title": "Configurações estáveis e contato institucional",
   "notes": [
-    "Nova tela de Configurações inspirada nas definições de celulares: perfil, grupos, ícones coloridos e busca.",
-    "Aparência, atalhos, backup, atualização e suporte organizados em opções que abrem as funções existentes.",
-    "Modo claro/escuro preservado; exclusão de conta abre solicitação segura sem apagar dados automaticamente."
+    "Corrigido o alinhamento da tela de Configurações com as demais telas e preservado o posicionamento da barra de ações no celular.",
+    "Política de Privacidade agora informa Suporte GaveBlue e contato@gaveblue.com.br, sem divulgar contato pessoal.",
+    "Links de ajuda e solicitação de exclusão de conta também usam o endereço institucional."
   ],
   "assets": [
     "./index.html",
@@ -36,6 +36,7 @@
     "./js/setup-ui.js",
     "./ai-lab/chat-history.js",
     "./js/auth-flow.js",
-    "./settings-page.css"
+    "./settings-page.css",
+    "./privacidade.html"
   ]
 }
