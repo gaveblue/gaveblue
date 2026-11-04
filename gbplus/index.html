@@ -20,13 +20,19 @@
 .gb-ai-widget iframe{display:block;position:absolute;inset:0;width:100%;height:100%;border:0;border-radius:0;background:#fff;box-shadow:none}
 body.auth-locked .gb-ai-widget{display:none}
 @media(max-width:640px){.gb-ai-widget:not([open]){bottom:calc(100px + env(safe-area-inset-bottom));right:12px}.gb-ai-widget[open] iframe{position:absolute;inset:0;width:100%;height:100%;min-height:0}}
+
+/* The AI overlay uses the same palette as the financial dashboard. */
+:root[data-theme="dark"] .gb-ai-widget[open],
+:root[data-theme="dark"] .gb-ai-widget iframe{background:#111214}
+:root[data-theme="dark"] .gb-ai-widget[open]>summary,
+:root[data-theme="dark"] .gb-ai-widget[open]>summary::after{background:#292a30;color:#f1f1f5}
 </style></head>
 <body class="auth-locked">
   <main id="auth-gate" aria-label="Acesso ao GB+"><section class="auth-page"><div class="auth-card"><header class="auth-brand"><div class="auth-wordmark">GB<span>+</span></div><p>Gestão Financeira</p></header><p class="auth-description" role="status">Preparando seu acesso…</p><noscript>Ative o JavaScript para entrar no GB+.</noscript></div></section></main>
   <a class="skip" href="#main">Pular para o conteúdo</a>
   <aside class="sidebar" id="sidebar"><a class="brand" href="#dashboard" aria-label="GB+ início"><strong>GB<span>+</span></strong><span>Gestão Financeira</span></a><div class="nav-label">SEU FINANCEIRO</div><nav id="navigation" aria-label="Navegação principal"></nav><div class="sidebar-bottom"><div class="local-mark"><span class="status-dot"></span> Armazenamento local<small>Seus dados, neste navegador.</small></div><button class="theme-button" data-action="theme"></button><div class="version">GB+ <span>Versão 1.4.2</span></div></div></aside>
   <div class="workspace"><header class="topbar"><span class="breadcrumb">Workspace <span>/</span> <b id="breadcrumb">Visão geral</b></span><a class="mobile-brand" href="#dashboard">GB+</a><div class="top-actions"><span id="connection" class="connection">Disponível offline</span><button class="icon-button" data-action="search" aria-label="Pesquisar lançamentos"></button><button class="icon-button" data-action="notifications" aria-label="Ver títulos vencidos"></button><span class="avatar" title="Meu financeiro">GB</span></div></header><main id="main" tabindex="-1"></main><footer class="desktop-footer">Uma visão clara. Decisões melhores.<span>GB+ · Gestão Financeira</span></footer></div>
-  <details class="gb-ai-widget"><summary aria-label="Abrir ou fechar assistente financeiro">✦</summary><iframe title="Assistente financeiro GB+ AI" src="./ai-lab/?v=20261104-13" loading="lazy"></iframe></details>
+  <details class="gb-ai-widget"><summary aria-label="Abrir ou fechar assistente financeiro">✦</summary><iframe title="Assistente financeiro GB+ AI" src="./ai-lab/?v=20261104-dark" loading="lazy"></iframe></details>
   <nav class="mobile-nav" id="mobile-navigation" aria-label="Navegação móvel"></nav>
   <dialog id="modal"><div id="modal-content"></div></dialog><div id="toast" role="status" aria-live="polite"></div>
   <noscript>Ative o JavaScript para usar o GB+. Os dados são armazenados neste navegador.</noscript>
