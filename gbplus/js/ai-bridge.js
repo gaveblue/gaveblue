@@ -35,12 +35,27 @@ export function answerFromDb(db,query){
  if(!s)return 'Me diga o que gostaria de consultar no GB+.';
  if(/^(oi|ola|bom dia|boa tarde|boa noite|opa|tudo bem)$/.test(s))return 'Olá! Posso consultar os dados reais da sua conta GB+: saldo, contas a pagar e receber, vencimentos, clientes e relatórios financeiros.';
  if(/^(que dia e hoje|qual e a data de hoje|hoje e que dia|qual dia e hoje)$/.test(s))return 'Hoje é '+new Intl.DateTimeFormat('pt-BR',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(new Date())+'.';
+ if(/(ia de verdade|inteligencia artificial|voce e uma ia|voce e robo|como funciona essa ia)/.test(s))return 'Estou conectado aos registros reais da sua conta GB+ e faço consultas financeiras calculadas pelo próprio sistema. Minha interpretação de mensagens ainda é baseada em regras; a IA generativa externa só funciona quando o serviço de IA estiver ativado.';
  if(/^(o que voce faz|o que vc faz|me ajuda|ajuda|como pode ajudar|o que consegue fazer)$/.test(s))return 'Estou conectado aos seus dados GB+. Posso consultar saldos, contas a pagar e receber, vencimentos, resultados, categorias, parceiros e maiores despesas. Também preparo lançamentos para sua confirmação.';
  if(/(?:contas?|titulos?|boletos?|pagamentos?) (?:em atraso|atrasad|vencid)|o que esta atrasad|tenho (?:algo|contas?) atrasad|inadimplen/.test(s))return list(db,open.filter(t=>t.due<day),'Títulos vencidos');
  if(/(?:amanha|proximo dia)/.test(s)&&/(?:vence|vencem|venciment|conta|titulo|boleto)/.test(s))return list(db,open.filter(t=>t.due===nextDay(day)),'Vencimentos de amanhã');
  if(/hoje/.test(s)&&/(?:vence|vencem|venciment|conta|titulo|boleto)/.test(s))return list(db,open.filter(t=>t.due===day),'Vencimentos de hoje');
  if(/(?:venc|boleto|contas?|titulos?)/.test(s)&&/(?:mes|mensal)/.test(s))return list(db,open.filter(t=>t.due.startsWith(month)),'Vencimentos de '+period);
  if(/(?:venciment|proximas contas|proximos titulos|vai vencer|a vencer)/.test(s))return list(db,open.filter(t=>t.due>=day),'Próximos vencimentos');
+ if(/(quais sao meus clientes|quais clientes tenho|quantos clientes|listar clientes)/.test(s)){
+  const clients=db.partners.filter(p=>p.roles?.includes('Cliente'));
+  return clients.length?'Clientes cadastrados: '+clients.length+'.\n'+clients.slice(0,12).map(p=>'• '+p.name).join('\\n')+(clients.length>12?'\\n… e mais '+(clients.length-12)+' clientes.':''):'Não há clientes cadastrados na sua conta GB+.';
+ }
+ if(/(quais sao meus fornecedores|quantos fornecedores|listar fornecedores)/.test(s)){
+  const suppliers=db.partners.filter(p=>p.roles?.includes('Fornecedor'));
+  return suppliers.length?'Fornecedores cadastrados: '+suppliers.length+'.\\n'+suppliers.slice(0,12).map(p=>'• '+p.name).join('\\n')+(suppliers.length>12?'\\n… e mais '+(suppliers.length-12)+' fornecedores.':''):'Não há fornecedores cadastrados na sua conta GB+.';
+ }
+ const partnerMention=db.partners.find(p=>p.name&&normalize(p.name).length>=4&&s.includes(normalize(p.name)));
+ if(partnerMention&&/(quanto|valor|saldo|devo|devendo|a pagar|receber|pendencias|pendente)/.test(s)){
+  const debts=open.filter(t=>t.partnerId===partnerMention.id);
+  const type=/(me deve|receber|cliente|a receber)/.test(s)?'income':/(pagar|devo|fornecedor|despesa)/.test(s)?'expense':null;
+  return list(db,type?debts.filter(t=>t.type===type):debts,'Títulos em aberto de '+partnerMention.name);
+ }
  if(/(?:maior despesa|maiores despesas|mais caro|onde gasto mais)/.test(s)){
    const expenses=db.titles.filter(t=>t.type==='expense'&&!t.cancelled).sort((a,b)=>b.amount-a.amount);
    return expenses.length?'Maiores despesas cadastradas (valor do título):\n'+expenses.slice(0,5).map(t=>'• '+t.description+' — '+money(t.amount)+' — '+dateLabel(t.due)).join('\n'):'Ainda não há despesas cadastradas.';
