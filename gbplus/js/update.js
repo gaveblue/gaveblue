@@ -88,19 +88,62 @@
   put(els.primary,'Tentar novamente');els.primary.dataset.next='retry';active=false;
  }
  const releaseURL=()=>new URL('./version.json?check='+Date.now(),base);
+ // Independent public repository reference. A stale/offline service-worker cache
+ // must never be accepted as proof that there is no newer version.
+ const sourceURL=()=>new URL('https://raw.githubusercontent.com/gaveblue/gaveblue/main/gbplus/version.json?check='+Date.now());
+ function validRelease(data){
+  return !!data&&/^\d+\.\d+\.\d+$/.test(data.version)&&Array.isArray(data.assets)&&
+   Number.isInteger(data.build)&&data.assets.length<=35&&data.assets.length>=1;
+ }
+ async function loadRelease(url,ms=8500){
+  const controller=new AbortController();
+  const timer=setTimeout(()=>controller.abort(),ms);
+  try{
+   const response=await fetch(url,{cache:'no-store',signal:controller.signal});
+   if(!response.ok)throw Error('Arquivo de versões indisponível ('+response.status+').');
+   const data=await response.json();
+   if(!validRelease(data))throw Error('O arquivo de versões recebido é inválido.');
+   return data;
+  }finally{clearTimeout(timer);}
+ }
+ function publicationPending(source,hosted=null){
+  if(active)return;
+  manifest=null;preview=false;downloadReady=false;
+  const hostedLabel=hosted?.version||'não confirmada';
+  show('Atualização aguardando publicação',
+   'GitHub '+source.version+' · site '+hostedLabel,
+   'A nova versão já consta no repositório, mas o site ainda não a está entregando. Por segurança, o GB+ não vai instalar arquivos incompletos ou mostrar “Tudo atualizado”.');
+  notes(['Sua conta, seus lançamentos e seus saldos não serão alterados.','É possível tentar renovar somente os arquivos antigos do aplicativo.']);
+  put(els.later,'Fechar');put(els.primary,'Recuperar atualização');
+  els.primary.hidden=false;els.primary.dataset.next='recover';
+ }
+ function unverified(){
+  show('Versão não confirmada','GB+ '+installed,
+   'Não consegui consultar a publicação do GitHub. O site informou esta versão, mas não posso garantir que seja a mais recente.');
+  put(els.later,'Fechar');put(els.primary,'Tentar novamente');
+  els.primary.hidden=false;els.primary.dataset.next='retry';
+ }
  async function check(manual=false){
   if(checking||active)return;
   checking=true;
   try{
    if(!navigator.onLine)throw Error('Você está offline.');
-   const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),9000);
-   let response;
-   try{response=await fetch(releaseURL(),{cache:'no-store',signal:controller.signal});}finally{clearTimeout(timer);}
-   if(!response.ok)throw Error('Servidor de versões indisponível ('+response.status+').');
-   const data=await response.json();
-   if(!data||!/^\d+\.\d+\.\d+$/.test(data.version)||!Array.isArray(data.assets)||!Number.isInteger(data.build)||data.assets.length>35||data.assets.length<1)throw Error('Informações de atualização inválidas.');
-   if(compare(data.version,installed)>0)available(data,manual);
-   else if(manual)current();
+   const results=await Promise.allSettled([
+    loadRelease(releaseURL(),8500),
+    loadRelease(sourceURL(),6500)
+   ]);
+   const hosted=results[0].status==='fulfilled'?results[0].value:null;
+   const source=results[1].status==='fulfilled'?results[1].value:null;
+   // Check public source against the hosted manifest before claiming "up to date".
+   if(source&&(!hosted||compare(source.version,hosted.version)>0)){
+    publicationPending(source,hosted);return;
+   }
+   if(!hosted)throw Error('Não foi possível obter a versão publicada no site.');
+   if(compare(hosted.version,installed)>0){available(hosted,manual);return;}
+   if(manual){
+    if(source)current();
+    else unverified();
+   }
   }catch(error){if(manual)trouble(error.message||'Verificação indisponível.');}
   finally{checking=false;}
  }
@@ -220,6 +263,7 @@
   if(next==='close'){dismiss();return;}
   if(next==='install'){apply();return;}
   if(next==='retry'){check(true);return;}
+  if(next==='recover'){location.assign(new URL('./recuperar.html',base).href);return;}
   download();
  }
  function start(){
