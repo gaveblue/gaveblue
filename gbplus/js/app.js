@@ -5,11 +5,12 @@ import {routes,dashboard,titlesView,partnersView,accountsView,categoriesView,flo
 import {titleForm,partnerForm,accountForm,categoryForm,paymentForm,transferForm,titleDetail,customizeForm,accountDetail} from './forms.js';
 import {SupabaseRepository} from '../integrations/supabase/repository.js';
 import {initializeAuth,authClient,currentUser,showAuth,isRecovery,updatePersonalProfile,consumeAuthReturnMessage} from './auth.js?v=20261104-32';
-import {profileView,validateProfile} from './profile.js?v=20261104-35';
+import {profileView,validateProfile,validCPF,formatCPF} from './profile.js?v=20261104-35';
 import {firstSetupView,customMobileNavForm,shortcutsPreview,readMobileNav} from './setup-ui.js?v=20261104-35';
 let repository=null;let db;let busy=false;let pendingGeneration=null;let confirmAction=null;let installPrompt=null;let installedInSession=false;
 const isInstalledApp=()=>installedInSession||matchMedia('(display-mode: standalone)').matches||matchMedia('(display-mode: fullscreen)').matches||navigator.standalone===true;
 const inviteLink='https://gaveblue.com.br/gbplus/';
+let profileCpfStatus={userId:null,cpf:'',ready:false,loading:false,error:''};
 const state={route:'dashboard',period:'month',range:{},query:'',status:'',type:'',partner:'',category:'',partnerQuery:'',granularity:'month',report:'payable',reportPartner:'',moreFilters:false};
 const modal=document.querySelector('#modal');
 // Desktop-only sidebar preference; changing it never touches the finance database.
@@ -74,7 +75,7 @@ function render(){if(!db)return;updateSystemAppearance(db.settings.theme);docume
  const custom=effectiveMobileNav(db.settings);
  const slots=[['dashboard','Início','home'],renderMobileShortcut(custom[0]),['new','Novo','plus'],renderMobileShortcut(custom[1]),renderMobileShortcut(custom[2])];
  return slots.map(([key,label,ico])=>key==='new'||key==='menu'?`<button type="button" data-action="${key==='new'?'new-title':'mobile-menu'}" class="${key==='new'?'mobile-new':''}" aria-label="${label}">${icon(ico)}<span>${label}</span></button>`:`<a href="#${key}" class="${state.route===key?'active':''}" ${state.route===key?'aria-current="page"':''}>${icon(ico)}<span>${label}</span></a>`).join('');
-})();const views={dashboard:()=>dashboard(db,state,!!currentUser(),currentUser()),titles:()=>titlesView(db,state),payable:()=>titlesView(db,state),receivable:()=>titlesView(db,state),partners:()=>partnersView(db,state),accounts:()=>accountsView(db),categories:()=>categoriesView(db),flow:()=>flowView(db,state),provisions:()=>flowView(db,state),reports:()=>reportsView(db,state),settings:()=>settingsView(db,!!installPrompt,!!currentUser(),currentUser(),isInstalledApp()),notifications:()=>notificationsView(db),profile:()=>profileView(currentUser())};document.body.classList.toggle('gb-settings-page',state.route==='settings');document.querySelector('#main').innerHTML=(views[state.route]||views.dashboard)();if(state.route==='profile')initializeProfileDirtyState();updateConnection();if(state.route==='dashboard')applyPanel();}
+})();const views={dashboard:()=>dashboard(db,state,!!currentUser(),currentUser()),titles:()=>titlesView(db,state),payable:()=>titlesView(db,state),receivable:()=>titlesView(db,state),partners:()=>partnersView(db,state),accounts:()=>accountsView(db),categories:()=>categoriesView(db),flow:()=>flowView(db,state),provisions:()=>flowView(db,state),reports:()=>reportsView(db,state),settings:()=>settingsView(db,!!installPrompt,!!currentUser(),currentUser(),isInstalledApp()),notifications:()=>notificationsView(db),profile:()=>profileView(currentUser(),profileCpfStatus.userId===currentUser()?.id?profileCpfStatus:{ready:false,cpf:'',error:''})};document.body.classList.toggle('gb-settings-page',state.route==='settings');document.querySelector('#main').innerHTML=(views[state.route]||views.dashboard)();if(state.route==='profile'){initializeProfileDirtyState();if(!profileCpfStatus.ready&&!profileCpfStatus.loading&&!profileCpfStatus.error)void loadRegisteredCpf();}updateConnection();if(state.route==='dashboard')applyPanel();}
 
 function filterSettings(value){
  const search=String(value||'').trim().toLocaleLowerCase('pt-BR');
@@ -92,6 +93,34 @@ function filterSettings(value){
  const remove=document.querySelector('.gb-cfg-delete');
  if(remove){remove.hidden=!!search&&!remove.dataset.settingsKeywords.includes(search);if(!remove.hidden)matches++;}
  const empty=document.querySelector('#gb-cfg-no-results');if(empty)empty.hidden=matches>0||(profile&&!profile.hidden);
+}
+async function loadRegisteredCpf(force=false){
+ const id=currentUser()?.id;
+ if(!id)return;
+ if(profileCpfStatus.userId!==id)profileCpfStatus={userId:id,cpf:'',ready:false,loading:false,error:''};
+ if(profileCpfStatus.loading||(!force&&(profileCpfStatus.ready||profileCpfStatus.error)))return;
+ profileCpfStatus.loading=true;profileCpfStatus.error='';
+ try{
+  const {data,error}=await authClient().from('gbplus_profiles').select('cpf').eq('user_id',id).maybeSingle();
+  if(error)throw error;
+  if(currentUser()?.id!==id)return;
+  profileCpfStatus.cpf=data?.cpf||'';
+  profileCpfStatus.ready=true;
+ }catch(error){
+  if(currentUser()?.id!==id)return;
+  profileCpfStatus.ready=false;profileCpfStatus.error='Não foi possível validar o CPF cadastrado. Confira a conexão e tente novamente.';
+ }finally{
+  if(profileCpfStatus.userId===id)profileCpfStatus.loading=false;
+  if(currentUser()?.id===id&&state.route==='profile')render();
+ }
+}
+function profileCpfFeedback(form){
+ const el=form.querySelector('[name="cpf"]'),output=form.querySelector('#gb-cpf-validation');
+ if(!el||!output)return;
+ const digits=el.value.replace(/\D/g,'');
+ const valid=digits.length===11&&validCPF(digits);
+ output.textContent=digits.length===0?'':valid?'CPF válido. Ele ficará bloqueado após salvar.':digits.length<11?'Informe os 11 dígitos do CPF.':'CPF inválido. Confira os dígitos.';
+ output.dataset.invalid=String(digits.length>0&&!valid);
 }
 function profileSnapshot(form){
  return JSON.stringify([...new FormData(form)].map(([key,value])=>[key,String(value)]));
@@ -180,6 +209,7 @@ const actions={
     try{await navigator.share({title:'GB+ · Gestão Financeira',text:'Conheça o GB+ e organize suas finanças:',url:inviteLink});}
     catch(e){if(e?.name!=='AbortError')toast('Não foi possível compartilhar. Use Copiar link.');}
   },
+  'retry-profile-cpf':()=>{profileCpfStatus.ready=false;profileCpfStatus.error='';void loadRegisteredCpf(true);},
   'profile-change-password':()=>{
     const email=currentUser()?.email;
     if(!email)throw Error('Não foi possível identificar seu e-mail de acesso.');
@@ -267,17 +297,30 @@ document.addEventListener('submit',async e=>{e.preventDefault();if(busy||!db)ret
   if(form.id==='profile-form'){
    const button=form.querySelector('#profile-save'),result=form.querySelector('#profile-message');
    if(!button||button.disabled||form.dataset.initialSnapshot===profileSnapshot(form))return;
+   if(!profileCpfStatus.ready){if(result)result.textContent='Aguarde a confirmação do cadastro do CPF.';return;}
    form.dataset.saving='true';button.disabled=true;
    if(result)result.textContent='Salvando alterações…';
    try{
-    const savedCpf=currentUser()?.user_metadata?.gbplus_profile?.cpf||'';
+    const savedCpf=profileCpfStatus.cpf||'';
     const profile=validateProfile(form,savedCpf);
+    if(!savedCpf&&profile.cpf){
+      const userId=currentUser()?.id;
+      const {error}=await authClient().from('gbplus_profiles').insert({user_id:userId,cpf:profile.cpf});
+      if(error){
+        if(error.code==='23505')throw Error('Este CPF já está cadastrado no GB+ ou foi registrado em outra sessão. Confira os dados.');
+        if(error.code==='23514')throw Error('CPF inválido. Confira os 11 dígitos.');
+        throw Error('Não foi possível registrar seu CPF. Confira a conexão e tente novamente.');
+      }
+      profileCpfStatus.cpf=profile.cpf;
+    }
     await updatePersonalProfile(profile);
     window.dispatchEvent(new Event('gbplus-ai-ready'));
     render();
     toast('Alterações salvas com sucesso.');
    }catch(error){
-    if(result)result.textContent=error.message||'Não foi possível salvar. Tente novamente.';
+    if(profileCpfStatus.cpf&&!currentUser()?.user_metadata?.gbplus_profile?.cpf){
+      if(result)result.textContent='CPF registrado e bloqueado. Os outros dados não foram salvos; tente novamente.';
+    }else if(result)result.textContent=error.message||'Não foi possível salvar. Tente novamente.';
    }finally{
     delete form.dataset.saving;
     if(form.isConnected)syncProfileSaveState(form);
@@ -334,7 +377,14 @@ document.addEventListener('change',async e=>{if(!db)return;const el=e.target;try
   if(el.id==='report-partner'){state.reportPartner=el.value;render();}
   if(el.id==='backup-input'&&el.files[0]){const file=el.files[0];el.value='';if(file.size>15*1024*1024)throw Error('O backup deve ter no máximo 15 MB.');const restored=parseBackup(await file.text());confirm('Restaurar backup?',`Este arquivo contém ${restored.titles.length} títulos, ${restored.partners.length} parceiros e ${restored.accounts.length} contas. Os registros atuais serão substituídos. Exporte um backup antes de continuar, se necessário.`,()=>commit(d=>{Object.keys(d).forEach(k=>delete d[k]);Object.assign(d,restored);},'Backup restaurado com sucesso.'));}
 }catch(error){fail(error);}});
-document.addEventListener('input',e=>{if(e.target.form?.id==='profile-form'){syncProfileSaveState(e.target.form);return;}if(e.target.id==='settings-search-input'){filterSettings(e.target.value);return;}if(!['title-search','partner-search'].includes(e.target.id))return;const el=e.target;const pos=el.selectionStart;state[el.id==='title-search'?'query':'partnerQuery']=el.value;render();const next=document.getElementById(el.id);next.focus();next.setSelectionRange(pos,pos);});
+document.addEventListener('input',e=>{if(e.target.form?.id==='profile-form'){
+ const field=e.target;
+ if(field.name==='cpf'){
+  const digits=field.value.replace(/\D/g,'').slice(0,11);
+  field.value=formatCPF(digits);
+  profileCpfFeedback(field.form);
+ }
+ syncProfileSaveState(e.target.form);return;}if(e.target.id==='settings-search-input'){filterSettings(e.target.value);return;}if(!['title-search','partner-search'].includes(e.target.id))return;const el=e.target;const pos=el.selectionStart;state[el.id==='title-search'?'query':'partnerQuery']=el.value;render();const next=document.getElementById(el.id);next.focus();next.setSelectionRange(pos,pos);});
 window.addEventListener('hashchange',route);
 matchMedia('(max-width: 760px)').addEventListener('change',()=>{if(db&&state.route==='dashboard')applyPanel();});
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPrompt=e;if(db&&state.route==='settings')render();});
@@ -343,7 +393,7 @@ window.addEventListener('storage',e=>{if(e.key===KEY&&!currentUser())toast('Dado
 modal.addEventListener('cancel',()=>{pendingGeneration=null;confirmAction=null;});
 
 function clearAccount(){
-  db=null;repository?.dispose?.();closeModal();
+  db=null;repository?.dispose?.();closeModal();profileCpfStatus={userId:null,cpf:'',ready:false,loading:false,error:''};
   document.body.classList.add('auth-locked');
   showAuth('signin');
   document.querySelector('#main').innerHTML='<section class="panel recovery"><h1>Atualizando sua sessão…</h1></section>';
