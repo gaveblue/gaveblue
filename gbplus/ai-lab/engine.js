@@ -1,3 +1,4 @@
+import {answerFAQ} from './faq.js?v=50-20261103';
 // GB+ AI Lab: deterministic offline test adapter. No production data or writes.
 export const fixture=Object.freeze({balance:500000,payable:280000,receivable:120000});
 export const formatBRL=cents=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(cents/100);
@@ -37,5 +38,6 @@ export function interpret(message,context=null,data=fixture){
   if(missing.length)return {intent:'preparar_lancamento',status:'needs_clarification',missing,context:{proposal},reason:'Não há gravação; o protótipo não completa dados ausentes por suposição.',answer:'Entendi que você quer preparar um lançamento, mas faltam: '+missing.join(', ')+'. Pode informar esses dados?'};
   return {intent:'preparar_lancamento',status:'ready',proposal,answer:'Preparei uma prévia fictícia. Confira os campos antes de confirmar a simulação. Nenhum dado será gravado.'};
  }
+ const faq=answerFAQ(message,data);if(faq)return faq;
  return {intent:'nao_identificada',status:'unsupported',reason:'Interpretador local experimental, sem modelo de linguagem conectado.',answer:'Ainda não consigo interpretar essa solicitação. Este é o teste local; a versão com modelo de IA deverá entender variações mais livres, respeitando as funções do GB+.'};
 }
