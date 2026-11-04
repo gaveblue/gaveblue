@@ -4,7 +4,13 @@ import {esc,icon} from './ui.js';
 import {loginRedirectMessage,clearLoginErrorUrl,safeAuthEmail} from './auth-flow.js';
 
 let client,user=null,recovery=false,working=false,startup=true,pendingEmail='',lastResend=0;
-let onChange=()=>{};
+let onChange=()=>{},reloadScheduled=false;
+function refreshAuthOnce(){
+ if(reloadScheduled)return;
+ reloadScheduled=true;
+ onChange();
+ setTimeout(()=>location.reload(),0);
+}
 export const currentUser=()=>user;
 export const authClient=()=>client;
 export const isRecovery=()=>recovery;
@@ -24,7 +30,7 @@ export async function initializeAuth(changed){
       if(!startup)setTimeout(()=>showAuth('recovery'),0);
     }
     if(!startup&&(session?.user?.id||null)!==(user?.id||null)){
-      onChange();setTimeout(()=>location.reload(),0);
+      refreshAuthOnce();
     }
   });
   const {data,error}=await client.auth.getSession();
@@ -153,7 +159,7 @@ document.addEventListener('click',async event=>{
     setWorking(true);
     try{
       const {error}=await getClient().auth.signOut({scope:'local'});if(error)throw error;
-      sessionStorage.removeItem('gbplus-recovery');onChange();location.reload();
+      sessionStorage.removeItem('gbplus-recovery');refreshAuthOnce();
     }catch{window.dispatchEvent(new CustomEvent('gbplus-message',{detail:'Não foi possível encerrar a sessão. Verifique a conexão e tente novamente.'}));}
     finally{setWorking(false);}return;
   }
@@ -186,7 +192,7 @@ document.addEventListener('submit',async event=>{
    feedback(authError(result.error));return;
   }
   if(mode==='signin'||(mode==='signup'&&result?.data?.session)){
-   onChange();location.reload();return;
+   refreshAuthOnce();return;
   }
   if(mode==='signup'){
    pendingEmail=email;showAuth('confirm');
