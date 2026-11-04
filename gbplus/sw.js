@@ -1,49 +1,48 @@
-// GB+ PWA release 2026-11-04 — network-first prevents stale financial UI and AI.
-const CACHE='gb-plus-shell-v12';
-const VERSION='v12';
-const ASSETS=['./','./index.html','./styles.css','./js/app.js','./js/ai-bridge.js','./js/update.js','./js/domain.js','./js/store.js','./js/ui.js','./js/views.js','./js/forms.js','./js/auth.js','./js/cloud-config.js','./vendor/supabase-2.118.0.js','./integrations/supabase/client.js','./integrations/supabase/repository.js','./manifest.webmanifest','./icons/icon.svg','./icons/icon-192.png','./icons/icon-512.png','./icons/maskable-512.png','./ai-lab/','./ai-lab/index.html','./ai-lab/engine.js','./ai-lab/faq.js','./ai-lab/voice.js'];
+// GB+ PWA recovery release v13: do not block installation on network requests,
+// automatically redirect app windows, or reload open financial forms.
+const CACHE='gb-plus-shell-v13';
+const CORE=['./','./index.html','./styles.css','./js/app.js','./js/update.js','./recuperar.html'];
 const scope=new URL(self.registration.scope);
 const inScope=url=>url.origin===scope.origin&&url.pathname.startsWith(scope.pathname);
-self.addEventListener('install',event=>event.waitUntil((async()=>{
- const cache=await caches.open(CACHE);
- // Individual asset errors must not block a new safety/update fix from installing.
- await Promise.allSettled(ASSETS.map(async asset=>{
-  const url=new URL(asset,scope);url.searchParams.set('gbplus_release',VERSION);
-  const res=await fetch(url,{cache:'no-store'});
-  if(!res.ok)throw Error('Unavailable: '+asset);
-  await cache.put(new Request(new URL(asset,scope)),res);
- }));
- await self.skipWaiting();
-})()));
-self.addEventListener('activate',event=>event.waitUntil((async()=>{
- await Promise.all((await caches.keys()).filter(name=>name.startsWith('gb-plus-shell-')&&name!==CACHE).map(name=>caches.delete(name)));
- await self.clients.claim();
- const clients=await self.clients.matchAll({type:'window'});
- // Only background tabs are navigated automatically: never discard an open form.
- await Promise.all(clients.filter(client=>client.visibilityState==='hidden').map(client=>{
-  const url=new URL(client.url);if(!inScope(url)||url.searchParams.get('gbplus_release')===VERSION)return Promise.resolve();
-  url.searchParams.set('gbplus_release',VERSION);
-  return client.navigate(url.href).catch(()=>{});
- }));
- await Promise.all(clients.filter(client=>client.visibilityState==='visible').map(client=>client.postMessage({kind:'gbplus-update-ready',version:VERSION})));
-})()));
+const delay=(ms)=>new Promise((_,reject)=>setTimeout(()=>reject(new Error('NETWORK_TIMEOUT')),ms));
+async function network(request,ms){
+ const controller=new AbortController();
+ const timer=setTimeout(()=>controller.abort(),ms);
+ try{return await fetch(request,{cache:'no-store',signal:controller.signal});}
+ finally{clearTimeout(timer);}
+}
+async function fallback(request){
+ const own=await caches.open(CACHE);
+ const hit=await own.match(request,{ignoreSearch:true})||await caches.match(request,{ignoreSearch:true});
+ if(hit)return hit;
+ if(request.mode==='navigate'){
+  const offline=await own.match(new URL('./index.html',scope))||
+    await caches.match(new URL('./index.html',scope));
+  if(offline)return offline;
+  return new Response('<!doctype html><html lang="pt-BR"><meta name="viewport" content="width=device-width,initial-scale=1"><title>GB+ indisponível</title><body style="font:16px system-ui;padding:30px;background:#f5f5f8;color:#161616"><h1>GB+ temporariamente indisponível</h1><p>Não foi possível carregar a página. Confira sua conexão e tente novamente.</p><p><a href="./recuperar.html">Abrir recuperação do GB+</a></p></body></html>',{status:503,headers:{'Content-Type':'text/html;charset=utf-8'}});
+ }
+ return Response.error();
+}
+self.addEventListener('install',event=>{
+ // No large asset prefetch: waiting for network can trap Android PWA splash.
+ event.waitUntil(self.skipWaiting());
+});
+self.addEventListener('activate',event=>{
+ // Never redirect or force-reload open pages; old caches remain until safely replaced.
+ event.waitUntil(self.clients.claim());
+});
 self.addEventListener('fetch',event=>{
  const request=event.request,url=new URL(request.url);
  if(request.method!=='GET'||!inScope(url))return;
  event.respondWith((async()=>{
-  const cache=await caches.open(CACHE);
   try{
-   const response=await fetch(request,{cache:'no-store'});
-   if(response.ok&&response.type==='basic')await cache.put(request,response.clone()).catch(()=>{});
-   return response;
-  }catch(error){
-   const previous=await cache.match(request,{ignoreSearch:true});
-   if(previous)return previous;
-   if(request.mode==='navigate'){
-    const shell=await cache.match(new URL('./index.html',scope));
-    if(shell)return shell;
+   const response=await network(request,request.mode==='navigate'?6000:8000);
+   if(response.ok&&response.type==='basic'){
+    // Cache writes MUST NOT delay the response that releases the PWA splash.
+    const clone=response.clone();
+    event.waitUntil(caches.open(CACHE).then(cache=>cache.put(request,clone)).catch(()=>{}));
    }
-   return Response.error();
-  }
+   return response;
+  }catch(error){return fallback(request);}
  })());
 });
