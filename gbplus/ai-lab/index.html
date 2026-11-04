@@ -97,6 +97,10 @@ import {interpret,formatBRL,fixture} from './engine.js?v=20261103-v8';
 import {setupVoice} from './voice.js?v=20261103-v9';
 import {createChatHistory} from './chat-history.js?v=20261104-v1';
 const $=s=>document.querySelector(s),log=$('#messages'),input=$('#message');let proposal=null,context=null,live=false,session=null,history=[];
+const initialWelcome=$('#welcome').cloneNode(true);
+const chats=createChatHistory(message=>{$('#voice-status').textContent=message;});
+chats.setUser(null);
+
 const supabaseUrl='https://layrxmkosyqurpobzmku.supabase.co';const publishableKey='sb_publishable_AaQyS_d5doh7RtrkLucHUQ_d8KR07Gg';
 async function getSession(){const raw=localStorage.getItem('gbplus-auth-v1');if(!raw)return null;try{const v=JSON.parse(raw);const token=v?.access_token||v?.currentSession?.access_token;return token||null;}catch{return null;}}
 $('#ai-login').addEventListener('click',async()=>{
@@ -122,6 +126,8 @@ window.addEventListener('message',event=>{
  if(event.origin!==location.origin||event.source!==window.parent||event.data?.kind!=='gbplus-ai-profile')return;
  firstName=String(event.data.name||'').trim().slice(0,40);
  bridge={realData:!!event.data.realData,writeEnabled:!!event.data.writeEnabled};
+ if(chats.setUser(event.data.userId||null)){restoreChat();closeHistory();}
+
  updateGreeting();
  if(!live){$('#ai-state').textContent=bridge.realData?'Conta GB+ conectada · Consultas reais':'Modo local de demonstração';}
  $('#voice-status').textContent=bridge.realData?'Consultas com dados do GB+ · Gravação somente após confirmação':'Entre na sua conta GB+ para consultar dados reais';
@@ -130,15 +136,21 @@ window.addEventListener('message',event=>{
 function requestBridge(){if(window.parent!==window)window.parent.postMessage({kind:'gbplus-ai-request-profile'},location.origin);}
 requestBridge();window.addEventListener('focus',requestBridge);
 updateGreeting();
-function add(text,who='assistant'){
+function add(text,who='assistant',targetChat=chats.activeId()){
+ if(!chats.append(targetChat,who,text))return;
+ renderChatList();
+ if(targetChat!==chats.activeId())return;
+ paintMessage(text,who,true);
+}
+function paintMessage(text,who='assistant',animated=true){
  if(who!=='user')lastAnswer=String(text);
  const welcome=$('#welcome');if(welcome)welcome.remove();
  const row=document.createElement('div');row.className='message '+(who==='user'?'user':'assistant');
  if(who!=='user'){const avatar=document.createElement('div');avatar.className='avatar';avatar.textContent='+';row.append(avatar);}
  const el=document.createElement('div');el.className='bubble';row.append(el);log.append(row);
  const scroll=()=>{log.scrollTop=log.scrollHeight;};
- if(who==='user'||window.matchMedia('(prefers-reduced-motion: reduce)').matches){el.textContent=text;scroll();return;}
- // Only presentation is animated. The financial answer itself is never modified.
+ if(!animated||who==='user'||window.matchMedia('(prefers-reduced-motion: reduce)').matches){el.textContent=text;scroll();return;}
+ // Animation is visual only; the full message was already saved.
  el.setAttribute('aria-label',text);el.setAttribute('aria-live','off');
  const chars=Array.from(String(text));const duration=Math.min(950,Math.max(180,chars.length*5));
  const animate=()=>new Promise(resolve=>{
@@ -152,6 +164,58 @@ function add(text,who='assistant'){
  });
  typingQueue=typingQueue.then(animate).catch(()=>{el.textContent=text;});
 }
+function renderChatList(){
+ const list=$('#history-list');list.replaceChildren();
+ for(const chat of chats.list()){
+  const item=document.createElement('div');item.className='history-item'+(chat.id===chats.activeId()?' active':'');
+  const open=document.createElement('button');open.type='button';open.className='history-open';
+  open.setAttribute('aria-label','Abrir chat: '+chat.title);
+  const title=document.createElement('b');title.textContent=chat.title;
+  const subtitle=document.createElement('small');
+  const date=new Date(chat.updatedAt);
+  subtitle.textContent=chat.messages.length+' mensagens · '+(Number.isNaN(date.getTime())?'':date.toLocaleDateString('pt-BR'));
+  open.append(title,subtitle);
+  open.addEventListener('click',()=>{if(chats.select(chat.id))restoreChat();closeHistory();});
+  const del=document.createElement('button');del.type='button';del.className='history-delete';
+  del.setAttribute('aria-label','Excluir chat: '+chat.title);
+  del.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 11v6m4-6v6"/></svg>';
+  del.addEventListener('click',()=>{if(!window.confirm('Excluir definitivamente este chat deste dispositivo?'))return;const active=chats.activeId();chats.remove(chat.id);if(active!==chats.activeId())restoreChat();else renderChatList();});
+  item.append(open,del);list.append(item);
+ }
+}
+function restoreChat(){
+ // Never restore a stale payment/expense confirmation after changing chats.
+ proposal=null;context=null;lastTopic='';lastAnswer='';history=[];input.value='';
+ $('#details').open=false;$('#details').classList.add('hidden');
+ $('#confirm').disabled=true;$('#discard').disabled=true;
+ $('#preview').textContent='Nenhuma operação preparada.';
+ log.replaceChildren();
+ const current=chats.active();
+ if(!current?.messages.length){
+  log.append(initialWelcome.cloneNode(true));
+  updateGreeting();
+ }else for(const entry of current.messages)paintMessage(entry.text,entry.who,false);
+ renderChatList();
+}
+function openHistory(){
+ $('#history-layer').hidden=false;
+ renderChatList();
+ $('#history-close').focus();
+}
+function closeHistory(){
+ $('#history-layer').hidden=true;
+}
+function newChat(){
+ chats.create();restoreChat();closeHistory();
+}
+$('#chat-history-open').addEventListener('click',openHistory);
+$('#chat-new').addEventListener('click',newChat);
+$('#history-close').addEventListener('click',closeHistory);
+$('#history-scrim').addEventListener('click',closeHistory);
+$('#history-new').addEventListener('click',newChat);
+document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!$('#history-layer').hidden)closeHistory();});
+log.addEventListener('click',event=>{const example=event.target.closest('[data-example]');if(example)submit(example.dataset.example);});
+restoreChat();
 function field(k,v){const d=document.createElement('div');d.className='field';const a=document.createElement('span');a.textContent=k;const b=document.createElement('strong');b.textContent=String(v);d.append(a,b);return d;}
 function show(result){
  const details=$('#details'),hasProposal=!!result.proposal;
@@ -257,7 +321,7 @@ async function submit(text){
  else context=null;
 }
 $('#chat-form').addEventListener('submit',e=>{e.preventDefault();const text=input.value.trim();if(!text)return;input.value='';submit(text);});
-document.querySelectorAll('[data-example]').forEach(b=>b.addEventListener('click',()=>submit(b.dataset.example)));
+// Example suggestions are delegated to #messages so they also work in new chats.
 $('#confirm').addEventListener('click',()=>{
  if(!proposal)return;
  if(window.parent===window||!bridge.realData){add('Para gravar um título de verdade, abra o chat dentro do aplicativo GB+ e esteja conectado à sua conta. Aqui fora só é possível simular.');return;}
