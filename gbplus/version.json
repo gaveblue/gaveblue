@@ -1,12 +1,12 @@
 {
-  "version": "1.9.0",
-  "build": 25,
+  "version": "2.0.0",
+  "build": 26,
   "published_at": "2026-11-04",
-  "title": "Primeiros passos e atalhos personalizados",
+  "title": "Grande Atualização — GB+ 2.0.0",
   "notes": [
-    "Novo passo a passo após o primeiro cadastro: conta financeira, saldo inicial opcional e preferências.",
-    "Barra inferior personalizável: escolha três atalhos, com Início e Novo sempre fixos.",
-    "Preferências salvas na conta e editáveis nas Configurações. Dados financeiros anteriores preservados."
+    "Configuração inicial guiada: primeira conta, saldo de abertura e preferências, com revisão antes de salvar.",
+    "Barra inferior personalizável, mantendo Início e Novo fixos; menu Mais com três pontos no celular.",
+    "Tela de acesso sem bordas e GB+ AI arrastável com recolhimento lateral seguro, sem desaparecer da tela."
   ],
   "assets": [
     "./index.html",
