@@ -3,7 +3,7 @@ import {cloudConfig} from './cloud-config.js';
 import {esc,icon} from './ui.js';
 import {loginRedirectMessage,clearLoginErrorUrl,safeAuthEmail} from './auth-flow.js';
 
-let client,user=null,recovery=false,working=false,startup=true,pendingEmail='';
+let client,user=null,recovery=false,working=false,startup=true,pendingEmail='',lastResend=0;
 let onChange=()=>{};
 export const currentUser=()=>user;
 export const authClient=()=>client;
@@ -161,24 +161,48 @@ document.addEventListener('click',async event=>{
 });
 
 document.addEventListener('submit',async event=>{
-  if(event.target.id!=='auth-form')return;
-  event.preventDefault();event.stopImmediatePropagation();if(working)return;
-  const form=event.target,mode=form.dataset.mode,values=Object.fromEntries(new FormData(form));
-  feedback('');feedback('',false);
-  if(['signup','recovery'].includes(mode)&&values.password!==values.confirmation){feedback('As senhas precisam ser iguais.');return;}
-  setWorking(true);
-  try{
-    const auth=getClient().auth;let result;
-    if(mode==='signin')result=await auth.signInWithPassword({email:values.email.trim(),password:values.password});
-    if(mode==='signup')result=await auth.signUp({email:values.email.trim(),password:values.password,options:{emailRedirectTo:cloudConfig.siteUrl}});
-    if(mode==='forgot')result=await auth.resetPasswordForEmail(values.email.trim(),{redirectTo:cloudConfig.siteUrl});
-    if(mode==='recovery')result=await auth.updateUser({password:values.password});
-    if(result.error){feedback(authError(result.error));return;}
-    form.reset();
-    if(mode==='signin'||(mode==='signup'&&result.data.session)){onChange();location.reload();return;}
-    if(mode==='recovery'){
-      recovery=false;sessionStorage.removeItem('gbplus-recovery');feedback('Senha atualizada. Clique em Voltar ao financeiro.',false);
-    }else feedback(mode==='signup'?'Confira seu e-mail para confirmar o cadastro. Abra o link neste mesmo navegador. Se já tiver conta, entre ou recupere sua senha.':'Se houver uma conta para este endereço, você receberá um link de recuperação. Abra-o neste mesmo navegador.',false);
-  }catch{feedback('Não foi possível conectar. Verifique sua conexão e tente novamente.');}
-  finally{setWorking(false);}
+ if(event.target.id!=='auth-form')return;
+ event.preventDefault();event.stopImmediatePropagation();if(working)return;
+ const form=event.target,mode=form.dataset.mode,values=Object.fromEntries(new FormData(form));
+ const email=String(values.email||'').trim().toLowerCase();
+ feedback('');feedback('',false);
+ if(mode!=='recovery'&&!safeAuthEmail(email)){feedback('Informe um endereço de e-mail válido.');return;}
+ if(['signup','recovery'].includes(mode)&&values.password!==values.confirmation){feedback('As senhas precisam ser iguais.');return;}
+ if(['signup','recovery'].includes(mode)&&String(values.password||'').length<8){feedback('A senha precisa ter pelo menos 8 caracteres.');return;}
+ if(!navigator.onLine){feedback('Sem conexão. Conecte-se para continuar.');return;}
+ if(mode==='confirm'&&Date.now()-lastResend<60000){feedback('Aguarde um minuto antes de pedir outro e-mail.');return;}
+ setWorking(true);
+ try{
+  const auth=getClient().auth;let result;
+  if(mode==='signin')result=await auth.signInWithPassword({email,password:values.password});
+  if(mode==='signup')result=await auth.signUp({email,password:values.password,options:{emailRedirectTo:cloudConfig.siteUrl}});
+  if(mode==='forgot')result=await auth.resetPasswordForEmail(email,{redirectTo:cloudConfig.siteUrl});
+  if(mode==='confirm')result=await auth.resend({type:'signup',email,options:{emailRedirectTo:cloudConfig.siteUrl}});
+  if(mode==='recovery')result=await auth.updateUser({password:values.password});
+  if(result?.error){
+   if(mode==='signin'&&result.error.code==='email_not_confirmed'){
+    pendingEmail=email;showAuth('confirm',authError(result.error));return;
+   }
+   feedback(authError(result.error));return;
+  }
+  if(mode==='signin'||(mode==='signup'&&result?.data?.session)){
+   onChange();location.reload();return;
+  }
+  if(mode==='signup'){
+   pendingEmail=email;showAuth('confirm');
+   feedback('Cadastro solicitado. Confira seu e-mail para confirmar a conta. Se não chegar, você poderá reenviar o link.',false);
+  }else if(mode==='confirm'){
+   lastResend=Date.now();
+   pendingEmail=email;
+   feedback('Se o cadastro precisar de confirmação, um novo link será enviado. Confira também a pasta de spam.',false);
+  }else if(mode==='forgot'){
+   form.reset();
+   feedback('Se o e-mail estiver cadastrado, você receberá um link de recuperação. Abra-o no mesmo navegador em que fez a solicitação.',false);
+  }else if(mode==='recovery'){
+   recovery=false;sessionStorage.removeItem('gbplus-recovery');
+   feedback('Senha atualizada. Agora você pode voltar ao financeiro.',false);
+  }
+ }catch(error){
+  feedback(error?.message?.includes('fetch')?'Falha de conexão. Confira sua internet e tente novamente.':'Não foi possível concluir a solicitação. Verifique sua conexão e tente novamente.');
+ }finally{setWorking(false);}
 },true);
