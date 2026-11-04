@@ -4,10 +4,12 @@ import {esc,icon,button,field,formFooter,download,csv,titleTable} from './ui.js?
 import {routes,dashboard,titlesView,partnersView,accountsView,categoriesView,flowView,reportsView,settingsView,notificationsView,filteredTitles,reportData} from './views.js?v=20261104-33';
 import {titleForm,partnerForm,accountForm,categoryForm,paymentForm,transferForm,titleDetail,customizeForm,accountDetail} from './forms.js';
 import {SupabaseRepository} from '../integrations/supabase/repository.js';
-import {initializeAuth,authClient,currentUser,showAuth,isRecovery,updatePersonalProfile,requestProfileEmail,consumeAuthReturnMessage} from './auth.js?v=20261104-32';
-import {profileView,validateProfile,validateEmail} from './profile.js?v=20261104-27';
+import {initializeAuth,authClient,currentUser,showAuth,isRecovery,updatePersonalProfile,consumeAuthReturnMessage} from './auth.js?v=20261104-32';
+import {profileView,validateProfile} from './profile.js?v=20261104-27';
 import {firstSetupView,customMobileNavForm,shortcutsPreview,readMobileNav} from './setup-ui.js';
-let repository=null;let db;let busy=false;let pendingGeneration=null;let confirmAction=null;let installPrompt=null;
+let repository=null;let db;let busy=false;let pendingGeneration=null;let confirmAction=null;let installPrompt=null;let installedInSession=false;
+const isInstalledApp=()=>installedInSession||matchMedia('(display-mode: standalone)').matches||matchMedia('(display-mode: fullscreen)').matches||navigator.standalone===true;
+const inviteLink='https://gaveblue.com.br/gbplus/';
 const state={route:'dashboard',period:'month',range:{},query:'',status:'',type:'',partner:'',category:'',partnerQuery:'',granularity:'month',report:'payable',reportPartner:'',moreFilters:false};
 const modal=document.querySelector('#modal');
 // Desktop-only sidebar preference; changing it never touches the finance database.
@@ -33,7 +35,7 @@ function confirm(title,message,callback){confirmAction=callback;openModal(title,
 let setupDraft=null;
 function startSetupWizard(){
  if(!db)return;
- setupDraft={step:'welcome',history:[],createAccount:false,name:'',bank:'',branch:'',number:'',initial:0,theme:db.settings.theme,mobileNav:[...effectiveMobileNav(db.settings)]};
+ setupDraft={step:'welcome',history:[],createAccount:false,name:'',bank:'',branch:'',number:'',initial:0,theme:db.settings.theme};
  showSetupWizard();
 }
 function showSetupWizard(){
@@ -47,7 +49,7 @@ function nextSetupStep(step){
  showSetupWizard();
 }
 function updateMobileNavPreview(form){
- if(!form||!['mobile-nav-form','setup-preferences-form'].includes(form.id))return;
+ if(!form||form.id!=='mobile-nav-form')return;
  const current=readMobileNav(form),preview=form.querySelector('#mobile-nav-preview');
  if(preview)preview.innerHTML=shortcutsPreview(current);
  const message=form.querySelector('.form-error');
@@ -72,7 +74,7 @@ function render(){if(!db)return;updateSystemAppearance(db.settings.theme);docume
  const custom=effectiveMobileNav(db.settings);
  const slots=[['dashboard','Início','home'],renderMobileShortcut(custom[0]),['new','Novo','plus'],renderMobileShortcut(custom[1]),renderMobileShortcut(custom[2])];
  return slots.map(([key,label,ico])=>key==='new'||key==='menu'?`<button type="button" data-action="${key==='new'?'new-title':'mobile-menu'}" class="${key==='new'?'mobile-new':''}" aria-label="${label}">${icon(ico)}<span>${label}</span></button>`:`<a href="#${key}" class="${state.route===key?'active':''}" ${state.route===key?'aria-current="page"':''}>${icon(ico)}<span>${label}</span></a>`).join('');
-})();const views={dashboard:()=>dashboard(db,state,!!currentUser(),currentUser()),titles:()=>titlesView(db,state),payable:()=>titlesView(db,state),receivable:()=>titlesView(db,state),partners:()=>partnersView(db,state),accounts:()=>accountsView(db),categories:()=>categoriesView(db),flow:()=>flowView(db,state),provisions:()=>flowView(db,state),reports:()=>reportsView(db,state),settings:()=>settingsView(db,!!installPrompt,!!currentUser(),currentUser()),notifications:()=>notificationsView(db),profile:()=>profileView(currentUser())};document.body.classList.toggle('gb-settings-page',state.route==='settings');document.querySelector('#main').innerHTML=(views[state.route]||views.dashboard)();updateConnection();if(state.route==='dashboard')applyPanel();}
+})();const views={dashboard:()=>dashboard(db,state,!!currentUser(),currentUser()),titles:()=>titlesView(db,state),payable:()=>titlesView(db,state),receivable:()=>titlesView(db,state),partners:()=>partnersView(db,state),accounts:()=>accountsView(db),categories:()=>categoriesView(db),flow:()=>flowView(db,state),provisions:()=>flowView(db,state),reports:()=>reportsView(db,state),settings:()=>settingsView(db,!!installPrompt,!!currentUser(),currentUser(),isInstalledApp()),notifications:()=>notificationsView(db),profile:()=>profileView(currentUser())};document.body.classList.toggle('gb-settings-page',state.route==='settings');document.querySelector('#main').innerHTML=(views[state.route]||views.dashboard)();if(state.route==='profile')initializeProfileDirtyState();updateConnection();if(state.route==='dashboard')applyPanel();}
 
 function filterSettings(value){
  const search=String(value||'').trim().toLocaleLowerCase('pt-BR');
@@ -91,6 +93,20 @@ function filterSettings(value){
  if(remove){remove.hidden=!!search&&!remove.dataset.settingsKeywords.includes(search);if(!remove.hidden)matches++;}
  const empty=document.querySelector('#gb-cfg-no-results');if(empty)empty.hidden=matches>0||(profile&&!profile.hidden);
 }
+function profileSnapshot(form){
+ return JSON.stringify([...new FormData(form)].map(([key,value])=>[key,String(value)]));
+}
+function syncProfileSaveState(form){
+ if(!form||form.id!=='profile-form')return;
+ const submit=form.querySelector('#profile-save');
+ if(submit)submit.disabled=form.dataset.saving==='true'||form.dataset.initialSnapshot===profileSnapshot(form);
+}
+function initializeProfileDirtyState(){
+ const form=document.getElementById('profile-form');
+ if(!form)return;
+ form.dataset.initialSnapshot=profileSnapshot(form);
+ syncProfileSaveState(form);
+}
 function applyPanel(){const device=matchMedia('(max-width: 760px)').matches?'mobile':'desktop';document.querySelectorAll('[data-indicator]').forEach(el=>{el.hidden=!db.settings.panel[device][el.dataset.indicator];});document.querySelectorAll('.dashboard-middle,.results-grid,.stats-grid').forEach(el=>el.hidden=![...el.children].some(x=>!x.hidden));}
 function route(){if(!db)return;const next=location.hash.slice(1);if(next==='main'&&document.querySelector('#main').childElementCount)return;state.route=next==='profile'||routes.some(r=>r[0]===next)?next:'dashboard';state.type=state.route==='payable'?'expense':state.route==='receivable'?'income':'';closeModal();render();window.scrollTo(0,0);}
 function formValues(form){return Object.fromEntries(new FormData(form));}
@@ -103,7 +119,6 @@ const actions={
   theme:()=>commit(d=>{d.settings.theme=d.settings.theme==='light'?'dark':'light';},'Tema atualizado.'),
   'top-theme':()=>commit(d=>{d.settings.theme=d.settings.theme==='light'?'dark':'light';},'Tema atualizado.'),
   'check-updates':()=>{closeModal();window.dispatchEvent(new Event('gbplus-check-updates'));},
-  'preview-update':()=>{closeModal();window.dispatchEvent(new Event('gbplus-preview-update'));},
   'toggle-title-filters':()=>{state.moreFilters=!state.moreFilters;render();},
   'clear-title-filters':()=>{state.query='';state.status='';state.partner='';state.category='';state.type=state.route==='payable'?'expense':state.route==='receivable'?'income':'';state.period='month';state.range=rangeFor('month');state.moreFilters=false;render();},
   'set-theme':el=>commit(d=>{d.settings.theme=el.dataset.value;},'Tema atualizado.'),
@@ -144,9 +159,8 @@ const actions={
     '<p class="form-hint" style="margin-top:16px">Seus registros financeiros não são apagados ao sair do aplicativo.</p>'),
   'refresh-settings':()=>{closeModal();window.dispatchEvent(new Event('gbplus-refresh'));},
   'settings-updates':()=>openModal('Atualizações do GB+',
-    '<p class="muted">Versão instalada: <strong>GB+ '+esc(document.querySelector('meta[name="gbplus-version"]')?.content||'')+'</strong>. Verifique novas versões ou veja uma simulação do processo.</p>'+
-    '<div class="button-stack" style="margin-top:20px">'+button(icon('refresh')+' Verificar atualizações','check-updates','primary')+
-    button(icon('eye')+' Prévia da atualização','preview-update')+'</div>'),
+    '<p class="muted">Versão instalada: <strong>GB+ '+esc(document.querySelector('meta[name="gbplus-version"]')?.content||'')+'</strong>. Confira se há uma versão nova para baixar e instalar.</p>'+
+    '<div class="button-stack" style="margin-top:20px">'+button(icon('refresh')+' Verificar atualizações','check-updates','primary')+'</div>'),
   'settings-help':()=>openModal('Ajuda e suporte',
     '<p>Precisa de ajuda com o GB+? Descreva sua dúvida, informe a versão do aplicativo e, se necessário, anexe uma captura da tela. Nunca envie senhas ou códigos de acesso.</p>'+
     '<p style="margin-top:16px"><a class="button primary" href="mailto:contato@gaveblue.com.br?subject=Suporte%20GB%2B">'+icon('arrow')+' Entrar em contato</a></p>'+
@@ -184,7 +198,7 @@ const actions={
   'setup-finish':async()=>{
    if(!setupDraft||busy)return;
    const draft=structuredClone(setupDraft);
-   if(!['dark','light'].includes(draft.theme)||!validMobileNav(draft.mobileNav))throw Error('Revise as preferências e escolha atalhos diferentes.');
+   if(!['dark','light'].includes(draft.theme))throw Error('Revise a preferência de aparência.');
    if(draft.createAccount&&(!draft.name.trim()||draft.name.length>120))throw Error('Informe um nome válido para a conta.');
    if(!Number.isSafeInteger(draft.initial)||Math.abs(draft.initial)>1e12)throw Error('Saldo inicial inválido.');
    await commit(d=>{
@@ -193,7 +207,6 @@ const actions={
      d.accounts.push({id:uid(),name:draft.name.trim(),bank:draft.bank.trim(),branch:draft.branch.trim(),number:draft.number.trim(),initial:draft.initial,active:true});
     }
     d.settings.theme=draft.theme;
-    d.settings.mobileNav=[...draft.mobileNav];
     d.settings.setupCompleted=true;
    },'Configuração inicial concluída. Seu GB+ está pronto!');
    setupDraft=null;
@@ -268,10 +281,9 @@ document.addEventListener('submit',async e=>{e.preventDefault();if(busy||!db)ret
   }
   if(form.id==='setup-preferences-form'){
    if(!setupDraft)return;
-   const nav=readMobileNav(form),theme=String(v.theme||'');
-   if(!validMobileNav(nav))throw Error('Selecione três atalhos diferentes para a barra inferior.');
+   const theme=String(v.theme||'');
    if(!['light','dark'].includes(theme))throw Error('Selecione um tema válido.');
-   setupDraft.mobileNav=[...nav];setupDraft.theme=theme;
+   setupDraft.theme=theme;
    nextSetupStep('review');
    return;
   }
@@ -286,7 +298,7 @@ document.addEventListener('submit',async e=>{e.preventDefault();if(busy||!db)ret
 }catch(error){fail(error);}});
 function upsert(rows,row){const i=rows.findIndex(x=>x.id===row.id);if(i<0)rows.push(row);else rows[i]=row;}
 document.addEventListener('change',async e=>{if(!db)return;const el=e.target;try{
-  if(el.name?.startsWith('slot')&&['mobile-nav-form','setup-preferences-form'].includes(el.form?.id))updateMobileNavPreview(el.form);
+  if(el.name?.startsWith('slot')&&el.form?.id==='mobile-nav-form')updateMobileNavPreview(el.form);
   if(el.id==='entry-type'){const select=document.querySelector('#entry-category');select.innerHTML=db.categories.filter(c=>c.type===el.value).map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');}
   if(el.id==='entry-mode'){document.querySelector('#count-field').hidden=el.value==='single';document.querySelector('#mode-hint').textContent=el.value==='installment'?'O valor total será dividido entre as parcelas, com ajuste exato dos centavos.':el.value==='recurring'?'O valor mensal será repetido em cada mês. Você poderá editar as ocorrências depois.':'Um título, um vencimento. O saldo só muda ao registrar uma baixa.';}
   if(el.id==='period'){if(el.value==='custom'){openModal('Escolher período',`<form id="period-form"><div class="form-grid">${field('De','from',state.range.from||today(),'date','required')}${field('Até','to',state.range.to||today(),'date','required')}</div>${formFooter('Aplicar período')}</form>`);el.value=state.period;}else{state.period=el.value;state.range=rangeFor(el.value);render();}}
@@ -299,6 +311,7 @@ document.addEventListener('input',e=>{if(e.target.id==='settings-search-input'){
 window.addEventListener('hashchange',route);
 matchMedia('(max-width: 760px)').addEventListener('change',()=>{if(db&&state.route==='dashboard')applyPanel();});
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPrompt=e;if(db&&state.route==='settings')render();});
+window.addEventListener('appinstalled',()=>{installedInSession=true;installPrompt=null;if(db&&state.route==='settings')render();});
 window.addEventListener('storage',e=>{if(e.key===KEY&&!currentUser())toast('Dados alterados em outra aba. Atualize a página antes de continuar.');});
 modal.addEventListener('cancel',()=>{pendingGeneration=null;confirmAction=null;});
 
