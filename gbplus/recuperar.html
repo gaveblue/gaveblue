@@ -19,11 +19,11 @@ button{width:100%;background:#19191c;color:white}a.action{color:#19191c;backgrou
 <body><main>
 <div class="logo">GB+</div>
 <h1>Recuperar acesso ao GB+</h1>
-<p>Se o aplicativo ficou preso na tela com o logotipo, reinicie apenas o componente de atualização. Isso não exclui contas bancárias, títulos, sessões ou registros financeiros.</p>
+<p>Se o aplicativo ficou preso na tela com o logotipo, recarregue os arquivos do aplicativo e reinicie o componente de atualização. Isso não exclui contas bancárias, títulos, sessões ou registros financeiros.</p>
 <button id="repair" type="button">Reiniciar atualização do aplicativo</button>
 <a class="action" href="./?gbplus_recovery=1">Abrir GB+ normalmente</a>
 <div id="status" role="status" aria-live="polite"></div>
-<small>Esta operação não apaga o armazenamento local, o cache de dados ou os registros no Supabase. Evite usar opções do Android como “Limpar dados” ou desinstalar antes de conferir seus registros.</small>
+<small>Esta operação remove somente caches de arquivos do aplicativo. Não apaga títulos, contas, armazenamento local, sessão ou registros no Supabase. Evite usar opções do Android como “Limpar dados” ou desinstalar antes de conferir seus registros.</small>
 </main>
 <script>
 const button=document.getElementById('repair'),status=document.getElementById('status');
@@ -36,7 +36,15 @@ button.addEventListener('click',async()=>{
    const matches=registrations.filter(reg=>new URL(reg.scope).origin===base.origin&&new URL(reg.scope).pathname===base.pathname);
    for(const reg of matches)await reg.unregister();
   }
-  status.textContent='Atualização reiniciada. Abrindo o GB+…';
+  // Remove ONLY compiled application-shell caches. Do not clear localStorage,
+  // IndexedDB, cookies, user sessions, financial records or business data.
+  if('caches' in window){
+   const names=await caches.keys();
+   for(const name of names){
+    if(/^gb-plus-shell-v\d+$/.test(name))await caches.delete(name);
+   }
+  }
+  status.textContent='Arquivos antigos do aplicativo renovados. Abrindo o GB+…';
   location.replace('./?gbplus_recovery='+Date.now());
  }catch(error){
   status.textContent='Não foi possível reiniciar automaticamente. Abra o link “Abrir GB+ normalmente” ou tente pelo Chrome.';
