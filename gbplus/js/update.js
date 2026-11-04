@@ -261,7 +261,6 @@
  function primaryClick(){
   if(active)return;
   const next=els.primary.dataset.next;
-  if(next==='demo'){runDemo();return;}
   if(next==='close'){dismiss();return;}
   if(next==='install'){apply();return;}
   if(next==='retry'){check(true);return;}
@@ -279,7 +278,7 @@
   }
   document.addEventListener('input',event=>{if(event.target.closest?.('#main,#modal'))dirty=true;},{passive:true});
   window.addEventListener('gbplus-check-updates',()=>check(true));
-  window.addEventListener('gbplus-preview-update',demo);
+  // Update previews are intentionally disabled; only real version checks are available.
   window.addEventListener('focus',()=>check(false));
   // Once on boot and infrequently after; no forced reload.
   setTimeout(()=>check(false),1800);
