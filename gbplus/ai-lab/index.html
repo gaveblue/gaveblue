@@ -35,8 +35,49 @@
 @keyframes voice-idle{0%,100%{height:4px;opacity:.5}50%{height:9px;opacity:.85}}
 @keyframes voice-speech{0%,100%{height:5px;opacity:.75}50%{height:24px;opacity:1}}
 @media(prefers-reduced-motion:reduce){.voice-wave .voice-bar{animation:none!important;height:7px}}
+
+/* Multi-chat history; the finance app and PWA stay isolated from this overlay. */
+header{padding-right:62px;gap:10px}
+.brand{min-width:0;flex-shrink:1}.brand-meta{min-width:0}
+.chat-header-actions{display:flex;align-items:center;gap:5px;flex-shrink:0;margin-left:auto}
+.chat-icon-button{background:transparent;border:1px solid #e7e7ea;color:#353535;border-radius:12px;width:36px;height:36px;display:inline-grid;place-items:center;padding:0}
+.chat-icon-button:hover,.chat-icon-button:focus-visible{background:#f2f2f5}
+.history-layer{position:fixed;inset:0;z-index:60;display:block}
+.history-layer[hidden]{display:none!important}
+.history-scrim{position:absolute;inset:0;border:0;background:#18181888;cursor:pointer}
+.history-drawer{position:absolute;inset:0 auto 0 0;width:min(360px,87vw);background:#fff;color:#171717;display:flex;flex-direction:column;padding:21px 16px max(15px,env(safe-area-inset-bottom));box-shadow:5px 0 32px #0002}
+.history-heading{display:flex;align-items:center;justify-content:space-between;padding:3px 2px 20px;font-size:21px}
+.history-heading .chat-icon-button{font-size:25px;font-weight:300}
+.history-new{display:flex;align-items:center;gap:10px;text-align:left;padding:12px 14px;border:1px solid #e4e4e8;border-radius:14px;background:#18181b;color:#fff;font-weight:600;font-size:14px}
+.history-new span{font-size:23px;line-height:1}
+.history-note{margin:17px 3px 13px;color:#85858e;font-size:11px;line-height:1.5}
+.history-list{min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:5px;padding:2px 0 10px}
+.history-item{display:flex;gap:3px;border-radius:12px;align-items:center;padding:5px}
+.history-item.active{background:#f0eff6}
+.history-open{background:none;border:0;min-width:0;flex:1;text-align:left;display:flex;flex-direction:column;gap:3px;padding:8px;color:#24242a}
+.history-open b{font-size:12px;font-weight:600;white-space:nowrap;text-overflow:ellipsis;overflow:hidden;width:100%}
+.history-open small{font-size:10px;color:#86868e}
+.history-delete{background:transparent;border:0;color:#8c8c96;width:34px;height:34px;border-radius:9px;display:grid;place-items:center;flex-shrink:0}
+.history-delete:hover,.history-delete:focus-visible{color:#b02b38;background:#fff0f1}
+.history-delete svg{width:16px;height:16px}
+@media(max-width:680px){header{padding-right:53px}.chat-header-actions .pill{display:none}.chat-icon-button{width:34px;height:34px}.brand{gap:7px}.logo{font-size:25px}.brand-meta{padding-left:8px}.brand-meta strong{font-size:12px}.brand-meta .muted{font-size:10px}}
+@media(max-width:350px){.brand-meta .muted{display:none}.chat-header-actions{gap:2px}}
 </style></head><body><div class="wrap">
-<header><div class="brand"><span class="logo">GB+</span><span class="brand-meta"><strong>GB+ AI</strong><span class="muted">Assistente financeiro</span></span></div><span class="pill" id="mode-pill">● Modo local</span></header>
+<header><div class="brand"><span class="logo">GB+</span><span class="brand-meta"><strong>GB+ AI</strong><span class="muted">Assistente financeiro</span></span></div>
+<div class="chat-header-actions">
+<span class="pill" id="mode-pill">● Conectando</span>
+<button type="button" id="chat-history-open" class="chat-icon-button" aria-label="Abrir histórico de chats" title="Histórico de chats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="21" height="21" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/><path d="M12 7v5l3.5 2"/></svg></button>
+<button type="button" id="chat-new" class="chat-icon-button" aria-label="Novo chat" title="Novo chat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="21" height="21" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+</div></header>
+<div id="history-layer" class="history-layer" hidden>
+<button id="history-scrim" type="button" class="history-scrim" aria-label="Fechar histórico"></button>
+<aside class="history-drawer" role="dialog" aria-modal="true" aria-label="Histórico de chats">
+<div class="history-heading"><strong>Seus chats</strong><button id="history-close" type="button" class="chat-icon-button" aria-label="Fechar histórico">×</button></div>
+<button type="button" id="history-new" class="history-new"><span aria-hidden="true">＋</span> Novo chat</button>
+<p class="history-note">As conversas ficam salvas apenas neste navegador, separadas por conta.</p>
+<div id="history-list" class="history-list"></div>
+</aside>
+</div>
 <main class="workspace">
 <div id="messages" class="messages" role="log" aria-live="polite">
 <div id="welcome" class="welcome"><div class="welcome-icon">GB+</div><h1 id="welcome-title">Como posso ajudar?</h1><p>Seu assistente financeiro do GB+. Faça perguntas, simule lançamentos ou experimente comandos por voz.</p>
@@ -49,11 +90,12 @@
   <button id="voice-cancel" class="voice-minor" type="button">Cancelar</button>
   <button id="voice-finish" class="voice-finish" type="button">Concluir</button>
 </section>
-<form id="chat-form" class="composer"><input id="message" aria-label="Sua mensagem" placeholder="Mensagem para GB+ AI..." autocomplete="off" required><button id="mic" class="voice-trigger" type="button" aria-pressed="false" aria-label="Iniciar gravação de voz" title="Gravar mensagem de voz"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="13" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 17v5m-4 0h8"/></svg></button><button id="send" class="primary" type="submit" aria-label="Enviar mensagem"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 14-7-5 14-3-6-6-1z"/><path d="m11 13 8-8"/></svg></button></form>
+<form id="chat-form" class="composer"><input id="message" name="gbplus_chat_message" type="text" aria-label="Sua mensagem" aria-autocomplete="none" placeholder="Mensagem para GB+ AI..." autocomplete="off" autocapitalize="sentences" enterkeyhint="send" spellcheck="true" required><button id="mic" class="voice-trigger" type="button" aria-pressed="false" aria-label="Iniciar gravação de voz" title="Gravar mensagem de voz"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="13" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 17v5m-4 0h8"/></svg></button><button id="send" class="primary" type="submit" aria-label="Enviar mensagem"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 14-7-5 14-3-6-6-1z"/><path d="m11 13 8-8"/></svg></button></form>
 <div id="ai-connect" style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:10px;flex-wrap:wrap"><span id="ai-state" class="muted">Conectando ao GB+…</span><button id="ai-login" type="button" style="border:1px solid #ddd;border-radius:99px;padding:7px 12px;background:#fff;font-size:12px">Conectar IA</button></div><p id="voice-status" class="footnote" role="status">Aguardando conexão com seu financeiro GB+</p>
 </div></main></div><script type="module">
 import {interpret,formatBRL,fixture} from './engine.js?v=20261103-v8';
 import {setupVoice} from './voice.js?v=20261103-v9';
+import {createChatHistory} from './chat-history.js?v=20261104-v1';
 const $=s=>document.querySelector(s),log=$('#messages'),input=$('#message');let proposal=null,context=null,live=false,session=null,history=[];
 const supabaseUrl='https://layrxmkosyqurpobzmku.supabase.co';const publishableKey='sb_publishable_AaQyS_d5doh7RtrkLucHUQ_d8KR07Gg';
 async function getSession(){const raw=localStorage.getItem('gbplus-auth-v1');if(!raw)return null;try{const v=JSON.parse(raw);const token=v?.access_token||v?.currentSession?.access_token;return token||null;}catch{return null;}}
