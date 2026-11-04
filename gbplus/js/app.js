@@ -4,7 +4,7 @@ import {esc,icon,button,field,formFooter,download,csv,titleTable} from './ui.js'
 import {routes,dashboard,titlesView,partnersView,accountsView,categoriesView,flowView,reportsView,settingsView,notificationsView,filteredTitles,reportData} from './views.js';
 import {titleForm,partnerForm,accountForm,categoryForm,paymentForm,transferForm,titleDetail,customizeForm,accountDetail} from './forms.js';
 import {SupabaseRepository} from '../integrations/supabase/repository.js';
-import {initializeAuth,authClient,currentUser,accountCard,showAuth,isRecovery,updatePersonalProfile,requestProfileEmail} from './auth.js';
+import {initializeAuth,authClient,currentUser,accountCard,showAuth,isRecovery,updatePersonalProfile,requestProfileEmail,consumeAuthReturnMessage} from './auth.js';
 import {profileView,validateProfile,validateEmail} from './profile.js?v=20261104-27';
 import {firstSetupView,customMobileNavForm,shortcutsPreview,readMobileNav} from './setup-ui.js';
 let repository=null;let db;let busy=false;let pendingGeneration=null;let confirmAction=null;let installPrompt=null;
@@ -313,8 +313,9 @@ async function init(){
   if(account)account.onclick=()=>{if(currentUser()&&db){location.hash='profile';}else showAuth();};
   const main=document.querySelector('#main');
   if(main&&!document.querySelector('#sync-alert'))main.insertAdjacentHTML('beforebegin','<div id="sync-alert" class="auth-notice sync-alert" role="alert" hidden>A gravação online precisa ser conferida. Feche o formulário, atualize os dados e refaça a alteração. <button class="button small" data-auth-action="refresh">Atualizar dados online</button></div>');
+  const loginReturnMessage=consumeAuthReturnMessage();
   const user=await startupLimit(initializeAuth(clearAccount),16000);
-  if(!user){showAuth('signin');return;}
+  if(!user){showAuth('signin',loginReturnMessage);return;}
   if(isRecovery()){showAuth('recovery');return;}
   repository=new SupabaseRepository(authClient(),user.id);
   db=await startupLimit(repository.read(),16000);
