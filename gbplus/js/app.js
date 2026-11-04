@@ -10,7 +10,7 @@ const state={route:'dashboard',period:'month',range:{},query:'',status:'',type:'
 const modal=document.querySelector('#modal');
 function toast(message){const el=document.querySelector('#toast');el.textContent=message;el.classList.add('visible');clearTimeout(toast.timer);toast.timer=setTimeout(()=>el.classList.remove('visible'),4500);}
 function openModal(title,content){document.querySelector('#modal-content').innerHTML=`<div class="modal-heading"><h2 id="modal-title">${title}</h2><button class="icon-button" data-action="close" aria-label="Fechar">${icon('close')}</button></div><div class="modal-body">${content}</div>`;modal.setAttribute('aria-labelledby','modal-title');if(!modal.open)modal.showModal();}
-function closeModal(){modal.close();pendingGeneration=null;confirmAction=null;}
+function closeModal(){if(modal.open)modal.close();pendingGeneration=null;confirmAction=null;}
 function confirm(title,message,callback){confirmAction=callback;openModal(title,`<p class="confirm-message">${esc(message)}</p><div class="form-error" role="alert"></div><div class="form-footer">${button('Cancelar','close')}${button('Confirmar','confirm','primary')}</div>`);}
 function rangeFor(period){const now=today();const [y,m]=now.split('-').map(Number);const date=(y,m,d)=>`${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;if(period==='all')return {from:'',to:''};if(period==='year')return {from:`${y}-01-01`,to:`${y}-12-31`};const dt=new Date(y,m-1-(period==='last'?1:0),1);const yy=dt.getFullYear(),mm=dt.getMonth()+1;return {from:date(yy,mm,1),to:date(yy,mm,new Date(yy,mm,0).getDate())};}
 async function commit(mutator,message='Salvo com sucesso.'){if(!db)throw Error('Entre ou abra o modo local antes de continuar.');if(busy)throw Error('Aguarde a gravação atual.');busy=true;document.body.classList.add('saving');try{const draft=structuredClone(db);await mutator(draft);db=await repository.save(draft);closeModal();render();toast(message);}finally{busy=false;document.body.classList.remove('saving');}}
@@ -119,36 +119,7 @@ async function refreshOnline(manual=false){
   }catch(error){document.querySelector('#connection').textContent='Online · atualização pendente';if(manual)fail(error);}
   finally{busy=false;}
 }
-// AI Lab bridge: writes only after explicit preview confirmation in the embedded chat.
-// No generic commands, arbitrary mutations, or payments are accepted.
-window.addEventListener('message',async event=>{
- const frame=document.querySelector('.gb-ai-widget iframe');
- if(event.origin!==location.origin||event.source!==frame?.contentWindow)return;
- const msg=event.data;if(!msg||msg.kind!=='gbplus-ai-create-title'||typeof msg.requestId!=='string')return;
- const respond=(ok,message)=>event.source.postMessage({kind:'gbplus-ai-create-result',requestId:msg.requestId,ok,message},event.origin);
- if(!db||!currentUser()||!repository){respond(false,'Entre na conta GB+ antes de gravar.');return;}
- const p=msg.proposal;
- if(!p||!['income','expense'].includes(p.type)||!['single','recurring','installment'].includes(p.mode)||!Number.isSafeInteger(p.amountCents)||p.amountCents<=0||typeof p.description!=='string'||!p.description.trim()||p.description.length>300||typeof p.due!=='string'||!/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(p.due)||!Number.isInteger(p.count)||p.count<1||p.count>120){respond(false,'Prévia inválida. Confira todos os campos.');return;}
- const category=db.categories.find(x=>x.type===p.type&&x.name.toLocaleLowerCase('pt-BR')===p.description.toLocaleLowerCase('pt-BR'))||db.categories.find(x=>x.type===p.type&&/outras despesas|outras receitas/i.test(x.name))||db.categories.find(x=>x.type===p.type);
- if(!category){respond(false,'Cadastre uma categoria adequada antes de gravar.');return;}
- const partnerId=p.partner?db.partners.find(x=>x.name.toLocaleLowerCase('pt-BR')===p.partner.toLocaleLowerCase('pt-BR'))?.id||'':'';
- if(p.partner&&!partnerId){respond(false,'Parceiro não encontrado. Cadastre-o primeiro para evitar vinculação incorreta.');return;}
- try{
-  const generated=generateTitles({type:p.type,description:p.description.trim(),categoryId:category.id,partnerId,document:'',issue:today(),due:p.due,amount:p.amountCents,accountId:'',notes:'Criado pelo GB+ AI com confirmação do usuário.'},p.mode,p.mode==='single'?1:p.count);
-  await commit(d=>{d.titles.push(...generated);},'Lançamento criado pelo GB+ AI.');
-  respond(true,generated.length+' título(s) gravado(s) na sua conta GB+.');
- }catch(error){respond(false,error.message||'Falha ao salvar. Atualize e confira os dados antes de tentar novamente.');}
-});
-// Pass only the signed-in user's display name to the same-origin AI frame.
-const aiFrame=document.querySelector('.gb-ai-widget iframe');
-function shareAiName(){
- const user=currentUser();if(!user||!aiFrame?.contentWindow)return;
- const raw=user.user_metadata?.full_name||user.user_metadata?.name||user.user_metadata?.display_name||user.email?.split('@')[0]||'';
- const name=String(raw).trim().split(/\s+/)[0].slice(0,40);
- aiFrame.contentWindow.postMessage({kind:'gbplus-ai-profile',name},location.origin);
-}
-aiFrame?.addEventListener('load',shareAiName);
-document.querySelector('.gb-ai-widget')?.addEventListener('toggle',()=>{if(document.querySelector('.gb-ai-widget').open)shareAiName();});
+// Financial assistant bridge runs separately so failures cannot prevent GB+ startup.
 window.addEventListener('gbplus-refresh',()=>refreshOnline(true));
 window.addEventListener('gbplus-message',event=>toast(event.detail));
 window.addEventListener('focus',()=>refreshOnline());
@@ -165,7 +136,7 @@ async function init(){
     repository=new SupabaseRepository(authClient(),user.id);
     db=await repository.read();state.range=rangeFor('month');
     document.querySelector('#auth-gate').hidden=true;
-    document.body.classList.remove('auth-locked');route();
+    document.body.classList.remove('auth-locked');route();window.dispatchEvent(new Event('gbplus-ai-ready'));
   }catch(error){
     showAuth(isRecovery()?'recovery':'signin',error.message);
   }
@@ -173,3 +144,8 @@ async function init(){
 
 }
 init();
+// Importing the AI integration must never block the financial application.
+import('./ai-bridge.js?v=20261104-v1').then(({installAiBridge})=>{
+ installAiBridge({getDb:()=>db,getUser:currentUser,getRepository:()=>repository,commit});
+ window.dispatchEvent(new Event('gbplus-ai-ready'));
+}).catch(error=>console.error('Assistente GB+ indisponível; financeiro preservado.',error));
