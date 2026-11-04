@@ -104,7 +104,74 @@ function show(result){
  }else pre.textContent='Nenhuma operação preparada.';
 }
 
-function submit(text){add(text,'user');if(live){askLive(text);return;}const r=interpret(text,context,fixture);show(r);add(r.answer);if(r.status==='needs_clarification')context=r.context||null;else if(r.proposal)context={proposal:r.proposal};else context=null;}
+const normalized=s=>s.toLocaleLowerCase('pt-BR').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9\s]/g,' ').replace(/\s+/g,' ').trim();
+function classifyQuery(text){
+ const s=normalized(text);
+ if(/saldo.*(?:previsto|projetado|futuro)|projecao.*saldo/.test(s))return 'projected';
+ if(/disponivel|posso gastar|dinheiro livre/.test(s))return 'available';
+ if(/(?:saldo|tenho no banco|tenho na conta|quanto tenho em caixa)/.test(s))return 'balance';
+ if(/(?:a pagar|contas? a pagar|despesas? em aberto)/.test(s))return 'payable';
+ if(/(?:a receber|contas? a receber|recebiveis)/.test(s))return 'receivable';
+ if(/(?:venc|boletos?).*(?:hoje)/.test(s))return 'due_today';
+ if(/(?:venc|boletos?).*(?:mes|este mes)/.test(s))return 'due_month';
+ if(/(?:atrasad|vencid|em atraso)/.test(s))return 'overdue';
+ if(/(?:proxim|venciment)/.test(s)&&!/(?:como|onde)/.test(s))return 'upcoming';
+ if(/(?:quanto gastei|quanto paguei|gastos deste mes|despesas deste mes)/.test(s))return 'spent_month';
+ if(/(?:quanto recebi|recebimentos deste mes|entradas deste mes)/.test(s))return 'received_month';
+ return null;
+}
+function realAnswer(data){
+ const money=formatBRL;
+ switch(data.kind){
+  case 'balance':return 'Seu saldo bancário calculado no GB+ é '+money(data.balance)+'. Esse valor considera os saldos iniciais, as baixas e as transferências cadastradas.';
+  case 'available':return 'Saldo bancário: '+money(data.balance)+'. Contas a pagar em aberto: '+money(data.payable)+'. Saldo restante após reservar essas contas: '+money(data.available)+'. É uma estimativa, não um limite de gastos.';
+  case 'payable':return 'Você tem '+money(data.payable)+' em contas a pagar em aberto no GB+.';
+  case 'receivable':return 'Há '+money(data.receivable)+' em títulos a receber. Eles ainda não foram contabilizados como saldo bancário.';
+  case 'projected':return 'A projeção simplificada é '+money(data.projected)+' (saldo '+money(data.balance)+' menos contas a pagar '+money(data.payable)+' mais contas a receber '+money(data.receivable)+'). Não considera datas de liquidação.';
+  case 'spent_month':return 'Neste mês você registrou '+money(data.spentMonth)+' em baixas de despesas no GB+.';
+  case 'received_month':return 'Neste mês você registrou '+money(data.receivedMonth)+' em recebimentos baixados no GB+.';
+  default:{
+   const rows=data.items||[];
+   const list=rows.map(t=>'• '+t.description+' — '+money(t.amount)+' — '+new Date(t.due+'T12:00:00').toLocaleDateString('pt-BR')).join('\n');
+   if(!rows.length)return 'Não encontrei títulos em aberto nessa consulta.';
+   return 'Encontrei '+data.total+' título(s) em aberto'+(rows.length<data.total?' (mostrando os primeiros '+rows.length+')':'')+':\n'+list;
+  }
+ }
+}
+function askReal(query){
+ return new Promise((resolve,reject)=>{
+  const requestId=crypto.randomUUID();
+  const timer=setTimeout(()=>{window.removeEventListener('message',handler);reject(Error('A consulta ao GB+ não respondeu. Confira sua conexão ou atualize o aplicativo.'));},9000);
+  function handler(event){if(event.origin!==location.origin||event.source!==window.parent||event.data?.kind!=='gbplus-ai-query-result'||event.data.requestId!==requestId)return;
+   clearTimeout(timer);window.removeEventListener('message',handler);
+   if(event.data.ok)resolve(realAnswer(event.data.data));else reject(Error(event.data.message||'Consulta indisponível.'));
+  }
+  window.addEventListener('message',handler);
+  window.parent.postMessage({kind:'gbplus-ai-query',requestId,query},location.origin);
+ });
+}
+async function submit(text){
+ add(text,'user');
+ if(live){askLive(text);return;}
+ const s=normalized(text);
+ if(/^(?:que dia e hoje|qual e a data de hoje|qual data e hoje|hoje e que dia|qual dia e hoje)$/.test(s)){
+  lastTopic='date';add('Hoje é '+new Intl.DateTimeFormat('pt-BR',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(new Date())+'.');return;
+ }
+ if(/^(?:como assim|nao entendi|pode explicar|explique melhor|o que quer dizer)$/.test(s)){
+  const explanations={balance:'O saldo é o dinheiro registrado nas contas bancárias do GB+. Cadastrar uma despesa não reduz o saldo: é necessário registrar a baixa.',available:'A disponibilidade estimada reserva o valor das contas a pagar, mas não substitui a análise das datas de vencimento.',payable:'Contas a pagar são valores ainda pendentes. Elas não são baixadas automaticamente só por estarem cadastradas.',receivable:'Valores a receber são previsões. O banco só aumenta após o registro da baixa do recebimento.',date:'A data foi obtida do relógio do seu dispositivo.'};
+  add(explanations[lastTopic]||'Estou operando com regras locais, não com compreensão generativa. Posso responder sobre saldos, pagamentos, vencimentos ou ajudar você a cadastrar títulos. O que gostaria de fazer?');
+  return;
+ }
+ const query=classifyQuery(text);
+ if(query&&bridge.realData){
+  lastTopic=query;
+  try{add(await askReal(query));}catch(err){add(err.message+' Não vou apresentar dados fictícios como se fossem da sua conta.');}
+  return;
+ }
+ const r=interpret(text,context,fixture);show(r);lastTopic=query||r.intent;add(r.answer);
+ if(r.status==='needs_clarification')context=r.context||null;else if(r.proposal)context={proposal:r.proposal};else context=null;
+}
+
 $('#chat-form').addEventListener('submit',e=>{e.preventDefault();const text=input.value.trim();if(!text)return;input.value='';submit(text);});
 document.querySelectorAll('[data-example]').forEach(b=>b.addEventListener('click',()=>submit(b.dataset.example)));
 $('#confirm').addEventListener('click',()=>{
