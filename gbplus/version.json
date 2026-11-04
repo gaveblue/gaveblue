@@ -1,12 +1,12 @@
 {
-  "version": "1.8.5",
-  "build": 23,
+  "version": "1.8.6",
+  "build": 24,
   "published_at": "2026-11-04",
   "title": "Atualizações do GB+",
   "notes": [
-    "Botão hambúrguer no computador para ocultar ou mostrar o menu lateral, com preferência salva no navegador.",
-    "Barra de rolagem lateral mais fina e discreta nos temas claro e escuro.",
-    "Contador removido do item Contas a pagar no menu, sem alterar os títulos financeiros."
+    "Menu hambúrguer lateral agora aparece apenas no desktop com mouse ou trackpad.",
+    "Botão de menu lateral não aparece no celular, inclusive em paisagem.",
+    "A navegação inferior do celular, o efeito glass e os registros financeiros permanecem sem alterações."
   ],
   "assets": [
     "./index.html",
