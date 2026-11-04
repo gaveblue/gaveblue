@@ -26,6 +26,8 @@ const actions={
   confirm:async()=>{const fn=confirmAction;if(fn&&!busy){confirmAction=null;try{await fn();}catch(e){confirmAction=fn;throw e;}}},
   theme:()=>commit(d=>{d.settings.theme=d.settings.theme==='light'?'dark':'light';},'Tema atualizado.'),
   'top-theme':()=>commit(d=>{d.settings.theme=d.settings.theme==='light'?'dark':'light';},'Tema atualizado.'),
+  'check-updates':()=>window.dispatchEvent(new Event('gbplus-check-updates')),
+  'preview-update':()=>window.dispatchEvent(new Event('gbplus-preview-update')),
   'toggle-title-filters':()=>{state.moreFilters=!state.moreFilters;render();},
   'clear-title-filters':()=>{state.query='';state.status='';state.partner='';state.category='';state.type=state.route==='payable'?'expense':state.route==='receivable'?'income':'';state.period='month';state.range=rangeFor('month');state.moreFilters=false;render();},
   'set-theme':el=>commit(d=>{d.settings.theme=el.dataset.value;},'Tema atualizado.'),
