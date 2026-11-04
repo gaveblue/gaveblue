@@ -214,3 +214,49 @@ html,body{background-color:var(--bg);min-height:100%;min-height:100dvh}
  .profile-form-actions .button{width:100%;min-height:46px}
 }
 @media(max-width:355px){.profile-fields{grid-template-columns:1fr}.notification-amount{font-size:10px}.notification-item>.icon{display:none}}
+
+/* GB+ Update Center 1.7 — use the exact existing app palette. */
+.gb-update-notice{
+ position:fixed;z-index:9998;bottom:20px;right:18px;
+ width:min(425px,calc(100vw - 30px));max-height:min(78dvh,660px);
+ overflow-y:auto;overscroll-behavior:contain;
+ border:1px solid var(--border);border-radius:23px;background:var(--surface);
+ box-shadow:0 18px 55px #00000029,0 5px 17px #00000012;
+ padding:19px 19px 17px;color:var(--ink);
+ animation:gb-update-arrive .23s ease-out both;
+}
+.gb-update-notice[hidden],.gb-update-progress[hidden],.gb-update-notice button[hidden]{display:none!important}
+@keyframes gb-update-arrive{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.gb-update-top{display:flex;align-items:center;gap:12px}
+.gb-update-symbol{width:46px;height:46px;border-radius:15px;display:grid;place-items:center;flex:none;color:var(--inverse);background:var(--ink)}
+.gb-update-symbol svg{width:23px;height:23px}
+.gb-update-heading{min-width:0;flex:1;display:flex;flex-direction:column;gap:4px}
+.gb-update-heading strong{font-size:15px;letter-spacing:-.25px;line-height:1.25;color:var(--ink)}
+.gb-update-heading small{font-size:11px;color:var(--muted);line-height:1.5}
+.gb-update-close{width:32px;height:32px;flex:none;border:0;background:transparent;border-radius:10px;color:var(--muted);font-size:24px;line-height:1}
+.gb-update-close:hover{background:var(--hover);color:var(--ink)}
+.gb-update-description{font-size:12px;color:var(--muted);line-height:1.65;margin:15px 0 0}
+.gb-update-notes{list-style:none;margin:13px 0 0;padding:0;display:grid;gap:6px}
+.gb-update-notes:empty{display:none}
+.gb-update-notes li{position:relative;padding-left:17px;line-height:1.5;color:var(--ink);font-size:11px}
+.gb-update-notes li::before{content:'✓';position:absolute;left:0;top:0;color:var(--ink);font-weight:800}
+.gb-update-progress{margin-top:17px}
+.gb-update-progress-track{height:8px;width:100%;background:var(--soft);border:1px solid var(--border);border-radius:99px;overflow:hidden}
+.gb-update-progress-track>span{display:block;height:100%;width:0%;background:var(--ink);border-radius:99px;transition:width .16s ease}
+.gb-update-progress-meta{display:flex;justify-content:space-between;align-items:center;gap:10px;color:var(--muted);font-size:11px;margin-top:8px}
+.gb-update-progress-meta b{color:var(--ink);font-size:12px;font-variant-numeric:tabular-nums}
+.gb-update-feedback{color:var(--muted);font-size:11px;line-height:1.5;min-height:0;margin:10px 0}
+.gb-update-feedback:empty{display:none}
+.gb-update-buttons{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.45fr);gap:9px;margin-top:15px}
+.gb-update-buttons button{min-width:0;min-height:43px;padding:11px 12px;border-radius:12px;font-weight:650;font-size:12px;border:1px solid var(--border);white-space:normal;line-height:1.3}
+.gb-update-secondary{background:var(--surface);color:var(--ink)}
+.gb-update-primary{background:var(--ink);border-color:var(--ink)!important;color:var(--inverse)}
+.gb-update-buttons button:disabled{opacity:.5;cursor:progress}
+.gb-update-buttons button:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+@media(max-width:760px){
+ .gb-update-notice{bottom:calc(100px + env(safe-area-inset-bottom));left:12px;right:12px;width:auto;max-height:calc(100dvh - 135px);padding:17px 15px 15px;border-radius:20px}
+ .gb-update-heading strong{font-size:14px}
+ .gb-update-buttons button{min-height:44px}
+}
+@media(max-width:360px){.gb-update-notice{left:9px;right:9px;padding:13px}.gb-update-buttons{grid-template-columns:1fr}.gb-update-buttons button{min-height:41px}}
+@media(prefers-reduced-motion:reduce){.gb-update-notice{animation:none}.gb-update-progress-track>span{transition:none}}
