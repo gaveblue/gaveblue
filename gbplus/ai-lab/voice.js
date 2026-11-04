@@ -118,7 +118,7 @@ export function setupVoice({input,onStatus}){
    try{recognition?.stop();}
    catch{finishSession(id);return;}
    // Some Android browsers do not fire onend after stop.
-   finishTimer=setTimeout(()=>finishSession(id),2200);
+   if(active&&id===generation)finishTimer=setTimeout(()=>finishSession(id),2200);
  });
  cancel?.addEventListener('click',()=>{
    if(!active)return;
