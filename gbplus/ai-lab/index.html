@@ -181,26 +181,39 @@ function askReal(text){
 }
 async function submit(text){
  add(text,'user');
- if(live){askLive(text);return;}
  const s=normalized(text);
- if(/^(?:que dia e hoje|qual e a data de hoje|qual data e hoje|hoje e que dia|qual dia e hoje)$/.test(s)){
+ if(/^(que dia e hoje|qual e a data de hoje|qual data e hoje|hoje e que dia|qual dia e hoje)$/.test(s)){
   lastTopic='date';add('Hoje é '+new Intl.DateTimeFormat('pt-BR',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(new Date())+'.');return;
  }
- if(/^(?:como assim|nao entendi|pode explicar|explique melhor|o que quer dizer)$/.test(s)){
-  const explanations={balance:'O saldo é o dinheiro registrado nas contas bancárias do GB+. Cadastrar uma despesa não reduz o saldo: é necessário registrar a baixa.',available:'A disponibilidade estimada reserva o valor das contas a pagar, mas não substitui a análise das datas de vencimento.',payable:'Contas a pagar são valores ainda pendentes. Elas não são baixadas automaticamente só por estarem cadastradas.',receivable:'Valores a receber são previsões. O banco só aumenta após o registro da baixa do recebimento.',date:'A data foi obtida do relógio do seu dispositivo.'};
-  add(explanations[lastTopic]||'Estou operando com regras locais, não com compreensão generativa. Posso responder sobre saldos, pagamentos, vencimentos ou ajudar você a cadastrar títulos. O que gostaria de fazer?');
+ if(/^(como assim|nao entendi|pode explicar|explique melhor|o que quer dizer)$/.test(s)){
+  const explanations={balance:'O saldo é o valor das contas bancárias do GB+. Uma despesa só altera o saldo após sua baixa.',available:'A disponibilidade estima quanto sobraria após pagar os títulos em aberto. Confira também os vencimentos.',payable:'Contas a pagar são compromissos ainda pendentes.',receivable:'Valores a receber não são dinheiro já no banco.',date:'A data vem do relógio do dispositivo.'};
+  add(explanations[lastTopic]||'Posso explicar saldos, lançamentos, vencimentos, baixas e recorrências. Qual informação deseja entender?');return;
+ }
+ const wantsCreate=/(lan[cç]|criar|crie|registre|registrar|cadastrar|dividir|divide|parcela|repete|repetir|recorrente)/.test(s)&&!/^(como|posso|qual a diferenca|por que|porque|onde)/.test(s);
+ const isCorrection=!!context?.proposal&&/(corrig|muda|altera|nao falei|na verdade|troca)/.test(s);
+ const instructional=/^(como|onde|posso|qual a diferenca|por que|porque|o que e|o que significa)/.test(s)&&/(lan[cç]|cadastr|titulo|parcela|baixa|categoria|parceiro|configur|backup|export|modo)/.test(s);
+ const greet=/^(oi|ola|opa|e ai|bom dia|boa tarde|boa noite|tudo bom|tudo bem)$/.test(s);
+ if(!wantsCreate&&!isCorrection&&!instructional&&!greet){
+  if(!bridge.realData){
+   requestBridge();
+   add('O chat ainda não tem acesso à sua conta GB+. Entre na conta e reabra o assistente. Não vou apresentar saldos fictícios.');
+   return;
+  }
+  lastTopic=classifyQuery(text)||'consulta';
+  try{add(await askReal(text));}catch(error){add(error.message);}
   return;
  }
- const query=classifyQuery(text);
- if(query&&bridge.realData){
-  lastTopic=query;
-  try{add(await askReal(query));}catch(err){add(err.message+' Não vou apresentar dados fictícios como se fossem da sua conta.');}
-  return;
+ if(live&&instructional){askLive(text);return;}
+ const result=interpret(text,context,fixture);
+ show(result);lastTopic=result.intent;
+ if(/fict.ci|demonstra/.test(normalized(result.answer||''))&&!result.proposal){
+  add('Não tenho dados reais para essa resposta. Entre na conta GB+ para consultar seus saldos e títulos.');return;
  }
- const r=interpret(text,context,fixture);show(r);lastTopic=query||r.intent;add(r.answer);
- if(r.status==='needs_clarification')context=r.context||null;else if(r.proposal)context={proposal:r.proposal};else context=null;
+ add(result.answer);
+ if(result.status==='needs_clarification')context=result.context||null;
+ else if(result.proposal)context={proposal:result.proposal};
+ else context=null;
 }
-
 $('#chat-form').addEventListener('submit',e=>{e.preventDefault();const text=input.value.trim();if(!text)return;input.value='';submit(text);});
 document.querySelectorAll('[data-example]').forEach(b=>b.addEventListener('click',()=>submit(b.dataset.example)));
 $('#confirm').addEventListener('click',()=>{
