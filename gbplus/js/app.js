@@ -264,27 +264,24 @@ const actions={
 document.addEventListener('click',async e=>{const el=e.target.closest('[data-action]');if(!el||!db)return;if(el.tagName==='BUTTON')e.preventDefault();try{await actions[el.dataset.action]?.(el);}catch(error){fail(error);}});
 document.addEventListener('submit',async e=>{e.preventDefault();if(busy||!db)return;const form=e.target;
   // Profile saves use Supabase Auth and never change financial accounts or titles.
-  if(form.id==='profile-form'||form.id==='profile-email-form'){
-   const button=form.querySelector('[type="submit"]'),result=form.querySelector('[role="status"]');
-   if(button?.disabled)return;
-   if(button)button.disabled=true;
-   if(result)result.textContent='Salvando…';
+  if(form.id==='profile-form'){
+   const button=form.querySelector('#profile-save'),result=form.querySelector('#profile-message');
+   if(!button||button.disabled||form.dataset.initialSnapshot===profileSnapshot(form))return;
+   form.dataset.saving='true';button.disabled=true;
+   if(result)result.textContent='Salvando alterações…';
    try{
-    if(form.id==='profile-form'){
-     const profile=validateProfile(form);
-     await updatePersonalProfile(profile);
-     if(result)result.textContent='Perfil salvo com sucesso.';
-     window.dispatchEvent(new Event('gbplus-ai-ready'));
-     updateConnection();
-    }else{
-     const value=validateEmail(new FormData(form).get('email'));
-     const change=await requestProfileEmail(value);
-     if(result)result.textContent=change.unchanged?'O e-mail informado já é o da conta.':
-      'Solicitação recebida. Se for exigida confirmação, confira seu e-mail atual e o novo endereço antes de considerar a alteração concluída.';
-     updateConnection();
-    }
-   }catch(error){if(result)result.textContent=error.message||'Não foi possível salvar. Tente novamente.';}
-   finally{if(button)button.disabled=false;}
+    const savedCpf=currentUser()?.user_metadata?.gbplus_profile?.cpf||'';
+    const profile=validateProfile(form,savedCpf);
+    await updatePersonalProfile(profile);
+    window.dispatchEvent(new Event('gbplus-ai-ready'));
+    render();
+    toast('Alterações salvas com sucesso.');
+   }catch(error){
+    if(result)result.textContent=error.message||'Não foi possível salvar. Tente novamente.';
+   }finally{
+    delete form.dataset.saving;
+    if(form.isConnected)syncProfileSaveState(form);
+   }
    return;
   }
   const v=formValues(form),id=form.dataset.id;try{
@@ -327,6 +324,7 @@ document.addEventListener('submit',async e=>{e.preventDefault();if(busy||!db)ret
 }catch(error){fail(error);}});
 function upsert(rows,row){const i=rows.findIndex(x=>x.id===row.id);if(i<0)rows.push(row);else rows[i]=row;}
 document.addEventListener('change',async e=>{if(!db)return;const el=e.target;try{
+  if(el.form?.id==='profile-form')syncProfileSaveState(el.form);
   if(el.name?.startsWith('slot')&&el.form?.id==='mobile-nav-form')updateMobileNavPreview(el.form);
   if(el.id==='entry-type'){const select=document.querySelector('#entry-category');select.innerHTML=db.categories.filter(c=>c.type===el.value).map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');}
   if(el.id==='entry-mode'){document.querySelector('#count-field').hidden=el.value==='single';document.querySelector('#mode-hint').textContent=el.value==='installment'?'O valor total será dividido entre as parcelas, com ajuste exato dos centavos.':el.value==='recurring'?'O valor mensal será repetido em cada mês. Você poderá editar as ocorrências depois.':'Um título, um vencimento. O saldo só muda ao registrar uma baixa.';}
@@ -336,7 +334,7 @@ document.addEventListener('change',async e=>{if(!db)return;const el=e.target;try
   if(el.id==='report-partner'){state.reportPartner=el.value;render();}
   if(el.id==='backup-input'&&el.files[0]){const file=el.files[0];el.value='';if(file.size>15*1024*1024)throw Error('O backup deve ter no máximo 15 MB.');const restored=parseBackup(await file.text());confirm('Restaurar backup?',`Este arquivo contém ${restored.titles.length} títulos, ${restored.partners.length} parceiros e ${restored.accounts.length} contas. Os registros atuais serão substituídos. Exporte um backup antes de continuar, se necessário.`,()=>commit(d=>{Object.keys(d).forEach(k=>delete d[k]);Object.assign(d,restored);},'Backup restaurado com sucesso.'));}
 }catch(error){fail(error);}});
-document.addEventListener('input',e=>{if(e.target.id==='settings-search-input'){filterSettings(e.target.value);return;}if(!['title-search','partner-search'].includes(e.target.id))return;const el=e.target;const pos=el.selectionStart;state[el.id==='title-search'?'query':'partnerQuery']=el.value;render();const next=document.getElementById(el.id);next.focus();next.setSelectionRange(pos,pos);});
+document.addEventListener('input',e=>{if(e.target.form?.id==='profile-form'){syncProfileSaveState(e.target.form);return;}if(e.target.id==='settings-search-input'){filterSettings(e.target.value);return;}if(!['title-search','partner-search'].includes(e.target.id))return;const el=e.target;const pos=el.selectionStart;state[el.id==='title-search'?'query':'partnerQuery']=el.value;render();const next=document.getElementById(el.id);next.focus();next.setSelectionRange(pos,pos);});
 window.addEventListener('hashchange',route);
 matchMedia('(max-width: 760px)').addEventListener('change',()=>{if(db&&state.route==='dashboard')applyPanel();});
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPrompt=e;if(db&&state.route==='settings')render();});
