@@ -27,6 +27,7 @@ export function interpret(message,context=null,data=fixture){
  if(/quanto.*receber|contas? a receber/.test(s))return {intent:'consultar_recebiveis',status:'answered',answer:'No cenário fictício, há '+formatBRL(data.receivable)+' a receber. Não são valores já disponíveis no banco.'};
  if(/quanto.*pagar|contas? a pagar/.test(s))return {intent:'consultar_pagaveis',status:'answered',answer:'No cenário fictício, há '+formatBRL(data.payable)+' em contas a pagar.'};
  if(/venc|proximas contas/.test(s)&&!/lan[cç]|cria|cadastra|registra/.test(s))return {intent:'consultar_vencimentos',status:'unsupported',reason:'Os dados fictícios incluem apenas totais, sem títulos e datas individuais.',answer:'Ainda não tenho uma lista de vencimentos neste laboratório. Não vou inventar datas.'};
+ const faq=answerFAQ(message,data);if(faq)return faq;
  if(/lan[cç]|cria|cadastra|registra|despesa|receita|parcela|divide/.test(s)){
   const type=/receita|receber|entrada/.test(s)?'income':'expense';
   const description=/energia|luz/.test(s)?'Energia elétrica':/manuten[cç]/.test(s)?'Manutenção':/internet/.test(s)?'Internet':/aluguel/.test(s)?'Aluguel':'Lançamento informado por mensagem';
@@ -38,6 +39,5 @@ export function interpret(message,context=null,data=fixture){
   if(missing.length)return {intent:'preparar_lancamento',status:'needs_clarification',missing,context:{proposal},reason:'Não há gravação; o protótipo não completa dados ausentes por suposição.',answer:'Entendi que você quer preparar um lançamento, mas faltam: '+missing.join(', ')+'. Pode informar esses dados?'};
   return {intent:'preparar_lancamento',status:'ready',proposal,answer:'Preparei uma prévia fictícia. Confira os campos antes de confirmar a simulação. Nenhum dado será gravado.'};
  }
- const faq=answerFAQ(message,data);if(faq)return faq;
  return {intent:'nao_identificada',status:'unsupported',reason:'Interpretador local experimental, sem modelo de linguagem conectado.',answer:'Ainda não consigo interpretar essa solicitação. Este é o teste local; a versão com modelo de IA deverá entender variações mais livres, respeitando as funções do GB+.'};
 }
