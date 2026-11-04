@@ -227,6 +227,7 @@ document.addEventListener('submit',async e=>{e.preventDefault();if(busy||!db)ret
 }catch(error){fail(error);}});
 function upsert(rows,row){const i=rows.findIndex(x=>x.id===row.id);if(i<0)rows.push(row);else rows[i]=row;}
 document.addEventListener('change',async e=>{if(!db)return;const el=e.target;try{
+  if(el.name?.startsWith('slot')&&['mobile-nav-form','setup-preferences-form'].includes(el.form?.id))updateMobileNavPreview(el.form);
   if(el.id==='entry-type'){const select=document.querySelector('#entry-category');select.innerHTML=db.categories.filter(c=>c.type===el.value).map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');}
   if(el.id==='entry-mode'){document.querySelector('#count-field').hidden=el.value==='single';document.querySelector('#mode-hint').textContent=el.value==='installment'?'O valor total será dividido entre as parcelas, com ajuste exato dos centavos.':el.value==='recurring'?'O valor mensal será repetido em cada mês. Você poderá editar as ocorrências depois.':'Um título, um vencimento. O saldo só muda ao registrar uma baixa.';}
   if(el.id==='period'){if(el.value==='custom'){openModal('Escolher período',`<form id="period-form"><div class="form-grid">${field('De','from',state.range.from||today(),'date','required')}${field('Até','to',state.range.to||today(),'date','required')}</div>${formFooter('Aplicar período')}</form>`);el.value=state.period;}else{state.period=el.value;state.range=rangeFor(el.value);render();}}
@@ -321,6 +322,7 @@ async function init(){
   document.querySelector('#auth-gate').hidden=true;
   document.body.classList.remove('auth-locked');
   route();window.dispatchEvent(new Event('gbplus-ai-ready'));
+  if(shouldOfferSetup(db))startSetupWizard();
   updateConnection();setInterval(()=>refreshOnline(),60000);
  }catch(error){
   if(error?.code==='GBPLUS_STARTUP_TIMEOUT'||!document.querySelector('#account-access')){
