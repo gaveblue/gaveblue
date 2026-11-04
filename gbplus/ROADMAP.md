@@ -1,0 +1,44 @@
+# GB+ — Plano de evolução após a versão 2.0.0
+
+Este arquivo separa o que já entrou no código do que ainda depende de implementação e testes. Não representa homologação de uma versão publicada no servidor.
+
+## Versão 2.0.0 — Grande Atualização (código concluído)
+
+- [x] Configuração inicial para contas novas, com cadastro opcional de conta e saldo de abertura
+- [x] Revisão e confirmação antes de gravar dados financeiros iniciais
+- [x] Atalhos móveis personalizáveis: Início e Novo fixos; três posições editáveis
+- [x] Tela de abertura com conteúdo em toda a largura, sem margens do painel
+- [x] Menu hambúrguer de recolhimento exclusivo do desktop; atalho móvel “Mais” com três pontos
+- [x] Bolha de IA móvel: posição inicial visível, arraste, docking lateral e área sempre recuperável
+- [x] Preferências preservadas nas estruturas existentes, sem migração destrutiva
+
+## Próxima etapa — Estabilidade e validação em dispositivos
+
+- [ ] Testar a abertura e a autenticação no Android, no iPhone e em navegadores desktop
+- [ ] Homologar primeiro acesso, conta com saldo positivo/negativo e opção de pular
+- [ ] Testar transição claro/escuro, atualização de PWA, offline e rotação de tela
+- [ ] Confirmar visual do menu inferior em aparelhos de diferentes larguras
+- [ ] Confirmar persistência das preferências ao entrar na mesma conta em dois dispositivos
+
+## Etapa seguinte — Configuração mais completa
+
+- [ ] Possibilidade de adicionar mais de uma conta no passo a passo
+- [ ] Melhor orientação sobre saldo inicial, sem duplicar receitas nem baixas
+- [ ] Personalização da barra de ações mais intuitiva, com prévia e reordenação
+- [ ] Checklist simples de primeiros passos: conta, parceiro e primeiro lançamento
+
+## Etapa seguinte — GB+ AI
+
+- [ ] Comandos em linguagem natural para localizar, filtrar e editar títulos de forma guiada
+- [ ] Prévia obrigatória antes de criar, editar, baixar ou excluir lançamentos
+- [ ] Histórico de conversas e recuperação de contexto sem ações silenciosas
+- [ ] Mensagens de erro claras e acesso seguro aos registros, respeitando o usuário conectado
+
+## Etapa seguinte — Controle e confiabilidade
+
+- [ ] Conferências e alertas para vencimentos, saldos e inconsistências
+- [ ] Exportação e restauração verificáveis com versões de backup compatíveis
+- [ ] Melhorar relatório do fluxo de caixa e controle de contas a pagar/receber
+- [ ] Testes automatizados de regressão antes de cada publicação
+
+**Regra:** alterações financeiras exigem confirmação e persistência validada. Não apagar dados do usuário para corrigir interface, cache ou atualização.
