@@ -1,7 +1,7 @@
 import {money,today,dateLabel,metrics,pending,paid,status,flow,accountBalance,within} from './domain.js';
 import {INDICATORS} from './store.js';
 import {esc,icon,button,empty,titleTable,chart,select,field} from './ui.js';
-export const routes=[['dashboard','Dashboard','home'],['titles','Lançamentos','titles'],['payable','Contas a pagar','down'],['receivable','Contas a receber','up'],['provisions','Provisões','layers'],['flow','Fluxo de caixa','chart'],['partners','Parceiros','people'],['accounts','Contas bancárias','wallet'],['categories','Categorias','category'],['reports','Relatórios','chart'],['settings','Configurações','settings']];
+export const routes=[['dashboard','Dashboard','home'],['titles','Lançamentos','titles'],['payable','Contas a pagar','down'],['receivable','Contas a receber','up'],['provisions','Provisões','layers'],['flow','Fluxo de caixa','chart'],['partners','Parceiros','people'],['accounts','Contas bancárias','wallet'],['categories','Categorias','category'],['reports','Relatórios','chart'],['notifications','Notificações','bell'],['settings','Configurações','settings']];
 const stat=(key,value,subtitle,ico,extra='')=>`<article class="stat ${extra}" data-indicator="${key}"><div class="stat-top"><span class="stat-icon">${icon(ico)}</span>${key==='balance'?'<span class="stat-tag">AGORA</span>':''}</div><p>${INDICATORS[key]}</p><strong>${money(value)}</strong><small>${subtitle}</small></article>`;
 export function periodBar(state){return `<div class="period-control">${icon('calendar')}<select id="period" aria-label="Período"><option value="month" ${state.period==='month'?'selected':''}>Este mês</option><option value="last" ${state.period==='last'?'selected':''}>Mês anterior</option><option value="year" ${state.period==='year'?'selected':''}>Este ano</option><option value="all" ${state.period==='all'?'selected':''}>Todo o período</option><option value="custom" ${state.period==='custom'?'selected':''}>Personalizado</option></select></div>`;}
 export function heading(title,subtitle,actions=''){return `<div class="page-heading"><div><h1>${title}</h1><p>${subtitle}</p></div><div class="heading-actions">${actions}</div></div>`;}
@@ -59,6 +59,36 @@ export function titlesView(db,state){
   <div class="titles-mobile-cards">${mobileTitleCards(db,titles)}</div>
  </section>`;
 }
+// Notifications are calculated from the authenticated user's actual open titles.
+// They are not push notifications and are never fabricated or stored separately.
+export function notificationsView(db){
+ const day=today(),next=new Date(day+'T12:00:00');next.setDate(next.getDate()+7);
+ const limit=next.getFullYear()+'-'+String(next.getMonth()+1).padStart(2,'0')+'-'+String(next.getDate()).padStart(2,'0');
+ const open=db.titles.filter(t=>!t.cancelled&&pending(db,t)>0);
+ const late=open.filter(t=>t.due<day).sort((a,b)=>a.due.localeCompare(b.due));
+ const current=open.filter(t=>t.due===day);
+ const soon=open.filter(t=>t.due>day&&t.due<=limit).sort((a,b)=>a.due.localeCompare(b.due));
+ const groups=[['Atrasados',late,'clock'],['Vencem hoje',current,'calendar'],['Próximos 7 dias',soon,'bell']];
+ const item=t=>{
+  const category=db.categories.find(c=>c.id===t.categoryId)?.name||'Sem categoria';
+  return '<button class="notification-item" type="button" data-action="title-detail" data-id="'+esc(t.id)+'">'+
+   '<span class="notification-direction '+(t.type==='income'?'income-arrow':'expense-arrow')+'">'+icon(t.type==='income'?'up':'down')+'</span>'+
+   '<span class="notification-description"><strong>'+esc(t.description)+'</strong><small>'+esc(category)+' · '+(t.type==='income'?'A receber':'A pagar')+' · '+dateLabel(t.due)+'</small></span>'+
+   '<span class="notification-amount">'+money(pending(db,t))+'</span>'+icon('chevron')+
+  '</button>';
+ };
+ return heading('Notificações','Seus compromissos financeiros que merecem atenção.')+
+  '<div class="notification-overview"><span>'+icon('clock')+' <b>'+late.length+'</b> atrasado(s)</span>'+
+   '<span>'+icon('calendar')+' <b>'+current.length+'</b> vencem hoje</span>'+
+   '<span>'+icon('bell')+' <b>'+soon.length+'</b> nos próximos 7 dias</span></div>'+
+  '<div class="notification-groups">'+groups.map(([name,rows,ico])=>
+   '<section class="panel notification-group"><div class="notification-group-heading"><h2>'+icon(ico)+' '+name+'</h2><span class="badge">'+rows.length+'</span></div>'+
+   (rows.length?'<div class="notification-items">'+rows.map(item).join('')+'</div>':
+    '<p class="notification-empty">Nenhum título '+(name==='Atrasados'?'atrasado':name==='Vencem hoje'?'vence hoje':'vence nos próximos 7 dias')+'.</p>')+
+   '</section>').join('')+
+  '</div><p class="notification-help">Estas notificações são calculadas com base nos títulos em aberto do GB+. Toque em um lançamento para ver seus detalhes. Não são alertas enviados ao telefone.</p>';
+}
+
 export function partnersView(db,state){const ps=db.partners.filter(p=>`${p.name} ${p.tradeName} ${p.document}`.toLowerCase().includes(state.partnerQuery.toLowerCase()));return `${heading('Parceiros','Pessoas e empresas que fazem parte do seu negócio.',button(icon('plus')+'Novo parceiro','new-partner','primary'))}<section class="panel"><div class="filters"><label class="search-field">${icon('search')}<input id="partner-search" type="search" placeholder="Buscar nome, CPF ou CNPJ" aria-label="Pesquisar parceiros" value="${esc(state.partnerQuery)}"></label><span class="muted">${ps.length} parceiros</span></div>${ps.length?`<div class="partner-grid">${ps.map(p=>`<article class="partner-card"><div class="partner-top"><div class="partner-avatar">${esc(p.name.slice(0,2).toUpperCase())}</div><span class="badge">${p.active?'Ativo':'Inativo'}</span></div><h3>${esc(p.name)}</h3><p>${esc(p.tradeName||p.email||'Sem nome fantasia')}</p><div class="role-list">${p.roles.map(r=>`<span>${esc(r)}</span>`).join('')}</div><div class="partner-bottom">${button('Ver histórico','partner-detail','small',`data-id="${p.id}"`)}<button class="icon-button" data-action="edit-partner" data-id="${p.id}" aria-label="Editar ${esc(p.name)}">${icon('edit')}</button></div></article>`).join('')}</div>`:empty('Bons negócios começam com boas conexões','Cadastre clientes, fornecedores e outros parceiros.','new-partner','Adicionar parceiro')}</section>`;}
 export function accountsView(db){return `${heading('Contas bancárias','Saldos reais. Todas as contas sob seu controle.',button(icon('transfer')+'Transferir','new-transfer')+button(icon('plus')+'Nova conta','new-account','primary'))}<div class="account-grid">${db.accounts.map(a=>`<article class="panel account-card"><div class="panel-heading"><span class="stat-icon">${icon('wallet')}</span><span class="badge">${a.active?'Ativa':'Inativa'}</span></div><h2>${esc(a.name)}</h2><p>${esc(a.bank||'Conta financeira')}</p><strong>${money(accountBalance(db,a.id,today()))}</strong><small>Saldo atual · Inicial: ${money(a.initial)}</small><div class="partner-bottom">${button('Movimentações','account-detail','small',`data-id="${a.id}"`)}<button class="icon-button" data-action="edit-account" data-id="${a.id}" aria-label="Editar conta ${esc(a.name)}">${icon('edit')}</button></div></article>`).join('')}</div>${!db.accounts.length?`<section class="panel">${empty('Onde seu dinheiro se movimenta?','Adicione uma conta bancária, carteira ou caixa para registrar baixas.','new-account','Adicionar conta')}</section>`:''}`;}
 export function categoriesView(db){return `${heading('Categorias','Dê significado a cada entrada e saída.',button(icon('plus')+'Nova categoria','new-category','primary'))}<div class="two-columns">${['income','expense'].map(type=>`<section class="panel"><div class="panel-heading"><h2>${icon(type==='income'?'up':'down')} ${type==='income'?'Receitas':'Despesas'}</h2><span class="badge">${db.categories.filter(c=>c.type===type).length}</span></div><div class="category-list">${db.categories.filter(c=>c.type===type).map(c=>`<div><span>${esc(c.name)}</span><button class="icon-button" data-action="edit-category" data-id="${c.id}" aria-label="Editar ${esc(c.name)}">${icon('edit')}</button></div>`).join('')}</div></section>`).join('')}</div>`;}
