@@ -50,7 +50,7 @@
   <button id="voice-finish" class="voice-finish" type="button">Concluir</button>
 </section>
 <form id="chat-form" class="composer"><input id="message" aria-label="Sua mensagem" placeholder="Mensagem para GB+ AI..." autocomplete="off" required><button id="mic" class="voice-trigger" type="button" aria-pressed="false" aria-label="Iniciar gravação de voz" title="Gravar mensagem de voz"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="13" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 17v5m-4 0h8"/></svg></button><button id="send" class="primary" type="submit" aria-label="Enviar mensagem"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 14-7-5 14-3-6-6-1z"/><path d="m11 13 8-8"/></svg></button></form>
-<div id="ai-connect" style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:10px;flex-wrap:wrap"><span id="ai-state" class="muted">Modo local de demonstração</span><button id="ai-login" type="button" style="border:1px solid #ddd;border-radius:99px;padding:7px 12px;background:#fff;font-size:12px">Conectar IA</button></div><p id="voice-status" class="footnote" role="status">Ambiente de testes · Dados fictícios · Gravação somente após confirmação</p>
+<div id="ai-connect" style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:10px;flex-wrap:wrap"><span id="ai-state" class="muted">Conectando ao GB+…</span><button id="ai-login" type="button" style="border:1px solid #ddd;border-radius:99px;padding:7px 12px;background:#fff;font-size:12px">Conectar IA</button></div><p id="voice-status" class="footnote" role="status">Aguardando conexão com seu financeiro GB+</p>
 </div></main></div><script type="module">
 import {interpret,formatBRL,fixture} from './engine.js?v=20261103-v8';
 import {setupVoice} from './voice.js?v=20261103-v9';
@@ -59,7 +59,7 @@ const supabaseUrl='https://layrxmkosyqurpobzmku.supabase.co';const publishableKe
 async function getSession(){const raw=localStorage.getItem('gbplus-auth-v1');if(!raw)return null;try{const v=JSON.parse(raw);const token=v?.access_token||v?.currentSession?.access_token;return token||null;}catch{return null;}}
 $('#ai-login').addEventListener('click',async()=>{
  const button=$('#ai-login');
- if(live){live=false;session=null;history=[];$('#ai-state').textContent=bridge.realData?'Conta GB+ conectada · Consultas reais':'Modo local de demonstração';button.textContent='Conectar IA';add('Voltei ao assistente local.');return;}
+ if(live){live=false;session=null;history=[];$('#ai-state').textContent=bridge.realData?'Conta GB+ conectada · Consultas reais':'Sem acesso aos dados GB+';button.textContent='Conectar IA';add('Voltei ao assistente local.');return;}
  const token=await getSession();if(!token){add('A IA generativa precisa de uma sessão GB+ ativa. Continue com o modo local para consultas e lançamentos.');return;}
  button.disabled=true;button.textContent='Verificando…';
  try{
@@ -82,8 +82,8 @@ window.addEventListener('message',event=>{
  bridge={realData:!!event.data.realData,writeEnabled:!!event.data.writeEnabled};
  updateGreeting();
  if(!live){$('#ai-state').textContent=bridge.realData?'Conta GB+ conectada · Consultas reais':'Modo local de demonstração';}
- $('#voice-status').textContent=bridge.realData?'Consultas com dados do GB+ · Gravação somente após confirmação':'Respostas demonstrativas · Nenhum saldo real consultado';
- $('#mode-pill').textContent=bridge.realData?'● Dados do GB+':'● Modo local';
+ $('#voice-status').textContent=bridge.realData?'Consultas com dados do GB+ · Gravação somente após confirmação':'Entre na sua conta GB+ para consultar dados reais';
+ $('#mode-pill').textContent=bridge.realData?'● Dados reais do GB+':'● Sem conexão';
 });
 function requestBridge(){if(window.parent!==window)window.parent.postMessage({kind:'gbplus-ai-request-profile'},location.origin);}
 requestBridge();window.addEventListener('focus',requestBridge);
@@ -164,16 +164,19 @@ function realAnswer(data){
   }
  }
 }
-function askReal(query){
+function askReal(text){
  return new Promise((resolve,reject)=>{
+  if(window.parent===window){reject(Error('Abra o assistente dentro do GB+ para acessar dados reais.'));return;}
   const requestId=crypto.randomUUID();
-  const timer=setTimeout(()=>{window.removeEventListener('message',handler);reject(Error('A consulta ao GB+ não respondeu. Confira sua conexão ou atualize o aplicativo.'));},9000);
-  function handler(event){if(event.origin!==location.origin||event.source!==window.parent||event.data?.kind!=='gbplus-ai-query-result'||event.data.requestId!==requestId)return;
+  const timer=setTimeout(()=>{window.removeEventListener('message',handler);reject(Error('O GB+ não respondeu à consulta. Reabra o assistente.'));},9500);
+  function handler(event){
+   if(event.origin!==location.origin||event.source!==window.parent||event.data?.kind!=='gbplus-ai-query-result'||event.data.requestId!==requestId)return;
    clearTimeout(timer);window.removeEventListener('message',handler);
-   if(event.data.ok)resolve(realAnswer(event.data.data));else reject(Error(event.data.message||'Consulta indisponível.'));
+   if(event.data.ok&&typeof event.data.answer==='string')resolve(event.data.answer);
+   else reject(Error(event.data.message||'Não consegui consultar o GB+.'));
   }
   window.addEventListener('message',handler);
-  window.parent.postMessage({kind:'gbplus-ai-query',requestId,query},location.origin);
+  window.parent.postMessage({kind:'gbplus-ai-query',requestId,text},location.origin);
  });
 }
 async function submit(text){
