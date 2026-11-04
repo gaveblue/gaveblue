@@ -26,3 +26,18 @@ body.auth-locked>.sidebar,body.auth-locked>.workspace,body.auth-locked>.mobile-n
 .auth-primary,.auth-google{width:100%;min-height:46px;border-radius:24px;font-size:15px;display:flex;align-items:center;justify-content:center;gap:12px;cursor:pointer}.auth-primary{background:#111;color:white;border:1px solid #111;font-weight:600;margin-top:25px;box-shadow:0 2px 4px #00000008}.auth-primary:hover{background:#303033}.auth-forgot{display:block;margin:15px auto 0;padding:4px 8px;background:none;border:none;font-size:12px;color:#6f6f75;text-decoration:underline;text-underline-offset:3px}.auth-divider{display:flex;align-items:center;gap:22px;margin:23px 0;color:#555;font-size:13px}.auth-divider:before,.auth-divider:after{content:'';height:1px;background:#dddde1;flex:1}.auth-google{border:1px solid #e0e0e5;background:#fff;color:#171719;box-shadow:0 2px 4px #0000000e}.auth-google:hover{background:#f8f8fa}.google-mark{width:23px;height:23px;flex-shrink:0}.auth-bottom{text-align:center;margin-top:44px;font-size:14px;color:#222}.auth-text-link{border:0;background:transparent;color:#111;font-weight:650;text-decoration:underline;text-underline-offset:3px;font-size:14px;padding:3px 8px}.auth-footer{text-align:center;color:#97979e;font-size:11px;letter-spacing:.2px;margin-top:45px}.auth-card .form-error{color:#a82929;margin:12px 0 0;line-height:1.5;font-size:13px}.auth-card .form-error:empty,.auth-card .auth-message:empty{display:none}.auth-card .auth-message{padding:12px 14px;background:#f2f5f3;border:1px solid #dce7df;color:#214c32;border-radius:12px;font-size:13px;margin-top:14px;line-height:1.6}.auth-card button:disabled{opacity:.55;cursor:wait}
 @media(min-width:761px){.auth-page:before{width:110%;left:-45%;top:-33%;height:80%}.auth-page:after{left:25%;bottom:-44%;height:80%}.auth-card{padding:22px 0}.auth-brand{margin-bottom:50px}}
 @media(max-width:420px){.auth-page{padding:40px 26px}.auth-brand{margin-bottom:48px}.auth-wordmark{font-size:76px}.auth-brand p{font-size:21px}.auth-input{height:46px}.auth-bottom{margin-top:38px}}
+
+/* GB+ Entrada (receber) e saída (pagar): cor aplicada somente às setas. */
+:root{--income-arrow:#16a34a;--expense-arrow:#dc2626}
+[data-theme="dark"]{--income-arrow:#4ade80;--expense-arrow:#f87171}
+.stat[data-indicator="receivable"] .stat-icon .icon,
+.stat[data-indicator="received"] .stat-icon .icon,
+.income-arrow .icon,
+.nav-item[href="#receivable"] .icon{color:var(--income-arrow)}
+.stat[data-indicator="payable"] .stat-icon .icon,
+.stat[data-indicator="spent"] .stat-icon .icon,
+.expense-arrow .icon,
+.nav-item[href="#payable"] .icon{color:var(--expense-arrow)}
+.income-arrow,.expense-arrow{display:inline-flex;align-items:center;justify-content:center;vertical-align:middle}
+.income-arrow .icon,.expense-arrow .icon{width:16px;height:16px;stroke-width:2.2}
+.stat-icon .icon{stroke-width:2}
