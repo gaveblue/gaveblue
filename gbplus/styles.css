@@ -313,3 +313,45 @@ html,body{background-color:var(--bg);min-height:100%;min-height:100dvh}
     box-shadow:0 8px 30px #0005,0 0 0 1px #ffffff0c;
   }
 }
+
+
+/* GB+ 1.8.5 — Desktop sidebar and scrollbars.
+   Purely presentational: no financial data or business logic changes. */
+.topbar-start{display:flex;align-items:center;gap:14px;min-width:0}
+.sidebar-toggle{width:38px;height:38px;flex:none;border:1px solid var(--border);border-radius:11px;background:var(--soft);color:var(--ink);transition:background .18s ease}
+.sidebar-toggle:hover{background:var(--hover)}
+.sidebar-toggle svg{width:21px;height:21px;display:block}
+@media(min-width:761px){
+  .sidebar{
+    overflow-x:hidden;
+    scrollbar-width:thin;
+    scrollbar-color:color-mix(in srgb,var(--muted) 40%,transparent) transparent;
+    transition:transform .24s ease,visibility .24s ease;
+  }
+  .workspace{transition:margin-left .24s ease}
+  html.sidebar-hidden .sidebar{transform:translateX(-100%);visibility:hidden;pointer-events:none}
+  html.sidebar-hidden .workspace{margin-left:0}
+  .sidebar::-webkit-scrollbar{width:6px}
+  .sidebar::-webkit-scrollbar-track{background:transparent}
+  .sidebar::-webkit-scrollbar-thumb{
+    border-radius:999px;
+    background:color-mix(in srgb,var(--muted) 33%,transparent);
+  }
+  .sidebar:hover::-webkit-scrollbar-thumb{
+    background:color-mix(in srgb,var(--muted) 60%,transparent);
+  }
+}
+@media(max-width:760px){.topbar-start{display:none}}
+/* Subtle native scrollbars for all other scrollable views as well. */
+html, .table-wrap, .modal-body, .messages{
+  scrollbar-width:thin;
+  scrollbar-color:color-mix(in srgb,var(--muted) 35%,transparent) transparent;
+}
+html::-webkit-scrollbar, .table-wrap::-webkit-scrollbar, .modal-body::-webkit-scrollbar{width:7px;height:7px}
+html::-webkit-scrollbar-track, .table-wrap::-webkit-scrollbar-track, .modal-body::-webkit-scrollbar-track{background:transparent}
+html::-webkit-scrollbar-thumb, .table-wrap::-webkit-scrollbar-thumb, .modal-body::-webkit-scrollbar-thumb{
+  border-radius:999px;background:color-mix(in srgb,var(--muted) 42%,transparent);
+}
+@media(prefers-reduced-motion:reduce){
+  .sidebar,.workspace,.sidebar-toggle{transition:none!important}
+}
