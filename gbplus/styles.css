@@ -555,3 +555,17 @@ body.auth-locked .mobile-nav-fade{display:none!important}
 .profile-signout-button{display:inline-flex;gap:9px;align-items:center;border-color:color-mix(in srgb,#df5e5e 45%,var(--border));color:#c34343;min-height:42px}
 .profile-signout-button:hover{background:color-mix(in srgb,#df5e5e 9%,var(--surface))}
 :root[data-theme=dark] .profile-signout-button{color:#ff9292}
+
+/* GB+ 2.1.0 — Authentication UX polish */
+#auth-gate .auth-bottom:has([data-auth-action="continue"]){
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;
+}
+#auth-gate .auth-bottom:has([data-auth-action="continue"]) [data-auth-action="continue"]{
+  display:inline-flex;justify-content:center;min-width:200px;
+}
+#auth-gate form[data-mode="confirm"] .auth-primary{margin-top:20px}
+#auth-gate .auth-message{overflow-wrap:anywhere}
+#auth-gate form[aria-busy="true"]{cursor:progress}
+@media(max-width:760px){
+ #auth-gate .auth-bottom:has([data-auth-action="continue"]){margin-top:26px}
+}
