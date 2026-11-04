@@ -2,7 +2,25 @@ import {uid,validDate,paid,today} from './domain.js';
 export const KEY='gb-plus:data:v1';
 export const INDICATORS={balance:'Saldo disponível',receivable:'A receber',payable:'A pagar',provisions:'Provisões líquidas',received:'Receitas recebidas',spent:'Despesas pagas',result:'Resultado financeiro',overdue:'Títulos vencidos',chart:'Fluxo de caixa',upcoming:'Próximos vencimentos'};
 export const defaultPanel=()=>({desktop:Object.fromEntries(Object.keys(INDICATORS).map(k=>[k,true])),mobile:Object.fromEntries(Object.keys(INDICATORS).map(k=>[k,true]))});
-export function emptyDatabase(){return {schemaVersion:1,revision:0,titles:[],payments:[],partners:[],accounts:[],transfers:[],categories:[...['Água','Energia elétrica','Internet','Aluguel','Salários','Impostos','Combustíveis','Manutenção','Fretes','Serviços','Compras','Outras despesas'].map(name=>({id:uid(),name,type:'expense'})),...['Vendas','Prestação de serviços','Recebimento de clientes','Reembolsos','Outras receitas'].map(name=>({id:uid(),name,type:'income'}))],settings:{theme:'light',panel:defaultPanel()}};}
+// The first and middle shortcuts (Início and Novo) are permanent. The three other slots are user-defined.
+export const MOBILE_SHORTCUTS=[
+ ['titles','Títulos','transfer'],['payable','A pagar','down'],['receivable','A receber','up'],
+ ['provisions','Provisões','layers'],['flow','Fluxo de caixa','chart'],
+ ['partners','Parceiros','people'],['accounts','Contas','wallet'],
+ ['categories','Categorias','category'],['reports','Relatórios','chart'],
+ ['notifications','Notificações','bell'],['settings','Configurações','settings'],
+ ['profile','Meu perfil','user'],['menu','Menu','menu']
+];
+export const defaultMobileNav=()=>['titles','partners','menu'];
+export const validMobileNav=values=>Array.isArray(values)&&values.length===3&&new Set(values).size===3&&values.every(value=>MOBILE_SHORTCUTS.some(([key])=>key===value));
+export const effectiveMobileNav=settings=>validMobileNav(settings?.mobileNav)?settings.mobileNav:defaultMobileNav();
+export function shouldOfferSetup(db){
+ if(db?.settings?.setupCompleted===true)return false;
+ if(db?.settings?.setupCompleted===false)return true;
+ // Backward-compatible: do not trigger first-run wizard on existing edited finances.
+ return db?.revision===0&&['accounts','titles','payments','transfers','partners'].every(k=>Array.isArray(db[k])&&!db[k].length);
+}
+export function emptyDatabase(){return {schemaVersion:1,revision:0,titles:[],payments:[],partners:[],accounts:[],transfers:[],categories:[...['Água','Energia elétrica','Internet','Aluguel','Salários','Impostos','Combustíveis','Manutenção','Fretes','Serviços','Compras','Outras despesas'].map(name=>({id:uid(),name,type:'expense'})),...['Vendas','Prestação de serviços','Recebimento de clientes','Reembolsos','Outras receitas'].map(name=>({id:uid(),name,type:'income'}))],settings:{theme:'light',panel:defaultPanel(),mobileNav:defaultMobileNav(),setupCompleted:false}};}
 const assert=(ok,message)=>{if(!ok)throw Error(`Backup inválido: ${message}`);};
 const str=(s,max=2000)=>typeof s==='string'&&s.length<=max;
 const amount=n=>Number.isSafeInteger(n)&&Math.abs(n)<=1e12;
@@ -18,6 +36,9 @@ export function validateDatabase(db){
   for(const t of db.titles)assert(paid(db,t.id)<=t.amount&&(!t.cancelled||paid(db,t.id)===0),'baixas maiores que o título ou título cancelado com baixa.');
   for(const t of db.transfers)assert(has('accounts',t.from)&&has('accounts',t.to)&&t.from!==t.to&&validDate(t.date)&&t.date<=today()&&amount(t.amount)&&t.amount>0,'transferência.');
   assert(db.settings&&['light','dark'].includes(db.settings.theme),'tema.');for(const device of ['desktop','mobile']){assert(db.settings.panel?.[device],'painel.');for(const k of Object.keys(INDICATORS))assert(typeof db.settings.panel[device][k]==='boolean','indicador.');}
+  // Optional on older backups: unchanged data can be loaded without migration.
+  if(db.settings.mobileNav!==undefined)assert(validMobileNav(db.settings.mobileNav),'atalhos da barra inferior.');
+  if(db.settings.setupCompleted!==undefined)assert(typeof db.settings.setupCompleted==='boolean','configuração inicial.');
   assert(Number.isSafeInteger(db.revision)&&db.revision>=0,'revisão.');return db;
 }
 // Repository boundary: replace this adapter to migrate persistence without changing financial rules.
