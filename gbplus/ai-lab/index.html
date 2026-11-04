@@ -119,6 +119,10 @@
 :root[data-theme="dark"] .history-delete:hover,:root[data-theme="dark"] .history-delete:focus-visible{background:#452a30;color:#ff9ca1}
 .chat-icon-button:focus-visible,.history-open:focus-visible,.history-delete:focus-visible,.history-new:focus-visible{outline:2px solid #9288ff;outline-offset:2px}
 .history-drawer{max-height:100dvh}
+
+/* GB+ 2.0.4 — Keep connection/state elements in DOM for the existing
+   JS event handlers, but remove their visible footer from the chat UI. */
+#ai-connect,#voice-status{display:none!important}
 </style></head><body><div class="wrap">
 <header><div class="brand"><span class="logo">GB+</span><span class="brand-meta"><strong>GB+ AI</strong><span class="muted">Assistente financeiro</span></span></div>
 <div class="chat-header-actions">
