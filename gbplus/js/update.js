@@ -69,13 +69,14 @@
   manifest=info;preview=false;downloadReady=false;
   show('Atualização disponível','GB+ '+installed+' → '+info.version,'Uma versão nova foi publicada. Baixe os arquivos e depois escolha quando reiniciar.');
   notes(info.notes);
+  els.primary.hidden=false;els.primary.dataset.next='download';
   put(els.later,'Depois');put(els.primary,'Baixar atualização');
  }
  function current(){
   if(active)return;
   preview=false;downloadReady=false;
   show('Tudo atualizado','GB+ versão '+installed,'Você já está utilizando a versão mais recente publicada.');
-  put(els.later,'Fechar');els.primary.hidden=true;
+  put(els.later,'Fechar');els.primary.hidden=true;els.primary.dataset.next='';
  }
  function trouble(message){
   if(!view())return;
