@@ -35,6 +35,42 @@
 @keyframes voice-idle{0%,100%{height:4px;opacity:.5}50%{height:9px;opacity:.85}}
 @keyframes voice-speech{0%,100%{height:5px;opacity:.75}50%{height:24px;opacity:1}}
 @media(prefers-reduced-motion:reduce){.voice-wave .voice-bar{animation:none!important;height:7px}}
+
+/* The AI follows the GB+ appearance preference; no independent color setting. */
+:root[data-theme="dark"]{color-scheme:dark;color:#f0f1f5;background:#111214}
+:root[data-theme="dark"] body{background:#111214;color:#f0f1f5}
+:root[data-theme="dark"] header{border-bottom-color:#303136}
+:root[data-theme="dark"] .brand-meta{border-left-color:#3a3b40}
+:root[data-theme="dark"] .muted{color:#aaaab5}
+:root[data-theme="dark"] .pill{border-color:#37383f;background:#202126;color:#c2c2cb}
+:root[data-theme="dark"] .messages{scrollbar-color:#4c4d58 transparent}
+:root[data-theme="dark"] .bubble{color:#eaeaf0}
+:root[data-theme="dark"] .message.user .bubble{background:#292a30;color:#fafafd}
+:root[data-theme="dark"] .avatar{background:#eeeef3;color:#18181a}
+:root[data-theme="dark"] .welcome-icon{border-color:#38393f;color:#f6f6fa}
+:root[data-theme="dark"] .welcome p{color:#a8a9b2}
+:root[data-theme="dark"] .chips button{background:#202126;color:#e8e8ef;border-color:#3a3b41}
+:root[data-theme="dark"] .chips button:hover{background:#2b2c33}
+:root[data-theme="dark"] .composer{background:#1e1f23;border-color:#3b3c43;box-shadow:0 4px 22px #0003}
+:root[data-theme="dark"] .composer input{color:#f5f5f8;caret-color:#f5f5f8}
+:root[data-theme="dark"] .composer input::placeholder{color:#989aa5}
+:root[data-theme="dark"] .composer button.voice-trigger{color:#ededf2;background:#2c2d33;border-color:#42434a}
+:root[data-theme="dark"] .composer button.primary{background:#f0f0f4;color:#16171a;box-shadow:none}
+:root[data-theme="dark"] .footnote{color:#9798a4}
+:root[data-theme="dark"] .details{background:#191a1e;border-color:#35363c}
+:root[data-theme="dark"] .details summary{color:#dedee4}
+:root[data-theme="dark"] .field{border-bottom-color:#35363c}
+:root[data-theme="dark"] .field span{color:#b2b2bd}
+:root[data-theme="dark"] .field strong{color:#f2f2f7}
+:root[data-theme="dark"] .actions button{background:#27282e;border-color:#42434a;color:#f0f0f6}
+:root[data-theme="dark"] .actions .primary{background:#eeeef2;color:#17171b;border-color:#eeeef2}
+:root[data-theme="dark"] .hint{color:#abadb7}
+:root[data-theme="dark"] #ai-login{background:#27282d!important;color:#f1f1f5;border-color:#474850!important}
+:root[data-theme="dark"] .voice-panel{background:#202126;border-color:#3c3c44}
+:root[data-theme="dark"] .voice-hint{color:#e1e0eb}
+:root[data-theme="dark"] .voice-bar{background:#aaa1fa}
+:root[data-theme="dark"] .voice-panel .voice-minor{color:#d4d4df}
+:root[data-theme="dark"] .voice-panel .voice-finish{background:#efeff4;color:#18181b}
 </style></head><body><div class="wrap">
 <header><div class="brand"><span class="logo">GB+</span><span class="brand-meta"><strong>GB+ AI</strong><span class="muted">Assistente financeiro</span></span></div><span class="pill" id="mode-pill">● Modo local</span></header>
 <main class="workspace">
@@ -55,6 +91,29 @@
 import {interpret,formatBRL,fixture} from './engine.js?v=20261103-v8';
 import {setupVoice} from './voice.js?v=20261103-v9';
 const $=s=>document.querySelector(s),log=$('#messages'),input=$('#message');let proposal=null,context=null,live=false,session=null,history=[];
+
+/* Same-origin iframe: read the main GB+ theme without changing financial logic. */
+function syncAiTheme(){
+ let theme='light';
+ try{theme=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}catch{}
+ try{
+  if(window.parent!==window&&window.parent.location.origin===location.origin){
+   const parentTheme=window.parent.document.documentElement.dataset.theme;
+   if(parentTheme==='light'||parentTheme==='dark')theme=parentTheme;
+  }
+ }catch{}
+ document.documentElement.dataset.theme=theme;
+}
+syncAiTheme();
+try{
+ if(window.parent!==window&&window.parent.location.origin===location.origin){
+  const themeObserver=new MutationObserver(syncAiTheme);
+  themeObserver.observe(window.parent.document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+ }
+ const systemDark=window.matchMedia('(prefers-color-scheme: dark)');
+ systemDark.addEventListener?.('change',syncAiTheme);
+}catch{}
+
 const supabaseUrl='https://layrxmkosyqurpobzmku.supabase.co';const publishableKey='sb_publishable_AaQyS_d5doh7RtrkLucHUQ_d8KR07Gg';
 async function getSession(){const raw=localStorage.getItem('gbplus-auth-v1');if(!raw)return null;try{const v=JSON.parse(raw);const token=v?.access_token||v?.currentSession?.access_token;return token||null;}catch{return null;}}
 $('#ai-login').addEventListener('click',async()=>{
