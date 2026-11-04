@@ -296,7 +296,7 @@ function askReal(text){
 }
 async function submit(text){
  const targetChat=chats.activeId();
- const reply=message=>reply(message,'assistant',targetChat);
+ const reply=message=>add(message,'assistant',targetChat);
  add(text,'user',targetChat);
  const s=normalized(text);
  if(/^(que dia e hoje|qual e a data de hoje|qual data e hoje|hoje e que dia|qual dia e hoje)$/.test(s)){
@@ -335,8 +335,8 @@ $('#chat-form').addEventListener('submit',e=>{e.preventDefault();const text=inpu
 // Example suggestions are delegated to #messages so they also work in new chats.
 $('#confirm').addEventListener('click',()=>{
  if(!proposal)return;
- if(window.parent===window||!bridge.realData){reply('Para gravar um título de verdade, abra o chat dentro do aplicativo GB+ e esteja conectado à sua conta. Aqui fora só é possível simular.');return;}
- if(!bridge.writeEnabled){reply('A conta GB+ não está pronta para gravar: verifique sua conexão e atualize o aplicativo. Nenhuma alteração foi enviada.');requestBridge();return;}
+ if(window.parent===window||!bridge.realData){add('Para gravar um título de verdade, abra o chat dentro do aplicativo GB+ e esteja conectado à sua conta. Aqui fora só é possível simular.');return;}
+ if(!bridge.writeEnabled){add('A conta GB+ não está pronta para gravar: verifique sua conexão e atualize o aplicativo. Nenhuma alteração foi enviada.');requestBridge();return;}
  const current={...proposal};const targetChat=chats.activeId(),btn=$('#confirm'),discard=$('#discard');
  const reply=message=>add(message,'assistant',targetChat);
  btn.disabled=true;discard.disabled=true;btn.textContent='Gravando…';
