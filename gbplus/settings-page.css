@@ -1,5 +1,7 @@
 /* GB+ Settings · native-style grouped interface. Scoped to the settings route. */
-.gb-settings-page #main{max-width:930px;padding:29px 32px 82px}
+.gb-settings-page #main{position:relative;min-width:0}
+/* Keep #main's width and padding identical to the remaining screens.
+   Constrain only the settings CONTENT, not the application workspace. */
 .gb-settings-layout{
  --cfg-bg:var(--bg);
  --cfg-card:var(--surface);
@@ -9,6 +11,7 @@
  --cfg-muted:var(--muted);
  --cfg-header:var(--ink);
  position:relative;isolation:isolate;min-width:0;color:var(--cfg-text);
+ max-width:900px;width:100%;margin-inline:auto;
  padding:0 0 10px;
 }
 .gb-settings-layout::before{content:"";position:absolute;z-index:-1;inset:-20px -24px -38px;pointer-events:none;background:radial-gradient(ellipse 60% 27% at 100% 0%,rgba(137,101,224,.045),transparent 100%);opacity:.65}
@@ -72,9 +75,17 @@ html[data-theme="dark"] .gb-cfg-delete{background:linear-gradient(105deg,#251c24
 html[data-theme="dark"] .gb-cfg-delete:hover{background:#302128}
 html[data-theme="dark"] .gb-cfg-search-trigger{background:#22232c}
 @media(max-width:760px){
- body.gb-settings-page .topbar{display:none!important}
- .gb-settings-page #main{padding:calc(14px + env(safe-area-inset-top)) 18px calc(126px + env(safe-area-inset-bottom));max-width:100%}
- .gb-cfg-header{margin-bottom:17px;min-height:55px;gap:12px}
+ /* Preserve the original 72px topbar's space and the normal workspace
+    height; show the custom Settings header in precisely that same slot.
+    This keeps the fixed bottom action bar from shifting between routes. */
+ body.gb-settings-page .topbar{visibility:hidden;pointer-events:none}
+ .gb-settings-page #main{position:relative;min-width:0}
+ .gb-settings-layout{max-width:none;margin:0}
+ .gb-cfg-header{
+  position:absolute;top:-72px;left:0;right:0;
+  height:72px;min-height:72px;padding-inline:clamp(12px,4vw,22px);
+  margin:0;gap:12px
+ }
  .gb-cfg-header h1{font-size:24px}
  .gb-cfg-back{width:34px;height:41px}
  .gb-cfg-search-trigger{width:42px;height:42px}
@@ -97,5 +108,5 @@ html[data-theme="dark"] .gb-cfg-search-trigger{background:#22232c}
  .gb-cfg-delete{margin-top:32px;min-height:82px}
  .gb-cfg-delete .gb-cfg-row-label strong{font-size:14px}
 }
-@media(max-width:375px){.gb-settings-page #main{padding-left:12px;padding-right:12px}.gb-cfg-row{gap:9px}.gb-cfg-row-label small{font-size:10px}.gb-cfg-version{padding:3px 6px}}
+@media(max-width:375px){.gb-cfg-row{gap:9px}.gb-cfg-row-label small{font-size:10px}.gb-cfg-version{padding:3px 6px}}
 @media(prefers-reduced-motion:reduce){.gb-cfg-profile,.gb-cfg-row{transition:none}}
