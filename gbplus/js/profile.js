@@ -42,15 +42,6 @@ export function profileView(user,cpfStatus={ready:false,cpf:'',error:''}){
        '<p id="gb-cpf-validation" class="gb-account-cpf-validation" aria-live="polite"></p>')+
     '</div>'+
    '</section>'+
-   '<section class="gb-account-card" aria-labelledby="gb-account-security-title">'+
-    '<header class="gb-account-card-heading"><span class="gb-account-card-icon">'+icon('shield')+'</span><div><h2 id="gb-account-security-title">Segurança da conta</h2></div></header>'+
-    '<div class="gb-account-fields">'+
-     locked('E-mail da conta',user.email||'')+
-     '<button type="button" class="gb-account-action" data-action="profile-change-password">'+icon('key')+'<strong>Alterar senha</strong><span>'+icon('chevron')+'</span></button>'+
-     '<button type="button" class="gb-account-action gb-account-action-danger" data-action="settings-delete">'+icon('trash')+'<strong>Excluir conta</strong></button>'+
-    '</div>'+
-   '</section>'+
-   '<div class="gb-account-save-area"><span id="profile-message" role="status" aria-live="polite"></span><button type="submit" id="profile-save" class="gb-account-save" disabled>'+icon('check')+' Salvar alterações</button></div>'+
   '<details class="gb-account-address"><summary>'+icon('map-pin')+'<span><strong>Endereço</strong><small>Visualizar ou atualizar dados de endereço</small></span>'+icon('chevron')+'</summary>'+
     '<div class="gb-account-address-grid">'+
      addressField('CEP','postal_code',address.postal_code||'','inputmode="numeric" autocomplete="postal-code" maxlength="9" placeholder="00000-000"')+
@@ -62,8 +53,17 @@ export function profileView(user,cpfStatus={ready:false,cpf:'',error:''}){
      addressField('Estado (UF)','state',address.state||'','autocomplete="address-level1" maxlength="2" placeholder="ES"')+
     '</div>'+
    '</details>'+ 
+   '<section class="gb-account-card" aria-labelledby="gb-account-security-title">'+
+    '<header class="gb-account-card-heading"><span class="gb-account-card-icon">'+icon('shield')+'</span><div><h2 id="gb-account-security-title">Segurança da conta</h2></div></header>'+
+    '<div class="gb-account-fields">'+
+     locked('E-mail da conta',user.email||'')+
+     '<button type="button" class="gb-account-action" data-action="profile-change-password">'+icon('key')+'<strong>Alterar senha</strong><span>'+icon('chevron')+'</span></button>'+
+     '<button type="button" class="gb-account-action gb-account-action-danger" data-action="settings-delete">'+icon('trash')+'<strong>Excluir conta</strong></button>'+
+    '</div>'+
+   '</section>'+
+   '<div class="gb-account-save-area"><span id="profile-message" role="status" aria-live="polite"></span><button type="submit" id="profile-save" class="gb-account-save" disabled>'+icon('check')+' Salvar alterações</button></div>'+
+
   '</form>'+ 
-  '<div class="gb-account-bottom"><button type="button" class="gb-account-signout" data-auth-action="signout">'+icon('arrow')+' Sair da conta</button><a href="#settings">'+icon('settings')+' Voltar às configurações</a></div>'+
  '</div>';
 }
 export function validateProfile(form,existingCpf=''){
