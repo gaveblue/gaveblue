@@ -20,6 +20,7 @@ export function profileView(user){
  return '<div class="profile-layout">'+
   '<section class="panel profile-card">'+
    '<div class="profile-intro"><span class="profile-avatar">'+icon('user')+'</span><div><span class="eyebrow">PERFIL PESSOAL</span><h2>Suas informações</h2><p>Atualize os dados vinculados à sua conta GB+.</p></div></div>'+
+   '<a href="#settings" class="button profile-settings-link">'+icon('settings')+' Abrir configurações e personalizações</a>'+
    '<form id="profile-form" autocomplete="on">'+
     '<div class="profile-section-heading"><h3>Dados pessoais</h3><p>Preencha apenas as informações que deseja manter no perfil.</p></div>'+
     '<div class="profile-fields">'+
