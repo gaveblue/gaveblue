@@ -97,7 +97,7 @@ export function installAiBridge({getDb,getUser,getRepository,commit}){
   if(!frame.contentWindow)return;
   const user=getUser();
   const name=String(user?.user_metadata?.full_name||user?.user_metadata?.name||user?.user_metadata?.display_name||user?.email?.split('@')[0]||'').trim().split(/\s+/)[0].slice(0,40);
-  frame.contentWindow.postMessage({kind:'gbplus-ai-profile',name,realData:ready(),writeEnabled:ready()&&navigator.onLine},location.origin);
+  frame.contentWindow.postMessage({kind:'gbplus-ai-profile',name,userId:user?.id||null,realData:ready(),writeEnabled:ready()&&navigator.onLine},location.origin);
  }
  const reply=(target,kind,requestId,data)=>{try{target.postMessage({kind,requestId,...data},location.origin);}catch(error){console.warn('GB+ AI reply unavailable',error);}};
  async function receive(event){
