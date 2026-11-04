@@ -22,7 +22,12 @@ test('profile has minimal sections and locked identity fields',()=>{
  assert.ok(!html.includes('name="cpf"'));
  assert.ok(!html.includes('id="profile-email-form"'));
  assert.ok(html.includes('id="profile-save" class="gb-account-save" disabled'));
- assert.ok(html.includes('data-auth-action="signout"'));
+ assert.ok(!html.includes('data-auth-action="signout"'));
+ assert.ok(!html.includes('Voltar às configurações'));
+ assert.ok(html.indexOf('Dados pessoais')<html.indexOf('Visualizar ou atualizar dados de endereço'));
+ assert.ok(html.indexOf('Visualizar ou atualizar dados de endereço')<html.indexOf('Segurança da conta'));
+ assert.ok(html.indexOf('Segurança da conta')<html.indexOf('Salvar alterações'));
+ assert.ok(html.indexOf('name="city"')<html.indexOf('</form>'));
 });
 test('profile renders safe user-provided values',()=>{
  const html=funcs.profileView({email:'example@example.com',user_metadata:{full_name:'<script>alert(1)</script>'}},{ready:true,cpf:''});
@@ -40,8 +45,11 @@ test('CPF is editable only for the first registration and locked afterwards',()=
  assert.ok(existing.includes('Bloqueado'));
  assert.ok(!pending.includes('name="cpf"'));
  assert.ok(pending.includes('Verificando cadastro'));
+ assert.ok(existing.indexOf('Visualizar ou atualizar dados de endereço')<existing.indexOf('Segurança da conta'));
  assert.ok(existing.indexOf('Segurança da conta')<existing.indexOf('Salvar alterações'));
- assert.ok(existing.indexOf('Salvar alterações')<existing.indexOf('Visualizar ou atualizar dados de endereço'));
+ assert.ok(!existing.includes('gb-account-bottom'));
+ assert.ok(!existing.includes('Sair da conta'));
+ assert.ok(!existing.includes('Voltar às configurações'));
 });
 test('CPF validation accepts valid digits, rejects repeated numbers and wrong digits',()=>{
  assert.ok(funcs.validCPF('529.982.247-25'));
@@ -71,7 +79,10 @@ test('profile stylesheet uses a scoped design and release metadata',()=>{
  const css=read('profile-page.css'),index=read('index.html'),version=JSON.parse(read('version.json'));
  assert.ok(css.includes('.gb-account-card-heading'));
  assert.ok(css.includes('.gb-account-save:disabled'));
- assert.ok(index.includes('profile-page.css?v=20261104-36'));
+ assert.ok(css.includes('GB+ 2.1.5 — compact profile'));
+ assert.ok(css.includes('.gb-account-address{margin:0 0 12px'));
+ assert.ok(css.includes('.gb-account-field{min-height:60px'));
+ assert.ok(index.includes('profile-page.css?v=20261104-37'));
  assert.ok(version.assets.includes('./profile-page.css'));
- assert.equal(version.version,'2.1.4');
+ assert.equal(version.version,'2.1.5');
 });
