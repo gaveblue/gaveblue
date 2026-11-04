@@ -1,6 +1,6 @@
 import {money,today,dateLabel,metrics,pending,paid,status,flow,accountBalance,within} from './domain.js';
 import {INDICATORS} from './store.js';
-import {esc,icon,button,empty,titleTable,chart,select,field} from './ui.js?v=20261104-33';
+import {esc,icon,button,empty,titleTable,chart,select,field} from './ui.js?v=20261104-35';
 export const routes=[['dashboard','Dashboard','home'],['titles','Lançamentos','titles'],['payable','Contas a pagar','down'],['receivable','Contas a receber','up'],['provisions','Provisões','layers'],['flow','Fluxo de caixa','chart'],['partners','Parceiros','people'],['accounts','Contas bancárias','wallet'],['categories','Categorias','category'],['reports','Relatórios','chart'],['notifications','Notificações','bell'],['settings','Configurações','settings']];
 const stat=(key,value,subtitle,ico,extra='')=>`<article class="stat ${extra}" data-indicator="${key}"><div class="stat-top"><span class="stat-icon">${icon(ico)}</span>${key==='balance'?'<span class="stat-tag">AGORA</span>':''}</div><p>${INDICATORS[key]}</p><strong>${money(value)}</strong><small>${subtitle}</small></article>`;
 export function periodBar(state){return `<div class="period-control">${icon('calendar')}<select id="period" aria-label="Período"><option value="month" ${state.period==='month'?'selected':''}>Este mês</option><option value="last" ${state.period==='last'?'selected':''}>Mês anterior</option><option value="year" ${state.period==='year'?'selected':''}>Este ano</option><option value="all" ${state.period==='all'?'selected':''}>Todo o período</option><option value="custom" ${state.period==='custom'?'selected':''}>Personalizado</option></select></div>`;}
@@ -109,7 +109,7 @@ function cfgSection(label,rows){
  return `<section class="gb-cfg-group" aria-label="${esc(label)}"><h2>${esc(label)}</h2><div class="gb-cfg-list">${rows}</div></section>`;
 }
 export function settingsView(db,canInstall,online=false,user=null,installed=false){
- const appVersion=document.querySelector('meta[name="gbplus-version"]')?.content||'2.1.0';
+ const appVersion=document.querySelector('meta[name="gbplus-version"]')?.content||'2.1.3';
  const name=String(user?.user_metadata?.gbplus_profile?.full_name||user?.user_metadata?.full_name||user?.user_metadata?.name||user?.email?.split('@')[0]||'Minha conta').trim();
  const preferences=cfgSection('PREFERÊNCIAS',
   cfgOption('Aparência','Tema, cores e layout','palette','purple','settings-appearance')+
