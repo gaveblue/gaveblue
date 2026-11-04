@@ -1,12 +1,12 @@
 {
-  "version": "1.8.6",
-  "build": 24,
+  "version": "1.9.0",
+  "build": 25,
   "published_at": "2026-11-04",
-  "title": "Atualizações do GB+",
+  "title": "Primeiros passos e atalhos personalizados",
   "notes": [
-    "Menu hambúrguer lateral agora aparece apenas no desktop com mouse ou trackpad.",
-    "Botão de menu lateral não aparece no celular, inclusive em paisagem.",
-    "A navegação inferior do celular, o efeito glass e os registros financeiros permanecem sem alterações."
+    "Novo passo a passo após o primeiro cadastro: conta financeira, saldo inicial opcional e preferências.",
+    "Barra inferior personalizável: escolha três atalhos, com Início e Novo sempre fixos.",
+    "Preferências salvas na conta e editáveis nas Configurações. Dados financeiros anteriores preservados."
   ],
   "assets": [
     "./index.html",
@@ -32,6 +32,7 @@
     "./manifest.webmanifest",
     "./sw.js",
     "./js/ai-drag.js",
-    "./recuperar.html"
+    "./recuperar.html",
+    "./js/setup-ui.js"
   ]
 }
