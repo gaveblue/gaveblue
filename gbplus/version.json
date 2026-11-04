@@ -1,12 +1,12 @@
 {
-  "version": "1.7.0",
-  "build": 16,
+  "version": "1.7.1",
+  "build": 17,
   "published_at": "2026-11-04",
   "title": "Atualizações do GB+",
   "notes": [
-    "Novo aviso de atualização com barra de progresso.",
-    "Download dos arquivos e instalação com confirmação do usuário.",
-    "Melhorias na segurança do reinício do aplicativo."
+    "Saudação automática no início: bom dia, boa tarde ou boa noite.",
+    "Primeiro nome do perfil aparece quando estiver preenchido.",
+    "Ajustes visuais no título da tela inicial."
   ],
   "assets": [
     "./index.html",
