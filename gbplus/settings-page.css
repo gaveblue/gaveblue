@@ -110,3 +110,11 @@ html[data-theme="dark"] .gb-cfg-search-trigger{background:#22232c}
 }
 @media(max-width:375px){.gb-cfg-row{gap:9px}.gb-cfg-row-label small{font-size:10px}.gb-cfg-version{padding:3px 6px}}
 @media(prefers-reduced-motion:reduce){.gb-cfg-profile,.gb-cfg-row{transition:none}}
+
+/* GB+ 2.1.3 — Configurações uses its own header/back button; only this route
+   suppresses the floating mobile action bar. Other routes are unchanged. */
+@media(max-width:760px){
+ body.gb-settings-page .mobile-nav,
+ body.gb-settings-page .mobile-nav-fade{display:none!important}
+ body.gb-settings-page .gb-ai-widget:not([open]){bottom:24px}
+}
