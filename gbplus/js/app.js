@@ -139,6 +139,16 @@ window.addEventListener('message',async event=>{
   respond(true,generated.length+' título(s) gravado(s) na sua conta GB+.');
  }catch(error){respond(false,error.message||'Falha ao salvar. Atualize e confira os dados antes de tentar novamente.');}
 });
+// Pass only the signed-in user's display name to the same-origin AI frame.
+const aiFrame=document.querySelector('.gb-ai-widget iframe');
+function shareAiName(){
+ const user=currentUser();if(!user||!aiFrame?.contentWindow)return;
+ const raw=user.user_metadata?.full_name||user.user_metadata?.name||user.user_metadata?.display_name||user.email?.split('@')[0]||'';
+ const name=String(raw).trim().split(/\s+/)[0].slice(0,40);
+ aiFrame.contentWindow.postMessage({kind:'gbplus-ai-profile',name},location.origin);
+}
+aiFrame?.addEventListener('load',shareAiName);
+document.querySelector('.gb-ai-widget')?.addEventListener('toggle',()=>{if(document.querySelector('.gb-ai-widget').open)shareAiName();});
 window.addEventListener('gbplus-refresh',()=>refreshOnline(true));
 window.addEventListener('gbplus-message',event=>toast(event.detail));
 window.addEventListener('focus',()=>refreshOnline());
