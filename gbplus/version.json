@@ -1,12 +1,12 @@
 {
-  "version": "1.8.1",
-  "build": 19,
+  "version": "1.8.2",
+  "build": 20,
   "published_at": "2026-11-04",
   "title": "Atualizações do GB+",
   "notes": [
-    "O símbolo flutuante do GB+ AI pode ser arrastado com o dedo, mouse ou caneta para qualquer ponto da tela.",
-    "A posição do assistente é lembrada neste dispositivo e se adapta ao tamanho da tela.",
-    "Tocar no símbolo continua abrindo a conversa normalmente, sem alterar dados financeiros."
+    "Novo efeito degradê atrás da barra inferior no celular: o conteúdo desaparece suavemente durante a rolagem.",
+    "Blur progressivo e transição de opacidade acompanham automaticamente os modos claro e escuro.",
+    "A barra de navegação permanece funcional e os dados financeiros não são modificados."
   ],
   "assets": [
     "./index.html",
