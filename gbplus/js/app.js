@@ -149,7 +149,7 @@ const actions={
     button(icon('eye')+' Prévia da atualização','preview-update')+'</div>'),
   'settings-help':()=>openModal('Ajuda e suporte',
     '<p>Precisa de ajuda com o GB+? Descreva sua dúvida, informe a versão do aplicativo e, se necessário, anexe uma captura da tela. Nunca envie senhas ou códigos de acesso.</p>'+
-    '<p style="margin-top:16px"><a class="button primary" href="mailto:contato.lucaspimenteloliveira@gmail.com?subject=Suporte%20GB%2B">'+icon('arrow')+' Entrar em contato</a></p>'+
+    '<p style="margin-top:16px"><a class="button primary" href="mailto:contato@gaveblue.com.br?subject=Suporte%20GB%2B">'+icon('arrow')+' Entrar em contato</a></p>'+
     '<p style="margin-top:18px"><a href="./privacidade.html" class="button">Política de Privacidade</a></p>'),
   'settings-about':()=>openModal('Sobre o GB+',
     '<p><strong>GB+ · Gestão Financeira</strong></p>'+
@@ -160,7 +160,7 @@ const actions={
     '<p style="margin-top:12px" class="muted">A exclusão automática ainda não está disponível nesta versão. Para proteger sua conta, a solicitação é atendida após confirmação de titularidade. Nada será excluído ao abrir esta opção.</p>'+
     '<div class="button-stack" style="margin-top:20px">'+
     button(icon('download')+' Fazer backup antes','backup')+
-    '<a class="button danger" href="mailto:contato.lucaspimenteloliveira@gmail.com?subject=Solicita%C3%A7%C3%A3o%20de%20exclus%C3%A3o%20da%20conta%20GB%2B">Solicitar exclusão de conta</a></div>'),
+    '<a class="button danger" href="mailto:contato@gaveblue.com.br?subject=Solicita%C3%A7%C3%A3o%20de%20exclus%C3%A3o%20da%20conta%20GB%2B">Solicitar exclusão de conta</a></div>'),
   customize:()=>openModal('Personalizar painel',customizeForm(db)),
   'customize-mobile-nav':()=>openModal('Personalizar barra de ações',customMobileNavForm(db)),
   'reset-mobile-nav':()=>{
