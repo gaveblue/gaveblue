@@ -1,0 +1,34 @@
+{
+  "version": "1.7.0",
+  "build": 16,
+  "published_at": "2026-11-04",
+  "title": "Atualizações do GB+",
+  "notes": [
+    "Novo aviso de atualização com barra de progresso.",
+    "Download dos arquivos e instalação com confirmação do usuário.",
+    "Melhorias na segurança do reinício do aplicativo."
+  ],
+  "assets": [
+    "./index.html",
+    "./styles.css",
+    "./js/app.js",
+    "./js/views.js",
+    "./js/ui.js",
+    "./js/domain.js",
+    "./js/forms.js",
+    "./js/store.js",
+    "./js/auth.js",
+    "./js/profile.js",
+    "./js/ai-bridge.js",
+    "./js/update.js",
+    "./integrations/supabase/client.js",
+    "./integrations/supabase/repository.js",
+    "./js/cloud-config.js",
+    "./vendor/supabase-2.118.0.js",
+    "./ai-lab/index.html",
+    "./ai-lab/engine.js",
+    "./ai-lab/faq.js",
+    "./ai-lab/voice.js",
+    "./manifest.webmanifest"
+  ]
+}
