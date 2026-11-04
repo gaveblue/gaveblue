@@ -34,6 +34,16 @@ self.addEventListener('activate',event=>{
 self.addEventListener('fetch',event=>{
  const request=event.request,url=new URL(request.url);
  if(request.method!=='GET'||!inScope(url))return;
+ // Version checks must NEVER use an older cached manifest as a successful answer.
+ // Fail explicitly when the server is unavailable so users don't see a false
+ // "Tudo atualizado" status. No application/user data is affected.
+ if(url.pathname===new URL('./version.json',scope).pathname){
+  event.respondWith(network(request,8000).catch(()=>new Response(
+   JSON.stringify({error:'Não foi possível conferir a versão online.'}),
+   {status:503,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'}}
+  )));
+  return;
+ }
  event.respondWith((async()=>{
   try{
    const response=await network(request,request.mode==='navigate'?6000:8000);
