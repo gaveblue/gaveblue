@@ -1,12 +1,12 @@
 {
-  "version": "1.8.0",
-  "build": 18,
+  "version": "1.8.1",
+  "build": 19,
   "published_at": "2026-11-04",
   "title": "Atualizações do GB+",
   "notes": [
-    "GB+ AI entende perguntas de data em linguagem natural e oferece edição guiada de despesas e receitas.",
-    "Busca títulos reais pelo nome, documento ou parceiro e abre o formulário existente, sem alterações automáticas.",
-    "Aparência do sistema Android sincronizada antes da primeira renderização para reduzir a barra clara no modo escuro."
+    "O símbolo flutuante do GB+ AI pode ser arrastado com o dedo, mouse ou caneta para qualquer ponto da tela.",
+    "A posição do assistente é lembrada neste dispositivo e se adapta ao tamanho da tela.",
+    "Tocar no símbolo continua abrindo a conversa normalmente, sem alterar dados financeiros."
   ],
   "assets": [
     "./index.html",
@@ -30,6 +30,7 @@
     "./ai-lab/faq.js",
     "./ai-lab/voice.js",
     "./manifest.webmanifest",
-    "./sw.js"
+    "./sw.js",
+    "./js/ai-drag.js"
   ]
 }
