@@ -5,7 +5,7 @@ import {routes,dashboard,titlesView,partnersView,accountsView,categoriesView,flo
 import {titleForm,partnerForm,accountForm,categoryForm,paymentForm,transferForm,titleDetail,customizeForm,accountDetail} from './forms.js';
 import {SupabaseRepository} from '../integrations/supabase/repository.js';
 import {initializeAuth,authClient,currentUser,showAuth,isRecovery,updatePersonalProfile,consumeAuthReturnMessage} from './auth.js?v=20261104-32';
-import {profileView,validateProfile,validCPF,formatCPF} from './profile.js?v=20261104-35';
+import {profileView,validateProfile,validCPF,formatCPF} from './profile.js?v=20261104-36';
 import {firstSetupView,customMobileNavForm,shortcutsPreview,readMobileNav} from './setup-ui.js?v=20261104-35';
 let repository=null;let db;let busy=false;let pendingGeneration=null;let confirmAction=null;let installPrompt=null;let installedInSession=false;
 const isInstalledApp=()=>installedInSession||matchMedia('(display-mode: standalone)').matches||matchMedia('(display-mode: fullscreen)').matches||navigator.standalone===true;
