@@ -1,12 +1,12 @@
 {
-  "version": "1.8.3",
-  "build": 21,
+  "version": "1.8.4",
+  "build": 22,
   "published_at": "2026-11-04",
   "title": "Atualizações do GB+",
   "notes": [
-    "Efeito de desvanecimento atrás da barra inferior mais baixo e discreto.",
-    "Barra de navegação com efeito glass reforçado: mais transparência, blur e saturação.",
-    "Cores ajustadas para temas claro e escuro, mantendo os botões e seus tamanhos."
+    "Correção de travamento no início: espera limitada para sessão e dados online, com recuperação segura.",
+    "Acesso à recuperação aparece automaticamente quando a tela de abertura demora a responder.",
+    "Recuperação limpa somente os arquivos antigos do aplicativo, sem excluir registros financeiros nem sua sessão."
   ],
   "assets": [
     "./index.html",
