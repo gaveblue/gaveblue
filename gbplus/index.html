@@ -41,7 +41,7 @@ body.auth-locked .gb-ai-widget{display:none}
   setTimeout(()=>{const message=document.querySelector('#auth-gate .auth-description');if(message&&message.textContent.includes('Preparando seu acesso')){message.textContent='O acesso está demorando mais do que o normal. Confira sua conexão.';const recovery=document.createElement('a');recovery.href='./recuperar.html';recovery.textContent='Recuperar abertura do aplicativo';recovery.style.cssText='display:block;margin-top:14px;font-weight:600;text-decoration:underline';message.append(recovery);}},12000);
   </script>
 
-  <script src="./js/update.js?v=20261104-13"></script>
+  <script src="./js/update.js?v=20261104-14"></script>
   <script src="./vendor/supabase-2.118.0.js"></script>
   <script type="module" src="./js/app.js?v=20261104-14"></script>
 </body>
