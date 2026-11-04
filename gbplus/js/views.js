@@ -108,7 +108,7 @@ function cfgOption(title,description,ico,color,action,badge=''){
 function cfgSection(label,rows){
  return `<section class="gb-cfg-group" aria-label="${esc(label)}"><h2>${esc(label)}</h2><div class="gb-cfg-list">${rows}</div></section>`;
 }
-export function settingsView(db,canInstall,online=false,user=null){
+export function settingsView(db,canInstall,online=false,user=null,installed=false){
  const appVersion=document.querySelector('meta[name="gbplus-version"]')?.content||'2.1.0';
  const name=String(user?.user_metadata?.gbplus_profile?.full_name||user?.user_metadata?.full_name||user?.user_metadata?.name||user?.email?.split('@')[0]||'Minha conta').trim();
  const preferences=cfgSection('PREFERÊNCIAS',
@@ -121,8 +121,9 @@ export function settingsView(db,canInstall,online=false,user=null){
   cfgOption('Configuração inicial','Ajustes básicos e saldo inicial','gear','orange','restart-setup'));
  const system=cfgSection('SISTEMA',
   cfgOption('Atualizações do GB+','Verificar nova versão e instalar','refresh','blue','settings-updates','v'+appVersion)+
-  cfgOption('Instalar aplicativo','Adicionar o GB+ à tela inicial','download','purple','install'));
+  (installed?'':cfgOption('Instalar aplicativo','Adicionar o GB+ à tela inicial','download','purple','install')));
  const support=cfgSection('SUPORTE E SOBRE',
+  cfgOption('Convidar um amigo','Compartilhe o GB+ com seus amigos','share','green','invite-friend')+
   cfgOption('Ajuda e suporte','Dúvidas, tutoriais e contato','help','blue','settings-help')+
   cfgOption('Sobre o GB+','Versão, novidades e licenças','info','neutral','settings-about'));
  return `<div class="gb-settings-layout">
