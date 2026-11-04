@@ -5,6 +5,11 @@ const lower=s=>s.toLocaleLowerCase('pt-BR').normalize('NFD').replace(/[\u0300-\u
 const n=s=>{if(!s)return null;const v=Number(s.replace(/\./g,'').replace(',','.'));return Number.isFinite(v)?Math.round(v*100):null;};
 const dateFromDay=d=>{const now=new Date(),y=now.getFullYear(),m=now.getMonth();let target=new Date(y,m,Number(d),12);if(target.getMonth()!==m)return null;if(target<new Date(y,m,now.getDate(),0))target=new Date(y,m+1,Number(d),12);if(target.getDate()!==Number(d))return null;return [target.getFullYear(),String(target.getMonth()+1).padStart(2,'0'),String(target.getDate()).padStart(2,'0')].join('-');};
 export function interpret(message,context=null,data=fixture){
+ const greeting=lower(message.trim()).replace(/[!?.…]+$/g,'').trim();
+ if(/^(?:oi+|ola+|opa|e ai|bom dia|boa tarde|boa noite|ol[aá],? tudo bem|oi,? tudo bem|tudo bem|tudo bom)$/.test(greeting)){
+  const response=greeting.includes('bom dia')?'Bom dia!':greeting.includes('boa tarde')?'Boa tarde!':greeting.includes('boa noite')?'Boa noite!':'Olá!';
+  return {intent:'saudacao',status:'answered',answer:response+' Como posso ajudar com suas finanças no GB+? Posso consultar saldos, contas a pagar e a receber ou preparar lançamentos para você.'};
+ }
  const s=lower(message.trim()),amountMatch=s.match(/(?:r\$\s*)?([\d.]+(?:,\d{1,2})?)\s*(?:reais|real)?/),value=amountMatch?n(amountMatch[1]):null;
  const day=s.match(/(?:dia|vencimento(?:\s+(?:para|no|em))?)\s*(\d{1,2})(?!\d)/);
  const count=s.match(/(?:por|durante|em|repete|repetir|divide|dividir|parcela(?:do)?\s+em)\s*(\d{1,3})\s*(meses|vezes|parcelas)?/);
