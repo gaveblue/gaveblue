@@ -48,7 +48,7 @@
   const el=view();if(!el)return;
   el.hidden=false;put(els.title,title);put(els.subtitle,subtitle);put(els.description,description);
   els.notes.replaceChildren();els.progress.hidden=true;put(els.feedback,'');
-  els.later.hidden=false;els.later.disabled=false;els.close.disabled=false;els.primary.disabled=false;
+  els.later.hidden=false;els.later.disabled=false;els.close.disabled=false;els.primary.disabled=false;els.primary.hidden=false;
  }
  function dismiss(){
   if(active){put(els.feedback,'Conclua o download ou aguarde a operação terminar.');return;}
