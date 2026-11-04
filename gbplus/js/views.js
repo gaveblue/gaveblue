@@ -25,7 +25,7 @@ function mobileTitleCards(db,titles){
 }
 export function titlesView(db,state){
  const titles=filteredTitles(db,state);
- const advanced=!!state.moreFilters||!!state.partner||!!state.category;
+ const advanced=!!state.moreFilters;
  const active=[!!state.query,!!state.status,!!state.partner,!!state.category,!!(state.type&&state.route==='titles'),state.period!=='month'].filter(Boolean).length;
  const incomePending=titles.filter(t=>t.type==='income').reduce((sum,t)=>sum+pending(db,t),0);
  const expensePending=titles.filter(t=>t.type==='expense').reduce((sum,t)=>sum+pending(db,t),0);
