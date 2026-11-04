@@ -56,6 +56,36 @@ após capturar uma mensagem apropriada para o usuário.
 - [ ] Testes no celular, no PWA instalado e no desktop.
 - [ ] Verificar no painel do Supabase os logs de Auth sem expor tokens.
 
-**Status:** as melhorias de UX e tratamento de erros podem ser revisadas no GitHub.
-O provedor Google, as entregas SMTP e a segurança de produção precisam de validação
-na configuração real do Supabase e em dispositivos reais; não foram homologados aqui.
+## Verificação realizada em 4 de novembro de 2026
+
+- Google habilitado no Supabase, preservando e-mail/senha e cadastro com confirmação de e-mail.
+- Cliente Web criado no projeto Google Cloud exclusivo `GB Plus`, com origem e callback acima.
+- Site URL e URL de retorno exata conferidos no painel do Supabase.
+- No domínio oficial, a seleção da conta Google, o consentimento e o retorno autenticado funcionaram.
+- Cancelar no Google retornou ao login com a mensagem de cancelamento em português.
+- A sessão persistiu ao fechar a aba e reabrir o GB+ no mesmo navegador.
+- A conta usada no teste resultou em um usuário e uma identidade Google, sem duplicação nesse fluxo.
+- Os cinco testes existentes de autenticação passaram. O cliente mantém PKCE e persistência de sessão.
+- Os três registros exclusivos de e-mail do GB+ foram salvos e confirmados por consulta DNS pública.
+
+- Domínio `gbplus.gaveblue.com.br` verificado no Resend, com recebimento desativado.
+- SMTP próprio salvo e conferido após recarregar o painel: `smtp.resend.com`, porta 465,
+  usuário `resend`, remetente `acesso@gbplus.gaveblue.com.br` e nome `GB+ Gestão Financeira`.
+- Credencial restrita a envio pelo domínio do GB+, armazenada apenas no campo seguro
+  do Supabase; nenhuma credencial foi incluída nos arquivos do aplicativo.
+- Modelos de confirmação, recuperação e alteração de e-mail em português salvos e
+  conferidos na prévia. Cópias em `integrations/supabase/email-*.html` preservam os
+  placeholders oficiais `{{ .ConfirmationURL }}` e, na alteração, `{{ .NewEmail }}`.
+- Recuperação solicitada pelo formulário no domínio oficial; o Resend confirmou
+  status `Delivered` para o e-mail de teste. Isso confirma entrega ao provedor de destino,
+  não a leitura da mensagem nem a posição na caixa de entrada.
+- `emailReady` habilitado após a validação do envio SMTP.
+
+**Pendente:** validação completa de cadastro por e-mail e recuperação com definição de
+senha pelo usuário. O Google Cloud ainda está em Testing; a política de privacidade foi
+preparada, mas sua publicação e a conclusão do branding estão pendentes de confirmação.
+
+Também permanecem pendentes os testes em celular/PWA instalado, a associação de login
+Google a uma conta preexistente com e-mail verificado e registros, e os demais cenários
+da matriz que não estejam explicitamente confirmados acima. A configuração e os testes
+não excluíram usuários nem títulos e não alteraram RLS ou a estrutura do banco.
