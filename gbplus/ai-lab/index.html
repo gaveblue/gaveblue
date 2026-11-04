@@ -57,6 +57,7 @@ window.addEventListener('message',event=>{
  bridge={realData:!!event.data.realData,writeEnabled:!!event.data.writeEnabled};
  updateGreeting();
  if(!live){$('#ai-state').textContent=bridge.realData?'Conta GB+ conectada · Consultas reais':'Modo local de demonstração';}
+ $('#voice-status').textContent=bridge.realData?'Consultas com dados do GB+ · Gravação somente após confirmação':'Respostas demonstrativas · Nenhum saldo real consultado';
  $('#mode-pill').textContent=bridge.realData?'● Dados do GB+':'● Modo local';
 });
 function requestBridge(){if(window.parent!==window)window.parent.postMessage({kind:'gbplus-ai-request-profile'},location.origin);}
@@ -176,18 +177,29 @@ $('#chat-form').addEventListener('submit',e=>{e.preventDefault();const text=inpu
 document.querySelectorAll('[data-example]').forEach(b=>b.addEventListener('click',()=>submit(b.dataset.example)));
 $('#confirm').addEventListener('click',()=>{
  if(!proposal)return;
- const current={...proposal};const btn=$('#confirm');
- btn.disabled=true;$('#discard').disabled=true;
- if(window.parent===window){add('Abra este assistente dentro do GB+ e entre na sua conta para gravar o lançamento.');btn.disabled=false;$('#discard').disabled=false;return;}
- const requestId=crypto.randomUUID();
- const handler=event=>{if(event.origin!==location.origin||event.source!==window.parent||event.data?.kind!=='gbplus-ai-create-result'||event.data.requestId!==requestId)return;
-  window.removeEventListener('message',handler);clearTimeout(timeout);add(event.data.message);
-  if(event.data.ok){proposal=null;context=null;$('#preview').textContent='Lançamento gravado no GB+.';}
-  else{btn.disabled=false;$('#discard').disabled=false;}
- };
+ if(window.parent===window||!bridge.realData){add('Para gravar um título de verdade, abra o chat dentro do aplicativo GB+ e esteja conectado à sua conta. Aqui fora só é possível simular.');return;}
+ if(!bridge.writeEnabled){add('A conta GB+ não está pronta para gravar: verifique sua conexão e atualize o aplicativo. Nenhuma alteração foi enviada.');requestBridge();return;}
+ const current={...proposal};const btn=$('#confirm'),discard=$('#discard');
+ btn.disabled=true;discard.disabled=true;btn.textContent='Gravando…';
+ add('Confirmação recebida. Estou solicitando a gravação do título no GB+.');
+ const requestId=crypto.randomUUID();let finished=false;
+ function restore(){btn.textContent='Confirmar e gravar no GB+';discard.disabled=false;}
+ function handler(event){
+  if(event.origin!==location.origin||event.source!==window.parent||event.data?.kind!=='gbplus-ai-create-result'||event.data.requestId!==requestId)return;
+  finished=true;clearTimeout(timeout);window.removeEventListener('message',handler);restore();
+  add(event.data.message||'O GB+ não retornou detalhes da operação.');
+  if(event.data.ok){proposal=null;context=null;btn.disabled=true;discard.disabled=true;$('#preview').textContent='Gravação confirmada no GB+. Consulte Títulos para verificar.';$('#details').open=false;}
+  else{btn.disabled=false;}
+ }
  window.addEventListener('message',handler);
- const timeout=setTimeout(()=>{window.removeEventListener('message',handler);add('Sem resposta do GB+. Confira seus títulos antes de tentar novamente.');btn.disabled=false;$('#discard').disabled=false;},15000);
- window.parent.postMessage({kind:'gbplus-ai-create-title',requestId,proposal:current},location.origin);
+ const timeout=setTimeout(()=>{
+  if(finished)return;window.removeEventListener('message',handler);restore();
+  // A timeout does not prove failure. Do not offer a blind retry and risk duplicates.
+  add('Não recebi confirmação do servidor. Verifique se o título apareceu em Títulos antes de tentar novamente; uma nova tentativa pode duplicar o lançamento.');
+  btn.disabled=true;discard.disabled=false;
+ },16000);
+ try{window.parent.postMessage({kind:'gbplus-ai-create-title',requestId,proposal:current},location.origin);}
+ catch(error){clearTimeout(timeout);window.removeEventListener('message',handler);restore();btn.disabled=false;add('Não consegui enviar a confirmação: '+error.message);}
 });
 $('#discard').addEventListener('click',()=>{proposal=null;context=null;$('#confirm').disabled=true;$('#discard').disabled=true;$('#preview').textContent='Prévia descartada.';add('Prévia descartada.');});
 setupVoice({input,onStatus:text=>{$('#voice-status').textContent=text;}});
