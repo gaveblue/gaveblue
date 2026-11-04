@@ -15,48 +15,53 @@ export function profileView(user){
  if(!user)return '<section class="panel settings-card">Entre no GB+ para visualizar seu perfil.</section>';
  const p=profileOf(user),address=p.address||{};
  const fullName=p.full_name||user.user_metadata?.full_name||user.user_metadata?.name||'';
- const field=(label,name,value='',type='text',attrs='')=>
-  '<label class="field"><span>'+label+'</span><input type="'+type+'" name="'+name+'" value="'+val(value)+'" '+attrs+'></label>';
- return '<div class="profile-layout">'+
-  '<section class="panel profile-card">'+
-   '<div class="profile-intro"><span class="profile-avatar">'+icon('user')+'</span><div><span class="eyebrow">PERFIL PESSOAL</span><h2>Suas informações</h2><p>Atualize os dados vinculados à sua conta GB+.</p></div></div>'+
-   '<a href="#settings" class="button profile-settings-link">'+icon('settings')+' Abrir configurações e personalizações</a>'+
-   '<form id="profile-form" autocomplete="on">'+
-    '<div class="profile-section-heading"><h3>Dados pessoais</h3><p>Preencha apenas as informações que deseja manter no perfil.</p></div>'+
-    '<div class="profile-fields">'+
-     field('Nome completo','full_name',fullName,'text','autocomplete="name" maxlength="120" required')+
-     field('CPF','cpf',formatCPF(p.cpf||''),'text','inputmode="numeric" autocomplete="off" maxlength="14" placeholder="000.000.000-00"')+
-     field('Data de nascimento','birth_date',p.birth_date||'','date','max="'+today()+'"')+
-     field('Celular','phone',p.phone||'','tel','autocomplete="tel" inputmode="tel" maxlength="20" placeholder="(00) 00000-0000"')+
+ const accountField=(label,name,value='',type='text',attrs='')=>
+  '<label class="gb-account-field gb-account-editable"><span class="gb-account-field-text"><span class="gb-account-field-caption">'+label+'</span><input name="'+name+'" type="'+type+'" value="'+val(value)+'" '+attrs+'></span><span class="gb-account-field-arrow">'+icon('chevron')+'</span></label>';
+ const addressField=(label,name,value='',attrs='')=>
+  '<label class="gb-account-address-field"><span>'+label+'</span><input name="'+name+'" type="text" value="'+val(value)+'" '+attrs+'></label>';
+ const locked=(label,value)=>
+  '<div class="gb-account-field gb-account-locked"><span class="gb-account-field-text"><span class="gb-account-field-caption">'+label+'</span><span class="gb-account-locked-value">'+val(value||'Não cadastrado')+'</span></span><span class="gb-account-lock-indicator">'+icon('lock')+'<span>Bloqueado</span></span></div>';
+ return '<div class="gb-account-page">'+
+  '<header class="gb-account-page-heading"><h1>Minha conta</h1><p>Gerencie seus dados e a segurança do acesso.</p></header>'+
+  '<form id="profile-form" autocomplete="on">'+
+   '<section class="gb-account-card" aria-labelledby="gb-account-personal-title">'+
+    '<header class="gb-account-card-heading"><span class="gb-account-card-icon">'+icon('user')+'</span><div><h2 id="gb-account-personal-title">Dados pessoais</h2><p>Alguns dados sensíveis não podem ser editados nesta tela.</p></div></header>'+
+    '<div class="gb-account-fields">'+
+     accountField('Nome completo','full_name',fullName,'text','autocomplete="name" maxlength="120" required placeholder="Seu nome completo"')+
+     accountField('Celular','phone',p.phone||'','tel','autocomplete="tel" inputmode="tel" maxlength="20" placeholder="(00) 00000-0000"')+
+     accountField('Data de nascimento','birth_date',p.birth_date||'','date','max="'+today()+'"')+
+     locked('CPF',formatCPF(p.cpf||''))+
     '</div>'+
-    '<div class="profile-section-heading"><h3>Endereço</h3><p>Dados para identificação e contato.</p></div>'+
-    '<div class="profile-fields">'+
-     field('CEP','postal_code',address.postal_code||'','text','inputmode="numeric" autocomplete="postal-code" maxlength="9" placeholder="00000-000"')+
-     field('Rua / logradouro','street',address.street||'','text','autocomplete="address-line1" maxlength="160"')+
-     field('Número','number',address.number||'','text','maxlength="15"')+
-     field('Complemento','complement',address.complement||'','text','autocomplete="address-line2" maxlength="100"')+
-     field('Bairro','neighborhood',address.neighborhood||'','text','maxlength="100"')+
-     field('Cidade','city',address.city||'','text','autocomplete="address-level2" maxlength="100"')+
-     field('Estado (UF)','state',address.state||'','text','autocomplete="address-level1" maxlength="2" placeholder="ES"')+
+   '</section>'+
+   '<details class="gb-account-address"><summary>'+icon('map-pin')+'<span><strong>Endereço</strong><small>Visualizar ou atualizar dados de endereço</small></span>'+icon('chevron')+'</summary>'+
+    '<div class="gb-account-address-grid">'+
+     addressField('CEP','postal_code',address.postal_code||'','inputmode="numeric" autocomplete="postal-code" maxlength="9" placeholder="00000-000"')+
+     addressField('Rua / logradouro','street',address.street||'','autocomplete="address-line1" maxlength="160"')+
+     addressField('Número','number',address.number||'','maxlength="15"')+
+     addressField('Complemento','complement',address.complement||'','autocomplete="address-line2" maxlength="100"')+
+     addressField('Bairro','neighborhood',address.neighborhood||'','maxlength="100"')+
+     addressField('Cidade','city',address.city||'','autocomplete="address-level2" maxlength="100"')+
+     addressField('Estado (UF)','state',address.state||'','autocomplete="address-level1" maxlength="2" placeholder="ES"')+
     '</div>'+
-    '<p class="profile-privacy">'+icon('info')+' CPF, nascimento e endereço são dados pessoais. Preencha somente se desejar cadastrá-los. Eles ficarão associados ao seu perfil de login, não aos lançamentos financeiros.</p>'+
-    '<div class="profile-form-actions"><span id="profile-message" role="status" aria-live="polite"></span><button type="submit" class="button primary">'+icon('check')+' Salvar perfil</button></div>'+
-   '</form>'+
-  '</section>'+
-  '<section class="panel profile-card profile-email-card">'+
-   '<div class="profile-section-heading"><h3>E-mail da conta</h3><p>Alterar o e-mail pode exigir confirmação pelo endereço atual e pelo novo.</p></div>'+
-   '<form id="profile-email-form">'+
-    field('E-mail de acesso','email',user.email||'','email','autocomplete="email" inputmode="email" maxlength="254" required')+
-    '<div class="profile-form-actions"><span id="profile-email-message" role="status" aria-live="polite"></span><button type="submit" class="button">'+icon('arrow')+' Solicitar alteração</button></div>'+
-   '</form>'+
-   '<div class="profile-signout"><div><h3>Encerrar sessão</h3><p>Saia da sua conta neste dispositivo. Seus dados financeiros permanecem salvos no GB+.</p></div><button type="button" class="button profile-signout-button" data-auth-action="signout">'+icon('arrow')+' Sair da conta</button></div>'+
-  '</section>'+
+   '</details>'+
+   '<section class="gb-account-card" aria-labelledby="gb-account-security-title">'+
+    '<header class="gb-account-card-heading"><span class="gb-account-card-icon">'+icon('shield')+'</span><div><h2 id="gb-account-security-title">Segurança da conta</h2></div></header>'+
+    '<div class="gb-account-fields">'+
+     locked('E-mail da conta',user.email||'')+
+     '<button type="button" class="gb-account-action" data-action="profile-change-password">'+icon('key')+'<strong>Alterar senha</strong><span>'+icon('chevron')+'</span></button>'+
+     '<button type="button" class="gb-account-action gb-account-action-danger" data-action="settings-delete">'+icon('trash')+'<strong>Excluir conta</strong></button>'+
+    '</div>'+
+   '</section>'+
+   '<div class="gb-account-save-area"><span id="profile-message" role="status" aria-live="polite"></span><button type="submit" id="profile-save" class="gb-account-save" disabled>'+icon('check')+' Salvar alterações</button></div>'+
+  '</form>'+
+  '<div class="gb-account-bottom"><button type="button" class="gb-account-signout" data-auth-action="signout">'+icon('arrow')+' Sair da conta</button><a href="#settings">'+icon('settings')+' Voltar às configurações</a></div>'+
  '</div>';
 }
-export function validateProfile(form){
+export function validateProfile(form,existingCpf=''){
  const v=Object.fromEntries(new FormData(form));
  const full_name=String(v.full_name||'').trim().replace(/\s+/g,' ');
- const cpf=digits(v.cpf),phone=digits(v.phone),postal_code=digits(v.postal_code);
+ // CPF is deliberately not supplied by the editable form: preserve the signed-in profile value.
+ const cpf=digits(existingCpf),phone=digits(v.phone),postal_code=digits(v.postal_code);
  const birth_date=String(v.birth_date||'').trim();
  const state=String(v.state||'').trim().toUpperCase();
  if(full_name.length<2||full_name.length>120)throw Error('Informe um nome com 2 a 120 caracteres.');
