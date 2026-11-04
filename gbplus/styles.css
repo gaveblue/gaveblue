@@ -260,3 +260,40 @@ html,body{background-color:var(--bg);min-height:100%;min-height:100dvh}
 }
 @media(max-width:360px){.gb-update-notice{left:9px;right:9px;padding:13px}.gb-update-buttons{grid-template-columns:1fr}.gb-update-buttons button{min-height:41px}}
 @media(prefers-reduced-motion:reduce){.gb-update-notice{animation:none}.gb-update-progress-track>span{transition:none}}
+
+
+/* GB+ 1.8.2 — Dissolve content smoothly behind the mobile action bar.
+   Kept separate from .mobile-nav so its existing glass blur stays unchanged.
+   Pointer events pass through, and desktop layout is unaffected. */
+.mobile-nav-fade{display:none}
+@media(max-width:760px){
+  .mobile-nav-fade{
+    display:block;
+    position:fixed;
+    left:0;
+    right:0;
+    bottom:0;
+    height:calc(185px + env(safe-area-inset-bottom,0px));
+    z-index:9;
+    pointer-events:none;
+    background:linear-gradient(
+      to bottom,
+      transparent 0%,
+      color-mix(in srgb,var(--bg) 12%,transparent) 16%,
+      color-mix(in srgb,var(--bg) 51%,transparent) 43%,
+      color-mix(in srgb,var(--bg) 83%,transparent) 69%,
+      var(--bg) 100%
+    );
+  }
+  .mobile-nav-fade::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    -webkit-backdrop-filter:blur(8px);
+    backdrop-filter:blur(8px);
+    -webkit-mask-image:linear-gradient(to bottom,transparent 2%,#000 75%);
+    mask-image:linear-gradient(to bottom,transparent 2%,#000 75%);
+  }
+  body.auth-locked .mobile-nav-fade{display:none}
+}
+@media(min-width:761px){.mobile-nav-fade{display:none}}
