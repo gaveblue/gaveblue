@@ -2,6 +2,17 @@
 
 Este arquivo separa o que já entrou no código do que ainda depende de implementação e testes. Não representa homologação de uma versão publicada no servidor.
 
+## Versão 2.1.0 — Acesso e cadastro (código implementado, homologação pendente)
+
+- [x] Tela de confirmação de e-mail com possibilidade de reenvio
+- [x] Validação de e-mail e senha e mensagens de feedback mais claras
+- [x] Tratamento de retorno cancelado/expirado do login Google
+- [x] Prevenção de reloads duplicados ao mudar a sessão
+- [x] Diagnóstico de configuração Google e proteção contra espera excessiva
+- [x] Checklist de produção em [AUTH-DEPLOY.md](./AUTH-DEPLOY.md)
+- [ ] Validar SMTP, URLs permitidas e provedor Google no Supabase e no Google Cloud
+- [ ] Homologar cadastro, confirmação, recuperação, login Google e PWA com usuários de teste
+
 ## Versão 2.0.0 — Grande Atualização (código concluído)
 
 - [x] Configuração inicial para contas novas, com cadastro opcional de conta e saldo de abertura
