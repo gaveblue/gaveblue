@@ -1,12 +1,12 @@
 import {uid,today,money,dateLabel,cents,generateTitles,addPayment,transfer,updateTitle,pending,flow,within} from './domain.js';
 import {KEY,INDICATORS,defaultPanel,parseBackup,backupText,MOBILE_SHORTCUTS,defaultMobileNav,effectiveMobileNav,validMobileNav,shouldOfferSetup} from './store.js';
-import {esc,icon,button,field,formFooter,download,csv,titleTable} from './ui.js?v=20261104-33';
-import {routes,dashboard,titlesView,partnersView,accountsView,categoriesView,flowView,reportsView,settingsView,notificationsView,filteredTitles,reportData} from './views.js?v=20261104-33';
+import {esc,icon,button,field,formFooter,download,csv,titleTable} from './ui.js?v=20261104-35';
+import {routes,dashboard,titlesView,partnersView,accountsView,categoriesView,flowView,reportsView,settingsView,notificationsView,filteredTitles,reportData} from './views.js?v=20261104-35';
 import {titleForm,partnerForm,accountForm,categoryForm,paymentForm,transferForm,titleDetail,customizeForm,accountDetail} from './forms.js';
 import {SupabaseRepository} from '../integrations/supabase/repository.js';
 import {initializeAuth,authClient,currentUser,showAuth,isRecovery,updatePersonalProfile,consumeAuthReturnMessage} from './auth.js?v=20261104-32';
-import {profileView,validateProfile} from './profile.js?v=20261104-27';
-import {firstSetupView,customMobileNavForm,shortcutsPreview,readMobileNav} from './setup-ui.js';
+import {profileView,validateProfile} from './profile.js?v=20261104-35';
+import {firstSetupView,customMobileNavForm,shortcutsPreview,readMobileNav} from './setup-ui.js?v=20261104-35';
 let repository=null;let db;let busy=false;let pendingGeneration=null;let confirmAction=null;let installPrompt=null;let installedInSession=false;
 const isInstalledApp=()=>installedInSession||matchMedia('(display-mode: standalone)').matches||matchMedia('(display-mode: fullscreen)').matches||navigator.standalone===true;
 const inviteLink='https://gaveblue.com.br/gbplus/';
