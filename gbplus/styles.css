@@ -41,3 +41,13 @@ body.auth-locked>.sidebar,body.auth-locked>.workspace,body.auth-locked>.mobile-n
 .income-arrow,.expense-arrow{display:inline-flex;align-items:center;justify-content:center;vertical-align:middle}
 .income-arrow .icon,.expense-arrow .icon{width:16px;height:16px;stroke-width:2.2}
 .stat-icon .icon{stroke-width:2}
+
+/* Match the PWA's dark system navigation safe area with the dashboard. */
+html,body{background-color:var(--bg);min-height:100%;min-height:100dvh}
+:root[data-theme=dark],:root[data-theme=dark] body{background-color:#111214;color-scheme:dark}
+@media(max-width:760px){
+ :root[data-theme=dark] body::after{
+  content:"";position:fixed;bottom:0;left:0;right:0;height:env(safe-area-inset-bottom,0px);
+  background-color:#111214;pointer-events:none;z-index:0
+ }
+}
