@@ -88,7 +88,29 @@ export function answerFromDb(db,query){
  if(/(?:listar|mostrar|quais|ver).*(?:titulos|lancamentos|contas)/.test(s))return list(db,open,'Lançamentos em aberto');
  return null;
 }
-export function installAiBridge({getDb,getUser,getRepository,commit}){
+// Search within the signed-in account. Editing is performed only by the native form.
+export function findTitlesForEditing(db,query,type=null){
+ const term=normalize(query);
+ if(term.length<2)return {items:[],total:0,message:'Informe ao menos duas letras do nome, fornecedor ou documento da conta que deseja editar.'};
+ if(type!==null&&!['expense','income'].includes(type))return {items:[],total:0,message:'Tipo de título inválido.'};
+ const terms=term.split(' ').filter(Boolean);
+ const rows=db.titles.filter(t=>{
+  if(type&&t.type!==type)return false;
+  const partner=db.partners.find(p=>p.id===t.partnerId)?.name||'';
+  const searchable=normalize([t.description,partner,t.document||''].join(' '));
+  return terms.every(word=>searchable.includes(word));
+ }).sort((a,b)=>{
+  const aLabel=normalize(a.description),bLabel=normalize(b.description);
+  const aRank=(aLabel===term?0:aLabel.startsWith(term)?1:2)+(a.cancelled?10:0);
+  const bRank=(bLabel===term?0:bLabel.startsWith(term)?1:2)+(b.cancelled?10:0);
+  return aRank-bRank||a.due.localeCompare(b.due);
+ });
+ return {total:rows.length,items:rows.slice(0,8).map(t=>({
+  id:t.id,description:t.description,type:t.type,amount:t.amount,due:t.due,cancelled:!!t.cancelled,
+  partner:db.partners.find(p=>p.id===t.partnerId)?.name||''
+ }))};
+}
+export function installAiBridge({getDb,getUser,getRepository,commit,openEditor}){
  const frame=document.querySelector('.gb-ai-widget iframe'),widget=document.querySelector('.gb-ai-widget');
  if(!frame||!widget)return;
  const completed=new Map(),inFlight=new Set();
@@ -105,8 +127,10 @@ export function installAiBridge({getDb,getUser,getRepository,commit}){
   const data=event.data;
   if(!data||typeof data.kind!=='string')return;
   if(data.kind==='gbplus-ai-request-profile'){profile();return;}
-  if(!['gbplus-ai-query','gbplus-ai-create-title'].includes(data.kind)||typeof data.requestId!=='string'||data.requestId.length>90)return;
-  if(!ready()){reply(event.source,data.kind==='gbplus-ai-query'?'gbplus-ai-query-result':'gbplus-ai-create-result',data.requestId,{ok:false,message:'A conta GB+ ainda não carregou. Entre na sua conta e reabra o assistente.'});return;}
+  const responseKinds={'gbplus-ai-query':'gbplus-ai-query-result','gbplus-ai-create-title':'gbplus-ai-create-result','gbplus-ai-find-title':'gbplus-ai-find-title-result','gbplus-ai-open-title':'gbplus-ai-open-title-result'};
+  const resultKind=responseKinds[data.kind];
+  if(!resultKind||typeof data.requestId!=='string'||data.requestId.length>90)return;
+  if(!ready()){reply(event.source,resultKind,data.requestId,{ok:false,message:'A conta GB+ ainda não carregou. Entre na sua conta e reabra o assistente.'});return;}
   if(data.kind==='gbplus-ai-query'){
    const q=typeof data.text==='string'?data.text:typeof data.query==='string'?data.query:'';
    try{
@@ -114,6 +138,25 @@ export function installAiBridge({getDb,getUser,getRepository,commit}){
     const answer=answerFromDb(getDb(),q);
     reply(event.source,'gbplus-ai-query-result',data.requestId,{ok:!!answer,message:answer?'':'Não entendi essa consulta. Posso mostrar saldos, vencimentos, contas por cliente/fornecedor, categorias e resultados.',answer:answer||undefined});
    }catch(error){reply(event.source,'gbplus-ai-query-result',data.requestId,{ok:false,message:error.message||'Falha ao consultar seu financeiro.'});}
+   return;
+  }
+  if(data.kind==='gbplus-ai-find-title'){
+   try{
+    const query=typeof data.search==='string'?data.search.slice(0,150):'';
+    const type=data.type===null||data.type===undefined?null:data.type;
+    const matches=findTitlesForEditing(getDb(),query,type);
+    reply(event.source,resultKind,data.requestId,{ok:true,...matches});
+   }catch(error){reply(event.source,resultKind,data.requestId,{ok:false,message:error.message||'Não consegui localizar o lançamento.'});}
+   return;
+  }
+  if(data.kind==='gbplus-ai-open-title'){
+   try{
+    const title=getDb().titles.find(t=>t.id===data.titleId);
+    if(!title)throw Error('Esse título não foi encontrado. Faça uma nova busca.');
+    if(typeof openEditor!=='function')throw Error('O formulário de edição não está disponível nesta versão do GB+.');
+    openEditor(title.id);
+    reply(event.source,resultKind,data.requestId,{ok:true,message:'Formulário de edição aberto. Revise e salve as alterações por lá.'});
+   }catch(error){reply(event.source,resultKind,data.requestId,{ok:false,message:error.message||'Não consegui abrir a edição.'});}
    return;
   }
   if(completed.has(data.requestId)){reply(event.source,'gbplus-ai-create-result',data.requestId,{ok:true,message:completed.get(data.requestId)});return;}
