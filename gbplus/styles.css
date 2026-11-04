@@ -262,7 +262,7 @@ html,body{background-color:var(--bg);min-height:100%;min-height:100dvh}
 @media(prefers-reduced-motion:reduce){.gb-update-notice{animation:none}.gb-update-progress-track>span{transition:none}}
 
 
-/* GB+ 1.8.2 — Dissolve content smoothly behind the mobile action bar.
+/* GB+ 1.8.3 — Compact dissolve behind the mobile action bar.
    Kept separate from .mobile-nav so its existing glass blur stays unchanged.
    Pointer events pass through, and desktop layout is unaffected. */
 .mobile-nav-fade{display:none}
@@ -273,15 +273,15 @@ html,body{background-color:var(--bg);min-height:100%;min-height:100dvh}
     left:0;
     right:0;
     bottom:0;
-    height:calc(185px + env(safe-area-inset-bottom,0px));
+    height:calc(125px + env(safe-area-inset-bottom,0px));
     z-index:9;
     pointer-events:none;
     background:linear-gradient(
       to bottom,
       transparent 0%,
-      color-mix(in srgb,var(--bg) 12%,transparent) 16%,
-      color-mix(in srgb,var(--bg) 51%,transparent) 43%,
-      color-mix(in srgb,var(--bg) 83%,transparent) 69%,
+      color-mix(in srgb,var(--bg) 10%,transparent) 20%,
+      color-mix(in srgb,var(--bg) 38%,transparent) 48%,
+      color-mix(in srgb,var(--bg) 68%,transparent) 72%,
       var(--bg) 100%
     );
   }
@@ -289,11 +289,27 @@ html,body{background-color:var(--bg);min-height:100%;min-height:100dvh}
     content:"";
     position:absolute;
     inset:0;
-    -webkit-backdrop-filter:blur(8px);
-    backdrop-filter:blur(8px);
-    -webkit-mask-image:linear-gradient(to bottom,transparent 2%,#000 75%);
-    mask-image:linear-gradient(to bottom,transparent 2%,#000 75%);
+    -webkit-backdrop-filter:blur(6px);
+    backdrop-filter:blur(6px);
+    -webkit-mask-image:linear-gradient(to bottom,transparent 0%,#000 78%);
+    mask-image:linear-gradient(to bottom,transparent 0%,#000 78%);
   }
   body.auth-locked .mobile-nav-fade{display:none}
 }
 @media(min-width:761px){.mobile-nav-fade{display:none}}
+
+/* Slightly clearer frosted-glass navigation, same size and icon positions. */
+@media(max-width:760px){
+  .mobile-nav{
+    background:color-mix(in srgb,var(--surface) 76%,transparent);
+    border-color:color-mix(in srgb,#ffffff 58%,transparent);
+    box-shadow:0 8px 30px #11111918,0 0 0 1px #ffffff12;
+    -webkit-backdrop-filter:blur(28px) saturate(145%);
+    backdrop-filter:blur(28px) saturate(145%);
+  }
+  :root[data-theme=dark] .mobile-nav{
+    background:color-mix(in srgb,#1b1c1f 74%,transparent);
+    border-color:#ffffff24;
+    box-shadow:0 8px 30px #0005,0 0 0 1px #ffffff0c;
+  }
+}
