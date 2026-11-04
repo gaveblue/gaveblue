@@ -57,7 +57,7 @@ Este arquivo separa o que já entrou no código do que ainda depende de implemen
 ## Arquitetura de longo prazo — GB+ Pessoal e GB+ Empresas
 
 - [x] Projeto de arquitetura definido e documentado em [ARQUITETURA-PF-PJ.md](./ARQUITETURA-PF-PJ.md)
-- [ ] Criar perfis PF em tabela própria, CPF único e bloqueio no servidor após confirmação
+- [~] CPF único e imutável já protegido na tabela `gbplus_profiles` (primeiro cadastro validado, sem alterar registros financeiros); migração completa dos demais dados PF ainda pendente
 - [ ] Implementar ambientes financeiros (workspaces) independentes, sem alterar visual de usuários PF
 - [ ] Implantar cadastro PJ, CNPJ, matriz, filiais e vínculos de equipe por permissão
 - [ ] Evoluir o financeiro para segregação por empresa/filial, com consolidados e trilhas de auditoria
