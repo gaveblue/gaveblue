@@ -2,7 +2,7 @@
 // Never erase storage or reload while a user is entering a financial form.
 (function(){
  if(!('serviceWorker' in navigator))return;
- const VERSION='v11',KEY='gbplus:refreshed:'+VERSION;
+ const VERSION='v12',KEY='gbplus:refreshed:'+VERSION;
  let notice=null;
  function editing(){
   const active=document.activeElement;
