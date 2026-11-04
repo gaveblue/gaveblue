@@ -523,3 +523,27 @@ body.auth-locked .mobile-nav-fade{display:none!important}
 }
 /* Handsets should never show this desktop breadcrumb/hamburger container. */
 @media(max-width:760px){.topbar-start{display:none!important}}
+
+
+/* GB+ 2.0.0 — Safe AI side docking.
+   The visible edge is 32px; touch gestures can always recover it. */
+.gb-ai-widget:not([open]){
+  width:52px;
+  max-width:52px;
+  overflow:visible;
+}
+.gb-ai-widget.is-docked:not([open])>summary{
+  border-radius:16px;
+  animation:none;
+  box-shadow:0 0 0 2px color-mix(in srgb,#9a88ee 65%,transparent),0 3px 18px #0004;
+}
+.gb-ai-widget.is-docked[data-dock="left"]:not([open])>summary{
+  border-radius:0 17px 17px 0;
+}
+.gb-ai-widget.is-docked[data-dock="right"]:not([open])>summary{
+  border-radius:17px 0 0 17px;
+}
+.gb-ai-widget:not([open])>summary{touch-action:none}
+@media(max-width:760px){
+  .gb-ai-widget:not([open]){max-width:52px;max-height:52px}
+}
