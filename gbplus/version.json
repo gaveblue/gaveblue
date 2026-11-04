@@ -1,12 +1,13 @@
 {
-  "version": "2.1.2",
-  "build": 33,
+  "version": "2.1.3",
+  "build": 34,
   "published_at": "2026-11-04",
-  "title": "Configurações estáveis e contato institucional",
+  "title": "Minha Conta minimalista e Configurações mais práticas",
   "notes": [
-    "Corrigido o alinhamento da tela de Configurações com as demais telas e preservado o posicionamento da barra de ações no celular.",
-    "Política de Privacidade agora informa Suporte GaveBlue e contato@gaveblue.com.br, sem divulgar contato pessoal.",
-    "Links de ajuda e solicitação de exclusão de conta também usam o endereço institucional."
+    "Minha Conta ganhou visual minimalista, dados de acesso somente leitura, endereço recolhível e botão Salvar ativado apenas após alterações.",
+    "Configurações agora oculta sua barra de ações inferior exclusivamente nesta tela; instalação não aparece ao usar o GB+ como aplicativo instalado.",
+    "Novo convite de amigos para compartilhar o GB+, e opção Alterar senha por e-mail.",
+    "Removida a prévia de atualização e a personalização da barra de ações durante a configuração inicial."
   ],
   "assets": [
     "./index.html",
@@ -37,6 +38,7 @@
     "./ai-lab/chat-history.js",
     "./js/auth-flow.js",
     "./settings-page.css",
-    "./privacidade.html"
+    "./privacidade.html",
+    "./profile-page.css"
   ]
 }
