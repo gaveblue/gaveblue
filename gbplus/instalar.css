@@ -104,3 +104,57 @@ a{color:inherit}
 }
 @media(min-width:700px){.install-shell{border-left:1px solid #f0f0f1;border-right:1px solid #f0f0f1;min-height:100dvh;padding-left:33px;padding-right:33px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
+
+
+
+/* 2.3.1 — captura real, topo compacto e instalação acima da dobra no celular. */
+.install-shell{width:min(100%,470px);padding:0 16px max(14px,env(safe-area-inset-bottom))}
+.intro{position:relative;text-align:left;padding:12px 50px 0 0}
+.brand{font-size:45px;line-height:.98;letter-spacing:-.095em}
+.intro h1{font-size:clamp(24px,6.8vw,30px);line-height:1.07;margin:7px 0 5px}
+.intro>p{font-size:12px;line-height:1.32;max-width:315px;margin:0;color:#77777c}
+.open-web{position:absolute;right:0;top:15px;display:grid;place-items:center;width:42px;height:42px;border:1px solid #e6e6e8;border-radius:13px;background:#fff;color:#171719;text-decoration:none;box-shadow:0 1px 5px #00000007}
+.open-web:hover{background:#f7f7f8}
+.open-web svg{width:21px;height:21px}
+.device-stage{height:285px;margin:9px auto 0;max-width:365px}
+.device-stage::after{height:45px}
+.device-real{width:214px;height:464px;padding:6px 6px 0;border-radius:32px 32px 0 0}
+.device-real::before{display:none}
+.device-real .device-screen{border-radius:25px 25px 0 0;padding:0;height:100%;background:#fff;overflow:hidden}
+.device-real .device-screen img{width:100%;height:auto;display:block;max-width:none;image-rendering:auto}
+.features{margin:0 auto 11px;max-width:365px}
+.feature{gap:5px;padding:0 4px}
+.feature:not(:last-child)::after{height:38px;top:1px}
+.feature svg{width:21px;height:21px}
+.feature span{font-size:10px;line-height:1.15}
+.platforms{margin-top:0}
+.platforms h2{font-size:18px;margin:0 0 2px}
+.platforms-subtitle{font-size:11px;margin:0 0 9px}
+.platform{padding:9px 12px;min-height:68px;border-radius:15px;gap:10px;margin:8px 0}
+.platform-mark{width:32px;height:32px;flex:0 0 32px}
+.platform-mark svg{width:29px;height:29px}
+.platform-name small{font-size:10px}
+.platform-name strong{font-size:17px}
+.install-action{min-height:40px;min-width:90px;padding:0 14px}
+.store-note,.landing-footer{display:none!important}
+@media(max-height:760px){
+ .intro{padding-top:9px}
+ .brand{font-size:40px}
+ .intro h1{font-size:24px;margin:4px 0}
+ .intro>p{font-size:11px}
+ .device-stage{height:243px;margin-top:6px}
+ .device-real{width:197px}
+ .features{margin-bottom:8px}
+ .platform{min-height:61px;margin:6px 0;padding:7px 11px}
+ .platforms-subtitle{margin-bottom:7px}
+ .open-web{top:10px}
+}
+@media(max-width:355px){
+ .install-shell{padding-left:13px;padding-right:13px}
+ .intro{padding-right:45px}
+ .platform-name strong{font-size:15px}
+ .install-action{min-width:82px;padding:0 10px}
+}
+@media(min-width:700px){
+ .install-shell{min-height:100dvh;padding-left:26px;padding-right:26px}
+}
