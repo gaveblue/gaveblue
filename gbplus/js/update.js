@@ -56,7 +56,7 @@
  }
  function show(title,subtitle,description){
   const el=view();if(!el)return;
-  el.hidden=false;document.body.classList.add('gb-update-open');put(els.title,title);put(els.subtitle,subtitle);put(els.description,description);
+  el.hidden=false;document.body.classList.add('gb-update-open');window.dispatchEvent(new Event('gbplus-update-open'));put(els.title,title);put(els.subtitle,subtitle);put(els.description,description);
   els.notes.replaceChildren();els.progress.hidden=true;put(els.feedback,'');
   els.later.hidden=false;els.later.disabled=false;els.close.disabled=false;els.primary.disabled=false;els.primary.hidden=false;
   requestAnimationFrame(()=>els.primary.focus({preventScroll:true}));
