@@ -10,7 +10,7 @@ export function moneyFromStored(value){
  const str=String(value??'').trim();
  if(!str)return '0,00';
  // Decimal dot from older HTML number inputs, before the GB+ mask existed.
- if(/^-?\d+(?:\.\d{1,2})?$/.test(str))return formatCentavos(String(Math.round(Math.abs(Number(str))*100)));
+ if(/^-?\d+(?:\.\d{1,2})?$/.test(str))return (str.startsWith('-')?'-':'')+formatCentavos(String(Math.round(Math.abs(Number(str))*100)));
  if(/^-?[\d.]+,\d{1,2}$/.test(str))return formatCentavos(onlyDigits(str));
  return formatCentavos(str);
 }
@@ -31,7 +31,7 @@ export function formatPhone(value){
  if(d.length<=2)return d.length===2?'('+d+')':d?'('+d:'';
  const area='('+d.slice(0,2)+') ';
  if(d.length<=6)return area+d.slice(2);
- if(d.length<=10)return area+d.slice(2,-4)+'-'+d.slice(-4);
+ if(d.length<=10)return area+d.slice(2,6)+'-'+d.slice(6);
  return area+d.slice(2,7)+'-'+d.slice(7);
 }
 export function formatCpf(value){
