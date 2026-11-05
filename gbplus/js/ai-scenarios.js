@@ -80,9 +80,9 @@ export function answerScenario(db,question,{asOf,bankCents,context=null}={}){
  if(!buying&&!forecast&&!followup)return null;
  // A question about creating a title is not permission to simulate or write one.
  if(/\b(cadastrar|registrar|lancar|criar\s+(?:um|uma)\s+(?:titulo|lancamento))\b/.test(normalized)&&!forecast)return null;
- const month=readScenarioMonth(question,today)||prev?.month||null;
- const amount=readScenarioAmount(question)??(prev?.amount??null);
- const item=purchaseName(question)||prev?.item||(buying?'compra':null);
+ const month=readScenarioMonth(question,today)||(followup?prev.month:null);
+ const amount=readScenarioAmount(question)??(followup?prev.amount:null);
+ const item=purchaseName(question)||(followup?prev.item:null)||(buying?'compra':null);
  const scenario={kind:'scenario',month,item,amount};
  if(!month)return {answer:'Para qual mês você quer fazer a projeção? Pode dizer “mês que vem” ou “daqui a três meses”. Não vou estimar datas sem você informar.',context:scenario};
  if(month<today.slice(0,7))return {answer:'Essa data já passou. Informe um mês atual ou futuro para simular.',context:scenario};
