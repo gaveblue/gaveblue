@@ -1,13 +1,13 @@
 {
-  "version": "2.2.2",
-  "build": 39,
+  "version": "2.2.3",
+  "build": 40,
   "published_at": "2026-11-04",
-  "title": "Interface personalizada e instalação real",
+  "title": "Seletores e calendários refinados",
   "notes": [
-    "Calendários e seletores do GB+ redesenhados com componentes próprios, acessíveis e integrados aos formulários.",
-    "Central de atualização centralizada com fundo desfocado, download real e confirmação personalizada para reiniciar.",
-    "Aviso de periodicidade removido; formulário de lançamento mais limpo.",
-    "Sugestão de instalação no navegador do celular, usando a instalação real do sistema quando disponível ou instruções honestas quando não houver suporte."
+    "Correção do alinhamento dos seletores, mantendo o visual anterior antes de abrir o menu.",
+    "Menus de período e categoria com ícones vetoriais livres; chave de alterar senha corrigida.",
+    "Calendário agora permite escolher mês diretamente e navegar por grades de anos.",
+    "Todo o período é o filtro padrão no início e em Lançamentos, até o usuário mudar."
   ],
   "assets": [
     "./index.html",
@@ -49,6 +49,8 @@
     "./js/custom-controls.js",
     "./custom-controls.css",
     "./js/pwa-install.js",
-    "./overlays.css"
+    "./overlays.css",
+    "./js/gb-icons.js",
+    "./ICON_LICENSE.md"
   ]
 }
