@@ -1,14 +1,10 @@
 {
-  "version": "2.2.8",
-  "build": 45,
+  "version": "2.2.9",
+  "build": 46,
   "published_at": "2026-11-05",
-  "title": "Correções de recorrência, estabilidade do fluxo e interpretação da IA",
+  "title": "Ajuste visual da janela de atualização",
   "notes": [
-    "Prévia e salvamento de lançamentos recorrentes agora compartilham a data-base original, mesmo quando um vencimento anterior foi deslocado para dia útil.",
-    "Fluxo de caixa processa os pagamentos em uma passagem única, reduzindo trabalho em bases maiores e ignorando referências inválidas sem interromper a tela.",
-    "Uma falha de gráfico não bloqueia mais a renderização financeira.",
-    "GB+ AI interpreta expressões comuns como “daqui três meses” e “daqui 3 meses”.",
-    "Melhoria de desempenho: gráfico de barras não recalcula o histórico completo de receitas desnecessariamente."
+    "Removida a mensagem redundante durante o download de atualizações."
   ],
   "assets": [
     "./index.html",
