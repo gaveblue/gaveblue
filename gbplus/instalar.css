@@ -180,3 +180,40 @@ a{color:inherit}
 body.postinstall-open{overflow:hidden}
 @keyframes postinstall-spin{to{transform:rotate(360deg)}}
 @media(prefers-reduced-motion:reduce){.postinstall-spinner{animation:none;border-top-color:#0868f9}}
+
+
+/* GB+ 2.3.3 — concise platform guides and visible web shortcut. */
+.web-shortcut{position:absolute;right:0;top:13px;display:flex;align-items:center;gap:9px;z-index:3}
+.web-shortcut .open-web{position:static;flex:0 0 42px;box-shadow:0 1px 5px #00000007}
+.web-shortcut-hint{position:relative;display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;padding:8px 10px;min-height:32px;background:#0868f9;color:#fff;border-radius:11px;font-size:11px;font-weight:700;line-height:1.15;box-shadow:0 4px 12px #0868f929}
+.web-shortcut-hint::after{content:"";position:absolute;right:-4px;top:calc(50% - 4px);height:8px;width:8px;transform:rotate(45deg);background:#0868f9}
+.guide-nav{padding:8px 1px 0;min-height:51px;gap:8px}
+.guide-nav .guide-web-shortcut{position:static;flex-shrink:0}
+.guide-intro{padding:14px 0 12px}
+.guide-icon{display:none!important}
+.guide-intro .eyebrow{font-size:9px;letter-spacing:.13em;margin:0 0 4px}
+.guide-intro h1{font-size:clamp(26px,7.5vw,32px);line-height:1.08;margin:0 0 6px}
+.guide-intro>p:last-child{font-size:12px;line-height:1.4;max-width:none}
+.guide-steps{gap:9px;margin:0 0 10px}
+.guide-steps li{padding:11px 12px;gap:11px;border-radius:14px}
+.guide-steps li::before{width:27px;height:27px;flex:0 0 27px;font-size:12px}
+.guide-steps li>div{gap:3px}
+.guide-steps strong{font-size:13px;line-height:1.24}
+.guide-steps span{font-size:11.5px;line-height:1.4}
+.guide-callout{padding:11px 12px;border-radius:12px;font-size:11px;line-height:1.4;margin:0 0 10px}
+.install-status{margin:0 0 8px;font-size:12px}
+.guide-actions,.guide-footnote{display:none!important}
+@media(max-width:355px){
+ .web-shortcut{gap:6px}
+ .web-shortcut-hint{font-size:10px;padding:7px 7px}
+ .web-shortcut .open-web{flex-basis:40px;width:40px;height:40px}
+ .guide-steps li{padding:10px 9px;gap:9px}
+ .guide-steps span{font-size:11px}
+}
+@media(max-height:680px){
+ .guide-nav{padding-top:5px;min-height:47px}
+ .guide-intro{padding:9px 0 8px}
+ .guide-steps{gap:6px;margin-bottom:7px}
+ .guide-steps li{padding:8px 10px}
+ .guide-callout{padding:8px 10px;font-size:10px}
+}

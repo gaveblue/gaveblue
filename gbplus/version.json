@@ -1,14 +1,14 @@
 {
-  "version": "2.3.2",
-  "build": 49,
+  "version": "2.3.3",
+  "build": 50,
   "published_at": "2026-11-05",
-  "title": "Confirmação nativa antes da tela de preparação da instalação",
+  "title": "Tutoriais de instalação compactos e atalho para versão web",
   "notes": [
-    "No Android, o popup oficial de instalação aparece primeiro.",
-    "Após o usuário confirmar Instalar, o GB+ exibe uma etapa visual de preparação de aproximadamente 10 segundos.",
-    "O resultado da instalação só é indicado como concluído após o navegador informar a conclusão real pelo evento appinstalled.",
-    "Caso a instalação seja cancelada, a tela de preparação não é exibida.",
-    "Tutorial de instalação para iPhone e visual da página permanecem inalterados."
+    "Tutoriais de instalação para Android e iPhone mais compactos, com etapas e espaçamentos reduzidos.",
+    "Removidos os botões secundários Abrir GB+ no Chrome/Safari e Copiar link do GB+.",
+    "Novo balão azul Continuar na versão web, apontando para o ícone de acesso no topo da página de instalação e dos tutoriais.",
+    "Mensagem auxiliar de instalação Android simplificada.",
+    "Sem alteração na instalação nativa, nos lançamentos ou nos dados financeiros."
   ],
   "assets": [
     "./index.html",
