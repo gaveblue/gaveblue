@@ -12,7 +12,7 @@ import {CATEGORY_ICON_OPTIONS,categoryIconFor,gbIcon} from './gb-icons.js?v=2026
 import {setupPwaInstallation,maybeOfferPwaInstall,showInstallHelp,isPwaInstalled} from './pwa-install.js?v=20261104-40';
 import {SupabaseRepository} from '../integrations/supabase/repository.js?v=20261104-42';
 import {initializeAuth,authClient,currentUser,showAuth,isRecovery,updatePersonalProfile,consumeAuthReturnMessage} from './auth.js?v=20261105-58';
-import {profileView,validateProfile,validCPF,formatCPF} from './profile.js?v=20261105-57';
+import {profileView,validateProfile,validCPF,formatCPF} from './profile.js?v=20261105-59';
 import {firstSetupView,customMobileNavForm,shortcutsPreview,readMobileNav} from './setup-ui.js?v=20261104-35';
 import {launchesView} from './launches-view.js?v=20261105-47';
 import {installLaunchGestures} from './launches-gestures.js?v=20261104-38';
@@ -141,12 +141,23 @@ function profileCpfFeedback(form){
  output.dataset.invalid=String(digits.length>0&&!valid);
 }
 function profileSnapshot(form){
- return JSON.stringify([...new FormData(form)].map(([key,value])=>[key,String(value)]));
+ // Compare effective saved values, not formatting (phone, CPF or CEP masks).
+ const normalize=(key,value)=>{
+  const text=String(value);
+  if(['phone','cpf','postal_code'].includes(key))return text.replace(/\\D/g,'');
+  if(key==='full_name')return text.trim().replace(/\\s+/g,' ');
+  if(key==='state')return text.trim().toUpperCase();
+  return text.trim();
+ };
+ return JSON.stringify([...new FormData(form)].map(([key,value])=>[key,normalize(key,value)]));
 }
 function syncProfileSaveState(form){
  if(!form||form.id!=='profile-form')return;
  const submit=form.querySelector('#profile-save');
- if(submit)submit.disabled=form.dataset.saving==='true'||form.dataset.initialSnapshot===profileSnapshot(form);
+ const available=form.dataset.saving!=='true'&&form.dataset.initialSnapshot!==profileSnapshot(form);
+ if(submit){submit.disabled=!available;submit.hidden=!available;}
+ const area=form.querySelector('.gb-account-save-area');
+ if(area)area.hidden=!available&&!form.querySelector('#profile-message')?.textContent?.trim();
 }
 function initializeProfileDirtyState(){
  const form=document.getElementById('profile-form');
