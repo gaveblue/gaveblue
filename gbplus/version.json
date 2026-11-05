@@ -1,13 +1,13 @@
 {
-  "version": "2.2.4",
-  "build": 41,
-  "published_at": "2026-11-04",
-  "title": "Lançamentos em duas etapas e vencimentos inteligentes",
+  "version": "2.2.5",
+  "build": 42,
+  "published_at": "2026-11-05",
+  "title": "GB+ AI: simulações financeiras gratuitas e melhorias de interpretação",
   "notes": [
-    "Formulário de lançamentos dividido em duas etapas: dados até vencimento; depois valor, periodicidade e observações.",
-    "Valor em reais digitado de centavo em centavo; telefone e CPF/CNPJ formatados enquanto o usuário digita.",
-    "Novas categorias podem receber um ícone personalizado, exibido na categoria selecionada e nos menus.",
-    "Prévia detalhada das parcelas e recorrências com opção de passar vencimentos para o próximo dia útil, considerando fins de semana e feriados nacionais."
+    "GB+ AI agora simula o efeito de compras futuras e projeções de fluxo de caixa usando dados cadastrados, sem APIs pagas.",
+    "Continuidade da conversa em simulações como “e se custar R$ 250?” e “e daqui a três meses?”.",
+    "Correções na interpretação de meses, recebimentos, saldos e comandos de edição no chat.",
+    "Simulações não criam títulos; operações reais continuam exigindo confirmação expressa."
   ],
   "assets": [
     "./index.html",
@@ -21,6 +21,7 @@
     "./js/auth.js",
     "./js/profile.js",
     "./js/ai-bridge.js",
+    "./js/ai-scenarios.js",
     "./js/update.js",
     "./integrations/supabase/client.js",
     "./integrations/supabase/repository.js",

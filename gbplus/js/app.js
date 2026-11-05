@@ -709,7 +709,7 @@ async function init(){
 }
 init().catch(error=>startupRecovery(error?.message));
 // Importing the AI integration must never block the financial application.
-import('./ai-bridge.js?v=20261104-v3').then(({installAiBridge})=>{
+import('./ai-bridge.js?v=20261105-v4').then(({installAiBridge})=>{
  installAiBridge({getDb:()=>db,getUser:currentUser,getRepository:()=>repository,commit,openEditor:titleId=>{
    if(!db||!currentUser())throw Error('É necessário estar conectado para editar este título.');
    const title=getTitle(titleId);
