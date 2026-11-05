@@ -123,7 +123,7 @@
 /* GB+ 2.0.4 — Keep connection/state elements in DOM for the existing
    JS event handlers, but remove their visible footer from the chat UI. */
 #ai-connect,#voice-status{display:none!important}
-</style></head><body><div class="wrap">
+</style><link rel="stylesheet" href="./preview-card.css?v=20261105-82"></head><body><div class="wrap">
 <header><div class="brand"><span class="logo">GB+</span><span class="brand-meta"><strong>GB+ AI</strong><span class="muted">Assistente financeiro</span></span></div>
 <div class="chat-header-actions">
 <span class="pill" id="mode-pill">● Conectando</span>
@@ -144,17 +144,61 @@
 <div id="welcome" class="welcome"><div class="welcome-icon">GB+</div><h1 id="welcome-title">Como posso ajudar?</h1><p>Seu assistente financeiro do GB+. Faça perguntas, simule lançamentos ou experimente comandos por voz.</p>
 <div class="chips"><button data-example="Lança uma conta de energia de 450 reais para dia 15 e repete por seis meses">Criar uma despesa mensal</button><button data-example="Editar despesa">Editar uma despesa</button><button data-example="Quanto tenho disponível para gastar?">Quanto posso gastar?</button><button data-example="Quais contas vencem este mês?">Próximos vencimentos</button><button data-example="Divide 1200 reais em quatro parcelas">Parcelar um valor</button></div></div></div>
 <div class="bottom">
-<details id="details" class="details hidden"><summary>Ver interpretação e prévia da operação</summary><div class="detail-content"><div class="grid"><div><strong style="font-size:13px">Interpretação</strong><div id="interpretation" class="hint">Aguardando solicitação.</div></div><div><strong style="font-size:13px">Prévia para confirmação</strong><div id="preview" class="hint">Nenhuma operação preparada.</div><div class="actions"><button id="confirm" class="primary" disabled>Confirmar e gravar no GB+</button><button id="discard" disabled>Descartar</button></div></div></div></div></details>
+<details id="details" class="details hidden ai-preview-card" open>
+ <summary class="ai-preview-heading">
+  <span class="ai-preview-title">Prévia do lançamento</span><span id="ai-preview-type" class="ai-preview-type">Recorrente</span>
+ </summary>
+ <div class="detail-content ai-preview-content">
+  <div id="interpretation" class="ai-preview-meta" aria-live="polite"></div>
+  <div id="preview" class="ai-preview-dynamic">Nenhuma operação preparada.</div>
+  <form id="draft-editor" class="ai-preview-editor" hidden>
+   <h3>Editar lançamento antes de confirmar</h3>
+   <div class="ai-preview-editor-grid">
+    <label class="ai-full">Descrição <input name="description" type="text" maxlength="300" required autocomplete="off"></label>
+    <label>Valor (R$) <input name="amount" type="number" min="0.01" step="0.01" max="10000000000" required inputmode="decimal"></label>
+    <label>Primeiro vencimento <input name="due" type="date" required></label>
+    <label>Periodicidade <select name="mode" required>
+      <option value="single">Único</option><option value="recurring">Mensal</option><option value="installment">Parcelado</option>
+    </select></label>
+    <label>Quantidade de títulos <input name="count" type="number" min="1" max="120" step="1" required></label>
+   </div>
+   <p id="draft-edit-error" class="ai-preview-edit-error" role="alert"></p>
+   <div class="ai-preview-editor-actions">
+    <button id="draft-cancel" type="button">Cancelar</button><button type="submit" class="ai-editor-save">Aplicar alterações</button>
+   </div>
+  </form>
+  <p class="ai-preview-guidance"><strong>Quer mudar algo?</strong> Você pode editar por aqui ou pedir no chat.</p>
+  <div class="actions ai-preview-actions">
+   <button id="detail-toggle" type="button" aria-label="Recolher ou expandir os vencimentos">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>Detalhar
+   </button>
+   <button id="edit-draft" type="button">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m4 17 11-11 3 3L7 20H4z M14 7l3-3 3 3-3 3"/></svg>Editar
+   </button>
+   <button id="discard" class="ai-preview-discard" type="button" disabled>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 6h16 M9 6V4h6v2 M6 6l1 14h10l1-14 M10 10v7 M14 10v7"/></svg>Descartar
+   </button>
+   <button id="confirm" class="ai-preview-confirm" type="button" disabled>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true"><path d="m4 12 5 5L20 6"/></svg><span id="confirm-label">Confirmar e gravar</span>
+   </button>
+  </div>
+ </div>
+</details>
 <section id="voice-panel" class="voice-panel" hidden aria-label="Gravação de voz em andamento">
   <div class="voice-wave" aria-hidden="true"><span class="voice-bar"></span><span class="voice-bar"></span><span class="voice-bar"></span><span class="voice-bar"></span><span class="voice-bar"></span><span class="voice-bar"></span><span class="voice-bar"></span><span class="voice-bar"></span><span class="voice-bar"></span><span class="voice-bar"></span><span class="voice-bar"></span><span class="voice-bar"></span><span class="voice-bar"></span><span class="voice-bar"></span><span class="voice-bar"></span><span class="voice-bar"></span><span class="voice-bar"></span><span class="voice-bar"></span><span class="voice-bar"></span><span class="voice-bar"></span><span class="voice-bar"></span><span class="voice-bar"></span><span class="voice-bar"></span><span class="voice-bar"></span><span class="voice-bar"></span></div>
   <div id="voice-hint" class="voice-hint" role="status">Ouvindo…</div>
   <button id="voice-cancel" class="voice-minor" type="button">Cancelar</button>
   <button id="voice-finish" class="voice-finish" type="button">Concluir</button>
 </section>
-<form id="chat-form" class="composer"><input id="message" aria-label="Sua mensagem" placeholder="Mensagem para GB+ AI..." autocomplete="off" required><button id="mic" class="voice-trigger" type="button" aria-pressed="false" aria-label="Iniciar gravação de voz" title="Gravar mensagem de voz"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="13" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 17v5m-4 0h8"/></svg></button><button id="send" class="primary" type="submit" aria-label="Enviar mensagem"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 14-7-5 14-3-6-6-1z"/><path d="m11 13 8-8"/></svg></button></form>
+<form id="chat-form" class="composer">
+<button id="ai-attach" type="button" class="ai-attach-trigger" title="Anexar extrato ou planilha" aria-label="Anexar extrato ou planilha">
+ <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="m8 13 7-7a4 4 0 0 1 6 6l-9 9a7 7 0 0 1-10-10l9-9"/></svg>
+</button><input id="ai-file-input" class="ai-attach-input" type="file" accept=".ofx,.csv,.txt,.xlsx,.xls,.pdf" aria-label="Selecionar extrato ou planilha">
+<input id="message" aria-label="Sua mensagem" placeholder="Mensagem para GB+ AI..." autocomplete="off" required><button id="mic" class="voice-trigger" type="button" aria-pressed="false" aria-label="Iniciar gravação de voz" title="Gravar mensagem de voz"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="13" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 17v5m-4 0h8"/></svg></button><button id="send" class="primary" type="submit" aria-label="Enviar mensagem"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 14-7-5 14-3-6-6-1z"/><path d="m11 13 8-8"/></svg></button></form>
 <div id="ai-connect" style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:10px;flex-wrap:wrap"><span id="ai-state" class="muted">Conectando ao GB+…</span><button id="ai-login" type="button" hidden disabled title="Serviço generativo desativado; GB+ AI funciona gratuitamente em modo local" style="border:1px solid #ddd;border-radius:99px;padding:7px 12px;background:#fff;font-size:12px">IA generativa em breve</button></div><p id="voice-status" class="footnote" role="status">Aguardando conexão com seu financeiro GB+</p>
 </div></main></div><script type="module">
-import {interpret,formatBRL,fixture} from './engine.js?v=20261104-v18';
+import {interpret,formatBRL,fixture} from './engine.js?v=20261105-82';
+import {renderProposalPreview,validateEditedProposal,proposalSchedule,proposalModeLabel} from './preview-card.js?v=20261105-82';
 import {setupVoice} from './voice.js?v=20261103-v9';
 import {createChatHistory} from './chat-history.js?v=20261104-v2';
 const $=s=>document.querySelector(s),log=$('#messages'),input=$('#message');let proposal=null,context=null,live=false,session=null,history=[];
