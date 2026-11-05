@@ -542,8 +542,16 @@ async function submit(text,targetChat=chats.activeId()){
  const reply=(message,who='assistant')=>add(message,who,targetChat);
  reply(text,'user');
  const s=normalized(text);
- const followupPreviewCorrection=!!context?.proposal&&pendingPreviewCorrection&&
-  /^(?:(?:para |no |em )?(?:o )?dia\s+\d{1,2}|\d{1,2}|(?:para )?r?\$?\s*\d+[,.]?\d*\s*reais?|(?:o )?valor\s+\d+)/.test(s);
+ const shortDay=/^(?:(?:para |no |em )?(?:o )?dia\s+\d{1,2}|\d{1,2})$/;
+ const shortAmount=/^(?:r\s*)?\d+(?:[,.]\d{1,2})?(?:\s+reais?)?$/;
+ const followupPreviewCorrection=!!context?.proposal&&!!pendingPreviewCorrection&&(
+  (pendingPreviewCorrection==='due'&&shortDay.test(s))||
+  (pendingPreviewCorrection==='amount'&&shortAmount.test(s))||
+  (pendingPreviewCorrection==='any'&&/^(?:dia|valor|vencimento)\s+/.test(s))
+ );
+ const followupText=followupPreviewCorrection?
+  (pendingPreviewCorrection==='amount'?'altera o valor para '+text:
+   /^\d{1,2}$/.test(s)?'altera para dia '+text:'altera para '+text):text;
  if(/(?:^| )(?:que dia e hoje|qual e a data de hoje|qual data e hoje|hoje e que dia|qual dia e hoje)(?:$| )/.test(s)&&!/(?:vence|vencem|vencimento|boletos|contas)\b/.test(s)){
   lastTopic='date';reply('Hoje é '+new Intl.DateTimeFormat('pt-BR',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(new Date())+'.');return;
  }
@@ -581,8 +589,9 @@ async function submit(text,targetChat=chats.activeId()){
   return;
  }
  if(live&&instructional){askLive(text,targetChat);return;}
- const result=interpret(followupPreviewCorrection?'altera para '+text:text,context,fixture);
- pendingPreviewCorrection=result.intent==='corrigir_previa'&&result.status==='needs_clarification';
+ const result=interpret(followupText,context,fixture);
+ pendingPreviewCorrection=result.intent==='corrigir_previa'&&result.status==='needs_clarification'?
+  (/valor|preco|quantia/.test(s)?'amount':/data|vencimento|dia/.test(s)?'due':'any'):false;
  show(result);lastTopic=result.intent;
  if(/fict.ci|demonstra/.test(normalized(result.answer||''))&&!result.proposal){
   reply('Não tenho dados reais para essa resposta. Entre na conta GB+ para consultar seus saldos e títulos.');return;
