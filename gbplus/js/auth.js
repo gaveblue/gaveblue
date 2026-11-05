@@ -4,17 +4,31 @@ import {esc,icon} from './ui.js';
 import {loginRedirectMessage,clearLoginErrorUrl,safeAuthEmail} from './auth-flow.js?v=20261104-31';
 
 let client,user=null,recovery=false,working=false,startup=true,pendingEmail='',lastResend=0;
-let onChange=()=>{},reloadScheduled=false;
+let onChange=()=>{},reloadScheduled=false,logoutRedirectRequested=false;
 function refreshAuthOnce(){
  if(reloadScheduled)return;
  reloadScheduled=true;
  onChange();
- setTimeout(()=>location.reload(),0);
+ setTimeout(()=>{if(logoutRedirectRequested)location.replace('./?web=1');else location.reload();},0);
 }
 export const currentUser=()=>user;
 export const authClient=()=>client;
 export const isRecovery=()=>recovery;
 export const onlineSelected=()=>true;
+export async function signOutAccount(){
+ if(!navigator.onLine)throw Error('Você está sem conexão. Conecte-se para sair da conta com segurança.');
+ logoutRedirectRequested=true;
+ try{
+  const {error}=await getClient().auth.signOut({scope:'local'});
+  if(error)throw error;
+  sessionStorage.removeItem('gbplus-recovery');
+  refreshAuthOnce();
+ }catch(error){
+  logoutRedirectRequested=false;
+  throw Error('Não foi possível encerrar a sessão. Verifique sua conexão e tente novamente.');
+ }
+}
+
 const getClient=()=>client||(client=createGbplusClient(window.supabase?.createClient,cloudConfig));
 export function consumeAuthReturnMessage(){
  const message=loginRedirectMessage(location.href);
@@ -157,10 +171,8 @@ document.addEventListener('click',async event=>{
   }
   if(name==='signout'){
     setWorking(true);
-    try{
-      const {error}=await getClient().auth.signOut({scope:'local'});if(error)throw error;
-      sessionStorage.removeItem('gbplus-recovery');refreshAuthOnce();
-    }catch{window.dispatchEvent(new CustomEvent('gbplus-message',{detail:'Não foi possível encerrar a sessão. Verifique a conexão e tente novamente.'}));}
+    try{await signOutAccount();}
+    catch(error){window.dispatchEvent(new CustomEvent('gbplus-message',{detail:error.message}));}
     finally{setWorking(false);}return;
   }
   showAuth(name);
