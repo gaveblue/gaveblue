@@ -11,9 +11,9 @@ import {expectedDates,recurrenceAnchor} from './gb-calendar-rules.js?v=20261105-
 import {CATEGORY_ICON_OPTIONS,categoryIconFor,gbIcon} from './gb-icons.js?v=20261104-42';
 import {setupPwaInstallation,maybeOfferPwaInstall,showInstallHelp,isPwaInstalled} from './pwa-install.js?v=20261104-40';
 import {SupabaseRepository} from '../integrations/supabase/repository.js?v=20261104-42';
-import {initializeAuth,authClient,currentUser,showAuth,isRecovery,updatePersonalProfile,consumeAuthReturnMessage,signOutAccount} from './auth.js?v=20261105-61';
+import {initializeAuth,authClient,currentUser,showAuth,isRecovery,updatePersonalProfile,consumeAuthReturnMessage,consumeSessionNotice,signOutAccount} from './auth.js?v=20261105-63';
 import {profileView,validateProfile,validCPF,formatCPF} from './profile.js?v=20261105-59';
-import {firstSetupView,customMobileNavForm,shortcutsPreview,readMobileNav} from './setup-ui.js?v=20261104-35';
+import {firstSetupView,customMobileNavForm,shortcutsPreview,readMobileNav,firstStepsPanel} from './setup-ui.js?v=20261105-63';
 import {launchesView} from './launches-view.js?v=20261105-47';
 import {installLaunchGestures} from './launches-gestures.js?v=20261104-38';
 import {launchSelection,paymentSelection,paymentSummary,applyLaunchPayments,reversedSelection,applyLaunchReversals,deletionSelection,applyLaunchDeletions} from './launch-actions.js?v=20261104-42';
@@ -22,6 +22,12 @@ const isInstalledApp=isPwaInstalled;
 setupPwaInstallation();
 installGbControls();
 const inviteLink='https://gaveblue.com.br/gbplus/';
+const firstStepsIgnored=new Set();
+function firstStepsDismissed(){
+ const id=currentUser()?.id;if(!id)return true;
+ if(firstStepsIgnored.has(id))return true;
+ try{return localStorage.getItem('gbplus-first-steps-dismissed:'+id)==='1';}catch{return false;}
+}
 let profileCpfStatus={userId:null,cpf:'',ready:false,loading:false,error:''};
 const state={route:'dashboard',period:'all',range:{},query:'',status:'',type:'',partner:'',category:'',partnerQuery:'',granularity:'month',report:'payable',reportPartner:'',moreFilters:false,launchSelected:[],launchStatusOpen:false,launchSearchOpen:false};
 const modal=document.querySelector('#modal');
@@ -87,7 +93,14 @@ function render(){if(!db)return;updateSystemAppearance(db.settings.theme);docume
  const custom=effectiveMobileNav(db.settings);
  const slots=[['dashboard','Início','home'],renderMobileShortcut(custom[0]),['new','Novo','plus'],renderMobileShortcut(custom[1]),renderMobileShortcut(custom[2])];
  return slots.map(([key,label,ico])=>key==='new'||key==='menu'?`<button type="button" data-action="${key==='new'?'new-title':'mobile-menu'}" class="${key==='new'?'mobile-new':''}" aria-label="${label}">${icon(ico)}<span>${label}</span></button>`:`<a href="#${key}" class="${state.route===key?'active':''}" ${state.route===key?'aria-current="page"':''}>${icon(ico)}<span>${label}</span></a>`).join('');
-})();const views={dashboard:()=>dashboard(db,state,!!currentUser(),currentUser()),titles:()=>launchesView(db,state),payable:()=>titlesView(db,state),receivable:()=>titlesView(db,state),partners:()=>partnersView(db,state),accounts:()=>accountsView(db),categories:()=>categoriesView(db),flow:()=>flowView(db,state),provisions:()=>flowView(db,state),reports:()=>reportsView(db,state),settings:()=>settingsView(db,!isInstalledApp(),!!currentUser(),currentUser(),isInstalledApp()),notifications:()=>notificationsView(db),profile:()=>profileView(currentUser(),profileCpfStatus.userId===currentUser()?.id?profileCpfStatus:{ready:false,cpf:'',error:''})};document.body.classList.toggle('gb-settings-page',state.route==='settings');unmountReactCharts();document.querySelector('#main').innerHTML=(views[state.route]||views.dashboard)();enhanceGbControls(document.querySelector('#main'));if(state.route==='profile'){initializeProfileDirtyState();if(!profileCpfStatus.ready&&!profileCpfStatus.loading&&!profileCpfStatus.error)void loadRegisteredCpf();}updateConnection();if(state.route==='dashboard')applyPanel();if(['dashboard','flow','provisions'].includes(state.route)){
+})();const views={dashboard:()=>dashboard(db,state,!!currentUser(),currentUser()),titles:()=>launchesView(db,state),payable:()=>titlesView(db,state),receivable:()=>titlesView(db,state),partners:()=>partnersView(db,state),accounts:()=>accountsView(db),categories:()=>categoriesView(db),flow:()=>flowView(db,state),provisions:()=>flowView(db,state),reports:()=>reportsView(db,state),settings:()=>settingsView(db,!isInstalledApp(),!!currentUser(),currentUser(),isInstalledApp()),notifications:()=>notificationsView(db),profile:()=>profileView(currentUser(),profileCpfStatus.userId===currentUser()?.id?profileCpfStatus:{ready:false,cpf:'',error:''})};document.body.classList.toggle('gb-settings-page',state.route==='settings');unmountReactCharts();document.querySelector('#main').innerHTML=(views[state.route]||views.dashboard)();if(state.route==='dashboard'&&!firstStepsDismissed()){
+ const html=firstStepsPanel(db);
+ if(html){
+  const main=document.querySelector('#main'),anchor=main.querySelector('.page-heading');
+  if(anchor)anchor.insertAdjacentHTML('afterend',html);
+  else main.insertAdjacentHTML('afterbegin',html);
+ }
+}enhanceGbControls(document.querySelector('#main'));if(state.route==='profile'){initializeProfileDirtyState();if(!profileCpfStatus.ready&&!profileCpfStatus.loading&&!profileCpfStatus.error)void loadRegisteredCpf();}updateConnection();if(state.route==='dashboard')applyPanel();if(['dashboard','flow','provisions'].includes(state.route)){
   try{
    const rows=flow(db,state.range,state.route==='dashboard'?'month':state.granularity);
    mountNativeCharts(db,state,rows);
@@ -429,6 +442,12 @@ const actions={
    defaultMobileNav().forEach((value,i)=>{form.elements.namedItem('slot'+i).value=value;});
    updateMobileNavPreview(form);
   },
+  'onboarding-dismiss':()=>{
+   const id=currentUser()?.id;if(!id)return;
+   firstStepsIgnored.add(id);
+   try{localStorage.setItem('gbplus-first-steps-dismissed:'+id,'1');}catch{}
+   render();
+  },
   'restart-setup':startSetupWizard,
   'setup-begin':()=>nextSetupStep('account-choice'),
   'setup-account-yes':()=>{if(!setupDraft)return;setupDraft.createAccount=true;nextSetupStep('account-details');},
@@ -719,7 +738,7 @@ async function init(){
   if(main&&!document.querySelector('#sync-alert'))main.insertAdjacentHTML('beforebegin','<div id="sync-alert" class="auth-notice sync-alert" role="alert" hidden>A gravação online precisa ser conferida. Feche o formulário, atualize os dados e refaça a alteração. <button class="button small" data-auth-action="refresh">Atualizar dados online</button></div>');
   const loginReturnMessage=consumeAuthReturnMessage();
   const user=await startupLimit(initializeAuth(clearAccount),16000);
-  if(!user){showAuth('signin',loginReturnMessage);return;}
+  if(!user){const sessionNotice=consumeSessionNotice();showAuth('signin',loginReturnMessage||sessionNotice);return;}
   if(isRecovery()){showAuth('recovery');return;}
   repository=new SupabaseRepository(authClient(),user.id);
   db=await startupLimit(repository.read(),16000);
