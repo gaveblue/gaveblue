@@ -3,6 +3,7 @@ import {esc,field,select,textarea,formFooter,button,icon,titleTable,empty} from 
 import {INDICATORS} from './store.js?v=20261104-42';
 import {entrySelect} from './entry-select.js?v=20261104-42';
 import {gbIcon,CATEGORY_ICON_OPTIONS,categoryIconFor} from './gb-icons.js?v=20261104-42';
+import {bankOptions,findBank} from './banks.js?v=20261105-70';
 const required='required maxlength="200"';
 export function titleForm(db,t,type='expense'){
  type=t?.type||type;
@@ -50,6 +51,7 @@ export function titleForm(db,t,type='expense'){
     <p class="gb-entry-schedule-note">Feriados estaduais e municipais não estão incluídos. Confira as datas antes de confirmar.</p>
    </section>
   </section>
+  ${!t&&Array.isArray(db.cards)&&db.cards.some(c=>c.active)?'<div class="gb-credit-entry-link"><strong>Vai pagar no cartão de crédito?</strong><p>Registre a compra no cartão para gerar a fatura automaticamente, sem duplicar a despesa.</p><button type="button" class="button" data-action="new-card-purchase">Lançar compra no cartão</button></div>':''}
   <input type="hidden" name="accountId" value="${esc(t?.accountId||'')}">
   <div class="form-error" role="alert"></div>
   <div class="gb-entry-wizard-footer" data-entry-footer="1">
@@ -63,7 +65,21 @@ export function titleForm(db,t,type='expense'){
  </form>`;
 }
 export function partnerForm(p){return `<form id="partner-form" data-id="${p?.id||''}"><div class="form-grid">${field('Nome ou razão social','name',p?.name||'','text',required)}${field('Nome fantasia','tradeName',p?.tradeName||'','text','maxlength="200"')}${field('CPF ou CNPJ','document',p?.document||'','text','maxlength="18"')}${field('Telefone','phone',p?.phone||'','tel','maxlength="30"')}${field('E-mail','email',p?.email||'','email','maxlength="200"')}${select('Situação','active',[['true','Ativo'],['false','Inativo']],String(p?.active??true))}<fieldset class="full roles"><legend>Classificações · escolha uma ou mais</legend>${['Cliente','Fornecedor','Transportadora','Funcionário','Outros'].map(r=>`<label><input type="checkbox" name="roles" value="${r}" ${p?.roles.includes(r)?'checked':''}>${r}</label>`).join('')}</fieldset><div class="full">${field('Endereço','address',p?.address||'','text','maxlength="500"')}</div>${textarea('Observações','notes',p?.notes)}</div>${p?button(icon('trash')+'Excluir parceiro','delete-partner','danger small',`data-id="${p.id}" type="button"`):''}${formFooter()}</form>`;}
-export function accountForm(a){return `<form id="account-form" data-id="${a?.id||''}"><div class="form-grid">${field('Nome da conta','name',a?.name||'','text','required maxlength="120"')}${field('Banco / instituição','bank',a?.bank||'','text','maxlength="120"')}${field('Agência (opcional)','branch',a?.branch||'','text','maxlength="80"')}${field('Número da conta (opcional)','number',a?.number||'','text','maxlength="80"')}${field('Saldo inicial (R$)','initial',(a?.initial||0)/100,'number','required step="0.01" min="-10000000000" max="10000000000"')}${select('Situação','active',[['true','Ativa'],['false','Inativa']],String(a?.active??true))}<p class="form-hint full">O saldo inicial é a base da conta, antes de todas as baixas e transferências cadastradas. Alterá-lo recalcula o saldo atual.</p></div>${a?button(icon('trash')+'Excluir conta','delete-account','danger small',`data-id="${a.id}" type="button"`):''}${formFooter()}</form>`;}
+export function accountForm(db,a){
+ const id=a?.bankId||findBank(db,a?.bank)?.id||'';
+ return '<form id="account-form" data-id="'+esc(a?.id||'')+'"><div class="form-grid">'+
+ field('Nome da conta','name',a?.name||'','text','required maxlength="120"')+
+ '<div class="full">'+select('Banco ou instituição','bankId',bankOptions(db),id)+'</div>'+
+ '<div class="full">'+field('Outra instituição (opcional)','bank',a?.bank&&!id?a.bank:'','text','maxlength="120" placeholder="Ex.: Cooperativa regional"')+'</div>'+
+ field('Agência (opcional)','branch',a?.branch||'','text','maxlength="80"')+
+ field('Número da conta (opcional)','number',a?.number||'','text','maxlength="80"')+
+ field('Saldo inicial (R$)','initial',(a?.initial||0)/100,'number','required step="0.01" min="-10000000000" max="10000000000"')+
+ select('Situação','active',[['true','Ativa'],['false','Inativa']],String(a?.active??true))+
+ '<p class="form-hint full">Selecione um banco para exibir seu logo. Se não aparecer, você pode cadastrar uma instituição em Bancos. O saldo inicial é o ponto de partida da conta; alterá-lo recalcula o saldo atual.</p></div>'+
+ (a?button(icon('trash')+'Excluir conta','delete-account','danger small','data-id="'+esc(a.id)+'" type="button"'):'')+
+ formFooter()+'</form>';
+}
+
 export function categoryForm(c){
  const current=categoryIconFor(c);
  const palette=CATEGORY_ICON_OPTIONS.map(([key,label])=>`<button type="button" class="gb-category-icon-choice ${current===key?'is-selected':''}" data-action="category-icon" data-icon="${esc(key)}" aria-label="Ícone: ${esc(label)}" aria-pressed="${current===key}" title="${esc(label)}">${gbIcon(key)}<small>${esc(label)}</small></button>`).join('');
