@@ -4,10 +4,20 @@ import {esc,icon} from './ui.js';
 import {loginRedirectMessage,clearLoginErrorUrl,safeAuthEmail,passwordStrength,isExpiredSessionError} from './auth-flow.js?v=20261105-66';
 
 let client,user=null,recovery=false,working=false,startup=true,pendingEmail='',lastResend=0;
-const EMAIL_COOLDOWN_MS=60000,SESSION_NOTICE_KEY='gbplus-session-ended-at',ACTIVE_SESSION_KEY='gbplus-session-was-active';
+const EMAIL_COOLDOWN_MS=60000,EMAIL_COOLDOWN_KEY='gbplus-auth-email-last-sent-at',SESSION_NOTICE_KEY='gbplus-session-ended-at',ACTIVE_SESSION_KEY='gbplus-session-was-active';
 const storageGet=key=>{try{return sessionStorage.getItem(key);}catch{return null;}};
 const storageSet=(key,value)=>{try{sessionStorage.setItem(key,value);}catch{}};
 const storageRemove=key=>{try{sessionStorage.removeItem(key);}catch{}};
+export function emailCooldownSeconds(){
+ const now=Date.now();
+ const stored=Number(storageGet(EMAIL_COOLDOWN_KEY)||0);
+ const last=Math.max(lastResend,Number.isFinite(stored)&&stored<=now?stored:0);
+ return Math.ceil(Math.max(0,EMAIL_COOLDOWN_MS-(now-last))/1000);
+}
+export function markAuthEmailSent(){
+ lastResend=Date.now();
+ storageSet(EMAIL_COOLDOWN_KEY,String(lastResend));
+}
 function noteSessionEnded(){storageSet(SESSION_NOTICE_KEY,String(Date.now()));storageRemove(ACTIVE_SESSION_KEY);}
 function noteActiveSession(){storageSet(ACTIVE_SESSION_KEY,'1');storageRemove(SESSION_NOTICE_KEY);}
 export function consumeSessionNotice(){
@@ -322,9 +332,8 @@ document.addEventListener('submit',async event=>{
  if(['signup','recovery'].includes(mode)&&values.password!==values.confirmation){feedback('As senhas precisam ser iguais.');return;}
  if(['signup','recovery'].includes(mode)&&!passwordMeetsMinimum(values.password)){feedback('A senha precisa ter pelo menos 8 caracteres. Letras, números e símbolos podem ser usados livremente.');return;}
  if(!navigator.onLine){feedback('Sem conexão. Conecte-se para continuar.');return;}
- if(['confirm','forgot'].includes(mode)&&Date.now()-lastResend<EMAIL_COOLDOWN_MS){
-  const remaining=Math.ceil((EMAIL_COOLDOWN_MS-(Date.now()-lastResend))/1000);
-  feedback('Aguarde '+remaining+' segundos antes de solicitar outro e-mail.');return;
+ if(['confirm','forgot'].includes(mode)&&emailCooldownSeconds()>0){
+  feedback('Aguarde '+emailCooldownSeconds()+' segundos antes de solicitar outro e-mail.');return;
  }
  setWorking(true);
  try{
@@ -344,14 +353,14 @@ document.addEventListener('submit',async event=>{
    refreshAuthOnce();return;
   }
   if(mode==='signup'){
-   lastResend=Date.now();pendingEmail=email;showAuth('confirm');
+   markAuthEmailSent();pendingEmail=email;showAuth('confirm');
    feedback('Cadastro solicitado. Confira seu e-mail para confirmar a conta. Se não chegar, você poderá reenviar o link.',false);
   }else if(mode==='confirm'){
-   lastResend=Date.now();
+   markAuthEmailSent();
    pendingEmail=email;
    feedback('Se o cadastro precisar de confirmação, um novo link será enviado. Confira também a pasta de spam.',false);
   }else if(mode==='forgot'){
-   lastResend=Date.now();form.reset();
+   markAuthEmailSent();form.reset();
    feedback('Se o e-mail estiver cadastrado, você receberá um link de recuperação. Abra-o no mesmo navegador em que fez a solicitação.',false);
   }else if(mode==='recovery'){
    recovery=false;sessionStorage.removeItem('gbplus-recovery');
