@@ -1,5 +1,5 @@
-import {esc,icon} from './ui.js?v=20261104-41';
-import {today} from './domain.js';
+import {esc,icon} from './ui.js?v=20261104-42';
+import {today} from './domain.js?v=20261104-42';
 
 // Profile fields are attached to the signed-in user's Supabase Auth identity.
 // Financial records and their revision are never mutated by these forms.
