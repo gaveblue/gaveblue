@@ -1,4 +1,4 @@
-import {today,balance,pending,accountBalance,validDate} from './domain.js?v=20261105-47';
+import {today,balance,pending,accountBalance,validDate} from './domain.js?v=20261105-72';
 
 export function addForecastDays(date,days){
  if(!validDate(date)||!Number.isInteger(days)||Math.abs(days)>365)throw Error('Período de previsão inválido.');
