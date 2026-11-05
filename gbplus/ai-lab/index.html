@@ -157,10 +157,12 @@
     <label class="ai-full">Descrição <input name="description" type="text" maxlength="300" required autocomplete="off"></label>
     <label>Valor (R$) <input name="amount" type="number" min="0.01" step="0.01" max="10000000000" required inputmode="decimal"></label>
     <label>Primeiro vencimento <input name="due" type="date" required></label>
+    <label>Tipo <select name="type" required><option value="expense">Despesa</option><option value="income">Receita</option></select></label>
     <label>Periodicidade <select name="mode" required>
       <option value="single">Único</option><option value="recurring">Mensal</option><option value="installment">Parcelado</option>
     </select></label>
     <label>Quantidade de títulos <input name="count" type="number" min="1" max="120" step="1" required></label>
+    <label class="ai-full">Parceiro (opcional) <input name="partner" type="text" maxlength="120" autocomplete="off"></label>
    </div>
    <p id="draft-edit-error" class="ai-preview-edit-error" role="alert"></p>
    <div class="ai-preview-editor-actions">
@@ -201,7 +203,7 @@ import {interpret,formatBRL,fixture} from './engine.js?v=20261105-82';
 import {renderProposalPreview,validateEditedProposal,proposalSchedule,proposalModeLabel} from './preview-card.js?v=20261105-82';
 import {setupVoice} from './voice.js?v=20261103-v9';
 import {createChatHistory} from './chat-history.js?v=20261104-v2';
-const $=s=>document.querySelector(s),log=$('#messages'),input=$('#message');let proposal=null,context=null,live=false,session=null,history=[];
+const $=s=>document.querySelector(s),log=$('#messages'),input=$('#message'),detailsCard=$('#details');let proposal=null,context=null,live=false,session=null,history=[];
 const initialWelcome=$('#welcome').cloneNode(true);
 const chats=createChatHistory(message=>{$('#voice-status').textContent=message;});
 chats.setUser(null);
@@ -314,7 +316,7 @@ function renderChatList(){
 function restoreChat(){
  // Never restore a stale payment/expense confirmation after changing chats.
  proposal=null;context=null;lastTopic='';lastAnswer='';editPending=null;history=[];input.value='';
- $('#details').open=false;$('#details').classList.add('hidden');
+ detailsCard.open=false;detailsCard.classList.add('hidden');
  $('#confirm').disabled=true;$('#discard').disabled=true;
  $('#preview').textContent='Nenhuma operação preparada.';
  log.replaceChildren();
@@ -323,6 +325,7 @@ function restoreChat(){
   log.append(initialWelcome.cloneNode(true));
   updateGreeting();
  }else for(const entry of current.messages)paintMessage(entry.text,entry.who,false);
+ log.append(detailsCard); // Historic chats never restore unsaved financial confirmations.
  renderChatList();
 }
 function openHistory(){
@@ -346,23 +349,74 @@ log.addEventListener('click',event=>{const example=event.target.closest('[data-e
 restoreChat();
 function field(k,v){const d=document.createElement('div');d.className='field';const a=document.createElement('span');a.textContent=k;const b=document.createElement('strong');b.textContent=String(v);d.append(a,b);return d;}
 function show(result){
- const details=$('#details'),hasProposal=!!result.proposal;
- details.classList.toggle('hidden',!hasProposal&&result.status!=='needs_clarification');
- details.open=hasProposal;
- const box=$('#interpretation');box.replaceChildren();
- box.append(field('Solicitação',result.intent==='preparar_lancamento'?'Novo lançamento':result.intent==='corrigir_previa'?'Alteração da prévia':'Consulta'));
- box.append(field('Situação',result.status==='ready'?'Pronta para revisão':result.status==='needs_clarification'?'Faltam informações':'Respondida'));
- if(result.missing?.length)box.append(field('Faltando',result.missing.join(', ')));
- const pre=$('#preview');pre.replaceChildren();proposal=result.proposal||null;
+ const hasProposal=!!result.proposal;
+ detailsCard.classList.toggle('hidden',!hasProposal);
+ detailsCard.open=hasProposal;
+ proposal=hasProposal?result.proposal:null;
  $('#confirm').disabled=!hasProposal;$('#discard').disabled=!hasProposal;
- if(proposal){
-  const count=proposal.mode==='single'?1:proposal.count||1;
-  const total=proposal.mode==='recurring'?proposal.amountCents*count:proposal.amountCents;
-  pre.append(field('Tipo',proposal.type==='expense'?'Despesa':'Receita'),field('Descrição',proposal.description||'Não informada'),field('Valor '+(proposal.mode==='recurring'?'mensal':proposal.mode==='installment'?'total':''),formatBRL(proposal.amountCents)),field('Primeiro vencimento',proposal.due?new Date(proposal.due+'T12:00:00').toLocaleDateString('pt-BR'):'Não informado'),field('Modalidade',proposal.mode==='recurring'?'Recorrência':proposal.mode==='installment'?'Parcelamento':'Único'),field('Quantidade',count),field('Total de todos os títulos',formatBRL(total)));
-  if(proposal.partner)pre.append(field('Parceiro informado',proposal.partner));
-  const note=document.createElement('p');note.className='hint';note.textContent='Confira os dados: esta confirmação poderá criar títulos reais no GB+. O saldo bancário não muda até a baixa.';pre.append(note);
- }else pre.textContent='Nenhuma operação preparada.';
+ $('#edit-draft').disabled=!hasProposal;$('#detail-toggle').disabled=!hasProposal;
+ $('#draft-editor').hidden=true;
+ if(!hasProposal)return;
+ try{
+  validateEditedProposal(proposal);
+  renderProposalPreview($('#preview'),proposal,formatBRL);
+  $('#ai-preview-type').textContent=proposalModeLabel(proposal.mode);
+  $('#interpretation').textContent='Prévia aguardando sua revisão. Nenhuma alteração foi gravada.';
+ }catch(error){
+  proposal=null;detailsCard.classList.add('hidden');
+  $('#confirm').disabled=true;$('#discard').disabled=true;
+  add('Não consegui montar uma prévia válida: '+error.message);
+ }
 }
+function placePreviewAfterAnswer(){
+ if(proposal&&!detailsCard.classList.contains('hidden')){
+  log.append(detailsCard);log.scrollTop=log.scrollHeight;
+ }
+}
+function editorField(name){return $('#draft-editor').elements.namedItem(name);}
+function openDraftEditor(){
+ if(!proposal)return;
+ const form=$('#draft-editor');
+ editorField('description').value=proposal.description||'';
+ editorField('amount').value=(proposal.amountCents/100).toFixed(2);
+ editorField('due').value=proposal.due;
+ editorField('mode').value=proposal.mode;
+ editorField('type').value=proposal.type;
+ editorField('count').value=proposal.mode==='single'?1:proposal.count||1;
+ editorField('partner').value=proposal.partner||'';
+ $('#draft-edit-error').textContent='';
+ form.hidden=false;editorField('description').focus();
+}
+$('#detail-toggle').addEventListener('click',()=>{
+ const details=$('#ai-due-details');if(!details)return;
+ details.open=!details.open;
+ $('#detail-toggle').setAttribute('aria-expanded',String(details.open));
+});
+$('#edit-draft').addEventListener('click',openDraftEditor);
+$('#draft-cancel').addEventListener('click',()=>{$('#draft-editor').hidden=true;$('#draft-edit-error').textContent='';});
+$('#draft-editor').addEventListener('submit',event=>{
+ event.preventDefault();if(!proposal)return;
+ try{
+  const amount=Number(editorField('amount').value),amountCents=Math.round(amount*100);
+  if(!Number.isFinite(amount)||Math.abs(amount*100-amountCents)>.00001)throw Error('Informe um valor em reais com no máximo duas casas decimais.');
+  const revised=validateEditedProposal({
+   ...proposal,
+   description:editorField('description').value,
+   amountCents,
+   due:editorField('due').value,
+   mode:editorField('mode').value,
+   type:editorField('type').value,
+   count:Number(editorField('count').value),
+   partner:editorField('partner').value.trim()||null
+  });
+  proposal=revised;context={proposal:revised};
+  renderProposalPreview($('#preview'),revised,formatBRL);
+  $('#ai-preview-type').textContent=proposalModeLabel(revised.mode);
+  $('#draft-editor').hidden=true;$('#draft-edit-error').textContent='';
+  add('Atualizei a prévia conforme suas alterações. Confira os vencimentos e confirme somente se estiver tudo certo.');
+  placePreviewAfterAnswer();
+ }catch(error){$('#draft-edit-error').textContent=error.message;}
+});
 
 const normalized=s=>s.toLocaleLowerCase('pt-BR').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9\s]/g,' ').replace(/\s+/g,' ').trim();
 function classifyQuery(text){
