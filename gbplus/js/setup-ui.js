@@ -1,6 +1,7 @@
 import {esc,icon,button,field,select} from './ui.js?v=20261105-72';
 import {money} from './domain.js?v=20261105-72';
 import {MOBILE_SHORTCUTS,defaultMobileNav,effectiveMobileNav} from './store.js?v=20261105-72';
+import {bankOptions,bankName} from './banks.js?v=20261105-72';
 
 // The fixed slots are never rendered as selectors and cannot be removed.
 const selectionOptions=MOBILE_SHORTCUTS.map(([key,label])=>[key,label]);
@@ -44,7 +45,7 @@ const wizardNote='<p class="form-hint">Nada será lançado ou gravado até você
 const wizardFoot=(label)=>'<div class="form-error" role="alert"></div><div class="form-footer">'+wizardBack()+'<button class="button primary" type="submit">'+label+icon('arrow')+'</button></div>';
 const panel=(title,text,body)=>'<h3 class="setup-question">'+title+'</h3><p class="setup-description">'+text+'</p>'+body;
 const row=(back,buttons)=>'<div class="form-footer">'+(back?wizardBack():'')+buttons+'</div>';
-export function firstSetupView(d){
+export function firstSetupView(d,db){
  const stage=d.step;
  const progress={welcome:1,'account-choice':2,'account-details':2,'balance-choice':3,'balance-details':3,preferences:4,review:5}[stage]||1;
  const marker='<div class="setup-progress" aria-label="Etapa '+progress+' de 5"><span>PASSO '+progress+' DE 5</span><div class="setup-progress-track"><i style="width:'+(progress*20)+'%"></i></div></div>';
@@ -57,7 +58,8 @@ export function firstSetupView(d){
  if(stage==='account-details')body=panel('Primeira conta financeira','Informe os dados essenciais da sua conta. Agência e número são opcionais.',
   '<form id="setup-account-form"><div class="form-grid">'+
    field('Nome da conta','name',d.name,'text','required maxlength="120" placeholder="Ex.: Conta principal"')+
-   field('Banco ou instituição','bank',d.bank,'text','maxlength="120" placeholder="Ex.: Banco, dinheiro em caixa"')+
+   '<div class="full">'+select('Banco ou instituição','bankId',bankOptions(db),d.bankId||'')+'</div>'+
+   field('Outra instituição (se não estiver na lista)','bank',d.bankId?'':d.bank,'text','maxlength="120" placeholder="Ex.: Cooperativa, dinheiro em caixa"')+
    field('Agência (opcional)','branch',d.branch,'text','maxlength="80"')+
    field('Número da conta (opcional)','number',d.number,'text','maxlength="80"')+
    '</div>'+wizardFoot('Continuar')+'</form>');
@@ -74,7 +76,7 @@ export function firstSetupView(d){
  if(stage==='review')body=panel('Confira antes de começar','Somente depois de tocar em Concluir os dados serão salvos na sua conta GB+.',
   '<div class="setup-review">'+
   '<div><small>Conta financeira</small><strong>'+esc(d.createAccount?d.name:'Nenhuma conta agora')+'</strong></div>'+
-  (d.createAccount?'<div><small>Banco / instituição</small><strong>'+esc(d.bank||'Não informado')+'</strong></div><div><small>Saldo inicial</small><strong>'+money(d.initial)+'</strong></div>':'')+
+  (d.createAccount?'<div><small>Banco / instituição</small><strong>'+esc(bankName(db,d.bankId,d.bank)||'Não informado')+'</strong></div><div><small>Saldo inicial</small><strong>'+money(d.initial)+'</strong></div>':'')+
   '<div><small>Aparência</small><strong>'+(d.theme==='dark'?'Escura':'Clara')+'</strong></div></div>'+
   '<p class="form-hint">As categorias padrão de receitas e despesas já estarão disponíveis. Nenhuma receita, despesa ou baixa será criada por este assistente.</p>'+
   '<div class="form-error" role="alert"></div>'+
