@@ -83,3 +83,15 @@ Este arquivo separa o que já entrou no código do que ainda depende de implemen
 - [x] Checklist de conta, saldo inicial e primeiro lançamento.
 - [ ] Revisar limites efetivos de Auth no painel Supabase e homologar em dispositivos reais.
 - [ ] Auditar avisos do Security Advisor antes de considerar a proteção concluída.
+
+## GB+ 2.3.9 — correções de estabilidade e segurança
+
+- [x] Unificar e persistir na sessão o intervalo de reenvio de e-mails na autenticação.
+- [x] Impedir recuperação indiscriminada de recursos não versionados de caches de PWA de outros builds.
+- [x] Atualizar versão, build, histórico e testes de regressão (28 verificações em ambiente simulado).
+- [x] Inspecionar read-only RLS de documentos/perfis e a autorização básica de `gbplus_save`.
+- [ ] Homologar fluxo real em dispositivos, PWA, SMTP e Google.
+- [ ] Revisar configurações efetivas de limites de Auth e proteção contra senhas vazadas no painel.
+- [ ] Auditar formalmente a função financeira privilegiada antes de qualquer mudança no banco.
+
+O fechamento da 2.3.9 no repositório não equivale à confirmação da implantação no site e nos aplicativos instalados.
