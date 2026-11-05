@@ -106,3 +106,28 @@ não excluíram usuários nem títulos e não alteraram RLS ou a estrutura do ba
 7. [ ] Analisar Security Advisor: proteção contra senhas vazadas desabilitada (pode depender do plano) e aviso da função privilegiada public.gbplus_save. Não modificar a função financeira sem auditar as regras de autorização existentes.
 
 **Limitação desta execução:** o conector Supabase disponível não oferece leitura ou alteração das configurações de rate limits do Auth. Nenhum limite de servidor foi alterado; isso continua pendente no painel administrativo. Nunca armazenar tokens ou chaves administrativas no repositório.
+
+## GB+ 2.3.9 — homologação de estabilidade (05/11/2026)
+
+**Código atualizado e verificado:**
+- Reenvio de e-mails protegido por intervalo local de 60 segundos **persistido na sessão do navegador**, inclusive após recarregar. Compartilhado entre cadastro, confirmação, recuperar senha e alterar senha em Minha conta. Os limites definitivos continuam impostos pelo Supabase.
+- Service Worker: o fallback offline consulta primeiro o cache do build atual; recursos de builds anteriores só são aceitos por URL **exata e versionada**, para não misturar código de versões incompatíveis. A versão online nunca é inferida de cache antigo.
+- Compilação 57; versão exibida 2.3.9; atualização continua dependendo de publicação no domínio oficial.
+- Foram executados 28 testes lógicos e de regressão em ambiente isolado com simulação de APIs do navegador. **Não substituem** testes em Chrome, Android/iOS, PWA instalado e fluxos de e-mail reais.
+
+**Auditoria de segurança no Supabase (somente leitura, sem alteração de banco):**
+- Projeto GB+: ACTIVE_HEALTHY durante a consulta.
+- A função financeira `public.gbplus_save` permanece `SECURITY DEFINER`. A definição SQL foi inspecionada: exige `auth.uid()` não nulo e que `expected_user_id` corresponda ao usuário autenticado, verifica revisão/operação, tamanho e estrutura básica do JSON antes de gravar. O papel `anon` **não possui EXECUTE**; `authenticated` possui, conforme a operação normal do GB+. Isso reduz o risco imediato mas **não encerra** o aviso do Security Advisor nem substitui auditoria completa da função e testes de autorização entre usuários.
+- As tabelas `public.gbplus_documents` e `public.gbplus_profiles` estavam com RLS habilitada e políticas de leitura limitadas a `user_id = auth.uid()`. O CPF possui política de inserção pelo próprio usuário.
+- Permanecem dois avisos do Security Advisor: função `SECURITY DEFINER` executável por usuário autenticado e proteção contra senhas vazadas desabilitada.
+  - Função: https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable
+  - Senhas vazadas: https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection
+
+**Pendente para conclusão da homologação:**
+1. [ ] Confirmar e ajustar, se necessário, os limites efetivos em Authentication → Rate Limits; o conector disponível não permite alterar essa configuração.
+2. [ ] Avaliar habilitação de proteção contra senhas vazadas, observando recursos/limites do plano.
+3. [ ] Teste real de cadastro, confirmação e recuperação de senha por e-mail, login Google, logout/sessão expirada e troca de dispositivo.
+4. [ ] Atualização/download e utilização offline em dispositivo Android/iOS, conferindo integridade do cache e preservação de lançamentos.
+5. [ ] Auditoria adicional e teste de isolamento de usuários antes de modificar funções SQL privilegiadas.
+
+Nenhum lançamento, conta, pagamento, perfil de usuário ou função do banco foi alterado nesta revisão.
