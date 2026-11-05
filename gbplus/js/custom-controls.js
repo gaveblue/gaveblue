@@ -1,6 +1,6 @@
 /* GB+ Custom Controls · visual selectors and calendar without native popovers.
    The original form controls remain as data sources for FormData and validation. */
-const escapeHtml=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;':'&quot;',"'":'&#39;'}[c]));
+const escapeHtml=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const ptMonth=new Intl.DateTimeFormat('pt-BR',{month:'long',year:'numeric',timeZone:'UTC'});
 const ptWeek=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
 let openMenu=null,openCalendar=null,sequence=0;
@@ -110,7 +110,7 @@ function showCalendar(button){
  const current=parts(input.value)||{y:now.getFullYear(),m:now.getMonth()+1,d:now.getDate()};
  const backdrop=document.createElement('div');backdrop.className='gb-calendar-backdrop';
  const panel=document.createElement('section');panel.className='gb-calendar-panel';panel.setAttribute('role','dialog');panel.setAttribute('aria-modal','true');panel.setAttribute('aria-label','Calendário do GB+');
- backdrop.append(panel);document.body.append(backdrop);
+ backdrop.append(panel);(input.closest('dialog[open]')||document.body).append(backdrop);
  openCalendar={backdrop,panel,button,input,year:current.y,month:current.m};
  renderCalendar();panel.querySelector('[data-calendar-close]')?.focus({preventScroll:true});
 }
