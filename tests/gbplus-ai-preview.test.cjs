@@ -52,6 +52,18 @@ test('assistant prepares a proposal before recording; editing a day does not alt
  assert.equal(question.status,'needs_clarification');
  assert.match(question.answer,/Qual nova data/);
 });
+test('editing the amount asks for an amount and a supplied value changes only the amount',()=>{
+ const first=ai.interpret('Lança uma conta de energia de 450 reais para dia 15 e repete por seis meses');
+ const question=ai.interpret('edita o valor',{proposal:first.proposal});
+ assert.equal(question.status,'needs_clarification');
+ assert.equal(question.proposal.amountCents,45000);
+ const changed=ai.interpret('altera o valor para 250',{proposal:question.proposal});
+ assert.equal(changed.status,'ready');
+ assert.equal(changed.proposal.amountCents,25000);
+ assert.equal(changed.proposal.due,first.proposal.due);
+ assert.match(html,/pendingPreviewCorrection==='amount'/);
+ assert.match(html,/\$\('#confirm'\)\.disabled=true; \/\/ Do not save a stale draft/);
+});
 test('draft is inside chat with four actions and complete edit fields',()=>{
  for(const id of ['details','preview','detail-toggle','edit-draft','discard','confirm','draft-editor','ai-file-input','ai-attach'])
   assert.match(html,new RegExp('id="'+id+'"'));
