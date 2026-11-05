@@ -19,11 +19,15 @@
     try {
       if (!matchMedia('(max-width:760px) and (pointer:coarse)').matches) return;
       if (matchMedia('(display-mode:standalone)').matches || navigator.standalone === true) return;
-      if (location.search || (location.hash && location.hash !== '#dashboard')) return;
+      // Auth callbacks and explicit web links are never redirected.
+      const params = new URLSearchParams(location.search);
+      if ([...params.keys()].some(key => !key.startsWith('utm_') && !['ref','source'].includes(key))) return;
+      if (location.hash && location.hash !== '#dashboard') return;
       const existingSession = Object.keys(localStorage).some(key => /^sb-.+-auth-token$/.test(key));
       const existingData = localStorage.getItem('gb-plus:data:v1') !== null;
+      const usedBefore = ['gbplus-appearance-v1','gbplus-pwa-suggest-after-v1'].some(key => localStorage.getItem(key) !== null);
       const seen = localStorage.getItem('gbplus-install-intro-seen-v1') === '1';
-      if (seen || existingSession || existingData) return;
+      if (seen || existingSession || existingData || usedBefore) return;
       location.replace('./instalar.html?origem=link');
     } catch { /* Never block the existing GB+ app if browser storage is unavailable. */ }
   })();
