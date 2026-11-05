@@ -469,6 +469,22 @@ document.addEventListener('input',e=>{if(e.target.form?.id==='profile-form'){
   profileCpfFeedback(field.form);
  }
  syncProfileSaveState(e.target.form);return;}if(e.target.id==='settings-search-input'){filterSettings(e.target.value);return;}if(!['title-search','partner-search'].includes(e.target.id))return;const el=e.target;const pos=el.selectionStart;state[el.id==='title-search'?'query':'partnerQuery']=el.value;if(el.id==='title-search')state.launchSelected=[];render();const next=document.getElementById(el.id);next.focus();next.setSelectionRange(pos,pos);});
+document.addEventListener('keydown',event=>{
+ const card=event.target.closest?.('.gb-launch-card');
+ if(card&&card===event.target&&(event.key==='Enter'||event.key===' ')){
+  event.preventDefault();toggleLaunchSelection(card.dataset.id);
+ }
+});
+installLaunchGestures({
+ onLongPress:id=>{if(db&&state.route==='titles')toggleLaunchSelection(id,true);},
+ onSwipe:(direction,id)=>{
+  if(!db||state.route!=='titles')return;
+  try{
+   if(direction==='pay')startLaunchPayment([id]);
+   else if(direction==='delete')requestLaunchDeletion([id]);
+  }catch(error){fail(error);}
+ }
+});
 window.addEventListener('hashchange',route);
 matchMedia('(max-width: 760px)').addEventListener('change',()=>{if(db&&state.route==='dashboard')applyPanel();});
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPrompt=e;if(db&&state.route==='settings')render();});
