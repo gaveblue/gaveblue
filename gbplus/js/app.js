@@ -1,10 +1,12 @@
-import {uid,today,money,dateLabel,cents,generateTitles,addPayment,transfer,updateTitle,pending,flow,within} from './domain.js';
+import {uid,today,money,dateLabel,cents,addMonths,validDate,generateTitles,addPayment,transfer,updateTitle,pending,flow,within} from './domain.js';
 import {KEY,INDICATORS,defaultPanel,parseBackup,backupText,MOBILE_SHORTCUTS,defaultMobileNav,effectiveMobileNav,validMobileNav,shouldOfferSetup} from './store.js?v=20261104-38';
 import {esc,icon,button,field,select,formFooter,download,csv,titleTable} from './ui.js?v=20261104-41';
 import {routes,dashboard,titlesView,partnersView,accountsView,categoriesView,flowView,reportsView,settingsView,notificationsView,filteredTitles,reportData} from './views.js?v=20261104-41';
 import {titleForm,partnerForm,accountForm,categoryForm,paymentForm,transferForm,titleDetail,customizeForm,accountDetail} from './forms.js?v=20261104-41';
 import {toggleEntryMenu,chooseEntryOption,syncEntrySelect,closeEntryMenus} from './entry-select.js?v=20261104-41';
 import {installGbControls,enhanceGbControls} from './custom-controls.js?v=20261104-41';
+import {expectedDates} from './gb-calendar-rules.js?v=20261104-42';
+import {CATEGORY_ICON_OPTIONS,categoryIconFor,gbIcon} from './gb-icons.js?v=20261104-42';
 import {setupPwaInstallation,maybeOfferPwaInstall,showInstallHelp,isPwaInstalled} from './pwa-install.js?v=20261104-40';
 import {SupabaseRepository} from '../integrations/supabase/repository.js';
 import {initializeAuth,authClient,currentUser,showAuth,isRecovery,updatePersonalProfile,consumeAuthReturnMessage} from './auth.js?v=20261104-32';
@@ -83,7 +85,7 @@ function render(){if(!db)return;updateSystemAppearance(db.settings.theme);docume
  const custom=effectiveMobileNav(db.settings);
  const slots=[['dashboard','Início','home'],renderMobileShortcut(custom[0]),['new','Novo','plus'],renderMobileShortcut(custom[1]),renderMobileShortcut(custom[2])];
  return slots.map(([key,label,ico])=>key==='new'||key==='menu'?`<button type="button" data-action="${key==='new'?'new-title':'mobile-menu'}" class="${key==='new'?'mobile-new':''}" aria-label="${label}">${icon(ico)}<span>${label}</span></button>`:`<a href="#${key}" class="${state.route===key?'active':''}" ${state.route===key?'aria-current="page"':''}>${icon(ico)}<span>${label}</span></a>`).join('');
-})();const views={dashboard:()=>dashboard(db,state,!!currentUser(),currentUser()),titles:()=>launchesView(db,state),payable:()=>titlesView(db,state),receivable:()=>titlesView(db,state),partners:()=>partnersView(db,state),accounts:()=>accountsView(db),categories:()=>categoriesView(db),flow:()=>flowView(db,state),provisions:()=>flowView(db,state),reports:()=>reportsView(db,state),settings:()=>settingsView(db,!isInstalledApp(),!!currentUser(),currentUser(),isInstalledApp()),notifications:()=>notificationsView(db),profile:()=>profileView(currentUser(),profileCpfStatus.userId===currentUser()?.id?profileCpfStatus:{ready:false,cpf:'',error:''})};document.body.classList.toggle('gb-settings-page',state.route==='settings');document.querySelector('#main').innerHTML=(views[state.route]||views.dashboard)();if(state.route==='profile'){initializeProfileDirtyState();if(!profileCpfStatus.ready&&!profileCpfStatus.loading&&!profileCpfStatus.error)void loadRegisteredCpf();}updateConnection();if(state.route==='dashboard')applyPanel();}
+})();const views={dashboard:()=>dashboard(db,state,!!currentUser(),currentUser()),titles:()=>launchesView(db,state),payable:()=>titlesView(db,state),receivable:()=>titlesView(db,state),partners:()=>partnersView(db,state),accounts:()=>accountsView(db),categories:()=>categoriesView(db),flow:()=>flowView(db,state),provisions:()=>flowView(db,state),reports:()=>reportsView(db,state),settings:()=>settingsView(db,!isInstalledApp(),!!currentUser(),currentUser(),isInstalledApp()),notifications:()=>notificationsView(db),profile:()=>profileView(currentUser(),profileCpfStatus.userId===currentUser()?.id?profileCpfStatus:{ready:false,cpf:'',error:''})};document.body.classList.toggle('gb-settings-page',state.route==='settings');document.querySelector('#main').innerHTML=(views[state.route]||views.dashboard)();enhanceGbControls(document.querySelector('#main'));if(state.route==='profile'){initializeProfileDirtyState();if(!profileCpfStatus.ready&&!profileCpfStatus.loading&&!profileCpfStatus.error)void loadRegisteredCpf();}updateConnection();if(state.route==='dashboard')applyPanel();}
 
 function filterSettings(value){
  const search=String(value||'').trim().toLocaleLowerCase('pt-BR');
