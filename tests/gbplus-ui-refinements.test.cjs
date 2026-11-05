@@ -75,9 +75,9 @@ test('local open-source icon attribution and proper release metadata',()=>{
  assert.ok(license.includes('ISC'));
  assert.ok(license.includes('MIT'));
  const version=JSON.parse(read('version.json'));
- assert.equal(version.version,'2.2.3');
- assert.equal(version.build,40);
+ assert.equal(version.version,'2.2.4');
+ assert.equal(version.build,41);
  assert.ok(version.assets.includes('./js/gb-icons.js'));
- assert.ok(read('index.html').includes('app.js?v=20261104-41'));
- assert.ok(read('sw.js').includes('gb-plus-shell-v40'));
+ assert.ok(read('index.html').includes('app.js?v=20261104-42'));
+ assert.ok(read('sw.js').includes('gb-plus-shell-v41'));
 });
