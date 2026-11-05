@@ -4,7 +4,7 @@ set -euo pipefail
 # Alternative when GitHub-hosted Actions runners fail before starting.
 # Run from the repository root in GitHub Codespaces or a Node 22 environment:
 # bash gbplus/react-charts/build-no-actions.sh
-ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 if ! node --version | grep -Eq '^v(2[024]|[3-9][0-9])\.'; then
   echo "Node.js 20 or later is required."
