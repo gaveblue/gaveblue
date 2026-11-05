@@ -3,14 +3,16 @@ export const AUTH_CALLBACK_KEYS=['error','error_code','error_description'];
 export function loginRedirectMessage(rawUrl){
  const url=new URL(rawUrl);
  let error=url.searchParams.get('error')||url.searchParams.get('error_code')||'';
+ let code=url.searchParams.get('error_code')||'';
  let description=url.searchParams.get('error_description')||'';
  if(!error&&/^#error(?:=|_code=)/.test(url.hash)){
   const fragment=new URLSearchParams(url.hash.slice(1));
   error=fragment.get('error')||fragment.get('error_code')||'';
+  code=fragment.get('error_code')||'';
   description=fragment.get('error_description')||'';
  }
  if(!error)return '';
- const text=(error+' '+description).toLowerCase();
+ const text=(error+' '+code+' '+description).toLowerCase();
 
  if(/otp_expired|expired|expirad/.test(text))return 'Este link expirou ou já foi utilizado. Solicite um novo link de confirmação ou recuperação e abra-o no mesmo navegador.';
  if(/invalid_grant|invalid_token|token_invalid|flow_state_not_found|pkce|code_verifier|already_used|invalid_link/.test(text))return 'Este link é inválido, já foi usado ou foi aberto em outro navegador. Solicite um novo link e tente no mesmo navegador.';
