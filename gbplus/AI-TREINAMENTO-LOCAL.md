@@ -34,18 +34,19 @@ por API para usar este módulo.
 
 ## Bateria extensiva
 
-Arquivo: `tests/gbplus-ai-scenarios.test.cjs`.
+Arquivos: `tests/gbplus-ai-scenarios.test.cjs` e
+`tests/gbplus-ai-query-regressions.test.cjs`.
 
 Executar testes curtos:
 
 ```sh
-node --test tests/gbplus-ai-scenarios.test.cjs
+node --test tests/gbplus-ai-scenarios.test.cjs tests/gbplus-ai-query-regressions.test.cjs
 ```
 
 Executar teste extensivo, gerando 216.000 perguntas localmente, sem rede:
 
 ```sh
-GBPLUS_AI_STRESS=1 node --test tests/gbplus-ai-scenarios.test.cjs
+GBPLUS_AI_STRESS=1 node --test tests/gbplus-ai-scenarios.test.cjs tests/gbplus-ai-query-regressions.test.cjs
 ```
 
 **216.000 variações** são combinações de 60 objetos × 15 prazos × 10 preços
