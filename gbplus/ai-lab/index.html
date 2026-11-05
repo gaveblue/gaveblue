@@ -366,7 +366,7 @@ function show(result){
  }catch(error){
   proposal=null;detailsCard.classList.add('hidden');
   $('#confirm').disabled=true;$('#discard').disabled=true;
-  add('Não consegui montar uma prévia válida: '+error.message);
+  if(result.status!=='needs_clarification')add('Não consegui montar uma prévia válida: '+error.message);
  }
 }
 function placePreviewAfterAnswer(){
