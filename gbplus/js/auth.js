@@ -1,7 +1,7 @@
 import {createGbplusClient} from '../integrations/supabase/client.js';
 import {cloudConfig} from './cloud-config.js';
 import {esc,icon} from './ui.js';
-import {loginRedirectMessage,clearLoginErrorUrl,safeAuthEmail,passwordStrength,isExpiredSessionError} from './auth-flow.js?v=20261105-62';
+import {loginRedirectMessage,clearLoginErrorUrl,safeAuthEmail,passwordStrength,isExpiredSessionError} from './auth-flow.js?v=20261105-66';
 
 let client,user=null,recovery=false,working=false,startup=true,pendingEmail='',lastResend=0;
 const EMAIL_COOLDOWN_MS=60000,SESSION_NOTICE_KEY='gbplus-session-ended-at',ACTIVE_SESSION_KEY='gbplus-session-was-active';
