@@ -16,16 +16,19 @@
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" href="./icons/icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="./icons/icon-192.png">
-  <link rel="stylesheet" href="./instalar.css?v=20261105-51">
-  <script src="./js/install-landing.js?v=20261105-51" defer></script>
+  <link rel="stylesheet" href="./instalar.css?v=20261105-52">
+  <script src="./js/install-landing.js?v=20261105-52" defer></script>
 </head>
 <body>
   <main class="install-shell">
     <section id="install-welcome" aria-label="Instalar GB+">
       <header class="intro">
-        <a class="open-web" href="./?web=1" data-open-web aria-label="Abrir versão web" title="Abrir versão web">
+        <div class="web-shortcut">
+          <span class="web-shortcut-hint">Continuar na versão web</span>
+          <a class="open-web" href="./?web=1" data-open-web aria-label="Abrir versão web" title="Abrir versão web">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9"/><path d="M20 13v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h5"/></svg>
         </a>
+        </div>
         <div class="brand" aria-label="GB+">GB<span>+</span></div>
         <h1>Gestão Financeira</h1>
         <p>Controle, planejamento e fluxo de caixa para empresas e profissionais.</p>
@@ -90,7 +93,12 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 18 9 12l6-6"/></svg>
           Voltar
         </button>
-        <div class="guide-brand">GB+</div>
+        <div class="web-shortcut guide-web-shortcut">
+          <span class="web-shortcut-hint">Continuar na versão web</span>
+          <a class="open-web" href="./?web=1" data-open-web aria-label="Continuar na versão web" title="Continuar na versão web">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9"/><path d="M20 13v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h5"/></svg>
+          </a>
+        </div>
       </header>
       <div class="guide-intro">
         <div class="guide-icon" id="guide-icon" aria-hidden="true"></div>
@@ -101,11 +109,7 @@
       <ol class="guide-steps" id="guide-steps"></ol>
       <div class="guide-callout" id="guide-callout" hidden></div>
       <p id="install-status" class="install-status" aria-live="polite"></p>
-      <div class="guide-actions">
-        <a href="./?web=1" data-open-web id="guide-app-link" class="guide-primary">Abrir GB+ <span aria-hidden="true">↗</span></a>
-        <button type="button" id="copy-app-link" class="guide-secondary">Copiar link do GB+</button>
-      </div>
-      <p class="guide-footnote">A instalação é gratuita e não altera seus dados financeiros.</p>
+
     </section>
   </main>
 
