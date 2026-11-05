@@ -20,7 +20,9 @@ test('new launch resembles reference and shows correct field hierarchy',()=>{
  const html=render(db,null,'expense');
  for(const s of ['Tipo','Categoria','Descrição','Parceiro','Documento','Emissão','Vencimento','Valor (R$)','Periodicidade','Observações','Revisar lançamento'])assert.ok(html.includes(s),s);
  for(const s of ['name="description"','name="partnerId"','name="document"','name="issue"','name="due"','name="amount"','name="notes"'])assert.ok(html.includes(s),s);
- assert.ok(html.includes('class="gb-entry-form"'));
+ assert.ok(html.includes('class="gb-entry-form gb-entry-wizard"'));
+ assert.ok(html.includes('data-entry-stage="1"'));
+ assert.ok(html.includes('data-entry-stage="2"'));
  assert.ok(html.includes('name="accountId" value=""'));
  assert.ok(!html.includes('Conta prevista'));
 });
@@ -61,7 +63,7 @@ test('custom selected type keeps existing submit and category switch behavior',(
  assert.ok(app.includes("source.dispatchEvent(new Event('change',{bubbles:true}))")===false);
  assert.ok(file('js/entry-select.js').includes("source.dispatchEvent(new Event('change',{bubbles:true}))"));
  assert.ok(app.includes("if(form.id==='title-form')"));
- assert.ok(app.includes("!db.categories.some(c=>c.id===v.categoryId&&c.type===v.type)"));
+ assert.ok(app.includes("!db.categories.some(c=>c.id===categoryId&&c.type===type)"));
  assert.ok(app.includes("'back-generation':"));
 });
 test('custom modal retains accessible keyboard/dismiss behavior',()=>{
