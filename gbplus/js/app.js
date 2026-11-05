@@ -14,10 +14,15 @@ import {SupabaseRepository} from '../integrations/supabase/repository.js?v=20261
 import {initializeAuth,authClient,currentUser,showAuth,isRecovery,updatePersonalProfile,consumeAuthReturnMessage,consumeSessionNotice,signOutAccount,authError,emailCooldownSeconds,markAuthEmailSent} from './auth.js?v=20261105-69';
 import {profileView,validateProfile,validCPF,formatCPF} from './profile.js?v=20261105-59';
 import {firstSetupView,customMobileNavForm,shortcutsPreview,readMobileNav,firstStepsPanel} from './setup-ui.js?v=20261105-63';
+import {BANKS,bankCatalog,findBank,bankName} from './banks.js?v=20261105-70';
+import {addCardPurchase,removeCardPurchase,ensureCardMayChange,creditCards,cardPurchases} from './credit-cards.js?v=20261105-70';
+import {cashForecast} from './forecast.js?v=20261105-70';
+import {banksView,bankForm,cardsView,cardForm,cardPurchaseForm,forecastView,forecastSummary,forecastScenarioForm,forecastResult} from './finance-24-ui.js?v=20261105-70';
 import {launchesView} from './launches-view.js?v=20261105-47';
 import {installLaunchGestures} from './launches-gestures.js?v=20261104-38';
 import {launchSelection,paymentSelection,paymentSummary,applyLaunchPayments,reversedSelection,applyLaunchReversals,deletionSelection,applyLaunchDeletions} from './launch-actions.js?v=20261104-42';
 let repository=null;let db;let busy=false;let pendingGeneration=null;let confirmAction=null;let pwaReady=false;
+let forecastDays=30;
 const isInstalledApp=isPwaInstalled;
 setupPwaInstallation();
 installGbControls();
@@ -94,7 +99,11 @@ function render(){if(!db)return;updateSystemAppearance(db.settings.theme);docume
  const custom=effectiveMobileNav(db.settings);
  const slots=[['dashboard','Início','home'],renderMobileShortcut(custom[0]),['new','Novo','plus'],renderMobileShortcut(custom[1]),renderMobileShortcut(custom[2])];
  return slots.map(([key,label,ico])=>key==='new'||key==='menu'?`<button type="button" data-action="${key==='new'?'new-title':'mobile-menu'}" class="${key==='new'?'mobile-new':''}" aria-label="${label}">${icon(ico)}<span>${label}</span></button>`:`<a href="#${key}" class="${state.route===key?'active':''}" ${state.route===key?'aria-current="page"':''}>${icon(ico)}<span>${label}</span></a>`).join('');
-})();const views={dashboard:()=>dashboard(db,state,!!currentUser(),currentUser()),titles:()=>launchesView(db,state),payable:()=>titlesView(db,state),receivable:()=>titlesView(db,state),partners:()=>partnersView(db,state),accounts:()=>accountsView(db),categories:()=>categoriesView(db),flow:()=>flowView(db,state),provisions:()=>flowView(db,state),reports:()=>reportsView(db,state),settings:()=>settingsView(db,!isInstalledApp(),!!currentUser(),currentUser(),isInstalledApp()),notifications:()=>notificationsView(db),profile:()=>profileView(currentUser(),profileCpfStatus.userId===currentUser()?.id?profileCpfStatus:{ready:false,cpf:'',error:''})};document.body.classList.toggle('gb-settings-page',state.route==='settings');unmountReactCharts();document.querySelector('#main').innerHTML=(views[state.route]||views.dashboard)();if(state.route==='dashboard'&&!firstStepsDismissed()){
+})();const views={dashboard:()=>dashboard(db,state,!!currentUser(),currentUser()),titles:()=>launchesView(db,state),payable:()=>titlesView(db,state),receivable:()=>titlesView(db,state),partners:()=>partnersView(db,state),accounts:()=>accountsView(db),categories:()=>categoriesView(db),flow:()=>flowView(db,state),provisions:()=>flowView(db,state),reports:()=>reportsView(db,state),settings:()=>settingsView(db,!isInstalledApp(),!!currentUser(),currentUser(),isInstalledApp()),notifications:()=>notificationsView(db),banks:()=>banksView(db),cards:()=>cardsView(db),forecast:()=>forecastView(db,forecastDays),profile:()=>profileView(currentUser(),profileCpfStatus.userId===currentUser()?.id?profileCpfStatus:{ready:false,cpf:'',error:''})};document.body.classList.toggle('gb-settings-page',state.route==='settings');unmountReactCharts();document.querySelector('#main').innerHTML=(views[state.route]||views.dashboard)();if(state.route==='dashboard'){
+ const anchor=document.querySelector('#main .page-heading');
+ if(anchor)anchor.insertAdjacentHTML('afterend',forecastSummary(db));
+}
+if(state.route==='dashboard'&&!firstStepsDismissed()){
  const html=firstStepsPanel(db);
  if(html){
   const main=document.querySelector('#main'),anchor=main.querySelector('.page-heading');
@@ -340,14 +349,44 @@ const actions={
    });
   },
   'new-title':()=>openModal('Novo lançamento',titleForm(db,null,state.type||'expense')),
-  'edit-title':el=>openModal('Editar lançamento',titleForm(db,getTitle(el.dataset.id))),
+  'open-banks':()=>{location.hash='banks';if(state.route==='banks')render();},
+  'open-cards':()=>{location.hash='cards';if(state.route==='cards')render();},
+  'new-bank':()=>openModal('Cadastrar banco ou instituição',bankForm()),
+  'edit-bank':el=>{
+   const bank=(db.banks||[]).find(x=>x.id===el.dataset.id);
+   if(!bank)throw Error('Instituição personalizada não encontrada.');
+   openModal('Editar instituição financeira',bankForm(bank));
+  },
+  'new-card':()=>openModal('Cadastrar cartão de crédito',cardForm(db)),
+  'edit-card':el=>{
+   const card=creditCards(db).find(x=>x.id===el.dataset.id);
+   if(!card)throw Error('Cartão não encontrado.');
+   openModal('Editar cartão de crédito',cardForm(db,card));
+  },
+  'new-card-purchase':el=>openModal('Compra no cartão de crédito',cardPurchaseForm(db,el?.dataset?.id||'')),
+  'delete-card-purchase':el=>{
+   const purchase=cardPurchases(db).find(x=>x.id===el.dataset.id);
+   if(!purchase)throw Error('Compra não encontrada.');
+   confirm('Excluir compra do cartão?','A compra de '+money(purchase.amount)+' será removida da fatura correspondente. Se for parcelada, todas as parcelas serão removidas. Não é possível excluir compras de faturas que já tiveram pagamento.',()=>commit(d=>removeCardPurchase(d,purchase.id),'Compra removida e faturas atualizadas.'));
+  },
+  'forecast-period':el=>{
+   const days=Number(el.dataset.value);
+   if(![7,15,30,60,90].includes(days))return;
+   forecastDays=days;render();
+  },
+  'forecast-simulate':()=>openModal('Simular vencimento',forecastScenarioForm(db,forecastDays)),
+  'edit-title':el=>{
+   const title=getTitle(el.dataset.id);
+   if(title.cardInvoice)throw Error('Faturas são atualizadas pelas compras do cartão; não podem ser editadas como títulos comuns.');
+   openModal('Editar lançamento',titleForm(db,title));
+  },
   'title-detail':el=>openModal('Detalhes do título',titleDetail(db,getTitle(el.dataset.id))),
   payment:el=>openModal('Registrar baixa',paymentForm(db,getTitle(el.dataset.id))),
   'new-partner':()=>openModal('Novo parceiro',partnerForm()),
   'edit-partner':el=>openModal('Editar parceiro',partnerForm(db.partners.find(p=>p.id===el.dataset.id))),
   'partner-detail':el=>{const p=db.partners.find(p=>p.id===el.dataset.id);openModal('Histórico do parceiro',`<h3>${esc(p.name)}</h3><p class="muted">${esc(p.document||'')} ${esc(p.email||'')}</p><p>${esc(p.address||'')}</p><p>${esc(p.notes||'')}</p>${titleTable(db,db.titles.filter(t=>t.partnerId===p.id))}`);},
-  'new-account':()=>openModal('Nova conta financeira',accountForm()),
-  'edit-account':el=>openModal('Editar conta',accountForm(db.accounts.find(a=>a.id===el.dataset.id))),
+  'new-account':()=>openModal('Nova conta financeira',accountForm(db)),
+  'edit-account':el=>openModal('Editar conta',accountForm(db,db.accounts.find(a=>a.id===el.dataset.id))),
   'account-detail':el=>openModal('Movimentações da conta',accountDetail(db,db.accounts.find(a=>a.id===el.dataset.id))),
   'new-category':()=>openModal('Nova categoria',categoryForm()),
   'edit-category':el=>openModal('Editar categoria',categoryForm(db.categories.find(c=>c.id===el.dataset.id))),
@@ -480,7 +519,7 @@ const actions={
    setupDraft=null;
   },
   'reset-panel':()=>{modal.querySelectorAll('input[type="checkbox"]').forEach(el=>el.checked=true);},
-  'delete-title':el=>{const t=getTitle(el.dataset.id);if(db.payments.some(p=>p.titleId===t.id))throw Error('Estorne as baixas antes de excluir este título.');confirm('Excluir título?',`O lançamento “${t.description}” será removido. Os outros títulos da série serão mantidos.`,()=>commit(d=>{d.titles=d.titles.filter(x=>x.id!==t.id);},'Título excluído.'));},
+  'delete-title':el=>{const t=getTitle(el.dataset.id);if(t.cardInvoice)throw Error('Exclua as compras vinculadas ao cartão para ajustar a fatura.');if(db.payments.some(p=>p.titleId===t.id))throw Error('Estorne as baixas antes de excluir este título.');confirm('Excluir título?',`O lançamento “${t.description}” será removido. Os outros títulos da série serão mantidos.`,()=>commit(d=>{d.titles=d.titles.filter(x=>x.id!==t.id);},'Título excluído.'));},
   'delete-partner':el=>{const id=el.dataset.id;if(db.titles.some(t=>t.partnerId===id))throw Error('Este parceiro possui títulos. Altere sua situação para inativo para preservar o histórico.');confirm('Excluir parceiro?','O cadastro será removido.',()=>commit(d=>{d.partners=d.partners.filter(p=>p.id!==id);},'Parceiro excluído.'));},
   'delete-category':el=>{const id=el.dataset.id;if(db.titles.some(t=>t.categoryId===id))throw Error('Esta categoria está vinculada a títulos e não pode ser excluída.');confirm('Excluir categoria?','A categoria será removida.',()=>commit(d=>{d.categories=d.categories.filter(c=>c.id!==id);},'Categoria excluída.'));},
   'delete-account':el=>{const id=el.dataset.id;if(db.titles.some(t=>t.accountId===id)||db.payments.some(p=>p.accountId===id)||db.transfers.some(t=>t.from===id||t.to===id))throw Error('Esta conta tem vínculos. Marque-a como inativa para manter o histórico.');confirm('Excluir conta?','A conta e seu saldo inicial serão removidos.',()=>commit(d=>{d.accounts=d.accounts.filter(a=>a.id!==id);},'Conta excluída.'));},
@@ -609,7 +648,45 @@ document.addEventListener('submit',async e=>{e.preventDefault();if(busy||!db)ret
     button('Voltar','back-generation')+button('Confirmar geração','save-generation','primary')+'</div>');
   }
   else if(form.id==='partner-form'){const roles=new FormData(form).getAll('roles');if(!roles.length)throw Error('Selecione ao menos uma classificação.');const row={...v,id:id||uid(),name:v.name.trim(),active:v.active==='true',roles};await commit(d=>{if(row.document&&d.partners.some(p=>p.id!==row.id&&p.document.replace(/\D/g,'')===row.document.replace(/\D/g,'')))throw Error('Já existe um parceiro com este CPF/CNPJ.');upsert(d.partners,row);});}
-  else if(form.id==='account-form'){await commit(d=>upsert(d.accounts,{...v,id:id||uid(),name:v.name.trim(),initial:cents(v.initial),active:v.active==='true'}));}
+  else if(form.id==='account-form'){
+   const bank= v.bankId?findBank(db,v.bankId):null;
+   if(v.bankId&&!bank)throw Error('Selecione um banco válido.');
+   const chosen=bank?bank.name:String(v.bank||'').trim();
+   await commit(d=>upsert(d.accounts,{...v,id:id||uid(),name:v.name.trim(),bankId:bank?.id||'',bank:chosen,initial:cents(v.initial),active:v.active==='true'}));
+  }
+  else if(form.id==='bank-form'){
+   const name=String(v.name||'').trim();
+   if(!name||name.length>120||!/^#[0-9a-f]{6}$/i.test(v.color))throw Error('Informe um nome e uma cor válidos.');
+   await commit(d=>{
+    if(bankCatalog(d).some(b=>b.id!==id&&b.name.trim().toLocaleLowerCase('pt-BR')===name.toLocaleLowerCase('pt-BR')))throw Error('Já existe uma instituição com esse nome.');
+    if(!Array.isArray(d.banks))d.banks=[];
+    upsert(d.banks,{id:id||uid(),name,color:v.color});
+   },'Instituição personalizada salva.');
+  }
+  else if(form.id==='card-form'){
+   const row={id:id||uid(),name:String(v.name||'').trim(),bankId:String(v.bankId||''),last4:String(v.last4||'').trim(),
+    limit:cents(v.limit),closingDay:Number(v.closingDay),dueDay:Number(v.dueDay),active:v.active==='true'};
+   if(!row.name||row.name.length>120||row.limit<=0||!Number.isInteger(row.closingDay)||row.closingDay<1||row.closingDay>28||!Number.isInteger(row.dueDay)||row.dueDay<1||row.dueDay>28||row.last4&&!/^\d{4}$/.test(row.last4))throw Error('Confira nome, limite, final e dias do cartão.');
+   if(row.bankId&&!findBank(db,row.bankId))throw Error('Selecione uma instituição válida.');
+   await commit(d=>{
+    if(!Array.isArray(d.cards))d.cards=[];
+    ensureCardMayChange(d,id,row);
+    if(d.cards.some(c=>c.id!==row.id&&c.name.toLocaleLowerCase('pt-BR')===row.name.toLocaleLowerCase('pt-BR')))throw Error('Já existe um cartão com esse nome.');
+    upsert(d.cards,row);
+   },'Cartão atualizado. Limite e vencimentos configurados.');
+  }
+  else if(form.id==='card-purchase-form'){
+   const amount=cents(v.amount),count=Number(v.count||1);
+   if(!Number.isInteger(count)||count<1||count>36)throw Error('Informe de 1 a 36 parcelas.');
+   await commit(d=>addCardPurchase(d,{cardId:v.cardId,date:v.date,amount,description:v.description,categoryId:v.categoryId,partnerId:v.partnerId,count}),
+    'Compra registrada. As faturas correspondentes foram atualizadas.');
+  }
+  else if(form.id==='forecast-scenario-form'){
+   const title=db.titles.find(t=>t.id===v.titleId&&pending(db,t)>0);
+   if(!title||!validDate(v.due))throw Error('Selecione um título em aberto e uma data válida.');
+   const result=forecastResult(db,forecastDays,title.id,v.due);
+   openModal('Resultado da simulação',result+'<div class="form-footer">'+button('Voltar à previsão','close','primary')+'</div>');
+  }
   else if(form.id==='category-form'){if(!CATEGORY_ICON_OPTIONS.some(([key])=>key===v.icon))throw Error('Escolha um ícone válido para a categoria.');await commit(d=>{const row={...v,id:id||uid(),name:v.name.trim()};if(d.categories.some(c=>c.id!==row.id&&c.type===row.type&&c.name.toLowerCase()===row.name.toLowerCase()))throw Error('Já existe uma categoria com este nome e tipo.');if(id&&d.titles.some(t=>t.categoryId===id&&t.type!==v.type))throw Error('Não é possível alterar o tipo de uma categoria em uso.');upsert(d.categories,row);});}
   else if(form.id==='payment-form'){await commit(d=>addPayment(d,{titleId:id,accountId:v.accountId,date:v.date,amount:cents(v.amount)}),'Baixa registrada. Saldo atualizado.');}
   else if(form.id==='launch-bulk-pay-form'){
