@@ -9,6 +9,7 @@ export const MOBILE_SHORTCUTS=[
  ['titles','Lançamentos','transfer'],['payable','A pagar','down'],['receivable','A receber','up'],
  ['provisions','Provisões','layers'],['flow','Fluxo de caixa','chart'],
  ['partners','Parceiros','people'],['accounts','Contas','wallet'],
+ ['cards','Cartões','credit-card'],['forecast','Previsão','chart'],['banks','Bancos','building-2'],
  ['categories','Categorias','category'],['reports','Relatórios','chart'],
  ['notifications','Notificações','bell'],['settings','Configurações','settings'],
  ['profile','Meu perfil','user'],['menu','Mais','more']
