@@ -62,7 +62,7 @@ test('phone install prompt is offered only outside PWA and uses actual browser p
  assert.ok(pwa.includes('Deixar para depois'));
  assert.ok(pwa.includes('Instalar agora'));
  assert.ok(pwa.includes('Adicionar à Tela de Início'));
- assert.ok(!pwa.includes('simula'));
+ assert.ok(!pwa.includes('setInterval('));
  assert.ok(pwa.includes('isPwaInstalled()'));
 });
 test('release assets and cache are aligned',()=>{
