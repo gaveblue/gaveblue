@@ -31,7 +31,7 @@ export function bankBadge(bank,size=''){
  const initials=name.replace(/^banco\s+/i,'').split(/\s+/).filter(Boolean).map(v=>v[0]).join('').slice(0,2).toUpperCase()||'B';
  const color=/^#[0-9a-f]{6}$/i.test(bank?.color||'')?bank.color:'#535a6c';
  const logo=bank?.ispb&&/^\d{8}$/.test(bank.ispb)?
-  '<img loading="lazy" decoding="async" alt="" src="https://cdn.jsdelivr.net/npm/logos-bancos-br@0/logos/png/'+bank.ispb+'.png" onerror="this.remove()" />':'';
+  '<img loading="lazy" decoding="async" alt="" src="./assets/banks/'+bank.ispb+'.svg" onerror="this.remove()" />':'';
  return '<span class="gb-bank-badge '+(size==='large'?'gb-bank-large':'')+'" style="--bank-color:'+color+'" title="'+esc(name)+'" aria-label="'+esc(name)+'">'+logo+
   '<span aria-hidden="true">'+esc(initials)+'</span></span>';
 }
