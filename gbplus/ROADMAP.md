@@ -116,3 +116,18 @@ O fechamento da 2.3.9 no repositório não equivale à confirmação da implanta
 - [ ] Refinar logos offline, histórico de faturas fechadas, contestação de compras e regras bancárias especiais após feedback.
 
 **Detalhes e limites:** consulte [RELEASE-2.4.0.md](./RELEASE-2.4.0.md). A implementação dos arquivos não equivale à homologação final no site.
+
+
+## GB+ 2.4.5 — ajuste visual sem mudança de dados (código implementado)
+
+- [x] Colocar “Seu futuro financeiro” antes do fluxo de caixa, abaixo dos indicadores principais, sem redesenhar o topo do Dashboard.
+- [x] Corrigir largura do fluxo de caixa em telas móveis; conter rolagem de SVG e tabela dentro do painel.
+- [x] Criar visualizações de Barras, Linhas e Resultado líquido, mantendo os valores das baixas originais.
+- [x] Mostrar últimos 6 períodos no gráfico móvel, mantendo a tabela completa.
+- [x] Incorporar localmente 12 logotipos SVG de instituições financeiras e incluí-los no pacote do PWA.
+- [x] Permitir seleção visual do logo no cadastro de contas, cartões e configuração inicial, preservando instituições personalizadas.
+- [x] Testes de código (52 aprovações em ambiente simulado) e documentação da atualização.
+- [ ] Homologar em celular real (320/360/390 px), com logos, atualização do PWA e dados já cadastrados.
+- [ ] Confirmar publicação da compilação 59 no site oficial.
+
+Detalhes: [RELEASE-2.4.5.md](./RELEASE-2.4.5.md). A evolução maior permanece reservada para **2.5.0**, conforme planejamento.
