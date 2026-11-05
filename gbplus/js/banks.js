@@ -161,3 +161,19 @@ export function syncBankPicker(picker,db){
   '<small>'+esc(bank?.name||'Selecione um banco')+'</small>';
  picker.querySelectorAll('[data-bank-id]').forEach(btn=>btn.setAttribute('aria-pressed',String(btn.dataset.bankId===field.value)));
 }
+
+export function filterBankDirectory(container,db,term){
+ if(!container)return 0;
+ let count=0;
+ container.querySelectorAll('[data-directory-bank-id]').forEach(item=>{
+  const bank=findBank(db,item.dataset.directoryBankId);
+  const visible=!!bank&&matchesBank(bank,term);
+  item.hidden=!visible;
+  if(visible)count++;
+ });
+ const label=container.querySelector('[data-bank-directory-count]');
+ if(label)label.textContent=count+' '+(count===1?'instituição encontrada':'instituições encontradas')+'.';
+ const empty=container.querySelector('[data-bank-directory-empty]');
+ if(empty)empty.hidden=count>0;
+ return count;
+}
