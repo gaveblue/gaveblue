@@ -49,3 +49,10 @@ test('separação de recebíveis ainda pendentes de dinheiro recebido',()=>{
  assert.match(response('Quanto tenho em contas a receber?'),/R.\s?150,00/);
  assert.match(response('Quanto recebi em outubro?'),/R.\s?50,00/);
 });
+
+test('mensagens curtas de saudação e confirmação não geram erro',()=>{
+ assert.match(response('ol'),/Olá!/);
+ assert.match(response('oi'),/Olá!/);
+ assert.match(response('ok'),/Certo!/);
+ assert.match(response('beleza'),/Certo!/);
+});

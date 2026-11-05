@@ -1,13 +1,13 @@
 {
-  "version": "2.2.5",
-  "build": 42,
+  "version": "2.2.6",
+  "build": 43,
   "published_at": "2026-11-05",
-  "title": "GB+ AI: simulações financeiras gratuitas e melhorias de interpretação",
+  "title": "GB+ AI: correções das simulações, contexto e perguntas por mês",
   "notes": [
-    "GB+ AI agora simula o efeito de compras futuras e projeções de fluxo de caixa usando dados cadastrados, sem APIs pagas.",
-    "Continuidade da conversa em simulações como “e se custar R$ 250?” e “e daqui a três meses?”.",
-    "Correções na interpretação de meses, recebimentos, saldos e comandos de edição no chat.",
-    "Simulações não criam títulos; operações reais continuam exigindo confirmação expressa."
+    "Corrigido o reaproveitamento indevido de valores entre compras diferentes (ex.: calça de R$ 250 e iPhone de R$ 18.000).",
+    "Simulações agora distinguem recebimentos hipotéticos de compras e avisam sobre possível duplicidade com títulos cadastrados.",
+    "Continuidade da conversa corrigida: responda apenas “mês que vem” e mantenha a compra parcelada; parcelamento mensal sem juros explicitado.",
+    "Mensagens simples como “oi”, “ol” e “ok” passam a receber respostas adequadas."
   ],
   "assets": [
     "./index.html",

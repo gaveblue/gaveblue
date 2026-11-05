@@ -2,7 +2,7 @@
 // Read operations are pure; title creation uses the normal app commit pipeline.
 // This file is dynamically imported: if it fails, the finance UI remains available.
 import {balance,accountBalance,pending,paid,today,generateTitles} from './domain.js';
-import {answerScenario} from './ai-scenarios.js?v=20261105-1';
+import {answerScenario} from './ai-scenarios.js?v=20261105-2';
 
 const money=n=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(n/100);
 const dateLabel=d=>new Date(d+'T12:00:00').toLocaleDateString('pt-BR');
@@ -44,7 +44,8 @@ export function answerFromDb(db,query){
  const received=sum(payments.filter(p=>typeFor(p)==='income'),p=>p.amount);
  const period=month.slice(5,7)+'/'+month.slice(0,4);
  if(!s)return 'Me diga o que gostaria de consultar no GB+.';
- if(/^(oi|ola|bom dia|boa tarde|boa noite|opa|tudo bem)$/.test(s))return 'Olá! Posso consultar os dados reais da sua conta GB+: saldo, contas a pagar e receber, vencimentos, clientes e relatórios financeiros.';
+ if(/^(oi|ol|ola|bom dia|boa tarde|boa noite|opa|tudo bem|e ai)$/.test(s))return 'Olá! Posso consultar os dados reais da sua conta GB+: saldo, contas a pagar e receber, vencimentos, clientes e relatórios financeiros.';
+ if(/^(ok|okay|certo|entendi|beleza|blz|obrigado|obrigada)$/.test(s))return 'Certo! Pode continuar sua pergunta ou fazer outra consulta financeira.';
  if(/^(que dia e hoje|qual e a data de hoje|hoje e que dia|qual dia e hoje)$/.test(s))return 'Hoje é '+new Intl.DateTimeFormat('pt-BR',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(new Date())+'.';
  if(/(ia de verdade|inteligencia artificial|voce e uma ia|voce e robo|como funciona essa ia)/.test(s))return 'Estou conectado aos registros reais da sua conta GB+ e faço consultas financeiras calculadas pelo próprio sistema. Minha interpretação de mensagens ainda é baseada em regras; a IA generativa externa só funciona quando o serviço de IA estiver ativado.';
  if(/^(o que voce faz|o que vc faz|me ajuda|ajuda|como pode ajudar|o que consegue fazer)$/.test(s))return 'Estou conectado aos seus dados GB+. Posso consultar saldos, contas a pagar e receber, vencimentos, resultados, categorias, parceiros e maiores despesas. Também preparo lançamentos para sua confirmação.';
