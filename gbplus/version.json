@@ -1,16 +1,15 @@
 {
-  "version": "2.4.0",
-  "build": 58,
+  "version": "2.4.5",
+  "build": 59,
   "published_at": "2026-11-05",
-  "title": "Cartões de crédito, bancos e previsão financeira",
+  "title": "Painel refinado, gráficos móveis e logos dos bancos",
   "notes": [
-    "Nova gestão de cartões de crédito: limite disponível, fechamento, vencimento e compras parceladas.",
-    "Faturas criadas automaticamente em Contas a pagar, com pagamento pelas contas financeiras e proteção contra duplicidade.",
-    "Vinculação de despesas a cartões com seleção de categoria e geração das parcelas em faturas mensais.",
-    "Catálogo de bancos principais com logos e cadastro personalizado de outras instituições.",
-    "Previsão de saldo para 7, 15, 30, 60 e 90 dias, calendário financeiro e projeção por conta.",
-    "Simulador de mudança de vencimento sem alterar os lançamentos reais.",
-    "Compatibilidade com backups antigos e validação de cartões e faturas no salvamento."
+    "Previsão financeira reposicionada abaixo dos indicadores, imediatamente antes do fluxo de caixa, preservando o topo do painel.",
+    "Fluxo de caixa com visualizações de Barras, Linhas e Resultado líquido, com controles próprios e layout adaptado ao celular.",
+    "No celular, gráficos mostram os seis períodos mais recentes; a tabela continua exibindo o histórico completo.",
+    "Logos oficiais dos 12 bancos principais incorporados como SVGs locais ao aplicativo, inclusive disponíveis após armazenamento no PWA.",
+    "Seleção visual com logos no cadastro de contas, cartões e assistente de primeiro acesso, sem impedir bancos personalizados.",
+    "Nenhuma alteração nas regras de saldos, faturas, cartões, autenticação ou dados financeiros já cadastrados."
   ],
   "assets": [
     "./index.html",
@@ -73,6 +72,18 @@
     "./js/banks.js",
     "./js/credit-cards.js",
     "./js/forecast.js",
-    "./js/finance-24-ui.js"
+    "./js/finance-24-ui.js",
+    "./assets/banks/00000000.svg",
+    "./assets/banks/00360305.svg",
+    "./assets/banks/60701190.svg",
+    "./assets/banks/60746948.svg",
+    "./assets/banks/90400888.svg",
+    "./assets/banks/18236120.svg",
+    "./assets/banks/00416968.svg",
+    "./assets/banks/31872495.svg",
+    "./assets/banks/30306294.svg",
+    "./assets/banks/01181521.svg",
+    "./assets/banks/22896431.svg",
+    "./assets/banks/08561701.svg"
   ]
 }
