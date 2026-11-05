@@ -1,4 +1,5 @@
 import {gbIcon,gbOptionIcon} from './gb-icons.js?v=20261104-41';
+import {enhanceFinancialMasks,installFinancialMasks} from './gb-finance-input.js?v=20261104-42';
 /* GB+ Custom Controls · visual selectors and calendar without native popovers.
    The original form controls remain as data sources for FormData and validation. */
 const escapeHtml=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -66,6 +67,7 @@ function enhanceDate(input){
 export function enhanceGbControls(root=document){
  root.querySelectorAll?.('select').forEach(enhanceSelect);
  root.querySelectorAll?.('input[type="date"]').forEach(enhanceDate);
+ enhanceFinancialMasks(root);
 }
 function closeMenu(){if(!openMenu)return;const {list,button}=openMenu;list.hidden=true;list.removeAttribute('style');button.setAttribute('aria-expanded','false');openMenu=null;}
 function showMenu(button){
@@ -193,6 +195,7 @@ function changeMonth(steps){
  renderCalendar();
 }
 export function installGbControls(){
+ installFinancialMasks();
  document.addEventListener('click',event=>{
   const element=event.target;
   const dropdown=element.closest?.('.gb-custom-select-trigger');
