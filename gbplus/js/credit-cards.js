@@ -1,4 +1,4 @@
-import {uid,today,validDate,paid,pending} from './domain.js?v=20261105-47';
+import {uid,today,validDate,paid,pending} from './domain.js?v=20261105-72';
 
 export function cardCycle(date,closingDay){
  if(!validDate(date)||!Number.isInteger(closingDay)||closingDay<1||closingDay>28)throw Error('Confira a data e o dia de fechamento do cartão.');
