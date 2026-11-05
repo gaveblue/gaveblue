@@ -53,7 +53,7 @@ export function addCardPurchase(db,input){
    invoice={
     id:uid(),type:'expense',description:'Fatura '+card.name+' • '+cycle.slice(5)+'/'+cycle.slice(0,4),
     categoryId,partnerId:'',document:'',issue:input.date,
-    due:cardDue(cycle,card.closingDay,card.dueDay),amount:0,accountId:'',
+    due:cardDue(cycle,card.closingDay,card.dueDay),amount:0,accountId:card.payAccountId||'',
     notes:'Fatura criada a partir das compras do cartão. As compras não são lançadas novamente no caixa.',
     groupId:null,mode:'single',sequence:1,count:1,cancelled:false,
     cardInvoice:true,cardId:card.id,cardCycle:cycle
