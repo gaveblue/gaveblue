@@ -8,7 +8,7 @@ const source=name=>fs.readFileSync(path.join(root,name),'utf8');
 const moduleSource=text=>text.replace(/^import .*;$/gm,'').replace(/\bexport\s+/g,'');
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const icon=name=>'<svg data-icon="'+esc(name)+'"></svg>';
-const document={querySelector:sel=>sel==='meta[name="gbplus-version"]'?{content:'2.1.5'}:null};
+const document={querySelector:sel=>sel==='meta[name="gbplus-version"]'?{content:'2.2.0'}:null};
 const view=new Function('icon','esc','document',moduleSource(source('js/views.js'))+';return settingsView;')(icon,esc,document);
 const render=()=>view({settings:{theme:'dark'},titles:[],accounts:[]},true,true,{email:'example@example.com',user_metadata:{gbplus_profile:{full_name:'Pessoa de Teste'}}});
 
@@ -17,7 +17,7 @@ test('settings presents native-like grouped categories and dynamic profile name'
  for(const title of ['Configurações','PREFERÊNCIAS','DADOS E REGISTROS','SISTEMA','SUPORTE E SOBRE'])assert.ok(html.includes(title),title);
  assert.ok(html.includes('Pessoa de Teste'));
  assert.ok(!html.includes('example@example.com'));
- assert.ok(html.includes('v2.1.5'));
+ assert.ok(html.includes('v2.2.0'));
 });
 test('all settings rows have working app action handlers',()=>{
  const html=render(),app=source('js/app.js');
@@ -37,8 +37,8 @@ test('settings stylesheet and release version are linked',()=>{
  assert.ok(index.includes('settings-page.css?v=20261104-35'));
  assert.ok(css.includes('.gb-cfg-profile'));
  assert.ok(css.includes('html[data-theme="dark"] .gb-settings-layout'));
- assert.ok(index.includes('content="2.1.5"'));
- assert.equal(version.version,'2.1.5');
+ assert.ok(index.includes('content="2.2.0"'));
+ assert.equal(version.version,'2.2.0');
  assert.ok(version.assets.includes('./settings-page.css'));
 });
 
