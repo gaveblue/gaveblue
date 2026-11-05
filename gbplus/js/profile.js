@@ -58,7 +58,7 @@ export function profileView(user,cpfStatus={ready:false,cpf:'',error:''}){
     '<div class="gb-account-fields">'+
      locked('E-mail da conta',user.email||'')+
      '<button type="button" class="gb-account-action" data-action="profile-change-password">'+icon('key')+'<strong>Alterar senha</strong><span>'+icon('chevron')+'</span></button>'+
-     '<button type="button" class="gb-account-action gb-account-action-danger" data-action="settings-delete">'+icon('trash')+'<strong>Excluir conta</strong></button>'+
+     '<button type="button" class="gb-account-action" data-auth-action="signout">'+icon('arrow')+'<strong>Sair da conta</strong><span>'+icon('chevron')+'</span></button>'+
     '</div>'+
    '</section>'+
    '<div class="gb-account-save-area"><span id="profile-message" role="status" aria-live="polite"></span><button type="submit" id="profile-save" class="gb-account-save" disabled>'+icon('check')+' Salvar alterações</button></div>'+
