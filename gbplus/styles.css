@@ -702,3 +702,82 @@ body.auth-locked .mobile-nav-fade{display:none!important}
  .gb-first-steps-action{flex:1 1 100%;padding-left:39px;justify-content:flex-start}
 }
 @media(prefers-reduced-motion:reduce){.auth-refresh .auth-strength-track>span{transition:none}}
+
+
+/* GB+ 2.4.0: logos de bancos, cartões de crédito e previsão financeira */
+.gb-bank-badge{position:relative;display:inline-grid;place-items:center;flex:none;width:42px;height:42px;border-radius:13px;background:var(--bank-color,#535a6c);color:#fff;font-weight:800;font-size:13px;overflow:hidden;isolation:isolate}
+.gb-bank-badge img{position:absolute;inset:0;width:100%;height:100%;padding:6px;object-fit:contain;background:var(--surface);z-index:1}
+.gb-bank-badge>span{z-index:0}
+.gb-bank-large{width:60px;height:60px;border-radius:17px}
+.gb-bank-directory{display:grid;grid-template-columns:repeat(auto-fill,minmax(235px,1fr));gap:12px;margin:16px 0 30px}
+.gb-bank-directory-item{display:flex;align-items:center;gap:12px;min-width:0;padding:15px;border:1px solid var(--border);border-radius:15px;background:var(--surface)}
+.gb-bank-directory-item>div{min-width:0;flex:1}
+.gb-bank-directory-item strong,.gb-bank-directory-item small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gb-bank-directory-item strong{font-size:13px}.gb-bank-directory-item small{font-size:11px;color:var(--muted);margin-top:3px}
+.gb-bank-directory-label{font-size:11px;color:var(--muted)}
+.gb-account-bank-logo{display:inline-flex;align-items:center;justify-content:center}
+.gb-finance24-intro{margin:14px 0 22px;color:var(--muted);font-size:12px;line-height:1.65;max-width:860px}
+.gb-finance24-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:16px 0}
+.gb-finance24-stats>div{padding:18px;border:1px solid var(--border);background:var(--surface);border-radius:16px;min-width:0;display:flex;flex-direction:column;gap:6px}
+.gb-finance24-stats span{font-size:12px;color:var(--muted)}
+.gb-finance24-stats strong{font-size:clamp(15px,2vw,25px);font-variant-numeric:tabular-nums;letter-spacing:-.04em;overflow-wrap:anywhere}
+.gb-finance24-stats small{font-size:11px;color:var(--muted)}
+.gb-credit-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,390px),1fr));gap:18px;margin:18px 0}
+.gb-credit-card{padding:20px;border:1px solid var(--border);border-radius:19px;background:var(--surface);min-width:0;box-shadow:var(--shadow)}
+.gb-credit-card-top{display:flex;align-items:center;gap:12px;min-width:0}
+.gb-credit-card-top>div{flex:1;min-width:0}.gb-credit-card-top h2{font-size:16px;margin:0 0 3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gb-credit-card-top small{font-size:11px;color:var(--muted)}
+.gb-credit-card-balance{display:flex;flex-direction:column;gap:6px;margin:20px 0 12px}
+.gb-credit-card-balance>small,.gb-credit-card-balance>span{font-size:11px;color:var(--muted)}
+.gb-credit-card-balance>strong{font-size:clamp(25px,4vw,36px);font-variant-numeric:tabular-nums;letter-spacing:-.06em}
+.gb-credit-meter{height:7px;border-radius:40px;background:var(--soft);overflow:hidden}
+.gb-credit-meter i{display:block;background:var(--ink);height:100%;border-radius:40px}
+.gb-credit-card-meta{display:flex;gap:10px;flex-wrap:wrap;color:var(--muted);font-size:11px}
+.gb-credit-card-meta span{border:1px solid var(--border);border-radius:8px;padding:5px 8px}
+.gb-credit-card-meta b{color:var(--ink)}
+.gb-credit-card-buttons{display:flex;gap:8px;margin:15px 0 18px}
+.gb-credit-card h3{font-size:12px;letter-spacing:.04em;margin:18px 0 8px}
+.gb-credit-invoice,.gb-credit-purchase{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 4px;border:0;border-bottom:1px solid var(--border);background:transparent;width:100%;text-align:left;color:var(--ink)}
+.gb-credit-invoice span,.gb-credit-purchase>div{display:flex;flex-direction:column;gap:3px;min-width:0}
+.gb-credit-invoice small,.gb-credit-purchase small{font-size:10px;color:var(--muted)}
+.gb-credit-invoice strong,.gb-credit-purchase>span{font-size:12px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.gb-credit-purchase strong{font-size:12px;font-weight:660}
+.gb-credit-purchase .button{min-width:35px;min-height:34px;padding:6px;flex:none}
+.gb-credit-purchase .icon{width:16px;height:16px}
+.gb-credit-entry-link{border:1px solid var(--border);background:var(--soft);border-radius:13px;margin:10px 0;padding:13px 15px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.gb-credit-entry-link strong{font-size:12px}.gb-credit-entry-link p{font-size:11px;color:var(--muted);margin:0;flex:1;min-width:160px}
+.gb-credit-entry-link .button{font-size:11px;min-height:38px}
+.gb-future-summary{margin:10px 0 18px;padding:20px;border:1px solid var(--border);background:var(--surface);border-radius:18px;display:flex;flex-wrap:wrap;gap:15px;align-items:center;justify-content:space-between}
+.gb-future-summary>div:first-child{min-width:150px;flex:1}
+.gb-future-summary>div:first-child>span{font-size:10px;color:var(--muted);letter-spacing:.14em;font-weight:740}
+.gb-future-summary h2{font-size:17px;letter-spacing:-.04em;margin:5px 0}
+.gb-future-summary p{font-size:11px;color:var(--muted);margin:0}
+.gb-future-values{display:flex;flex-wrap:wrap;gap:18px;align-items:center}
+.gb-future-values>span{display:flex;flex-direction:column;gap:5px;color:var(--muted);font-size:11px}
+.gb-future-values strong{font-size:16px;font-variant-numeric:tabular-nums;color:var(--ink)}
+.gb-future-values strong.is-negative{color:#c44656}
+.gb-future-summary>a{font-size:12px;white-space:nowrap}
+.gb-forecast-period{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.gb-forecast-period button{min-width:66px;min-height:37px;font-size:12px}
+.gb-forecast-warning{padding:13px 16px;background:color-mix(in srgb,#b56b25 10%,var(--surface));border:1px solid color-mix(in srgb,#b56b25 40%,var(--border));border-radius:12px;color:var(--ink);display:flex;gap:8px;align-items:center;font-size:12px}
+.gb-forecast-chart,.gb-forecast-detail{padding:20px;margin-top:14px}
+.gb-forecast-chart h2,.gb-forecast-detail h2{font-size:16px;margin:0 0 4px}
+.gb-forecast-chart>p,.gb-forecast-detail>p{font-size:11px;line-height:1.55;color:var(--muted)}
+.gb-forecast-bars{height:168px;display:flex;gap:5px;align-items:end;margin-top:20px;border-bottom:1px solid var(--border);padding:0 0 12px}
+.gb-forecast-bars>div{display:flex;flex:1;min-width:8px;align-items:center;flex-direction:column;justify-content:end;height:100%;gap:4px}
+.gb-forecast-bars>div>span{display:block;width:100%;min-height:2px;max-width:24px;background:#268c6b;border-radius:5px 5px 0 0}
+.gb-forecast-bars>div.negative>span{background:#c74758}
+.gb-forecast-bars small{font-size:10px;color:var(--muted)}
+.gb-forecast-days{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-top:12px}
+.gb-forecast-day{display:flex;flex-direction:column;gap:6px;padding:13px;border:1px solid var(--border);border-radius:12px;background:var(--soft)}
+.gb-forecast-day time{font-size:11px;font-weight:750}
+.gb-forecast-day span{font-size:11px;font-variant-numeric:tabular-nums}
+.gb-forecast-day span.income{color:#19835d}.gb-forecast-day span.expense{color:#ba4050}
+.gb-forecast-day strong{font-size:11px;margin-top:5px}
+.gb-forecast-accounts{display:grid;gap:9px;margin-top:14px}
+.gb-forecast-accounts>div{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;border-bottom:1px solid var(--border);padding:10px 0;font-size:12px}
+.gb-forecast-accounts>div>strong{min-width:120px;flex:1}
+.gb-forecast-accounts>div>span{font-variant-numeric:tabular-nums}
+.gb-scenario-result{padding:8px 0}.gb-scenario-result p{font-size:14px;margin:14px 0}
+@media(max-width:760px){.gb-finance24-stats{gap:8px}.gb-finance24-stats>div{padding:12px}.gb-finance24-stats span{font-size:10px}.gb-finance24-stats strong{font-size:15px}.gb-credit-card{padding:15px}.gb-future-summary{padding:16px;align-items:flex-start}.gb-future-values{width:100%;justify-content:space-between;gap:9px}.gb-future-values strong{font-size:14px}.gb-future-summary>a{width:100%;justify-content:center}.gb-forecast-chart,.gb-forecast-detail{padding:15px}}
+@media(max-width:380px){.gb-finance24-stats{grid-template-columns:1fr}.gb-finance24-stats strong{font-size:19px}}
