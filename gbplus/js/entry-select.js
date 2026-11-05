@@ -1,4 +1,4 @@
-import {esc,icon} from './ui.js?v=20261104-39';
+import {esc,icon} from './ui.js?v=20261104-40';
 
 // A11y-friendly visual dropdown. An actual form select remains out of sight
 // only as the data carrier, so existing FormData and change handlers stay intact.
