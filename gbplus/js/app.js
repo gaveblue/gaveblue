@@ -4,6 +4,8 @@ import {esc,icon,button,field,select,formFooter,download,csv,titleTable} from '.
 import {routes,dashboard,titlesView,partnersView,accountsView,categoriesView,flowView,reportsView,settingsView,notificationsView,filteredTitles,reportData} from './views.js?v=20261104-38';
 import {titleForm,partnerForm,accountForm,categoryForm,paymentForm,transferForm,titleDetail,customizeForm,accountDetail} from './forms.js?v=20261104-39';
 import {toggleEntryMenu,chooseEntryOption,syncEntrySelect,closeEntryMenus} from './entry-select.js?v=20261104-39';
+import {installGbControls,enhanceGbControls} from './custom-controls.js?v=20261104-40';
+import {setupPwaInstallation,maybeOfferPwaInstall,showInstallHelp,isPwaInstalled} from './pwa-install.js?v=20261104-40';
 import {SupabaseRepository} from '../integrations/supabase/repository.js';
 import {initializeAuth,authClient,currentUser,showAuth,isRecovery,updatePersonalProfile,consumeAuthReturnMessage} from './auth.js?v=20261104-32';
 import {profileView,validateProfile,validCPF,formatCPF} from './profile.js?v=20261104-37';
@@ -11,8 +13,10 @@ import {firstSetupView,customMobileNavForm,shortcutsPreview,readMobileNav} from 
 import {launchesView} from './launches-view.js?v=20261104-38';
 import {installLaunchGestures} from './launches-gestures.js?v=20261104-38';
 import {launchSelection,paymentSelection,paymentSummary,applyLaunchPayments,reversedSelection,applyLaunchReversals,deletionSelection,applyLaunchDeletions} from './launch-actions.js?v=20261104-38';
-let repository=null;let db;let busy=false;let pendingGeneration=null;let confirmAction=null;let installPrompt=null;let installedInSession=false;
-const isInstalledApp=()=>installedInSession||matchMedia('(display-mode: standalone)').matches||matchMedia('(display-mode: fullscreen)').matches||navigator.standalone===true;
+let repository=null;let db;let busy=false;let pendingGeneration=null;let confirmAction=null;let pwaReady=false;
+const isInstalledApp=isPwaInstalled;
+setupPwaInstallation();
+installGbControls();
 const inviteLink='https://gaveblue.com.br/gbplus/';
 let profileCpfStatus={userId:null,cpf:'',ready:false,loading:false,error:''};
 const state={route:'dashboard',period:'month',range:{},query:'',status:'',type:'',partner:'',category:'',partnerQuery:'',granularity:'month',report:'payable',reportPartner:'',moreFilters:false,launchSelected:[],launchStatusOpen:false,launchSearchOpen:false};
@@ -33,8 +37,8 @@ function syncSidebarVisibility(hidden,save=false){
 try{syncSidebarVisibility(localStorage.getItem(sidebarPreferenceKey)==='1');}
 catch{syncSidebarVisibility(false);}
 function toast(message){const el=document.querySelector('#toast');el.textContent=message;el.classList.add('visible');clearTimeout(toast.timer);toast.timer=setTimeout(()=>el.classList.remove('visible'),4500);}
-function openModal(title,content){modal.classList.toggle("gb-entry-modal",content.includes('id="title-form"'));document.querySelector('#modal-content').innerHTML=`<div class="modal-heading"><h2 id="modal-title">${title}</h2><button class="icon-button" data-action="close" aria-label="Fechar">${icon('close')}</button></div><div class="modal-body">${content}</div>`;modal.setAttribute('aria-labelledby','modal-title');if(!modal.open)modal.showModal();}
-function closeModal(){if(modal.open)modal.close();pendingGeneration=null;confirmAction=null;}
+function openModal(title,content){modal.classList.toggle("gb-entry-modal",content.includes('id="title-form"'));document.querySelector('#modal-content').innerHTML=`<div class="modal-heading"><h2 id="modal-title">${title}</h2><button class="icon-button" data-action="close" aria-label="Fechar">${icon('close')}</button></div><div class="modal-body">${content}</div>`;modal.setAttribute('aria-labelledby','modal-title');if(!modal.open)modal.showModal();enhanceGbControls(modal);}
+function closeModal(){if(modal.open)modal.close();pendingGeneration=null;confirmAction=null;if(pwaReady)setTimeout(()=>maybeOfferPwaInstall(),1100);}
 function confirm(title,message,callback){confirmAction=callback;openModal(title,`<p class="confirm-message">${esc(message)}</p><div class="form-error" role="alert"></div><div class="form-footer">${button('Cancelar','close')}${button('Confirmar','confirm','primary')}</div>`);}
 // Guided onboarding is opt-in. No financial records are created before final confirmation.
 let setupDraft=null;
@@ -79,7 +83,7 @@ function render(){if(!db)return;updateSystemAppearance(db.settings.theme);docume
  const custom=effectiveMobileNav(db.settings);
  const slots=[['dashboard','Início','home'],renderMobileShortcut(custom[0]),['new','Novo','plus'],renderMobileShortcut(custom[1]),renderMobileShortcut(custom[2])];
  return slots.map(([key,label,ico])=>key==='new'||key==='menu'?`<button type="button" data-action="${key==='new'?'new-title':'mobile-menu'}" class="${key==='new'?'mobile-new':''}" aria-label="${label}">${icon(ico)}<span>${label}</span></button>`:`<a href="#${key}" class="${state.route===key?'active':''}" ${state.route===key?'aria-current="page"':''}>${icon(ico)}<span>${label}</span></a>`).join('');
-})();const views={dashboard:()=>dashboard(db,state,!!currentUser(),currentUser()),titles:()=>launchesView(db,state),payable:()=>titlesView(db,state),receivable:()=>titlesView(db,state),partners:()=>partnersView(db,state),accounts:()=>accountsView(db),categories:()=>categoriesView(db),flow:()=>flowView(db,state),provisions:()=>flowView(db,state),reports:()=>reportsView(db,state),settings:()=>settingsView(db,!!installPrompt,!!currentUser(),currentUser(),isInstalledApp()),notifications:()=>notificationsView(db),profile:()=>profileView(currentUser(),profileCpfStatus.userId===currentUser()?.id?profileCpfStatus:{ready:false,cpf:'',error:''})};document.body.classList.toggle('gb-settings-page',state.route==='settings');document.querySelector('#main').innerHTML=(views[state.route]||views.dashboard)();if(state.route==='profile'){initializeProfileDirtyState();if(!profileCpfStatus.ready&&!profileCpfStatus.loading&&!profileCpfStatus.error)void loadRegisteredCpf();}updateConnection();if(state.route==='dashboard')applyPanel();}
+})();const views={dashboard:()=>dashboard(db,state,!!currentUser(),currentUser()),titles:()=>launchesView(db,state),payable:()=>titlesView(db,state),receivable:()=>titlesView(db,state),partners:()=>partnersView(db,state),accounts:()=>accountsView(db),categories:()=>categoriesView(db),flow:()=>flowView(db,state),provisions:()=>flowView(db,state),reports:()=>reportsView(db,state),settings:()=>settingsView(db,!isInstalledApp(),!!currentUser(),currentUser(),isInstalledApp()),notifications:()=>notificationsView(db),profile:()=>profileView(currentUser(),profileCpfStatus.userId===currentUser()?.id?profileCpfStatus:{ready:false,cpf:'',error:''})};document.body.classList.toggle('gb-settings-page',state.route==='settings');document.querySelector('#main').innerHTML=(views[state.route]||views.dashboard)();if(state.route==='profile'){initializeProfileDirtyState();if(!profileCpfStatus.ready&&!profileCpfStatus.loading&&!profileCpfStatus.error)void loadRegisteredCpf();}updateConnection();if(state.route==='dashboard')applyPanel();}
 
 function filterSettings(value){
  const search=String(value||'').trim().toLocaleLowerCase('pt-BR');
@@ -366,7 +370,7 @@ const actions={
   'export-titles':()=>{const rows=filteredTitles(db,state);download(`gb-plus-titulos-${today()}.csv`,csv([['Descrição','Tipo','Parceiro','Categoria','Documento','Emissão','Vencimento','Valor (R$)','Pendente (R$)'],...rows.map(t=>[t.description,t.type==='income'?'Receita':'Despesa',db.partners.find(p=>p.id===t.partnerId)?.name||'',db.categories.find(c=>c.id===t.categoryId)?.name,t.document,dateLabel(t.issue),dateLabel(t.due),(t.amount/100).toFixed(2).replace('.',','),(pending(db,t)/100).toFixed(2).replace('.',',')])]),'text/csv;charset=utf-8');},
   'export-flow':()=>download(`gb-plus-fluxo-${today()}.csv`,csv([['Período','Entradas previstas','Saídas previstas','Entradas realizadas','Saídas realizadas'],...flow(db,state.range,state.granularity).map(r=>[dateLabel(r.date),...[r.expectedIn,r.expectedOut,r.actualIn,r.actualOut].map(v=>(v/100).toFixed(2).replace('.',','))])]),'text/csv;charset=utf-8'),
   'export-report':()=>download(`gb-plus-relatorio-${state.report}-${today()}.csv`,csv(reportData(db,state)),'text/csv;charset=utf-8'),
-  install:async()=>{if(isInstalledApp()){toast('GB+ já está instalado neste dispositivo.');return;}if(installPrompt){const prompt=installPrompt;installPrompt=null;await prompt.prompt();const choice=await prompt.userChoice;installedInSession=choice?.outcome==='accepted';render();}else openModal('Instalar o GB+',`<p>No <b>iPhone</b>, abra no Safari, toque em Compartilhar e selecione “Adicionar à Tela de Início”.</p><p>No <b>Android ou computador</b>, use “Instalar aplicativo” no menu do navegador, quando disponível.</p><p class="form-hint">A instalação e o modo offline precisam de HTTPS ou localhost. No modo local, os dados ficam neste navegador. No modo online, ficam vinculados ao seu login e exigem conexão.</p>`);}
+  install:()=>{if(isInstalledApp()){toast('GB+ já está instalado neste dispositivo.');return;}showInstallHelp();},
 };
 document.addEventListener('click',async e=>{const el=e.target.closest('[data-action]');if(!el||!db)return;if(el.tagName==='BUTTON')e.preventDefault();try{await actions[el.dataset.action]?.(el);}catch(error){fail(error);}});
 document.addEventListener('click',e=>{if(!e.target.closest('.gb-entry-select'))closeEntryMenus();});
@@ -460,7 +464,7 @@ document.addEventListener('change',async e=>{if(!db)return;const el=e.target;try
   if(el.form?.id==='profile-form')syncProfileSaveState(el.form);
   if(el.name?.startsWith('slot')&&el.form?.id==='mobile-nav-form')updateMobileNavPreview(el.form);
   if(el.id==='entry-type'){const select=document.querySelector('#entry-category');if(select){select.innerHTML=db.categories.filter(c=>c.type===el.value).map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');syncEntrySelect(select);}}
-  if(el.id==='entry-mode'){document.querySelector('#count-field').hidden=el.value==='single';document.querySelector('#mode-hint').textContent=el.value==='installment'?'O valor total será dividido entre as parcelas, com ajuste exato dos centavos.':el.value==='recurring'?'O valor mensal será repetido em cada mês. Você poderá editar as ocorrências depois.':'Um título, um vencimento. O saldo só muda ao registrar uma baixa.';}
+  if(el.id==='entry-mode'){const count=document.querySelector('#count-field');if(count)count.hidden=el.value==='single';}
   if(el.id==='period'){if(el.value==='custom'){openModal('Escolher período',`<form id="period-form"><div class="form-grid">${field('De','from',state.range.from||today(),'date','required')}${field('Até','to',state.range.to||today(),'date','required')}</div>${formFooter('Aplicar período')}</form>`);el.value=state.period;}else{state.period=el.value;state.range=rangeFor(el.value);state.launchSelected=[];state.launchStatusOpen=false;render();}}
   if(el.dataset.filter){state[el.dataset.filter]=el.value;if(['partner','category'].includes(el.dataset.filter))state.moreFilters=true;state.launchSelected=[];render();}
   if(el.id==='report-type'){state.report=el.value;render();}
@@ -493,8 +497,7 @@ installLaunchGestures({
 });
 window.addEventListener('hashchange',route);
 matchMedia('(max-width: 760px)').addEventListener('change',()=>{if(db&&state.route==='dashboard')applyPanel();});
-window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPrompt=e;if(db&&state.route==='settings')render();});
-window.addEventListener('appinstalled',()=>{installedInSession=true;installPrompt=null;if(db&&state.route==='settings')render();});
+window.addEventListener('gbplus-installed',()=>{if(db&&state.route==='settings')render();});
 window.addEventListener('storage',e=>{if(e.key===KEY&&!currentUser())toast('Dados alterados em outra aba. Atualize a página antes de continuar.');});
 modal.addEventListener('cancel',()=>{pendingGeneration=null;confirmAction=null;});
 
@@ -580,6 +583,8 @@ async function init(){
   document.documentElement.removeAttribute('data-boot');
   route();window.dispatchEvent(new Event('gbplus-ai-ready'));
   if(shouldOfferSetup(db))startSetupWizard();
+  pwaReady=true;
+  setTimeout(()=>maybeOfferPwaInstall(),1800);
   updateConnection();setInterval(()=>refreshOnline(),60000);
  }catch(error){
   if(error?.code==='GBPLUS_STARTUP_TIMEOUT'||!document.querySelector('#account-access')){
