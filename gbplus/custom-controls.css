@@ -156,3 +156,28 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
  background:transparent;appearance:auto;pointer-events:none
 }
 .gb-launch-period .period-control .gb-custom-select{height:100%}
+
+
+/* Restore native-looking closed field borders without exposing the native menus. */
+.field select.gb-custom-native-select{
+ border:1px solid var(--border)!important;border-radius:9px!important;
+ padding:11px 12px!important;min-height:42px!important;height:auto!important;
+ background:var(--surface)!important;color:var(--ink)!important;
+ font-size:inherit;line-height:1.4;
+}
+.period-control select.gb-custom-native-select{
+ border:0!important;padding:5px 0!important;min-height:0!important;
+ height:100%!important;background:transparent!important;max-width:none!important;
+ font-size:inherit;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.gb-launch-period .period-control select.gb-custom-native-select{
+ border:0!important;padding:0 2px!important;font-size:inherit;
+}
+.gb-calendar-jump button{display:inline-flex;gap:4px;align-items:center;justify-content:center;white-space:nowrap}
+.gb-calendar-jump button .gb-symbol{width:13px;height:13px;flex:none}
+.gb-account-field .gb-custom-date-trigger{
+ min-height:25px;height:25px;padding:0;border:0;background:transparent;
+ color:var(--acc-text);font-size:15px;font-weight:560;box-shadow:none;
+}
+.gb-account-field .gb-custom-date-icon .gb-symbol{width:17px;height:17px}
+.gb-calendar-pick .gb-symbol{width:18px;height:18px}
