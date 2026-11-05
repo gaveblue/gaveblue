@@ -192,6 +192,36 @@ const actions={
   theme:()=>commit(d=>{d.settings.theme=d.settings.theme==='light'?'dark':'light';},'Tema atualizado.'),
   'top-theme':()=>commit(d=>{d.settings.theme=d.settings.theme==='light'?'dark':'light';},'Tema atualizado.'),
   'check-updates':()=>{closeModal();window.dispatchEvent(new Event('gbplus-check-updates'));},
+  'select-launch':el=>toggleLaunchSelection(el.dataset.id),
+  'launch-clear':()=>{state.launchSelected=[];render();},
+  'launch-detail':()=>{
+   const ids=launchSelectedIds();
+   if(ids.length!==1)throw Error('Selecione um lançamento para visualizar.');
+   openModal('Detalhes do lançamento',titleDetail(db,getTitle(ids[0])));
+  },
+  'launch-edit':()=>{
+   const ids=launchSelectedIds();
+   if(ids.length!==1)throw Error('A edição é individual. Selecione apenas um lançamento.');
+   openModal('Editar lançamento',titleForm(db,getTitle(ids[0])));
+  },
+  'launch-pay':()=>startLaunchPayment(launchSelectedIds()),
+  'launch-reverse':()=>requestLaunchReversal(launchSelectedIds()),
+  'launch-delete':()=>requestLaunchDeletion(launchSelectedIds()),
+  'launch-status':()=>{state.launchStatusOpen=!state.launchStatusOpen;render();},
+  'launch-filter':el=>{
+   const key=el.dataset.value;
+   if(!['all','open','settled','income','expense'].includes(key))return;
+   state.type=key==='income'?'income':key==='expense'?'expense':'';
+   state.status=key==='open'?'open':key==='settled'?'settled':'';
+   state.launchSelected=[];state.launchStatusOpen=false;render();
+  },
+  'launch-search':()=>{
+   const wasOpen=!!state.launchSearchOpen||!!state.query||!!state.moreFilters;
+   state.launchSearchOpen=!wasOpen;
+   if(wasOpen){state.query='';state.moreFilters=false;}
+   state.launchSelected=[];state.launchStatusOpen=false;render();
+   if(!wasOpen)document.getElementById('title-search')?.focus();
+  },
   'toggle-title-filters':()=>{state.moreFilters=!state.moreFilters;state.launchSelected=[];render();},
   'clear-title-filters':()=>{state.query='';state.status='';state.partner='';state.category='';state.type=state.route==='payable'?'expense':state.route==='receivable'?'income':'';state.period='month';state.range=rangeFor('month');state.moreFilters=false;state.launchSelected=[];state.launchStatusOpen=false;render();},
   'set-theme':el=>commit(d=>{d.settings.theme=el.dataset.value;},'Tema atualizado.'),
