@@ -10,7 +10,6 @@ export function titleForm(db,t,type='expense'){
  const typeField=entrySelect('Tipo','type',[['expense','Despesa'],['income','Receita']],type,'entry-type',true);
  const categoryField=entrySelect('Categoria','categoryId',categoryOptions,t?.categoryId,'entry-category',true);
  const partnerField=entrySelect('Parceiro','partnerId',partnerOptions,t?.partnerId,'entry-partner');
- const info=t?'O saldo já baixado é preservado ao editar.':'Um título, um vencimento. O saldo só muda ao registrar uma baixa.';
  const periodicity=t?
    entrySelect('Situação','cancelled',[['false','Ativo'],['true','Cancelado']],String(t.cancelled),'entry-cancelled'):
    entrySelect('Periodicidade','mode',[['single','Único'],['installment','Parcelado'],['recurring','Recorrente']],'single','entry-mode',true);
@@ -30,7 +29,6 @@ export function titleForm(db,t,type='expense'){
      <div class="full">${periodicity}</div>
      ${!t?'<div id="count-field" class="full" hidden>'+field('Parcelas / meses','count',2,'number','min="2" max="120" step="1"')+'</div>':''}
      ${extra?'<div class="full">'+extra+'</div>':''}
-     <p class="form-hint full gb-entry-tip" id="mode-hint">${icon('info')}<span>${esc(info)}</span></p>
      ${textarea('Observações','notes',t?.notes)}
    </div>
    <input type="hidden" name="accountId" value="${esc(t?.accountId||'')}">
