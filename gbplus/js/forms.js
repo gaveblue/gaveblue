@@ -3,7 +3,7 @@ import {esc,field,select,textarea,formFooter,button,icon,titleTable,empty} from 
 import {INDICATORS} from './store.js?v=20261105-72';
 import {entrySelect} from './entry-select.js?v=20261104-42';
 import {gbIcon,CATEGORY_ICON_OPTIONS,categoryIconFor} from './gb-icons.js?v=20261104-42';
-import {bankOptions,findBank} from './banks.js?v=20261105-72';
+import {bankOptions,findBank,bankPicker} from './banks.js?v=20261105-72';
 const required='required maxlength="200"';
 export function titleForm(db,t,type='expense'){
  type=t?.type||type;
@@ -69,7 +69,7 @@ export function accountForm(db,a){
  const id=a?.bankId||findBank(db,a?.bank)?.id||'';
  return '<form id="account-form" data-id="'+esc(a?.id||'')+'"><div class="form-grid">'+
  field('Nome da conta','name',a?.name||'','text','required maxlength="120"')+
- '<div class="full">'+select('Banco ou instituição','bankId',bankOptions(db),id)+'</div>'+
+ bankPicker(db,id)+
  '<div class="full">'+field('Outra instituição (opcional)','bank',a?.bank&&!id?a.bank:'','text','maxlength="120" placeholder="Ex.: Cooperativa regional"')+'</div>'+
  field('Agência (opcional)','branch',a?.branch||'','text','maxlength="80"')+
  field('Número da conta (opcional)','number',a?.number||'','text','maxlength="80"')+
