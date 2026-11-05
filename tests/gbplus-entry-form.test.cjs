@@ -6,14 +6,14 @@ const file=p=>fs.readFileSync(path.join(root,p),'utf8');
 const strip=s=>s.replace(/^import .*;$/gm,'').replace(/\bexport\s+/g,'');
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const icon=(name)=>'<svg data-icon="'+name+'"></svg>';
-const iconLib=new Function(strip(file('js/gb-icons.js'))+';return {gbIcon,gbOptionIcon};')();
+const iconLib=new Function(strip(file('js/gb-icons.js'))+';return {gbIcon,gbOptionIcon,CATEGORY_ICON_OPTIONS,categoryIconFor};')();
 const selectMarkup=new Function('esc','icon','gbIcon','gbOptionIcon',strip(file('js/entry-select.js'))+';return entrySelect;')(esc,icon,iconLib.gbIcon,iconLib.gbOptionIcon);
 const field=(label,name,value='',type='text',attrs='')=>'<label class="field">'+label+'<input name="'+name+'" type="'+type+'" value="'+esc(value)+'" '+attrs+'></label>';
 const textarea=(label,name,value='')=>'<label class="field full">'+label+'<textarea name="'+name+'">'+esc(value)+'</textarea></label>';
 const footer=label=>'<div class="form-error"></div><div class="form-footer"><button type="button">Cancelar</button><button type="submit">'+label+'</button></div>';
-const render=new Function('today','money','dateLabel','pending','paid','accountBalance','esc','field','select','textarea','formFooter','button','icon','titleTable','empty','INDICATORS','entrySelect',
+const render=new Function('today','money','dateLabel','pending','paid','accountBalance','esc','field','select','textarea','formFooter','button','icon','titleTable','empty','INDICATORS','entrySelect','gbIcon','CATEGORY_ICON_OPTIONS','categoryIconFor',
   strip(file('js/forms.js'))+';return titleForm;')(
- ()=> '2026-11-04', n=>String(n),()=>'',()=>0,()=>0,()=>0,esc,field,()=>'',textarea,footer,()=>'',icon,()=>'',()=>'',{},selectMarkup);
+ ()=> '2026-11-04', n=>String(n),()=>'',()=>0,()=>0,()=>0,esc,field,()=>'',textarea,footer,()=>'',icon,()=>'',()=>'',{},selectMarkup,iconLib.gbIcon,iconLib.CATEGORY_ICON_OPTIONS,iconLib.categoryIconFor);
 const db={categories:[{id:'c-exp',name:'Água',type:'expense'},{id:'c-inc',name:'Venda',type:'income'}],
  partners:[{id:'p1',name:'Cliente A',active:true}],accounts:[{id:'a1',name:'Banco',active:true}]};
 test('new launch resembles reference and shows correct field hierarchy',()=>{
