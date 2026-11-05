@@ -1,13 +1,12 @@
 {
-  "version": "2.3.4",
-  "build": 51,
+  "version": "2.3.5",
+  "build": 52,
   "published_at": "2026-11-05",
-  "title": "Botão Abrir no Safari no tutorial do iPhone",
+  "title": "Botão Safari movido para o final do tutorial",
   "notes": [
-    "O botão Abrir no Safari voltou apenas ao tutorial do iPhone, com orientação para copiar o link em outros navegadores.",
-    "Quando o iPhone já está no Safari, o tutorial detecta o navegador e oculta o botão desnecessário.",
-    "A instalação no Safari é apresentada em duas etapas: Compartilhar e Adicionar à Tela de Início.",
-    "Tutorial Android, popup nativo e preparação visual de instalação permanecem inalterados."
+    "O botão Abrir no Safari agora aparece ao final do tutorial do iPhone, abaixo das instruções e da observação, sem competir com o acesso à versão web no topo.",
+    "Identificação do Safari e cópia do link continuam funcionando como antes.",
+    "Android, instalação PWA e dados financeiros permanecem inalterados."
   ],
   "assets": [
     "./index.html",
