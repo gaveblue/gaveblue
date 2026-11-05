@@ -229,7 +229,7 @@ function refreshEntrySchedule(form){
  const countField=form.querySelector('#count-field');
  if(countField)countField.hidden=mode==='single';
  if(!section)return;
- section.hidden=mode==='single';
+ section.hidden=mode==='single'||(!!form.dataset.id&&form.elements.scope?.value!=='future');
  if(section.hidden)return;
  const target=form.querySelector('#gb-entry-schedule'),summary=form.querySelector('#gb-entry-schedule-count');
  const due=form.elements.due?.value;
@@ -573,7 +573,7 @@ document.addEventListener('submit',async e=>{e.preventDefault();if(busy||!db)ret
 function upsert(rows,row){const i=rows.findIndex(x=>x.id===row.id);if(i<0)rows.push(row);else rows[i]=row;}
 document.addEventListener('change',async e=>{if(!db)return;const el=e.target;try{
   if(el.form?.id==='profile-form')syncProfileSaveState(el.form);
-  if(el.form?.id==='title-form'&&['mode','count','due','businessDays'].includes(el.name))refreshEntrySchedule(el.form);
+  if(el.form?.id==='title-form'&&['mode','scope','count','due','businessDays'].includes(el.name))refreshEntrySchedule(el.form);
   if(el.name?.startsWith('slot')&&el.form?.id==='mobile-nav-form')updateMobileNavPreview(el.form);
   if(el.id==='entry-type'){const select=document.querySelector('#entry-category');if(select){select.innerHTML=db.categories.filter(c=>c.type===el.value).map(c=>`<option value="${esc(c.id)}" data-icon="${esc(categoryIconFor(c))}">${esc(c.name)}</option>`).join('');syncEntrySelect(select);}}
   if(el.id==='entry-mode'){refreshEntrySchedule(el.form);}
