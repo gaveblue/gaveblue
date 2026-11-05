@@ -8,7 +8,7 @@ import {installGbControls,enhanceGbControls} from './custom-controls.js?v=202611
 import {expectedDates} from './gb-calendar-rules.js?v=20261104-42';
 import {CATEGORY_ICON_OPTIONS,categoryIconFor,gbIcon} from './gb-icons.js?v=20261104-42';
 import {setupPwaInstallation,maybeOfferPwaInstall,showInstallHelp,isPwaInstalled} from './pwa-install.js?v=20261104-40';
-import {SupabaseRepository} from '../integrations/supabase/repository.js';
+import {SupabaseRepository} from '../integrations/supabase/repository.js?v=20261104-42';
 import {initializeAuth,authClient,currentUser,showAuth,isRecovery,updatePersonalProfile,consumeAuthReturnMessage} from './auth.js?v=20261104-32';
 import {profileView,validateProfile,validCPF,formatCPF} from './profile.js?v=20261104-41';
 import {firstSetupView,customMobileNavForm,shortcutsPreview,readMobileNav} from './setup-ui.js?v=20261104-35';
