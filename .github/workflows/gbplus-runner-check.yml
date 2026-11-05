@@ -1,0 +1,12 @@
+name: GB+ Runner Check
+on:
+  push:
+    branches:
+      - feature/gbplus-easyui-charts-227
+    paths:
+      - .github/workflows/gbplus-runner-check.yml
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo 'GB+ runner available'
