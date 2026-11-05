@@ -202,6 +202,8 @@ $('#ai-login').addEventListener('click',async()=>{
 async function askLive(text,targetChat=chats.activeId()){history.push({role:'user',content:text});const messages=history.slice(-12);try{const res=await fetch(supabaseUrl+'/functions/v1/gbplus-ai-lab',{method:'POST',headers:{'Content-Type':'application/json','apikey':publishableKey,'Authorization':'Bearer '+session},body:JSON.stringify({messages})});const body=await res.json();if(!res.ok)throw Error(body.error||'Não foi possível acessar a IA.');history.push({role:'assistant',content:body.answer});add(body.answer,'assistant',targetChat);}catch(err){history.pop();add(err.message+' Você pode voltar ao modo local para continuar os testes.');}}
 let typingQueue=Promise.resolve();
 let firstName='',bridge={realData:false,writeEnabled:false},lastAnswer='',lastTopic='',editPending=null;
+// Per-chat context for offline projections. This never modifies financial data.
+const scenarioContexts=new Map();
 function greeting(){const hour=new Date().getHours();return hour<12?'Bom dia':hour<18?'Boa tarde':'Boa noite';}
 function greetingText(){return greeting()+(firstName?', '+firstName:'')+'!';}
 function updateGreeting(){const title=$('#welcome-title');if(title)title.textContent=greetingText(); }
@@ -417,7 +419,7 @@ async function lookupForEditing(term,type,targetChat=chats.activeId()){
   if(targetChat===chats.activeId())showEditChoices(result.items);
  }catch(error){reply(error.message);}
 }
-function askReal(text){
+function askReal(text,targetChat=chats.activeId()){
  return new Promise((resolve,reject)=>{
   if(window.parent===window){reject(Error('Abra o assistente dentro do GB+ para acessar dados reais.'));return;}
   const requestId=crypto.randomUUID();
@@ -425,11 +427,14 @@ function askReal(text){
   function handler(event){
    if(event.origin!==location.origin||event.source!==window.parent||event.data?.kind!=='gbplus-ai-query-result'||event.data.requestId!==requestId)return;
    clearTimeout(timer);window.removeEventListener('message',handler);
-   if(event.data.ok&&typeof event.data.answer==='string')resolve(event.data.answer);
+   if(event.data.ok&&typeof event.data.answer==='string'){
+    scenarioContexts.set(targetChat,event.data.context||null);
+    resolve(event.data.answer);
+   }
    else reject(Error(event.data.message||'Não consegui consultar o GB+.'));
   }
   window.addEventListener('message',handler);
-  window.parent.postMessage({kind:'gbplus-ai-query',requestId,text},location.origin);
+  window.parent.postMessage({kind:'gbplus-ai-query',requestId,text,context:scenarioContexts.get(targetChat)||null},location.origin);
  });
 }
 async function submit(text,targetChat=chats.activeId()){
@@ -451,7 +456,7 @@ async function submit(text,targetChat=chats.activeId()){
   if(edit)editPending={type:edit.type,term:edit.term};
   const term=edit?edit.term:s;
   lastTopic='edit';
-  proposal=null;context=null;$('#details').classList.reply('hidden');
+  proposal=null;context=null;$('#details').classList.add('hidden');
   if(!term){reply('Claro! Qual '+(editPending.type==='income'?'receita':editPending.type==='expense'?'despesa':'lançamento')+' você quer editar? Diga o nome, fornecedor ou documento.');return;}
   await lookupForEditing(term,editPending.type,targetChat);
   return;
@@ -467,7 +472,7 @@ async function submit(text,targetChat=chats.activeId()){
    return;
   }
   lastTopic=classifyQuery(text)||'consulta';
-  try{reply(await askReal(text));}catch(error){reply(error.message);}
+  try{reply(await askReal(text,targetChat));}catch(error){reply(error.message);}
   return;
  }
  if(live&&instructional){askLive(text,targetChat);return;}
@@ -484,10 +489,11 @@ async function submit(text,targetChat=chats.activeId()){
 $('#chat-form').addEventListener('submit',e=>{e.preventDefault();const text=input.value.trim();if(!text)return;input.value='';submit(text);});
 // Suggestions are delegated in #messages so they survive New chat and History.
 $('#confirm').addEventListener('click',()=>{
+ const targetChat=chats.activeId();const reply=message=>add(message,'assistant',targetChat);
  if(!proposal)return;
  if(window.parent===window||!bridge.realData){reply('Para gravar um título de verdade, abra o chat dentro do aplicativo GB+ e esteja conectado à sua conta. Aqui fora só é possível simular.');return;}
  if(!bridge.writeEnabled){reply('A conta GB+ não está pronta para gravar: verifique sua conexão e atualize o aplicativo. Nenhuma alteração foi enviada.');requestBridge();return;}
- const current={...proposal};const targetChat=chats.activeId();const reply=message=>add(message,'assistant',targetChat);const btn=$('#confirm'),discard=$('#discard');
+ const current={...proposal};const btn=$('#confirm'),discard=$('#discard');
  btn.disabled=true;discard.disabled=true;btn.textContent='Gravando…';
  reply('Confirmação recebida. Estou solicitando a gravação do título no GB+.');
  const requestId=crypto.randomUUID();let finished=false;
