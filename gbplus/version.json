@@ -1,14 +1,14 @@
 {
-  "version": "2.3.1",
-  "build": 48,
+  "version": "2.3.2",
+  "build": 49,
   "published_at": "2026-11-05",
-  "title": "Página de instalação mais compacta com imagem real",
+  "title": "Confirmação nativa antes da tela de preparação da instalação",
   "notes": [
-    "Substituída a tela ilustrativa por uma captura real do painel GB+ fornecida pelo usuário.",
-    "Topo e espaçamentos reduzidos para facilitar a visualização dos botões Instalar na mesma tela.",
-    "Acesso à versão web movido para um ícone no canto superior direito.",
-    "Removidos o aviso sobre instalação pelo navegador e o link redundante do rodapé.",
-    "Instalação para iPhone e Android preservada, sem alterações em dados financeiros."
+    "No Android, o popup oficial de instalação aparece primeiro.",
+    "Após o usuário confirmar Instalar, o GB+ exibe uma etapa visual de preparação de aproximadamente 10 segundos.",
+    "O resultado da instalação só é indicado como concluído após o navegador informar a conclusão real pelo evento appinstalled.",
+    "Caso a instalação seja cancelada, a tela de preparação não é exibida.",
+    "Tutorial de instalação para iPhone e visual da página permanecem inalterados."
   ],
   "assets": [
     "./index.html",
