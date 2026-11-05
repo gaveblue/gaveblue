@@ -1,6 +1,6 @@
 import {esc,icon,button,field,select,formFooter,empty} from './ui.js?v=20261105-72';
 import {today,money,dateLabel,pending,accountBalance} from './domain.js?v=20261105-72';
-import {BANKS,bankCatalog,bankOptions,findBank,bankBadge} from './banks.js?v=20261105-72';
+import {BANKS,bankCatalog,bankOptions,findBank,bankBadge,bankPicker} from './banks.js?v=20261105-72';
 import {creditCards,cardPurchases,cardUsed,cardAvailable} from './credit-cards.js?v=20261105-72';
 import {cashForecast} from './forecast.js?v=20261105-72';
 
@@ -62,7 +62,7 @@ export function cardForm(db,card){
  const options=bankOptions(db);
  return '<form id="card-form" data-id="'+esc(card?.id||'')+'"><div class="form-grid">'+
   '<div class="full">'+field('Apelido do cartão','name',card?.name||'','text','required maxlength="120" placeholder="Ex.: Cartão principal"')+'</div>'+
-  '<div class="full">'+select('Banco ou instituição','bankId',options,card?.bankId||'')+'</div>'+
+  bankPicker(db,card?.bankId||'')+
   '<div class="full">'+select('Conta prevista para pagamento da fatura','payAccountId',[['','Não definir'],...db.accounts.map(a=>[a.id,a.name])],card?.payAccountId||'')+'</div>'+
   field('Últimos 4 dígitos (opcional)','last4',card?.last4||'','text','inputmode="numeric" pattern="[0-9]{4}" maxlength="4" placeholder="1234"')+
   field('Limite total (R$)','limit',(card?.limit||0)/100||'','number','required min="0.01" max="10000000000" step="0.01"')+
