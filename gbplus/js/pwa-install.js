@@ -82,7 +82,7 @@ export async function installNow(){
 }
 export function maybeOfferPwaInstall(){
  if(!isPhoneBrowser()||isPwaInstalled()||panel)return false;
- if(document.body.classList.contains('auth-locked')||document.querySelector('#modal[open],#auth-modal[open]'))return false;
+ if(document.body.classList.contains('auth-locked')||document.body.classList.contains('gb-update-open')||document.querySelector('#modal[open],#auth-modal[open]'))return false;
  if(Date.now()<laterTimestamp())return false;
  createOffer();return true;
 }
@@ -93,6 +93,7 @@ export function showInstallHelp(){
  return true;
 }
 export function setupPwaInstallation(){
+ window.addEventListener('gbplus-update-open',()=>hide());
  window.addEventListener('beforeinstallprompt',event=>{
   event.preventDefault();
   installEvent=event;
