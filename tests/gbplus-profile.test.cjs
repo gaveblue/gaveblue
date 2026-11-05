@@ -92,7 +92,7 @@ test('profile stylesheet uses a scoped design and release metadata',()=>{
  assert.ok(index.includes('profile-page.css?v=20261105-60'));
  assert.ok(css.includes('.gb-account-logout'));
  assert.ok(version.assets.includes('./profile-page.css'));
- assert.equal(version.version,'2.3.7');
+ assert.equal(version.version,'2.3.8');
 });
 
 test('logout requires confirmation and protects unsaved profile changes',()=>{
