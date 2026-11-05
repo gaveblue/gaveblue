@@ -78,3 +78,14 @@ html[data-theme=dark] .gb-entry-form .gb-entry-tip{background:#292931}
 }
 @media(max-width:350px){.gb-entry-form .gb-entry-grid{gap:13px 9px}.gb-entry-form .field input,.gb-entry-trigger{padding:9px;font-size:13px}.gb-entry-form .form-footer{gap:8px}}
 @media(prefers-reduced-motion:reduce){.gb-entry-trigger>.icon{transition:none}}
+
+/* Only the opened menu gains contextual icons; the closed field retains its original layout. */
+.gb-entry-option-symbol{flex:none;display:grid;place-items:center;width:27px;height:27px;border-radius:9px;background:var(--soft);color:var(--muted)}
+.gb-entry-option-symbol .gb-symbol{width:17px;height:17px;stroke-width:1.85}
+.gb-entry-option-title{flex:1;min-width:0;overflow-wrap:anywhere}
+.gb-entry-option.is-selected .gb-entry-option-symbol{color:#8976c9;background:color-mix(in srgb,#8976c9 12%,var(--soft))}
+.gb-entry-options{min-width:200px}
+.gb-entry-options[hidden]{display:none!important}
+@media(max-width:760px){
+ .gb-entry-form .field input:not([type="hidden"]),.gb-entry-form .field textarea{font-size:16px!important}
+}
