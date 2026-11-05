@@ -94,6 +94,7 @@ function showMenu(button){
 function closeCalendar(){
  if(!openCalendar)return;
  const {backdrop,button}=openCalendar;
+ if(backdrop.open)backdrop.close();
  backdrop.remove();openCalendar=null;
  button?.focus({preventScroll:true});
 }
@@ -102,24 +103,62 @@ function parts(date){
  return Number.isInteger(y)&&Number.isInteger(m)&&Number.isInteger(d)?{y,m,d}:null;
 }
 function dateISO(y,m,d){return [String(y).padStart(4,'0'),String(m).padStart(2,'0'),String(d).padStart(2,'0')].join('-');}
+function monthHasDates(input,year,month){
+ const first=dateISO(year,month,1);
+ const endDay=new Date(Date.UTC(year,month,0)).getUTCDate();
+ const last=dateISO(year,month,endDay);
+ return (!input.min||last>=input.min)&&(!input.max||first<=input.max);
+}
+function yearHasDates(input,year){
+ return (!input.min||dateISO(year,12,31)>=input.min)&&(!input.max||dateISO(year,1,1)<=input.max);
+}
+const monthNames=Array.from({length:12},(_,i)=>
+ new Intl.DateTimeFormat('pt-BR',{month:'short',timeZone:'UTC'}).format(new Date(Date.UTC(2020,i,1))).replace('.',''));
+const fullMonthNames=Array.from({length:12},(_,i)=>
+ new Intl.DateTimeFormat('pt-BR',{month:'long',timeZone:'UTC'}).format(new Date(Date.UTC(2020,i,1))));
 function renderCalendar(){
  if(!openCalendar)return;
- const {panel,input}=openCalendar;const y=openCalendar.year,m=openCalendar.month;
- const start=new Date(Date.UTC(y,m-1,1)).getUTCDay();
- const days=new Date(Date.UTC(y,m,0)).getUTCDate();
+ const {panel,input}=openCalendar,year=openCalendar.year,month=openCalendar.month;
+ const mode=openCalendar.mode||'days';
+ // Restrict both the day grid and the quick month/year selection.
  const min=input.min||'0001-01-01',max=input.max||'9999-12-31';
- const title=ptMonth.format(new Date(Date.UTC(y,m-1,1)));
- const cells=[...Array(start)].map(()=>'<span class="gb-calendar-empty" aria-hidden="true"></span>');
- for(let day=1;day<=days;day++){
-  const iso=dateISO(y,m,day);
-  const disabled=iso<min||iso>max;
-  cells.push('<button type="button" class="gb-calendar-day'+(input.value===iso?' selected':'')+'" data-calendar-day="'+iso+'"'+
-   (disabled?' disabled':'')+' aria-label="'+day+' de '+title+'" aria-pressed="'+String(input.value===iso)+'">'+day+'</button>');
+ const yearStart=openCalendar.yearPage;
+ let navigation='',grid='';
+ if(mode==='years'){
+  navigation='<div class="gb-calendar-month"><button type="button" data-calendar-year-page="-12" aria-label="Anos anteriores">'+gbIcon('chevrons-left')+'</button>'+
+   '<strong class="gb-calendar-year-range">'+yearStart+' – '+(yearStart+11)+'</strong>'+
+   '<button type="button" data-calendar-year-page="12" aria-label="Próximos anos">'+gbIcon('chevrons-right')+'</button></div>';
+  grid='<div class="gb-calendar-pick-grid gb-calendar-year-grid">'+
+    Array.from({length:12},(_,i)=>{
+     const y=yearStart+i,ok=yearHasDates(input,y);
+     return '<button type="button" class="gb-calendar-pick'+(y===year?' selected':'')+'" data-calendar-year="'+y+'"'+(ok?'':' disabled')+' aria-label="Ano '+y+'">'+y+'</button>';
+    }).join('')+'</div>';
+ }else{
+  const title=ptMonth.format(new Date(Date.UTC(year,month-1,1)));
+  navigation='<div class="gb-calendar-month"><button type="button" data-calendar-shift="-1" aria-label="Mês anterior">'+gbIcon('chevron-left')+'</button>'+
+   '<div class="gb-calendar-jump"><button type="button" data-calendar-month-view aria-label="Escolher mês" aria-expanded="'+(mode==='months')+'">'+escapeHtml(fullMonthNames[month-1])+' '+gbIcon('chevron-down')+'</button>'+
+   '<button type="button" data-calendar-year-view aria-label="Escolher ano">'+year+' '+gbIcon('chevron-down')+'</button></div>'+
+   '<button type="button" data-calendar-shift="1" aria-label="Próximo mês">'+gbIcon('chevron-right')+'</button></div>';
+  if(mode==='months'){
+   grid='<div class="gb-calendar-pick-grid gb-calendar-month-grid">'+monthNames.map((label,i)=>{
+    const value=i+1,ok=monthHasDates(input,year,value);
+    return '<button type="button" class="gb-calendar-pick'+(value===month?' selected':'')+'" data-calendar-month="'+value+'"'+(ok?'':' disabled')+' aria-label="'+escapeHtml(fullMonthNames[i])+'">'+escapeHtml(label)+'</button>';
+   }).join('')+'</div>';
+  }else{
+   const start=new Date(Date.UTC(year,month-1,1)).getUTCDay();
+   const days=new Date(Date.UTC(year,month,0)).getUTCDate();
+   const cells=[...Array(start)].map(()=>'<span class="gb-calendar-empty" aria-hidden="true"></span>');
+   for(let day=1;day<=days;day++){
+    const iso=dateISO(year,month,day),disabled=iso<min||iso>max;
+    cells.push('<button type="button" class="gb-calendar-day'+(input.value===iso?' selected':'')+'" data-calendar-day="'+iso+'"'+
+     (disabled?' disabled':'')+' aria-label="'+day+' de '+title+'" aria-pressed="'+String(input.value===iso)+'">'+day+'</button>');
+   }
+   grid='<div class="gb-calendar-grid">'+ptWeek.map(d=>'<span class="gb-calendar-week">'+d+'</span>').join('')+cells.join('')+'</div>';
+  }
  }
- panel.innerHTML='<header class="gb-calendar-header"><strong>Selecionar data</strong><button class="gb-calendar-close" type="button" data-calendar-close aria-label="Fechar">×</button></header>'+
- '<div class="gb-calendar-month"><button type="button" data-calendar-shift="-12" aria-label="Ano anterior">«</button><button type="button" data-calendar-shift="-1" aria-label="Mês anterior">‹</button><strong>'+escapeHtml(title)+'</strong><button type="button" data-calendar-shift="1" aria-label="Próximo mês">›</button><button type="button" data-calendar-shift="12" aria-label="Próximo ano">»</button></div>'+
- '<div class="gb-calendar-grid">'+ptWeek.map(d=>'<span class="gb-calendar-week">'+d+'</span>').join('')+cells.join('')+'</div>'+
- '<div class="gb-calendar-footer"><button type="button" data-calendar-today>Hoje</button><button type="button" data-calendar-close>Cancelar</button></div>';
+ panel.innerHTML='<header class="gb-calendar-header"><strong>Selecionar data</strong><button class="gb-calendar-close" type="button" data-calendar-close aria-label="Fechar">'+gbIcon('x')+'</button></header>'+
+  navigation+grid+
+  '<div class="gb-calendar-footer"><button type="button" data-calendar-today>Hoje</button><button type="button" data-calendar-close>Cancelar</button></div>';
 }
 function showCalendar(button){
  closeMenu();closeCalendar();
@@ -127,11 +166,15 @@ function showCalendar(button){
  if(!input)return;
  const now=new Date();
  const current=parts(input.value)||{y:now.getFullYear(),m:now.getMonth()+1,d:now.getDate()};
- const backdrop=document.createElement('div');backdrop.className='gb-calendar-backdrop';
- const panel=document.createElement('section');panel.className='gb-calendar-panel';panel.setAttribute('role','dialog');panel.setAttribute('aria-modal','true');panel.setAttribute('aria-label','Calendário do GB+');
- backdrop.append(panel);(input.closest('dialog[open]')||document.body).append(backdrop);
- openCalendar={backdrop,panel,button,input,year:current.y,month:current.m};
- renderCalendar();panel.querySelector('[data-calendar-close]')?.focus({preventScroll:true});
+ const backdrop=document.createElement('dialog');backdrop.className='gb-calendar-backdrop';
+ const panel=document.createElement('section');panel.className='gb-calendar-panel';
+ panel.setAttribute('role','document');panel.setAttribute('aria-label','Calendário do GB+');
+ backdrop.setAttribute('aria-label','Selecionar data');
+ backdrop.append(panel);document.body.append(backdrop);
+ openCalendar={backdrop,panel,button,input,year:current.y,month:current.m,yearPage:Math.floor(current.y/12)*12,mode:'days'};
+ renderCalendar();
+ try{backdrop.showModal();}catch(error){backdrop.remove();openCalendar=null;return;}
+ panel.querySelector('[data-calendar-close]')?.focus({preventScroll:true});
 }
 function setCalendarDate(date){
  if(!openCalendar)return;
@@ -167,6 +210,16 @@ export function installGbControls(){
   const dateButton=element.closest?.('.gb-custom-date-trigger');
   if(dateButton){event.preventDefault();event.stopPropagation();showCalendar(dateButton);return;}
   if(element.closest?.('[data-calendar-close]')){closeCalendar();return;}
+  const pickMonthView=element.closest?.('[data-calendar-month-view]');
+  if(pickMonthView&&openCalendar){openCalendar.mode='months';renderCalendar();return;}
+  const pickYearView=element.closest?.('[data-calendar-year-view]');
+  if(pickYearView&&openCalendar){openCalendar.mode='years';openCalendar.yearPage=Math.floor(openCalendar.year/12)*12;renderCalendar();return;}
+  const chooseYear=element.closest?.('[data-calendar-year]');
+  if(chooseYear&&openCalendar&&!chooseYear.disabled){openCalendar.year=Number(chooseYear.dataset.calendarYear);openCalendar.mode='months';renderCalendar();return;}
+  const chooseMonth=element.closest?.('[data-calendar-month]');
+  if(chooseMonth&&openCalendar&&!chooseMonth.disabled){openCalendar.month=Number(chooseMonth.dataset.calendarMonth);openCalendar.mode='days';renderCalendar();return;}
+  const shiftYear=element.closest?.('[data-calendar-year-page]');
+  if(shiftYear&&openCalendar){openCalendar.yearPage+=Number(shiftYear.dataset.calendarYearPage);renderCalendar();return;}
   const shift=element.closest?.('[data-calendar-shift]');
   if(shift){changeMonth(Number(shift.dataset.calendarShift));return;}
   const day=element.closest?.('[data-calendar-day]');
