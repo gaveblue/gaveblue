@@ -452,7 +452,7 @@ const actions={
   'export-titles':()=>{const rows=filteredTitles(db,state);download(`gb-plus-titulos-${today()}.csv`,csv([['Descrição','Tipo','Parceiro','Categoria','Documento','Emissão','Vencimento','Valor (R$)','Pendente (R$)'],...rows.map(t=>[t.description,t.type==='income'?'Receita':'Despesa',db.partners.find(p=>p.id===t.partnerId)?.name||'',db.categories.find(c=>c.id===t.categoryId)?.name,t.document,dateLabel(t.issue),dateLabel(t.due),(t.amount/100).toFixed(2).replace('.',','),(pending(db,t)/100).toFixed(2).replace('.',',')])]),'text/csv;charset=utf-8');},
   'export-flow':()=>download(`gb-plus-fluxo-${today()}.csv`,csv([['Período','Entradas previstas','Saídas previstas','Entradas realizadas','Saídas realizadas'],...flow(db,state.range,state.granularity).map(r=>[dateLabel(r.date),...[r.expectedIn,r.expectedOut,r.actualIn,r.actualOut].map(v=>(v/100).toFixed(2).replace('.',','))])]),'text/csv;charset=utf-8'),
   'export-report':()=>download(`gb-plus-relatorio-${state.report}-${today()}.csv`,csv(reportData(db,state)),'text/csv;charset=utf-8'),
-  install:()=>{if(isInstalledApp()){toast('GB+ já está instalado neste dispositivo.');return;}showInstallHelp();},
+  install:()=>{if(isInstalledApp()){toast('GB+ já está instalado neste dispositivo.');return;}if(matchMedia('(max-width:760px) and (pointer:coarse)').matches){location.assign('./instalar.html');return;}showInstallHelp();},
 };
 document.addEventListener('click',async e=>{const el=e.target.closest('[data-action]');if(!el||!db)return;if(el.tagName==='BUTTON')e.preventDefault();try{await actions[el.dataset.action]?.(el);}catch(error){fail(error);}});
 document.addEventListener('click',e=>{if(!e.target.closest('.gb-entry-select'))closeEntryMenus();});
