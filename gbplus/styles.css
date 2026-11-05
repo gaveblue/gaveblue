@@ -569,3 +569,10 @@ body.auth-locked .mobile-nav-fade{display:none!important}
 @media(max-width:760px){
  #auth-gate .auth-bottom:has([data-auth-action="continue"]){margin-top:26px}
 }
+
+/* Link de retorno à apresentação institucional na tela de login. */
+.auth-institutional-back{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;min-height:44px;margin-top:24px;border:1px solid #dfe0e6;border-radius:12px;background:#fff;color:#383941;font-size:14px;font-weight:650;text-decoration:none;transition:background .16s,border-color .16s}
+.auth-institutional-back:hover{background:#f5f5f8;border-color:#bdc0cc}
+.auth-institutional-back:focus-visible{outline:3px solid #7477d5;outline-offset:3px}
+.auth-institutional-back svg{width:18px;height:18px;flex:none}
+.auth-institutional-back+.auth-footer{margin-top:24px}
