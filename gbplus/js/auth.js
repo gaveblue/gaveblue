@@ -1,9 +1,19 @@
 import {createGbplusClient} from '../integrations/supabase/client.js';
 import {cloudConfig} from './cloud-config.js';
 import {esc,icon} from './ui.js';
-import {loginRedirectMessage,clearLoginErrorUrl,safeAuthEmail} from './auth-flow.js?v=20261104-31';
+import {loginRedirectMessage,clearLoginErrorUrl,safeAuthEmail,passwordStrength,isExpiredSessionError} from './auth-flow.js?v=20261105-62';
 
 let client,user=null,recovery=false,working=false,startup=true,pendingEmail='',lastResend=0;
+const EMAIL_COOLDOWN_MS=60000,SESSION_NOTICE_KEY='gbplus-session-ended-at',ACTIVE_SESSION_KEY='gbplus-session-was-active';
+const storageGet=key=>{try{return sessionStorage.getItem(key);}catch{return null;}};
+const storageSet=(key,value)=>{try{sessionStorage.setItem(key,value);}catch{}};
+const storageRemove=key=>{try{sessionStorage.removeItem(key);}catch{}};
+function noteSessionEnded(){storageSet(SESSION_NOTICE_KEY,String(Date.now()));storageRemove(ACTIVE_SESSION_KEY);}
+function noteActiveSession(){storageSet(ACTIVE_SESSION_KEY,'1');storageRemove(SESSION_NOTICE_KEY);}
+export function consumeSessionNotice(){
+ const stamp=Number(storageGet(SESSION_NOTICE_KEY)||0);storageRemove(SESSION_NOTICE_KEY);
+ return stamp>0&&Date.now()-stamp<10*60*1000?'Sua sessão expirou ou foi encerrada em outro dispositivo. Entre novamente para continuar com seus dados salvos.':'';
+}
 let onChange=()=>{},reloadScheduled=false,logoutRedirectRequested=false;
 function refreshAuthOnce(){
  if(reloadScheduled)return;
@@ -22,6 +32,7 @@ export async function signOutAccount(){
   const {error}=await getClient().auth.signOut({scope:'local'});
   if(error)throw error;
   sessionStorage.removeItem('gbplus-recovery');
+  storageRemove(ACTIVE_SESSION_KEY);storageRemove(SESSION_NOTICE_KEY);
   refreshAuthOnce();
  }catch(error){
   logoutRedirectRequested=false;
@@ -43,17 +54,26 @@ export async function initializeAuth(changed){
       recovery=true;sessionStorage.setItem('gbplus-recovery','1');
       if(!startup)setTimeout(()=>showAuth('recovery'),0);
     }
+    if(event==='SIGNED_OUT'&&!logoutRedirectRequested&&(user?.id||storageGet(ACTIVE_SESSION_KEY)))noteSessionEnded();
+    if(event==='SIGNED_IN'&&session?.user)noteActiveSession();
     if(!startup&&(session?.user?.id||null)!==(user?.id||null)){
       refreshAuthOnce();
     }
   });
   const {data,error}=await client.auth.getSession();
-  if(error)throw Error('Não foi possível recuperar a sessão. Tente entrar novamente.');
+  if(error){
+    if(isExpiredSessionError(error)){noteSessionEnded();startup=false;return null;}
+    throw Error('Não foi possível recuperar a sessão. Tente entrar novamente.');
+  }
   if(data.session){
     const verified=await client.auth.getUser();
-    if(verified.error||!verified.data?.user)throw Error('Não foi possível validar sua sessão. Verifique a conexão ou entre novamente.');
+    if(verified.error||!verified.data?.user){
+      if(isExpiredSessionError(verified.error)){noteSessionEnded();startup=false;return null;}
+      throw Error('Não foi possível validar sua sessão. Verifique a conexão ou entre novamente.');
+    }
     user=verified.data.user;
-  }
+    noteActiveSession();
+  }else if(storageGet(ACTIVE_SESSION_KEY))noteSessionEnded();
   recovery=recovery||sessionStorage.getItem('gbplus-recovery')==='1';
   startup=false;
   return user;
@@ -170,9 +190,29 @@ export function accountCard(){
 }
 
 export function authError(error){
-  const messages={invalid_credentials:'E-mail ou senha incorretos.',email_not_confirmed:'Confirme seu e-mail antes de entrar. Você pode reenviar a confirmação.',over_email_send_rate_limit:'Limite de envio atingido. Aguarde antes de solicitar outro e-mail.',over_request_rate_limit:'Muitas tentativas. Aguarde um momento e tente novamente.',email_address_not_authorized:'O envio de e-mails ainda precisa ser ativado pelo administrador do GB+.',user_already_exists:'Já existe uma conta para este e-mail.',weak_password:'Use uma senha mais forte, com pelo menos 8 caracteres.',otp_expired:'O link expirou. Solicite um novo link.',provider_disabled:'O login com Google ainda está sendo configurado.',email_provider_disabled:'O cadastro por e-mail não está disponível neste momento.',bad_code_verifier:'O link foi aberto em outro navegador ou expirou. Recomece a recuperação no mesmo navegador.',flow_state_not_found:'Não foi possível validar o retorno do login. Inicie novamente neste navegador.',validation_failed:'Verifique os dados informados.',signup_disabled:'O cadastro de novas contas está temporariamente desativado.'};
-  return messages[error?.code]||'Não foi possível concluir. Verifique sua conexão e tente novamente. Se o problema continuar, contate o administrador do GB+.';
+ const messages={
+  invalid_credentials:'E-mail ou senha incorretos.',
+  email_not_confirmed:'Confirme seu e-mail antes de entrar. Você pode reenviar a confirmação.',
+  over_email_send_rate_limit:'Muitos e-mails solicitados. Aguarde antes de pedir outro link.',
+  over_request_rate_limit:'Muitas tentativas de acesso. Aguarde alguns minutos antes de tentar novamente.',
+  email_address_not_authorized:'O envio de e-mails ainda precisa ser ativado pelo administrador do GB+.',
+  user_already_exists:'Se já possui conta, use login ou recuperação de senha.',
+  weak_password:'Esta senha não foi aceita pela segurança do servidor. Tente outra senha mais longa e menos previsível.',
+  otp_expired:'Este link expirou ou já foi utilizado. Solicite um novo link de recuperação ou confirmação.',
+  bad_code_verifier:'O link foi aberto em outro navegador ou não é mais válido. Solicite novo link no mesmo navegador.',
+  flow_state_not_found:'O retorno do link não foi reconhecido. Solicite novo link e abra-o no mesmo navegador.',
+  invalid_grant:'Este link não é mais válido. Solicite um novo link.',
+  token_expired:'O link expirou. Solicite um novo link.',
+  provider_disabled:'O login com Google ainda está sendo configurado.',
+  email_provider_disabled:'O cadastro por e-mail não está disponível neste momento.',
+  validation_failed:'Verifique os dados informados.',
+  signup_disabled:'O cadastro de novas contas está temporariamente desativado.'
+ };
+ if(messages[error?.code])return messages[error.code];
+ if(error?.status===429)return 'Muitas solicitações em pouco tempo. Aguarde alguns minutos antes de tentar novamente.';
+ return 'Não foi possível concluir. Verifique sua conexão e tente novamente. Se o problema continuar, contate o administrador do GB+.';
 }
+
 function feedback(text,error=true){
   const target=document.querySelector(error?'#auth-form .form-error':'#auth-form .auth-message');
   if(target)target.textContent=text;
