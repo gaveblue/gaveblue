@@ -1,7 +1,7 @@
-import {uid,today,money,dateLabel,cents,addMonths,validDate,generateTitles,addPayment,transfer,updateTitle,pending,flow,within} from './domain.js?v=20261104-42';
+import {uid,today,money,dateLabel,cents,addMonths,validDate,generateTitles,addPayment,transfer,updateTitle,pending,flow,within} from './domain.js?v=20261105-47';
 import {KEY,INDICATORS,defaultPanel,parseBackup,backupText,MOBILE_SHORTCUTS,defaultMobileNav,effectiveMobileNav,validMobileNav,shouldOfferSetup} from './store.js?v=20261104-42';
 import {esc,icon,button,field,select,formFooter,download,csv,titleTable} from './ui.js?v=20261104-42';
-import {routes,dashboard,titlesView,partnersView,accountsView,categoriesView,flowView,reportsView,settingsView,notificationsView,filteredTitles,reportData} from './views.js?v=20261104-42';
+import {routes,dashboard,titlesView,partnersView,accountsView,categoriesView,flowView,reportsView,settingsView,notificationsView,filteredTitles,reportData} from './views.js?v=20261105-47';
 import {renderReactCharts,unmountReactCharts} from './gb-react-loader.js?v=20261105-45';
 import {mountNativeCharts} from './gb-charts-native.js?v=20261105-46';
 import {titleForm,partnerForm,accountForm,categoryForm,paymentForm,transferForm,titleDetail,customizeForm,accountDetail} from './forms.js?v=20261104-42';
@@ -719,7 +719,7 @@ async function init(){
 }
 init().catch(error=>startupRecovery(error?.message));
 // Importing the AI integration must never block the financial application.
-import('./ai-bridge.js?v=20261105-v5').then(({installAiBridge})=>{
+import('./ai-bridge.js?v=20261105-47').then(({installAiBridge})=>{
  installAiBridge({getDb:()=>db,getUser:currentUser,getRepository:()=>repository,commit,openEditor:titleId=>{
    if(!db||!currentUser())throw Error('É necessário estar conectado para editar este título.');
    const title=getTitle(titleId);
