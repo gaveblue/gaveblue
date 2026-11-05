@@ -1,3 +1,4 @@
+import {gbIcon,gbOptionIcon} from './gb-icons.js?v=20261104-41';
 /* GB+ Custom Controls · visual selectors and calendar without native popovers.
    The original form controls remain as data sources for FormData and validation. */
 const escapeHtml=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -22,8 +23,12 @@ function refreshSelect(select){
  const count=select.options.length;
  button.querySelector('.gb-custom-select-value').textContent=selected?.textContent||'Selecione';
  button.disabled=select.disabled||count===0;
+ const name=select.name||select.id||'';
  list.innerHTML=selectOptions(select).map(({value,title,disabled,selected})=>
-  '<button type="button" role="option" class="gb-custom-select-option'+(selected?' is-active':'')+'" aria-selected="'+String(selected)+'" data-value="'+escapeHtml(value)+'"'+(disabled?' disabled':'')+'><span>'+escapeHtml(title)+'</span>'+(selected?'<span class="gb-custom-check" aria-hidden="true">✓</span>':'')+'</button>'
+  '<button type="button" role="option" class="gb-custom-select-option'+(selected?' is-active':'')+'" aria-selected="'+String(selected)+'" data-value="'+escapeHtml(value)+'"'+(disabled?' disabled':'')+'>'+
+  '<span class="gb-custom-option-icon">'+gbIcon(gbOptionIcon(name,value,title))+'</span>'+
+  '<span class="gb-custom-option-title">'+escapeHtml(title)+'</span>'+
+  (selected?'<span class="gb-custom-check" aria-hidden="true">'+gbIcon('check')+'</span>':'')+'</button>'
  ).join('');
 }
 function enhanceSelect(select){
@@ -33,10 +38,10 @@ function enhanceSelect(select){
  const id='gb-custom-list-'+(++sequence);
  trigger.setAttribute('aria-haspopup','listbox');trigger.setAttribute('aria-expanded','false');trigger.setAttribute('aria-controls',id);
  trigger.setAttribute('aria-label',select.getAttribute('aria-label')||select.name||'Seleção');
- trigger.innerHTML='<span class="gb-custom-select-value"></span><span class="gb-custom-chevron" aria-hidden="true">⌄</span>';
+ trigger.innerHTML='<span class="gb-custom-select-value"></span>';
  const list=document.createElement('span');list.id=id;list.className='gb-custom-select-list';list.setAttribute('role','listbox');list.hidden=true;
  select.parentNode.insertBefore(wrapper,select);wrapper.append(select,trigger,list);
- select.classList.add('gb-custom-native-select');select.tabIndex=-1;
+ select.classList.add('gb-custom-native-select');select.tabIndex=-1;select.setAttribute('aria-hidden','true');
  refreshSelect(select);
 }
 function refreshDate(input){
@@ -52,9 +57,9 @@ function enhanceDate(input){
  const trigger=document.createElement('button');trigger.type='button';trigger.className='gb-custom-date-trigger';
  trigger.setAttribute('aria-label','Selecionar data');
  trigger.setAttribute('aria-haspopup','dialog');
- trigger.innerHTML='<span class="gb-custom-date-value"></span><span class="gb-custom-date-icon" aria-hidden="true">▦</span>';
+ trigger.innerHTML='<span class="gb-custom-date-value"></span><span class="gb-custom-date-icon" aria-hidden="true">'+gbIcon('calendar-days')+'</span>';
  input.parentNode.insertBefore(wrapper,input);wrapper.append(input,trigger);
- input.classList.add('gb-custom-native-date');input.tabIndex=-1;
+ input.classList.add('gb-custom-native-date');input.tabIndex=-1;input.setAttribute('aria-hidden','true');
  refreshDate(input);
 }
 export function enhanceGbControls(root=document){
@@ -73,13 +78,15 @@ function showMenu(button){
  const rect=button.getBoundingClientRect();
  const availableBelow=window.innerHeight-rect.bottom-12;
  const availableAbove=rect.top-12;
- const desired=Math.min(list.scrollHeight||220,240);
+ const desired=Math.min(list.scrollHeight||260,290);
  const useAbove=availableBelow<Math.min(desired,125)&&availableAbove>availableBelow;
  const room=Math.max(70,useAbove?availableAbove:availableBelow);
  const height=Math.min(desired,room);
- list.style.left=Math.max(8,rect.left)+'px';
+ const width=Math.min(Math.max(rect.width,220),Math.max(220,window.innerWidth-18));
+ const left=Math.max(8,Math.min(rect.left,window.innerWidth-width-8));
+ list.style.left=left+'px';
  list.style.right='auto';
- list.style.width=Math.min(rect.width,window.innerWidth-16)+'px';
+ list.style.width=width+'px';
  list.style.top=(useAbove?Math.max(8,rect.top-height-5):rect.bottom+5)+'px';
  list.style.maxHeight=height+'px';
  list.querySelector('[aria-selected="true"]')?.focus({preventScroll:true});
