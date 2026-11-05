@@ -14,8 +14,6 @@
  const callout=document.getElementById('guide-callout');
  const status=document.getElementById('install-status');
  const landingStatus=document.getElementById('landing-install-status');
- const appLink=document.getElementById('guide-app-link');
- const copyButton=document.getElementById('copy-app-link');
  const postInstallOverlay=document.getElementById('postinstall-overlay');
  const postInstallTitle=document.getElementById('postinstall-title');
  const postInstallDescription=document.getElementById('postinstall-description');
@@ -44,24 +42,22 @@
    lead:'No iPhone, adicione o GB+ à Tela de Início pelo Safari.',
    icon:appleIcon,
    steps:[
-    ['Abra no Safari','Toque no botão “Abrir GB+” abaixo. Se estiver em outro navegador ou aplicativo, abra o endereço no Safari.'],
-    ['Toque em Compartilhar','No Safari, use o botão Compartilhar. Em algumas versões, toque primeiro em Mais para encontrá-lo.'],
-    ['Adicione à Tela de Início','Escolha “Adicionar à Tela de Início”, ative “Abrir como App” quando aparecer e toque em “Adicionar”.']
+    ['Abra no Safari','Acesse gaveblue.com.br/gbplus no Safari. Se estiver em outro navegador, abra esse endereço pelo Safari.'],
+    ['Toque em Compartilhar','No Safari, toque no ícone Compartilhar, na barra de ferramentas.'],
+    ['Adicione à Tela de Início','Escolha “Adicionar à Tela de Início”, marque “Abrir como App” se aparecer e confirme em “Adicionar”.']
    ],
-   note:'Depois, procure o ícone GB+ na Tela de Início. Ele abre o financeiro como aplicativo, sem precisar da App Store.',
-   button:'Abrir GB+ no Safari'
+   note:'Pronto! O ícone GB+ ficará na Tela de Início. Abra por ele para usar como aplicativo.'
   },
   android:{
    heading:'Instalar no Android',
    lead:'Se a instalação automática não aparecer, use a opção do navegador.',
    icon:playIcon,
    steps:[
-    ['Abra no Google Chrome','Toque no botão “Abrir GB+” abaixo. Se estiver em um navegador interno, abra o endereço no Chrome.'],
-    ['Toque no menu ⋮','No Chrome, abra o menu de três pontos, normalmente no canto superior direito.'],
-    ['Escolha Instalar','Toque em “Instalar aplicativo” ou “Adicionar à tela inicial” e confirme a opção apresentada pelo Chrome.']
+    ['Abra no Google Chrome','Acesse gaveblue.com.br/gbplus no Chrome. Se estiver em um navegador interno, escolha abrir no Chrome.'],
+    ['Toque no menu ⋮','Abra o menu de três pontos no canto superior direito do Chrome.'],
+    ['Escolha Instalar','Toque em “Instalar aplicativo” ou “Adicionar à tela inicial” e confirme.']
    ],
-   note:'O Chrome pode oferecer a instalação direta. Se a opção não aparecer, confira se o navegador está atualizado e se o GB+ está aberto no Chrome.',
-   button:'Abrir GB+ no Chrome'
+   note:'Se o Chrome não oferecer a instalação direta, abra o menu ⋮ e procure “Instalar aplicativo”.'
   }
  };
 
@@ -95,8 +91,6 @@
    div.append(strong,span);li.append(div);steps.append(li);
   }
   callout.textContent=info.note;callout.hidden=false;
-  appLink.textContent=info.button;
-  appLink.href=openUrl;
   status.textContent='';
   document.title=info.heading+' · GB+';
   window.scrollTo(0,0);
@@ -214,15 +208,6 @@
   if(activePlatform==='android')status.textContent='GB+ instalado! Agora você pode abrir pelo ícone na Tela de Início.';
  });
  document.querySelectorAll('[data-open-web]').forEach(link=>link.addEventListener('click',markWebAccess));
- copyButton.addEventListener('click',async()=>{
-  try{
-   await navigator.clipboard.writeText(openUrl);
-   copyButton.textContent='Link copiado!';
-   setTimeout(()=>{copyButton.textContent='Copiar link do GB+';},2200);
-  }catch{
-   status.textContent='Não foi possível copiar automaticamente. Copie este endereço: '+openUrl;
-  }
- });
  // Register the existing lightweight, network-first GB+ service worker without
  // waiting for it. First-time Android visitors can then become PWA-installable.
  if('serviceWorker' in navigator){
