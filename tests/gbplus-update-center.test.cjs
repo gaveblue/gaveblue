@@ -37,7 +37,8 @@ test('structured highlighted release notes retain each title, description and ic
  assert.equal(highlights.length,version.highlights.length);
  assert.ok(highlights.every((item,i)=>item.title===version.highlights[i].title));
  assert.ok(highlights.every(x=>x.description.length>0));
- assert.ok(highlights.some(x=>x.icon==='bank'));
+ assert.ok(highlights.some(x=>x.icon==='file'));
+ assert.ok(highlights.some(x=>x.icon==='repeat'));
 });
 test('legacy plain-text notes still work; no more first-three truncation',()=>{
  const core=isolatedUpdate();
