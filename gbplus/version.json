@@ -1,14 +1,14 @@
 {
-  "version": "2.3.0",
-  "build": 47,
+  "version": "2.3.1",
+  "build": 48,
   "published_at": "2026-11-05",
-  "title": "Nova página de instalação do GB+ para celular",
+  "title": "Página de instalação mais compacta com imagem real",
   "notes": [
-    "Nova tela de instalação para visitantes que acessam o GB+ pela primeira vez no celular, inspirada na identidade visual do aplicativo.",
-    "Botões azuis Instalar para iPhone e Android, sem indicar disponibilidade em lojas de aplicativos.",
-    "Tutorial de instalação para iPhone via Safari; no Android, instalação direta quando o navegador permitir, com instruções alternativas.",
-    "Versão web no computador, sessões existentes e aplicativo já instalado permanecem inalterados.",
-    "Opção Instalar aplicativo nas Configurações do celular passa a abrir a nova página."
+    "Substituída a tela ilustrativa por uma captura real do painel GB+ fornecida pelo usuário.",
+    "Topo e espaçamentos reduzidos para facilitar a visualização dos botões Instalar na mesma tela.",
+    "Acesso à versão web movido para um ícone no canto superior direito.",
+    "Removidos o aviso sobre instalação pelo navegador e o link redundante do rodapé.",
+    "Instalação para iPhone e Android preservada, sem alterações em dados financeiros."
   ],
   "assets": [
     "./index.html",
@@ -63,6 +63,7 @@
     "./js/gb-charts-native.js",
     "./instalar.html",
     "./instalar.css",
-    "./js/install-landing.js"
+    "./js/install-landing.js",
+    "./assets/gbplus-dashboard-real.svg"
   ]
 }
