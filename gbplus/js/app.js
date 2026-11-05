@@ -311,7 +311,9 @@ const actions={
   'launch-edit':()=>{
    const ids=launchSelectedIds();
    if(ids.length!==1)throw Error('A edição é individual. Selecione apenas um lançamento.');
-   openModal('Editar lançamento',titleForm(db,getTitle(ids[0])));
+   const target=getTitle(ids[0]);
+   if(target.cardInvoice)throw Error('Edite compras e parcelas pelo cartão. A fatura não pode ser alterada manualmente.');
+   openModal('Editar lançamento',titleForm(db,target));
   },
   'launch-pay':()=>startLaunchPayment(launchSelectedIds()),
   'launch-reverse':()=>requestLaunchReversal(launchSelectedIds()),
