@@ -33,7 +33,7 @@ export function interpret(message,context=null,data=fixture){
   const explicitAmount=/\bvalor\b|r\$|\d\s*reais?\b/.test(s);
   if(explicitAmount&&value!==null)p.amountCents=value;
   if(day)p.due=dateFromDay(day[1]);
-  if(!day&&!explicitAmount)return {intent:'corrigir_previa',status:'needs_clarification',proposal:p,context:{proposal:p},answer:'Claro. Qual nova data de vencimento ou valor você gostaria de usar? Pode dizer, por exemplo, “altera para o dia 20”.'};
+  if(!day&&(!explicitAmount||value===null))return {intent:'corrigir_previa',status:'needs_clarification',proposal:p,context:{proposal:p},answer:'Claro. Qual nova data de vencimento ou valor você gostaria de usar? Pode dizer, por exemplo, “altera para o dia 20”.'};
   return {intent:'corrigir_previa',status:'ready',proposal:p,answer:'Atualizei a prévia. Confira os dados e confirme apenas se estiverem corretos.'};
  }
  if(/quanto.*(?:disponivel|posso gastar|sobrando)|saldo.*disponivel/.test(s)){const available=data.balance-data.payable;return {intent:'consultar_disponibilidade',status:'answered',answer:'Neste cenário fictício, o saldo atual é '+formatBRL(data.balance)+'. Reservando '+formatBRL(data.payable)+' para contas a pagar, a disponibilidade conservadora é '+formatBRL(available)+'. Se todos os recebíveis previstos entrarem, o saldo projetado seria '+formatBRL(available+data.receivable)+'. Não é uma recomendação automática de compra.'};}
