@@ -7,11 +7,14 @@ import {SupabaseRepository} from '../integrations/supabase/repository.js';
 import {initializeAuth,authClient,currentUser,showAuth,isRecovery,updatePersonalProfile,consumeAuthReturnMessage} from './auth.js?v=20261104-32';
 import {profileView,validateProfile,validCPF,formatCPF} from './profile.js?v=20261104-37';
 import {firstSetupView,customMobileNavForm,shortcutsPreview,readMobileNav} from './setup-ui.js?v=20261104-35';
+import {launchesView} from './launches-view.js?v=20261104-38';
+import {installLaunchGestures} from './launches-gestures.js?v=20261104-38';
+import {launchSelection,paymentSelection,paymentSummary,applyLaunchPayments,reversedSelection,applyLaunchReversals,deletionSelection,applyLaunchDeletions} from './launch-actions.js?v=20261104-38';
 let repository=null;let db;let busy=false;let pendingGeneration=null;let confirmAction=null;let installPrompt=null;let installedInSession=false;
 const isInstalledApp=()=>installedInSession||matchMedia('(display-mode: standalone)').matches||matchMedia('(display-mode: fullscreen)').matches||navigator.standalone===true;
 const inviteLink='https://gaveblue.com.br/gbplus/';
 let profileCpfStatus={userId:null,cpf:'',ready:false,loading:false,error:''};
-const state={route:'dashboard',period:'month',range:{},query:'',status:'',type:'',partner:'',category:'',partnerQuery:'',granularity:'month',report:'payable',reportPartner:'',moreFilters:false};
+const state={route:'dashboard',period:'month',range:{},query:'',status:'',type:'',partner:'',category:'',partnerQuery:'',granularity:'month',report:'payable',reportPartner:'',moreFilters:false,launchSelected:[],launchStatusOpen:false,launchSearchOpen:false};
 const modal=document.querySelector('#modal');
 // Desktop-only sidebar preference; changing it never touches the finance database.
 const sidebarPreferenceKey='gbplus-sidebar-hidden-v1';
@@ -62,7 +65,7 @@ function renderMobileShortcut(key){
  return item||['titles','Títulos','transfer'];
 }
 function rangeFor(period){const now=today();const [y,m]=now.split('-').map(Number);const date=(y,m,d)=>`${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;if(period==='all')return {from:'',to:''};if(period==='year')return {from:`${y}-01-01`,to:`${y}-12-31`};const dt=new Date(y,m-1-(period==='last'?1:0),1);const yy=dt.getFullYear(),mm=dt.getMonth()+1;return {from:date(yy,mm,1),to:date(yy,mm,new Date(yy,mm,0).getDate())};}
-async function commit(mutator,message='Salvo com sucesso.'){if(!db)throw Error('Entre ou abra o modo local antes de continuar.');if(busy)throw Error('Aguarde a gravação atual.');busy=true;document.body.classList.add('saving');try{const draft=structuredClone(db);await mutator(draft);db=await repository.save(draft);closeModal();render();toast(message);}finally{busy=false;document.body.classList.remove('saving');}}
+async function commit(mutator,message='Salvo com sucesso.'){if(!db)throw Error('Entre ou abra o modo local antes de continuar.');if(busy)throw Error('Aguarde a gravação atual.');busy=true;document.body.classList.add('saving');try{const draft=structuredClone(db);await mutator(draft);db=await repository.save(draft);state.launchSelected=[];closeModal();render();toast(message);}finally{busy=false;document.body.classList.remove('saving');}}
 function updateSystemAppearance(theme){
  const selected=theme==='dark'?'dark':'light',color=selected==='dark'?'#111214':'#f6f6f8';
  document.documentElement.dataset.theme=selected;
@@ -75,7 +78,7 @@ function render(){if(!db)return;updateSystemAppearance(db.settings.theme);docume
  const custom=effectiveMobileNav(db.settings);
  const slots=[['dashboard','Início','home'],renderMobileShortcut(custom[0]),['new','Novo','plus'],renderMobileShortcut(custom[1]),renderMobileShortcut(custom[2])];
  return slots.map(([key,label,ico])=>key==='new'||key==='menu'?`<button type="button" data-action="${key==='new'?'new-title':'mobile-menu'}" class="${key==='new'?'mobile-new':''}" aria-label="${label}">${icon(ico)}<span>${label}</span></button>`:`<a href="#${key}" class="${state.route===key?'active':''}" ${state.route===key?'aria-current="page"':''}>${icon(ico)}<span>${label}</span></a>`).join('');
-})();const views={dashboard:()=>dashboard(db,state,!!currentUser(),currentUser()),titles:()=>titlesView(db,state),payable:()=>titlesView(db,state),receivable:()=>titlesView(db,state),partners:()=>partnersView(db,state),accounts:()=>accountsView(db),categories:()=>categoriesView(db),flow:()=>flowView(db,state),provisions:()=>flowView(db,state),reports:()=>reportsView(db,state),settings:()=>settingsView(db,!!installPrompt,!!currentUser(),currentUser(),isInstalledApp()),notifications:()=>notificationsView(db),profile:()=>profileView(currentUser(),profileCpfStatus.userId===currentUser()?.id?profileCpfStatus:{ready:false,cpf:'',error:''})};document.body.classList.toggle('gb-settings-page',state.route==='settings');document.querySelector('#main').innerHTML=(views[state.route]||views.dashboard)();if(state.route==='profile'){initializeProfileDirtyState();if(!profileCpfStatus.ready&&!profileCpfStatus.loading&&!profileCpfStatus.error)void loadRegisteredCpf();}updateConnection();if(state.route==='dashboard')applyPanel();}
+})();const views={dashboard:()=>dashboard(db,state,!!currentUser(),currentUser()),titles:()=>launchesView(db,state),payable:()=>titlesView(db,state),receivable:()=>titlesView(db,state),partners:()=>partnersView(db,state),accounts:()=>accountsView(db),categories:()=>categoriesView(db),flow:()=>flowView(db,state),provisions:()=>flowView(db,state),reports:()=>reportsView(db,state),settings:()=>settingsView(db,!!installPrompt,!!currentUser(),currentUser(),isInstalledApp()),notifications:()=>notificationsView(db),profile:()=>profileView(currentUser(),profileCpfStatus.userId===currentUser()?.id?profileCpfStatus:{ready:false,cpf:'',error:''})};document.body.classList.toggle('gb-settings-page',state.route==='settings');document.querySelector('#main').innerHTML=(views[state.route]||views.dashboard)();if(state.route==='profile'){initializeProfileDirtyState();if(!profileCpfStatus.ready&&!profileCpfStatus.loading&&!profileCpfStatus.error)void loadRegisteredCpf();}updateConnection();if(state.route==='dashboard')applyPanel();}
 
 function filterSettings(value){
  const search=String(value||'').trim().toLocaleLowerCase('pt-BR');
@@ -137,7 +140,7 @@ function initializeProfileDirtyState(){
  syncProfileSaveState(form);
 }
 function applyPanel(){const device=matchMedia('(max-width: 760px)').matches?'mobile':'desktop';document.querySelectorAll('[data-indicator]').forEach(el=>{el.hidden=!db.settings.panel[device][el.dataset.indicator];});document.querySelectorAll('.dashboard-middle,.results-grid,.stats-grid').forEach(el=>el.hidden=![...el.children].some(x=>!x.hidden));}
-function route(){if(!db)return;const next=location.hash.slice(1);if(next==='main'&&document.querySelector('#main').childElementCount)return;state.route=next==='profile'||routes.some(r=>r[0]===next)?next:'dashboard';state.type=state.route==='payable'?'expense':state.route==='receivable'?'income':'';closeModal();render();window.scrollTo(0,0);}
+function route(){if(!db)return;const next=location.hash.slice(1);if(next==='main'&&document.querySelector('#main').childElementCount)return;const previous=state.route;state.route=next==='profile'||routes.some(r=>r[0]===next)?next:'dashboard';if(previous!==state.route){state.launchSelected=[];state.launchStatusOpen=false;}state.type=state.route==='payable'?'expense':state.route==='receivable'?'income':'';closeModal();render();window.scrollTo(0,0);}
 function formValues(form){return Object.fromEntries(new FormData(form));}
 function getTitle(id){const t=db.titles.find(t=>t.id===id);if(!t)throw Error('Título não encontrado.');return t;}
 function fail(error){if(currentUser()&&['SESSION','CONFLICT','SAVE','RELOAD'].includes(error.code)){document.querySelector('#sync-alert').hidden=false;}const area=modal.open?modal.querySelector('.form-error'):null;if(area){area.textContent=error.message;area.scrollIntoView({block:'nearest'});}else toast(error.message||'Não foi possível concluir a operação.');}
@@ -148,8 +151,8 @@ const actions={
   theme:()=>commit(d=>{d.settings.theme=d.settings.theme==='light'?'dark':'light';},'Tema atualizado.'),
   'top-theme':()=>commit(d=>{d.settings.theme=d.settings.theme==='light'?'dark':'light';},'Tema atualizado.'),
   'check-updates':()=>{closeModal();window.dispatchEvent(new Event('gbplus-check-updates'));},
-  'toggle-title-filters':()=>{state.moreFilters=!state.moreFilters;render();},
-  'clear-title-filters':()=>{state.query='';state.status='';state.partner='';state.category='';state.type=state.route==='payable'?'expense':state.route==='receivable'?'income':'';state.period='month';state.range=rangeFor('month');state.moreFilters=false;render();},
+  'toggle-title-filters':()=>{state.moreFilters=!state.moreFilters;state.launchSelected=[];render();},
+  'clear-title-filters':()=>{state.query='';state.status='';state.partner='';state.category='';state.type=state.route==='payable'?'expense':state.route==='receivable'?'income':'';state.period='month';state.range=rangeFor('month');state.moreFilters=false;state.launchSelected=[];state.launchStatusOpen=false;render();},
   'set-theme':el=>commit(d=>{d.settings.theme=el.dataset.value;},'Tema atualizado.'),
   'new-title':()=>openModal('Novo lançamento',titleForm(db,null,state.type||'expense')),
   'edit-title':el=>openModal('Editar lançamento',titleForm(db,getTitle(el.dataset.id))),
@@ -371,8 +374,8 @@ document.addEventListener('change',async e=>{if(!db)return;const el=e.target;try
   if(el.name?.startsWith('slot')&&el.form?.id==='mobile-nav-form')updateMobileNavPreview(el.form);
   if(el.id==='entry-type'){const select=document.querySelector('#entry-category');select.innerHTML=db.categories.filter(c=>c.type===el.value).map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');}
   if(el.id==='entry-mode'){document.querySelector('#count-field').hidden=el.value==='single';document.querySelector('#mode-hint').textContent=el.value==='installment'?'O valor total será dividido entre as parcelas, com ajuste exato dos centavos.':el.value==='recurring'?'O valor mensal será repetido em cada mês. Você poderá editar as ocorrências depois.':'Um título, um vencimento. O saldo só muda ao registrar uma baixa.';}
-  if(el.id==='period'){if(el.value==='custom'){openModal('Escolher período',`<form id="period-form"><div class="form-grid">${field('De','from',state.range.from||today(),'date','required')}${field('Até','to',state.range.to||today(),'date','required')}</div>${formFooter('Aplicar período')}</form>`);el.value=state.period;}else{state.period=el.value;state.range=rangeFor(el.value);render();}}
-  if(el.dataset.filter){state[el.dataset.filter]=el.value;if(['partner','category'].includes(el.dataset.filter))state.moreFilters=true;render();}
+  if(el.id==='period'){if(el.value==='custom'){openModal('Escolher período',`<form id="period-form"><div class="form-grid">${field('De','from',state.range.from||today(),'date','required')}${field('Até','to',state.range.to||today(),'date','required')}</div>${formFooter('Aplicar período')}</form>`);el.value=state.period;}else{state.period=el.value;state.range=rangeFor(el.value);state.launchSelected=[];state.launchStatusOpen=false;render();}}
+  if(el.dataset.filter){state[el.dataset.filter]=el.value;if(['partner','category'].includes(el.dataset.filter))state.moreFilters=true;state.launchSelected=[];render();}
   if(el.id==='report-type'){state.report=el.value;render();}
   if(el.id==='report-partner'){state.reportPartner=el.value;render();}
   if(el.id==='backup-input'&&el.files[0]){const file=el.files[0];el.value='';if(file.size>15*1024*1024)throw Error('O backup deve ter no máximo 15 MB.');const restored=parseBackup(await file.text());confirm('Restaurar backup?',`Este arquivo contém ${restored.titles.length} títulos, ${restored.partners.length} parceiros e ${restored.accounts.length} contas. Os registros atuais serão substituídos. Exporte um backup antes de continuar, se necessário.`,()=>commit(d=>{Object.keys(d).forEach(k=>delete d[k]);Object.assign(d,restored);},'Backup restaurado com sucesso.'));}
@@ -384,7 +387,7 @@ document.addEventListener('input',e=>{if(e.target.form?.id==='profile-form'){
   field.value=formatCPF(digits);
   profileCpfFeedback(field.form);
  }
- syncProfileSaveState(e.target.form);return;}if(e.target.id==='settings-search-input'){filterSettings(e.target.value);return;}if(!['title-search','partner-search'].includes(e.target.id))return;const el=e.target;const pos=el.selectionStart;state[el.id==='title-search'?'query':'partnerQuery']=el.value;render();const next=document.getElementById(el.id);next.focus();next.setSelectionRange(pos,pos);});
+ syncProfileSaveState(e.target.form);return;}if(e.target.id==='settings-search-input'){filterSettings(e.target.value);return;}if(!['title-search','partner-search'].includes(e.target.id))return;const el=e.target;const pos=el.selectionStart;state[el.id==='title-search'?'query':'partnerQuery']=el.value;if(el.id==='title-search')state.launchSelected=[];render();const next=document.getElementById(el.id);next.focus();next.setSelectionRange(pos,pos);});
 window.addEventListener('hashchange',route);
 matchMedia('(max-width: 760px)').addEventListener('change',()=>{if(db&&state.route==='dashboard')applyPanel();});
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPrompt=e;if(db&&state.route==='settings')render();});
