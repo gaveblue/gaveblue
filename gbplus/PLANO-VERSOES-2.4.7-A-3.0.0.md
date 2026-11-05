@@ -7,7 +7,7 @@
 | Marco | Tema | Entrega principal | Critério para avançar |
 |---|---|---|---|
 | **2.4.7** | Central de atualizações | Novidades ilustradas por cartões com ícones, títulos e descrições; mostrar todas as melhorias; manter download e reinício com confirmação; corrigir validação de pacotes com mais de 80 assets | Publicar versão e conferir painel no Android/PWA, notas e download real sem perder dados |
-| **2.4.8** | Lançamentos automáticos e recorrências | Revisão da criação automática de títulos, datas de vencimento, periodicidade e dias úteis; melhorar a prévia e o processo de confirmação | Receber do usuário a regra adicional ainda não detalhada; testar recorrências/parcelas sem duplicidade |
+| **2.4.8** | GB+ AI: prévia visual e anexos | Prévia do lançamento integrada ao chat, vencimentos, edição antes de gravar e anexo OFX/CSV para leitura local. PDF e Excel ainda aguardam parser. | Validar no celular, conferir edição por comando e confirmar que nenhum arquivo cria lançamentos |
 | **2.4.9** | Preparação da importação | Ampliar parser e prévia OFX/CSV em modo somente leitura; detectar transações duplicadas e ambíguas; reconhecer formatos diferentes; validar segurança e volume | Testar extratos reais anonimizados de bancos distintos, sem escrita de lançamentos |
 | **2.5.0** | Importação e conciliação bancária | Interface de selecionar conta, importar OFX/CSV, visualizar movimentos, comparar com baixas/transferências, aprovar conciliação ou criação de títulos e conferir divergências | Testes ponta a ponta de autorização, RLS, idempotência/reimportação, reversão e ausência de dupla contabilização |
 | **3.0.0** | **GB+ com IA financeira** | Assistente em linguagem natural para consultar e analisar dados, sugerir e preparar lançamentos; execução somente após prévia e confirmação do usuário | Política de segurança, permissões, histórico de ações, isolamento de dados, custo e testes de comandos reais |
@@ -24,16 +24,20 @@
 
 **Pendências:** testar no Android/iPhone, confirmar publicação da 2.4.7 e conferir que o processo não interrompe lançamentos não salvos.
 
-## 2.4.8 — Lançamentos automáticos e vencimentos
+## 2.4.8 — Chat redondo e prévia de lançamentos (implementado no código)
 
-**A especificar com o usuário:** o novo comportamento de lançamentos automáticos mencionado na solicitação. Não implementar uma regra desconhecida por suposição.
+A expressão “lançamentos automáticos” foi esclarecida: trata-se de **criar lançamentos ausentes a partir de extratos importados, somente após aprovação**, não de gerar recorrências de maneira independente.
 
-Revisões já identificadas:
-- Geração de parcelas e títulos recorrentes sem duplicidade.
-- Condição de vencimento em dias úteis, sem perder a data-base.
-- Prévia das próximas datas e valores **antes da confirmação**.
-- Edição de lançamentos futuros sem reescrever pagamentos já realizados.
-- Mensagens claras de validação, confirmação e histórico.
+- [x] Prévia de título dentro da conversa, seguindo o layout minimalista do GB+ AI.
+- [x] Detalhamento de datas/quantidades, inclusive 6 parcelas mensais de R$ 450,00.
+- [x] Botões Detalhar, Editar, Descartar e Confirmar e gravar.
+- [x] Editor de descrição, tipo, valor, primeiro vencimento, periodicidade, quantidade e parceiro.
+- [x] Corrigir a interpretação de “altera para dia 20”, sem modificar o valor.
+- [x] Botão de anexo para OFX, CSV, PDF e Excel no chat.
+- [x] OFX/CSV: leitura e totalização preliminar **local e não persistente**; PDF/XLSX: identificar o arquivo e indicar que a leitura está pendente.
+- [x] Manter a gravação existente via ponte autenticada somente depois de confirmação.
+- [ ] Homologar em aparelho real o formulário, a rolagem dos vencimentos, o PWA e a sincronização.
+- [ ] A importação em lote e a conciliação bancária real continuam reservadas à 2.5.0.
 
 ## 2.4.9 — Preparação segura da importação
 
