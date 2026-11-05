@@ -3,7 +3,7 @@ import {KEY,INDICATORS,defaultPanel,parseBackup,backupText,MOBILE_SHORTCUTS,defa
 import {esc,icon,button,field,select,formFooter,download,csv,titleTable} from './ui.js?v=20261104-42';
 import {routes,dashboard,titlesView,partnersView,accountsView,categoriesView,flowView,reportsView,settingsView,notificationsView,filteredTitles,reportData} from './views.js?v=20261105-47';
 import {renderReactCharts,unmountReactCharts} from './gb-react-loader.js?v=20261105-45';
-import {mountNativeCharts} from './gb-charts-native.js?v=20261105-46';
+import {mountNativeCharts} from './gb-charts-native.js?v=20261105-47';
 import {titleForm,partnerForm,accountForm,categoryForm,paymentForm,transferForm,titleDetail,customizeForm,accountDetail} from './forms.js?v=20261104-42';
 import {toggleEntryMenu,chooseEntryOption,syncEntrySelect,closeEntryMenus} from './entry-select.js?v=20261104-42';
 import {installGbControls,enhanceGbControls} from './custom-controls.js?v=20261104-42';
@@ -14,7 +14,7 @@ import {SupabaseRepository} from '../integrations/supabase/repository.js?v=20261
 import {initializeAuth,authClient,currentUser,showAuth,isRecovery,updatePersonalProfile,consumeAuthReturnMessage} from './auth.js?v=20261104-32';
 import {profileView,validateProfile,validCPF,formatCPF} from './profile.js?v=20261104-41';
 import {firstSetupView,customMobileNavForm,shortcutsPreview,readMobileNav} from './setup-ui.js?v=20261104-35';
-import {launchesView} from './launches-view.js?v=20261104-42';
+import {launchesView} from './launches-view.js?v=20261105-47';
 import {installLaunchGestures} from './launches-gestures.js?v=20261104-38';
 import {launchSelection,paymentSelection,paymentSummary,applyLaunchPayments,reversedSelection,applyLaunchReversals,deletionSelection,applyLaunchDeletions} from './launch-actions.js?v=20261104-42';
 let repository=null;let db;let busy=false;let pendingGeneration=null;let confirmAction=null;let pwaReady=false;
