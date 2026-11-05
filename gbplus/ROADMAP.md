@@ -64,10 +64,13 @@ Este arquivo separa o que já entrou no código do que ainda depende de implemen
 
 > Plano futuro: o documento é preparatório; não autoriza migração, atualização do banco ou mudança de cadastro sem revisão e testes.
 
-## Interface 100% personalizada (planejamento futuro)
+## Interface personalizada — GB+ 2.2.2
 
-- [ ] Substituir gradualmente os componentes nativos ainda presentes no GB+ (calendários, seletores, inputs e outros controles) por componentes visuais próprios e acessíveis, com suporte a toque, teclado, temas e tamanhos de tela.
-- [ ] Manter a integração de formulários com validações, preenchimento, datas e acessibilidade, migrando cada controle em etapas testadas.
-- [x] Primeiro componente personalizado: menus de Tipo (Receita/Despesa com setas coloridas), Categoria, Parceiro e Periodicidade no formulário de Lançamentos (v2.2.1).
+- [x] Seletores próprios nos formulários e filtros do GB+, com navegação por toque e teclado e integração com dados existentes.
+- [x] Calendário visual do GB+ para os campos de data, com limites de data, confirmação por seleção e fundo desfocado.
+- [x] Janela de atualização centralizada, sem simulações de download/instalação e com confirmação própria para reiniciar.
+- [x] Convite de instalação PWA no navegador de celular, utilizando o evento real do navegador quando oferecido.
+- [x] Menu de Receita e Despesa com setas coloridas (v2.2.1).
+- [ ] Continuar refinando outros elementos nativos fora de seletores/calendários (por exemplo: seletor de arquivos, teclado do dispositivo e recursos do sistema). Algumas interfaces do navegador ou sistema operacional não podem ser substituídas pela aplicação; não simular ações do sistema.
 
-> Não alterar controles globais sem teste de regressão; esta é uma etapa futura, separada do redesenho atual do formulário.
+> Os elementos de origem dos formulários continuam existentes, mas ficam visualmente ocultos quando substituídos pelos controles GB+, preservando FormData e validações. Nunca alterar dados financeiros apenas ao abrir um seletor ou calendário.
