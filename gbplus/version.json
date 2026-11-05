@@ -1,12 +1,12 @@
 {
-  "version": "2.2.0",
-  "build": 37,
+  "version": "2.2.1",
+  "build": 38,
   "published_at": "2026-11-04",
-  "title": "Lançamentos selecionáveis",
+  "title": "Formulário de lançamentos redesenhado",
   "notes": [
-    "Novo visual para Lançamentos e seleção por toque, sem checkbox.",
-    "Ações circulares para editar, baixar, estornar ou excluir, individualmente ou em lote.",
-    "Arrastar para direita ou esquerda abre a confirmação de baixa ou exclusão; transações protegidas."
+    "Novo lançamento e edição com visual minimalista inspirado na referência enviada.",
+    "Menus personalizados para Tipo, Categoria, Parceiro e Periodicidade, com Receita em verde/seta para cima e Despesa em vermelho/seta para baixo.",
+    "Fluxos de categoria, periodicidade, confirmação e edição preservados; demais componentes customizados ficam previstos para a próxima etapa."
   ],
   "assets": [
     "./index.html",
@@ -42,6 +42,8 @@
     "./launches-page.css",
     "./js/launches-view.js",
     "./js/launches-gestures.js",
-    "./js/launch-actions.js"
+    "./js/launch-actions.js",
+    "./entry-form.css",
+    "./js/entry-select.js"
   ]
 }
