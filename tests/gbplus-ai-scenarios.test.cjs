@@ -40,7 +40,7 @@ test('intenção de comprar calça, preço ausente, e seguimento no mesmo chat',
  assert.equal(first.context.item,'calça');
  assert.equal(first.context.month,'2026-12');
  assert.equal(first.context.amount,null);
- assert.match(first.answer,/Quanto você estima gastar/);
+ assert.match(first.answer,/Quanto estima gastar/);
  const second=ask('e se custar R$ 250?',first.context);
  assert.equal(second.context.amount,25000);
  assert.match(second.answer,/Saldo projetado com a compra: R.\s?400,00/);
