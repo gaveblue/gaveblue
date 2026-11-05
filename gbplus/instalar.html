@@ -16,44 +16,30 @@
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" href="./icons/icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="./icons/icon-192.png">
-  <link rel="stylesheet" href="./instalar.css?v=20261105-49">
+  <link rel="stylesheet" href="./instalar.css?v=20261105-50">
   <script src="./js/install-landing.js?v=20261105-49" defer></script>
 </head>
 <body>
   <main class="install-shell">
     <section id="install-welcome" aria-label="Instalar GB+">
       <header class="intro">
+        <a class="open-web" href="./?web=1" data-open-web aria-label="Abrir versão web" title="Abrir versão web">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9"/><path d="M20 13v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h5"/></svg>
+        </a>
         <div class="brand" aria-label="GB+">GB<span>+</span></div>
         <h1>Gestão Financeira</h1>
         <p>Controle, planejamento e fluxo de caixa para empresas e profissionais.</p>
       </header>
 
       <div class="device-stage">
-        <div class="device" role="img" aria-label="Prévia ilustrativa da tela inicial do aplicativo GB+">
+        <div class="device device-real">
           <div class="device-screen">
-            <div class="device-status"><span>09:41</span><span class="device-signal">● ▂▅▇</span></div>
-            <div class="device-top">
-              <span class="mini-brand">GB+</span>
-              <span class="mini-icons" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 15A8 8 0 0 1 9 4a8 8 0 1 0 11 11Z"/></svg>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 22a8 8 0 0 1 16 0"/></svg>
-              </span>
-            </div>
-            <div class="device-greeting"><strong>Bom dia!</strong><span>Aqui está o resumo do seu financeiro.</span></div>
-            <div class="device-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 11h18"/></svg> Este mês <span class="tiny-chevron">⌄</span></div>
-            <div class="device-section"><span>VISÃO GERAL</span><span>Todos os registros</span></div>
-            <div class="device-balance"><span>Saldo disponível</span><strong>R$ 0,00</strong><small>Saldo atual das contas</small><span class="device-wallet" aria-hidden="true">▤</span></div>
-            <div class="device-stats">
-              <div><span class="indicator positive">↑</span><small>A receber</small><strong>R$ 0,00</strong></div>
-              <div><span class="indicator negative">↓</span><small>A pagar</small><strong>R$ 0,00</strong></div>
-            </div>
+            <img src="./assets/gbplus-dashboard-real.svg" alt="Captura real do GB+ com painel de saldo, contas a receber, contas a pagar e próximos vencimentos." width="280" height="607" loading="eager" decoding="async">
           </div>
         </div>
-        <span class="device-disclaimer">Prévia ilustrativa</span>
       </div>
 
-      <div class="features" aria-label="Principais recursos">
+            <div class="features" aria-label="Principais recursos">
         <div class="feature">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" aria-hidden="true"><path d="m12 2 9 5-9 5-9-5 9-5ZM3 12l9 5 9-5M3 17l9 5 9-5"/></svg>
           <span>Contas</span>
@@ -93,9 +79,9 @@
         </article>
 
         <p id="landing-install-status" class="landing-install-status" role="status" aria-live="polite"></p>
-        <p class="store-note">Instalação pelo navegador. O GB+ não requer download nas lojas de aplicativos.</p>
+
       </section>
-      <footer class="landing-footer"><a href="./?web=1" data-open-web>Já uso o GB+ · Abrir versão web</a></footer>
+
     </section>
 
     <section id="install-guide" hidden aria-labelledby="guide-title">
