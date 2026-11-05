@@ -1,6 +1,7 @@
 // GB+ AI: deterministic, private, read-only simulations. Money is in cents.
 // A conversation context may describe a hypothetical plan, never an actual financial entry.
 const MONTH_NAMES=['janeiro','fevereiro','marco','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+const MONTH_DISPLAY=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
 const WORD_NUMBERS={um:1,uma:1,dois:2,duas:2,tres:3,quatro:4,cinco:5,seis:6,sete:7,oito:8,nove:9,dez:10,onze:11,doze:12};
 const brl=n=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(n/100);
 export const normalizeAi=s=>String(s||'').toLocaleLowerCase('pt-BR').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim();
@@ -14,7 +15,7 @@ const monthEnd=key=>{
 };
 const monthLabel=key=>{
  const [y,m]=key.split('-').map(Number);
- return MONTH_NAMES[m-1]+' de '+y;
+ return MONTH_DISPLAY[m-1]+' de '+y;
 };
 const numberValue=w=>/^\d+$/.test(w)?Number(w):(WORD_NUMBERS[w]??null);
 const safeCents=(text)=>{
@@ -102,7 +103,7 @@ export function projectCash(db,asOf,targetMonth,bankCents){
  }
  return {current:bankCents,incoming,outgoing,overdue,conservative:bankCents-outgoing,estimated:bankCents-outgoing+incoming};
 }
-const responseContext=(month,item,amount,extraIncome,installments)=>({kind:'scenario',month,item,amount,extraIncome,installments});
+const responseContext=(month,item,amount,extraIncome,installments,noOtherReceipts=false)=>({kind:'scenario',month,item,amount,extraIncome,installments,noOtherReceipts});
 const validPrev=context=>context?.kind==='scenario'&&
  (context.month===null||/^\d{4}-(?:0[1-9]|1[0-2])$/.test(context.month))&&
  (context.amount===null||(Number.isSafeInteger(context.amount)&&context.amount>0))?context:null;
@@ -132,7 +133,9 @@ export function answerScenario(db,question,{asOf,bankCents,context=null}={}){
  const amount=explicitPrice??((followup&&!itemExplicit)?prev.amount:null);
  const item=itemExplicit||((followup&&prev)?prev.item:null)||(isBuying?'compra':null);
  const installmentCount=readScenarioInstallments(question)??((followup&&!itemExplicit)?prev.installments:null);
- const scenario=responseContext(month,item,amount,incomingExtra,installmentCount);
+ const noReceipts=/(?:se\s+(?:eu\s+)?nao\s+receber|sem\s+receber\s+nada|nenhum\s+recebimento|clientes\s+nao\s+pagarem)/.test(s);
+ const noOtherReceipts=noReceipts?true:(conditionalIncome!==null?false:((followup&&!itemExplicit)?!!prev.noOtherReceipts:false));
+ const scenario=responseContext(month,item,amount,noReceipts?0:incomingExtra,installmentCount,noOtherReceipts);
  if(!month)return {answer:'Para qual mês você quer fazer a simulação? Responda “mês que vem”, “daqui a três meses” ou informe um mês específico.',context:scenario};
  if(month<today.slice(0,7))return {answer:'Esse período já passou. Informe um mês atual ou futuro.',context:scenario};
  const p=projectCash(db,today,month,bankCents);
@@ -148,8 +151,8 @@ export function answerScenario(db,question,{asOf,bankCents,context=null}={}){
   const values=installmentAmounts(amount,installmentCount);
   const [year,monthNum]=month.split('-').map(Number);
   const lastMonth=monthKey(year,monthNum,installmentCount-1);
-  const firstExpected=p.estimated-values[0]+incomingExtra;
-  const firstConservative=p.conservative-values[0]+incomingExtra;
+  const firstExpected=(noOtherReceipts?p.conservative:p.estimated)-values[0]+scenario.extraIncome;
+  const firstConservative=p.conservative-values[0]+scenario.extraIncome;
   const lastProjection=projectCash(db,today,lastMonth,bankCents);
   const lines=values.map((v,i)=>'• '+monthLabel(monthKey(year,monthNum,i))+': '+brl(v));
   const schedule=lines.length<=12?lines.join('\n'):[...lines.slice(0,5),'• … '+(lines.length-6)+' meses intermediários',lines.at(-1)].join('\n');
@@ -157,17 +160,17 @@ export function answerScenario(db,question,{asOf,bankCents,context=null}={}){
    +schedule+'\nTotal da compra: '+brl(amount)+'.'
    +'\nSaldo projetado no primeiro mês, após a parcela: '+brl(firstExpected)+'.'
    +'\nSaldo conservador no primeiro mês, sem recebimentos cadastrados: '+brl(firstConservative)+'.'
-   +'\nSaldo projetado ao fim das parcelas ('+monthLabel(lastMonth)+'): '+brl(lastProjection.estimated-amount+incomingExtra)+'.'
-   +(incomingExtra?'\nRecebimento hipotético adicional considerado: '+brl(incomingExtra)+'.':'')
+   +'\nSaldo projetado ao fim das parcelas ('+monthLabel(lastMonth)+'): '+brl((noOtherReceipts?lastProjection.conservative:lastProjection.estimated)-amount+scenario.extraIncome)+'.'
+   +(scenario.extraIncome?'\nRecebimento hipotético adicional considerado: '+brl(scenario.extraIncome)+'.':'')
    +'\nPressupostos: sem juros ou taxas, parcelas mensais e nenhuma outra compra não cadastrada. É uma simulação, não criei lançamento.',context:scenario};
  }
- const adjusted=p.estimated+incomingExtra-amount,prudent=p.conservative+incomingExtra-amount;
- const extra=incomingExtra?'\n• Recebimento hipotético ADICIONAL informado: '+brl(incomingExtra)+'.'
+ const adjusted=(noOtherReceipts?p.conservative:p.estimated)+scenario.extraIncome-amount,prudent=p.conservative+scenario.extraIncome-amount;
+ const extra=scenario.extraIncome?'\n• Recebimento hipotético ADICIONAL informado: '+brl(scenario.extraIncome)+'.'
    +'\n• Atenção: só some esse valor se ele ainda NÃO estiver entre os recebimentos cadastrados.':'';
  return {answer:prefix+extra
   +'\n• Compra simulada de '+item+': '+brl(amount)+' (à vista em '+monthLabel(month)+').'
-  +'\n• Saldo projetado com a compra'+(incomingExtra?' e o recebimento hipotético':'')+': '+brl(adjusted)+'.'
+  +'\n• Saldo projetado com a compra'+(scenario.extraIncome?' e o recebimento hipotético':'')+(noOtherReceipts?', sem outros recebimentos futuros':'')+': '+brl(adjusted)+'.'
   +'\n• Cenário conservador, sem outros recebimentos futuros: '+brl(prudent)+'.'
   +(prudent<0?'\nAtenção: no cenário conservador faltariam '+brl(-prudent)+'.':'')
-  +'\nSimulação apenas; não criei lançamento. Recebimentos futuros não são garantidos.',context:scenario};
+  +'\nSimulação apenas; não criei lançamento nem alterei seus dados. Recebimentos futuros não são garantidos.',context:scenario};
 }
