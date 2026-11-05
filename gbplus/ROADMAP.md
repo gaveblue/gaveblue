@@ -36,7 +36,7 @@ Este arquivo separa o que já entrou no código do que ainda depende de implemen
 - [ ] Possibilidade de adicionar mais de uma conta no passo a passo
 - [ ] Melhor orientação sobre saldo inicial, sem duplicar receitas nem baixas
 - [ ] Personalização da barra de ações mais intuitiva, com prévia e reordenação
-- [ ] Checklist simples de primeiros passos: conta, parceiro e primeiro lançamento
+- [x] Checklist opcional de primeiros passos: conta, saldo inicial e primeiro lançamento, sem gravar movimentações automaticamente
 
 ## Etapa seguinte — GB+ AI
 
@@ -74,3 +74,12 @@ Este arquivo separa o que já entrou no código do que ainda depende de implemen
 - [ ] Continuar refinando outros elementos nativos fora de seletores/calendários (por exemplo: seletor de arquivos, teclado do dispositivo e recursos do sistema). Algumas interfaces do navegador ou sistema operacional não podem ser substituídas pela aplicação; não simular ações do sistema.
 
 > Os elementos de origem dos formulários continuam existentes, mas ficam visualmente ocultos quando substituídos pelos controles GB+, preservando FormData e validações. Nunca alterar dados financeiros apenas ao abrir um seletor ou calendário.
+
+## GB+ 2.3.8 — autenticação e boas-vindas
+
+- [x] Indicador de força da senha (consultivo) e confirmação em tempo real.
+- [x] Avisos de sessão encerrada e links de acesso/recuperação inválidos ou expirados.
+- [x] Feedback para HTTP 429 e intervalo local de reenvio de e-mails.
+- [x] Checklist de conta, saldo inicial e primeiro lançamento.
+- [ ] Revisar limites efetivos de Auth no painel Supabase e homologar em dispositivos reais.
+- [ ] Auditar avisos do Security Advisor antes de considerar a proteção concluída.
