@@ -8,7 +8,17 @@ const money=n=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).
 const dateLabel=d=>new Date(d+'T12:00:00').toLocaleDateString('pt-BR');
 const normalize=s=>String(s||'').toLocaleLowerCase('pt-BR').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim();
 const sum=(rows,fn)=>rows.reduce((n,row)=>n+fn(row),0);
-const monthOf=(s,base)=>{if(!/(mes passado|ultimo mes|mes anterior)/.test(s))return base.slice(0,7);const d=new Date(base+'T12:00:00');d.setDate(1);d.setMonth(d.getMonth()-1);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');};
+const monthOf=(s,base)=>{
+  const d=new Date(base+'T12:00:00');
+  if(/(mes passado|ultimo mes|mes anterior)/.test(s)){d.setDate(1);d.setMonth(d.getMonth()-1);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');}
+  const months=['janeiro','fevereiro','marco','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+  const named=s.match(/\b(?:em|no|de|do|durante)\s+(?:o\s+mes\s+de\s+)?(janeiro|fevereiro|marco|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro)(?:\s+de\s+(\d{4}))?\b/);
+  if(!named)return base.slice(0,7);
+  const month=months.indexOf(named[1])+1;
+  // Historical paid/received amounts must never silently select a future month.
+  const year=named[2]?Number(named[2]):d.getFullYear()-(month>d.getMonth()+1?1:0);
+  return year+'-'+String(month).padStart(2,'0');
+ };
 function nextDay(date){const d=new Date(date+'T12:00:00');d.setDate(d.getDate()+1);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 function line(t,db){const partner=db.partners.find(p=>p.id===t.partnerId)?.name;return '• '+t.description+(partner?' ('+partner+')':'')+' — '+money(pending(db,t))+' — '+dateLabel(t.due);}
 function list(db,rows,title,limit=8){
@@ -41,8 +51,8 @@ export function answerFromDb(db,query){
  if(/(?:contas?|titulos?|boletos?|pagamentos?) (?:em atraso|atrasad|vencid)|o que esta atrasad|tenho (?:algo|contas?) atrasad|inadimplen/.test(s))return list(db,open.filter(t=>t.due<day),'Títulos vencidos');
  if(/(?:amanha|proximo dia)/.test(s)&&/(?:vence|vencem|venciment|conta|titulo|boleto)/.test(s))return list(db,open.filter(t=>t.due===nextDay(day)),'Vencimentos de amanhã');
  if(/hoje/.test(s)&&/(?:vence|vencem|venciment|conta|titulo|boleto)/.test(s))return list(db,open.filter(t=>t.due===day),'Vencimentos de hoje');
- if(/(?:venc|boleto|contas?|titulos?)/.test(s)&&/(?:mes|mensal)/.test(s))return list(db,open.filter(t=>t.due.startsWith(month)),'Vencimentos de '+period);
- if(/(?:venciment|proximas contas|proximos titulos|vai vencer|a vencer)/.test(s))return list(db,open.filter(t=>t.due>=day),'Próximos vencimentos');
+ if(/(?:venc|boleto|titulos?)/.test(s)&&/(?:mes|mensal)/.test(s))return list(db,open.filter(t=>t.due.startsWith(month)),'Vencimentos de '+period);
+ if(/(?:venciment|proxima(?:s)? conta(?:s)?|proximos titulos|vai vencer|a vencer)/.test(s))return list(db,open.filter(t=>t.due>=day),'Próximos vencimentos');
  if(/(quais sao meus clientes|quais clientes tenho|quantos clientes|listar clientes)/.test(s)){
   const clients=db.partners.filter(p=>p.roles?.includes('Cliente'));
   return clients.length?'Clientes cadastrados: '+clients.length+'.\n'+clients.slice(0,12).map(p=>'• '+p.name).join('\n')+(clients.length>12?'\n… e mais '+(clients.length-12)+' clientes.':''):'Não há clientes cadastrados na sua conta GB+.';
@@ -62,14 +72,14 @@ export function answerFromDb(db,query){
    return expenses.length?'Maiores despesas cadastradas (valor do título):\n'+expenses.slice(0,5).map(t=>'• '+t.description+' — '+money(t.amount)+' — '+dateLabel(t.due)).join('\n'):'Ainda não há despesas cadastradas.';
  }
  if(/(?:quanto gastei|quanto paguei|despesas pagas|total pago|gastos? (?:de|do|deste|no) mes|gastei no mes)/.test(s))return 'Despesas efetivamente pagas em '+period+': '+money(spent)+'. Conto apenas baixas registradas no GB+.';
- if(/(?:quanto recebi|recebimentos do mes|receitas recebidas|total recebido|recebi no mes)/.test(s))return 'Receitas efetivamente recebidas em '+period+': '+money(received)+'. Conto apenas baixas registradas.';
+ if(/(?:quanto recebi|quanto entrou|quanto dinheiro entrou|entradas do mes|entradas neste mes|recebimentos do mes|receitas recebidas|total recebido|recebi no mes)/.test(s))return 'Receitas efetivamente recebidas em '+period+': '+money(received)+'. Conto apenas baixas registradas.';
  if(/(?:resultado financeiro|resultado do mes|lucro|superavit|deficit|gastei mais do que recebi|recebi mais do que gastei)/.test(s))return 'Resultado financeiro de '+period+': '+money(received-spent)+' (recebido '+money(received)+' menos pago '+money(spent)+'). Isso não é necessariamente lucro contábil.';
  if(/(?:saldo por banco|saldos? das contas|saldo de cada conta|saldo por conta|contas bancarias|quais bancos)/.test(s)){
    return db.accounts.length?'Saldos calculados das suas contas:\n'+db.accounts.map(a=>'• '+a.name+': '+money(accountBalance(db,a.id,day))).join('\n'):'Não há contas bancárias cadastradas.';
  }
  if(/(?:projet|previs|futur)/.test(s)&&/(?:saldo|caixa|dinheiro|valor)/.test(s))return 'Saldo projetado simplificado: '+money(bank-payableTotal+receivableTotal)+' = saldo atual '+money(bank)+' − contas a pagar '+money(payableTotal)+' + contas a receber '+money(receivableTotal)+'. As datas dos pagamentos e recebimentos não foram consideradas.';
- if(/(?:disponivel|quanto posso gastar|dinheiro livre|sobra pra gastar|sobra para gastar)/.test(s))return 'Saldo bancário: '+money(bank)+'. Após reservar '+money(payableTotal)+' de contas a pagar, sobram '+money(available)+'. É uma estimativa financeira, não uma autorização para gastar.';
- if(/(?:quanto|qual|mostrar|ver|consultar|tenho|meu|atual).*saldo|saldo.*(?:atual|total|bancario)|tenho no banco|tenho em caixa/.test(s))return 'Saldo atual calculado das contas bancárias cadastradas no GB+: '+money(bank)+'. Considera saldos iniciais, baixas e transferências.';
+ if(/(?:disponivel|quanto posso gastar|dinheiro livre|sobra pra gastar|sobra para gastar|tenho (?:dinheiro|saldo) (?:pra|para) pagar)/.test(s))return 'Saldo bancário: '+money(bank)+'. Após reservar '+money(payableTotal)+' de contas a pagar, sobram '+money(available)+'. É uma estimativa financeira, não uma autorização para gastar.';
+ if(/(?:quanto|qual|mostrar|ver|consultar|tenho|meu|atual).*saldo|saldo.*(?:atual|total|bancario)|tenho no banco|tenho em caixa|quanto tenho na conta|quanto tenho de dinheiro/.test(s))return 'Saldo atual calculado das contas bancárias cadastradas no GB+: '+money(bank)+'. Considera saldos iniciais, baixas e transferências.';
  if(/(?:por fornecedor|por parceiro|quem devo|quem eu devo)/.test(s)&&/(?:despesa|pagar|devo|fornecedor|parceiro)/.test(s))return formatGroups(summarizeBy(db,payable,'partner'),'Contas a pagar por parceiro');
  if(/(?:por cliente|quem me deve|clientes? devendo|clientes? em aberto)/.test(s))return formatGroups(summarizeBy(db,receivable,'partner'),'Contas a receber por cliente');
  if(/(?:por categoria|categorias? com|categoria)/.test(s)&&/(?:despesa|gasto|pagar|receita|receber)/.test(s)){
