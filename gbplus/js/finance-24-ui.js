@@ -63,12 +63,13 @@ export function cardForm(db,card){
  return '<form id="card-form" data-id="'+esc(card?.id||'')+'"><div class="form-grid">'+
   '<div class="full">'+field('Apelido do cartão','name',card?.name||'','text','required maxlength="120" placeholder="Ex.: Cartão principal"')+'</div>'+
   '<div class="full">'+select('Banco ou instituição','bankId',options,card?.bankId||'')+'</div>'+
+  '<div class="full">'+select('Conta prevista para pagamento da fatura','payAccountId',[['','Não definir'],...db.accounts.map(a=>[a.id,a.name])],card?.payAccountId||'')+'</div>'+
   field('Últimos 4 dígitos (opcional)','last4',card?.last4||'','text','inputmode="numeric" pattern="[0-9]{4}" maxlength="4" placeholder="1234"')+
   field('Limite total (R$)','limit',(card?.limit||0)/100||'','number','required min="0.01" max="10000000000" step="0.01"')+
   field('Dia do fechamento','closingDay',card?.closingDay||10,'number','required min="1" max="28" step="1"')+
   field('Dia do vencimento','dueDay',card?.dueDay||17,'number','required min="1" max="28" step="1"')+
   select('Situação','active',[['true','Ativo'],['false','Inativo']],String(card?.active??true))+
-  '</div><p class="form-hint">Use dias de 1 a 28. Depois da primeira compra, os dias de fechamento e vencimento não poderão mudar, para preservar o histórico das faturas. Não informe o número completo, CVV ou senha do cartão.</p>'+
+  '</div><p class="form-hint">A conta escolhida é usada somente para prever o saldo das novas faturas; o dinheiro sai apenas quando a baixa for registrada. Use dias de 1 a 28. Após registrar compras, fechamento e vencimento ficam fixos. Não informe número completo, CVV ou senha.</p>'+
   formFooter(card?'Salvar cartão':'Cadastrar cartão')+'</form>';
 }
 export function cardPurchaseForm(db,cardId=''){
