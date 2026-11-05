@@ -16,8 +16,8 @@
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" href="./icons/icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="./icons/icon-192.png">
-  <link rel="stylesheet" href="./instalar.css?v=20261105-50">
-  <script src="./js/install-landing.js?v=20261105-49" defer></script>
+  <link rel="stylesheet" href="./instalar.css?v=20261105-51">
+  <script src="./js/install-landing.js?v=20261105-51" defer></script>
 </head>
 <body>
   <main class="install-shell">
@@ -108,5 +108,25 @@
       <p class="guide-footnote">A instalação é gratuita e não altera seus dados financeiros.</p>
     </section>
   </main>
+
+  <!-- Visual transition shown only AFTER Android's native install confirmation. -->
+  <div id="postinstall-overlay" class="postinstall-overlay" hidden>
+    <section class="postinstall-panel" role="dialog" aria-modal="true" aria-labelledby="postinstall-title" aria-describedby="postinstall-description">
+      <div class="postinstall-logo" aria-hidden="true">GB+</div>
+      <div class="postinstall-spinner" id="postinstall-spinner" aria-hidden="true"></div>
+      <h2 id="postinstall-title">Preparando seu acesso</h2>
+      <p id="postinstall-description">O Android recebeu sua confirmação. Estamos preparando a tela de conclusão.</p>
+      <div class="postinstall-progress" id="postinstall-progress" role="progressbar" aria-label="Preparação para acessar o GB+" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+        <div class="postinstall-progress-fill" id="postinstall-progress-fill"></div>
+      </div>
+      <div class="postinstall-info">
+        <span id="postinstall-stage">Preparando acesso…</span>
+        <span id="postinstall-percent">0%</span>
+      </div>
+      <p class="postinstall-footnote" id="postinstall-footnote">A instalação é realizada pelo Android.</p>
+      <a class="postinstall-done" id="postinstall-done" href="./?web=1" data-open-web hidden>Abrir GB+</a>
+      <button type="button" class="postinstall-dismiss" id="postinstall-dismiss" hidden>Fechar</button>
+    </section>
+  </div>
 </body>
 </html>
