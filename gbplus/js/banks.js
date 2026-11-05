@@ -125,12 +125,12 @@ export function bankPicker(db,value='',label='Banco ou instituição'){
  '<span class="gb-bank-selected" data-bank-selected>'+(selected?bankBadge(selected):'<span class="gb-bank-placeholder" aria-hidden="true">B</span>')+
  '<small>'+esc(selected?.name||'Selecione um banco')+'</small></span></div>'+
  '<label class="gb-bank-search-label" for="gb-bank-search-'+esc(label.replace(/[^a-z]/gi,'').toLowerCase())+'">Buscar instituição por nome, código bancário ou ISPB</label>'+
- '<input id="gb-bank-search-'+esc(label.replace(/[^a-z]/gi,'').toLowerCase())+'" class="gb-bank-search" type="search" name="bankLookup" autocomplete="off" placeholder="Ex.: Sicoob, Banco do Nordeste, 623, 756..." aria-label="Buscar banco por nome ou código">'+
- '<div class="gb-bank-native-select">'+select(label,'bankId',bankOptions(db),value)+'</div>'+
+ '<input id="gb-bank-search-'+esc(label.replace(/[^a-z]/gi,'').toLowerCase())+'" class="gb-bank-search" type="search" name="bankLookup" autocomplete="off" placeholder="Ex.: Sicoob, Nordeste, Pan, 623 ou 756" aria-label="Buscar banco por nome, COMPE ou ISPB">'+
+ '<details class="gb-bank-native-select"><summary>Ver lista completa de bancos</summary>'+select(label,'bankId',bankOptions(db),value)+'</details>'+
  '<div class="gb-bank-search-summary" data-bank-count aria-live="polite">'+bankCards.length+' instituições disponíveis em ordem alfabética. Deslize ou pesquise.</div>'+
  '<div class="gb-bank-shortcuts" role="group" aria-label="Instituições financeiras em ordem alfabética">'+bankCards.map(bank=>
   '<button type="button" class="gb-bank-shortcut" data-action="choose-bank" data-bank-id="'+esc(bank.id)+'" data-bank-search="'+
-  esc(normalize([bank.name,bank.code,bank.ispb,bank.aliases].filter(Boolean).join(' ')))+
+  esc([bank.name,bank.code,bank.ispb,bank.aliases].filter(Boolean).map(normalize).join(' '))+
   '" aria-pressed="'+String(bank.id===value)+'" title="'+esc(bank.name+(bank.code?' · '+bank.code:''))+'">'+
   bankBadge(bank)+'<small>'+esc(bank.name)+'</small>'+(bank.code?'<span class="gb-bank-code">'+esc(bank.code)+'</span>':'')+'</button>').join('')+'</div>'+
  '<p class="gb-bank-no-results" data-bank-no-results hidden>Nenhuma instituição encontrada. Você pode cadastrá-la em Bancos.</p></div>';
