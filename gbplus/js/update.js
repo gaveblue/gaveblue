@@ -11,6 +11,51 @@
  const numberParts=v=>String(v).split('.').slice(0,3).map(n=>Number(n)||0);
  const compare=(a,b)=>{const aa=numberParts(a),bb=numberParts(b);for(let i=0;i<3;i++){const d=(aa[i]||0)-(bb[i]||0);if(d)return d;}return 0;};
  const sIcon='<svg viewBox="0 0 24 24" aria-hidden="true" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m-5-5 5 5 5-5M5 18v3h14v-3"/></svg>';
+
+ // Icon drawing is predefined; release data is always inserted using textContent.
+ const glyphs=Object.freeze({
+  sparkles:'M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3z M19 16l.7 1.3L21 18l-1.3.7L19 20l-.7-1.3L17 18l1.3-.7L19 16z',
+  shield:'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z M9 12l2 2 4-4',
+  bank:'M3 10l9-6 9 6 M4 10h16 M6 10v9 M10 10v9 M14 10v9 M18 10v9 M3 20h18',
+  chart:'M4 19V5 M4 19h16 M7 15l4-5 4 2 4-6',
+  card:'M3 5h18v14H3z M3 10h18 M7 15h4',
+  repeat:'M20 7h-7l2-2 M13 7l2 2 M4 17h7l-2-2 M11 17l-2 2 M6 7a7 7 0 0 1 12 0 M18 17a7 7 0 0 1-12 0',
+  file:'M7 3h8l5 5v13H7z M15 3v5h5 M10 13h7 M10 17h7',
+  wallet:'M4 7V5a2 2 0 0 1 2-2h12 M4 7h16v14H4z M15 12h5v5h-5a2.5 2.5 0 0 1 0-5z',
+  check:'M4 12l5 5L20 6',
+  bell:'M5 17h14l-2-2V9a5 5 0 0 0-10 0v6z M10 20h4',
+  gear:'M12 3v2 M12 19v2 M3 12h2 M19 12h2 M5.6 5.6 7 7 M17 17l1.4 1.4 M18.4 5.6 17 7 M7 17l-1.4 1.4 M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0z'
+ });
+ const svgIcon=key=>'<svg viewBox="0 0 24 24" aria-hidden="true" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="'+(glyphs[key]||glyphs.sparkles)+'"/></svg>';
+ function inferredIcon(value){
+  const words=String(value||'').toLowerCase();
+  if(/seguran|privac|prote|permiss|senha/.test(words))return 'shield';
+  if(/banco|institui|logo|conta financeira/.test(words))return 'bank';
+  if(/cart[aã]o|fatura|limite/.test(words))return 'card';
+  if(/ofx|csv|arquivo|planilha|extrato|importa/.test(words))return 'file';
+  if(/fluxo|gr[aá]fico|previs[aã]o|saldo futuro|indicador/.test(words))return 'chart';
+  if(/lan[çc]ament|parcela|recorr|autom[aá]t/.test(words))return 'repeat';
+  if(/notific|aviso|alerta|vencimento/.test(words))return 'bell';
+  return 'sparkles';
+ }
+ function releaseHighlights(info){
+  const entries=Array.isArray(info?.highlights)&&info.highlights.length?info.highlights:info?.notes;
+  if(!Array.isArray(entries))return [];
+  return entries.slice(0,16).flatMap(item=>{
+   if(typeof item==='string'){
+    const title=item.trim().slice(0,340);
+    return title?[{title,description:'',icon:inferredIcon(title)}]:[];
+   }
+   if(!item||typeof item!=='object')return [];
+   const title=String(item.title||'').trim().slice(0,110);
+   if(!title)return [];
+   const description=String(item.description||'').trim().slice(0,320);
+   const icon=typeof item.icon==='string'&&Object.prototype.hasOwnProperty.call(glyphs,item.icon)?
+    item.icon:inferredIcon(title+' '+description);
+   return [{title,description,icon}];
+  });
+ }
+
  let registration=null,manifest=null,box=null,active=false,dirty=false;
  let dismissedVersion=null,downloadReady=false,checking=false,confirmRestart=false;
  const els={};
@@ -26,13 +71,15 @@
   node.innerHTML='<div class="gb-update-top"><span class="gb-update-symbol">'+sIcon+'</span>'+
    '<div class="gb-update-heading"><strong id="gbu-title">Atualização disponível</strong><small id="gbu-subtitle">Uma nova versão está pronta</small></div>'+
    '<button class="gb-update-close" type="button" aria-label="Fechar aviso de atualização" id="gbu-close">×</button></div>'+
+   '<p class="gb-update-eyebrow">O QUE HÁ DE NOVO</p>'+
    '<p id="gbu-description" class="gb-update-description"></p>'+
-   '<ul id="gbu-notes" class="gb-update-notes"></ul>'+
+   '<section class="gb-update-features" aria-label="Novidades desta versão"><div class="gb-update-features-top"><strong>Melhorias desta atualização</strong><small id="gbu-features-count"></small></div>'+
+   '<ul id="gbu-notes" class="gb-update-notes"></ul></section>'+
    '<div id="gbu-progress" class="gb-update-progress" hidden><div class="gb-update-progress-track" role="progressbar" aria-label="Arquivos preparados" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="gbu-bar"><span id="gbu-fill"></span></div><div class="gb-update-progress-meta"><span id="gbu-phase">Preparando…</span><b id="gbu-percent">0%</b></div></div>'+
    '<p id="gbu-feedback" class="gb-update-feedback" role="status" aria-live="polite"></p>'+
    '<div class="gb-update-buttons"><button type="button" id="gbu-later" class="gb-update-secondary">Depois</button><button type="button" id="gbu-primary" class="gb-update-primary">Baixar atualização</button></div>';
   document.body.append(node);box=node;
-  for(const id of ['title','subtitle','description','notes','progress','bar','fill','phase','percent','feedback','later','primary','close'])els[id]=node.querySelector('#gbu-'+id);
+  for(const id of ['title','subtitle','description','features-count','notes','progress','bar','fill','phase','percent','feedback','later','primary','close'])els[id]=node.querySelector('#gbu-'+id);
   els.close.addEventListener('click',dismiss);
   els.later.addEventListener('click',dismiss);
   els.primary.addEventListener('click',primaryClick);
@@ -66,11 +113,22 @@
   if(box)box.hidden=true;document.body.classList.remove('gb-update-open');confirmRestart=false;
   if(manifest&&compare(manifest.version,installed)>0)dismissedVersion=manifest.version;
  }
- function notes(list){
+ function notes(info){
   els.notes.replaceChildren();
-  for(const item of (Array.isArray(list)?list:[]).slice(0,3)){
-   if(typeof item!=='string')continue;
-   const li=document.createElement('li');li.textContent=item.slice(0,140);els.notes.append(li);
+  const items=releaseHighlights(info);
+  const panel=els.notes.parentElement;
+  if(panel)panel.hidden=items.length===0;
+  put(els['features-count'],items.length?items.length+' melhorias':'');
+  for(const item of items){
+   const li=document.createElement('li');li.className='gb-update-feature';
+   const badge=document.createElement('span');badge.className='gb-update-feature-icon gb-update-feature-icon--'+item.icon;
+   badge.innerHTML=svgIcon(item.icon); // Only predefined glyph markup is rendered.
+   const body=document.createElement('span');body.className='gb-update-feature-body';
+   const title=document.createElement('strong');title.textContent=item.title;body.append(title);
+   if(item.description){
+    const detail=document.createElement('small');detail.textContent=item.description;body.append(detail);
+   }
+   li.append(badge,body);els.notes.append(li);
   }
  }
  function available(info,force=false){
@@ -78,17 +136,18 @@
   if(!force&&dismissedVersion===info.version)return;
   manifest=info;downloadReady=false;
   const isMajor=Number(info.version.split('.')[0])>Number(installed.split('.')[0]);
-  show(isMajor?'Grande atualização disponível':'Atualização disponível',
-   'GB+ '+installed+' → '+info.version,
-   isMajor?'Uma nova geração do GB+: configuração inicial guiada, barra personalizável e experiência móvel aprimorada. Baixe e escolha quando reiniciar.':'Uma versão nova foi publicada. Baixe os arquivos e depois escolha quando reiniciar.');
-  notes(info.notes);
+  show(isMajor?'Uma nova geração do GB+':'Novidades chegando ao GB+',
+   'Versão '+installed+'  →  '+info.version,
+   isMajor?'Uma atualização importante está pronta. Veja as novidades e decida quando instalar.':'Confira o que melhorou no aplicativo. Seus dados financeiros serão preservados.');
+  notes(info);
   els.primary.hidden=false;els.primary.dataset.next='download';
   put(els.later,'Depois');put(els.primary,'Baixar atualização');
  }
- function current(){
+ function current(info){
   if(active)return;
   downloadReady=false;
   show('Tudo atualizado','GB+ versão '+installed,'Você já está utilizando a versão mais recente publicada.');
+  if(info&&info.version===installed)notes(info);
   put(els.later,'Fechar');els.primary.hidden=true;els.primary.dataset.next='';
  }
  function trouble(message){
@@ -103,7 +162,8 @@
  const sourceURL=()=>new URL('https://raw.githubusercontent.com/gaveblue/gaveblue/main/gbplus/version.json?check='+Date.now());
  function validRelease(data){
   return !!data&&/^\d+\.\d+\.\d+$/.test(data.version)&&Array.isArray(data.assets)&&
-   Number.isInteger(data.build)&&data.assets.length<=80&&data.assets.length>=1;
+   Number.isInteger(data.build)&&data.build>0&&data.assets.length<=500&&data.assets.length>=1&&
+   data.assets.every(asset=>typeof asset==='string'&&asset.length<=300&&asset.startsWith('./'));
  }
  async function loadRelease(url,ms=8500){
   const controller=new AbortController();
@@ -153,7 +213,7 @@
    }
    if(!hosted)throw Error('Não foi possível obter a versão publicada no site.');
    if(manual){
-    if(source)current();
+    if(source)current(hosted);
     else unverified();
    }
   }catch(error){if(manual)trouble(error.message||'Verificação indisponível.');}
