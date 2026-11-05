@@ -34,6 +34,16 @@ export function nextBusinessDay(value){
  }
  throw Error('Não foi possível calcular o próximo dia útil.');
 }
+// Keep edit previews and persisted recurring titles anchored to the same original date.
+// A shifted due date is not the monthly anniversary (e.g. 31/10 -> 03/11).
+export function recurrenceAnchor(due,original){
+ const originalDue=original?.originalDue;
+ if(due===original?.due&&typeof originalDue==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(originalDue)){
+  const d=new Date(originalDue+'T12:00:00Z');
+  if(Number.isFinite(d.getTime())&&d.toISOString().slice(0,10)===originalDue)return originalDue;
+ }
+ return due;
+}
 export function expectedDates(due,mode,count,businessDays,addMonths){
  const size=mode==='single'?1:count;
  if(!Number.isInteger(size)||size<1||size>120)throw Error('Informe de 1 a 120 vencimentos.');
