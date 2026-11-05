@@ -17,8 +17,8 @@ export function titleForm(db,t,type='expense'){
  const extra=t&&t.mode==='recurring'?
    entrySelect('Aplicar alterações','scope',[['one','Somente este lançamento'],['future','Este e os futuros da recorrência']],'one','entry-scope'):
    '';
- const isSeries=!t||t.mode!=='single';
- return `<form id="title-form" class="gb-entry-form gb-entry-wizard" data-id="${esc(t?.id||'')}" data-mode="${esc(t?.mode||'single')}" data-count="${Number(t?.count||1)}" data-step="1">
+ const isSeries=!t||t.mode==='recurring';
+ return `<form id="title-form" class="gb-entry-form gb-entry-wizard" data-id="${esc(t?.id||'')}" data-mode="${esc(t?.mode||'single')}" data-count="${Number(t?Math.max(1,t.count-t.sequence+1):1)}" data-step="1">
   <div class="gb-entry-progress" aria-label="Etapa 1 de 2"><span class="active">1 · Dados</span><span>2 · Valores</span></div>
   <section id="gb-entry-step-one" class="gb-entry-stage" data-entry-stage="1" aria-label="Dados do lançamento">
    <div class="form-grid gb-entry-grid">
