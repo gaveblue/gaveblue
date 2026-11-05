@@ -173,6 +173,18 @@ function startLaunchPayment(ids){
   select('Conta utilizada','accountId',[['','Selecione uma conta'],...accounts.map(a=>[a.id,a.name])],suggested,'required')+
   '</div>'+formFooter('Revisar baixas')+'</form>');
 }
+function requestLaunchReversal(ids){
+ const {titles,payments,total}=reversedSelection(db,ids);
+ confirm('Estornar '+payments.length+' baixa(s)?',
+  'Serão estornadas '+payments.length+' baixas de '+titles.length+' lançamento(s), totalizando '+money(total)+'. Os saldos serão recalculados. Continuar?',
+  ()=>commit(d=>applyLaunchReversals(d,ids),payments.length+' baixa(s) estornada(s).'));
+}
+function requestLaunchDeletion(ids){
+ const selected=deletionSelection(db,ids);
+ confirm('Excluir '+selected.length+' lançamento(s)?',
+  'Os '+selected.length+' lançamento(s) selecionados serão removidos. Registros já baixados precisam ser estornados antes. Confirmar exclusão?',
+  ()=>commit(d=>applyLaunchDeletions(d,ids),selected.length+' lançamento(s) excluído(s).'));
+}
 const actions={
   close:closeModal,
   'toggle-sidebar':()=>syncSidebarVisibility(!document.documentElement.classList.contains('sidebar-hidden'),true),
