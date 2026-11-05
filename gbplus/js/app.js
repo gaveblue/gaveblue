@@ -512,10 +512,49 @@ document.addEventListener('submit',async e=>{e.preventDefault();if(busy||!db)ret
    nextSetupStep('review');
    return;
   }
-  if(form.id==='title-form'){if(!['income','expense'].includes(v.type)||!db.categories.some(c=>c.id===v.categoryId&&c.type===v.type))throw Error('Escolha uma categoria válida para o tipo do lançamento.');const input={type:v.type,description:v.description.trim(),categoryId:v.categoryId,partnerId:v.partnerId,document:v.document.trim(),issue:v.issue,due:v.due,amount:cents(v.amount),accountId:v.accountId||'',notes:v.notes.trim()};if(id){await commit(d=>updateTitle(d,id,{...input,cancelled:v.cancelled==='true'},v.scope==='future'));return;}const generated=generateTitles(input,v.mode,v.mode==='single'?1:Number(v.count));const clone=form.cloneNode(true);form.querySelectorAll('input,select,textarea').forEach((el,i)=>{const dest=clone.querySelectorAll('input,select,textarea')[i];if(el.tagName==='SELECT')[...dest.options].forEach(o=>o.toggleAttribute('selected',o.value===el.value));else if(el.tagName==='TEXTAREA')dest.textContent=el.value;else dest.setAttribute('value',el.value);});generated.formHTML=clone.outerHTML;pendingGeneration=generated;openModal('Revise antes de confirmar',`<div class="preview-summary"><span>${generated.length} título(s) · ${v.mode==='installment'?'Parcelado':v.mode==='recurring'?'Recorrente':'Único'}</span><strong>${money(generated.reduce((s,t)=>s+t.amount,0))}</strong><p>Valor total da operação</p></div><div class="preview-list">${generated.map(t=>`<div><span>${esc(t.description)} ${t.count>1?`${t.sequence}/${t.count}`:''}<small>${dateLabel(t.due)}</small></span><b>${money(t.amount)}</b></div>`).join('')}</div><div class="form-error" role="alert"></div><div class="form-footer">${button('Voltar','back-generation')}${button('Confirmar geração','save-generation','primary')}</div>`);}
+  if(form.id==='title-form'){
+   if(form.dataset.step!=='2')throw Error('Conclua as duas etapas do lançamento.');
+   validateEntryStepOne(form);
+   const input={type:v.type,description:v.description.trim(),categoryId:v.categoryId,partnerId:v.partnerId||'',
+    document:v.document.trim(),issue:v.issue,due:v.due,amount:cents(v.amount),
+    accountId:v.accountId||'',notes:v.notes.trim()};
+   if(id){
+    const original=getTitle(id);
+    const businessDays=original.mode!=='single'&&v.businessDays==='true';
+    await commit(d=>updateTitle(d,id,{...input,cancelled:v.cancelled==='true',businessDays},v.scope==='future'));
+    return;
+   }
+   const businessDays=v.mode!=='single'&&v.businessDays==='true';
+   const generated=generateTitles(input,v.mode,v.mode==='single'?1:Number(v.count),{businessDays});
+   const clone=form.cloneNode(true);
+   const originals=[...form.querySelectorAll('input,select,textarea')],destinations=[...clone.querySelectorAll('input,select,textarea')];
+   originals.forEach((el,i)=>{
+    const dest=destinations[i];if(!dest)return;
+    if(el.tagName==='SELECT'){[...dest.options].forEach(o=>o.toggleAttribute('selected',o.value===el.value));}
+    else if(el.type==='checkbox')dest.toggleAttribute('checked',el.checked);
+    else if(el.tagName==='TEXTAREA')dest.textContent=el.value;
+    else dest.setAttribute('value',el.value);
+   });
+   generated.formHTML=clone.outerHTML;
+   pendingGeneration=generated;
+   const shifted=generated.filter(t=>t.shiftedToBusinessDay).length;
+   openModal('Revise antes de confirmar',
+    '<div class="preview-summary"><span>'+generated.length+' título(s) · '+
+    (v.mode==='installment'?'Parcelado':v.mode==='recurring'?'Recorrente':'Único')+
+    '</span><strong>'+money(generated.reduce((sum,t)=>sum+t.amount,0))+
+    '</strong><p>Valor total da operação</p></div>'+
+    (businessDays?'<p class="gb-entry-review-note">Somente dias úteis nacionais. '+shifted+
+    ' vencimento(s) ajustado(s) ao próximo dia útil.</p>':'')+
+    '<div class="preview-list">'+generated.map(t=>
+     '<div><span>'+esc(t.description)+(t.count>1?' · '+t.sequence+'/'+t.count:'')+
+     '<small>'+dateLabel(t.due)+(t.shiftedToBusinessDay?' · ajustado do dia '+dateLabel(t.originalDue):'')+
+     '</small></span><b>'+money(t.amount)+'</b></div>').join('')+'</div>'+
+    '<div class="form-error" role="alert"></div><div class="form-footer">'+
+    button('Voltar','back-generation')+button('Confirmar geração','save-generation','primary')+'</div>');
+  }
   else if(form.id==='partner-form'){const roles=new FormData(form).getAll('roles');if(!roles.length)throw Error('Selecione ao menos uma classificação.');const row={...v,id:id||uid(),name:v.name.trim(),active:v.active==='true',roles};await commit(d=>{if(row.document&&d.partners.some(p=>p.id!==row.id&&p.document.replace(/\D/g,'')===row.document.replace(/\D/g,'')))throw Error('Já existe um parceiro com este CPF/CNPJ.');upsert(d.partners,row);});}
   else if(form.id==='account-form'){await commit(d=>upsert(d.accounts,{...v,id:id||uid(),name:v.name.trim(),initial:cents(v.initial),active:v.active==='true'}));}
-  else if(form.id==='category-form'){await commit(d=>{const row={...v,id:id||uid(),name:v.name.trim()};if(d.categories.some(c=>c.id!==row.id&&c.type===row.type&&c.name.toLowerCase()===row.name.toLowerCase()))throw Error('Já existe uma categoria com este nome e tipo.');if(id&&d.titles.some(t=>t.categoryId===id&&t.type!==v.type))throw Error('Não é possível alterar o tipo de uma categoria em uso.');upsert(d.categories,row);});}
+  else if(form.id==='category-form'){if(!CATEGORY_ICON_OPTIONS.some(([key])=>key===v.icon))throw Error('Escolha um ícone válido para a categoria.');await commit(d=>{const row={...v,id:id||uid(),name:v.name.trim()};if(d.categories.some(c=>c.id!==row.id&&c.type===row.type&&c.name.toLowerCase()===row.name.toLowerCase()))throw Error('Já existe uma categoria com este nome e tipo.');if(id&&d.titles.some(t=>t.categoryId===id&&t.type!==v.type))throw Error('Não é possível alterar o tipo de uma categoria em uso.');upsert(d.categories,row);});}
   else if(form.id==='payment-form'){await commit(d=>addPayment(d,{titleId:id,accountId:v.accountId,date:v.date,amount:cents(v.amount)}),'Baixa registrada. Saldo atualizado.');}
   else if(form.id==='launch-bulk-pay-form'){
    const ids=String(form.dataset.ids||'').split(',').filter(Boolean);
