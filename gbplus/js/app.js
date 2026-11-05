@@ -60,12 +60,12 @@ function confirm(title,message,callback){confirmAction=callback;openModal(title,
 let setupDraft=null;
 function startSetupWizard(){
  if(!db)return;
- setupDraft={step:'welcome',history:[],createAccount:false,name:'',bank:'',branch:'',number:'',initial:0,theme:db.settings.theme};
+ setupDraft={step:'welcome',history:[],createAccount:false,name:'',bank:'',branch:'',number:'',bankId:'',initial:0,theme:db.settings.theme};
  showSetupWizard();
 }
 function showSetupWizard(){
  if(!setupDraft)return;
- openModal('Configuração inicial do GB+',firstSetupView(setupDraft));
+ openModal('Configuração inicial do GB+',firstSetupView(setupDraft,db));
 }
 function nextSetupStep(step){
  if(!setupDraft)return;
@@ -513,7 +513,7 @@ const actions={
    await commit(d=>{
     if(draft.createAccount){
      if(d.accounts.some(a=>a.name.trim().toLocaleLowerCase('pt-BR')===draft.name.trim().toLocaleLowerCase('pt-BR')))throw Error('Já existe uma conta com esse nome. Escolha outro para evitar duplicidade.');
-     d.accounts.push({id:uid(),name:draft.name.trim(),bank:draft.bank.trim(),branch:draft.branch.trim(),number:draft.number.trim(),initial:draft.initial,active:true});
+     d.accounts.push({id:uid(),name:draft.name.trim(),bank:draft.bank.trim(),bankId:draft.bankId||'',branch:draft.branch.trim(),number:draft.number.trim(),initial:draft.initial,active:true});
     }
     d.settings.theme=draft.theme;
     d.settings.setupCompleted=true;
@@ -589,9 +589,11 @@ document.addEventListener('submit',async e=>{e.preventDefault();if(busy||!db)ret
   }
   if(form.id==='setup-account-form'){
    if(!setupDraft)return;
-   const name=String(v.name||'').trim(),bank=String(v.bank||'').trim(),branch=String(v.branch||'').trim(),number=String(v.number||'').trim();
+   const name=String(v.name||'').trim(),bankId=String(v.bankId||''),manualBank=String(v.bank||'').trim();
+   const bank=bankId?bankName(db,bankId):manualBank,branch=String(v.branch||'').trim(),number=String(v.number||'').trim();
+   if(bankId&&!findBank(db,bankId))throw Error('Selecione uma instituição válida.');
    if(!name||name.length>120||bank.length>120||branch.length>80||number.length>80)throw Error('Confira o nome e os dados da conta.');
-   Object.assign(setupDraft,{createAccount:true,name,bank,branch,number});
+   Object.assign(setupDraft,{createAccount:true,name,bank,bankId,branch,number});
    nextSetupStep('balance-choice');
    return;
   }
