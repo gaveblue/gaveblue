@@ -31,7 +31,7 @@
   const words=String(value||'').toLowerCase();
   if(/seguran|privac|prote|permiss|senha/.test(words))return 'shield';
   if(/banco|institui|logo|conta financeira/.test(words))return 'bank';
-  if(/cart[aã]o|fatura|limite/.test(words))return 'card';
+  if(/cart[aãõ]o|cart[oõ]es|fatura|limite/.test(words))return 'card';
   if(/ofx|csv|arquivo|planilha|extrato|importa/.test(words))return 'file';
   if(/fluxo|gr[aá]fico|previs[aã]o|saldo futuro|indicador/.test(words))return 'chart';
   if(/lan[çc]ament|parcela|recorr|autom[aá]t/.test(words))return 'repeat';
