@@ -1,4 +1,4 @@
-import {addPayment,pending,paid} from './domain.js';
+import {addPayment,pending,paid} from './domain.js?v=20261104-42';
 
 // Resolve an explicit visible selection. No implicit "all in filter" updates.
 export function launchSelection(db,ids){
