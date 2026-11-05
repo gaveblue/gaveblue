@@ -144,8 +144,8 @@ function profileSnapshot(form){
  // Compare effective saved values, not formatting (phone, CPF or CEP masks).
  const normalize=(key,value)=>{
   const text=String(value);
-  if(['phone','cpf','postal_code'].includes(key))return text.replace(/\\D/g,'');
-  if(key==='full_name')return text.trim().replace(/\\s+/g,' ');
+  if(['phone','cpf','postal_code'].includes(key))return text.replace(/\D/g,'');
+  if(key==='full_name')return text.trim().replace(/\s+/g,' ');
   if(key==='state')return text.trim().toUpperCase();
   return text.trim();
  };
