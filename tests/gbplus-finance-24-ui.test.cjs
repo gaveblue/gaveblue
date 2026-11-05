@@ -14,7 +14,7 @@ const formFooter=(label='Salvar')=>'<button type="submit">'+label+'</button>';
 const empty=(title,description)=>'<div>'+title+' '+description+'</div>';
 const money=value=>'R$ '+(value/100).toFixed(2).replace('.',',');
 const dateLabel=v=>v?String(v).split('-').reverse().join('/'):'—';
-const banks=new Function('esc',load('banks.js')+';return {BANKS,bankCatalog,findBank,bankBadge,bankOptions};')(esc);
+const banks=new Function('esc','select',load('banks.js')+';return {BANKS,bankCatalog,findBank,bankBadge,bankOptions,bankPicker};')(esc,select);
 const forecast=new Function('today','balance','pending','accountBalance','validDate',load('forecast.js')+';return {cashForecast};')(
  ()=> '2026-11-05',
  db=>(db.accounts||[]).reduce((sum,a)=>sum+a.initial,0),
@@ -23,11 +23,11 @@ const forecast=new Function('today','balance','pending','accountBalance','validD
  s=>/^\d{4}-\d{2}-\d{2}$/.test(s)
 );
 const credit=new Function(load('credit-cards.js')+';return {creditCards,cardPurchases,cardUsed,cardAvailable};')();
-const ui=new Function('esc','icon','button','field','select','formFooter','empty','today','money','dateLabel','pending','accountBalance','BANKS','bankCatalog','bankOptions','findBank','bankBadge','creditCards','cardPurchases','cardUsed','cardAvailable','cashForecast',
+const ui=new Function('esc','icon','button','field','select','formFooter','empty','today','money','dateLabel','pending','accountBalance','BANKS','bankCatalog','bankOptions','findBank','bankBadge','bankPicker','creditCards','cardPurchases','cardUsed','cardAvailable','cashForecast',
  load('finance-24-ui.js')+';return {banksView,bankForm,cardsView,cardForm,cardPurchaseForm,forecastSummary,forecastView,forecastScenarioForm,forecastResult};')(
  esc,icon,button,field,select,formFooter,empty,()=> '2026-11-05',money,dateLabel,
  (db,t)=>t.amount,()=>0,
- banks.BANKS,banks.bankCatalog,banks.bankOptions,banks.findBank,banks.bankBadge,
+ banks.BANKS,banks.bankCatalog,banks.bankOptions,banks.findBank,banks.bankBadge,banks.bankPicker,
  credit.creditCards,credit.cardPurchases,credit.cardUsed,credit.cardAvailable,forecast.cashForecast
 );
 const fixture=()=>({
