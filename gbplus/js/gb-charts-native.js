@@ -36,6 +36,8 @@ export function mountNativeCharts(db,state,flowRows){
   const payload=buildChartPayload(db,state,flowRows);
   if(earnings&&payload.earnings.hasRecords){
     earnings.hidden=false;
+    const original=earnings.parentElement?.querySelector('[data-gb-chart-original]');
+    if(original)original.hidden=true;
     const draw=id=>{
       const period=payload.earnings.periods.find(p=>p.id===id)||payload.earnings.periods[1];
       earnings.innerHTML=earningsMarkup(period);
