@@ -1,6 +1,6 @@
 /* GB+ Update Center.
  * Real downloads, file-by-file progress, explicit installation/reload.
- * Optional animation preview is clearly labeled and does not install anything.
+ * This center contains real downloads only; no previews or fake installations.
  * Never change financial records, user storage or auth sessions.
  */
 (function(){
@@ -11,15 +11,16 @@
  const numberParts=v=>String(v).split('.').slice(0,3).map(n=>Number(n)||0);
  const compare=(a,b)=>{const aa=numberParts(a),bb=numberParts(b);for(let i=0;i<3;i++){const d=(aa[i]||0)-(bb[i]||0);if(d)return d;}return 0;};
  const sIcon='<svg viewBox="0 0 24 24" aria-hidden="true" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m-5-5 5 5 5-5M5 18v3h14v-3"/></svg>';
- let registration=null,manifest=null,box=null,active=false,preview=false,dirty=false;
- let demoTimer=null,dismissedVersion=null,downloadReady=false,checking=false;
+ let registration=null,manifest=null,box=null,active=false,dirty=false;
+ let dismissedVersion=null,downloadReady=false,checking=false,confirmRestart=false;
  const els={};
  function view(){
   if(box)return box;
   if(!document.body)return null;
   const node=document.createElement('aside');
   node.className='gb-update-notice';
-  node.setAttribute('role','region');
+  node.setAttribute('role','dialog');
+  node.setAttribute('aria-modal','true');
   node.setAttribute('aria-label','Atualizações do GB+');
   node.hidden=true;
   node.innerHTML='<div class="gb-update-top"><span class="gb-update-symbol">'+sIcon+'</span>'+
@@ -35,6 +36,15 @@
   els.close.addEventListener('click',dismiss);
   els.later.addEventListener('click',dismiss);
   els.primary.addEventListener('click',primaryClick);
+  node.addEventListener('keydown',event=>{
+   if(event.key==='Escape'&&!active){event.preventDefault();dismiss();}
+   if(event.key==='Tab'){
+    const controls=[...node.querySelectorAll('button:not([hidden]):not([disabled])')];
+    if(!controls.length)return;
+    if(event.shiftKey&&document.activeElement===controls[0]){event.preventDefault();controls[controls.length-1].focus();}
+    else if(!event.shiftKey&&document.activeElement===controls[controls.length-1]){event.preventDefault();controls[0].focus();}
+   }
+  });
   return box;
  }
  function put(node,text){if(node)node.textContent=text;}
@@ -46,16 +56,16 @@
  }
  function show(title,subtitle,description){
   const el=view();if(!el)return;
-  el.hidden=false;put(els.title,title);put(els.subtitle,subtitle);put(els.description,description);
+  el.hidden=false;document.body.classList.add('gb-update-open');put(els.title,title);put(els.subtitle,subtitle);put(els.description,description);
   els.notes.replaceChildren();els.progress.hidden=true;put(els.feedback,'');
   els.later.hidden=false;els.later.disabled=false;els.close.disabled=false;els.primary.disabled=false;els.primary.hidden=false;
+  requestAnimationFrame(()=>els.primary.focus({preventScroll:true}));
  }
  function dismiss(){
   if(active){put(els.feedback,'Conclua o download ou aguarde a operação terminar.');return;}
-  stopDemo();if(box)box.hidden=true;
+  if(box)box.hidden=true;document.body.classList.remove('gb-update-open');confirmRestart=false;
   if(manifest&&compare(manifest.version,installed)>0)dismissedVersion=manifest.version;
  }
- function stopDemo(){if(demoTimer){clearInterval(demoTimer);demoTimer=null;} }
  function notes(list){
   els.notes.replaceChildren();
   for(const item of (Array.isArray(list)?list:[]).slice(0,3)){
@@ -66,7 +76,7 @@
  function available(info,force=false){
   if(active)return;
   if(!force&&dismissedVersion===info.version)return;
-  manifest=info;preview=false;downloadReady=false;
+  manifest=info;downloadReady=false;
   const isMajor=Number(info.version.split('.')[0])>Number(installed.split('.')[0]);
   show(isMajor?'Grande atualização disponível':'Atualização disponível',
    'GB+ '+installed+' → '+info.version,
@@ -77,7 +87,7 @@
  }
  function current(){
   if(active)return;
-  preview=false;downloadReady=false;
+  downloadReady=false;
   show('Tudo atualizado','GB+ versão '+installed,'Você já está utilizando a versão mais recente publicada.');
   put(els.later,'Fechar');els.primary.hidden=true;els.primary.dataset.next='';
  }
@@ -93,7 +103,7 @@
  const sourceURL=()=>new URL('https://raw.githubusercontent.com/gaveblue/gaveblue/main/gbplus/version.json?check='+Date.now());
  function validRelease(data){
   return !!data&&/^\d+\.\d+\.\d+$/.test(data.version)&&Array.isArray(data.assets)&&
-   Number.isInteger(data.build)&&data.assets.length<=35&&data.assets.length>=1;
+   Number.isInteger(data.build)&&data.assets.length<=80&&data.assets.length>=1;
  }
  async function loadRelease(url,ms=8500){
   const controller=new AbortController();
@@ -108,7 +118,7 @@
  }
  function publicationPending(source,hosted=null){
   if(active)return;
-  manifest=null;preview=false;downloadReady=false;
+  manifest=null;downloadReady=false;
   const hostedLabel=hosted?.version||'não confirmada';
   show('Atualização aguardando publicação',
    'GitHub '+source.version+' · site '+hostedLabel,
@@ -157,7 +167,7 @@
  }
  async function download(){
   if(active||!manifest)return;
-  active=true;downloadReady=false;preview=false;
+  active=true;downloadReady=false;
   els.primary.disabled=true;els.later.disabled=true;els.close.disabled=true;els.primary.dataset.next='';
   put(els.primary,'Baixando…');put(els.feedback,'Arquivos baixados de verdade, não apenas uma animação.');
   const assets=manifest.assets;
@@ -219,11 +229,17 @@
   }
  }
  function apply(){
-  if(!downloadReady||!manifest||preview)return;
+  if(!downloadReady||!manifest)return;
   if(document.body.classList.contains('saving')||document.querySelector('dialog[open]')){
    put(els.feedback,'Conclua e feche o lançamento ou formulário antes de reiniciar.');return;
   }
-  if(dirty&&!window.confirm('Há campos editados nesta sessão. Deseja reiniciar mesmo assim? Alterações não salvas podem ser perdidas.'))return;
+  if(dirty&&!confirmRestart){
+   confirmRestart=true;
+   put(els.title,'Confirme a reinicialização');
+   put(els.description,'Houve alterações em campos nesta sessão. Se algum formulário ainda não foi salvo, ele poderá perder essas alterações ao reiniciar. Deseja continuar?');
+   put(els.later,'Voltar');put(els.primary,'Reiniciar mesmo assim');
+   els.primary.dataset.next='install';return;
+  }
   put(els.title,'Instalando atualização…');
   put(els.description,'Reabrindo o GB+ com a nova versão. Seus dados financeiros serão preservados.');
   setProgress(100,'Instalando e reiniciando…');
@@ -232,31 +248,6 @@
   const destination=new URL(location.href);
   destination.searchParams.set('gbplus_release',String(manifest.build));
   location.assign(destination.href);
- }
- function demo(){
-  if(active)return;
-  preview=true;downloadReady=false;stopDemo();
-  show('Prévia da atualização','Demonstração visual','Veja como aparecerá o download e a instalação. Nenhum arquivo será baixado ou instalado nesta simulação.');
-  notes(['Aviso de atualização disponível','Preparação dos arquivos','Confirmação para reiniciar o aplicativo']);
-  put(els.primary,'Simular atualização');els.primary.dataset.next='demo';
-  put(els.later,'Fechar');
- }
- function runDemo(){
-  if(active||!preview)return;
-  active=true;els.primary.disabled=true;els.close.disabled=true;els.later.disabled=true;
-  let progress=0;setProgress(0,'Demonstração: iniciando download…');
-  demoTimer=setInterval(()=>{
-   progress=Math.min(100,progress+5);
-   const phase=progress<72?'Demonstração: baixando arquivos…':progress<96?'Demonstração: preparando instalação…':'Demonstração: concluída';
-   setProgress(progress,phase);
-   if(progress>=100){
-    stopDemo();active=false;
-    els.primary.disabled=false;els.later.disabled=false;els.close.disabled=false;
-    put(els.title,'Prévia concluída');put(els.description,'Esta foi apenas uma demonstração. Nenhuma versão foi instalada.');
-    put(els.feedback,'Seu aplicativo continua na versão '+installed+'.');
-    put(els.primary,'Fechar prévia');els.primary.dataset.next='close';
-   }
-  },75);
  }
  function primaryClick(){
   if(active)return;
@@ -278,7 +269,7 @@
   }
   document.addEventListener('input',event=>{if(event.target.closest?.('#main,#modal'))dirty=true;},{passive:true});
   window.addEventListener('gbplus-check-updates',()=>check(true));
-  // Update previews are intentionally disabled; only real version checks are available.
+  // Only real version checks and verified asset downloads are supported.
   window.addEventListener('focus',()=>check(false));
   // Once on boot and infrequently after; no forced reload.
   setTimeout(()=>check(false),1800);
