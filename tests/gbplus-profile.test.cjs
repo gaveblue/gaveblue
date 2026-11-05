@@ -22,9 +22,9 @@ test('profile has minimal sections and locked identity fields',()=>{
  assert.ok(!html.includes('name="cpf"'));
  assert.ok(!html.includes('id="profile-email-form"'));
  assert.ok(html.includes('id="profile-save" class="gb-account-save" disabled hidden'));
- assert.ok(html.includes('data-auth-action="signout"'));
+ assert.ok(html.includes('data-action="profile-signout"'));
  assert.ok(!html.includes('Excluir conta'));
- assert.ok(html.indexOf('data-auth-action="signout"')>html.indexOf('</form>'));
+ assert.ok(html.indexOf('data-action="profile-signout"')>html.indexOf('</form>'));
  assert.ok(!html.slice(html.indexOf('Segurança da conta'),html.indexOf('</section>',html.indexOf('Segurança da conta'))).includes('signout'));
  assert.ok(html.includes('M21 12H9'));
  assert.ok(!html.includes('Voltar às configurações'));
@@ -89,8 +89,23 @@ test('profile stylesheet uses a scoped design and release metadata',()=>{
  assert.ok(css.includes('compact profile with a coherent sequence'));
  assert.ok(css.includes('.gb-account-address{margin:0 0 12px'));
  assert.ok(css.includes('.gb-account-field{min-height:60px'));
- assert.ok(index.includes('profile-page.css?v=20261105-59'));
+ assert.ok(index.includes('profile-page.css?v=20261105-60'));
  assert.ok(css.includes('.gb-account-logout'));
  assert.ok(version.assets.includes('./profile-page.css'));
  assert.equal(version.version,'2.3.7');
+});
+
+test('logout requires confirmation and protects unsaved profile changes',()=>{
+ const app=read('js/app.js'),auth=read('js/auth.js'),css=read('profile-page.css');
+ assert.ok(app.includes("'profile-signout':()=>{"));
+ assert.ok(app.includes("form.dataset.initialSnapshot!==profileSnapshot(form)"));
+ assert.ok(app.includes('Você tem alterações não salvas em Minha conta'));
+ assert.ok(app.includes('Deseja sair da sua conta?'));
+ assert.ok(app.includes("button('Continuar no GB+','close')"));
+ assert.ok(app.includes('data-action="confirm"'));
+ assert.ok(auth.includes("export async function signOutAccount()"));
+ assert.ok(auth.includes("signOut({scope:'local'})"));
+ assert.ok(auth.includes("location.replace('./?web=1')"));
+ assert.ok(css.includes('.gb-logout-dialog-actions'));
+ assert.ok(css.includes('.gb-logout-confirm-button'));
 });
