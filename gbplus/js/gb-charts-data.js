@@ -23,7 +23,7 @@ const cleanRows = db => {
   const titles = new Map((db?.titles||[]).map(title=>[title.id,title]));
   return (db?.payments||[]).flatMap(payment=>{
     const title=titles.get(payment.titleId);
-    if(!title||title.cancelled||!validAmount(payment.amount)||!(/^\d{4}-\d{2}-\d{2}$/.test(payment.date)))return [];
+    if(!title||!validAmount(payment.amount)||!(/^\d{4}-\d{2}-\d{2}$/.test(payment.date)))return [];
     return [{date:payment.date,amount:payment.amount,type:title.type,categoryId:title.categoryId||''}];
   });
 };
