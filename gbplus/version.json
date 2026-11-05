@@ -1,14 +1,13 @@
 {
-  "version": "2.3.8",
-  "build": 56,
+  "version": "2.3.9",
+  "build": 57,
   "published_at": "2026-11-05",
-  "title": "Acesso mais seguro e primeiros passos",
+  "title": "Estabilidade da autenticação e atualização offline",
   "notes": [
-    "Indicador de força da senha no cadastro e na recuperação, sem exigir combinação específica de letras, números ou símbolos.",
-    "Validação em tempo real da confirmação de senha e avisos claros para links expirados, inválidos ou utilizados.",
-    "Orientação ao usuário quando a sessão expira ou é encerrada, preservando seus dados financeiros.",
-    "Intervalo de 60 segundos para novos pedidos de e-mail no aplicativo, com mensagens específicas para bloqueios do Supabase; os limites efetivos continuam aplicados pelo servidor.",
-    "Checklist opcional para cadastrar a primeira conta, informar saldo inicial e criar o primeiro lançamento, sem gravar operações automaticamente."
+    "Melhorada a consistência do intervalo de 60 segundos para solicitar e-mails de autenticação, inclusive após atualizar a página e ao alterar senha em Minha conta.",
+    "Revisado o tratamento de arquivos do PWA quando não há conexão: evita combinar arquivos sem versão de compilações anteriores.",
+    "Mantidas a confirmação do logout, a recuperação de senha e a proteção das alterações não salvas no perfil.",
+    "Acrescentados testes de regressão para reenvio de e-mails, recuperação de conta e arquivos offline."
   ],
   "assets": [
     "./index.html",
