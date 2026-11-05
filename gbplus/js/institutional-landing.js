@@ -6,8 +6,11 @@
   const mobileBrowser = (() => {
     try {
       if (window.matchMedia('(display-mode:standalone)').matches || navigator.standalone === true) return false;
-      if (navigator.userAgentData?.mobile === true) return true;
-      if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '')) return true;
+      const ua = String(navigator.userAgent || '');
+      if (/Android|iPhone|iPad|iPod/i.test(ua)) return true;
+      if (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) return true;
+      if (typeof navigator.userAgentData?.mobile === 'boolean') return navigator.userAgentData.mobile;
+      if (/Windows NT|Macintosh|X11|Linux x86_64/i.test(ua)) return false;
       return window.matchMedia('(max-width:820px) and (pointer:coarse)').matches;
     } catch { return false; }
   })();
