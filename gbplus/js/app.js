@@ -19,7 +19,7 @@ setupPwaInstallation();
 installGbControls();
 const inviteLink='https://gaveblue.com.br/gbplus/';
 let profileCpfStatus={userId:null,cpf:'',ready:false,loading:false,error:''};
-const state={route:'dashboard',period:'month',range:{},query:'',status:'',type:'',partner:'',category:'',partnerQuery:'',granularity:'month',report:'payable',reportPartner:'',moreFilters:false,launchSelected:[],launchStatusOpen:false,launchSearchOpen:false};
+const state={route:'dashboard',period:'all',range:{},query:'',status:'',type:'',partner:'',category:'',partnerQuery:'',granularity:'month',report:'payable',reportPartner:'',moreFilters:false,launchSelected:[],launchStatusOpen:false,launchSearchOpen:false};
 const modal=document.querySelector('#modal');
 // Desktop-only sidebar preference; changing it never touches the finance database.
 const sidebarPreferenceKey='gbplus-sidebar-hidden-v1';
@@ -228,7 +228,7 @@ const actions={
    if(!wasOpen)document.getElementById('title-search')?.focus();
   },
   'toggle-title-filters':()=>{state.moreFilters=!state.moreFilters;state.launchSelected=[];render();},
-  'clear-title-filters':()=>{state.query='';state.status='';state.partner='';state.category='';state.type=state.route==='payable'?'expense':state.route==='receivable'?'income':'';state.period='month';state.range=rangeFor('month');state.moreFilters=false;state.launchSelected=[];state.launchStatusOpen=false;render();},
+  'clear-title-filters':()=>{state.query='';state.status='';state.partner='';state.category='';state.type=state.route==='payable'?'expense':state.route==='receivable'?'income':'';state.period='all';state.range=rangeFor('all');state.moreFilters=false;state.launchSelected=[];state.launchStatusOpen=false;render();},
   'set-theme':el=>commit(d=>{d.settings.theme=el.dataset.value;},'Tema atualizado.'),
   'entry-toggle':el=>toggleEntryMenu(el),
   'entry-option':el=>chooseEntryOption(el),
@@ -577,7 +577,7 @@ async function init(){
   if(isRecovery()){showAuth('recovery');return;}
   repository=new SupabaseRepository(authClient(),user.id);
   db=await startupLimit(repository.read(),16000);
-  state.range=rangeFor('month');
+  state.range=rangeFor('all');
   document.querySelector('#auth-gate').hidden=true;
   document.body.classList.remove('auth-locked');
   document.documentElement.removeAttribute('data-boot');
