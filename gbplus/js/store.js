@@ -1,5 +1,6 @@
 import {uid,validDate,paid,today} from './domain.js?v=20261104-42';
 import {CATEGORY_ICON_OPTIONS} from './gb-icons.js?v=20261104-42';
+import {BANKS} from './banks.js?v=20261105-70';
 export const KEY='gb-plus:data:v1';
 export const INDICATORS={balance:'Saldo disponível',receivable:'A receber',payable:'A pagar',provisions:'Provisões líquidas',received:'Receitas recebidas',spent:'Despesas pagas',result:'Resultado financeiro',overdue:'Títulos vencidos',chart:'Fluxo de caixa',upcoming:'Próximos vencimentos'};
 export const defaultPanel=()=>({desktop:Object.fromEntries(Object.keys(INDICATORS).map(k=>[k,true])),mobile:Object.fromEntries(Object.keys(INDICATORS).map(k=>[k,true]))});
@@ -25,6 +26,52 @@ export function emptyDatabase(){return {schemaVersion:1,revision:0,titles:[],pay
 const assert=(ok,message)=>{if(!ok)throw Error(`Backup inválido: ${message}`);};
 const str=(s,max=2000)=>typeof s==='string'&&s.length<=max;
 const amount=n=>Number.isSafeInteger(n)&&Math.abs(n)<=1e12;
+const entityId=id=>str(id,100)&&/^[A-Za-z0-9_-]+$/.test(id);
+function validateCreditData(db){
+ const banks=db.banks||[],cards=db.cards||[],purchases=db.cardPurchases||[];
+ for(const key of ['banks','cards','cardPurchases'])assert(db[key]===undefined||Array.isArray(db[key])&&db[key].length<=100000,key+' inválido.');
+ const ids=new Set(BANKS.map(b=>b.id));
+ for(const bank of banks){
+  assert(bank&&entityId(bank.id)&&!ids.has(bank.id)&&str(bank.name,120)&&bank.name.trim()&&/^#[0-9a-fA-F]{6}$/.test(bank.color),'instituição financeira personalizada.');
+  ids.add(bank.id);
+ }
+ const cardIds=new Set();
+ for(const card of cards){
+  assert(card&&entityId(card.id)&&!cardIds.has(card.id)&&str(card.name,120)&&card.name.trim()&&
+   str(card.bankId||'',100)&&(!card.bankId||ids.has(card.bankId))&&
+   str(card.last4||'',4)&&(!card.last4||/^\d{4}$/.test(card.last4))&&
+   Number.isSafeInteger(card.limit)&&card.limit>0&&card.limit<=1e12&&
+   Number.isInteger(card.closingDay)&&card.closingDay>=1&&card.closingDay<=28&&
+   Number.isInteger(card.dueDay)&&card.dueDay>=1&&card.dueDay<=28&&
+   typeof card.active==='boolean','cartão de crédito.');
+  cardIds.add(card.id);
+ }
+ const invoiceTotals=new Map(),purchaseIds=new Set(),invoiceCodes=new Set();
+ for(const t of db.titles){
+  if(t.cardInvoice!==true)continue;
+  assert(entityId(t.cardId)&&cardIds.has(t.cardId)&&/^\d{4}-(0[1-9]|1[0-2])$/.test(t.cardCycle||'')&&
+   t.type==='expense'&&!t.cancelled&&t.mode==='single','fatura de cartão.');
+  const key=t.cardId+'|'+t.cardCycle;
+  assert(!invoiceCodes.has(key),'fatura duplicada.');
+  invoiceCodes.add(key);invoiceTotals.set(t.id,0);
+ }
+ for(const p of purchases){
+  assert(p&&entityId(p.id)&&!purchaseIds.has(p.id)&&cardIds.has(p.cardId)&&invoiceTotals.has(p.invoiceId)&&
+   str(p.description,300)&&p.description.trim()&&validDate(p.date)&&amount(p.amount)&&p.amount>0&&
+   db.categories.some(c=>c.id===p.categoryId&&c.type==='expense')&&
+   (!p.partnerId||db.partners.some(x=>x.id===p.partnerId))&&
+   Number.isInteger(p.sequence)&&Number.isInteger(p.count)&&p.count>=1&&p.count<=36&&p.sequence>=1&&p.sequence<=p.count&&
+   (p.groupId===null||entityId(p.groupId)),'compra no cartão.');
+  purchaseIds.add(p.id);
+  const invoice=db.titles.find(t=>t.id===p.invoiceId);
+  assert(invoice.cardId===p.cardId,'compra vinculada à fatura de outro cartão.');
+  invoiceTotals.set(p.invoiceId,invoiceTotals.get(p.invoiceId)+p.amount);
+ }
+ for(const [invoiceId,sum] of invoiceTotals){
+  assert(sum>0&&db.titles.find(t=>t.id===invoiceId)?.amount===sum,'fatura não corresponde às compras do cartão.');
+ }
+ for(const a of db.accounts)if(a.bankId!==undefined)assert(str(a.bankId,100)&&(!a.bankId||ids.has(a.bankId)),'instituição da conta.');
+}
 export function validateDatabase(db){
   assert(db&&db.schemaVersion===1,'versão não suportada.');
   for(const key of ['titles','payments','partners','accounts','transfers','categories']) {assert(Array.isArray(db[key])&&db[key].length<=100000,`lista ${key}.`); const ids=new Set(); for(const row of db[key]){assert(row&&str(row.id,100)&&/^[A-Za-z0-9_-]+$/.test(row.id)&&!ids.has(row.id),`identificador em ${key}.`);ids.add(row.id);}}
@@ -40,6 +87,7 @@ export function validateDatabase(db){
   // Optional on older backups: unchanged data can be loaded without migration.
   if(db.settings.mobileNav!==undefined)assert(validMobileNav(db.settings.mobileNav),'atalhos da barra inferior.');
   if(db.settings.setupCompleted!==undefined)assert(typeof db.settings.setupCompleted==='boolean','configuração inicial.');
+  validateCreditData(db);
   assert(Number.isSafeInteger(db.revision)&&db.revision>=0,'revisão.');return db;
 }
 // Repository boundary: replace this adapter to migrate persistence without changing financial rules.
