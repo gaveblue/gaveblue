@@ -1,12 +1,14 @@
 {
-  "version": "2.3.7",
-  "build": 54,
+  "version": "2.3.8",
+  "build": 55,
   "published_at": "2026-11-05",
-  "title": "Sair da conta em Minha conta",
+  "title": "Acesso mais seguro e primeiros passos",
   "notes": [
-    "O botão Excluir conta foi retirado da tela Minha conta e permanece somente em Configurações.",
-    "Adicionado o botão Sair da conta na seção Segurança da conta, utilizando o logout já existente do GB+.",
-    "Nenhum dado pessoal ou lançamento financeiro foi modificado."
+    "Indicador de força da senha no cadastro e na recuperação, sem exigir combinação específica de letras, números ou símbolos.",
+    "Validação em tempo real da confirmação de senha e avisos claros para links expirados, inválidos ou utilizados.",
+    "Orientação ao usuário quando a sessão expira ou é encerrada, preservando seus dados financeiros.",
+    "Intervalo de 60 segundos para novos pedidos de e-mail no aplicativo, com mensagens específicas para bloqueios do Supabase; os limites efetivos continuam aplicados pelo servidor.",
+    "Checklist opcional para cadastrar a primeira conta, informar saldo inicial e criar o primeiro lançamento, sem gravar operações automaticamente."
   ],
   "assets": [
     "./index.html",
