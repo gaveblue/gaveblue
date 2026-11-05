@@ -11,9 +11,10 @@ export function loginRedirectMessage(rawUrl){
  }
  if(!error)return '';
  const text=(error+' '+description).toLowerCase();
- if(/access_denied|cancel|cancelado|canceled/.test(text))return 'O acesso com Google foi cancelado. Você pode tentar novamente ou entrar por e-mail.';
+
  if(/otp_expired|expired|expirad/.test(text))return 'Este link expirou ou já foi utilizado. Solicite um novo link de confirmação ou recuperação e abra-o no mesmo navegador.';
  if(/invalid_grant|invalid_token|token_invalid|flow_state_not_found|pkce|code_verifier|already_used|invalid_link/.test(text))return 'Este link é inválido, já foi usado ou foi aberto em outro navegador. Solicite um novo link e tente no mesmo navegador.';
+ if(/access_denied|cancel|cancelado|canceled/.test(text))return 'O acesso com Google foi cancelado. Você pode tentar novamente ou entrar por e-mail.';
  if(/redirect_uri|redirect_to|unauthorized_client|provider/.test(text))return 'Não foi possível concluir o retorno do Google. A configuração de acesso precisa ser conferida.';
  return 'Não foi possível concluir a autenticação. Tente novamente ou utilize a recuperação de acesso.';
 }
