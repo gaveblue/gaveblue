@@ -142,6 +142,13 @@
    status.textContent='Não foi possível copiar automaticamente. Copie este endereço: '+openUrl;
   }
  });
+ // Register the existing lightweight, network-first GB+ service worker without
+ // waiting for it. First-time Android visitors can then become PWA-installable.
+ if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+   navigator.serviceWorker.register('./sw.js',{scope:'./'}).catch(()=>{});
+  },{once:true});
+ }
  if(isStandalone()){
   markWebAccess();
   location.replace(openUrl);
