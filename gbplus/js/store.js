@@ -1,6 +1,6 @@
 import {uid,validDate,paid,today} from './domain.js?v=20261105-72';
 import {CATEGORY_ICON_OPTIONS} from './gb-icons.js?v=20261104-42';
-import {BANKS} from './banks.js?v=20261105-72';
+import {BANKS} from './banks.js?v=20261105-75';
 export const KEY='gb-plus:data:v1';
 export const INDICATORS={balance:'Saldo disponível',receivable:'A receber',payable:'A pagar',provisions:'Provisões líquidas',received:'Receitas recebidas',spent:'Despesas pagas',result:'Resultado financeiro',overdue:'Títulos vencidos',chart:'Fluxo de caixa',upcoming:'Próximos vencimentos'};
 export const defaultPanel=()=>({desktop:Object.fromEntries(Object.keys(INDICATORS).map(k=>[k,true])),mobile:Object.fromEntries(Object.keys(INDICATORS).map(k=>[k,true]))});
