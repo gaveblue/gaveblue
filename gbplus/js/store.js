@@ -41,6 +41,7 @@ function validateCreditData(db){
   assert(card&&entityId(card.id)&&!cardIds.has(card.id)&&str(card.name,120)&&card.name.trim()&&
    str(card.bankId||'',100)&&(!card.bankId||ids.has(card.bankId))&&
    str(card.last4||'',4)&&(!card.last4||/^\d{4}$/.test(card.last4))&&
+   str(card.payAccountId||'',100)&&(!card.payAccountId||db.accounts.some(a=>a.id===card.payAccountId))&&
    Number.isSafeInteger(card.limit)&&card.limit>0&&card.limit<=1e12&&
    Number.isInteger(card.closingDay)&&card.closingDay>=1&&card.closingDay<=28&&
    Number.isInteger(card.dueDay)&&card.dueDay>=1&&card.dueDay<=28&&
