@@ -1,6 +1,6 @@
 import {uid,today,money,dateLabel,cents,generateTitles,addPayment,transfer,updateTitle,pending,flow,within} from './domain.js';
 import {KEY,INDICATORS,defaultPanel,parseBackup,backupText,MOBILE_SHORTCUTS,defaultMobileNav,effectiveMobileNav,validMobileNav,shouldOfferSetup} from './store.js';
-import {esc,icon,button,field,formFooter,download,csv,titleTable} from './ui.js?v=20261104-35';
+import {esc,icon,button,field,select,formFooter,download,csv,titleTable} from './ui.js?v=20261104-35';
 import {routes,dashboard,titlesView,partnersView,accountsView,categoriesView,flowView,reportsView,settingsView,notificationsView,filteredTitles,reportData} from './views.js?v=20261104-35';
 import {titleForm,partnerForm,accountForm,categoryForm,paymentForm,transferForm,titleDetail,customizeForm,accountDetail} from './forms.js';
 import {SupabaseRepository} from '../integrations/supabase/repository.js';
@@ -144,6 +144,18 @@ function route(){if(!db)return;const next=location.hash.slice(1);if(next==='main
 function formValues(form){return Object.fromEntries(new FormData(form));}
 function getTitle(id){const t=db.titles.find(t=>t.id===id);if(!t)throw Error('Título não encontrado.');return t;}
 function fail(error){if(currentUser()&&['SESSION','CONFLICT','SAVE','RELOAD'].includes(error.code)){document.querySelector('#sync-alert').hidden=false;}const area=modal.open?modal.querySelector('.form-error'):null;if(area){area.textContent=error.message;area.scrollIntoView({block:'nearest'});}else toast(error.message||'Não foi possível concluir a operação.');}
+function launchSelectedIds(){
+ const visible=new Set(filteredTitles(db,state).map(t=>t.id));
+ return state.launchSelected.filter(id=>visible.has(id));
+}
+function toggleLaunchSelection(id,longPress=false){
+ if(state.route!=='titles'||!filteredTitles(db,state).some(t=>t.id===id))return;
+ const next=new Set(launchSelectedIds());
+ if(longPress)next.add(id);
+ else if(next.has(id))next.delete(id);
+ else next.add(id);
+ state.launchSelected=[...next];state.launchStatusOpen=false;render();
+}
 const actions={
   close:closeModal,
   'toggle-sidebar':()=>syncSidebarVisibility(!document.documentElement.classList.contains('sidebar-hidden'),true),
