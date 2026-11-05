@@ -13,6 +13,7 @@
  const steps=document.getElementById('guide-steps');
  const callout=document.getElementById('guide-callout');
  const status=document.getElementById('install-status');
+ const landingStatus=document.getElementById('landing-install-status');
  const appLink=document.getElementById('guide-app-link');
  const copyButton=document.getElementById('copy-app-link');
  const openUrl=new URL('./?web=1',location.href).href;
@@ -102,8 +103,9 @@
    await event.prompt(); // Always called directly from a user's click.
    const choice=await event.userChoice;
    if(choice?.outcome==='accepted'){
-    navigate('android');
-    status.textContent='Confirme a instalação no navegador. Quando o ícone aparecer, abra o GB+ pela Tela de Início.';
+    // Keep the visitor on the first screen: Chrome has handled the install prompt.
+    markWebAccess();
+    landingStatus.textContent=installedByEvent?'GB+ instalado! Abra pelo ícone na Tela de Início.':'Instalação aceita. Abra o GB+ pelo ícone na Tela de Início.';
    }else{
     navigate('android');
     status.textContent='A instalação não foi concluída. Você pode tentar pelo menu do Chrome.';
@@ -130,6 +132,7 @@
   installedByEvent=true;
   promptEvent=null;
   markWebAccess();
+  landingStatus.textContent='GB+ instalado! Abra pelo ícone na Tela de Início.';
   if(activePlatform==='android')status.textContent='GB+ instalado! Agora você pode abrir pelo ícone na Tela de Início.';
  });
  document.querySelectorAll('[data-open-web]').forEach(link=>link.addEventListener('click',markWebAccess));
