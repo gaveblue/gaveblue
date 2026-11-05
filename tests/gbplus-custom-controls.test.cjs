@@ -67,11 +67,11 @@ test('phone install prompt is offered only outside PWA and uses actual browser p
 });
 test('release assets and cache are aligned',()=>{
  const manifest=JSON.parse(read('version.json')),index=read('index.html'),sw=read('sw.js');
- assert.equal(manifest.version,'2.2.3');
- assert.equal(manifest.build,40);
+ assert.equal(manifest.version,'2.2.4');
+ assert.equal(manifest.build,41);
  for(const asset of ['./custom-controls.css','./overlays.css','./js/custom-controls.js','./js/pwa-install.js'])assert.ok(manifest.assets.includes(asset),asset);
  assert.ok(index.includes('custom-controls.css?v=20261104-41'));
  assert.ok(index.includes('overlays.css?v=20261104-40'));
- assert.ok(index.includes('app.js?v=20261104-41'));
- assert.ok(sw.includes('gb-plus-shell-v40'));
+ assert.ok(index.includes('app.js?v=20261104-42'));
+ assert.ok(sw.includes('gb-plus-shell-v41'));
 });
