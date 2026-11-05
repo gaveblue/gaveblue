@@ -1,0 +1,69 @@
+import {esc,icon} from './ui.js?v=20261104-39';
+
+// A11y-friendly visual dropdown. An actual form select remains out of sight
+// only as the data carrier, so existing FormData and change handlers stay intact.
+const typeMarkup=(value)=>value==='income'
+ ? '<span class="gb-entry-direction income">'+icon('up')+'</span>'
+ : value==='expense'
+ ? '<span class="gb-entry-direction expense">'+icon('down')+'</span>'
+ : '';
+function decoratedText(option,isType){
+ return (isType?typeMarkup(option.value):'')+'<span>'+esc(option.textContent||'')+'</span>';
+}
+export function entrySelect(label,name,options,value='',id='',required=false){
+ const type=name==='type';
+ const optionRows=options.map(([key,text])=>({value:String(key),text:String(text)}));
+ const chosen=optionRows.find(o=>o.value===String(value??''))||optionRows[0];
+ const selected=chosen?.value||'';
+ const source='<select class="gb-entry-source" aria-hidden="true" tabindex="-1" name="'+esc(name)+'"'+(id?' id="'+esc(id)+'"':'')+'>'+
+  optionRows.map(o=>'<option value="'+esc(o.value)+'"'+(o.value===selected?' selected':'')+'>'+esc(o.text)+'</option>').join('')+'</select>';
+ const renderValue=(o)=>type
+  ? (o.value==='income'?'<span class="gb-entry-direction income">'+icon('up')+'</span>':'<span class="gb-entry-direction expense">'+icon('down')+'</span>')+'<span>'+esc(o.text)+'</span>'
+  :'<span>'+esc(o?.text||'Selecione')+'</span>';
+ const optionsHtml=optionRows.map(o=>'<button type="button" role="option" class="gb-entry-option'+(o.value===selected?' is-selected':'')+'" data-action="entry-option" data-value="'+esc(o.value)+'" aria-selected="'+(o.value===selected)+'">'+renderValue(o)+
+  (o.value===selected?icon('check','gb-entry-option-check'):'')+'</button>').join('');
+ return '<div class="gb-entry-select'+(type?' gb-entry-type':'')+'" data-entry-name="'+esc(name)+'">'+
+  '<span class="gb-entry-label" id="label-entry-'+esc(name)+'">'+esc(label)+(required?' <span class="gb-entry-required" aria-hidden="true"></span>':'')+'</span>'+source+
+  '<button type="button" class="gb-entry-trigger" data-action="entry-toggle" role="combobox" aria-labelledby="label-entry-'+esc(name)+'" aria-haspopup="listbox" aria-expanded="false">'+
+   '<span class="gb-entry-current">'+renderValue(chosen||{value:'',text:'Selecione'})+'</span>'+icon('chevron')+
+  '</button>'+
+  '<div class="gb-entry-options" role="listbox" aria-label="'+esc(label)+'" hidden>'+optionsHtml+'</div></div>';
+}
+export function syncEntrySelect(select){
+ const wrap=select?.closest('.gb-entry-select');if(!wrap)return;
+ const isType=wrap.dataset.entryName==='type';
+ const chosen=select.selectedOptions[0];
+ const options=[...select.options];
+ const current=wrap.querySelector('.gb-entry-current');
+ if(current)current.innerHTML=chosen?decoratedText(chosen,isType):'<span>Selecione</span>';
+ const optionsTarget=wrap.querySelector('.gb-entry-options');
+ if(optionsTarget)optionsTarget.innerHTML=options.map(o=>'<button type="button" role="option" class="gb-entry-option'+(o.selected?' is-selected':'')+'" data-action="entry-option" data-value="'+esc(o.value)+'" aria-selected="'+o.selected+'">'+decoratedText(o,isType)+(o.selected?icon('check','gb-entry-option-check'):'')+'</button>').join('');
+}
+export function closeEntryMenus(except=null){
+ document.querySelectorAll('#modal .gb-entry-select').forEach(wrap=>{
+  if(wrap===except)return;
+  const list=wrap.querySelector('.gb-entry-options'),trigger=wrap.querySelector('.gb-entry-trigger');
+  if(list)list.hidden=true;
+  trigger?.setAttribute('aria-expanded','false');
+ });
+}
+export function toggleEntryMenu(button){
+ const wrap=button?.closest('.gb-entry-select');if(!wrap)return;
+ const list=wrap.querySelector('.gb-entry-options');if(!list)return;
+ const open=list.hidden;closeEntryMenus();
+ list.hidden=!open;
+ button.setAttribute('aria-expanded',String(open));
+ if(open)list.querySelector('[aria-selected="true"]')?.focus({preventScroll:true});
+}
+export function chooseEntryOption(option){
+ const wrap=option?.closest('.gb-entry-select');
+ const source=wrap?.querySelector('.gb-entry-source');if(!source)return;
+ const value=option.dataset.value;
+ if(![...source.options].some(o=>o.value===value))return;
+ source.value=value;
+ syncEntrySelect(source);
+ closeEntryMenus();
+ wrap.querySelector('.gb-entry-trigger')?.focus({preventScroll:true});
+ // Native-compatible event for the existing category/periodicity rules.
+ source.dispatchEvent(new Event('change',{bubbles:true}));
+}
