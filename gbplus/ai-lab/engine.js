@@ -27,8 +27,14 @@ export function interpret(message,context=null,data=fixture){
  const qty=count?Number(count[1]):wordCount?words[wordCount[1]]:1;
  const isRecurring=/repete|recorrent|todo mes|todos os meses|mensal|durante\s+\w+\s+meses/.test(s);
  const isInstallment=/parcel|divide|dividir/.test(s);
- if(context?.proposal && /corrig|muda|altera|nao falei|na verdade|troca/.test(s)){
-  const p={...context.proposal};if(value!==null)p.amountCents=value;if(day)p.due=dateFromDay(day[1]);return {intent:'corrigir_previa',status:'ready',proposal:p,answer:'Atualizei a prévia. Confira os dados e confirme apenas se estiverem corretos.'};
+ if(context?.proposal && /corrig|muda|altera|nao falei|na verdade|troca|edita|editar|ajusta|ajustar/.test(s)){
+  const p={...context.proposal};
+  // "Altere para dia 20" must never change R$450 into R$20 by mistake.
+  const explicitAmount=/\\bvalor\\b|r\\$|\\d\\s*reais?\\b/.test(s);
+  if(explicitAmount&&value!==null)p.amountCents=value;
+  if(day)p.due=dateFromDay(day[1]);
+  if(!day&&!explicitAmount)return {intent:'corrigir_previa',status:'needs_clarification',proposal:p,context:{proposal:p},answer:'Claro. Qual nova data de vencimento ou valor você gostaria de usar? Pode dizer, por exemplo, “altera para o dia 20”.'};
+  return {intent:'corrigir_previa',status:'ready',proposal:p,answer:'Atualizei a prévia. Confira os dados e confirme apenas se estiverem corretos.'};
  }
  if(/quanto.*(?:disponivel|posso gastar|sobrando)|saldo.*disponivel/.test(s)){const available=data.balance-data.payable;return {intent:'consultar_disponibilidade',status:'answered',answer:'Neste cenário fictício, o saldo atual é '+formatBRL(data.balance)+'. Reservando '+formatBRL(data.payable)+' para contas a pagar, a disponibilidade conservadora é '+formatBRL(available)+'. Se todos os recebíveis previstos entrarem, o saldo projetado seria '+formatBRL(available+data.receivable)+'. Não é uma recomendação automática de compra.'};}
  if(/saldo|quanto (?:eu )?tenho (?:na conta|no banco|em caixa)|qual (?:e )?meu saldo/.test(s))return {intent:'consultar_saldo',status:'answered',answer:'No modo demonstrativo, seu saldo fictício é '+formatBRL(data.balance)+'. Para consultar o saldo real, preciso acessar os registros da sua conta GB+.'};
