@@ -23,3 +23,7 @@ O proprietário pode compilar dentro do GitHub Codespaces na própria ramificaç
 ## Diagnóstico de Actions
 
 Verificar: `https://github.com/gaveblue/gaveblue/actions` → falha do workflow → avisos; `https://github.com/settings/billing` para alertas/limites e `https://github.com/gaveblue/gaveblue/settings/actions` para habilitação. Como o repositório é público, runners padrão normalmente são gratuitos; não pressupor problema de cobrança sem mensagem de confirmação.
+
+## Alternativa de produção sem build
+
+Os gráficos interativos em `gbplus/js/gb-charts-native.js` reutilizam o adaptador financeiro e não exigem npm, Actions ou Codespaces. No GB+ 2.2.7, este renderizador é habilitado e o carregador React fica desligado até que os assets compilados existam. A versão 2.2.7 pode ser lançada sem o React e sem referenciar arquivos inexistentes no manifesto. O pacote React segue preservado para atualização posterior.
