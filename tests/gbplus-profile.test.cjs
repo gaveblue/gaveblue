@@ -84,5 +84,5 @@ test('profile stylesheet uses a scoped design and release metadata',()=>{
  assert.ok(css.includes('.gb-account-field{min-height:60px'));
  assert.ok(index.includes('profile-page.css?v=20261104-37'));
  assert.ok(version.assets.includes('./profile-page.css'));
- assert.equal(version.version,'2.2.3');
+ assert.equal(version.version,'2.2.4');
 });
