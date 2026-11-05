@@ -1,12 +1,13 @@
 {
-  "version": "2.2.1",
-  "build": 38,
+  "version": "2.2.2",
+  "build": 39,
   "published_at": "2026-11-04",
-  "title": "Formulário de lançamentos redesenhado",
+  "title": "Interface personalizada e instalação real",
   "notes": [
-    "Novo lançamento e edição com visual minimalista inspirado na referência enviada.",
-    "Menus personalizados para Tipo, Categoria, Parceiro e Periodicidade, com Receita em verde/seta para cima e Despesa em vermelho/seta para baixo.",
-    "Fluxos de categoria, periodicidade, confirmação e edição preservados; demais componentes customizados ficam previstos para a próxima etapa."
+    "Calendários e seletores do GB+ redesenhados com componentes próprios, acessíveis e integrados aos formulários.",
+    "Central de atualização centralizada com fundo desfocado, download real e confirmação personalizada para reiniciar.",
+    "Aviso de periodicidade removido; formulário de lançamento mais limpo.",
+    "Sugestão de instalação no navegador do celular, usando a instalação real do sistema quando disponível ou instruções honestas quando não houver suporte."
   ],
   "assets": [
     "./index.html",
@@ -44,6 +45,10 @@
     "./js/launches-gestures.js",
     "./js/launch-actions.js",
     "./entry-form.css",
-    "./js/entry-select.js"
+    "./js/entry-select.js",
+    "./js/custom-controls.js",
+    "./custom-controls.css",
+    "./js/pwa-install.js",
+    "./overlays.css"
   ]
 }
