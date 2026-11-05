@@ -204,7 +204,7 @@ import {renderProposalPreview,validateEditedProposal,proposalSchedule,proposalMo
 import {installAttachmentStage} from './file-stage.js?v=20261105-82';
 import {setupVoice} from './voice.js?v=20261103-v9';
 import {createChatHistory} from './chat-history.js?v=20261104-v2';
-const $=s=>document.querySelector(s),log=$('#messages'),input=$('#message'),detailsCard=$('#details');let proposal=null,context=null,live=false,session=null,history=[];
+const $=s=>document.querySelector(s),log=$('#messages'),input=$('#message'),detailsCard=$('#details');let proposal=null,context=null,live=false,session=null,history=[],pendingPreviewCorrection=false;
 const initialWelcome=$('#welcome').cloneNode(true);
 const chats=createChatHistory(message=>{$('#voice-status').textContent=message;});
 chats.setUser(null);
@@ -316,7 +316,7 @@ function renderChatList(){
 }
 function restoreChat(){
  // Never restore a stale payment/expense confirmation after changing chats.
- proposal=null;context=null;lastTopic='';lastAnswer='';editPending=null;history=[];input.value='';
+ proposal=null;context=null;lastTopic='';lastAnswer='';editPending=null;pendingPreviewCorrection=false;history=[];input.value='';
  detailsCard.open=false;detailsCard.classList.add('hidden');
  $('#confirm').disabled=true;$('#discard').disabled=true;
  $('#preview').textContent='Nenhuma operação preparada.';
@@ -410,7 +410,7 @@ $('#draft-editor').addEventListener('submit',event=>{
    count:Number(editorField('count').value),
    partner:editorField('partner').value.trim()||null
   });
-  proposal=revised;context={proposal:revised};
+  proposal=revised;context={proposal:revised};pendingPreviewCorrection=false;
   renderProposalPreview($('#preview'),revised,formatBRL);
   $('#ai-preview-type').textContent=proposalModeLabel(revised.mode);
   $('#draft-editor').hidden=true;$('#draft-edit-error').textContent='';
@@ -540,6 +540,8 @@ async function submit(text,targetChat=chats.activeId()){
  const reply=(message,who='assistant')=>add(message,who,targetChat);
  reply(text,'user');
  const s=normalized(text);
+ const followupPreviewCorrection=!!context?.proposal&&pendingPreviewCorrection&&
+  /^(?:(?:para |no |em )?(?:o )?dia\s+\d{1,2}|\d{1,2}|(?:para )?r?\$?\s*\d+[,.]?\d*\s*reais?|(?:o )?valor\s+\d+)/.test(s);
  if(/(?:^| )(?:que dia e hoje|qual e a data de hoje|qual data e hoje|hoje e que dia|qual dia e hoje)(?:$| )/.test(s)&&!/(?:vence|vencem|vencimento|boletos|contas)\b/.test(s)){
   lastTopic='date';reply('Hoje é '+new Intl.DateTimeFormat('pt-BR',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(new Date())+'.');return;
  }
@@ -548,7 +550,7 @@ async function submit(text,targetChat=chats.activeId()){
   reply(explanations[lastTopic]||'Posso explicar saldos, lançamentos, vencimentos, baixas e recorrências. Qual informação deseja entender?');return;
  }
  if(editPending&&/^(cancelar|cancela|deixa pra la|sair|esquece)$/.test(s)){editPending=null;reply('Tudo bem, cancelei a busca para edição. Nenhum lançamento foi alterado.');return;}
- const correctingPreview=!!context?.proposal&&/(corrig|muda|altera|nao falei|na verdade|troca|edita|editar|ajusta|ajustar)/.test(s);
+ const correctingPreview=!!context?.proposal&&(followupPreviewCorrection||/(corrig|muda|altera|nao falei|na verdade|troca|edita|editar|ajusta|ajustar)/.test(s));
  const edit=correctingPreview?null:editCommand(s);
  if(editPending&&!edit&&/(?:saldo|data de hoje|que dia e hoje|vencimentos|a pagar|a receber|criar|lancar|bom dia|resumo)/.test(s))editPending=null;
  if(edit||editPending){
@@ -563,7 +565,7 @@ async function submit(text,targetChat=chats.activeId()){
  // Buying something is a read-only scenario, even if the user mentions installments.
  const purchasePlanning=/\b(?:comprar|compro|comprarei|adquirir|adquiro)\b/.test(s);
  const wantsCreate=!purchasePlanning&&/(lan[cç]|criar|crie|registre|registrar|cadastrar|dividir|divide|parcela|repete|repetir|recorrente)/.test(s)&&!/^(como|posso|qual a diferenca|por que|porque|onde)/.test(s);
- const isCorrection=!!context?.proposal&&/(corrig|muda|altera|nao falei|na verdade|troca|edita|editar|ajusta|ajustar)/.test(s);
+ const isCorrection=!!context?.proposal&&(followupPreviewCorrection||/(corrig|muda|altera|nao falei|na verdade|troca|edita|editar|ajusta|ajustar)/.test(s));
  const instructional=/^(como|onde|posso|qual a diferenca|por que|porque|o que e|o que significa)/.test(s)&&/(lan[cç]|cadastr|titulo|parcela|baixa|categoria|parceiro|configur|backup|export|modo)/.test(s);
  const greet=/^(oi|ola|opa|e ai|bom dia|boa tarde|boa noite|tudo bom|tudo bem)$/.test(s);
  if(!wantsCreate&&!isCorrection&&!instructional&&!greet){
@@ -577,7 +579,8 @@ async function submit(text,targetChat=chats.activeId()){
   return;
  }
  if(live&&instructional){askLive(text,targetChat);return;}
- const result=interpret(text,context,fixture);
+ const result=interpret(followupPreviewCorrection?'altera para '+text:text,context,fixture);
+ pendingPreviewCorrection=result.intent==='corrigir_previa'&&result.status==='needs_clarification';
  show(result);lastTopic=result.intent;
  if(/fict.ci|demonstra/.test(normalized(result.answer||''))&&!result.proposal){
   reply('Não tenho dados reais para essa resposta. Entre na conta GB+ para consultar seus saldos e títulos.');return;
@@ -605,7 +608,7 @@ $('#confirm').addEventListener('click',()=>{
   if(event.origin!==location.origin||event.source!==window.parent||event.data?.kind!=='gbplus-ai-create-result'||event.data.requestId!==requestId)return;
   finished=true;clearTimeout(timeout);window.removeEventListener('message',handler);restore();
   reply(event.data.message||'O GB+ não retornou detalhes da operação.');
-  if(event.data.ok&&targetChat===chats.activeId()){proposal=null;context=null;btn.disabled=true;discard.disabled=true;detailsCard.open=false;detailsCard.classList.add('hidden');$('#draft-editor').hidden=true;}
+  if(event.data.ok&&targetChat===chats.activeId()){proposal=null;context=null;pendingPreviewCorrection=false;btn.disabled=true;discard.disabled=true;detailsCard.open=false;detailsCard.classList.add('hidden');$('#draft-editor').hidden=true;}
   else if(!event.data.ok&&targetChat===chats.activeId()){btn.disabled=false;}
  }
  window.addEventListener('message',handler);
@@ -618,7 +621,7 @@ $('#confirm').addEventListener('click',()=>{
  try{window.parent.postMessage({kind:'gbplus-ai-create-title',requestId,proposal:current},location.origin);}
  catch(error){clearTimeout(timeout);window.removeEventListener('message',handler);restore();if(targetChat===chats.activeId())btn.disabled=false;reply('Não consegui enviar a confirmação: '+error.message);}
 });
-$('#discard').addEventListener('click',()=>{proposal=null;context=null;$('#confirm').disabled=true;$('#discard').disabled=true;$('#draft-editor').hidden=true;detailsCard.classList.add('hidden');add('Prévia descartada. Nenhum título foi alterado.');});
+$('#discard').addEventListener('click',()=>{proposal=null;context=null;pendingPreviewCorrection=false;$('#confirm').disabled=true;$('#discard').disabled=true;$('#draft-editor').hidden=true;detailsCard.classList.add('hidden');add('Prévia descartada. Nenhum título foi alterado.');});
 installAttachmentStage({
  fileInput:$('#ai-file-input'),attachButton:$('#ai-attach'),messages:log,
  activeChatId:()=>chats.activeId(),
