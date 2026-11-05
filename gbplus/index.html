@@ -13,7 +13,7 @@
   #auth-gate[hidden]{display:none!important}
   </style>
   <script>
-  // First-time mobile visitors see the installation landing before the account gate.
+  // First-time mobile visitors see the institutional page before installation.
   // Installed apps, signed-in/returning users, callbacks and desktop visitors stay here.
   (() => {
     try {
@@ -28,7 +28,7 @@
       const usedBefore = ['gbplus-appearance-v1','gbplus-pwa-suggest-after-v1'].some(key => localStorage.getItem(key) !== null);
       const seen = localStorage.getItem('gbplus-install-intro-seen-v1') === '1';
       if (seen || existingSession || existingData || usedBefore) return;
-      location.replace('./instalar.html?origem=link');
+      location.replace('./apresentacao.html?origem=link');
     } catch { /* Never block the existing GB+ app if browser storage is unavailable. */ }
   })();
   document.documentElement.dataset.boot='auth';
