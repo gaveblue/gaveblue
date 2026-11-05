@@ -37,7 +37,7 @@ test('projeção é imutável, sem dupla contagem de baixas e sem cancelados',()
 });
 test('intenção de comprar calça, preço ausente, e seguimento no mesmo chat',()=>{
  const first=ask('Quero comprar uma calça mês que vem. Como vai estar meu fluxo de caixa?');
- assert.equal(first.context.item,'calca');
+ assert.equal(first.context.item,'calça');
  assert.equal(first.context.month,'2026-12');
  assert.equal(first.context.amount,null);
  assert.match(first.answer,/Quanto você estima gastar/);
@@ -58,6 +58,16 @@ test('sem data pede esclarecimento; sem compromisso não inventa resposta',()=>{
  assert.match(one.answer,/Para qual mês/);
  assert.equal(ask('cadastre uma despesa de 250 reais'),null);
  assert.equal(ask('boa tarde'),null);
+});
+test('compra parcelada não é tratada como à vista sem aviso',()=>{
+ const r=ask('Quero comprar uma calça parcelada em 3 vezes mês que vem por R$ 300');
+ assert.match(r.answer,/Ainda não calculo compras parceladas/);
+ assert.doesNotMatch(r.answer,/Saldo projetado com a compra/);
+});
+test('consultas futuras mantêm acentos no item e reconhecem mês por nome',()=>{
+ const r=ask('Quero comprar uma televisão em dezembro por R$ 300');
+ assert.equal(r.context.item,'televisão');
+ assert.equal(r.context.month,'2026-12');
 });
 test('déficit conservador fica explícito',()=>{
  const r=ask('Posso comprar um notebook no próximo mês por R$ 1.000,00?');
