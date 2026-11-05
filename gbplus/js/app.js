@@ -14,7 +14,7 @@ import {SupabaseRepository} from '../integrations/supabase/repository.js?v=20261
 import {initializeAuth,authClient,currentUser,showAuth,isRecovery,updatePersonalProfile,consumeAuthReturnMessage,consumeSessionNotice,signOutAccount,authError,emailCooldownSeconds,markAuthEmailSent} from './auth.js?v=20261105-69';
 import {profileView,validateProfile,validCPF,formatCPF} from './profile.js?v=20261105-59';
 import {firstSetupView,customMobileNavForm,shortcutsPreview,readMobileNav,firstStepsPanel} from './setup-ui.js?v=20261105-75';
-import {BANKS,bankCatalog,findBank,bankName,syncBankPicker} from './banks.js?v=20261105-75';
+import {BANKS,bankCatalog,findBank,bankName,syncBankPicker,filterBankPicker,filterBankDirectory} from './banks.js?v=20261105-77';
 import {addCardPurchase,removeCardPurchase,ensureCardMayChange,creditCards,cardPurchases} from './credit-cards.js?v=20261105-72';
 import {cashForecast} from './forecast.js?v=20261105-72';
 import {banksView,bankForm,cardsView,cardForm,cardPurchaseForm,forecastView,forecastSummary,forecastScenarioForm,forecastResult} from './finance-24-ui.js?v=20261105-75';
@@ -552,6 +552,21 @@ document.addEventListener('click',async e=>{const el=e.target.closest('[data-act
 document.addEventListener('click',e=>{if(!e.target.closest('.gb-entry-select'))closeEntryMenus();});
 document.addEventListener('change',e=>{
  if(e.target?.matches?.('select[name="bankId"]')&&db)syncBankPicker(e.target.closest('.gb-bank-picker'),db);
+});
+document.addEventListener('input',e=>{
+ if(!db)return;
+ if(e.target?.matches?.('.gb-bank-search')){
+  filterBankPicker(e.target.closest('.gb-bank-picker'),e.target.value);
+ }
+ if(e.target?.matches?.('.gb-bank-directory-search-input')){
+  filterBankDirectory(document.querySelector('#main'),db,e.target.value);
+ }
+});
+document.addEventListener('keydown',e=>{
+ if(e.key!=='Enter'||!e.target?.matches?.('.gb-bank-search'))return;
+ e.preventDefault();
+ const first=e.target.closest('.gb-bank-picker')?.querySelector('.gb-bank-shortcut:not([hidden])');
+ if(first)first.click();
 });
 document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;const open=document.querySelector('#modal .gb-entry-select .gb-entry-trigger[aria-expanded="true"]');if(!open)return;e.preventDefault();e.stopImmediatePropagation();closeEntryMenus();open.focus();},true);
 document.addEventListener('keydown',e=>{const trigger=e.target.closest?.('.gb-entry-trigger');if(!trigger||!['ArrowDown','ArrowUp','Home','End'].includes(e.key))return;e.preventDefault();const wrap=trigger.closest('.gb-entry-select');const options=[...wrap.querySelectorAll('.gb-entry-option')];toggleEntryMenu(trigger);if(!options.length)return;const selected=options.findIndex(el=>el.getAttribute('aria-selected')==='true');const last=options.length-1;const index=e.key==='Home'?0:e.key==='End'?last:e.key==='ArrowUp'?Math.max(0,selected-1):Math.min(last,selected+1);options[index]?.focus();});
