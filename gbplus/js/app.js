@@ -192,6 +192,64 @@ function requestLaunchDeletion(ids){
   'Os '+selected.length+' lançamento(s) selecionados serão removidos. Registros já baixados precisam ser estornados antes. Confirmar exclusão?',
   ()=>commit(d=>applyLaunchDeletions(d,ids),selected.length+' lançamento(s) excluído(s).'));
 }
+
+function validateEntryStepOne(form){
+ const type=form.elements.type?.value;
+ const categoryId=form.elements.categoryId?.value;
+ if(!['income','expense'].includes(type)||!db.categories.some(c=>c.id===categoryId&&c.type===type))throw Error('Selecione o tipo e uma categoria válida.');
+ if(!form.elements.description?.value.trim())throw Error('Informe a descrição do lançamento.');
+ if(!validDate(form.elements.issue?.value))throw Error('Informe uma data de emissão válida.');
+ if(!validDate(form.elements.due?.value))throw Error('Informe uma data de vencimento válida.');
+}
+function toggleEntryStep(form,step){
+ if(!form||form.id!=='title-form')return;
+ const forward=step===2;
+ if(forward)validateEntryStepOne(form);
+ form.dataset.step=String(step);
+ form.querySelector('#gb-entry-step-one').hidden=forward;
+ form.querySelector('#gb-entry-step-two').hidden=!forward;
+ form.querySelector('[data-entry-footer="1"]').hidden=forward;
+ form.querySelector('[data-entry-footer="2"]').hidden=!forward;
+ const progress=form.querySelector('.gb-entry-progress');
+ if(progress){
+  progress.setAttribute('aria-label','Etapa '+step+' de 2');
+  [...progress.children].forEach((item,i)=>item.classList.toggle('active',i===step-1));
+ }
+ const error=form.querySelector('.form-error');if(error)error.textContent='';
+ if(forward)refreshEntrySchedule(form);
+ const scroll=modal.querySelector('.modal-body')||modal;
+ scroll.scrollTo({top:0,behavior:'instant'});
+ const focus=forward?form.elements.amount:form.elements.description;
+ requestAnimationFrame(()=>focus?.focus({preventScroll:true}));
+}
+function refreshEntrySchedule(form){
+ if(!form||form.id!=='title-form')return;
+ const mode=form.elements.mode?.value||form.dataset.mode||'single';
+ const section=form.querySelector('#gb-entry-installments');
+ const countField=form.querySelector('#count-field');
+ if(countField)countField.hidden=mode==='single';
+ if(!section)return;
+ section.hidden=mode==='single';
+ if(section.hidden)return;
+ const target=form.querySelector('#gb-entry-schedule'),summary=form.querySelector('#gb-entry-schedule-count');
+ const due=form.elements.due?.value;
+ const count=form.elements.count?Number(form.elements.count.value):(Number(form.dataset.count)||1);
+ if(!validDate(due)){target.textContent='Defina um vencimento válido na primeira etapa.';return;}
+ if(!Number.isInteger(count)||count<1||count>120){target.textContent='Informe de 1 a 120 parcelas ou meses.';return;}
+ try{
+  const dates=expectedDates(due,mode,count,!!form.elements.businessDays?.checked,addMonths);
+  let amount=0;
+  try{amount=cents(form.elements.amount?.value||'0,00');}catch{}
+  summary.textContent=count+' vencimento'+(count!==1?'s':'');
+  target.innerHTML=dates.map((entry,i)=>{
+   const installment=mode==='installment'?(Math.floor(amount/count)+(i<amount%count?1:0)):amount;
+   return '<div class="gb-entry-schedule-row"><span class="gb-entry-schedule-sequence">'+entry.index+'</span>'+
+    '<span class="gb-entry-schedule-date"><strong>'+dateLabel(entry.date)+'</strong>'+
+    (entry.shifted?'<small>Próximo dia útil · original '+dateLabel(entry.nominal)+'</small>':'<small>Vencimento previsto</small>')+'</span>'+
+    '<strong>'+money(installment)+'</strong></div>';
+  }).join('');
+ }catch(error){target.textContent=error.message||'Revise os vencimentos.';}
+}
 const actions={
   close:closeModal,
   'toggle-sidebar':()=>syncSidebarVisibility(!document.documentElement.classList.contains('sidebar-hidden'),true),
