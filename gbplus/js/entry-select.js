@@ -45,7 +45,7 @@ export function closeEntryMenus(except=null){
  document.querySelectorAll('#modal .gb-entry-select').forEach(wrap=>{
   if(wrap===except)return;
   const list=wrap.querySelector('.gb-entry-options'),trigger=wrap.querySelector('.gb-entry-trigger');
-  if(list)list.hidden=true;
+  if(list){list.hidden=true;list.removeAttribute('style');}
   trigger?.setAttribute('aria-expanded','false');
  });
 }
@@ -55,7 +55,19 @@ export function toggleEntryMenu(button){
  const open=list.hidden;closeEntryMenus();
  list.hidden=!open;
  button.setAttribute('aria-expanded',String(open));
- if(open)list.querySelector('[aria-selected="true"]')?.focus({preventScroll:true});
+ if(open){
+  const rect=button.getBoundingClientRect();
+  const below=window.innerHeight-rect.bottom-9,above=rect.top-9;
+  const desired=Math.min(list.scrollHeight||180,220);
+  const goesUp=below<Math.min(125,desired)&&above>below;
+  const height=Math.min(desired,Math.max(70,goesUp?above:below));
+  list.style.left=Math.max(8,rect.left)+'px';
+  list.style.right='auto';
+  list.style.width=Math.min(rect.width,window.innerWidth-16)+'px';
+  list.style.top=(goesUp?Math.max(8,rect.top-height-5):rect.bottom+5)+'px';
+  list.style.maxHeight=height+'px';
+  list.querySelector('[aria-selected="true"]')?.focus({preventScroll:true});
+ }
 }
 export function chooseEntryOption(option){
  const wrap=option?.closest('.gb-entry-select');
