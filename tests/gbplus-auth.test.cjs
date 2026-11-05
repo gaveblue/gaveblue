@@ -129,3 +129,10 @@ test('session-expired flow and server rate-limit feedback are wired',()=>{
  const message=new Function('document',auth+';return authError({status:429});')({addEventListener(){}});
  assert.match(message,/Muitas solicitações/i);
 });
+
+test('Supabase access_denied carrying otp_expired is a recovery-link failure, not Google cancellation',()=>{
+ const link='https://gaveblue.com.br/gbplus/?error=access_denied&error_code=otp_expired';
+ const message=helpers.loginRedirectMessage(link);
+ assert.match(message,/novo link/i);
+ assert.doesNotMatch(message,/Google foi cancelado/i);
+});
