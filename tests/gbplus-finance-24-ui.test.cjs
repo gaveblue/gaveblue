@@ -49,6 +49,7 @@ test('card registration does not request credit-card number or CVV',()=>{
  assert.match(html,/Limite total/);
  assert.match(html,/Dia do fechamento/);
  assert.match(html,/Dia do vencimento/);
+ assert.match(html,/Conta prevista para pagamento da fatura/);
  assert.match(html,/Últimos 4 dígitos/);
  assert.doesNotMatch(html,/name="cvv"/);
  assert.doesNotMatch(html,/name="cardNumber"/);
