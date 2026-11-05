@@ -81,3 +81,12 @@
  .gb-category-icon-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
  .gb-entry-wizard-footer>.button{font-size:12px}
 }
+
+.category-list .gb-category-list-label{display:flex;align-items:center;gap:9px;min-width:0;font-weight:600}
+.gb-category-list-icon{display:grid;place-items:center;flex:none;width:30px;height:30px;
+ border-radius:10px;background:var(--soft);color:var(--muted)}
+.gb-category-list-icon .gb-symbol{width:17px;height:17px}
+.gb-entry-form input[name="amount"],#payment-form input[name="amount"],
+#transfer-form input[name="amount"],#account-form input[name="initial"]{
+ font-variant-numeric:tabular-nums;letter-spacing:.1px
+}
