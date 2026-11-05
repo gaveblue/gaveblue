@@ -2,7 +2,7 @@
 
 **Decisão proposta:** realizar a importação manual de extratos e planilhas na **2.5.0**. Reservar a **3.0.0** para a grande evolução da **IA do GB+**. A integração bancária automatizada via Open Finance é um projeto separado e não integra este escopo.
 
-**Estado em 05/11/2026:** desenho funcional aprovado como preparação técnica; há parser e simulador isolados em `js/bank-import-preview.js`, sem botão de importação, envio de arquivos, mutação do banco nem atualização dos saldos. Nove testes iniciais passaram em ambiente simulado. O recurso **não está liberado** na versão 2.4.6.
+**Estado em 05/11/2026:** o parser/simulador isolado está em `js/bank-import-preview.js`. Na **2.4.8**, o GB+ AI ganhou um botão de anexo no chat: OFX e CSV geram apenas resumo de leitura local, sem selecionar conta nem conciliar; Excel e PDF apenas mostram que a leitura está pendente. **Nenhum arquivo pode criar títulos, baixar contas ou alterar saldos nesta etapa.** A conciliação e a gravação controlada continuam reservadas à 2.5.0.
 
 ## Objetivo
 
