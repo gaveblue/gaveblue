@@ -204,3 +204,19 @@ html[data-theme=dark] .gb-account-logout:hover{background:#b92d42}
 #profile-form .gb-account-save-area[hidden],#profile-save[hidden]{display:none!important}
 @media(max-width:760px){.gb-account-logout-area{margin:16px 0 10px}.gb-account-logout{min-height:52px;font-size:14px}}
 @media(prefers-reduced-motion:reduce){.gb-account-logout{transition:none}}
+
+/* Confirmação de encerramento de sessão no modal já existente do GB+. */
+.gb-logout-dialog{display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px;width:100%;max-width:480px;margin-inline:auto}
+.gb-logout-dialog-icon{display:grid;place-items:center;width:64px;height:64px;border-radius:20px;color:#cc364d;background:color-mix(in srgb,#d43c50 11%,transparent)}
+.gb-logout-dialog>p{margin:0;max-width:370px;font-size:14px;line-height:1.6;color:var(--muted)}
+.gb-logout-dialog .gb-logout-unsaved{color:#ad293e;background:color-mix(in srgb,#d43c50 8%,var(--surface));border:1px solid color-mix(in srgb,#d43c50 30%,var(--border));padding:12px 14px;border-radius:12px;font-weight:620;text-align:left;width:100%}
+.gb-logout-dialog .form-error{width:100%;color:#b62339;text-align:left}
+.gb-logout-dialog .form-error:empty{display:none}
+.gb-logout-dialog-actions{width:100%;display:flex;flex-direction:column;gap:10px;margin-top:4px}
+.gb-logout-dialog-actions>.button,.gb-logout-confirm-button{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:49px;border-radius:12px;padding:11px 16px;font-size:14px;font-weight:710}
+.gb-logout-dialog-actions>.button{order:2}
+.gb-logout-confirm-button{order:1;border:1px solid #b82d43;background:#c93449;color:#fff;cursor:pointer}
+.gb-logout-confirm-button:hover{background:#aa283d}
+.gb-logout-confirm-button svg{width:19px;height:19px}
+.gb-logout-confirm-button:focus-visible{outline:3px solid #f28c9b;outline-offset:2px}
+@media(prefers-reduced-motion:reduce){.gb-logout-confirm-button{transition:none}}
