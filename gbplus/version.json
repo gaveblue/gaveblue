@@ -1,14 +1,15 @@
 {
-  "version": "2.4.7",
-  "build": 61,
+  "version": "2.4.8",
+  "build": 62,
   "published_at": "2026-11-05",
-  "title": "Nova apresentação das atualizações do GB+",
+  "title": "GB+ AI com prévia visual e anexos preparados",
   "notes": [
-    "Notas de atualização com ícones por recurso e descrições fáceis de entender.",
-    "Central de novidades apresenta a lista completa de melhorias, sem cortar após os três primeiros itens.",
-    "Versões mais recentes mostram seus detalhes mesmo em uma verificação manual quando o aplicativo já está atualizado.",
-    "Corrigido o reconhecimento de pacotes com mais de 80 arquivos, como o catálogo de 78 logos bancários.",
-    "Mantidos o download real, a barra de progresso e a confirmação antes de reiniciar o aplicativo."
+    "Prévia do lançamento integrada à conversa, com detalhes e vencimentos antes de confirmar.",
+    "Botões Detalhar, Editar, Descartar e Confirmar e gravar em estilo minimalista, preservando a confirmação antes de qualquer gravação.",
+    "Edição de descrição, tipo, valor, vencimento, periodicidade, quantidade e parceiro diretamente na prévia.",
+    "Correção da interpretação de pedidos como alterar vencimento para o dia 20, sem modificar acidentalmente o valor.",
+    "Botão de anexo no GB+ AI, com leitura local demonstrativa de OFX e CSV e preparação visual para PDF e Excel.",
+    "Arquivos anexados não criam nem conciliam títulos nesta versão. A conciliação e a importação final seguem programadas para a 2.5.0."
   ],
   "assets": [
     "./index.html",
@@ -149,28 +150,32 @@
     "./assets/banks/00315557.svg",
     "./assets/banks/13720915.svg",
     "./assets/banks/02332886.svg",
-    "./assets/banks/10371492.svg"
+    "./assets/banks/10371492.svg",
+    "./ai-lab/preview-card.js",
+    "./ai-lab/preview-card.css",
+    "./ai-lab/file-stage.js",
+    "./js/bank-import-preview.js"
   ],
   "highlights": [
     {
       "icon": "sparkles",
-      "title": "Conheça as novidades",
-      "description": "As melhorias aparecem em cartões organizados, com ícones para identificar rapidamente cada recurso."
+      "title": "Uma conversa mais intuitiva",
+      "description": "A prévia do lançamento aparece dentro do chat, inspirada no novo visual minimalista do GB+ AI."
+    },
+    {
+      "icon": "repeat",
+      "title": "Vencimentos antes de gravar",
+      "description": "Confira todas as datas, a quantidade de títulos e o valor total antes de confirmar."
+    },
+    {
+      "icon": "check",
+      "title": "Detalhar, editar ou descartar",
+      "description": "Ajuste valor, tipo, data e periodicidade sem sair do assistente. A gravação continua exigindo confirmação."
     },
     {
       "icon": "file",
-      "title": "Notas de versão completas",
-      "description": "Veja todos os destaques publicados, incluindo descrições que explicam o que realmente mudou."
-    },
-    {
-      "icon": "bank",
-      "title": "Atualizações maiores reconhecidas",
-      "description": "Corrigida a verificação de pacotes com muitos arquivos, como os 78 logos de instituições."
-    },
-    {
-      "icon": "shield",
-      "title": "Atualização com seus dados preservados",
-      "description": "O download, o progresso real e a confirmação antes de reiniciar continuam protegendo seus lançamentos."
+      "title": "Anexos preparados para a importação",
+      "description": "OFX e CSV mostram uma prévia local; Excel e PDF serão interpretados em uma próxima etapa. Nenhum anexo altera os saldos."
     }
   ]
 }
