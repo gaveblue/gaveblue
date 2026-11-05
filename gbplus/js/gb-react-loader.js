@@ -1,3 +1,6 @@
+// React activation is intentionally disabled until a compiled bundle is available.
+// SVG charts in gb-charts-native.js are the no-dependency production fallback.
+const REACT_BUNDLE_COMPILED=false;
 import { buildChartPayload } from "./gb-charts-data.js?v=20261105-45";
 
 // Optional enhancement: the HTML/JS app and all financial operations run without React.
@@ -28,6 +31,7 @@ export function unmountReactCharts() {
   try { window.GBReactCharts?.unmountAll?.(); } catch (error) { console.warn('GB+ Charts cleanup', error); }
 }
 export function renderReactCharts(db,state,flowRows) {
+  if(!REACT_BUNDLE_COMPILED)return;
   if (!document.querySelector('[data-gb-react]')) return;
   const token = ++generation;
   try {
