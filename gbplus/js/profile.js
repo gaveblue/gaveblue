@@ -58,12 +58,15 @@ export function profileView(user,cpfStatus={ready:false,cpf:'',error:''}){
     '<div class="gb-account-fields">'+
      locked('E-mail da conta',user.email||'')+
      '<button type="button" class="gb-account-action" data-action="profile-change-password">'+icon('key')+'<strong>Alterar senha</strong><span>'+icon('chevron')+'</span></button>'+
-     '<button type="button" class="gb-account-action" data-auth-action="signout">'+icon('arrow')+'<strong>Sair da conta</strong><span>'+icon('chevron')+'</span></button>'+
+
     '</div>'+
    '</section>'+
-   '<div class="gb-account-save-area"><span id="profile-message" role="status" aria-live="polite"></span><button type="submit" id="profile-save" class="gb-account-save" disabled>'+icon('check')+' Salvar alterações</button></div>'+
+   '<div class="gb-account-save-area" hidden><span id="profile-message" role="status" aria-live="polite"></span><button type="submit" id="profile-save" class="gb-account-save" disabled hidden>'+icon('check')+' Salvar alterações</button></div>'+
 
-  '</form>'+ 
+  '</form>'+
+  '<div class="gb-account-logout-area"><button type="button" class="gb-account-logout" data-auth-action="signout" aria-label="Sair da conta">'+
+   '<svg class="icon" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5M21 12H9"/></svg>'+
+   '<strong>Sair da conta</strong></button></div>'+
  '</div>';
 }
 export function validateProfile(form,existingCpf=''){
