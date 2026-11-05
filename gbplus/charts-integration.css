@@ -1,0 +1,13 @@
+/* Optional EasyUI mounts. No changes to global GB+ typography, forms or palette. */
+.gb-chart-slot{min-width:0;width:100%}
+.gb-chart-slot .gb-react-charts{min-width:0;width:100%;padding:4px 18px 10px}
+.gb-chart-slot .gb-react-charts[hidden],.gb-chart-slot .gb-chart-fallback[hidden]{display:none!important}
+.gb-chart-slot .gb-chart-fallback{min-width:0}
+.gb-chart-slot .gb-react-charts .gb-earnings-in-panel{background:transparent!important;box-shadow:none!important;border:0!important;border-radius:0!important;outline:0!important}
+.gb-cashflow-slot .gb-react-charts{padding:12px 18px 14px}
+.gb-cashflow-slot .gb-chart-wrapper{max-width:100%}
+@media(max-width:760px){
+ .gb-chart-slot .gb-react-charts{padding:4px 12px 8px}
+ .gb-cashflow-slot .gb-react-charts{padding:8px 8px 10px}
+ .gb-cashflow-slot .gb-chart-wrapper{overscroll-behavior-x:contain}
+}
