@@ -88,9 +88,14 @@ export const bankCatalog=db=>[...BANKS,...(db?.banks||[])].sort((a,b)=>collator.
 export function matchesBank(bank,term){
  const query=normalize(term);
  if(!query)return true;
- const strings=[bank.id,bank.name,bank.code,bank.ispb,bank.aliases].filter(Boolean);
- return strings.some(text=>normalize(text).includes(query))||
-  (/^\d{1,3}$/.test(query)&&String(bank.code||'').replace(/^0+/,'')===query.replace(/^0+/,''));
+ if(/^\d{1,3}$/.test(query)){
+  const code=String(bank.code||'');
+  return query.length===3?code===query:code.startsWith(query)||code.replace(/^0+/,'').startsWith(query.replace(/^0+/,''));
+ }
+ if(/^0\d{3}$/.test(query))return String(bank.code||'')===query.slice(1);
+ if(/^\d{8}$/.test(query))return String(bank.ispb||'')===query;
+ return [bank.id,bank.name,bank.code,bank.ispb,bank.aliases].filter(Boolean)
+  .some(value=>normalize(value).includes(query));
 }
 export function findBank(db,idOrName){
  const query=normalize(idOrName);
@@ -131,7 +136,7 @@ export function bankPicker(db,value='',label='Banco ou instituição'){
  '<div class="gb-bank-shortcuts" role="group" aria-label="Instituições financeiras em ordem alfabética">'+bankCards.map(bank=>
   '<button type="button" class="gb-bank-shortcut" data-action="choose-bank" data-bank-id="'+esc(bank.id)+'" data-bank-search="'+
   esc([bank.name,bank.code,bank.ispb,bank.aliases].filter(Boolean).map(normalize).join(' '))+
-  '" aria-pressed="'+String(bank.id===value)+'" title="'+esc(bank.name+(bank.code?' · '+bank.code:''))+'">'+
+  '" data-bank-code="'+esc(bank.code||'')+'" data-bank-ispb="'+esc(bank.ispb||'')+'" aria-pressed="'+String(bank.id===value)+'" title="'+esc(bank.name+(bank.code?' · '+bank.code:''))+'">'+
   bankBadge(bank)+'<small>'+esc(bank.name)+'</small>'+(bank.code?'<span class="gb-bank-code">'+esc(bank.code)+'</span>':'')+'</button>').join('')+'</div>'+
  '<p class="gb-bank-no-results" data-bank-no-results hidden>Nenhuma instituição encontrada. Você pode cadastrá-la em Bancos.</p></div>';
 }
@@ -140,9 +145,15 @@ export function filterBankPicker(picker,term){
  const query=normalize(term);
  let count=0;
  picker.querySelectorAll('[data-bank-id]').forEach(button=>{
-  const key=String(button.dataset.bankSearch||'');
-  const codePart=key.match(/(?:^|\s)(\d{1,3})(?:\s|$)/)?.[1]||'';
-  const matches=!query||key.includes(query)||(codePart&&/^\d{1,3}$/.test(query)&&codePart.replace(/^0+/,'')===query.replace(/^0+/,''));
+  const key=String(button.dataset.bankSearch||''),code=String(button.dataset.bankCode||'');
+  const ispb=String(button.dataset.bankIspb||'');
+  let matches;
+  if(!query)matches=true;
+  else if(/^\d{1,3}$/.test(query))matches=query.length===3?code===query:
+   code.startsWith(query)||code.replace(/^0+/,'').startsWith(query.replace(/^0+/,''));
+  else if(/^0\d{3}$/.test(query))matches=code===query.slice(1);
+  else if(/^\d{8}$/.test(query))matches=ispb===query;
+  else matches=key.includes(query);
   button.hidden=!matches;
   if(matches)count++;
  });
