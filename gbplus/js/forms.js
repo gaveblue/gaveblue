@@ -1,7 +1,7 @@
 import {today,money,dateLabel,pending,paid,accountBalance} from './domain.js';
 import {esc,field,select,textarea,formFooter,button,icon,titleTable,empty} from './ui.js';
 import {INDICATORS} from './store.js';
-import {entrySelect} from './entry-select.js?v=20261104-39';
+import {entrySelect} from './entry-select.js?v=20261104-40';
 const required='required maxlength="200"';
 export function titleForm(db,t,type='expense'){
  type=t?.type||type;
