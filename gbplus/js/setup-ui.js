@@ -81,3 +81,31 @@ export function firstSetupView(d){
   row(true,button('Concluir configuração','setup-finish','primary')));
  return marker+'<div class="setup-step">'+body+'</div>';
 }
+
+/** Checklist opcional: não cria dados nem altera saldos por conta própria. */
+export function firstStepsPanel(db){
+ const accounts=Array.isArray(db?.accounts)?db.accounts:[],titles=Array.isArray(db?.titles)?db.titles:[];
+ const account=accounts[0],hasAccount=accounts.length>0,hasTitle=titles.length>0;
+ if(hasAccount&&hasTitle)return '';
+ const progress=(hasAccount?2:0)+(hasTitle?1:0);
+ const item=(number,title,description,done,actionHTML)=>'<div class="gb-first-steps-item '+(done?'is-done':'')+'">'+
+  '<span class="gb-first-steps-number">'+(done?icon('check'):number)+'</span>'+
+  '<div class="gb-first-steps-text"><strong>'+title+'</strong><p>'+description+'</p></div>'+
+  '<div class="gb-first-steps-action">'+(done?'<span class="gb-first-steps-done">Feito</span>':actionHTML)+'</div></div>';
+ const first=item('1','Cadastre sua primeira conta',
+  'Escolha a conta bancária ou o caixa que deseja controlar.',hasAccount,
+  button('Cadastrar conta','new-account','small'));
+ const second=item('2','Informe o saldo inicial',
+  hasAccount?'Saldo registrado: <strong>'+money(account.initial||0)+'</strong>. Pode ser zero; ajuste pelo cadastro da conta quando necessário.':'Durante o cadastro da conta, informe quanto ela tem hoje (inclusive R$ 0,00).',
+  hasAccount,hasAccount?'':button('Criar conta e saldo','new-account','small'));
+ const third=item('3','Registre seu primeiro lançamento',
+  'Lance uma despesa ou receita com valor e vencimento para acompanhar seu financeiro.',
+  hasTitle,button('Criar lançamento','new-title','small'));
+ return '<section class="gb-first-steps" aria-labelledby="gb-first-steps-title">'+
+  '<div class="gb-first-steps-heading"><div><span class="gb-first-steps-kicker">PRIMEIROS PASSOS</span>'+
+  '<h2 id="gb-first-steps-title">Vamos deixar seu financeiro pronto?</h2>'+
+  '<p>Três passos simples. O saldo inicial é um ponto de partida, não uma receita.</p></div>'+
+  button('Agora não','onboarding-dismiss','small','aria-label="Ocultar orientações iniciais"')+'</div>'+
+  '<div class="gb-first-steps-progress" role="status">'+progress+' de 3 etapas realizadas</div>'+
+  '<div class="gb-first-steps-list">'+first+second+third+'</div></section>';
+}
