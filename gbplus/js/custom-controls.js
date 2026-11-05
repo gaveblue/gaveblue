@@ -1,4 +1,4 @@
-import {gbIcon,gbOptionIcon} from './gb-icons.js?v=20261104-41';
+import {gbIcon,gbOptionIcon} from './gb-icons.js?v=20261104-42';
 import {enhanceFinancialMasks,installFinancialMasks} from './gb-finance-input.js?v=20261104-42';
 /* GB+ Custom Controls · visual selectors and calendar without native popovers.
    The original form controls remain as data sources for FormData and validation. */
