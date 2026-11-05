@@ -1,7 +1,7 @@
-import {today,money,dateLabel,pending,paid,accountBalance} from './domain.js';
-import {esc,field,select,textarea,formFooter,button,icon,titleTable,empty} from './ui.js?v=20261104-41';
-import {INDICATORS} from './store.js';
-import {entrySelect} from './entry-select.js?v=20261104-41';
+import {today,money,dateLabel,pending,paid,accountBalance} from './domain.js?v=20261104-42';
+import {esc,field,select,textarea,formFooter,button,icon,titleTable,empty} from './ui.js?v=20261104-42';
+import {INDICATORS} from './store.js?v=20261104-42';
+import {entrySelect} from './entry-select.js?v=20261104-42';
 import {gbIcon,CATEGORY_ICON_OPTIONS,categoryIconFor} from './gb-icons.js?v=20261104-42';
 const required='required maxlength="200"';
 export function titleForm(db,t,type='expense'){
