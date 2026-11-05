@@ -1,8 +1,42 @@
 import {today,money,dateLabel,pending,paid,accountBalance} from './domain.js';
 import {esc,field,select,textarea,formFooter,button,icon,titleTable,empty} from './ui.js';
 import {INDICATORS} from './store.js';
+import {entrySelect} from './entry-select.js?v=20261104-39';
 const required='required maxlength="200"';
-export function titleForm(db,t,type='expense'){type=t?.type||type;return `<form id="title-form" data-id="${t?.id||''}"><div class="form-grid">${select('Tipo de lançamento','type',[['expense','Despesa'],['income','Receita']],type,'id="entry-type"')}${select('Categoria financeira','categoryId',db.categories.filter(c=>c.type===type).map(c=>[c.id,c.name]),t?.categoryId,'required id="entry-category"')}<div class="full">${field('Descrição','description',t?.description||'','text','required maxlength="300" placeholder="Ex.: Energia do escritório"')}</div>${select('Parceiro','partnerId',[['','Sem parceiro'],...db.partners.filter(p=>p.active||p.id===t?.partnerId).map(p=>[p.id,p.name])],t?.partnerId)}${field('Número do documento','document',t?.document||'','text','maxlength="100"')}${field('Data de emissão','issue',t?.issue||today(),'date','required')}${field(t?'Vencimento':'Primeiro vencimento','due',t?.due||today(),'date','required')}${field(t?'Valor do título (R$)':'Valor total / mensal (R$)','amount',t?t.amount/100:'','number','required min="0.01" max="10000000000" step="0.01" placeholder="0,00"')}${select('Conta prevista (opcional)','accountId',[['','Escolher na baixa'],...db.accounts.filter(a=>a.active||a.id===t?.accountId).map(a=>[a.id,a.name])],t?.accountId)}${!t?`${select('Modalidade','mode',[['single','Único'],['installment','Parcelado · divide o total'],['recurring','Recorrente · repete o valor']],'single','id="entry-mode"')}<div id="count-field" hidden>${field('Parcelas / meses','count',2,'number','min="2" max="120" step="1"')}</div><p class="form-hint full" id="mode-hint">Um título, um vencimento. O saldo só muda ao registrar uma baixa.</p>`:`${select('Situação','cancelled',[['false','Ativo · situação calculada pelas baixas'],['true','Cancelado']],String(t.cancelled))}${t.mode==='recurring'?select('Aplicar alterações','scope',[['one','Somente este lançamento'],['future','Este e os futuros da recorrência']],'one'):''}<p class="form-hint full">${money(paid(db,t.id))} já baixados. Parcelas e ocorrências são editadas individualmente por padrão.</p>`}${textarea('Observações','notes',t?.notes)}</div>${formFooter(t?'Salvar alterações':'Revisar lançamento')}</form>`;}
+export function titleForm(db,t,type='expense'){
+ type=t?.type||type;
+ const categoryOptions=db.categories.filter(c=>c.type===type).map(c=>[c.id,c.name]);
+ const partnerOptions=[['','Sem parceiro'],...db.partners.filter(p=>p.active||p.id===t?.partnerId).map(p=>[p.id,p.name])];
+ const typeField=entrySelect('Tipo','type',[['expense','Despesa'],['income','Receita']],type,'entry-type',true);
+ const categoryField=entrySelect('Categoria','categoryId',categoryOptions,t?.categoryId,'entry-category',true);
+ const partnerField=entrySelect('Parceiro','partnerId',partnerOptions,t?.partnerId,'entry-partner');
+ const info=t?'O saldo já baixado é preservado ao editar.':'Um título, um vencimento. O saldo só muda ao registrar uma baixa.';
+ const periodicity=t?
+   entrySelect('Situação','cancelled',[['false','Ativo'],['true','Cancelado']],String(t.cancelled),'entry-cancelled'):
+   entrySelect('Periodicidade','mode',[['single','Único'],['installment','Parcelado'],['recurring','Recorrente']],'single','entry-mode',true);
+ const extra=t&&t.mode==='recurring'?
+    entrySelect('Aplicar alterações','scope',[['one','Somente este lançamento'],['future','Este e os futuros da recorrência']],'one','entry-scope'):
+    '';
+ return `<form id="title-form" class="gb-entry-form" data-id="${esc(t?.id||'')}">
+   <div class="form-grid gb-entry-grid">
+     ${typeField}
+     ${categoryField}
+     <div class="full">${field('Descrição','description',t?.description||'','text','required maxlength="300" placeholder="Ex.: Energia do escritório"')}</div>
+     ${partnerField}
+     ${field('Documento','document',t?.document||'','text','maxlength="100" placeholder="Nº do documento"')}
+     <div class="gb-entry-date">${field('Emissão','issue',t?.issue||today(),'date','required')}</div>
+     <div class="gb-entry-date">${field('Vencimento','due',t?.due||today(),'date','required')}</div>
+     <div class="full">${field('Valor (R$)','amount',t?t.amount/100:'','number','required min="0.01" max="10000000000" step="0.01" placeholder="0,00"')}</div>
+     <div class="full">${periodicity}</div>
+     ${!t?'<div id="count-field" class="full" hidden>'+field('Parcelas / meses','count',2,'number','min="2" max="120" step="1"')+'</div>':''}
+     ${extra?'<div class="full">'+extra+'</div>':''}
+     <p class="form-hint full gb-entry-tip" id="mode-hint">${icon('info')}<span>${esc(info)}</span></p>
+     ${textarea('Observações','notes',t?.notes)}
+   </div>
+   <input type="hidden" name="accountId" value="${esc(t?.accountId||'')}">
+   ${formFooter(t?'Salvar alterações':'Revisar lançamento')}
+ </form>`;
+}
 export function partnerForm(p){return `<form id="partner-form" data-id="${p?.id||''}"><div class="form-grid">${field('Nome ou razão social','name',p?.name||'','text',required)}${field('Nome fantasia','tradeName',p?.tradeName||'','text','maxlength="200"')}${field('CPF ou CNPJ','document',p?.document||'','text','maxlength="18"')}${field('Telefone','phone',p?.phone||'','tel','maxlength="30"')}${field('E-mail','email',p?.email||'','email','maxlength="200"')}${select('Situação','active',[['true','Ativo'],['false','Inativo']],String(p?.active??true))}<fieldset class="full roles"><legend>Classificações · escolha uma ou mais</legend>${['Cliente','Fornecedor','Transportadora','Funcionário','Outros'].map(r=>`<label><input type="checkbox" name="roles" value="${r}" ${p?.roles.includes(r)?'checked':''}>${r}</label>`).join('')}</fieldset><div class="full">${field('Endereço','address',p?.address||'','text','maxlength="500"')}</div>${textarea('Observações','notes',p?.notes)}</div>${p?button(icon('trash')+'Excluir parceiro','delete-partner','danger small',`data-id="${p.id}" type="button"`):''}${formFooter()}</form>`;}
 export function accountForm(a){return `<form id="account-form" data-id="${a?.id||''}"><div class="form-grid">${field('Nome da conta','name',a?.name||'','text','required maxlength="120"')}${field('Banco / instituição','bank',a?.bank||'','text','maxlength="120"')}${field('Agência (opcional)','branch',a?.branch||'','text','maxlength="80"')}${field('Número da conta (opcional)','number',a?.number||'','text','maxlength="80"')}${field('Saldo inicial (R$)','initial',(a?.initial||0)/100,'number','required step="0.01" min="-10000000000" max="10000000000"')}${select('Situação','active',[['true','Ativa'],['false','Inativa']],String(a?.active??true))}<p class="form-hint full">O saldo inicial é a base da conta, antes de todas as baixas e transferências cadastradas. Alterá-lo recalcula o saldo atual.</p></div>${a?button(icon('trash')+'Excluir conta','delete-account','danger small',`data-id="${a.id}" type="button"`):''}${formFooter()}</form>`;}
 export function categoryForm(c){return `<form id="category-form" data-id="${c?.id||''}"><div class="form-grid">${field('Nome da categoria','name',c?.name||'','text','required maxlength="100"')}${select('Tipo','type',[['expense','Despesa'],['income','Receita']],c?.type||'expense')}</div>${c?button(icon('trash')+'Excluir categoria','delete-category','danger small',`data-id="${c.id}" type="button"`):''}${formFooter()}</form>`;}
