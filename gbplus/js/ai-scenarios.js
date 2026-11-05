@@ -27,7 +27,7 @@ export function readScenarioMonth(query,asOf){
   const count=numberValue(relative[1]);
   return count>=0&&count<=60?monthKey(year,month,count):null;
  }
- const named=s.match(/\b(?:em|no|para|ate|durante)\s+(?:o\s+mes\s+de\s+)?(janeiro|fevereiro|marco|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro)(?:\s+de\s+(\d{4}))?\b/);
+ const named=s.match(/\b(?:em|no|para|ate|durante|de|do)\s+(?:o\s+mes\s+de\s+)?(janeiro|fevereiro|marco|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro)(?:\s+de\s+(\d{4}))?\b/);
  if(named){
   let targetYear=named[2]?Number(named[2]):year;
   const targetMonth=MONTH_NAMES.indexOf(named[1])+1;
@@ -53,7 +53,7 @@ function purchaseName(query){
  return trimmed||null;
 }
 const wantsBuy=s=>/\b(comprar|compro|comprarei|adquirir|adquiro|gastar\s+com|investir\s+em)\b/.test(s);
-const wantsForecast=s=>/(fluxo\s+de\s+caixa|saldo\s+(?:futuro|projetado|previsto)|projecao|previsao|como\s+(?:vai|estara|fica)\s+(?:o\s+)?(?:meu\s+)?(?:caixa|saldo)|quanto\s+(?:vai|vou)\s+(?:sobrar|ter)|posso\s+(?:comprar|gastar)|da\s+pra\s+comprar|vale\s+a\s+pena\s+comprar)/.test(s);
+const wantsForecast=s=>/(fluxo\s+de\s+caixa|saldo\s+(?:futuro|projetado|previsto)|projecao|previsao|como\s+(?:vai|estara|fica)\s+(?:o\s+)?(?:meu\s+)?(?:caixa|saldo)|quanto\s+(?:dinheiro\s+)?(?:vai|vou)\s+(?:me\s+)?(?:sobrar|ter)|posso\s+(?:comprar|gastar)|da\s+pra\s+comprar|vale\s+a\s+pena\s+comprar)/.test(s);
 
 export function projectCash(db,asOf,targetMonth,bankCents){
  if(!/^\d{4}-\d{2}$/.test(targetMonth))throw Error('Mês inválido.');
