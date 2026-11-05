@@ -16,13 +16,17 @@ const mockUser={email:'exemplo@dominio.com',user_metadata:{gbplus_profile:{
 
 test('profile has minimal sections and locked identity fields',()=>{
  const html=funcs.profileView(mockUser,{ready:true,cpf:'52998224725'});
- for(const value of ['Minha conta','Dados pessoais','Segurança da conta','Endereço','Bloqueado','Alterar senha','Excluir conta','Salvar alterações'])assert.ok(html.includes(value),value);
+ for(const value of ['Minha conta','Dados pessoais','Segurança da conta','Endereço','Bloqueado','Alterar senha','Sair da conta','Salvar alterações'])assert.ok(html.includes(value),value);
  assert.ok(html.includes('529.982.247-25'));
  assert.ok(html.includes('exemplo@dominio.com'));
  assert.ok(!html.includes('name="cpf"'));
  assert.ok(!html.includes('id="profile-email-form"'));
- assert.ok(html.includes('id="profile-save" class="gb-account-save" disabled'));
- assert.ok(!html.includes('data-auth-action="signout"'));
+ assert.ok(html.includes('id="profile-save" class="gb-account-save" disabled hidden'));
+ assert.ok(html.includes('data-auth-action="signout"'));
+ assert.ok(!html.includes('Excluir conta'));
+ assert.ok(html.indexOf('data-auth-action="signout"')>html.indexOf('</form>'));
+ assert.ok(!html.slice(html.indexOf('Segurança da conta'),html.indexOf('</section>',html.indexOf('Segurança da conta'))).includes('signout'));
+ assert.ok(html.includes('M21 12H9'));
  assert.ok(!html.includes('Voltar às configurações'));
  assert.ok(html.indexOf('Dados pessoais')<html.indexOf('Visualizar ou atualizar dados de endereço'));
  assert.ok(html.indexOf('Visualizar ou atualizar dados de endereço')<html.indexOf('Segurança da conta'));
@@ -48,7 +52,7 @@ test('CPF is editable only for the first registration and locked afterwards',()=
  assert.ok(existing.indexOf('Visualizar ou atualizar dados de endereço')<existing.indexOf('Segurança da conta'));
  assert.ok(existing.indexOf('Segurança da conta')<existing.indexOf('Salvar alterações'));
  assert.ok(!existing.includes('gb-account-bottom'));
- assert.ok(!existing.includes('Sair da conta'));
+ assert.ok(existing.includes('Sair da conta'));
  assert.ok(!existing.includes('Voltar às configurações'));
 });
 test('CPF validation accepts valid digits, rejects repeated numbers and wrong digits',()=>{
@@ -63,7 +67,10 @@ test('CPF validation accepts valid digits, rejects repeated numbers and wrong di
 });
 test('save is enabled only when an editable profile field actually changes',()=>{
  const app=read('js/app.js');
- assert.ok(app.includes("submit.disabled=form.dataset.saving==='true'||form.dataset.initialSnapshot===profileSnapshot(form)"));
+ assert.ok(app.includes("const available=form.dataset.saving!=='true'&&form.dataset.initialSnapshot!==profileSnapshot(form)"));
+ assert.ok(app.includes('submit.disabled=!available;submit.hidden=!available'));
+ assert.ok(app.includes('area.hidden=!available'));
+ assert.ok(app.includes("if(['phone','cpf','postal_code'].includes(key))"));
  assert.ok(app.includes('form.dataset.initialSnapshot=profileSnapshot(form)'));
  assert.ok(app.includes("e.target.form?.id==='profile-form'"));
  assert.ok(app.includes("if(form.id==='profile-form')"));
@@ -82,7 +89,8 @@ test('profile stylesheet uses a scoped design and release metadata',()=>{
  assert.ok(css.includes('compact profile with a coherent sequence'));
  assert.ok(css.includes('.gb-account-address{margin:0 0 12px'));
  assert.ok(css.includes('.gb-account-field{min-height:60px'));
- assert.ok(index.includes('profile-page.css?v=20261104-37'));
+ assert.ok(index.includes('profile-page.css?v=20261105-59'));
+ assert.ok(css.includes('.gb-account-logout'));
  assert.ok(version.assets.includes('./profile-page.css'));
- assert.equal(version.version,'2.2.4');
+ assert.equal(version.version,'2.3.7');
 });
