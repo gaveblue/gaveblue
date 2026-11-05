@@ -98,3 +98,20 @@ test('existing cards/bank records must survive standard schema validation',()=>{
  db.cards[0].bankId=db.banks[0].id;
  assert.equal(store.validateDatabase(db),db);
 });
+
+test('future card invoices can project against a selected bank account without payment',()=>{
+ const db=fixture();
+ db.cards[0].payAccountId=db.accounts[0].id;
+ purchase(db,12000,2);
+ assert.ok(db.titles.every(t=>t.accountId===db.accounts[0].id));
+ assert.equal(domain.accountBalance(db,db.accounts[0].id,'2026-11-05'),50000);
+ const projection=forecast.cashForecast(db,60,'2026-11-05');
+ assert.equal(projection.byAccount[0].current,50000);
+ assert.equal(projection.byAccount[0].expected,38000);
+ assert.equal(store.validateDatabase(db),db);
+});
+test('invalid payment account reference is rejected without changing existing data',()=>{
+ const db=fixture();
+ db.cards[0].payAccountId='non_existing_account';
+ assert.throws(()=>store.validateDatabase(db),/cartão de crédito/);
+});
