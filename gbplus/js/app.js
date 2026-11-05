@@ -11,7 +11,7 @@ import {expectedDates,recurrenceAnchor} from './gb-calendar-rules.js?v=20261105-
 import {CATEGORY_ICON_OPTIONS,categoryIconFor,gbIcon} from './gb-icons.js?v=20261104-42';
 import {setupPwaInstallation,maybeOfferPwaInstall,showInstallHelp,isPwaInstalled} from './pwa-install.js?v=20261104-40';
 import {SupabaseRepository} from '../integrations/supabase/repository.js?v=20261104-42';
-import {initializeAuth,authClient,currentUser,showAuth,isRecovery,updatePersonalProfile,consumeAuthReturnMessage,consumeSessionNotice,signOutAccount,authError} from './auth.js?v=20261105-66';
+import {initializeAuth,authClient,currentUser,showAuth,isRecovery,updatePersonalProfile,consumeAuthReturnMessage,consumeSessionNotice,signOutAccount,authError,emailCooldownSeconds,markAuthEmailSent} from './auth.js?v=20261105-69';
 import {profileView,validateProfile,validCPF,formatCPF} from './profile.js?v=20261105-59';
 import {firstSetupView,customMobileNavForm,shortcutsPreview,readMobileNav,firstStepsPanel} from './setup-ui.js?v=20261105-63';
 import {launchesView} from './launches-view.js?v=20261105-47';
@@ -29,7 +29,7 @@ function firstStepsDismissed(){
  try{return localStorage.getItem('gbplus-first-steps-dismissed:'+id)==='1';}catch{return false;}
 }
 let profileCpfStatus={userId:null,cpf:'',ready:false,loading:false,error:''};
-let lastProfileResetRequestAt=0;
+
 const state={route:'dashboard',period:'all',range:{},query:'',status:'',type:'',partner:'',category:'',partnerQuery:'',granularity:'month',report:'payable',reportPartner:'',moreFilters:false,launchSelected:[],launchStatusOpen:false,launchSearchOpen:false};
 const modal=document.querySelector('#modal');
 // Desktop-only sidebar preference; changing it never touches the finance database.
@@ -416,10 +416,10 @@ const actions={
     if(!email)throw Error('Não foi possível identificar seu e-mail de acesso.');
     confirm('Alterar senha','Vamos enviar um link de redefinição de senha para o e-mail da sua conta. Deseja continuar?',async()=>{
       if(!navigator.onLine)throw Error('Conecte-se à internet para solicitar a alteração de senha.');
-      if(Date.now()-lastProfileResetRequestAt<60000)throw Error('Aguarde um minuto antes de solicitar outro e-mail de recuperação.');
+      if(emailCooldownSeconds()>0)throw Error('Aguarde '+emailCooldownSeconds()+' segundos antes de solicitar outro e-mail de recuperação.');
       const response=await authClient().auth.resetPasswordForEmail(email,{redirectTo:new URL('./',document.baseURI).href});
       if(response.error)throw Error(authError(response.error));
-      lastProfileResetRequestAt=Date.now();
+      markAuthEmailSent();
       closeModal();toast('Se o e-mail estiver cadastrado, você receberá um link para alterar sua senha.');
     });
   },
