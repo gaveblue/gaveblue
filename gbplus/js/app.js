@@ -14,7 +14,7 @@ import {SupabaseRepository} from '../integrations/supabase/repository.js?v=20261
 import {initializeAuth,authClient,currentUser,showAuth,isRecovery,updatePersonalProfile,consumeAuthReturnMessage,consumeSessionNotice,signOutAccount,authError,emailCooldownSeconds,markAuthEmailSent} from './auth.js?v=20261105-69';
 import {profileView,validateProfile,validCPF,formatCPF} from './profile.js?v=20261105-59';
 import {firstSetupView,customMobileNavForm,shortcutsPreview,readMobileNav,firstStepsPanel} from './setup-ui.js?v=20261105-72';
-import {BANKS,bankCatalog,findBank,bankName} from './banks.js?v=20261105-72';
+import {BANKS,bankCatalog,findBank,bankName,syncBankPicker} from './banks.js?v=20261105-72';
 import {addCardPurchase,removeCardPurchase,ensureCardMayChange,creditCards,cardPurchases} from './credit-cards.js?v=20261105-72';
 import {cashForecast} from './forecast.js?v=20261105-72';
 import {banksView,bankForm,cardsView,cardForm,cardPurchaseForm,forecastView,forecastSummary,forecastScenarioForm,forecastResult} from './finance-24-ui.js?v=20261105-72';
@@ -35,7 +35,7 @@ function firstStepsDismissed(){
 }
 let profileCpfStatus={userId:null,cpf:'',ready:false,loading:false,error:''};
 
-const state={route:'dashboard',period:'all',range:{},query:'',status:'',type:'',partner:'',category:'',partnerQuery:'',granularity:'month',report:'payable',reportPartner:'',moreFilters:false,launchSelected:[],launchStatusOpen:false,launchSearchOpen:false};
+const state={route:'dashboard',period:'all',range:{},query:'',status:'',type:'',partner:'',category:'',partnerQuery:'',granularity:'month',flowChartMode:'bars',report:'payable',reportPartner:'',moreFilters:false,launchSelected:[],launchStatusOpen:false,launchSearchOpen:false};
 const modal=document.querySelector('#modal');
 // Desktop-only sidebar preference; changing it never touches the finance database.
 const sidebarPreferenceKey='gbplus-sidebar-hidden-v1';
@@ -530,6 +530,13 @@ const actions={
   'save-generation':()=>{if(!pendingGeneration||busy)return;const generated=pendingGeneration;return commit(d=>{if(generated.some(t=>d.titles.some(x=>!x.cancelled&&x.type===t.type&&x.description===t.description&&x.due===t.due&&x.amount===t.amount&&x.partnerId===t.partnerId)))throw Error('Já existe um título igual (descrição, parceiro, valor e vencimento). Revise para evitar duplicidade.');d.titles.push(...generated);},`${generated.length} título(s) criado(s).`);},
   'back-generation':()=>{if(pendingGeneration?.formHTML){openModal('Novo lançamento',pendingGeneration.formHTML);pendingGeneration=null;}},
   granularity:el=>{state.granularity=el.dataset.value;render();},
+  'flow-chart-mode':el=>{const mode=el.dataset.mode;if(!['bars','lines','net'].includes(mode))return;state.flowChartMode=mode;render();},
+  'choose-bank':el=>{
+   const select=el.closest('.gb-bank-picker')?.querySelector('select[name="bankId"]');
+   if(!select||!findBank(db,el.dataset.bankId))return;
+   select.value=el.dataset.bankId;
+   select.dispatchEvent(new Event('change',{bubbles:true}));
+  },
   search:()=>{state.query='';location.hash='titles';if(state.route==='titles')render();requestAnimationFrame(()=>document.querySelector('#title-search')?.focus());},
   notifications:()=>{location.hash='notifications';if(state.route==='notifications')render();},
   'mobile-menu':()=>openModal('Seu financeiro',`<nav class="menu-grid">${routes.map(([key,label,ico])=>`<a href="#${key}" data-action="close">${icon(ico)}${label}</a>`).join('')}</nav><div class="local-note">${icon('info')} ${currentUser()?'Conta online · use o mesmo login em seus dispositivos.':'Dados locais, sem sincronização entre dispositivos.'}</div>`),
@@ -543,6 +550,9 @@ const actions={
 };
 document.addEventListener('click',async e=>{const el=e.target.closest('[data-action]');if(!el||!db)return;if(el.tagName==='BUTTON')e.preventDefault();try{await actions[el.dataset.action]?.(el);}catch(error){fail(error);}});
 document.addEventListener('click',e=>{if(!e.target.closest('.gb-entry-select'))closeEntryMenus();});
+document.addEventListener('change',e=>{
+ if(e.target?.matches?.('select[name="bankId"]')&&db)syncBankPicker(e.target.closest('.gb-bank-picker'),db);
+});
 document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;const open=document.querySelector('#modal .gb-entry-select .gb-entry-trigger[aria-expanded="true"]');if(!open)return;e.preventDefault();e.stopImmediatePropagation();closeEntryMenus();open.focus();},true);
 document.addEventListener('keydown',e=>{const trigger=e.target.closest?.('.gb-entry-trigger');if(!trigger||!['ArrowDown','ArrowUp','Home','End'].includes(e.key))return;e.preventDefault();const wrap=trigger.closest('.gb-entry-select');const options=[...wrap.querySelectorAll('.gb-entry-option')];toggleEntryMenu(trigger);if(!options.length)return;const selected=options.findIndex(el=>el.getAttribute('aria-selected')==='true');const last=options.length-1;const index=e.key==='Home'?0:e.key==='End'?last:e.key==='ArrowUp'?Math.max(0,selected-1):Math.min(last,selected+1);options[index]?.focus();});
 document.addEventListener('submit',async e=>{e.preventDefault();if(busy||!db)return;const form=e.target;
