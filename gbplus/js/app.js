@@ -156,6 +156,23 @@ function toggleLaunchSelection(id,longPress=false){
  else next.add(id);
  state.launchSelected=[...next];state.launchStatusOpen=false;render();
 }
+function startLaunchPayment(ids){
+ const selected=paymentSelection(db,ids);
+ if(selected.length===1){openModal('Registrar baixa',paymentForm(db,selected[0]));return;}
+ const totals=paymentSummary(db,ids);
+ const accounts=db.accounts.filter(a=>a.active);
+ if(!accounts.length){openModal('Baixar lançamentos','<p>Cadastre uma conta financeira ativa antes de registrar baixas.</p>'+button('Cadastrar conta','new-account','primary'));return;}
+ const assigned=[...new Set(selected.map(t=>t.accountId).filter(Boolean))];
+ const suggested=assigned.length===1&&accounts.some(a=>a.id===assigned[0])?assigned[0]:accounts.length===1?accounts[0].id:'';
+ openModal('Baixar '+selected.length+' lançamentos',
+  '<p class="muted">Cada lançamento será baixado pelo saldo pendente. Receitas e despesas são registradas separadamente.</p>'+
+  '<div class="detail-summary" style="margin:16px 0"><span>'+selected.length+' lançamentos</span><strong>'+money(totals.income+totals.expense)+'</strong><small>'+
+  money(totals.income)+' a receber · '+money(totals.expense)+' a pagar</small></div>'+
+  '<form id="launch-bulk-pay-form" data-ids="'+ids.join(',')+'"><div class="form-grid">'+
+  field('Data da baixa','date',today(),'date','required max="'+today()+'"')+
+  select('Conta utilizada','accountId',[['','Selecione uma conta'],...accounts.map(a=>[a.id,a.name])],suggested,'required')+
+  '</div>'+formFooter('Revisar baixas')+'</form>');
+}
 const actions={
   close:closeModal,
   'toggle-sidebar':()=>syncSidebarVisibility(!document.documentElement.classList.contains('sidebar-hidden'),true),
