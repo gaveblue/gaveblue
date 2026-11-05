@@ -2,6 +2,7 @@
 // Read operations are pure; title creation uses the normal app commit pipeline.
 // This file is dynamically imported: if it fails, the finance UI remains available.
 import {balance,accountBalance,pending,paid,today,generateTitles} from './domain.js';
+import {answerScenario} from './ai-scenarios.js?v=20261105-1';
 
 const money=n=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(n/100);
 const dateLabel=d=>new Date(d+'T12:00:00').toLocaleDateString('pt-BR');
@@ -135,8 +136,10 @@ export function installAiBridge({getDb,getUser,getRepository,commit,openEditor})
    const q=typeof data.text==='string'?data.text:typeof data.query==='string'?data.query:'';
    try{
     if(q.length>500)throw Error('Pergunta muito longa. Resuma em até 500 caracteres.');
-    const answer=answerFromDb(getDb(),q);
-    reply(event.source,'gbplus-ai-query-result',data.requestId,{ok:!!answer,message:answer?'':'Não entendi essa consulta. Posso mostrar saldos, vencimentos, contas por cliente/fornecedor, categorias e resultados.',answer:answer||undefined});
+    const currentDb=getDb();
+    const scenario=answerScenario(currentDb,q,{asOf:today(),bankCents:balance(currentDb),context:data.context});
+    const answer=scenario?.answer||answerFromDb(currentDb,q);
+    reply(event.source,'gbplus-ai-query-result',data.requestId,{ok:!!answer,message:answer?'':'Não entendi essa consulta. Posso mostrar saldos, vencimentos, contas por cliente/fornecedor, categorias e resultados.',answer:answer||undefined,context:scenario?.context||null});
    }catch(error){reply(event.source,'gbplus-ai-query-result',data.requestId,{ok:false,message:error.message||'Falha ao consultar seu financeiro.'});}
    return;
   }
