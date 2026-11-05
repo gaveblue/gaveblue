@@ -1,4 +1,4 @@
-import {esc} from './ui.js?v=20261104-42';
+import {esc} from './ui.js?v=20261105-72';
 
 // Curated identities: ISPB maps to actual bank logos from public Open Finance sources.
 // Logos are nominative identifiers only; GB+ is not affiliated with the banks.
