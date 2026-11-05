@@ -89,3 +89,20 @@ Também permanecem pendentes os testes em celular/PWA instalado, a associação 
 Google a uma conta preexistente com e-mail verificado e registros, e os demais cenários
 da matriz que não estejam explicitamente confirmados acima. A configuração e os testes
 não excluíram usuários nem títulos e não alteraram RLS ou a estrutura do banco.
+
+## GB+ 2.3.8 — proteção contra abuso e experiência de autenticação (05/11/2026)
+
+**Alterações no aplicativo:** indicador consultivo de força (mínimo de 8 caracteres, sem exigir mistura de letras, números e símbolos); confirmação em tempo real; mensagens para sessões encerradas e links inválidos/expirados; intervalo local de 60 segundos entre pedidos de e-mail de confirmação/recuperação, incluindo troca de senha pelo perfil; tratamento de resposta 429; checklist inicial para conta, saldo de abertura e primeiro lançamento, sem gravar operações automaticamente.
+
+**Proteção efetiva ocorre no servidor.** O intervalo local pode ser contornado e não substitui os rate limits do Supabase Auth, que responde HTTP 429 a requisições excessivas. Documento oficial: https://supabase.com/docs/guides/auth/rate-limits .
+
+**Conferências de servidor pendentes:**
+1. [ ] Authentication → Rate Limits: verificar limites atuais para signup, recover, resend, verify, token e envio de e-mails/hora com SMTP Resend; ajustar conforme capacidade real e testes de abuso.
+2. [ ] Conferir intervalo de no mínimo 60 segundos para recuperação/confirmação por usuário e proteções por IP, inclusive sem JavaScript.
+3. [ ] Avaliar ocorrências de 429 nos logs, limites do provedor de SMTP e necessidade de CAPTCHA/Turnstile, se houver abuso real.
+4. [ ] Confirmar política de senha do servidor: mínimo de 8 caracteres e sem exigência de classes; homologar senhas de apenas letras, apenas números e frases longas.
+5. [ ] Testar links expirados, usados, inválidos, abertos em outro navegador e reenvio, sem incluir credenciais em logs.
+6. [ ] Testar sessão revogada, logout voluntário e alternância entre usuários/dispositivos.
+7. [ ] Analisar Security Advisor: proteção contra senhas vazadas desabilitada (pode depender do plano) e aviso da função privilegiada public.gbplus_save. Não modificar a função financeira sem auditar as regras de autorização existentes.
+
+**Limitação desta execução:** o conector Supabase disponível não oferece leitura ou alteração das configurações de rate limits do Auth. Nenhum limite de servidor foi alterado; isso continua pendente no painel administrativo. Nunca armazenar tokens ou chaves administrativas no repositório.
