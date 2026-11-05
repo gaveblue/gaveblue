@@ -10,11 +10,15 @@ export function banksView(db){
  const all=bankCatalog(db);
  return heading('Bancos e instituições','Identifique suas contas e cartões com ícones das principais instituições brasileiras.',
   button(icon('plus')+'Cadastrar instituição','new-bank','primary'))+
- '<div class="gb-finance24-intro">Os logos identificam instituições, não representam integração bancária. Se não encontrar seu banco, cadastre com nome e cor personalizados.</div>'+
- '<div class="gb-bank-directory">'+all.map(b=>{
+ '<div class="gb-finance24-intro">As instituições aparecem em ordem alfabética, com código bancário COMPE quando disponível. Os logos não representam integração bancária.</div>'+
+ '<div class="gb-bank-directory-search"><label for="gb-bank-directory-query">Buscar banco por nome, código COMPE ou ISPB</label>'+
+ '<input id="gb-bank-directory-query" class="gb-bank-directory-search-input" type="search" autocomplete="off" placeholder="Ex.: Sicoob, Sicobi, Nordeste, Pan, 623, 756" aria-controls="gb-bank-directory-results">'+
+ '<small data-bank-directory-count>'+all.length+' instituições disponíveis.</small></div>'+
+ '<p data-bank-directory-empty class="gb-bank-no-results" hidden>Nenhuma instituição encontrada. Cadastre seu banco personalizado.</p>'+
+ '<div id="gb-bank-directory-results" class="gb-bank-directory">'+all.map(b=>{
   const removable=custom.some(x=>x.id===b.id);
-  return '<article class="gb-bank-directory-item">'+bankBadge(b)+
-   '<div><strong>'+esc(b.name)+'</strong><small>'+(removable?'Personalizado':'Catálogo GB+')+'</small></div>'+
+  return '<article class="gb-bank-directory-item" data-directory-bank-id="'+esc(b.id)+'">'+bankBadge(b)+
+   '<div><strong>'+esc(b.name)+'</strong><small>'+(removable?'Personalizado':(b.code?'Cód. '+esc(b.code)+' · ':'')+'ISPB '+esc(b.ispb||'—'))+'</small></div>'+
    (removable?button('Editar','edit-bank','small','data-id="'+esc(b.id)+'"'): '<span class="gb-bank-directory-label">Disponível</span>')+'</article>';
  }).join('')+'</div>';
 }
