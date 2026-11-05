@@ -1,4 +1,4 @@
-import {esc} from './ui.js?v=20261105-72';
+import {esc,select} from './ui.js?v=20261105-72';
 
 // Curated identities: ISPB maps to actual bank logos from public Open Finance sources.
 // Logos are nominative identifiers only; GB+ is not affiliated with the banks.
@@ -40,4 +40,26 @@ export function bankName(db,id,fallback=''){
 }
 export function bankForAccount(db,account){
  return findBank(db,account?.bankId)||findBank(db,account?.bank);
+}
+
+/** Select remains a real HTML form field; visual shortcuts only choose its value. */
+export function bankPicker(db,value='',label='Banco ou instituição'){
+ const selected=findBank(db,value);
+ const popular=BANKS.slice(0,9);
+ return '<div class="gb-bank-picker full"><div class="gb-bank-picker-heading"><strong>'+esc(label)+'</strong>'+
+  '<span class="gb-bank-selected" data-bank-selected>'+(selected?bankBadge(selected):'<span class="gb-bank-placeholder" aria-hidden="true">B</span>')+
+  '<small>'+esc(selected?.name||'Selecione um banco')+'</small></span></div>'+
+  select(label,'bankId',bankOptions(db),value)+
+  '<div class="gb-bank-shortcuts" role="group" aria-label="Bancos principais">'+popular.map(bank=>
+   '<button type="button" class="gb-bank-shortcut" data-action="choose-bank" data-bank-id="'+esc(bank.id)+'" aria-pressed="'+String(bank.id===value)+'" title="'+esc(bank.name)+'">'+
+   bankBadge(bank)+'<small>'+esc(bank.name)+'</small></button>').join('')+'</div></div>';
+}
+export function syncBankPicker(picker,db){
+ if(!picker)return;
+ const selected=picker.querySelector('select[name="bankId"]');
+ if(!selected)return;
+ const bank=findBank(db,selected.value);
+ const slot=picker.querySelector('[data-bank-selected]');
+ if(slot)slot.innerHTML=(bank?bankBadge(bank):'<span class="gb-bank-placeholder" aria-hidden="true">B</span>')+'<small>'+esc(bank?.name||'Selecione um banco')+'</small>';
+ picker.querySelectorAll('[data-bank-id]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.bankId===selected.value)));
 }
