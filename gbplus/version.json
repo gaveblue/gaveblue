@@ -1,12 +1,12 @@
 {
-  "version": "2.1.5",
-  "build": 36,
+  "version": "2.2.0",
+  "build": 37,
   "published_at": "2026-11-04",
-  "title": "Minha Conta mais compacta e organizada",
+  "title": "Lançamentos selecionáveis",
   "notes": [
-    "Endereço reposicionado logo após Dados pessoais, mantendo seu preenchimento e salvamento.",
-    "Cartões, campos e espaçamentos compactados para melhorar a hierarquia visual no celular.",
-    "Removidos os atalhos redundantes Sair da conta e Voltar às configurações do rodapé de Minha Conta."
+    "Novo visual para Lançamentos e seleção por toque, sem checkbox.",
+    "Ações circulares para editar, baixar, estornar ou excluir, individualmente ou em lote.",
+    "Arrastar para direita ou esquerda abre a confirmação de baixa ou exclusão; transações protegidas."
   ],
   "assets": [
     "./index.html",
@@ -38,6 +38,10 @@
     "./js/auth-flow.js",
     "./settings-page.css",
     "./privacidade.html",
-    "./profile-page.css"
+    "./profile-page.css",
+    "./launches-page.css",
+    "./js/launches-view.js",
+    "./js/launches-gestures.js",
+    "./js/launch-actions.js"
   ]
 }
