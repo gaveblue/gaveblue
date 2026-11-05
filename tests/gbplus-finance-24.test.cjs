@@ -31,7 +31,7 @@ const purchase=(db,amount=90000,count=3)=>cards.addCardPurchase(db,{cardId:db.ca
 test('catalog offers real bank logo identifiers and custom names fallback',()=>{
  assert.equal(banks.findBank(null,'Nubank').ispb,'18236120');
  assert.equal(banks.findBank(null,'Caixa').ispb,'00360305');
- assert.match(banks.bankBadge(banks.findBank(null,'Itaú')),/60701190.png/);
+ assert.match(banks.bankBadge(banks.findBank(null,'Itaú')),/60701190\.svg/);
  assert.match(banks.bankBadge({name:'Cooperativa local',color:'#555555'}),/CL/);
 });
 test('legacy backup is valid with absent banks and cards arrays',()=>{
