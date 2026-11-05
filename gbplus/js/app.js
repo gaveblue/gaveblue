@@ -435,6 +435,16 @@ document.addEventListener('submit',async e=>{e.preventDefault();if(busy||!db)ret
   else if(form.id==='account-form'){await commit(d=>upsert(d.accounts,{...v,id:id||uid(),name:v.name.trim(),initial:cents(v.initial),active:v.active==='true'}));}
   else if(form.id==='category-form'){await commit(d=>{const row={...v,id:id||uid(),name:v.name.trim()};if(d.categories.some(c=>c.id!==row.id&&c.type===row.type&&c.name.toLowerCase()===row.name.toLowerCase()))throw Error('Já existe uma categoria com este nome e tipo.');if(id&&d.titles.some(t=>t.categoryId===id&&t.type!==v.type))throw Error('Não é possível alterar o tipo de uma categoria em uso.');upsert(d.categories,row);});}
   else if(form.id==='payment-form'){await commit(d=>addPayment(d,{titleId:id,accountId:v.accountId,date:v.date,amount:cents(v.amount)}),'Baixa registrada. Saldo atualizado.');}
+  else if(form.id==='launch-bulk-pay-form'){
+   const ids=String(form.dataset.ids||'').split(',').filter(Boolean);
+   const summary=paymentSummary(db,ids);
+   if(!db.accounts.some(a=>a.id===v.accountId&&a.active))throw Error('Selecione uma conta financeira ativa.');
+   confirm('Confirmar '+summary.count+' baixas?',
+     'Serão lançadas '+summary.count+' baixas na conta escolhida, com data '+dateLabel(v.date)+
+     ', no valor total de '+money(summary.income+summary.expense)+'. Confirmar?',
+     ()=>commit(d=>applyLaunchPayments(d,ids,v.accountId,v.date),
+       summary.count+' baixa(s) registradas. Saldos atualizados.'));
+  }
   else if(form.id==='transfer-form'){await commit(d=>transfer(d,{...v,amount:cents(v.amount)}),'Transferência registrada.');}
   else if(form.id==='customize-form'){await commit(d=>{for(const device of ['desktop','mobile'])for(const key of Object.keys(INDICATORS))d.settings.panel[device][key]=new FormData(form).has(`${device}:${key}`);},'Painel personalizado.');}
   else if(form.id==='period-form'){if(v.from>v.to)throw Error('O início deve ser anterior ao fim do período.');state.period='custom';state.range={from:v.from,to:v.to};closeModal();render();}
