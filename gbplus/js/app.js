@@ -668,10 +668,11 @@ document.addEventListener('submit',async e=>{e.preventDefault();if(busy||!db)ret
    },'Instituição personalizada salva.');
   }
   else if(form.id==='card-form'){
-   const row={id:id||uid(),name:String(v.name||'').trim(),bankId:String(v.bankId||''),last4:String(v.last4||'').trim(),
+   const row={id:id||uid(),name:String(v.name||'').trim(),bankId:String(v.bankId||''),payAccountId:String(v.payAccountId||''),last4:String(v.last4||'').trim(),
     limit:cents(v.limit),closingDay:Number(v.closingDay),dueDay:Number(v.dueDay),active:v.active==='true'};
    if(!row.name||row.name.length>120||row.limit<=0||!Number.isInteger(row.closingDay)||row.closingDay<1||row.closingDay>28||!Number.isInteger(row.dueDay)||row.dueDay<1||row.dueDay>28||row.last4&&!/^\d{4}$/.test(row.last4))throw Error('Confira nome, limite, final e dias do cartão.');
    if(row.bankId&&!findBank(db,row.bankId))throw Error('Selecione uma instituição válida.');
+   if(row.payAccountId&&!db.accounts.some(a=>a.id===row.payAccountId))throw Error('Selecione uma conta financeira válida para o cartão.');
    await commit(d=>{
     if(!Array.isArray(d.cards))d.cards=[];
     ensureCardMayChange(d,id,row);
