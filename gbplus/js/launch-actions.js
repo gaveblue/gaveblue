@@ -43,6 +43,7 @@ export function applyLaunchReversals(db,ids){
 }
 export function deletionSelection(db,ids){
  const selected=launchSelection(db,ids);
+ if(selected.some(t=>t.cardInvoice))throw Error('Faturas de cartão não podem ser excluídas como títulos comuns. Ajuste as compras vinculadas.');
  if(selected.some(t=>paid(db,t.id)>0))throw Error('Há lançamentos com baixas na seleção. Estorne as baixas antes de excluir.');
  return selected;
 }
