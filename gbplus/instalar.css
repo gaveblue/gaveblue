@@ -1,0 +1,104 @@
+/* GB+ · standalone mobile installation landing. No external CSS/runtime. */
+:root{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Arial,sans-serif;color:#111113;background:#fff;color-scheme:light;font-synthesis:none}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{margin:0;background:#fff;line-height:1.45}
+button,a{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+button{font:inherit;cursor:pointer}
+a{color:inherit}
+[hidden]{display:none!important}
+.install-shell{width:min(100%,520px);margin:0 auto;padding:0 18px max(28px,env(safe-area-inset-bottom))}
+.intro{text-align:center;padding:26px 4px 0}
+.brand{font-size:clamp(58px,16vw,85px);font-weight:950;font-style:italic;letter-spacing:-.1em;line-height:1;transform:skew(-4deg);padding-right:.12em}
+.brand span{letter-spacing:-.11em}
+.intro h1{font-size:clamp(30px,8vw,39px);line-height:1.08;letter-spacing:-.055em;margin:14px 0 11px;font-weight:830}
+.intro>p{font-size:clamp(14px,4.1vw,18px);line-height:1.4;color:#66676c;margin:0 auto;max-width:390px}
+.device-stage{position:relative;height:330px;margin:23px auto 0;overflow:hidden;max-width:420px;pointer-events:none}
+.device-stage::after{content:"";position:absolute;bottom:0;left:0;right:0;height:78px;background:linear-gradient(0deg,#fff 4%,#ffffff00);pointer-events:none}
+.device{width:min(300px,86%);border-radius:43px 43px 0 0;padding:9px 8px 0;margin:auto;background:linear-gradient(135deg,#454549,#050505 24%,#343439 58%,#050505);border:2px solid #1d1d1e;box-shadow:0 11px 32px #0002,0 0 0 1px #979797;height:480px;position:relative}
+.device::before{content:"";position:absolute;left:50%;transform:translateX(-50%);top:13px;width:17px;height:17px;border-radius:50%;background:#0d111a;box-shadow:0 0 0 3px #393a40;z-index:2}
+.device-screen{background:#fff;border-radius:35px 35px 0 0;height:100%;overflow:hidden;padding:9px 13px}
+.device-status{font-size:10px;font-weight:700;display:flex;justify-content:space-between;align-items:center;padding:0 9px}
+.device-signal{font-size:9px;letter-spacing:.5px}
+.device-top{display:flex;justify-content:space-between;align-items:center;margin-top:19px}
+.mini-brand{font-size:22px;font-weight:950;font-style:italic;letter-spacing:-.09em}
+.mini-icons{display:flex;gap:7px;align-items:center}
+.mini-icons svg{width:26px;height:26px;padding:5px;border-radius:50%;border:1px solid #efeff0;background:#fafafa}
+.device-greeting{display:grid;gap:5px;margin-top:28px}
+.device-greeting strong{font-size:20px;letter-spacing:-.05em}
+.device-greeting span{font-size:9px;color:#8b8b8c}
+.device-pill{display:flex;align-items:center;gap:6px;border:1px solid #ededed;border-radius:11px;padding:8px 11px;width:max-content;font-size:10px;font-weight:650;margin-top:18px;box-shadow:0 2px 6px #00000008}
+.device-pill svg{width:13px;height:13px}
+.tiny-chevron{font-size:14px;margin-left:9px}
+.device-section{display:flex;justify-content:space-between;margin:26px 0 11px;font-size:8px;color:#85858a}
+.device-section span:first-child{letter-spacing:.16em;font-weight:750}
+.device-balance{position:relative;background:linear-gradient(125deg,#2d2e32,#18191c);color:#fff;border-radius:13px;padding:16px 17px;height:106px;display:flex;flex-direction:column;gap:3px}
+.device-balance>span:first-child{font-size:10px;opacity:.8}
+.device-balance strong{font-size:27px;letter-spacing:-.04em;line-height:1.18}
+.device-balance small{font-size:9px;color:#bdbdc0}
+.device-wallet{position:absolute;right:17px;top:20px;font-size:22px}
+.device-stats{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}
+.device-stats>div{border:1px solid #ececed;border-radius:13px;box-shadow:0 2px 8px #00000008;min-height:94px;padding:11px;display:grid;gap:3px}
+.indicator{width:24px;height:24px;display:grid;place-items:center;background:#f5f5f5;border-radius:7px;font-size:17px;line-height:1}
+.indicator.positive{color:#16a34a}.indicator.negative{color:#df3a45}
+.device-stats small{font-size:9px;color:#8b8b8c}
+.device-stats strong{font-size:15px;letter-spacing:-.05em}
+.device-disclaimer{position:absolute;right:10px;bottom:2px;color:#b3b3b6;font-size:9px;z-index:2}
+.features{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;margin:3px auto 26px;max-width:450px}
+.feature{display:flex;align-items:center;flex-direction:column;gap:10px;padding:1px 6px;position:relative;text-align:center;color:#171719}
+.feature:not(:last-child)::after{position:absolute;content:"";width:1px;height:58px;right:0;top:3px;background:#dedee0}
+.feature svg{width:26px;height:26px}
+.feature span{font-size:11px;line-height:1.25;max-width:88px}
+.platforms{margin-top:8px}
+.platforms h2{font-size:22px;line-height:1.2;letter-spacing:-.045em;text-align:center;margin:0 0 5px}
+.platforms-subtitle{font-size:13px;color:#75757b;text-align:center;margin:0 0 18px}
+.platform{display:flex;align-items:center;gap:13px;border:1px solid #e4e4e6;border-radius:19px;background:#fff;box-shadow:0 5px 15px #00000007,0 1px 2px #0000000b;padding:16px 15px;margin:12px 0;min-height:90px}
+.platform-mark{width:45px;height:45px;display:grid;place-items:center;flex:0 0 45px;color:#0f0f10}
+.platform-mark svg{width:36px;height:36px}
+.platform-name{min-width:0;display:grid;gap:0;flex:1}
+.platform-name small{color:#77777c;font-size:11px}
+.platform-name strong{font-size:clamp(17px,5vw,22px);letter-spacing:-.04em;white-space:nowrap}
+.platform-name strong span{font-weight:750}
+.install-action{border:0;border-radius:999px;background:#0868f9;color:#fff;font-weight:750;min-width:100px;min-height:47px;padding:0 18px;box-shadow:0 3px 12px #0868f91d;transition:background .15s,transform .15s}
+.install-action:hover,.guide-primary:hover{background:#0058dc}
+.install-action:active,.guide-primary:active{transform:scale(.985)}
+.store-note{margin:17px auto 0;max-width:370px;font-size:11px;line-height:1.5;color:#87878d;text-align:center}
+.landing-footer{text-align:center;padding:21px 0 8px}
+.landing-footer a{font-size:13px;text-decoration:none;color:#6f7077;font-weight:600}
+.landing-footer a:hover{text-decoration:underline}
+.guide-nav{display:flex;justify-content:space-between;align-items:center;padding:21px 1px 0}
+.back-button{display:flex;align-items:center;gap:4px;border:0;background:transparent;padding:9px 7px 9px 0;color:#3e3e42;font-size:14px;font-weight:600}
+.back-button svg{width:21px;height:21px}
+.guide-brand{font-size:26px;font-style:italic;font-weight:950;letter-spacing:-.09em}
+.guide-intro{padding:46px 2px 23px}
+.guide-icon{width:66px;height:66px;border-radius:19px;background:#f4f4f5;display:grid;place-items:center;margin-bottom:19px}
+.guide-icon svg{width:36px;height:36px}
+.eyebrow{font-size:10px;letter-spacing:.16em;color:#7f8085;font-weight:750;margin:0 0 8px}
+.guide-intro h1{font-size:clamp(29px,8vw,39px);letter-spacing:-.055em;line-height:1.08;margin:0 0 11px}
+.guide-intro>p:last-child{margin:0;color:#76767d;font-size:15px;line-height:1.5;max-width:370px}
+.guide-steps{list-style:none;padding:0;margin:2px 0 22px;counter-reset:stage;display:grid;gap:12px}
+.guide-steps li{counter-increment:stage;display:flex;gap:15px;border:1px solid #e8e8eb;border-radius:17px;padding:16px 14px;align-items:flex-start}
+.guide-steps li::before{content:counter(stage);width:31px;height:31px;border-radius:50%;background:#111113;color:#fff;font-size:13px;font-weight:750;display:grid;place-items:center;flex:0 0 31px}
+.guide-steps li>div{display:grid;gap:4px;min-width:0}
+.guide-steps strong{font-size:15px;letter-spacing:-.02em}
+.guide-steps span{font-size:13px;color:#76767b;line-height:1.45}
+.guide-callout{background:#f5f5f7;padding:15px 16px;border-radius:15px;font-size:12px;line-height:1.55;color:#5d5d63;margin:0 0 15px}
+.install-status{margin:0 0 13px;font-size:13px;color:#56565b}
+.install-status:empty{display:none}
+.guide-actions{display:grid;gap:10px;margin:24px 0 10px}
+.guide-primary,.guide-secondary{min-height:55px;border-radius:15px;display:flex;align-items:center;justify-content:center;gap:7px;text-decoration:none;font-weight:750;font-size:15px;transition:background .15s,transform .15s}
+.guide-primary{background:#0868f9;color:white;border:0}
+.guide-secondary{background:white;border:1px solid #e2e2e4;color:#222}
+.guide-secondary:hover{background:#fafafa}
+.guide-footnote{font-size:12px;color:#939399;line-height:1.45;text-align:center;margin:21px auto 14px}
+:focus-visible{outline:3px solid #2178ff;outline-offset:3px}
+@media(max-width:355px){
+ .install-shell{padding-left:13px;padding-right:13px}
+ .platform{gap:8px;padding:14px 11px}
+ .platform-mark{width:37px;flex-basis:37px}.platform-mark svg{width:32px;height:32px}
+ .install-action{min-width:90px;padding:0 12px}
+ .feature span{font-size:10px}
+ .device-stage{height:309px}
+}
+@media(min-width:700px){.install-shell{border-left:1px solid #f0f0f1;border-right:1px solid #f0f0f1;min-height:100dvh;padding-left:33px;padding-right:33px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
