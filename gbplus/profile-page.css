@@ -190,3 +190,17 @@ html[data-theme=dark] .gb-account-lock-indicator span{background:#393942;color:#
  .gb-account-save-area{margin:15px 0 0}
  .gb-account-save{min-height:52px;font-size:14px;border-radius:13px}
 }
+
+/* Logout independente do cartão Segurança; permanece acessível sem editar o perfil. */
+.gb-account-logout-area{margin:18px 0 12px}
+.gb-account-logout{display:flex;align-items:center;justify-content:center;gap:11px;width:100%;min-height:54px;padding:12px 18px;border:1px solid #b62e42;border-radius:13px;background:#c93449;color:#fff;font:inherit;font-size:15px;font-weight:720;cursor:pointer;transition:background .16s,border-color .16s,transform .16s}
+.gb-account-logout strong{font:inherit}
+.gb-account-logout .icon{width:21px;height:21px;flex-shrink:0}
+.gb-account-logout:hover{background:#ad273a;border-color:#a52637}
+.gb-account-logout:active{transform:scale(.995)}
+.gb-account-logout:focus-visible{outline:3px solid #ef8290;outline-offset:3px}
+html[data-theme=dark] .gb-account-logout{background:#d43c50;border-color:#e45b6d;color:#fff}
+html[data-theme=dark] .gb-account-logout:hover{background:#b92d42}
+#profile-form .gb-account-save-area[hidden],#profile-save[hidden]{display:none!important}
+@media(max-width:760px){.gb-account-logout-area{margin:16px 0 10px}.gb-account-logout{min-height:52px;font-size:14px}}
+@media(prefers-reduced-motion:reduce){.gb-account-logout{transition:none}}
