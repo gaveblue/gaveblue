@@ -1,13 +1,13 @@
 {
-  "version": "2.2.6",
-  "build": 43,
+  "version": "2.2.7",
+  "build": 44,
   "published_at": "2026-11-05",
-  "title": "GB+ AI: correções das simulações, contexto e perguntas por mês",
+  "title": "Gráficos financeiros EasyUI com React isolado",
   "notes": [
-    "Corrigido o reaproveitamento indevido de valores entre compras diferentes (ex.: calça de R$ 250 e iPhone de R$ 18.000).",
-    "Simulações agora distinguem recebimentos hipotéticos de compras e avisam sobre possível duplicidade com títulos cadastrados.",
-    "Continuidade da conversa corrigida: responda apenas “mês que vem” e mantenha a compra parcelada; parcelamento mensal sem juros explicitado.",
-    "Mensagens simples como “oi”, “ol” e “ok” passam a receber respostas adequadas."
+    "Novo gráfico Earnings para receitas recebidas, com períodos 7 dias, 30 dias e 12 meses.",
+    "Novo Bar Chart no fluxo de caixa, com comparação de receitas e despesas efetivamente baixadas.",
+    "Componentes React originais do EasyUI integrados em módulo isolado, respeitando os temas claro e escuro.",
+    "Inicialização e lançamentos não dependem dos gráficos; visualização anterior permanece disponível se o módulo falhar."
   ],
   "assets": [
     "./index.html",
@@ -55,6 +55,11 @@
     "./ICON_LICENSE.md",
     "./gb-entry-wizard.css",
     "./js/gb-finance-input.js",
-    "./js/gb-calendar-rules.js"
+    "./js/gb-calendar-rules.js",
+    "./charts-integration.css",
+    "./js/gb-react-loader.js",
+    "./js/gb-charts-data.js",
+    "./charts-dist/gb-react-charts.js",
+    "./charts-dist/gb-react-charts.css"
   ]
 }
