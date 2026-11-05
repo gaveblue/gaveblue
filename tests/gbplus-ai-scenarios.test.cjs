@@ -59,15 +59,67 @@ test('sem data pede esclarecimento; sem compromisso não inventa resposta',()=>{
  assert.equal(ask('cadastre uma despesa de 250 reais'),null);
  assert.equal(ask('boa tarde'),null);
 });
-test('compra parcelada não é tratada como à vista sem aviso',()=>{
+test('compra parcelada gera projeção mensal sem juros, nunca à vista',()=>{
  const r=ask('Quero comprar uma calça parcelada em 3 vezes mês que vem por R$ 300');
- assert.match(r.answer,/Ainda não calculo compras parceladas/);
- assert.doesNotMatch(r.answer,/Saldo projetado com a compra/);
+ assert.equal(r.context.installments,3);
+ assert.match(r.answer,/3 parcelas, sem juros/);
+ assert.match(r.answer,/dezembro de 2026: R.\s?100,00/);
+ assert.match(r.answer,/Saldo projetado no primeiro mês, após a parcela:/);
+ assert.doesNotMatch(r.answer,/à vista/);
 });
 test('consultas futuras mantêm acentos no item e reconhecem mês por nome',()=>{
  const r=ask('Quero comprar uma televisão em dezembro por R$ 300');
  assert.equal(r.context.item,'televisão');
  assert.equal(r.context.month,'2026-12');
+});
+test('regressão real: compra distinta não herda R$ 250 da calça',()=>{
+ const first=ask('Quero comprar uma calça mês que vem. Como vai estar meu fluxo de caixa?');
+ const second=ask('E se essa calça custar R$ 250?',first.context);
+ const third=ask('e se eu receber 20.000,00 consigo comprar um iphone de 18.000,00?',second.context);
+ assert.equal(third.context.item,'iphone');
+ assert.equal(third.context.amount,1800000);
+ assert.equal(third.context.extraIncome,2000000);
+ assert.equal(third.context.month,'2026-12');
+ assert.match(third.answer,/iPhone|iphone/);
+ assert.match(third.answer,/R.\s?18.000,00/);
+ assert.match(third.answer,/R.\s?20.000,00/);
+ assert.doesNotMatch(third.answer,/iphone de 18.000,00: R.\s?250,00/);
+ assert.match(third.answer,/se ele ainda NÃO estiver entre os recebimentos cadastrados/);
+});
+test('regressão real: notebook em 12 vezes, depois somente mês que vem',()=>{
+ const first=ask('Quero comprar um notebook de R$ 3.600 parcelado em 12 vezes. Como fica meu caixa?');
+ assert.equal(first.context.item,'notebook');
+ assert.equal(first.context.amount,360000);
+ assert.equal(first.context.installments,12);
+ assert.equal(first.context.month,null);
+ assert.match(first.answer,/Para qual mês/);
+ const second=ask('mes que vem',first.context);
+ assert.equal(second.context.month,'2026-12');
+ assert.match(second.answer,/12 parcelas, sem juros/);
+ assert.match(second.answer,/dezembro de 2026: R.\s?300,00/);
+ assert.match(second.answer,/Total da compra: R.\s?3.600,00/);
+});
+test('recebimento hipotético não vira preço da compra',()=>{
+ assert.equal(readScenarioAmount('se eu receber R$ 20.000,00'),null);
+ assert.equal(readScenarioAmount('e se eu receber 20.000,00 consigo comprar um iphone de 18.000,00?'),1800000);
+ assert.equal(readScenarioAmount('notebook de R$ 3.600 parcelado em 12 vezes'),360000);
+});
+test('seguir com mês informado depois de pedir esclarecimento',()=>{
+ const initial=ask('Quero comprar uma calça');
+ const second=ask('mês que vem',initial.context);
+ assert.equal(second.context.item,'calça');
+ assert.equal(second.context.month,'2026-12');
+ assert.match(second.answer,/Quanto estima gastar com calça/);
+});
+test('sem outros recebimentos previstos e contextos independentes',()=>{
+ const initial=ask('Quero comprar uma calça mês que vem por R$ 250');
+ const noReceipts=ask('e se eu nao receber nada?',initial.context);
+ assert.equal(noReceipts.context.noOtherReceipts,true);
+ assert.match(noReceipts.answer,/sem outros recebimentos futuros/);
+ assert.equal(ask('ok',noReceipts.context),null);
+ const independent=ask('Quero comprar um celular em janeiro');
+ assert.equal(independent.context.item,'celular');
+ assert.equal(independent.context.amount,null);
 });
 test('déficit conservador fica explícito',()=>{
  const r=ask('Posso comprar um notebook no próximo mês por R$ 1.000,00?');
