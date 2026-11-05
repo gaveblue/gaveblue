@@ -27,9 +27,9 @@ const cleanRows = db => {
     return [{date:payment.date,amount:payment.amount,type:title.type,categoryId:title.categoryId||''}];
   });
 };
-function buildPeriods(db){
+function buildPeriods(db,allRecords){
   const now=iso(new Date()),firstOfMonth=now.slice(0,7)+'-01';
-  const records=cleanRows(db).filter(row=>row.type==='income');
+  const records=allRecords.filter(row=>row.type==='income');
   const categories=new Map((db?.categories||[]).map(category=>[category.id,String(category.name||'Sem categoria')]));
   const definitions=[
     {id:'7d',label:'7D',start:addDays(now,-6),end:now,previousStart:addDays(now,-13),previousEnd:addDays(now,-7),comparison:'em relação aos 7 dias anteriores',key:date=>date,buckets:Array.from({length:7},(_,i)=>addDays(now,i-6))},
@@ -54,14 +54,16 @@ function buildPeriods(db){
     return {id:def.id,label:def.label,comparison:def.comparison,total:moneyNumber(current.reduce((s,row)=>s+row.amount,0)),previous:moneyNumber(previous.reduce((s,row)=>s+row.amount,0)),trend:def.buckets.map(key=>moneyNumber(bucketAmounts.get(key)||0)),trendLabels:def.buckets.map(key=>def.id==='12m'?fmtMonth(key):fmtDay(key)),sources};
   });
 }
-export function buildChartPayload(db, state, flowRows){
+export function buildChartPayload(db, state, flowRows, options={}){
+  // Avoid rescanning payment history on the bar-chart-only screens.
+  const records=options.includeEarnings===false?[]:cleanRows(db);
   const barData=(flowRows||[]).slice(-36).map(r=>({
     label:state?.granularity==='month'?fmtMonth(r.date):fmtDay(r.date),
     income:moneyNumber(r.actualIn),
     expense:moneyNumber(r.actualOut)
   }));
   return {
-    earnings: { periods:buildPeriods(db), hasRecords:cleanRows(db).some(row=>row.type==='income') },
+    earnings: { periods:options.includeEarnings===false?[]:buildPeriods(db,records), hasRecords:records.some(row=>row.type==='income') },
     bar: { data:barData, count:(flowRows||[]).length, periodLabel:state?.granularity==='day'?'diários':state?.granularity==='week'?'semanais':'mensais' }
   };
 }

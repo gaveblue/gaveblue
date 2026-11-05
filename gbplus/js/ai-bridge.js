@@ -2,7 +2,7 @@
 // Read operations are pure; title creation uses the normal app commit pipeline.
 // This file is dynamically imported: if it fails, the finance UI remains available.
 import {balance,accountBalance,pending,paid,today,generateTitles} from './domain.js';
-import {answerScenario} from './ai-scenarios.js?v=20261105-2';
+import {answerScenario} from './ai-scenarios.js?v=20261105-47';
 
 const money=n=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(n/100);
 const dateLabel=d=>new Date(d+'T12:00:00').toLocaleDateString('pt-BR');

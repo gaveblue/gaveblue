@@ -1,14 +1,14 @@
 {
-  "version": "2.2.7",
-  "build": 44,
+  "version": "2.2.8",
+  "build": 45,
   "published_at": "2026-11-05",
-  "title": "Gráficos de receitas e fluxo de caixa modernizados",
+  "title": "Correções de recorrência, estabilidade do fluxo e interpretação da IA",
   "notes": [
-    "Novo gráfico interativo de receitas recebidas no Dashboard, com períodos de 7 dias, 30 dias e 12 meses.",
-    "Novo gráfico de barras no Fluxo de Caixa para comparar recebimentos e pagamentos, com receitas em verde e despesas em vermelho.",
-    "Gráficos feitos em SVG e JavaScript sem dependências externas, com leitura dos registros financeiros já existentes.",
-    "Componentes React do EasyUI mantidos no código para integração posterior, quando for possível compilar o pacote.",
-    "Nenhuma alteração na autenticação, nos lançamentos ou na base de dados."
+    "Prévia e salvamento de lançamentos recorrentes agora compartilham a data-base original, mesmo quando um vencimento anterior foi deslocado para dia útil.",
+    "Fluxo de caixa processa os pagamentos em uma passagem única, reduzindo trabalho em bases maiores e ignorando referências inválidas sem interromper a tela.",
+    "Uma falha de gráfico não bloqueia mais a renderização financeira.",
+    "GB+ AI interpreta expressões comuns como “daqui três meses” e “daqui 3 meses”.",
+    "Melhoria de desempenho: gráfico de barras não recalcula o histórico completo de receitas desnecessariamente."
   ],
   "assets": [
     "./index.html",

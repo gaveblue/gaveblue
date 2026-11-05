@@ -1,4 +1,4 @@
-import {money,today,dateLabel,metrics,pending,paid,status,flow,accountBalance,within} from './domain.js?v=20261104-42';
+import {money,today,dateLabel,metrics,pending,paid,status,flow,accountBalance,within} from './domain.js?v=20261105-47';
 import {INDICATORS} from './store.js?v=20261104-42';
 import {esc,icon,button,empty,titleTable,chart,select,field} from './ui.js?v=20261104-42';
 import {gbIcon,categoryIconFor} from './gb-icons.js?v=20261104-42';

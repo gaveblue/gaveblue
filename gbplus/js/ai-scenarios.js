@@ -29,7 +29,7 @@ export function readScenarioMonth(query,asOf){
  const s=normalizeAi(query),[year,month]=asOf.slice(0,7).split('-').map(Number);
  if(/(?:este|nesse|neste|atual)\s+mes/.test(s))return monthKey(year,month);
  if(/(?:mes\s+que\s+vem|proximo\s+mes|mes\s+seguinte)/.test(s))return monthKey(year,month,1);
- const relative=s.match(/(?:daqui\s+a|em|dentro\s+de|apos|para\s+daqui\s+a)\s+(\d{1,2}|um|uma|dois|duas|tres|quatro|cinco|seis|sete|oito|nove|dez|onze|doze)\s+mes(?:es)?\b/);
+ const relative=s.match(/(?:daqui(?:\s+a)?|em|dentro\s+de|apos|para\s+daqui(?:\s+a)?)\s+(\d{1,2}|um|uma|dois|duas|tres|quatro|cinco|seis|sete|oito|nove|dez|onze|doze)\s+mes(?:es)?\b/);
  if(relative){
   const count=numberValue(relative[1]);
   return count!==null&&count>=0&&count<=60?monthKey(year,month,count):null;

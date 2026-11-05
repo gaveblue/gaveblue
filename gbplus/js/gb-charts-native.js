@@ -1,6 +1,6 @@
 // Offline-friendly SVG charts, using exactly the same data as EasyUI React.
 // Never changes payment records, fetches remote assets, or delays sign-in.
-import {buildChartPayload} from './gb-charts-data.js?v=20261105-45';
+import {buildChartPayload} from './gb-charts-data.js?v=20261105-47';
 const currency=new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'});
 const short=new Intl.NumberFormat('pt-BR',{notation:'compact',maximumFractionDigits:1});
 const money=n=>currency.format(Number.isFinite(n)?n:0);
@@ -33,7 +33,7 @@ function barMarkup(rows,periodLabel){
 export function mountNativeCharts(db,state,flowRows){
   const earnings=document.querySelector('[data-gb-native="earnings"]'),bars=document.querySelector('[data-gb-native="cashflow-bars"]');
   if(!earnings&&!bars)return;
-  const payload=buildChartPayload(db,state,flowRows);
+  const payload=buildChartPayload(db,state,flowRows,{includeEarnings:!!earnings});
   if(earnings&&payload.earnings.hasRecords){
     earnings.hidden=false;
     const original=earnings.parentElement?.querySelector('[data-gb-chart-original]');
