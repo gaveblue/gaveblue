@@ -1,0 +1,84 @@
+/* GB+ 2.2.2: custom selectors, calendar and numeric fields. The native inputs
+   remain as invisible form sources; popovers and displayed controls are ours. */
+.gb-custom-select,.gb-custom-date{display:block;position:relative;width:100%;min-width:0;flex:1}
+.gb-custom-native-select,.gb-custom-native-date{
+ position:absolute!important;width:1px!important;height:1px!important;min-width:0!important;
+ opacity:0!important;pointer-events:none!important;z-index:-1!important;
+ padding:0!important;border:0!important;overflow:hidden!important;
+}
+.gb-custom-select-trigger,.gb-custom-date-trigger{
+ width:100%;min-width:0;display:flex;align-items:center;justify-content:space-between;gap:8px;
+ height:100%;min-height:42px;padding:10px 12px;
+ border:1px solid #dcdce1;border-radius:10px;background:var(--surface);
+ color:var(--ink);text-align:left;font-size:13px;font-weight:560;line-height:1.4;
+}
+.gb-custom-select-trigger:hover,.gb-custom-date-trigger:hover{border-color:#aaaab7}
+.gb-custom-select-trigger:focus-visible,.gb-custom-date-trigger:focus-visible{
+ outline:2px solid #958aca;outline-offset:1px;
+}
+.gb-custom-select-trigger:disabled,.gb-custom-date-trigger:disabled{opacity:.6;cursor:not-allowed}
+.gb-custom-select-value,.gb-custom-date-value{min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gb-custom-chevron{font-size:19px;font-weight:450;line-height:1;color:var(--muted)}
+.gb-custom-select-list{
+ position:absolute;top:calc(100% + 5px);left:0;right:0;min-width:100%;z-index:1100;
+ max-height:min(240px,50dvh);overflow:auto;border:1px solid var(--border);
+ border-radius:13px;padding:5px;display:grid;gap:2px;
+ background:var(--surface);box-shadow:0 15px 38px #0003;
+}
+.gb-custom-select-list[hidden]{display:none!important}
+.gb-custom-select-option{
+ border:0;border-radius:9px;width:100%;display:flex;align-items:center;gap:8px;
+ justify-content:space-between;text-align:left;padding:9px 11px;background:transparent;
+ color:var(--ink);font-size:13px;line-height:1.4;min-height:39px;
+}
+.gb-custom-select-option span:first-child{min-width:0;flex:1;overflow-wrap:anywhere}
+.gb-custom-select-option.is-active{background:var(--soft);font-weight:700}
+.gb-custom-select-option:hover,.gb-custom-select-option:focus-visible{background:var(--hover);outline:0}
+.gb-custom-check{color:#8171bd;font-size:14px;font-weight:750}
+.gb-custom-date-trigger{gap:13px}
+.gb-custom-date-icon{font-size:19px;font-weight:600;line-height:1;color:var(--muted)}
+.gb-calendar-backdrop{
+ position:fixed;inset:0;z-index:50000;display:flex;align-items:center;justify-content:center;
+ padding:16px;background:#08091385;backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);
+}
+.gb-calendar-panel{
+ width:min(378px,100%);max-height:min(600px,calc(100dvh - 35px));overflow:auto;
+ padding:21px 20px 16px;border:1px solid var(--border);border-radius:22px;
+ background:var(--surface);color:var(--ink);box-shadow:0 26px 70px #0004;
+}
+.gb-calendar-header,.gb-calendar-month,.gb-calendar-footer{display:flex;align-items:center;gap:8px}
+.gb-calendar-header{justify-content:space-between;margin-bottom:17px}
+.gb-calendar-header strong{font-size:18px;font-weight:750}
+.gb-calendar-header button,.gb-calendar-month button,.gb-calendar-footer button{
+ display:grid;place-items:center;min-width:35px;min-height:35px;border-radius:11px;
+ border:1px solid var(--border);background:var(--surface);color:var(--ink);
+ font-size:17px;line-height:1;
+}
+.gb-calendar-month{justify-content:space-between;margin-bottom:14px}
+.gb-calendar-month>strong{flex:1;min-width:0;text-align:center;text-transform:capitalize;font-size:14px}
+.gb-calendar-month button{min-width:29px;min-height:34px;font-size:18px;border-color:transparent}
+.gb-calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.gb-calendar-week{display:grid;place-items:center;font-size:10px;color:var(--muted);padding-bottom:7px}
+.gb-calendar-day,.gb-calendar-empty{
+ height:39px;min-width:0;display:grid;place-items:center;border:0;background:transparent;
+ border-radius:11px;font-size:12px;font-weight:520;color:var(--ink);
+}
+.gb-calendar-day:hover:not(:disabled),.gb-calendar-day:focus-visible{background:var(--soft);outline:1px solid #8b7acd}
+.gb-calendar-day.selected{background:var(--ink);color:var(--inverse);font-weight:760}
+.gb-calendar-day:disabled{color:var(--muted);opacity:.35;cursor:not-allowed}
+.gb-calendar-footer{justify-content:space-between;border-top:1px solid var(--border);padding-top:14px;margin-top:14px}
+.gb-calendar-footer button{font-size:12px;font-weight:650;padding:0 15px}
+.gb-calendar-footer button:first-child{background:var(--ink);color:var(--inverse)}
+/* Make every numeric text field look like a GB+ field, not a browser spin box. */
+input[type=number]{appearance:textfield;-moz-appearance:textfield}
+input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+#modal .form-grid>.field .gb-custom-select-trigger,#modal .form-grid>.field .gb-custom-date-trigger{min-height:42px}
+.gb-entry-form .gb-custom-date-trigger{min-height:51px;border-radius:12px;padding:12px 14px;font-size:15px}
+.gb-entry-form .gb-custom-date-icon{font-size:19px}
+@media(max-width:760px){
+ .gb-calendar-panel{border-radius:20px;padding:19px 15px 15px}
+ .gb-calendar-day,.gb-calendar-empty{height:37px}
+ .gb-entry-form .gb-custom-date-trigger{min-height:47px;font-size:14px;padding:10px 11px}
+ .gb-custom-select-list{max-height:44dvh}
+}
+/* Native controls from the OS (keyboard, file chooser, browser install UI) remain browser-owned. */
