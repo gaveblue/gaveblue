@@ -201,6 +201,7 @@
 </div></main></div><script type="module">
 import {interpret,formatBRL,fixture} from './engine.js?v=20261105-82';
 import {renderProposalPreview,validateEditedProposal,proposalSchedule,proposalModeLabel} from './preview-card.js?v=20261105-82';
+import {installAttachmentStage} from './file-stage.js?v=20261105-82';
 import {setupVoice} from './voice.js?v=20261103-v9';
 import {createChatHistory} from './chat-history.js?v=20261104-v2';
 const $=s=>document.querySelector(s),log=$('#messages'),input=$('#message'),detailsCard=$('#details');let proposal=null,context=null,live=false,session=null,history=[];
@@ -618,5 +619,11 @@ $('#confirm').addEventListener('click',()=>{
  catch(error){clearTimeout(timeout);window.removeEventListener('message',handler);restore();if(targetChat===chats.activeId())btn.disabled=false;reply('Não consegui enviar a confirmação: '+error.message);}
 });
 $('#discard').addEventListener('click',()=>{proposal=null;context=null;$('#confirm').disabled=true;$('#discard').disabled=true;$('#draft-editor').hidden=true;detailsCard.classList.add('hidden');add('Prévia descartada. Nenhum título foi alterado.');});
+installAttachmentStage({
+ fileInput:$('#ai-file-input'),attachButton:$('#ai-attach'),messages:log,
+ activeChatId:()=>chats.activeId(),
+ isChatActive:id=>chats.activeId()===id,
+ addMessage:add,formatBRL
+});
 setupVoice({input,onStatus:text=>{$('#voice-status').textContent=text;}});
 </script></body></html>
