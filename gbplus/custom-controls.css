@@ -20,7 +20,7 @@
 .gb-custom-select-value,.gb-custom-date-value{min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .gb-custom-chevron{font-size:19px;font-weight:450;line-height:1;color:var(--muted)}
 .gb-custom-select-list{
- position:absolute;top:calc(100% + 5px);left:0;right:0;min-width:100%;z-index:1100;
+ position:fixed;top:0;left:0;right:auto;min-width:0;z-index:1100;
  max-height:min(240px,50dvh);overflow:auto;border:1px solid var(--border);
  border-radius:13px;padding:5px;display:grid;gap:2px;
  background:var(--surface);box-shadow:0 15px 38px #0003;
