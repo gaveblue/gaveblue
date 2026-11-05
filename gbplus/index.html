@@ -13,6 +13,20 @@
   #auth-gate[hidden]{display:none!important}
   </style>
   <script>
+  // First-time mobile visitors see the installation landing before the account gate.
+  // Installed apps, signed-in/returning users, callbacks and desktop visitors stay here.
+  (() => {
+    try {
+      if (!matchMedia('(max-width:760px) and (pointer:coarse)').matches) return;
+      if (matchMedia('(display-mode:standalone)').matches || navigator.standalone === true) return;
+      if (location.search || (location.hash && location.hash !== '#dashboard')) return;
+      const existingSession = Object.keys(localStorage).some(key => /^sb-.+-auth-token$/.test(key));
+      const existingData = localStorage.getItem('gb-plus:data:v1') !== null;
+      const seen = localStorage.getItem('gbplus-install-intro-seen-v1') === '1';
+      if (seen || existingSession || existingData) return;
+      location.replace('./instalar.html?origem=link');
+    } catch { /* Never block the existing GB+ app if browser storage is unavailable. */ }
+  })();
   document.documentElement.dataset.boot='auth';
   // Apply the last GB+ appearance before first paint so Android does not latch a light navigation bar.
   (()=>{
