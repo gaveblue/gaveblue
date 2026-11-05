@@ -1,6 +1,6 @@
 import {money,dateLabel,pending,paid,today,within} from './domain.js';
-import {esc,icon,select,empty} from './ui.js?v=20261104-38';
-import {filteredTitles,periodBar} from './views.js?v=20261104-38';
+import {esc,icon,select,empty} from './ui.js?v=20261104-41';
+import {filteredTitles,periodBar} from './views.js?v=20261104-41';
 
 const statusOptions=[
  ['all','Todos','layers'],['open','Pendentes','clock'],['settled','Pagos','check'],
