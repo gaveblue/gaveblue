@@ -808,3 +808,33 @@ body.auth-locked .mobile-nav-fade{display:none!important}
  .gb-bank-shortcut{flex-basis:64px;min-width:64px}
  .gb-bank-picker-heading>strong{font-size:11px}
 }
+
+
+
+/* GB+ 2.4.6 — Busca alfabética por nome, COMPE ou ISPB nas instituições. */
+.gb-bank-picker{position:relative;max-width:100%;min-width:0}
+.gb-bank-search-label{font-size:11px;color:var(--muted);font-weight:610}
+.gb-bank-search,.gb-bank-directory-search-input{
+ display:block;box-sizing:border-box;width:100%;min-width:0;min-height:43px;
+ padding:10px 13px;border:1px solid var(--border);border-radius:11px;
+ background:var(--surface);color:var(--ink);font-size:13px;outline:none;
+}
+.gb-bank-search:focus,.gb-bank-directory-search-input:focus{border-color:var(--ink);outline:2px solid color-mix(in srgb,var(--ink) 13%,transparent);outline-offset:1px}
+.gb-bank-search-summary{font-size:10.5px;color:var(--muted);line-height:1.45}
+.gb-bank-native-select{font-size:10.5px;color:var(--muted)}
+.gb-bank-native-select summary{width:max-content;max-width:100%;cursor:pointer;text-decoration:underline;text-underline-offset:2px;padding:3px 0}
+.gb-bank-native-select>.field{margin:8px 0;max-width:100%;min-width:0}
+.gb-bank-shortcuts{max-width:100%;overflow-x:auto;padding-block:5px 10px}
+.gb-bank-shortcut{flex:0 0 78px;min-width:78px;max-width:78px;padding:8px 5px;gap:4px}
+.gb-bank-shortcut small{font-size:10px;line-height:1.2;white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:24px}
+.gb-bank-code{font-size:10px;color:var(--muted);font-variant-numeric:tabular-nums}
+.gb-bank-shortcut[hidden],.gb-bank-directory-item[hidden],.gb-bank-no-results[hidden]{display:none!important}
+.gb-bank-no-results{color:var(--muted);font-size:11px;line-height:1.5}
+.gb-bank-directory-search{display:grid;gap:7px;margin:15px 0 12px;max-width:600px}
+.gb-bank-directory-search>label{font-size:12px;font-weight:680}
+.gb-bank-directory-search>small{font-size:11px;color:var(--muted)}
+@media(max-width:760px){
+ .gb-bank-search,.gb-bank-directory-search-input{font-size:16px}
+ .gb-bank-shortcut{flex-basis:74px;min-width:74px;max-width:74px}
+ .gb-bank-shortcut small{font-size:9.5px}
+}
