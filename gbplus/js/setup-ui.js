@@ -1,7 +1,7 @@
 import {esc,icon,button,field,select} from './ui.js?v=20261105-72';
 import {money} from './domain.js?v=20261105-72';
-import {MOBILE_SHORTCUTS,defaultMobileNav,effectiveMobileNav} from './store.js?v=20261105-72';
-import {bankOptions,bankName,bankPicker} from './banks.js?v=20261105-72';
+import {MOBILE_SHORTCUTS,defaultMobileNav,effectiveMobileNav} from './store.js?v=20261105-75';
+import {bankOptions,bankName,bankPicker} from './banks.js?v=20261105-75';
 
 // The fixed slots are never rendered as selectors and cannot be removed.
 const selectionOptions=MOBILE_SHORTCUTS.map(([key,label])=>[key,label]);
