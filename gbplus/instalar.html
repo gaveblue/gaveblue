@@ -16,7 +16,7 @@
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" href="./icons/icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="./icons/icon-192.png">
-  <link rel="stylesheet" href="./instalar.css?v=20261105-53">
+  <link rel="stylesheet" href="./instalar.css?v=20261105-54">
   <script src="./js/install-landing.js?v=20261105-53" defer></script>
 </head>
 <body>
@@ -106,6 +106,9 @@
         <h1 id="guide-title">Instalar no celular</h1>
         <p id="guide-description"></p>
       </div>
+      <ol class="guide-steps" id="guide-steps"></ol>
+      <div class="guide-callout" id="guide-callout" hidden></div>
+      <p id="install-status" class="install-status" aria-live="polite"></p>
       <div class="guide-safari-action" id="guide-safari-action" hidden>
         <button type="button" class="guide-safari-button" id="guide-safari-button">
           <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -116,9 +119,6 @@
         <p class="guide-safari-caption">Copie o endereço e abra-o no Safari para instalar.</p>
         <p class="guide-safari-feedback" id="guide-safari-feedback" role="status" aria-live="polite" hidden></p>
       </div>
-      <ol class="guide-steps" id="guide-steps"></ol>
-      <div class="guide-callout" id="guide-callout" hidden></div>
-      <p id="install-status" class="install-status" aria-live="polite"></p>
 
     </section>
   </main>
