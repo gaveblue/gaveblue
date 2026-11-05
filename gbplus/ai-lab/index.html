@@ -547,7 +547,7 @@ async function submit(text,targetChat=chats.activeId()){
   reply(explanations[lastTopic]||'Posso explicar saldos, lançamentos, vencimentos, baixas e recorrências. Qual informação deseja entender?');return;
  }
  if(editPending&&/^(cancelar|cancela|deixa pra la|sair|esquece)$/.test(s)){editPending=null;reply('Tudo bem, cancelei a busca para edição. Nenhum lançamento foi alterado.');return;}
- const correctingPreview=!!context?.proposal&&/(corrig|muda|altera|nao falei|na verdade|troca)/.test(s);
+ const correctingPreview=!!context?.proposal&&/(corrig|muda|altera|nao falei|na verdade|troca|edita|editar|ajusta|ajustar)/.test(s);
  const edit=correctingPreview?null:editCommand(s);
  if(editPending&&!edit&&/(?:saldo|data de hoje|que dia e hoje|vencimentos|a pagar|a receber|criar|lancar|bom dia|resumo)/.test(s))editPending=null;
  if(edit||editPending){
@@ -562,7 +562,7 @@ async function submit(text,targetChat=chats.activeId()){
  // Buying something is a read-only scenario, even if the user mentions installments.
  const purchasePlanning=/\b(?:comprar|compro|comprarei|adquirir|adquiro)\b/.test(s);
  const wantsCreate=!purchasePlanning&&/(lan[cç]|criar|crie|registre|registrar|cadastrar|dividir|divide|parcela|repete|repetir|recorrente)/.test(s)&&!/^(como|posso|qual a diferenca|por que|porque|onde)/.test(s);
- const isCorrection=!!context?.proposal&&/(corrig|muda|altera|nao falei|na verdade|troca)/.test(s);
+ const isCorrection=!!context?.proposal&&/(corrig|muda|altera|nao falei|na verdade|troca|edita|editar|ajusta|ajustar)/.test(s);
  const instructional=/^(como|onde|posso|qual a diferenca|por que|porque|o que e|o que significa)/.test(s)&&/(lan[cç]|cadastr|titulo|parcela|baixa|categoria|parceiro|configur|backup|export|modo)/.test(s);
  const greet=/^(oi|ola|opa|e ai|bom dia|boa tarde|boa noite|tudo bom|tudo bem)$/.test(s);
  if(!wantsCreate&&!isCorrection&&!instructional&&!greet){
@@ -582,6 +582,7 @@ async function submit(text,targetChat=chats.activeId()){
   reply('Não tenho dados reais para essa resposta. Entre na conta GB+ para consultar seus saldos e títulos.');return;
  }
  reply(result.answer);
+ placePreviewAfterAnswer();
  if(result.status==='needs_clarification')context=result.context||null;
  else if(result.proposal)context={proposal:result.proposal};
  else context=null;
@@ -594,15 +595,16 @@ $('#confirm').addEventListener('click',()=>{
  if(window.parent===window||!bridge.realData){reply('Para gravar um título de verdade, abra o chat dentro do aplicativo GB+ e esteja conectado à sua conta. Aqui fora só é possível simular.');return;}
  if(!bridge.writeEnabled){reply('A conta GB+ não está pronta para gravar: verifique sua conexão e atualize o aplicativo. Nenhuma alteração foi enviada.');requestBridge();return;}
  const current={...proposal};const btn=$('#confirm'),discard=$('#discard');
- btn.disabled=true;discard.disabled=true;btn.textContent='Gravando…';
+ btn.disabled=true;discard.disabled=true;$('#edit-draft').disabled=true;
+ $('#confirm-label').textContent='Gravando…';
  reply('Confirmação recebida. Estou solicitando a gravação do título no GB+.');
  const requestId=crypto.randomUUID();let finished=false;
- function restore(){if(targetChat!==chats.activeId())return;btn.textContent='Confirmar e gravar no GB+';discard.disabled=false;}
+ function restore(){if(targetChat!==chats.activeId())return;$('#confirm-label').textContent='Confirmar e gravar';discard.disabled=false;$('#edit-draft').disabled=false;}
  function handler(event){
   if(event.origin!==location.origin||event.source!==window.parent||event.data?.kind!=='gbplus-ai-create-result'||event.data.requestId!==requestId)return;
   finished=true;clearTimeout(timeout);window.removeEventListener('message',handler);restore();
   reply(event.data.message||'O GB+ não retornou detalhes da operação.');
-  if(event.data.ok&&targetChat===chats.activeId()){proposal=null;context=null;btn.disabled=true;discard.disabled=true;$('#preview').textContent='Gravação confirmada no GB+. Consulte Títulos para verificar.';$('#details').open=false;}
+  if(event.data.ok&&targetChat===chats.activeId()){proposal=null;context=null;btn.disabled=true;discard.disabled=true;detailsCard.open=false;detailsCard.classList.add('hidden');$('#draft-editor').hidden=true;}
   else if(!event.data.ok&&targetChat===chats.activeId()){btn.disabled=false;}
  }
  window.addEventListener('message',handler);
@@ -615,6 +617,6 @@ $('#confirm').addEventListener('click',()=>{
  try{window.parent.postMessage({kind:'gbplus-ai-create-title',requestId,proposal:current},location.origin);}
  catch(error){clearTimeout(timeout);window.removeEventListener('message',handler);restore();if(targetChat===chats.activeId())btn.disabled=false;reply('Não consegui enviar a confirmação: '+error.message);}
 });
-$('#discard').addEventListener('click',()=>{proposal=null;context=null;$('#confirm').disabled=true;$('#discard').disabled=true;$('#preview').textContent='Prévia descartada.';add('Prévia descartada.');});
+$('#discard').addEventListener('click',()=>{proposal=null;context=null;$('#confirm').disabled=true;$('#discard').disabled=true;$('#draft-editor').hidden=true;detailsCard.classList.add('hidden');add('Prévia descartada. Nenhum título foi alterado.');});
 setupVoice({input,onStatus:text=>{$('#voice-status').textContent=text;}});
 </script></body></html>
