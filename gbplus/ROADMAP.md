@@ -174,11 +174,17 @@ Detalhes: [RELEASE-2.4.5.md](./RELEASE-2.4.5.md). A evolução maior permanece r
 - [x] Cinco testes novos de validação de manifesto, ícones e apresentação.
 - [ ] Conferir publicação e homologar central de atualização no Android/PWA.
 
-### 2.4.8 — Lançamentos automáticos (planejada)
+### 2.4.8 — Estrutura do GB+ AI e anexos (implementada no GitHub)
 
-- [ ] Receber a especificação da mudança adicional do usuário antes de codificar.
-- [ ] Melhorar recorrências, vencimentos, dias úteis e revisão antes da gravação.
-- [ ] Testar edição futura e proteção de parcelas já pagas.
+- [x] Prévia dentro da conversa, com vencimentos e total detalhados.
+- [x] Botões Detalhar, Editar, Descartar e Confirmar e gravar, com gravação expressamente autorizada.
+- [x] Edição completa dos dados antes da confirmação e tratamento de pedidos como “altera para dia 20”.
+- [x] Botão de anexos: OFX/CSV com prévia local e PDF/Excel aguardando interpretação.
+- [x] Quatro novos assets registrados no PWA e build 62.
+- [x] Testes de cálculos e segurança do fluxo do chat.
+- [ ] Conferir a publicação e homologar em celular real.
+
+**Esclarecimento:** “lançamentos automáticos” significa sugerir a criação de títulos a partir do extrato bancário não conciliado, com seleção e aprovação pelo usuário. O motor de conciliação completa entra na 2.5.0.
 
 ### 2.4.9 — Preparação de OFX/CSV (planejada)
 
