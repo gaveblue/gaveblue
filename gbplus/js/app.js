@@ -11,7 +11,7 @@ import {expectedDates,recurrenceAnchor} from './gb-calendar-rules.js?v=20261105-
 import {CATEGORY_ICON_OPTIONS,categoryIconFor,gbIcon} from './gb-icons.js?v=20261104-42';
 import {setupPwaInstallation,maybeOfferPwaInstall,showInstallHelp,isPwaInstalled} from './pwa-install.js?v=20261104-40';
 import {SupabaseRepository} from '../integrations/supabase/repository.js?v=20261104-42';
-import {initializeAuth,authClient,currentUser,showAuth,isRecovery,updatePersonalProfile,consumeAuthReturnMessage} from './auth.js?v=20261105-58';
+import {initializeAuth,authClient,currentUser,showAuth,isRecovery,updatePersonalProfile,consumeAuthReturnMessage,signOutAccount} from './auth.js?v=20261105-60';
 import {profileView,validateProfile,validCPF,formatCPF} from './profile.js?v=20261105-59';
 import {firstSetupView,customMobileNavForm,shortcutsPreview,readMobileNav} from './setup-ui.js?v=20261104-35';
 import {launchesView} from './launches-view.js?v=20261105-47';
@@ -384,6 +384,19 @@ const actions={
     catch(e){if(e?.name!=='AbortError')toast('Não foi possível compartilhar. Use Copiar link.');}
   },
   'retry-profile-cpf':()=>{profileCpfStatus.ready=false;profileCpfStatus.error='';void loadRegisteredCpf(true);},
+  'profile-signout':()=>{
+    const form=document.querySelector('#profile-form');
+    const unsaved=!!form&&form.dataset.initialSnapshot!==profileSnapshot(form);
+    confirmAction=async()=>{await signOutAccount();};
+    const exitIcon='<svg viewBox="0 0 24 24" width="27" height="27" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5M21 12H9"/></svg>';
+    openModal('Deseja sair da sua conta?',
+      '<div class="gb-logout-dialog"><span class="gb-logout-dialog-icon">'+exitIcon+'</span>'+
+      '<p>Sua sessão será encerrada neste dispositivo. Seus dados financeiros salvos permanecerão na sua conta.</p>'+
+      (unsaved?'<p class="gb-logout-unsaved" role="alert">Você tem alterações não salvas em Minha conta. Elas serão perdidas se sair agora.</p>':'')+
+      '<div class="form-error" role="alert"></div>'+
+      '<div class="gb-logout-dialog-actions">'+button('Continuar no GB+','close')+
+      '<button type="button" class="gb-logout-confirm-button" data-action="confirm">'+exitIcon+' Sair da conta</button></div></div>');
+  },
   'profile-change-password':()=>{
     const email=currentUser()?.email;
     if(!email)throw Error('Não foi possível identificar seu e-mail de acesso.');
