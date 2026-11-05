@@ -13,7 +13,7 @@ a{color:inherit}
 .brand span{letter-spacing:-.11em}
 .intro h1{font-size:clamp(30px,8vw,39px);line-height:1.08;letter-spacing:-.055em;margin:14px 0 11px;font-weight:830}
 .intro>p{font-size:clamp(14px,4.1vw,18px);line-height:1.4;color:#66676c;margin:0 auto;max-width:390px}
-.device-stage{position:relative;height:330px;margin:23px auto 0;overflow:hidden;max-width:420px;pointer-events:none}
+.device-stage{position:relative;height:430px;margin:23px auto 0;overflow:hidden;max-width:420px;pointer-events:none}
 .device-stage::after{content:"";position:absolute;bottom:0;left:0;right:0;height:78px;background:linear-gradient(0deg,#fff 4%,#ffffff00);pointer-events:none}
 .device{width:min(300px,86%);border-radius:43px 43px 0 0;padding:9px 8px 0;margin:auto;background:linear-gradient(135deg,#454549,#050505 24%,#343439 58%,#050505);border:2px solid #1d1d1e;box-shadow:0 11px 32px #0002,0 0 0 1px #979797;height:480px;position:relative}
 .device::before{content:"";position:absolute;left:50%;transform:translateX(-50%);top:13px;width:17px;height:17px;border-radius:50%;background:#0d111a;box-shadow:0 0 0 3px #393a40;z-index:2}
@@ -98,7 +98,7 @@ a{color:inherit}
  .platform-mark{width:37px;flex-basis:37px}.platform-mark svg{width:32px;height:32px}
  .install-action{min-width:90px;padding:0 12px}
  .feature span{font-size:10px}
- .device-stage{height:309px}
+ .device-stage{height:402px}
 }
 @media(min-width:700px){.install-shell{border-left:1px solid #f0f0f1;border-right:1px solid #f0f0f1;min-height:100dvh;padding-left:33px;padding-right:33px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
