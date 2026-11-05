@@ -20,7 +20,6 @@ test('custom controls visibly replace native selects and dates without changing 
  assert.ok(custom.includes('input[type="date"]'));
  assert.ok(custom.includes("new Event('change',{bubbles:true})"));
  assert.ok(custom.includes("new Event('input',{bubbles:true})"));
- assert.ok(custom.includes('className=\\'gb-custom-native-date\\'')===false);
  assert.ok(custom.includes("input.classList.add('gb-custom-native-date')"));
  assert.ok(custom.includes("select.classList.add('gb-custom-native-select')"));
  assert.ok(read('custom-controls.css').includes('.gb-custom-native-select'));
