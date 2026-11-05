@@ -292,6 +292,18 @@ const actions={
   'set-theme':el=>commit(d=>{d.settings.theme=el.dataset.value;},'Tema atualizado.'),
   'entry-toggle':el=>toggleEntryMenu(el),
   'entry-option':el=>chooseEntryOption(el),
+  'title-next':el=>toggleEntryStep(el.closest('#title-form'),2),
+  'title-back':el=>toggleEntryStep(el.closest('#title-form'),1),
+  'category-icon':el=>{
+   const form=el.closest('#category-form'),value=el.dataset.icon;
+   if(!form||!CATEGORY_ICON_OPTIONS.some(([key])=>key===value))return;
+   form.elements.icon.value=value;
+   form.querySelectorAll('.gb-category-icon-choice').forEach(button=>{
+    const selected=button.dataset.icon===value;
+    button.classList.toggle('is-selected',selected);
+    button.setAttribute('aria-pressed',String(selected));
+   });
+  },
   'new-title':()=>openModal('Novo lançamento',titleForm(db,null,state.type||'expense')),
   'edit-title':el=>openModal('Editar lançamento',titleForm(db,getTitle(el.dataset.id))),
   'title-detail':el=>openModal('Detalhes do título',titleDetail(db,getTitle(el.dataset.id))),
@@ -522,16 +534,17 @@ document.addEventListener('submit',async e=>{e.preventDefault();if(busy||!db)ret
 function upsert(rows,row){const i=rows.findIndex(x=>x.id===row.id);if(i<0)rows.push(row);else rows[i]=row;}
 document.addEventListener('change',async e=>{if(!db)return;const el=e.target;try{
   if(el.form?.id==='profile-form')syncProfileSaveState(el.form);
+  if(el.form?.id==='title-form'&&['mode','count','due','businessDays'].includes(el.name))refreshEntrySchedule(el.form);
   if(el.name?.startsWith('slot')&&el.form?.id==='mobile-nav-form')updateMobileNavPreview(el.form);
-  if(el.id==='entry-type'){const select=document.querySelector('#entry-category');if(select){select.innerHTML=db.categories.filter(c=>c.type===el.value).map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');syncEntrySelect(select);}}
-  if(el.id==='entry-mode'){const count=document.querySelector('#count-field');if(count)count.hidden=el.value==='single';}
+  if(el.id==='entry-type'){const select=document.querySelector('#entry-category');if(select){select.innerHTML=db.categories.filter(c=>c.type===el.value).map(c=>`<option value="${esc(c.id)}" data-icon="${esc(categoryIconFor(c))}">${esc(c.name)}</option>`).join('');syncEntrySelect(select);}}
+  if(el.id==='entry-mode'){refreshEntrySchedule(el.form);}
   if(el.id==='period'){if(el.value==='custom'){openModal('Escolher período',`<form id="period-form"><div class="form-grid">${field('De','from',state.range.from||today(),'date','required')}${field('Até','to',state.range.to||today(),'date','required')}</div>${formFooter('Aplicar período')}</form>`);el.value=state.period;}else{state.period=el.value;state.range=rangeFor(el.value);state.launchSelected=[];state.launchStatusOpen=false;render();}}
   if(el.dataset.filter){state[el.dataset.filter]=el.value;if(['partner','category'].includes(el.dataset.filter))state.moreFilters=true;state.launchSelected=[];render();}
   if(el.id==='report-type'){state.report=el.value;render();}
   if(el.id==='report-partner'){state.reportPartner=el.value;render();}
   if(el.id==='backup-input'&&el.files[0]){const file=el.files[0];el.value='';if(file.size>15*1024*1024)throw Error('O backup deve ter no máximo 15 MB.');const restored=parseBackup(await file.text());confirm('Restaurar backup?',`Este arquivo contém ${restored.titles.length} títulos, ${restored.partners.length} parceiros e ${restored.accounts.length} contas. Os registros atuais serão substituídos. Exporte um backup antes de continuar, se necessário.`,()=>commit(d=>{Object.keys(d).forEach(k=>delete d[k]);Object.assign(d,restored);},'Backup restaurado com sucesso.'));}
 }catch(error){fail(error);}});
-document.addEventListener('input',e=>{if(e.target.form?.id==='profile-form'){
+document.addEventListener('input',e=>{if(e.target.form?.id==='title-form'&&['amount','count','due'].includes(e.target.name))refreshEntrySchedule(e.target.form);if(e.target.form?.id==='profile-form'){
  const field=e.target;
  if(field.name==='cpf'){
   const digits=field.value.replace(/\D/g,'').slice(0,11);
