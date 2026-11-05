@@ -29,7 +29,7 @@ export function cashForecast(db,days=30,asOf=today(),overrides={}){
    allocated.set(t.accountId,perAccount+(t.type==='income'?amount:-amount));
   }
  }
- const current=balance(db);let projected=current,lowest=current,lowestDate=asOf,totalIn=0,totalOut=0;
+ const current=(db.accounts||[]).reduce((sum,a)=>sum+accountBalance(db,a.id,asOf),0);let projected=current,lowest=current,lowestDate=asOf,totalIn=0,totalOut=0;
  const points=[];
  for(let day=0;day<=days;day++){
   const date=addForecastDays(asOf,day),change=changes.get(date)||{in:0,out:0};
