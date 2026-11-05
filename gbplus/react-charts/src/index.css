@@ -1,0 +1,11 @@
+@tailwind components;
+@tailwind utilities;
+/* Local chart styles only; the rest of GB+ retains its own stylesheet. */
+.gb-react-charts { font-family: inherit; color: var(--ink, #19191c); }
+.gb-react-charts svg { max-width: none; }
+.gb-react-charts button { font: inherit; }
+.gb-react-charts * { box-sizing: border-box; }
+.gb-react-charts .gb-chart-description { font-size: 12px; color: var(--muted, #818187); margin: 0 0 12px; }
+.gb-react-charts .gb-chart-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.gb-react-charts .gb-chart-inner { min-width: 0; }
+.gb-react-charts .gb-chart-empty { display: grid; min-height: 190px; align-content: center; text-align: center; color: var(--muted, #818187); font-size: 13px; }
