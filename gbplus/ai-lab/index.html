@@ -386,6 +386,7 @@ function openDraftEditor(){
  editorField('count').value=proposal.mode==='single'?1:proposal.count||1;
  editorField('partner').value=proposal.partner||'';
  $('#draft-edit-error').textContent='';
+ $('#confirm').disabled=true; // Do not save a stale draft while the editor has unapplied changes.
  form.hidden=false;editorField('description').focus();
 }
 $('#detail-toggle').addEventListener('click',()=>{
@@ -394,7 +395,7 @@ $('#detail-toggle').addEventListener('click',()=>{
  $('#detail-toggle').setAttribute('aria-expanded',String(details.open));
 });
 $('#edit-draft').addEventListener('click',openDraftEditor);
-$('#draft-cancel').addEventListener('click',()=>{$('#draft-editor').hidden=true;$('#draft-edit-error').textContent='';});
+$('#draft-cancel').addEventListener('click',()=>{$('#draft-editor').hidden=true;$('#draft-edit-error').textContent='';$('#confirm').disabled=!proposal;});
 $('#draft-editor').addEventListener('submit',event=>{
  event.preventDefault();if(!proposal)return;
  try{
@@ -414,6 +415,7 @@ $('#draft-editor').addEventListener('submit',event=>{
   renderProposalPreview($('#preview'),revised,formatBRL);
   $('#ai-preview-type').textContent=proposalModeLabel(revised.mode);
   $('#draft-editor').hidden=true;$('#draft-edit-error').textContent='';
+  $('#confirm').disabled=false;
   add('Atualizei a prévia conforme suas alterações. Confira os vencimentos e confirme somente se estiver tudo certo.');
   placePreviewAfterAnswer();
  }catch(error){$('#draft-edit-error').textContent=error.message;}
