@@ -1,12 +1,14 @@
 {
-  "version": "2.3.5",
-  "build": 52,
+  "version": "2.3.6",
+  "build": 53,
   "published_at": "2026-11-05",
-  "title": "Botão Safari movido para o final do tutorial",
+  "title": "Nova página institucional GB+ antes da instalação",
   "notes": [
-    "O botão Abrir no Safari agora aparece ao final do tutorial do iPhone, abaixo das instruções e da observação, sem competir com o acesso à versão web no topo.",
-    "Identificação do Safari e cópia do link continuam funcionando como antes.",
-    "Android, instalação PWA e dados financeiros permanecem inalterados."
+    "Criada página institucional responsiva com identidade visual GB+, captura real no mockup do celular, benefícios e recursos.",
+    "Botões Usar gratuitamente levam visitantes de celular à página de instalação e visitantes de computador à versão web.",
+    "Novos visitantes pelo link do GB+ no celular conhecem a apresentação antes de instalar; usuários e sessões existentes continuam acessando normalmente.",
+    "Links organizados para Web, Android e iOS, com instalação pelo navegador e sem alegar publicação nas lojas.",
+    "Fluxos financeiros, autenticação e instalação PWA preservados."
   ],
   "assets": [
     "./index.html",
@@ -62,6 +64,9 @@
     "./instalar.html",
     "./instalar.css",
     "./js/install-landing.js",
-    "./assets/gbplus-dashboard-real.svg"
+    "./assets/gbplus-dashboard-real.svg",
+    "./apresentacao.html",
+    "./apresentacao.css",
+    "./js/institutional-landing.js"
   ]
 }
