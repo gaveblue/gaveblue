@@ -30,7 +30,7 @@ export function interpret(message,context=null,data=fixture){
  if(context?.proposal && /corrig|muda|altera|nao falei|na verdade|troca|edita|editar|ajusta|ajustar/.test(s)){
   const p={...context.proposal};
   // "Altere para dia 20" must never change R$450 into R$20 by mistake.
-  const explicitAmount=/\\bvalor\\b|r\\$|\\d\\s*reais?\\b/.test(s);
+  const explicitAmount=/\bvalor\b|r\$|\d\s*reais?\b/.test(s);
   if(explicitAmount&&value!==null)p.amountCents=value;
   if(day)p.due=dateFromDay(day[1]);
   if(!day&&!explicitAmount)return {intent:'corrigir_previa',status:'needs_clarification',proposal:p,context:{proposal:p},answer:'Claro. Qual nova data de vencimento ou valor você gostaria de usar? Pode dizer, por exemplo, “altera para o dia 20”.'};
