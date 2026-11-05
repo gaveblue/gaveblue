@@ -24,10 +24,10 @@ export function entrySelect(label,name,options,value='',id='',required=false){
   (o.value===selected?icon('check','gb-entry-option-check'):'')+'</button>').join('');
  return '<div class="gb-entry-select'+(type?' gb-entry-type':'')+'" data-entry-name="'+esc(name)+'">'+
   '<span class="gb-entry-label" id="label-entry-'+esc(name)+'">'+esc(label)+(required?' <span class="gb-entry-required" aria-hidden="true"></span>':'')+'</span>'+source+
-  '<button type="button" class="gb-entry-trigger" data-action="entry-toggle" role="combobox" aria-labelledby="label-entry-'+esc(name)+'" aria-haspopup="listbox" aria-expanded="false">'+
+  '<button type="button" class="gb-entry-trigger" data-action="entry-toggle" role="combobox" aria-labelledby="label-entry-'+esc(name)+'" aria-label="'+esc(label+': '+(chosen?.text||'Selecione'))+'" aria-controls="entry-options-'+esc(name)+'" aria-haspopup="listbox" aria-expanded="false">'+
    '<span class="gb-entry-current">'+renderValue(chosen||{value:'',text:'Selecione'})+'</span>'+icon('chevron')+
   '</button>'+
-  '<div class="gb-entry-options" role="listbox" aria-label="'+esc(label)+'" hidden>'+optionsHtml+'</div></div>';
+  '<div class="gb-entry-options" id="entry-options-'+esc(name)+'" role="listbox" aria-label="'+esc(label)+'" hidden>'+optionsHtml+'</div></div>';
 }
 export function syncEntrySelect(select){
  const wrap=select?.closest('.gb-entry-select');if(!wrap)return;
@@ -36,6 +36,8 @@ export function syncEntrySelect(select){
  const options=[...select.options];
  const current=wrap.querySelector('.gb-entry-current');
  if(current)current.innerHTML=chosen?decoratedText(chosen,isType):'<span>Selecione</span>';
+ const trigger=wrap.querySelector('.gb-entry-trigger');
+ if(trigger)trigger.setAttribute('aria-label',(wrap.querySelector('.gb-entry-label')?.textContent||'Campo')+': '+(chosen?.textContent||'Selecione'));
  const optionsTarget=wrap.querySelector('.gb-entry-options');
  if(optionsTarget)optionsTarget.innerHTML=options.map(o=>'<button type="button" role="option" class="gb-entry-option'+(o.selected?' is-selected':'')+'" data-action="entry-option" data-value="'+esc(o.value)+'" aria-selected="'+o.selected+'">'+decoratedText(o,isType)+(o.selected?icon('check','gb-entry-option-check'):'')+'</button>').join('');
 }
