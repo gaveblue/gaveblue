@@ -1,4 +1,4 @@
-import { emptyDatabase, validateDatabase } from '../../js/store.js';
+import { emptyDatabase, validateDatabase } from '../../js/store.js?v=20261104-42';
 import { uid } from '../../js/domain.js';
 
 export class CloudError extends Error {
