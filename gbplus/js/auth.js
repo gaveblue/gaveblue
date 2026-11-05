@@ -106,7 +106,7 @@ export function showAuth(mode='signin',error=''){
  const passwordFields=!['forgot','confirm'].includes(mode)
   ?input(mode==='recovery'?'Nova senha':'Senha','password','password',mode==='signin'?'current-password':'new-password')
    +(newPassword?input('Confirmar senha','confirmation','password','new-password'):'')
-   +(newPassword?'<p id="auth-password-rule" class="auth-password-rule" aria-live="polite">Mínimo de 8 caracteres. Pode usar letras, números ou símbolos, sem combinação obrigatória.</p>':'')
+   +(newPassword?'<p id="auth-password-rule" class="auth-password-rule" aria-live="polite">Mínimo de 8 caracteres. Pode usar letras, números ou símbolos, sem combinação obrigatória.</p><div id="auth-password-strength" class="auth-password-strength" data-level="empty" aria-live="polite"><div class="auth-strength-track" aria-hidden="true"><span></span></div><span class="auth-strength-label">Força da senha: informe uma senha</span></div><p id="auth-confirmation-feedback" class="auth-confirmation-feedback" aria-live="polite">Repita a senha para confirmar.</p>':'')
   :'';
  gate.hidden=false;
  gate.innerHTML=
@@ -143,6 +143,7 @@ export function showAuth(mode='signin',error=''){
         mode==='confirm'?action('Já confirmei meu e-mail','continue','auth-text-link')+action('Voltar ao login','signin','auth-text-link'):
         mode==='recovery'&&user?action('Voltar ao financeiro','continue','auth-text-link'):action('Voltar ao login','signin','auth-text-link'))+
       '</div>'+
+      (mode==='signin'&&/link|expirou|inválido|usado/i.test(error)?'<p class="auth-recovery-help">Problemas com um link de recuperação? '+action('Solicitar outro link','forgot','auth-text-link')+'</p>':'')+
       '<p class="auth-footer">Seu financeiro. Mais simples.<br><a href="./privacidade.html">Política de Privacidade</a></p>'+
      '</div>'+
     '</div>'+
@@ -274,16 +275,41 @@ document.addEventListener('click',async event=>{
   showAuth(name);
 });
 
+export function syncPasswordFeedback(form){
+ if(!['signup','recovery'].includes(form?.dataset?.mode))return;
+ const password=form.querySelector('[name="password"]'),confirmation=form.querySelector('[name="confirmation"]');
+ if(!password||!confirmation)return;
+ const text=String(password.value||''),count=Array.from(text).length;
+ const rule=form.querySelector('#auth-password-rule');
+ if(rule){
+  rule.dataset.valid=String(count>=8);
+  rule.textContent=count===0?'Mínimo de 8 caracteres. Pode usar letras, números ou símbolos, sem combinação obrigatória.':
+   count>=8?'✓ Mínimo de 8 caracteres atendido.':'Faltam '+(8-count)+' caracteres para o mínimo de 8.';
+ }
+ const meter=form.querySelector('#auth-password-strength');
+ if(meter){
+  const strength=passwordStrength(text);
+  meter.dataset.level=strength.level;
+  const label=meter.querySelector('.auth-strength-label');
+  if(label)label.textContent=strength.label?'Força da senha: '+strength.label:'Força da senha: informe uma senha';
+ }
+ const feedback=form.querySelector('#auth-confirmation-feedback');
+ const confirmText=String(confirmation.value||'');
+ const match=confirmText.length>0&&text===confirmText;
+ if(feedback){
+  feedback.dataset.status=!confirmText?'neutral':match?'valid':'invalid';
+  feedback.textContent=!confirmText?'Repita a senha para confirmar.':match?'✓ As senhas coincidem.':'As senhas ainda não coincidem.';
+ }
+ if(confirmText)confirmation.setAttribute('aria-invalid',String(!match));
+ else confirmation.removeAttribute('aria-invalid');
+}
 document.addEventListener('input',event=>{
  const field=event.target;
- if(field?.name!=='password'||!['signup','recovery'].includes(field.closest?.('#auth-form')?.dataset.mode))return;
- const hint=field.closest('#auth-form')?.querySelector('#auth-password-rule');
- if(!hint)return;
- const count=Array.from(String(field.value||'')).length;
- hint.dataset.valid=String(count>=8);
- hint.textContent=count===0
-  ?'Mínimo de 8 caracteres. Pode usar letras, números ou símbolos, sem combinação obrigatória.'
-  :count>=8?'✓ Mínimo de 8 caracteres atendido.':'Faltam '+(8-count)+' caracteres para o mínimo de 8.';
+ if(!['password','confirmation'].includes(field?.name))return;
+ syncPasswordFeedback(field.closest?.('#auth-form'));
+});
+document.addEventListener('change',event=>{
+ if(['password','confirmation'].includes(event.target?.name))syncPasswordFeedback(event.target.closest?.('#auth-form'));
 });
 
 document.addEventListener('submit',async event=>{
@@ -296,7 +322,10 @@ document.addEventListener('submit',async event=>{
  if(['signup','recovery'].includes(mode)&&values.password!==values.confirmation){feedback('As senhas precisam ser iguais.');return;}
  if(['signup','recovery'].includes(mode)&&!passwordMeetsMinimum(values.password)){feedback('A senha precisa ter pelo menos 8 caracteres. Letras, números e símbolos podem ser usados livremente.');return;}
  if(!navigator.onLine){feedback('Sem conexão. Conecte-se para continuar.');return;}
- if(mode==='confirm'&&Date.now()-lastResend<60000){feedback('Aguarde um minuto antes de pedir outro e-mail.');return;}
+ if(['confirm','forgot'].includes(mode)&&Date.now()-lastResend<EMAIL_COOLDOWN_MS){
+  const remaining=Math.ceil((EMAIL_COOLDOWN_MS-(Date.now()-lastResend))/1000);
+  feedback('Aguarde '+remaining+' segundos antes de solicitar outro e-mail.');return;
+ }
  setWorking(true);
  try{
   const auth=getClient().auth;let result;
@@ -315,20 +344,20 @@ document.addEventListener('submit',async event=>{
    refreshAuthOnce();return;
   }
   if(mode==='signup'){
-   pendingEmail=email;showAuth('confirm');
+   lastResend=Date.now();pendingEmail=email;showAuth('confirm');
    feedback('Cadastro solicitado. Confira seu e-mail para confirmar a conta. Se não chegar, você poderá reenviar o link.',false);
   }else if(mode==='confirm'){
    lastResend=Date.now();
    pendingEmail=email;
    feedback('Se o cadastro precisar de confirmação, um novo link será enviado. Confira também a pasta de spam.',false);
   }else if(mode==='forgot'){
-   form.reset();
+   lastResend=Date.now();form.reset();
    feedback('Se o e-mail estiver cadastrado, você receberá um link de recuperação. Abra-o no mesmo navegador em que fez a solicitação.',false);
   }else if(mode==='recovery'){
    recovery=false;sessionStorage.removeItem('gbplus-recovery');
    feedback('Senha atualizada. Agora você pode voltar ao financeiro.',false);
   }
  }catch(error){
-  feedback(error?.message?.includes('fetch')?'Falha de conexão. Confira sua internet e tente novamente.':'Não foi possível concluir a solicitação. Verifique sua conexão e tente novamente.');
+  feedback(error?.status||error?.code?authError(error):error?.message?.includes('fetch')?'Falha de conexão. Confira sua internet e tente novamente.':'Não foi possível concluir a solicitação. Verifique sua conexão e tente novamente.');
  }finally{setWorking(false);}
 },true);
