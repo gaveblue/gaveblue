@@ -1,6 +1,6 @@
-// GB+ PWA network-first release v54: do not block installation on network requests,
+// GB+ PWA network-first release v57: do not block installation on network requests,
 // automatically redirect app windows, or reload open financial forms.
-const CACHE='gb-plus-shell-v56';
+const CACHE='gb-plus-shell-v57';
 const CORE=['./','./index.html','./styles.css','./js/app.js','./js/update.js','./recuperar.html'];
 const scope=new URL(self.registration.scope);
 const inScope=url=>url.origin===scope.origin&&url.pathname.startsWith(scope.pathname);
@@ -13,7 +13,12 @@ async function network(request,ms){
 }
 async function fallback(request){
  const own=await caches.open(CACHE);
- const hit=await own.match(request,{ignoreSearch:true})||await caches.match(request,{ignoreSearch:true});
+ // Only the current build may ignore the URL query. Older builds can serve a
+ // resource solely when its exact versioned URL matches; otherwise fail safely
+ // instead of mixing JavaScript/CSS from incompatible builds.
+ const requestURL=new URL(request.url);
+ const versioned=requestURL.searchParams.has('v')||requestURL.searchParams.has('gbplus_release');
+ const hit=await own.match(request,{ignoreSearch:true})||(versioned?await caches.match(request):null);
  if(hit)return hit;
  if(request.mode==='navigate'){
   const offline=await own.match(new URL('./index.html',scope))||
