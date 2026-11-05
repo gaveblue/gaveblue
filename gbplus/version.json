@@ -1,13 +1,16 @@
 {
-  "version": "2.3.9",
-  "build": 57,
+  "version": "2.4.0",
+  "build": 58,
   "published_at": "2026-11-05",
-  "title": "Estabilidade da autenticação e atualização offline",
+  "title": "Cartões de crédito, bancos e previsão financeira",
   "notes": [
-    "Melhorada a consistência do intervalo de 60 segundos para solicitar e-mails de autenticação, inclusive após atualizar a página e ao alterar senha em Minha conta.",
-    "Revisado o tratamento de arquivos do PWA quando não há conexão: evita combinar arquivos sem versão de compilações anteriores.",
-    "Mantidas a confirmação do logout, a recuperação de senha e a proteção das alterações não salvas no perfil.",
-    "Acrescentados testes de regressão para reenvio de e-mails, recuperação de conta e arquivos offline."
+    "Nova gestão de cartões de crédito: limite disponível, fechamento, vencimento e compras parceladas.",
+    "Faturas criadas automaticamente em Contas a pagar, com pagamento pelas contas financeiras e proteção contra duplicidade.",
+    "Vinculação de despesas a cartões com seleção de categoria e geração das parcelas em faturas mensais.",
+    "Catálogo de bancos principais com logos e cadastro personalizado de outras instituições.",
+    "Previsão de saldo para 7, 15, 30, 60 e 90 dias, calendário financeiro e projeção por conta.",
+    "Simulador de mudança de vencimento sem alterar os lançamentos reais.",
+    "Compatibilidade com backups antigos e validação de cartões e faturas no salvamento."
   ],
   "assets": [
     "./index.html",
@@ -66,6 +69,10 @@
     "./assets/gbplus-dashboard-real.svg",
     "./apresentacao.html",
     "./apresentacao.css",
-    "./js/institutional-landing.js"
+    "./js/institutional-landing.js",
+    "./js/banks.js",
+    "./js/credit-cards.js",
+    "./js/forecast.js",
+    "./js/finance-24-ui.js"
   ]
 }
