@@ -1,4 +1,4 @@
-import {money,dateLabel,pending,paid,status,within} from './domain.js';
+import {money,dateLabel,pending,paid,today,within} from './domain.js';
 import {esc,icon,select,empty} from './ui.js?v=20261104-38';
 import {filteredTitles,periodBar} from './views.js?v=20261104-38';
 
@@ -14,9 +14,8 @@ function selectedStatus(state){
 function launchCard(db,t,isSelected){
  const income=t.type==='income';
  const balance=pending(db,t);
- const rawStatus=status(db,t);
- const label=t.cancelled?'Cancelado':balance===0?'Pago':paid(db,t.id)>0?'Parcial':t.due<new Date().toLocaleDateString('en-CA')?'Vencido':'Pendente';
- const statusStyle=t.cancelled?'cancelled':balance===0?'settled':t.due<new Date().toISOString().slice(0,10)?'late':'pending';
+ const label=t.cancelled?'Cancelado':balance===0?(income?'Recebido':'Pago'):paid(db,t.id)>0?'Parcial':t.due<today()?'Vencido':'Pendente';
+ const statusStyle=t.cancelled?'cancelled':balance===0?'settled':t.due<today()?'late':'pending';
  const partner=db.partners.find(p=>p.id===t.partnerId)?.name||'Sem parceiro';
  const category=db.categories.find(c=>c.id===t.categoryId)?.name||'Sem categoria';
  const subtitle=partner==='Sem parceiro'?category:partner;
