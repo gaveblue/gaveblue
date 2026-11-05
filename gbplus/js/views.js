@@ -1,6 +1,6 @@
-import {money,today,dateLabel,metrics,pending,paid,status,flow,accountBalance,within} from './domain.js';
-import {INDICATORS} from './store.js?v=20261104-38';
-import {esc,icon,button,empty,titleTable,chart,select,field} from './ui.js?v=20261104-41';
+import {money,today,dateLabel,metrics,pending,paid,status,flow,accountBalance,within} from './domain.js?v=20261104-42';
+import {INDICATORS} from './store.js?v=20261104-42';
+import {esc,icon,button,empty,titleTable,chart,select,field} from './ui.js?v=20261104-42';
 import {gbIcon,categoryIconFor} from './gb-icons.js?v=20261104-42';
 export const routes=[['dashboard','Dashboard','home'],['titles','Lançamentos','titles'],['payable','Contas a pagar','down'],['receivable','Contas a receber','up'],['provisions','Provisões','layers'],['flow','Fluxo de caixa','chart'],['partners','Parceiros','people'],['accounts','Contas bancárias','wallet'],['categories','Categorias','category'],['reports','Relatórios','chart'],['notifications','Notificações','bell'],['settings','Configurações','settings']];
 const stat=(key,value,subtitle,ico,extra='')=>`<article class="stat ${extra}" data-indicator="${key}"><div class="stat-top"><span class="stat-icon">${icon(ico)}</span>${key==='balance'?'<span class="stat-tag">AGORA</span>':''}</div><p>${INDICATORS[key]}</p><strong>${money(value)}</strong><small>${subtitle}</small></article>`;
