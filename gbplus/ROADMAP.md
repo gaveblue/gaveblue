@@ -95,3 +95,24 @@ Este arquivo separa o que já entrou no código do que ainda depende de implemen
 - [ ] Auditar formalmente a função financeira privilegiada antes de qualquer mudança no banco.
 
 O fechamento da 2.3.9 no repositório não equivale à confirmação da implantação no site e nos aplicativos instalados.
+
+
+## GB+ 2.4.0 — Cartões, bancos e futuro financeiro (implementado no código)
+
+- [x] Catálogo de bancos principais com logos por ISPB e identificação alternativa por iniciais.
+- [x] Cadastro e edição de bancos personalizados em Bancos e Configurações.
+- [x] Seleção de banco nas contas financeiras e no assistente de primeiro acesso.
+- [x] Cadastro de cartão de crédito, limite, fechamento, vencimento e conta prevista para pagamento.
+- [x] Compras vinculadas ao cartão, com categoria, parceiro e parcelamento de até 36 parcelas.
+- [x] Geração/atualização automática das faturas em títulos de Contas a pagar sem despesa duplicada.
+- [x] Baixa parcial ou integral das faturas pela rotina financeira existente, liberando limite somente pelo pagamento efetivo.
+- [x] Bloqueio de exclusão de compras com faturas pagas e edição/exclusão direta de faturas.
+- [x] Projeção de caixa para 7, 15, 30, 60 e 90 dias; resumo no Dashboard, calendário e alertas de saldo negativo.
+- [x] Projeção por conta bancária e simulador de vencimento sem alteração de registros reais.
+- [x] Relatório de compras no cartão por categoria, independente da despesa realizada em caixa.
+- [x] Compatibilidade de validação com backups do formato anterior e inclusão dos novos módulos na atualização do PWA.
+- [x] Testes lógicos/de regressão em ambiente simulado (46 aprovações).
+- [ ] Homologar a publicação, PWA, sincronização Supabase, parcelamentos e faturas em dispositivos reais.
+- [ ] Refinar logos offline, histórico de faturas fechadas, contestação de compras e regras bancárias especiais após feedback.
+
+**Detalhes e limites:** consulte [RELEASE-2.4.0.md](./RELEASE-2.4.0.md). A implementação dos arquivos não equivale à homologação final no site.
