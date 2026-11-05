@@ -158,3 +158,25 @@ a{color:inherit}
 @media(min-width:700px){
  .install-shell{min-height:100dvh;padding-left:26px;padding-right:26px}
 }
+
+
+/* After-confirmation transition — the browser install prompt always comes first. */
+.postinstall-overlay[hidden],.postinstall-done[hidden],.postinstall-dismiss[hidden]{display:none!important}
+.postinstall-overlay{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px;padding-top:max(24px,env(safe-area-inset-top));padding-bottom:max(24px,env(safe-area-inset-bottom));background:#10101496;backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px)}
+.postinstall-panel{width:min(100%,360px);padding:25px 23px 21px;border-radius:25px;background:#fff;box-shadow:0 24px 65px #0003;text-align:center;color:#151518}
+.postinstall-logo{width:60px;height:60px;display:grid;place-items:center;background:#19191c;color:white;border-radius:18px;font-size:25px;font-style:italic;font-weight:900;letter-spacing:-.09em;margin:0 auto 14px;padding-right:3px}
+.postinstall-spinner{height:18px;width:18px;border:2px solid #dce9ff;border-top-color:#0868f9;border-radius:50%;margin:0 auto 16px;animation:postinstall-spin .85s linear infinite}
+.postinstall-spinner.is-complete{border-color:#15a75b;animation:none;position:relative}
+.postinstall-spinner.is-complete::after{content:"";position:absolute;top:2px;left:5px;width:4px;height:8px;border:solid #15a75b;border-width:0 2px 2px 0;transform:rotate(45deg)}
+.postinstall-panel h2{font-size:21px;line-height:1.15;letter-spacing:-.045em;margin:0 0 9px;font-weight:800}
+.postinstall-panel>p{font-size:13px;line-height:1.5;margin:0 0 21px;color:#77777e}
+.postinstall-progress{height:7px;border-radius:99px;background:#eeeeF1;overflow:hidden;margin:0 0 11px}
+.postinstall-progress-fill{width:0%;height:100%;border-radius:inherit;background:#0868f9}
+.postinstall-info{display:flex;gap:12px;justify-content:space-between;align-items:center;color:#62626a;font-size:12px;font-variant-numeric:tabular-nums}
+.postinstall-info span:last-child{font-weight:750;color:#3c3c42}
+.postinstall-panel .postinstall-footnote{font-size:11px;margin:15px 0 0;color:#94949a}
+.postinstall-done{display:flex;align-items:center;justify-content:center;text-decoration:none;min-height:46px;border-radius:13px;background:#0868f9;color:#fff;font-weight:750;margin-top:21px}
+.postinstall-dismiss{background:transparent;border:0;display:block;margin:12px auto 0;padding:8px 20px;font-size:13px;color:#77777e}
+body.postinstall-open{overflow:hidden}
+@keyframes postinstall-spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.postinstall-spinner{animation:none;border-top-color:#0868f9}}
