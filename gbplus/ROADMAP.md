@@ -63,3 +63,11 @@ Este arquivo separa o que já entrou no código do que ainda depende de implemen
 - [ ] Evoluir o financeiro para segregação por empresa/filial, com consolidados e trilhas de auditoria
 
 > Plano futuro: o documento é preparatório; não autoriza migração, atualização do banco ou mudança de cadastro sem revisão e testes.
+
+## Interface 100% personalizada (planejamento futuro)
+
+- [ ] Substituir gradualmente os componentes nativos ainda presentes no GB+ (calendários, seletores, inputs e outros controles) por componentes visuais próprios e acessíveis, com suporte a toque, teclado, temas e tamanhos de tela.
+- [ ] Manter a integração de formulários com validações, preenchimento, datas e acessibilidade, migrando cada controle em etapas testadas.
+- [x] Primeiro componente personalizado: menus de Tipo (Receita/Despesa com setas coloridas), Categoria, Parceiro e Periodicidade no formulário de Lançamentos (v2.2.1).
+
+> Não alterar controles globais sem teste de regressão; esta é uma etapa futura, separada do redesenho atual do formulário.
