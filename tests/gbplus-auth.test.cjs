@@ -125,7 +125,7 @@ test('session-expired flow and server rate-limit feedback are wired',()=>{
  assert.match(auth,/consumeSessionNotice/);
  assert.match(auth,/isExpiredSessionError/);
  assert.match(auth,/EMAIL_COOLDOWN_MS/);
- assert.match(auth,/lastResend=Date.now\(\);form.reset\(\)/);
+ assert.match(auth,/markAuthEmailSent\(\);form.reset\(\)/);
  const message=new Function('document',auth+';return authError({status:429});')({addEventListener(){}});
  assert.match(message,/Muitas solicitações/i);
 });
@@ -135,4 +135,26 @@ test('Supabase access_denied carrying otp_expired is a recovery-link failure, no
  const message=helpers.loginRedirectMessage(link);
  assert.match(message,/novo link/i);
  assert.doesNotMatch(message,/Google foi cancelado/i);
+});
+
+test('email cooldown survives reload and is shared with password reset from profile',()=>{
+ const memory=new Map();
+ const sessionStorage={
+  getItem:key=>memory.get(key)??null,
+  setItem:(key,value)=>memory.set(key,String(value)),
+  removeItem:key=>memory.delete(key)
+ };
+ const document={addEventListener(){}};
+ const loadCooldown=()=>new Function('document','sessionStorage',load('auth.js')+
+  ';return {emailCooldownSeconds,markAuthEmailSent};')(document,sessionStorage);
+ const first=loadCooldown();
+ assert.equal(first.emailCooldownSeconds(),0);
+ first.markAuthEmailSent();
+ assert.ok(first.emailCooldownSeconds()>0);
+ assert.ok(first.emailCooldownSeconds()<=60);
+ const reloaded=loadCooldown();
+ assert.ok(reloaded.emailCooldownSeconds()>0,'refreshing must not reset cooldown');
+ const app=fs.readFileSync(path.resolve(__dirname,'../gbplus/js/app.js'),'utf8');
+ assert.match(app,/if\(emailCooldownSeconds\(\)>0\)/);
+ assert.match(app,/markAuthEmailSent\(\)/);
 });
