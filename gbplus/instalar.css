@@ -62,6 +62,8 @@ a{color:inherit}
 .install-action{border:0;border-radius:999px;background:#0868f9;color:#fff;font-weight:750;min-width:100px;min-height:47px;padding:0 18px;box-shadow:0 3px 12px #0868f91d;transition:background .15s,transform .15s}
 .install-action:hover,.guide-primary:hover{background:#0058dc}
 .install-action:active,.guide-primary:active{transform:scale(.985)}
+.landing-install-status{font-size:13px;text-align:center;color:#34343a;line-height:1.4;margin:12px auto 0;max-width:370px}
+.landing-install-status:empty{display:none}
 .store-note{margin:17px auto 0;max-width:370px;font-size:11px;line-height:1.5;color:#87878d;text-align:center}
 .landing-footer{text-align:center;padding:21px 0 8px}
 .landing-footer a{font-size:13px;text-decoration:none;color:#6f7077;font-weight:600}
