@@ -22,6 +22,7 @@ function refreshSelect(select){
  const selected=select.selectedOptions[0];
  const count=select.options.length;
  button.querySelector('.gb-custom-select-value').textContent=selected?.textContent||'Selecione';
+ button.setAttribute('aria-label',(select.getAttribute('aria-label')||select.name||'Seleção')+': '+(selected?.textContent||'Selecione'));
  button.disabled=select.disabled||count===0;
  const name=select.name||select.id||'';
  list.innerHTML=selectOptions(select).map(({value,title,disabled,selected})=>
@@ -36,7 +37,7 @@ function enhanceSelect(select){
  const wrapper=document.createElement('span');wrapper.className='gb-custom-select';
  const trigger=document.createElement('button');trigger.type='button';trigger.className='gb-custom-select-trigger';
  const id='gb-custom-list-'+(++sequence);
- trigger.setAttribute('aria-haspopup','listbox');trigger.setAttribute('aria-expanded','false');trigger.setAttribute('aria-controls',id);
+ trigger.setAttribute('role','combobox');trigger.setAttribute('aria-haspopup','listbox');trigger.setAttribute('aria-expanded','false');trigger.setAttribute('aria-controls',id);
  trigger.setAttribute('aria-label',select.getAttribute('aria-label')||select.name||'Seleção');
  trigger.innerHTML='<span class="gb-custom-select-value"></span>';
  const list=document.createElement('span');list.id=id;list.className='gb-custom-select-list';list.setAttribute('role','listbox');list.hidden=true;
@@ -199,12 +200,13 @@ export function installGbControls(){
   const option=element.closest?.('.gb-custom-select-option');
   if(option){
    event.preventDefault();event.stopPropagation();
-   const select=option.closest('.gb-custom-select')?.querySelector('select');
+   const wrapper=option.closest('.gb-custom-select');
+   const select=wrapper?.querySelector('select');
    if(!select)return;
    select.value=option.dataset.value;
    refreshSelect(select);closeMenu();
    select.dispatchEvent(new Event('change',{bubbles:true}));
-   option.closest('.gb-custom-select')?.querySelector('.gb-custom-select-trigger')?.focus({preventScroll:true});
+   wrapper.querySelector('.gb-custom-select-trigger')?.focus({preventScroll:true});
    return;
   }
   const dateButton=element.closest?.('.gb-custom-date-trigger');
