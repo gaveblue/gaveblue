@@ -79,7 +79,7 @@ test('profile stylesheet uses a scoped design and release metadata',()=>{
  const css=read('profile-page.css'),index=read('index.html'),version=JSON.parse(read('version.json'));
  assert.ok(css.includes('.gb-account-card-heading'));
  assert.ok(css.includes('.gb-account-save:disabled'));
- assert.ok(css.includes('GB+ 2.2.0 — compact profile'));
+ assert.ok(css.includes('compact profile with a coherent sequence'));
  assert.ok(css.includes('.gb-account-address{margin:0 0 12px'));
  assert.ok(css.includes('.gb-account-field{min-height:60px'));
  assert.ok(index.includes('profile-page.css?v=20261104-37'));
