@@ -158,3 +158,44 @@ Detalhes: [RELEASE-2.4.5.md](./RELEASE-2.4.5.md). A evolução maior permanece r
 - [ ] Homologação de arquivos bancários reais, múltiplos bancos, dispositivos e PWA offline.
 
 **Não antecipar a sincronização via Open Finance**: ela permanece candidata a uma versão estrutural posterior como a 3.0.0. Arquivo de design: [IMPORTACAO-2.5.0.md](./IMPORTACAO-2.5.0.md). A existência do parser não ativa a importação nesta versão.
+
+## GB+ — Cronograma 2.4.7 a 3.0.0
+
+**Plano formal:** [PLANO-VERSOES-2.4.7-A-3.0.0.md](./PLANO-VERSOES-2.4.7-A-3.0.0.md).
+
+### 2.4.7 — Notas de atualização ilustradas (código implementado)
+
+- [x] Cartões visuais com ícones, títulos e descrições nas novidades da versão.
+- [x] Suporte a `highlights` estruturados e às `notes` antigas.
+- [x] Mostrar todas as melhorias listadas em vez de truncar nos três primeiros itens.
+- [x] Mostrar notas da versão instalada na conferência manual, quando publicada e confirmada.
+- [x] Corrigir leitura de manifestos com mais de 80 assets (139 no catálogo atual).
+- [x] Manifesto **2.4.7 / build 61**, estilos e cache atualizados.
+- [x] Cinco testes novos de validação de manifesto, ícones e apresentação.
+- [ ] Conferir publicação e homologar central de atualização no Android/PWA.
+
+### 2.4.8 — Lançamentos automáticos (planejada)
+
+- [ ] Receber a especificação da mudança adicional do usuário antes de codificar.
+- [ ] Melhorar recorrências, vencimentos, dias úteis e revisão antes da gravação.
+- [ ] Testar edição futura e proteção de parcelas já pagas.
+
+### 2.4.9 — Preparação de OFX/CSV (planejada)
+
+- [ ] Melhorar cobertura do parser de extratos e o tratamento de arquivos problemáticos.
+- [ ] Endurecer a proposta de conciliação e a detecção de duplicidades.
+- [ ] Homologar operações em modo prévia, sem permitir gravação.
+
+### 2.5.0 — Importação bancária (planejada)
+
+- [ ] Tela de importação, conferência e conciliação OFX/CSV por conta.
+- [ ] Aprovação por lançamento e gravação segura sem dupla contabilização.
+- [ ] RLS, auditoria, reversão controlada e testes ponta a ponta.
+- [ ] XLSX de despesas/receitas em etapa de homologação específica.
+
+### 3.0.0 — Evolução principal da IA (planejada)
+
+- [ ] Linguagem natural para análise financeira e preparação de operações.
+- [ ] Prévia e confirmação obrigatórias antes de qualquer gravação.
+- [ ] Permissões, histórico auditável, privacidade e testes da IA.
+- [ ] Não assumir Open Finance automático como parte desta versão.
