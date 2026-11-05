@@ -461,7 +461,9 @@ async function submit(text,targetChat=chats.activeId()){
   await lookupForEditing(term,editPending.type,targetChat);
   return;
  }
- const wantsCreate=/(lan[cç]|criar|crie|registre|registrar|cadastrar|dividir|divide|parcela|repete|repetir|recorrente)/.test(s)&&!/^(como|posso|qual a diferenca|por que|porque|onde)/.test(s);
+ // Buying something is a read-only scenario, even if the user mentions installments.
+ const purchasePlanning=/\b(?:comprar|compro|comprarei|adquirir|adquiro)\b/.test(s);
+ const wantsCreate=!purchasePlanning&&/(lan[cç]|criar|crie|registre|registrar|cadastrar|dividir|divide|parcela|repete|repetir|recorrente)/.test(s)&&!/^(como|posso|qual a diferenca|por que|porque|onde)/.test(s);
  const isCorrection=!!context?.proposal&&/(corrig|muda|altera|nao falei|na verdade|troca)/.test(s);
  const instructional=/^(como|onde|posso|qual a diferenca|por que|porque|o que e|o que significa)/.test(s)&&/(lan[cç]|cadastr|titulo|parcela|baixa|categoria|parceiro|configur|backup|export|modo)/.test(s);
  const greet=/^(oi|ola|opa|e ai|bom dia|boa tarde|boa noite|tudo bom|tudo bem)$/.test(s);
