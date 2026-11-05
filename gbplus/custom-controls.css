@@ -82,3 +82,77 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
  .gb-custom-select-list{max-height:44dvh}
 }
 /* Native controls from the OS (keyboard, file chooser, browser install UI) remain browser-owned. */
+
+
+/* GB+ 2.2.3 — Preserve the original closed-field appearance.
+   The source select remains visually intact; only its opening menu is custom. */
+.gb-custom-select{position:relative;display:block;min-width:0;flex:1 1 auto;height:auto}
+.gb-custom-native-select{
+ display:block!important;position:relative!important;inset:auto!important;
+ width:100%!important;height:100%!important;min-height:inherit!important;
+ opacity:1!important;overflow:visible!important;z-index:auto!important;
+ pointer-events:none!important;border:initial;
+}
+.gb-custom-select-trigger{
+ position:absolute;inset:0;display:block;width:100%;height:100%;min-height:0;
+ padding:0;border:0!important;background:transparent!important;
+ color:transparent!important;box-shadow:none!important;border-radius:inherit;
+ cursor:pointer;font-size:0;appearance:none;
+}
+.gb-custom-select-trigger .gb-custom-select-value,
+.gb-custom-select-trigger .gb-custom-chevron{display:none!important}
+.gb-custom-select-trigger:focus-visible{
+ outline:2px solid color-mix(in srgb,#8276c8 75%,transparent);
+ outline-offset:2px;
+}
+.gb-custom-select-list{width:max-content;max-width:calc(100vw - 20px)}
+.gb-custom-select-option{justify-content:flex-start;gap:11px;padding:10px 11px}
+.gb-custom-select-option>span:first-of-type:not(.gb-custom-option-icon){flex:1}
+.gb-custom-option-icon{flex:none;display:grid;place-items:center;width:27px;height:27px;border-radius:9px;background:var(--soft);color:var(--muted)}
+.gb-custom-option-icon .gb-symbol{width:17px;height:17px;stroke-width:1.9}
+.gb-custom-select-option.is-active .gb-custom-option-icon{background:color-mix(in srgb,#8878c7 14%,var(--soft));color:#8576c6}
+.gb-custom-select-option[data-value="all"] .gb-custom-option-icon{color:#7d73b6}
+.gb-custom-select-option[data-value="income"] .gb-custom-option-icon{color:#13a45b}
+.gb-custom-select-option[data-value="expense"] .gb-custom-option-icon{color:#e8505c}
+.gb-custom-select-option>span.gb-custom-option-title{min-width:0;flex:1;overflow-wrap:anywhere}
+.gb-custom-check{flex:none}
+.gb-custom-native-date{position:absolute!important;opacity:0!important;pointer-events:none!important;width:1px!important;height:1px!important;z-index:-1!important}
+.gb-custom-date-trigger{min-height:46px;padding:11px 12px;border:1px solid var(--border);border-radius:9px}
+.gb-custom-date-icon{display:grid;place-items:center;color:var(--muted);flex:none}
+.gb-custom-date-icon .gb-symbol{width:18px;height:18px;stroke-width:1.9}
+.gb-calendar-header button .gb-symbol,.gb-calendar-month button .gb-symbol{width:19px;height:19px}
+.gb-calendar-jump{display:flex;align-items:center;justify-content:center;gap:3px;flex:1;min-width:0}
+.gb-calendar-jump button{
+ min-width:0;padding:7px 8px;min-height:34px;font-size:13px;
+ font-weight:750;text-transform:capitalize;border-radius:9px;border:1px solid transparent;
+}
+.gb-calendar-jump button:hover{background:var(--soft);border-color:var(--border)}
+.gb-calendar-pick-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:13px 0}
+.gb-calendar-pick{border:1px solid var(--border);min-height:54px;border-radius:11px;background:var(--surface);
+ color:var(--ink);font-size:13px;font-weight:600;display:grid;place-items:center}
+.gb-calendar-pick:hover:not(:disabled),.gb-calendar-pick:focus-visible{background:var(--soft);outline:1px solid #958ace}
+.gb-calendar-pick.selected{background:var(--ink);color:var(--inverse)}
+.gb-calendar-pick:disabled{opacity:.35;cursor:not-allowed}
+.gb-calendar-year-range{font-size:13px;text-align:center;font-weight:750;flex:1;min-width:0}
+.gb-calendar-backdrop{border:0;background:transparent;padding:16px;max-width:none;max-height:none;width:100%;height:100%;
+ margin:0;display:flex;align-items:center;justify-content:center;box-shadow:none;overflow:auto}
+.gb-calendar-backdrop::backdrop{background:#08091385;backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
+.gb-calendar-backdrop:not([open]){display:none!important}
+.gb-calendar-panel{flex:none;max-height:calc(100dvh - 38px)}
+/* 16px mobile text prevents browser auto-zoom when focusing the form. */
+@media(max-width:760px){
+ #modal.gb-entry-modal .field input:not([type="hidden"]),#modal.gb-entry-modal .field textarea{
+  font-size:16px!important;
+ }
+ .gb-custom-date-trigger{font-size:16px}
+ .gb-calendar-jump button{font-size:13px}
+ .gb-calendar-pick{min-height:48px}
+ .gb-custom-select-list{max-height:50dvh}
+}
+/* Keep existing dashboard/launch period frame and text sizes unchanged. */
+.period-control .gb-custom-select{height:100%;display:flex;align-items:center;min-width:0;flex:1}
+.period-control .gb-custom-native-select{
+ display:block!important;flex:1;height:100%!important;min-width:0!important;
+ background:transparent;appearance:auto;pointer-events:none
+}
+.gb-launch-period .period-control .gb-custom-select{height:100%}
