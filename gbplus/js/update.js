@@ -169,7 +169,7 @@
   if(active||!manifest)return;
   active=true;downloadReady=false;
   els.primary.disabled=true;els.later.disabled=true;els.close.disabled=true;els.primary.dataset.next='';
-  put(els.primary,'Baixando…');put(els.feedback,'Arquivos baixados de verdade, não apenas uma animação.');
+  put(els.primary,'Baixando…');put(els.feedback,'');
   const assets=manifest.assets;
   const total=assets.length;
   let completed=0,failed=null;
