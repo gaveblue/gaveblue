@@ -50,3 +50,31 @@ test('Unconfirmed accounts can resend an email without a password prompt',()=>{
  auth.showAuth('signin');
  assert.match(gate.innerHTML,/Continuar com o Google/);
 });
+
+
+test('welcome login and signup use shared visual identity and eight character passwords',()=>{
+ const gate={hidden:true,innerHTML:'',querySelector:selector=>selector==='[name=email]'?{value:''}:null};
+ const document={body:{classList:{add(){}}},querySelector:selector=>selector==='#auth-gate'?gate:null,addEventListener(){}};
+ const auth=new Function('document','window','icon','esc','createGbplusClient','cloudConfig','loginRedirectMessage','clearLoginErrorUrl','safeAuthEmail',
+  load('auth.js')+';return {showAuth,passwordMeetsMinimum};')(
+   document,{},()=>'<i></i>',x=>String(x),()=>null,{},helpers.loginRedirectMessage,helpers.clearLoginErrorUrl,helpers.safeAuthEmail
+  );
+ auth.showAuth('signin');
+ assert.match(gate.innerHTML,/Bem-vindo de volta/);
+ assert.match(gate.innerHTML,/auth-story-preview/);
+ assert.match(gate.innerHTML,/Voltar ao site/);
+ assert.match(gate.innerHTML,/Cadastre-se gratuitamente/);
+ auth.showAuth('signup');
+ assert.match(gate.innerHTML,/Criar minha conta/);
+ assert.match(gate.innerHTML,/name="confirmation"/);
+ assert.match(gate.innerHTML,/Mínimo de 8 caracteres/);
+ assert.match(gate.innerHTML,/sem combinação obrigatória/);
+ assert.equal(auth.passwordMeetsMinimum('abcdefgh'),true);
+ assert.equal(auth.passwordMeetsMinimum('12345678'),true);
+ assert.equal(auth.passwordMeetsMinimum('!@#$%^&*'),true);
+ assert.equal(auth.passwordMeetsMinimum('abc1234'),false);
+ auth.showAuth('recovery');
+ assert.match(gate.innerHTML,/name="confirmation"/);
+ auth.showAuth('confirm');
+ assert.doesNotMatch(gate.innerHTML,/name="password"/);
+});
