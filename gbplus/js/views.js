@@ -1,8 +1,8 @@
 import {money,today,dateLabel,metrics,pending,paid,status,flow,accountBalance,within} from './domain.js?v=20261105-72';
-import {INDICATORS} from './store.js?v=20261105-72';
+import {INDICATORS} from './store.js?v=20261105-75';
 import {esc,icon,button,empty,titleTable,chart,select,field} from './ui.js?v=20261105-72';
 import {gbIcon,categoryIconFor} from './gb-icons.js?v=20261104-42';
-import {bankBadge,bankForAccount,bankName} from './banks.js?v=20261105-72';
+import {bankBadge,bankForAccount,bankName} from './banks.js?v=20261105-75';
 export const routes=[['dashboard','Dashboard','home'],['titles','Lançamentos','titles'],['payable','Contas a pagar','down'],['receivable','Contas a receber','up'],['provisions','Provisões','layers'],['flow','Fluxo de caixa','chart'],['partners','Parceiros','people'],['accounts','Contas bancárias','wallet'],['cards','Cartões de crédito','credit-card'],['forecast','Previsão financeira','chart'],['banks','Bancos','building-2'],['categories','Categorias','category'],['reports','Relatórios','chart'],['notifications','Notificações','bell'],['settings','Configurações','settings']];
 const stat=(key,value,subtitle,ico,extra='')=>`<article class="stat ${extra}" data-indicator="${key}"><div class="stat-top"><span class="stat-icon">${icon(ico)}</span>${key==='balance'?'<span class="stat-tag">AGORA</span>':''}</div><p>${INDICATORS[key]}</p><strong>${money(value)}</strong><small>${subtitle}</small></article>`;
 export function periodBar(state){return `<div class="period-control">${icon('calendar')}<select id="period" aria-label="Período"><option value="month" ${state.period==='month'?'selected':''}>Este mês</option><option value="last" ${state.period==='last'?'selected':''}>Mês anterior</option><option value="year" ${state.period==='year'?'selected':''}>Este ano</option><option value="all" ${state.period==='all'?'selected':''}>Todo o período</option><option value="custom" ${state.period==='custom'?'selected':''}>Personalizado</option></select></div>`;}
