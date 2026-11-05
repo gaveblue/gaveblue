@@ -168,6 +168,15 @@ export function installGbControls(){
    const now=new Date();setCalendarDate(dateISO(now.getFullYear(),now.getMonth()+1,now.getDate()));return;
   }
   if(openCalendar&&element===openCalendar.backdrop){closeCalendar();return;}
+  // Clicking the caption of a labelled date/select must not activate the
+  // invisible browser control and accidentally open a native OS picker.
+  const label=element.closest?.('label.field');
+  if(label&&!element.closest?.('.gb-custom-select,.gb-custom-date')){
+   const customDate=label.querySelector('.gb-custom-date-trigger');
+   const customSelect=label.querySelector('.gb-custom-select-trigger');
+   if(customDate){event.preventDefault();event.stopPropagation();showCalendar(customDate);return;}
+   if(customSelect){event.preventDefault();event.stopPropagation();showMenu(customSelect);return;}
+  }
   if(openMenu&&!element.closest?.('.gb-custom-select'))closeMenu();
  },true);
  document.addEventListener('keydown',event=>{
