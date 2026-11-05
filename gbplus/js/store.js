@@ -4,7 +4,7 @@ export const INDICATORS={balance:'Saldo disponível',receivable:'A receber',paya
 export const defaultPanel=()=>({desktop:Object.fromEntries(Object.keys(INDICATORS).map(k=>[k,true])),mobile:Object.fromEntries(Object.keys(INDICATORS).map(k=>[k,true]))});
 // The first and middle shortcuts (Início and Novo) are permanent. The three other slots are user-defined.
 export const MOBILE_SHORTCUTS=[
- ['titles','Títulos','transfer'],['payable','A pagar','down'],['receivable','A receber','up'],
+ ['titles','Lançamentos','transfer'],['payable','A pagar','down'],['receivable','A receber','up'],
  ['provisions','Provisões','layers'],['flow','Fluxo de caixa','chart'],
  ['partners','Parceiros','people'],['accounts','Contas','wallet'],
  ['categories','Categorias','category'],['reports','Relatórios','chart'],
