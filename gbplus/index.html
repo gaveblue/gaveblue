@@ -18,6 +18,10 @@
   (() => {
     try {
       if (!matchMedia('(max-width:760px) and (pointer:coarse)').matches) return;
+      // Touchscreen desktop/laptop users should keep the normal web login.
+      const userAgent = String(navigator.userAgent || '');
+      if (/Windows NT|X11|Linux x86_64/i.test(userAgent)) return;
+      if (navigator.userAgentData?.mobile === false && !/Android|iPhone|iPad|iPod/i.test(userAgent)) return;
       if (matchMedia('(display-mode:standalone)').matches || navigator.standalone === true) return;
       // Auth callbacks and explicit web links are never redirected.
       const params = new URLSearchParams(location.search);
