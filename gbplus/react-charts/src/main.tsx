@@ -79,6 +79,7 @@ export function mountGBCharts(payload: Payload) {
     mount(earningsHost,
       <Earnings
         title="Receitas recebidas"
+        className="gb-earnings-in-panel"
         periods={payload.earnings.periods}
         defaultPeriod="30d"
         currency="BRL"
