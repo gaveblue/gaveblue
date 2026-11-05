@@ -11,3 +11,47 @@
  .gb-cashflow-slot .gb-react-charts{padding:8px 8px 10px}
  .gb-cashflow-slot .gb-chart-wrapper{overscroll-behavior-x:contain}
 }
+
+
+/* Minimal, fully offline EasyUI-style charts: no Tailwind/React needed. */
+.gb-native-earnings,.gb-native-bars{color:var(--ink);padding:6px 4px 12px;min-width:0}
+.gb-native-header,.gb-native-bar-header{display:flex;justify-content:space-between;gap:14px;align-items:flex-start}
+.gb-native-eyebrow{display:block;font-size:12px;color:var(--muted);font-weight:500}
+.gb-native-total{display:block;font-size:clamp(22px,4.7vw,32px);font-weight:700;letter-spacing:-.8px;font-variant-numeric:tabular-nums;margin:4px 0}
+.gb-native-comparison{display:flex;gap:8px;align-items:center;flex-wrap:wrap;color:var(--muted);font-size:11px;line-height:1.35}
+.gb-native-growth{font-weight:700}
+.gb-native-growth.up{color:#16a34a}.gb-native-growth.down{color:#ef4444}
+.gb-native-switch{display:flex;gap:2px;border:1px solid var(--border);border-radius:11px;padding:3px;background:var(--soft);flex-shrink:0}
+.gb-native-switch button{border:0;background:transparent;color:var(--muted);border-radius:8px;min-height:30px;padding:0 10px;font-size:11px;font-weight:650}
+.gb-native-switch button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 5px #0000000e}
+.gb-native-interaction{font-size:11px;color:var(--muted);margin:13px 0 2px}
+.gb-native-svg{min-width:0;overflow:hidden;margin:4px 0 10px}
+.gb-native-svg svg{width:100%;height:auto;max-height:190px;overflow:visible;display:block;color:var(--muted);touch-action:pan-y}
+.gb-native-grid{fill:none;stroke:var(--border);stroke-width:1}
+.gb-native-line{fill:none;stroke:#16a34a;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+.gb-native-dot{fill:transparent;stroke:transparent;cursor:pointer}
+.gb-native-dot:hover,.gb-native-dot:focus{fill:#16a34a;stroke:var(--surface);stroke-width:2;outline:none}
+.gb-native-sources-title{font-size:11px;font-weight:700;color:var(--muted);margin:8px 0 12px}
+.gb-native-source{margin-bottom:12px}
+.gb-native-source>div:first-child{display:flex;justify-content:space-between;gap:8px;font-size:12px;margin-bottom:6px}
+.gb-native-source strong{font-weight:650;font-variant-numeric:tabular-nums}
+.gb-native-source-track{height:4px;background:var(--soft);border-radius:8px;overflow:hidden}
+.gb-native-source-track span{display:block;height:100%;border-radius:8px;transition:width .25s ease}
+.gb-native-bar-header{flex-wrap:wrap}
+.gb-native-bar-header>div:first-child{display:grid;gap:4px}
+.gb-native-bar-header strong{font-size:14px}
+.gb-native-bar-header>div:first-child span{font-size:11px;color:var(--muted)}
+.gb-native-legend{display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:11px;color:var(--muted)}
+.gb-native-legend>span{display:flex;gap:5px;align-items:center}
+.gb-native-key{width:8px;height:8px;border-radius:2px;display:inline-block}
+.gb-native-key.income{background:#16a34a}.gb-native-key.expense{background:#ef4444}
+.gb-native-scroll{overflow-x:auto;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;padding-top:15px;color:var(--muted);max-width:100%}
+.gb-native-scroll svg{display:block;max-width:none}
+.gb-chart-fallback [hidden]{display:none!important}
+@media(max-width:760px){
+ .gb-native-earnings,.gb-native-bars{padding:3px 0 8px}
+ .gb-native-header{gap:7px}
+ .gb-native-switch button{min-height:28px;padding:0 7px}
+ .gb-native-bar-header{gap:9px}
+ .gb-native-total{font-size:25px}
+}
