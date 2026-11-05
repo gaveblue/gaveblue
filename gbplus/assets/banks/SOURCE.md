@@ -1,13 +1,13 @@
-# Logos dos bancos — origem e uso
+# Origem dos logos e dados bancários
 
-Estes 12 arquivos SVG foram copiados para o GB+ em **05/11/2026** para garantir a visualização dos ícones no cadastro de contas, cartões e durante o uso offline do PWA.
+**Atualização do catálogo:** 05/11/2026 (GB+ 2.4.6).
 
-**Fonte:** [logos-bancos-br](https://github.com/rzmt/logos-bancos-br), repositório `rzmt/logos-bancos-br`, pasta `logos/svg`, com nomes definidos pelo código ISPB.
+A interface possui **78 instituições pré-cadastradas em ordem alfabética**, identificadas por nome de uso corrente, código de compensação **COMPE** (três dígitos), identificador **ISPB** (oito dígitos) e arquivo local de logo SVG. Bancos personalizados não recebem código oficial inventado: são exibidos por nome, iniciais e cor.
 
-A fonte reúne informações públicas do Banco Central e arquivos de marca coletados no ecossistema de Open Finance e em sites das próprias instituições. A listagem dos bancos e o código de interface não dão ao GB+ qualquer vínculo com, certificação ou patrocínio dessas instituições.
+**Fonte do catálogo e dos arquivos:** [rzmt/logos-bancos-br](https://github.com/rzmt/logos-bancos-br), especialmente `data/bancos.json` e `logos/svg/`. O projeto de origem reconstrói sua lista a partir dos participantes do STR do **Banco Central do Brasil**, dos participantes Pix e de fontes visuais do **Open Finance Brasil** e sites oficiais. A snapshot incorporada ao GB+ é a lista consultada em 05/11/2026; informações bancárias podem mudar com o tempo.
 
-**Importante:** nomes e logotipos são marcas de seus respectivos titulares. Sua apresentação é exclusivamente identificadora. Os arquivos SVG foram disponibilizados no repositório de origem e mantidos localmente como assets da interface; não são permissões para representar o banco ou usar a marca fora deste contexto.
+Os **78 SVGs** foram armazenados localmente em `assets/banks/<ISPB>.svg` para evitar a dependência de serviço CDN e oferecer suporte após o download do PWA. Alguns arquivos possuem identificador de logo distinto do ISPB da instituição, quando a fonte original compartilha marca com um sistema cooperativo; o campo `logoIspb` no catálogo resolve essa situação. O arquivo da instituição Guanabara foi saneado para remover declarações DTD e manter apenas a imagem PNG incorporada.
 
-Os ícones locais usados nesta versão são: `00000000`, `00360305`, `60701190`, `60746948`, `90400888`, `18236120`, `00416968`, `31872495`, `30306294`, `01181521`, `22896431`, `08561701`.
+**Marcas:** nomes, símbolos e logotipos são propriedades dos titulares e não são abrangidos automaticamente pela licença do código do GB+. Seu uso neste aplicativo tem finalidade meramente identificadora e não significa representação, afiliação, autorização comercial ou integração com os bancos. Detalhes de provenance e solicitações de correção/remoção: [DISCLAIMER.md do projeto de origem](https://github.com/rzmt/logos-bancos-br/blob/main/DISCLAIMER.md).
 
-O cadastro de instituições personalizadas continua disponível: uma instituição sem logo próprio usa suas iniciais em fundo colorido.
+A pesquisa e a escolha de uma instituição no GB+ são locais. Nenhuma senha, token ou dado bancário é solicitado para exibir um logo.
