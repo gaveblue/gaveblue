@@ -80,3 +80,18 @@ export function gbOptionIcon(name,value,label){
  if(nameKey.includes('status'))return v==='settled'?'check':v==='open'?'history':'tag';
  return 'tag';
 }
+
+/* Curated, explicit choices stored on category records. */
+export const CATEGORY_ICON_OPTIONS=[
+ ['tag','Geral'],['droplets','Água'],['zap','Energia'],['wifi','Internet'],
+ ['house','Moradia'],['shopping-cart','Compras'],['shopping-bag','Vendas'],
+ ['utensils','Alimentação'],['fuel','Combustível'],['car','Transporte'],
+ ['heart-pulse','Saúde'],['graduation-cap','Educação'],['briefcase-business','Trabalho'],
+ ['receipt','Impostos'],['wallet','Finanças'],['credit-card','Cartão'],
+ ['phone','Telefone'],['shirt','Vestuário'],['gift','Presentes'],
+ ['wrench','Manutenção'],['layers','Outros']
+];
+export function categoryIconFor(category){
+ const stored=category?.icon;
+ return CATEGORY_ICON_OPTIONS.some(([name])=>name===stored)?stored:gbCategoryIcon(category?.name||'');
+}
