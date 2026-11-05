@@ -1,8 +1,8 @@
-import {esc,icon,button,field,select,formFooter,empty} from './ui.js?v=20261104-42';
-import {today,money,dateLabel,pending,accountBalance} from './domain.js?v=20261105-47';
-import {BANKS,bankCatalog,bankOptions,findBank,bankBadge} from './banks.js?v=20261105-70';
-import {creditCards,cardPurchases,cardUsed,cardAvailable} from './credit-cards.js?v=20261105-70';
-import {cashForecast} from './forecast.js?v=20261105-70';
+import {esc,icon,button,field,select,formFooter,empty} from './ui.js?v=20261105-72';
+import {today,money,dateLabel,pending,accountBalance} from './domain.js?v=20261105-72';
+import {BANKS,bankCatalog,bankOptions,findBank,bankBadge} from './banks.js?v=20261105-72';
+import {creditCards,cardPurchases,cardUsed,cardAvailable} from './credit-cards.js?v=20261105-72';
+import {cashForecast} from './forecast.js?v=20261105-72';
 
 const heading=(title,subtitle,buttons='')=>'<div class="page-heading"><div><h1>'+title+'</h1><p>'+subtitle+'</p></div><div class="heading-actions">'+buttons+'</div></div>';
 export function banksView(db){
