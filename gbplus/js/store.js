@@ -1,4 +1,5 @@
 import {uid,validDate,paid,today} from './domain.js';
+import {CATEGORY_ICON_OPTIONS} from './gb-icons.js?v=20261104-42';
 export const KEY='gb-plus:data:v1';
 export const INDICATORS={balance:'Saldo disponível',receivable:'A receber',payable:'A pagar',provisions:'Provisões líquidas',received:'Receitas recebidas',spent:'Despesas pagas',result:'Resultado financeiro',overdue:'Títulos vencidos',chart:'Fluxo de caixa',upcoming:'Próximos vencimentos'};
 export const defaultPanel=()=>({desktop:Object.fromEntries(Object.keys(INDICATORS).map(k=>[k,true])),mobile:Object.fromEntries(Object.keys(INDICATORS).map(k=>[k,true]))});
@@ -28,7 +29,7 @@ export function validateDatabase(db){
   assert(db&&db.schemaVersion===1,'versão não suportada.');
   for(const key of ['titles','payments','partners','accounts','transfers','categories']) {assert(Array.isArray(db[key])&&db[key].length<=100000,`lista ${key}.`); const ids=new Set(); for(const row of db[key]){assert(row&&str(row.id,100)&&/^[A-Za-z0-9_-]+$/.test(row.id)&&!ids.has(row.id),`identificador em ${key}.`);ids.add(row.id);}}
   const has=(key,id)=>db[key].some(x=>x.id===id);
-  for(const c of db.categories)assert(str(c.name,100)&&c.name.trim()&&['income','expense'].includes(c.type),'categoria.');
+  for(const c of db.categories)assert(str(c.name,100)&&c.name.trim()&&['income','expense'].includes(c.type)&&(c.icon===undefined||CATEGORY_ICON_OPTIONS.some(([key])=>key===c.icon)),'categoria.');
   for(const a of db.accounts)assert(str(a.name,120)&&a.name.trim()&&str(a.bank,120)&&str(a.branch,80)&&str(a.number,80)&&amount(a.initial)&&typeof a.active==='boolean','conta.');
   for(const p of db.partners)assert(str(p.name,200)&&p.name.trim()&&['tradeName','document','phone','email','address','notes'].every(k=>str(p[k]))&&typeof p.active==='boolean'&&Array.isArray(p.roles)&&p.roles.length>0&&p.roles.every(r=>['Cliente','Fornecedor','Transportadora','Funcionário','Outros'].includes(r)),'parceiro.');
   for(const t of db.titles){assert(str(t.description,300)&&t.description.trim()&&str(t.document,100)&&str(t.notes)&&['income','expense'].includes(t.type)&&amount(t.amount)&&t.amount>0&&validDate(t.issue)&&validDate(t.due)&&typeof t.cancelled==='boolean','título.');assert((!t.partnerId||has('partners',t.partnerId))&&(!t.accountId||has('accounts',t.accountId))&&db.categories.some(c=>c.id===t.categoryId&&c.type===t.type),'referência do título.');assert(['single','installment','recurring'].includes(t.mode)&&Number.isInteger(t.sequence)&&Number.isInteger(t.count)&&t.sequence>=1&&t.sequence<=t.count&&t.count<=120&&(t.groupId===null||str(t.groupId,100)),'série do título.');}
