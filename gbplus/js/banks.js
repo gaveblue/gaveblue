@@ -11,7 +11,10 @@ export const BANKS=Object.freeze([
  {id:'nubank',name:'Nubank',ispb:'18236120',color:'#7a1ab9'},
  {id:'inter',name:'Inter',ispb:'00416968',color:'#fa7400'},
  {id:'c6',name:'C6 Bank',ispb:'31872495',color:'#171717'},
- {id:'btg',name:'BTG Pactual',ispb:'30306294',color:'#002c62'}
+ {id:'btg',name:'BTG Pactual',ispb:'30306294',color:'#002c62'},
+ {id:'sicredi',name:'Sicredi',ispb:'01181521',color:'#3b9b35'},
+ {id:'picpay',name:'PicPay',ispb:'22896431',color:'#21b965'},
+ {id:'pagbank',name:'PagBank',ispb:'08561701',color:'#5bba4a'}
 ]);
 const normalize=text=>String(text||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');
 export const bankCatalog=db=>[...BANKS,...(db?.banks||[])];
