@@ -13,6 +13,9 @@
  const steps=document.getElementById('guide-steps');
  const callout=document.getElementById('guide-callout');
  const status=document.getElementById('install-status');
+ const safariAction=document.getElementById('guide-safari-action');
+ const safariButton=document.getElementById('guide-safari-button');
+ const safariFeedback=document.getElementById('guide-safari-feedback');
  const landingStatus=document.getElementById('landing-install-status');
  const postInstallOverlay=document.getElementById('postinstall-overlay');
  const postInstallTitle=document.getElementById('postinstall-title');
@@ -68,6 +71,46 @@
    localStorage.setItem('gbplus-pwa-suggest-after-v1',String(Date.now()+7*86400000));
   }catch{}
  }
+ // Browser recognition is best-effort; iOS in-app browsers may mask their identity.
+ // Never use the Safari engine alone, because Chrome and other iOS apps use WebKit too.
+ function isSafariOnAppleMobile(){
+  const ua=String(navigator.userAgent||'');
+  const appleMobile=/iPhone|iPad|iPod/i.test(ua)||
+   (navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+  if(!appleMobile)return false;
+  const safari=/Version\/[0-9.]+/.test(ua)&&/Safari\/[0-9.]+/.test(ua);
+  const others=/CriOS|FxiOS|EdgiOS|OPiOS|OPT\/|DuckDuckGo|GSA\/|FBAN|FBAV|FBIOS|Instagram|LinkedInApp|Snapchat|TikTok|musical_ly|Twitter|Line\/|MicroMessenger|WhatsApp|YaBrowser|UCBrowser|Brave\//i.test(ua);
+  return safari&&!others;
+ }
+ async function assistSafariOpen(){
+  // Websites cannot reliably switch another iOS browser to Safari.
+  // Offer an explicit, useful action instead of a nonfunctional deep link.
+  let copied=false;
+  try{
+   if(navigator.clipboard?.writeText){
+    await navigator.clipboard.writeText(openUrl);
+    copied=true;
+   }
+  }catch{}
+  if(!copied){
+   try{
+    const field=document.createElement('textarea');
+    field.value=openUrl;
+    field.setAttribute('readonly','');
+    field.style.position='fixed';
+    field.style.opacity='0';
+    document.body.appendChild(field);
+    field.select();
+    copied=!!document.execCommand?.('copy');
+    field.remove();
+   }catch{}
+  }
+  safariFeedback.hidden=false;
+  safariFeedback.textContent=copied
+   ?'Endereço copiado! Abra o Safari e cole na barra de endereços.'
+   :'Abra o Safari e digite: gaveblue.com.br/gbplus/';
+ }
+ safariButton?.addEventListener('click',()=>{void assistSafariOpen();});
  function platformFromLocation(){
   const mode=new URLSearchParams(location.search).get('plataforma');
   return mode==='iphone'||mode==='android'?mode:'';
@@ -79,11 +122,18 @@
   guide.hidden=!isGuide;
   if(!isGuide){document.title='Instalar GB+ · Gestão Financeira';window.scrollTo(0,0);return;}
   const info=content[platform];
+  const safariDetected=platform==='iphone'&&isSafariOnAppleMobile();
   title.textContent=info.heading;
-  description.textContent=info.lead;
+  description.textContent=safariDetected
+   ?'Você já está no Safari. Adicione o GB+ à Tela de Início.'
+   :info.lead;
   icon.innerHTML=info.icon;
+  safariAction.hidden=platform!=='iphone'||safariDetected;
+  safariFeedback.hidden=true;
+  safariFeedback.textContent='';
   steps.replaceChildren();
-  for(const [heading,detail]of info.steps){
+  const tutorialSteps=safariDetected?info.steps.slice(1):info.steps;
+  for(const [heading,detail]of tutorialSteps){
    const li=document.createElement('li');
    const div=document.createElement('div');
    const strong=document.createElement('strong'),span=document.createElement('span');
