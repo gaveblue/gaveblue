@@ -1,10 +1,14 @@
 {
-  "version": "2.2.9",
-  "build": 46,
+  "version": "2.3.0",
+  "build": 47,
   "published_at": "2026-11-05",
-  "title": "Ajuste visual da janela de atualização",
+  "title": "Nova página de instalação do GB+ para celular",
   "notes": [
-    "Removida a mensagem redundante durante o download de atualizações."
+    "Nova tela de instalação para visitantes que acessam o GB+ pela primeira vez no celular, inspirada na identidade visual do aplicativo.",
+    "Botões azuis Instalar para iPhone e Android, sem indicar disponibilidade em lojas de aplicativos.",
+    "Tutorial de instalação para iPhone via Safari; no Android, instalação direta quando o navegador permitir, com instruções alternativas.",
+    "Versão web no computador, sessões existentes e aplicativo já instalado permanecem inalterados.",
+    "Opção Instalar aplicativo nas Configurações do celular passa a abrir a nova página."
   ],
   "assets": [
     "./index.html",
@@ -56,6 +60,9 @@
     "./charts-integration.css",
     "./js/gb-react-loader.js",
     "./js/gb-charts-data.js",
-    "./js/gb-charts-native.js"
+    "./js/gb-charts-native.js",
+    "./instalar.html",
+    "./instalar.css",
+    "./js/install-landing.js"
   ]
 }
