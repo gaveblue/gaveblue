@@ -1,13 +1,14 @@
 {
-  "version": "2.2.6",
-  "build": 43,
+  "version": "2.2.7",
+  "build": 44,
   "published_at": "2026-11-05",
-  "title": "GB+ AI: correções das simulações, contexto e perguntas por mês",
+  "title": "Gráficos de receitas e fluxo de caixa modernizados",
   "notes": [
-    "Corrigido o reaproveitamento indevido de valores entre compras diferentes (ex.: calça de R$ 250 e iPhone de R$ 18.000).",
-    "Simulações agora distinguem recebimentos hipotéticos de compras e avisam sobre possível duplicidade com títulos cadastrados.",
-    "Continuidade da conversa corrigida: responda apenas “mês que vem” e mantenha a compra parcelada; parcelamento mensal sem juros explicitado.",
-    "Mensagens simples como “oi”, “ol” e “ok” passam a receber respostas adequadas."
+    "Novo gráfico interativo de receitas recebidas no Dashboard, com períodos de 7 dias, 30 dias e 12 meses.",
+    "Novo gráfico de barras no Fluxo de Caixa para comparar recebimentos e pagamentos, com receitas em verde e despesas em vermelho.",
+    "Gráficos feitos em SVG e JavaScript sem dependências externas, com leitura dos registros financeiros já existentes.",
+    "Componentes React do EasyUI mantidos no código para integração posterior, quando for possível compilar o pacote.",
+    "Nenhuma alteração na autenticação, nos lançamentos ou na base de dados."
   ],
   "assets": [
     "./index.html",
@@ -55,6 +56,10 @@
     "./ICON_LICENSE.md",
     "./gb-entry-wizard.css",
     "./js/gb-finance-input.js",
-    "./js/gb-calendar-rules.js"
+    "./js/gb-calendar-rules.js",
+    "./charts-integration.css",
+    "./js/gb-react-loader.js",
+    "./js/gb-charts-data.js",
+    "./js/gb-charts-native.js"
   ]
 }
