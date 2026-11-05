@@ -681,7 +681,8 @@ document.addEventListener('submit',async e=>{e.preventDefault();if(busy||!db)ret
    const bank= v.bankId?findBank(db,v.bankId):null;
    if(v.bankId&&!bank)throw Error('Selecione um banco válido.');
    const chosen=bank?bank.name:String(v.bank||'').trim();
-   await commit(d=>upsert(d.accounts,{...v,id:id||uid(),name:v.name.trim(),bankId:bank?.id||'',bank:chosen,initial:cents(v.initial),active:v.active==='true'}));
+   const {bankLookup,...accountFields}=v; // A consulta de busca nunca é gravada junto à conta.
+   await commit(d=>upsert(d.accounts,{...accountFields,id:id||uid(),name:v.name.trim(),bankId:bank?.id||'',bank:chosen,initial:cents(v.initial),active:v.active==='true'}));
   }
   else if(form.id==='bank-form'){
    const name=String(v.name||'').trim();
