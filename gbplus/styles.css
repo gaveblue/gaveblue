@@ -655,3 +655,50 @@ body.auth-locked .mobile-nav-fade{display:none!important}
 @media(prefers-reduced-motion:reduce){
  .auth-refresh *,.auth-refresh *:before,.auth-refresh *:after{scroll-behavior:auto;animation:none;transition:none}
 }
+
+
+/* GB+ authentication feedback — advisory strength + real-time password confirmation. */
+.auth-refresh .auth-password-strength{margin:-4px 2px 11px;display:flex;align-items:center;gap:12px;color:#696a77;font-size:11.5px}
+.auth-refresh .auth-strength-track{width:100px;max-width:35%;height:6px;border-radius:999px;background:#e8e8ee;overflow:hidden;flex:none}
+.auth-refresh .auth-strength-track>span{display:block;width:0;height:100%;background:#c0c0c9;border-radius:inherit;transition:width .18s,background .18s}
+.auth-refresh .auth-password-strength[data-level=weak] .auth-strength-track>span{width:28%;background:#db4e5f}
+.auth-refresh .auth-password-strength[data-level=medium] .auth-strength-track>span{width:65%;background:#be853a}
+.auth-refresh .auth-password-strength[data-level=strong] .auth-strength-track>span{width:100%;background:#20815c}
+.auth-refresh .auth-password-strength[data-level=weak] .auth-strength-label{color:#b83d4e}
+.auth-refresh .auth-password-strength[data-level=medium] .auth-strength-label{color:#a2702b}
+.auth-refresh .auth-password-strength[data-level=strong] .auth-strength-label{color:#187451}
+.auth-refresh .auth-confirmation-feedback{font-size:12px;margin:0 2px 12px;line-height:1.5;color:#777886}
+.auth-refresh .auth-confirmation-feedback[data-status=invalid]{color:#b9364a}
+.auth-refresh .auth-confirmation-feedback[data-status=valid]{color:#187451}
+.auth-refresh .auth-input:has(input[aria-invalid=true]){border-color:#d7475f;background:#fff9fa}
+.auth-refresh .auth-recovery-help{text-align:center;padding:9px 12px;border:1px solid #ebdfc9;background:#fffcf5;border-radius:11px;color:#76592e;margin:14px 0 0;font-size:12px;line-height:1.5}
+.auth-refresh .auth-recovery-help .auth-text-link{font-size:12px}
+
+/* First steps are guidance only; financial mutations still use the existing verified forms. */
+.gb-first-steps{margin:14px 0 22px;padding:20px;border:1px solid var(--border);border-radius:18px;background:var(--surface);box-shadow:var(--shadow)}
+.gb-first-steps-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
+.gb-first-steps-heading h2{font-size:19px;font-weight:760;letter-spacing:-.35px;margin:5px 0 6px}
+.gb-first-steps-heading p{font-size:12px;line-height:1.55;color:var(--muted);margin:0}
+.gb-first-steps-kicker{font-size:10px;letter-spacing:.12em;font-weight:800;color:var(--muted)}
+.gb-first-steps-heading>.button{flex:none}
+.gb-first-steps-progress{font-size:11px;color:var(--muted);font-weight:680;margin:16px 0 10px}
+.gb-first-steps-list{display:grid;gap:9px}
+.gb-first-steps-item{display:flex;align-items:center;gap:13px;padding:12px 13px;border:1px solid var(--border);border-radius:13px;background:var(--soft)}
+.gb-first-steps-number{display:grid;place-items:center;width:30px;height:30px;border-radius:10px;background:var(--surface);border:1px solid var(--border);font-size:12px;font-weight:760;flex:none}
+.gb-first-steps-item.is-done .gb-first-steps-number{background:color-mix(in srgb,#1a9162 14%,var(--surface));color:#198259}
+.gb-first-steps-item .icon{width:16px;height:16px}
+.gb-first-steps-text{flex:1;min-width:0}
+.gb-first-steps-text strong{font-size:13px;font-weight:710}
+.gb-first-steps-text p{font-size:11px;line-height:1.5;margin:3px 0 0;color:var(--muted)}
+.gb-first-steps-action{display:flex;align-items:center;justify-content:flex-end;flex:none}
+.gb-first-steps-action .button{font-size:11px;min-height:35px;padding:7px 10px}
+.gb-first-steps-done{font-size:11px;font-weight:720;color:#18845c}
+@media(max-width:590px){
+ .gb-first-steps{padding:15px;margin:10px 0 18px}
+ .gb-first-steps-heading h2{font-size:16px}
+ .gb-first-steps-heading>.button{font-size:10px;min-height:32px}
+ .gb-first-steps-item{align-items:flex-start;flex-wrap:wrap;gap:9px}
+ .gb-first-steps-text{flex:1 1 calc(100% - 48px)}
+ .gb-first-steps-action{flex:1 1 100%;padding-left:39px;justify-content:flex-start}
+}
+@media(prefers-reduced-motion:reduce){.auth-refresh .auth-strength-track>span{transition:none}}
