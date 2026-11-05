@@ -33,7 +33,7 @@ function barMarkup(rows,periodLabel){
 export function mountNativeCharts(db,state,flowRows){
   const earnings=document.querySelector('[data-gb-native="earnings"]'),bars=document.querySelector('[data-gb-native="cashflow-bars"]');
   if(!earnings&&!bars)return;
-  const payload=buildChartPayload(db,state,flowRows);
+  const payload=buildChartPayload(db,state,flowRows,{includeEarnings:!!earnings});
   if(earnings&&payload.earnings.hasRecords){
     earnings.hidden=false;
     const original=earnings.parentElement?.querySelector('[data-gb-chart-original]');
