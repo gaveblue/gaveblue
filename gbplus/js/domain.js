@@ -1,5 +1,5 @@
 import {parseMoneyCentavos} from './gb-finance-input.js?v=20261104-42';
-import {expectedDates,nextBusinessDay} from './gb-calendar-rules.js?v=20261104-42';
+import {expectedDates,nextBusinessDay,recurrenceAnchor} from './gb-calendar-rules.js?v=20261105-47';
 export const uid = () => crypto.randomUUID();
 export const today = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
 export const money = n => new Intl.NumberFormat('pt-BR', { style:'currency', currency:'BRL' }).format(n / 100);
@@ -30,5 +30,37 @@ export function generateTitles(input,mode='single',count=1,options={}) {
 }
 export function addPayment(db,p) { const t=db.titles.find(t=>t.id===p.titleId); const account=db.accounts.find(a=>a.id===p.accountId&&a.active); if(!t||t.cancelled||!account||!validDate(p.date)||p.date>today()||!Number.isSafeInteger(p.amount)||p.amount<=0||p.amount>pending(db,t)) throw Error('Confira o valor pendente, a conta ativa e a data da baixa (até hoje).'); db.payments.push({...p,id:uid()}); }
 export function transfer(db,t) { if(t.from===t.to||![t.from,t.to].every(id=>db.accounts.some(a=>a.id===id&&a.active))||!validDate(t.date)||t.date>today()||!Number.isSafeInteger(t.amount)||t.amount<=0) throw Error('Informe duas contas ativas diferentes, valor positivo e data até hoje.'); db.transfers.push({...t,id:uid()}); }
-export function updateTitle(db,id,values,future=false) { const original=db.titles.find(t=>t.id===id); if(!original) throw Error('Título não encontrado.'); const targets=future&&original.mode==='recurring'&&original.groupId?db.titles.filter(t=>t.groupId===original.groupId&&t.sequence>=original.sequence):[original]; if(targets.some(t=>paid(db,t.id)>0&&(values.cancelled||values.type!==t.type||values.amount<paid(db,t.id)))) throw Error('Não é possível cancelar, trocar o tipo ou reduzir o valor abaixo das baixas existentes.'); for(const t of targets) { const baseDue=values.due===original.due&&validDate(original.originalDue)?original.originalDue:values.due; const nominal=addMonths(baseDue,t.sequence-original.sequence); const workdays=values.businessDays??t.businessDays??false; const due=workdays?nextBusinessDay(nominal):nominal; Object.assign(t,values,{due,businessDays:workdays,originalDue:nominal,shiftedToBusinessDay:due!==nominal}); } }
-export function flow(db,range,granularity='month') { const buckets=new Map(); const key = d => { if(granularity==='month') return d.slice(0,7)+'-01'; if(granularity==='day') return d; const dt=new Date(d+'T12:00:00'); dt.setDate(dt.getDate()-((dt.getDay()+6)%7)); return `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`; }; const get=d=>{const k=key(d);if(!buckets.has(k))buckets.set(k,{date:k,expectedIn:0,expectedOut:0,actualIn:0,actualOut:0});return buckets.get(k);}; db.titles.filter(t=>within(t.due,range)&&!t.cancelled).forEach(t=>get(t.due)[t.type==='income'?'expectedIn':'expectedOut']+=pending(db,t)); db.payments.filter(p=>within(p.date,range)).forEach(p=>get(p.date)[db.titles.find(t=>t.id===p.titleId).type==='income'?'actualIn':'actualOut']+=p.amount); return [...buckets.values()].sort((a,b)=>a.date.localeCompare(b.date)); }
+export function updateTitle(db,id,values,future=false) { const original=db.titles.find(t=>t.id===id); if(!original) throw Error('Título não encontrado.'); const targets=future&&original.mode==='recurring'&&original.groupId?db.titles.filter(t=>t.groupId===original.groupId&&t.sequence>=original.sequence):[original]; if(targets.some(t=>paid(db,t.id)>0&&(values.cancelled||values.type!==t.type||values.amount<paid(db,t.id)))) throw Error('Não é possível cancelar, trocar o tipo ou reduzir o valor abaixo das baixas existentes.'); for(const t of targets) { const baseDue=recurrenceAnchor(values.due,original); const nominal=addMonths(baseDue,t.sequence-original.sequence); const workdays=values.businessDays??t.businessDays??false; const due=workdays?nextBusinessDay(nominal):nominal; Object.assign(t,values,{due,businessDays:workdays,originalDue:nominal,shiftedToBusinessDay:due!==nominal}); } }
+// Read-only cash flow, linear in titles + payments (no per-title payment scans).
+// Malformed orphan payments cannot prevent dashboards from opening.
+export function flow(db,range,granularity='month') {
+ const buckets=new Map();
+ const key=d=>{
+  if(granularity==='month')return d.slice(0,7)+'-01';
+  if(granularity==='day')return d;
+  const dt=new Date(d+'T12:00:00');
+  dt.setDate(dt.getDate()-((dt.getDay()+6)%7));
+  return `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
+ };
+ const get=date=>{
+  const k=key(date);
+  if(!buckets.has(k))buckets.set(k,{date:k,expectedIn:0,expectedOut:0,actualIn:0,actualOut:0});
+  return buckets.get(k);
+ };
+ const titles=new Map((db.titles||[]).map(t=>[t.id,t]));
+ const paidByTitle=new Map();
+ for(const payment of db.payments||[]){
+  if(!titles.has(payment.titleId)||!Number.isSafeInteger(payment.amount)||payment.amount<=0||!validDate(payment.date))continue;
+  paidByTitle.set(payment.titleId,(paidByTitle.get(payment.titleId)||0)+payment.amount);
+  if(within(payment.date,range)){
+   const t=titles.get(payment.titleId);
+   if(t.type==='income'||t.type==='expense')get(payment.date)[t.type==='income'?'actualIn':'actualOut']+=payment.amount;
+  }
+ }
+ for(const title of db.titles||[]){
+  if(title.cancelled||!within(title.due,range)||(title.type!=='income'&&title.type!=='expense'))continue;
+  const rest=title.amount-(paidByTitle.get(title.id)||0);
+  get(title.due)[title.type==='income'?'expectedIn':'expectedOut']+=rest;
+ }
+ return [...buckets.values()].sort((a,b)=>a.date.localeCompare(b.date));
+}
