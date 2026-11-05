@@ -45,7 +45,7 @@ test('native selection remains available while visual bank shortcuts and search 
 });
 test('filter limits visual chips to matching institution without changing saved bank ID',()=>{
  const buttons=bank.BANKS.map(b=>({
-  dataset:{bankId:b.id,bankSearch:[b.name,b.code,b.ispb,b.aliases].filter(Boolean).map(normalized).join(' ')},
+  dataset:{bankId:b.id,bankCode:b.code,bankIspb:b.ispb,bankSearch:[b.name,b.code,b.ispb,b.aliases].filter(Boolean).map(normalized).join(' ')},
   hidden:false
  }));
  const summary={textContent:''},none={hidden:true};
