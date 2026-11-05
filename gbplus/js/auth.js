@@ -60,6 +60,7 @@ export async function initializeAuth(changed){
 }
 
 export const googleMark=`<svg class="google-mark" viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M21.6 12.23c0-.71-.06-1.39-.18-2.05H12v3.88h5.38a4.6 4.6 0 0 1-1.99 3.02v2.51h3.23c1.89-1.74 2.98-4.31 2.98-7.36Z"/><path fill="#34A853" d="M12 22c2.7 0 4.96-.9 6.62-2.41l-3.23-2.51c-.9.6-2.04.96-3.39.96-2.6 0-4.8-1.76-5.59-4.12H3.07v2.59A10 10 0 0 0 12 22Z"/><path fill="#FBBC05" d="M6.41 13.92a6 6 0 0 1 0-3.84V7.49H3.07a10 10 0 0 0 0 9.02l3.34-2.59Z"/><path fill="#EA4335" d="M12 5.96c1.47 0 2.79.5 3.83 1.5l2.87-2.87A9.6 9.6 0 0 0 12 2a10 10 0 0 0-8.93 5.49l3.34 2.59C7.2 7.72 9.4 5.96 12 5.96Z"/></svg>`;
+export const passwordMeetsMinimum=value=>Array.from(String(value||'')).length>=8;
 const mailIcon='<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 6 9 7 9-7"/></svg>';
 const lockIcon='<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>';
 const action=(label,name,cls='')=>`<button type="button" class="${cls}" data-auth-action="${name}">${label}</button>`;
@@ -69,15 +70,70 @@ function input(label,name,type='text',autocomplete=''){
 }
 
 export function showAuth(mode='signin',error=''){
-  if(!['signin','signup','forgot','recovery','confirm'].includes(mode))mode='signin';
-  const gate=document.querySelector('#auth-gate');
-  document.body.classList.add('auth-locked');
-  const titles={signin:'Entrar no GB+',signup:'Crie sua conta',forgot:'Recuperar senha',recovery:'Nova senha',confirm:'Confirme seu e-mail'};
-  const labels={signin:'Entrar',signup:'Criar conta',forgot:'Enviar link de recuperação',recovery:'Salvar nova senha',confirm:'Reenviar confirmação'};
-  gate.hidden=false;
-  gate.innerHTML=`<section class="auth-page" aria-labelledby="auth-title"><div class="auth-card"><header class="auth-brand"><div class="auth-wordmark" aria-label="GB+">GB<span>+</span></div><p>Gestão Financeira</p></header><h1 id="auth-title" class="${mode==='signin'?'sr-only':'auth-title'}">${titles[mode]}</h1>${mode==='forgot'?'<p class="auth-description">Informe seu e-mail para receber um link de recuperação.</p>':mode==='confirm'?'<p class="auth-description">Confira seu e-mail e a pasta de spam. Se precisar, solicite outro link de confirmação.</p>':''}${mode==='recovery'?'<p class="auth-description">Escolha uma senha com pelo menos 8 caracteres.</p>':''}<form id="auth-form" data-mode="${mode}">${mode!=='recovery'?input('E-mail','email','email','email'):''}${!['forgot','confirm'].includes(mode)?input(mode==='recovery'?'Nova senha':'Senha','password','password',mode==='signin'?'current-password':'new-password'):''}${['signup','recovery'].includes(mode)?input('Confirmar senha','confirmation','password','new-password'):''}<div class="form-error" role="alert">${esc(error)}</div><div class="auth-message" role="status"></div><button type="submit" class="auth-primary">${labels[mode]}</button></form>${mode==='signin'?action('Esqueci minha senha','forgot','auth-forgot'):''}${['signin','signup'].includes(mode)?`<div class="auth-divider"><span>ou</span></div>${action(googleMark+'<span>Continuar com o Google</span>','google','auth-google')}`:''}<div class="auth-bottom">${mode==='signin'?`<p>Ainda não tem uma conta?</p>${action('Cadastre-se','signup','auth-text-link')}`:mode==='signup'?`<p>Já tem uma conta?</p>${action('Entrar','signin','auth-text-link')}`:mode==='confirm'?action('Já confirmei meu e-mail','continue','auth-text-link')+action('Voltar ao login','signin','auth-text-link'):mode==='recovery'&&user?action('Voltar ao financeiro','continue','auth-text-link'):action('Voltar ao login','signin','auth-text-link')}</div>${mode==='signin'?'<a class="auth-institutional-back" href="./apresentacao.html" aria-label="Voltar à página institucional do GB+"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5m6 6-6-6 6-6"/></svg>Voltar</a>':''}<p class="auth-footer">Seu financeiro. Mais simples.<br><a href="./privacidade.html">Privacidade</a></p></div></section>`;
-  const password=gate.querySelector('[name=password]');if(password&&mode!=='signin')password.minLength=8;
-   const email=gate.querySelector('[name=email]');if(email&&pendingEmail)email.value=pendingEmail;
+ if(!['signin','signup','forgot','recovery','confirm'].includes(mode))mode='signin';
+ const gate=document.querySelector('#auth-gate');
+ document.body.classList.add('auth-locked');
+ const titles={signin:'Bem-vindo de volta',signup:'Crie sua conta',forgot:'Recuperar senha',recovery:'Defina sua nova senha',confirm:'Confirme seu e-mail'};
+ const descriptions={
+  signin:'Acesse sua conta e continue de onde parou.',
+  signup:'Comece gratuitamente a organizar suas finanças no GB+.',
+  forgot:'Informe seu e-mail para receber um link de recuperação.',
+  recovery:'Escolha uma nova senha com pelo menos 8 caracteres.',
+  confirm:'Confira seu e-mail e a pasta de spam. Se precisar, solicite outro link de confirmação.'
+ };
+ const labels={signin:'Entrar na minha conta',signup:'Criar minha conta',forgot:'Enviar link de recuperação',recovery:'Salvar nova senha',confirm:'Reenviar confirmação'};
+ const newPassword=['signup','recovery'].includes(mode);
+ const passwordFields=!['forgot','confirm'].includes(mode)
+  ?input(mode==='recovery'?'Nova senha':'Senha','password','password',mode==='signin'?'current-password':'new-password')
+   +(newPassword?input('Confirmar senha','confirmation','password','new-password'):'')
+   +(newPassword?'<p id="auth-password-rule" class="auth-password-rule" aria-live="polite">Mínimo de 8 caracteres. Pode usar letras, números ou símbolos, sem combinação obrigatória.</p>':'')
+  :'';
+ gate.hidden=false;
+ gate.innerHTML=
+  '<section class="auth-page auth-refresh" data-mode="'+mode+'" aria-labelledby="auth-title">'+
+   '<div class="auth-layout">'+
+    '<aside class="auth-story" aria-label="Apresentação do GB+">'+
+     '<div class="auth-story-header"><a class="auth-story-logo" href="./apresentacao.html" aria-label="GB+ página institucional">GB<span>+</span></a><span>GESTÃO FINANCEIRA</span></div>'+
+     '<div class="auth-story-content">'+
+      '<p class="auth-story-eyebrow">GESTÃO FINANCEIRA, DO SEU JEITO.</p>'+
+      '<h2>Seu financeiro começa aqui<span>.</span></h2>'+
+      '<p>Mais controle das suas contas, clareza para as suas decisões e planejamento em um só lugar.</p>'+
+      '<div class="auth-story-preview" aria-hidden="true"><div class="auth-story-phone"><span class="auth-story-camera"></span><img src="./assets/gbplus-dashboard-real.svg" alt="" width="220" height="476" decoding="async"></div></div>'+
+     '</div>'+
+     '<div class="auth-story-footer"><span>Organize • Acompanhe • Planeje</span><span>GB+ Gestão Financeira</span></div>'+
+    '</aside>'+
+    '<div class="auth-access">'+
+     '<nav class="auth-access-nav" aria-label="Retornar à apresentação"><a href="./apresentacao.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5m6 6-6-6 6-6"/></svg>Voltar ao site</a></nav>'+
+     '<div class="auth-card">'+
+      '<header class="auth-brand"><div class="auth-wordmark" aria-label="GB+">GB<span>+</span></div><p>Gestão Financeira</p></header>'+
+      '<h1 id="auth-title" class="auth-title">'+titles[mode]+'</h1>'+
+      '<p class="auth-description">'+descriptions[mode]+'</p>'+
+      '<form id="auth-form" data-mode="'+mode+'">'+
+       (mode!=='recovery'?input('E-mail','email','email','email'):'')+
+       passwordFields+
+       '<div class="form-error" role="alert">'+esc(error)+'</div>'+
+       '<div class="auth-message" role="status"></div>'+
+       '<button type="submit" class="auth-primary">'+labels[mode]+'</button>'+
+      '</form>'+
+      (mode==='signin'?action('Esqueci minha senha','forgot','auth-forgot'):'')+
+      (['signin','signup'].includes(mode)?'<div class="auth-divider"><span>ou</span></div>'+action(googleMark+'<span>Continuar com o Google</span>','google','auth-google'):'')+
+      '<div class="auth-bottom">'+
+       (mode==='signin'?'<p>Ainda não tem uma conta?</p>'+action('Cadastre-se gratuitamente','signup','auth-text-link'):
+        mode==='signup'?'<p>Já tem uma conta?</p>'+action('Fazer login','signin','auth-text-link'):
+        mode==='confirm'?action('Já confirmei meu e-mail','continue','auth-text-link')+action('Voltar ao login','signin','auth-text-link'):
+        mode==='recovery'&&user?action('Voltar ao financeiro','continue','auth-text-link'):action('Voltar ao login','signin','auth-text-link'))+
+      '</div>'+
+      '<p class="auth-footer">Seu financeiro. Mais simples.<br><a href="./privacidade.html">Política de Privacidade</a></p>'+
+     '</div>'+
+    '</div>'+
+   '</div>'+
+  '</section>';
+ const password=gate.querySelector('[name=password]');
+ if(password&&newPassword)password.minLength=8;
+ const confirmation=gate.querySelector('[name=confirmation]');
+ if(confirmation&&newPassword)confirmation.minLength=8;
+ const email=gate.querySelector('[name=email]');
+ if(email&&pendingEmail)email.value=pendingEmail;
 }
 
 // Edit only the active Supabase Auth identity; the financial repository is untouched.
@@ -178,6 +234,18 @@ document.addEventListener('click',async event=>{
   showAuth(name);
 });
 
+document.addEventListener('input',event=>{
+ const field=event.target;
+ if(field?.name!=='password'||!['signup','recovery'].includes(field.closest?.('#auth-form')?.dataset.mode))return;
+ const hint=field.closest('#auth-form')?.querySelector('#auth-password-rule');
+ if(!hint)return;
+ const count=Array.from(String(field.value||'')).length;
+ hint.dataset.valid=String(count>=8);
+ hint.textContent=count===0
+  ?'Mínimo de 8 caracteres. Pode usar letras, números ou símbolos, sem combinação obrigatória.'
+  :count>=8?'✓ Mínimo de 8 caracteres atendido.':'Faltam '+(8-count)+' caracteres para o mínimo de 8.';
+});
+
 document.addEventListener('submit',async event=>{
  if(event.target.id!=='auth-form')return;
  event.preventDefault();event.stopImmediatePropagation();if(working)return;
@@ -186,7 +254,7 @@ document.addEventListener('submit',async event=>{
  feedback('');feedback('',false);
  if(mode!=='recovery'&&!safeAuthEmail(email)){feedback('Informe um endereço de e-mail válido.');return;}
  if(['signup','recovery'].includes(mode)&&values.password!==values.confirmation){feedback('As senhas precisam ser iguais.');return;}
- if(['signup','recovery'].includes(mode)&&String(values.password||'').length<8){feedback('A senha precisa ter pelo menos 8 caracteres.');return;}
+ if(['signup','recovery'].includes(mode)&&!passwordMeetsMinimum(values.password)){feedback('A senha precisa ter pelo menos 8 caracteres. Letras, números e símbolos podem ser usados livremente.');return;}
  if(!navigator.onLine){feedback('Sem conexão. Conecte-se para continuar.');return;}
  if(mode==='confirm'&&Date.now()-lastResend<60000){feedback('Aguarde um minuto antes de pedir outro e-mail.');return;}
  setWorking(true);
