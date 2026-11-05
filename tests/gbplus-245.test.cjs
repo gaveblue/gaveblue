@@ -19,13 +19,13 @@ test('dashboard restores former top, positioning future projection immediately b
  assert.match(js('views.js'),/VISÃO GERAL/);
 });
 test('twelve main financial institutions use self-hosted SVG and no CDN calls',()=>{
- assert.equal(banks.BANKS.length,12);
+ assert.ok(banks.BANKS.length>=50);
  for(const bank of banks.BANKS){
-  const imagePath=path.join(root,'assets','banks',bank.ispb+'.svg');
+  const imagePath=path.join(root,'assets','banks',bank.logoIspb+'.svg');
   const asset=fs.readFileSync(imagePath,'utf8');
   assert.match(asset,/<svg[\s>]/i,bank.name);
   const badge=banks.bankBadge(bank);
-  assert.match(badge,new RegExp('assets/banks/'+bank.ispb+'\\.svg'));
+  assert.match(badge,new RegExp('assets/banks/'+bank.logoIspb+'\\.svg'));
   assert.doesNotMatch(badge,/https?:\/\//);
  }
 });
