@@ -5,7 +5,7 @@ const fs=require('node:fs');
 const path=require('node:path');
 const root=path.resolve(__dirname,'../gbplus/js');
 const load=name=>fs.readFileSync(path.join(root,name),'utf8').replace(/^import .*;$/gm,'').replace(/\bexport\s+/g,'');
-const helpers=new Function('URL','URLSearchParams',load('auth-flow.js')+';return {loginRedirectMessage,clearLoginErrorUrl,safeAuthEmail};')(URL,URLSearchParams);
+const helpers=new Function('URL','URLSearchParams',load('auth-flow.js')+';return {loginRedirectMessage,clearLoginErrorUrl,safeAuthEmail,passwordStrength,isExpiredSessionError};')(URL,URLSearchParams);
 
 test('Google cancellation produces a clear Portuguese explanation',()=>{
  const message=helpers.loginRedirectMessage('https://gaveblue.com.br/gbplus/?error=access_denied&error_description=User%20cancelled');
@@ -77,4 +77,55 @@ test('welcome login and signup use shared visual identity and eight character pa
  assert.match(gate.innerHTML,/name="confirmation"/);
  auth.showAuth('confirm');
  assert.doesNotMatch(gate.innerHTML,/name="password"/);
+});
+
+test('password strength is advisory: eight characters remain valid without character-class rules',()=>{
+ assert.equal(helpers.passwordStrength('12345678').level,'weak');
+ assert.equal(helpers.passwordStrength('abcdefgh').level,'weak');
+ assert.equal(helpers.passwordStrength('').level,'empty');
+ assert.equal(helpers.passwordStrength('UmaSenhaBemLonga!123').level,'strong');
+ assert.equal(helpers.passwordStrength('12345678').label,'Fraca');
+});
+test('invalid, used, and expired recovery links show actionable Portuguese explanations',()=>{
+ assert.match(helpers.loginRedirectMessage('https://gaveblue.com.br/gbplus/?error=otp_expired'),/solicite um novo link/i);
+ assert.match(helpers.loginRedirectMessage('https://gaveblue.com.br/gbplus/?error=invalid_grant'),/inválido|usado/i);
+ assert.match(helpers.loginRedirectMessage('https://gaveblue.com.br/gbplus/?error=access_denied'),/Google foi cancelado/i);
+ assert.equal(helpers.isExpiredSessionError({code:'refresh_token_not_found'}),true);
+ assert.equal(helpers.isExpiredSessionError({code:'invalid_credentials'}),false);
+});
+test('confirmation feedback responds while user edits either password input',()=>{
+ const source=load('auth.js');
+ const document={addEventListener(){}};
+ const helper=new Function('document','passwordStrength',source+';return {syncPasswordFeedback};')(document,helpers.passwordStrength);
+ const rule={dataset:{},textContent:''},label={textContent:''},meter={dataset:{},querySelector:()=>label};
+ const notice={dataset:{},textContent:''};
+ const password={value:'12345678'};
+ const confirmation={value:'1234567',invalid:'',setAttribute(key,value){this.invalid=value;},removeAttribute(){this.invalid='';}};
+ const form={dataset:{mode:'signup'},querySelector:sel=>({
+  '[name="password"]':password,'[name="confirmation"]':confirmation,'#auth-password-rule':rule,
+  '#auth-password-strength':meter,'#auth-confirmation-feedback':notice
+ })[sel]||null};
+ helper.syncPasswordFeedback(form);
+ assert.equal(rule.dataset.valid,'true');
+ assert.equal(meter.dataset.level,'weak');
+ assert.equal(notice.dataset.status,'invalid');
+ assert.equal(confirmation.invalid,'true');
+ confirmation.value='12345678';
+ helper.syncPasswordFeedback(form);
+ assert.equal(notice.dataset.status,'valid');
+ assert.equal(confirmation.invalid,'false');
+ password.value='UmaSenhaBemLonga!123';
+ helper.syncPasswordFeedback(form);
+ assert.equal(meter.dataset.level,'strong');
+ assert.equal(notice.dataset.status,'invalid');
+});
+test('session-expired flow and server rate-limit feedback are wired',()=>{
+ const auth=load('auth.js');
+ assert.match(auth,/event==='SIGNED_OUT'/);
+ assert.match(auth,/consumeSessionNotice/);
+ assert.match(auth,/isExpiredSessionError/);
+ assert.match(auth,/EMAIL_COOLDOWN_MS/);
+ assert.match(auth,/lastResend=Date.now\(\);form.reset\(\)/);
+ const message=new Function('document',auth+';return authError({status:429});')({addEventListener(){}});
+ assert.match(message,/Muitas solicitações/i);
 });
