@@ -781,3 +781,30 @@ body.auth-locked .mobile-nav-fade{display:none!important}
 .gb-scenario-result{padding:8px 0}.gb-scenario-result p{font-size:14px;margin:14px 0}
 @media(max-width:760px){.gb-finance24-stats{gap:8px}.gb-finance24-stats>div{padding:12px}.gb-finance24-stats span{font-size:10px}.gb-finance24-stats strong{font-size:15px}.gb-credit-card{padding:15px}.gb-future-summary{padding:16px;align-items:flex-start}.gb-future-values{width:100%;justify-content:space-between;gap:9px}.gb-future-values strong{font-size:14px}.gb-future-summary>a{width:100%;justify-content:center}.gb-forecast-chart,.gb-forecast-detail{padding:15px}}
 @media(max-width:380px){.gb-finance24-stats{grid-template-columns:1fr}.gb-finance24-stats strong{font-size:19px}}
+
+
+/* 2.4.5: bank identity selection is shown inside account, card and onboarding forms. */
+.gb-bank-picker{min-width:0;width:100%;grid-column:1/-1;display:grid;gap:9px}
+.gb-bank-picker-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;min-width:0}
+.gb-bank-picker-heading>strong{font-size:12px;font-weight:670}
+.gb-bank-selected{display:flex;align-items:center;gap:7px;min-width:0;max-width:65%}
+.gb-bank-selected .gb-bank-badge{width:32px;height:32px;flex:none;border-radius:9px}
+.gb-bank-selected small{font-size:11px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gb-bank-placeholder{display:inline-grid;place-items:center;width:32px;height:32px;flex:none;border-radius:9px;color:var(--muted);background:var(--soft);border:1px solid var(--border);font-weight:750}
+.gb-bank-picker>.field{margin:0;min-width:0;width:100%}
+.gb-bank-shortcuts{display:flex;align-items:stretch;gap:8px;min-width:0;max-width:100%;width:100%;
+  overflow-x:auto;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;
+  padding:3px 2px 9px;scrollbar-width:thin}
+.gb-bank-shortcut{min-width:68px;max-width:80px;flex:0 0 68px;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:5px;border:1px solid var(--border);border-radius:12px;background:var(--surface);
+  color:var(--ink);padding:8px 4px;cursor:pointer;transition:border-color .14s,background .14s}
+.gb-bank-shortcut[aria-pressed="true"]{border-color:var(--ink);background:var(--soft)}
+.gb-bank-shortcut:hover{border-color:var(--muted)}
+.gb-bank-shortcut .gb-bank-badge{width:36px;height:36px;border-radius:10px}
+.gb-bank-shortcut small{display:block;font-size:9px;line-height:1.2;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gb-bank-shortcut:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+@media(max-width:760px){
+ .gb-bank-picker{gap:7px}
+ .gb-bank-shortcut{flex-basis:64px;min-width:64px}
+ .gb-bank-picker-heading>strong{font-size:11px}
+}
