@@ -61,7 +61,7 @@ export function enhanceGbControls(root=document){
  root.querySelectorAll?.('select').forEach(enhanceSelect);
  root.querySelectorAll?.('input[type="date"]').forEach(enhanceDate);
 }
-function closeMenu(){if(!openMenu)return;const {list,button}=openMenu;list.hidden=true;button.setAttribute('aria-expanded','false');openMenu=null;}
+function closeMenu(){if(!openMenu)return;const {list,button}=openMenu;list.hidden=true;list.removeAttribute('style');button.setAttribute('aria-expanded','false');openMenu=null;}
 function showMenu(button){
  if(openCalendar)closeCalendar();
  const wrapper=button.closest('.gb-custom-select');
@@ -70,6 +70,18 @@ function showMenu(button){
  const same=openMenu?.button===button;
  closeMenu();if(same)return;
  refreshSelect(wrapper.querySelector('select'));list.hidden=false;button.setAttribute('aria-expanded','true');openMenu={button,list};
+ const rect=button.getBoundingClientRect();
+ const availableBelow=window.innerHeight-rect.bottom-12;
+ const availableAbove=rect.top-12;
+ const desired=Math.min(list.scrollHeight||220,240);
+ const useAbove=availableBelow<Math.min(desired,125)&&availableAbove>availableBelow;
+ const room=Math.max(70,useAbove?availableAbove:availableBelow);
+ const height=Math.min(desired,room);
+ list.style.left=Math.max(8,rect.left)+'px';
+ list.style.right='auto';
+ list.style.width=Math.min(rect.width,window.innerWidth-16)+'px';
+ list.style.top=(useAbove?Math.max(8,rect.top-height-5):rect.bottom+5)+'px';
+ list.style.maxHeight=height+'px';
  list.querySelector('[aria-selected="true"]')?.focus({preventScroll:true});
 }
 function closeCalendar(){
@@ -184,6 +196,8 @@ export function installGbControls(){
   if(option&&(event.key==='Enter'||event.key===' ')){event.preventDefault();option.click();}
   if(event.key==='Escape'&&openMenu){event.preventDefault();closeMenu();}
  },true);
+ window.addEventListener('resize',closeMenu);
+ document.addEventListener('scroll',event=>{if(openMenu&&!event.target.closest?.('.gb-custom-select-list'))closeMenu();},true);
  document.addEventListener('change',event=>{
   if(event.target.matches?.('select.gb-custom-native-select'))refreshSelect(event.target);
   if(event.target.matches?.('input.gb-custom-native-date'))refreshDate(event.target);
