@@ -30,6 +30,48 @@ function barMarkup(rows,periodLabel){
   const marks=rows.map((r,i)=>{const center=left+step*(i+.5),bw=Math.min(18,step*.29),income=Math.max(0,r.income),expense=Math.max(0,r.expense),ih=income/limit*(base-top),eh=expense/limit*(base-top);return '<rect x="'+(center-bw-2)+'" y="'+(base-ih)+'" width="'+bw+'" height="'+ih+'" rx="3" fill="#16a34a"><title>'+esc(r.label+' · Receitas '+money(income))+'</title></rect><rect x="'+(center+2)+'" y="'+(base-eh)+'" width="'+bw+'" height="'+eh+'" rx="3" fill="#ef4444"><title>'+esc(r.label+' · Despesas '+money(expense))+'</title></rect>'+(n<=10||i%Math.ceil(n/10)===0||i===n-1?'<text x="'+center+'" y="197" text-anchor="middle" font-size="11" fill="currentColor">'+esc(r.label)+'</text>':'');}).join('');
   return '<section class="gb-native-bars"><div class="gb-native-bar-header"><div><strong>Receitas e despesas</strong><span>Movimentações efetivamente baixadas</span></div><div class="gb-native-legend"><span><i class="gb-native-key income"></i>Receitas</span><span><i class="gb-native-key expense"></i>Despesas</span></div></div>'+(n>12?'<p class="gb-native-interaction">Deslize para conferir os outros períodos '+esc(periodLabel)+'</p>':'')+'<div class="gb-native-scroll" tabindex="0" aria-label="Gráfico de barras rolável"><svg width="'+w+'" height="'+h+'" viewBox="0 0 '+w+' '+h+'" role="img" aria-label="Receitas verdes e despesas vermelhas por período">'+grid+marks+'</svg></div></section>';
 }
+
+export function visibleCashflowRows(rows,mobile=false){
+ // Retain the full financial table; limit only the chart density on small screens.
+ return (Array.isArray(rows)?rows:[]).slice(mobile?-6:-36);
+}
+function trendMarkup(rows,periodLabel,mode='lines'){
+ const net=mode==='net',n=rows.length,w=Math.max(340,n*62+62),h=224,left=48,top=17,bottom=170,right=w-16;
+ const income=rows.map(r=>Math.max(0,Number(r.income)||0));
+ const expense=rows.map(r=>Math.max(0,Number(r.expense)||0));
+ const result=rows.map((r,i)=>income[i]-expense[i]);
+ const all=net?[...result,0]:[...income,...expense,0];
+ const lower=Math.min(0,...all),upper=Math.max(1,...all),span=Math.max(1,upper-lower);
+ const x=i=>left+(right-left)*((i+.5)/Math.max(1,n));
+ const y=value=>bottom-(value-lower)/span*(bottom-top);
+ const zero=y(0);
+ const grid=[0,1,2,3,4].map(i=>{
+  const value=lower+span*i/4,yy=y(value);
+  return '<path class="gb-native-grid" d="M'+left+' '+yy+' H'+right+'"/>'+
+   '<text x="'+(left-7)+'" y="'+(yy+4)+'" font-size="10" text-anchor="end" fill="currentColor">'+esc(short.format(value))+'</text>';
+ }).join('');
+ const line=(values,color,label)=>{
+  const points=values.map((value,i)=>x(i).toFixed(2)+','+y(value).toFixed(2)).join(' ');
+  const dots=values.map((value,i)=>'<circle cx="'+x(i)+'" cy="'+y(value)+'" r="4" fill="'+color+'"><title>'+esc(rows[i].label+' · '+label+': '+money(value))+'</title></circle>').join('');
+  return '<polyline points="'+points+'" fill="none" stroke="'+color+'" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>'+dots;
+ };
+ const lines=net?line(result,'#6184d9','Resultado líquido'):
+  line(income,'#16a34a','Receitas')+line(expense,'#ef4444','Despesas');
+ const labels=rows.map((r,i)=>(i%Math.max(1,Math.ceil(n/8))===0||i===n-1)
+  ?'<text x="'+x(i)+'" y="'+(bottom+21)+'" text-anchor="middle" font-size="10" fill="currentColor">'+esc(r.label)+'</text>':'').join('');
+ return '<section class="gb-native-bars gb-native-lines"><div class="gb-native-bar-header"><div><strong>'+
+   (net?'Resultado líquido do período':'Comparativo de receitas e despesas')+'</strong><span>'+
+   (net?'Diferença entre recebimentos e pagamentos':'Movimentações efetivamente baixadas')+
+   '</span></div><div class="gb-native-legend">'+(net?
+   '<span><i class="gb-native-key net"></i>Receitas − despesas</span>':
+   '<span><i class="gb-native-key income"></i>Receitas</span><span><i class="gb-native-key expense"></i>Despesas</span>')+
+   '</div></div><div class="gb-native-scroll" tabindex="0" aria-label="Gráfico de linhas rolável">'+
+   '<svg width="'+w+'" height="'+h+'" viewBox="0 0 '+w+' '+h+'" role="img" aria-label="'+
+   (net?'Resultado líquido por período':'Comparação entre receitas e despesas por período')+'">'+
+   grid+'<path d="M'+left+' '+zero+' H'+right+'" stroke="currentColor" opacity=".35" stroke-dasharray="4 3"/>'+
+   lines+labels+'</svg></div></section>';
+}
+
 export function mountNativeCharts(db,state,flowRows){
   const earnings=document.querySelector('[data-gb-native="earnings"]'),bars=document.querySelector('[data-gb-native="cashflow-bars"]');
   if(!earnings&&!bars)return;
@@ -52,6 +94,10 @@ export function mountNativeCharts(db,state,flowRows){
   }
   if(bars&&payload.bar.data.length){
     bars.hidden=false;
-    bars.innerHTML=barMarkup(payload.bar.data.slice(-36),payload.bar.periodLabel);
+    const isMobile=typeof window!=='undefined'&&typeof window.matchMedia==='function'&&window.matchMedia('(max-width: 760px)').matches;
+    const rows=visibleCashflowRows(payload.bar.data,isMobile);
+    const mode=['bars','lines','net'].includes(state?.flowChartMode)?state.flowChartMode:'bars';
+    bars.innerHTML=(mode==='bars'?barMarkup(rows,payload.bar.periodLabel):trendMarkup(rows,payload.bar.periodLabel,mode))+
+      (isMobile&&payload.bar.data.length>6?'<p class="gb-native-chart-note">O gráfico mostra os últimos 6 períodos. Todos os períodos continuam na tabela abaixo.</p>':'');
   }
 }
