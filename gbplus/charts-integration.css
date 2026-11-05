@@ -55,3 +55,41 @@
  .gb-native-bar-header{gap:9px}
  .gb-native-total{font-size:25px}
 }
+
+
+/* 2.4.5: the chart scrolls inside its own panel, never the page viewport. */
+.gb-cashflow-panel{min-width:0;max-width:100%;width:100%;overflow:hidden}
+.gb-cashflow-panel .gb-chart-slot,
+.gb-cashflow-panel .gb-chart-fallback,
+.gb-cashflow-panel [data-gb-native="cashflow-bars"],
+.gb-cashflow-panel .gb-native-bars,
+.gb-cashflow-panel .gb-native-lines{display:block;min-width:0;max-width:100%;width:100%;overflow:hidden}
+.gb-cashflow-panel .gb-native-scroll{
+  display:block;box-sizing:border-box;min-width:0;max-width:100%;width:100%;
+  overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;
+  -webkit-overflow-scrolling:touch;scrollbar-width:thin;
+  border-radius:10px;
+}
+.gb-cashflow-panel .gb-native-scroll svg{display:block;max-width:none;height:auto}
+.gb-cashflow-panel .table-wrap{min-width:0;max-width:100%;width:100%;overflow-x:auto}
+.gb-flow-graph-toolbar{display:flex;align-items:center;gap:8px 14px;flex-wrap:wrap;
+  padding:12px 18px;border-bottom:1px solid var(--border);min-width:0}
+.gb-flow-graph-toolbar>strong{font-size:12px;font-weight:700}
+.gb-flow-graph-switch{display:flex;gap:5px;flex-wrap:wrap;min-width:0}
+.gb-flow-graph-switch .button{min-height:34px;min-width:58px;padding:6px 10px;font-size:11px}
+.gb-flow-graph-toolbar>p{color:var(--muted);font-size:10.5px;margin:0;line-height:1.45;flex:1 1 100%}
+.gb-native-key.net{background:#6184d9}
+.gb-native-chart-note{margin:9px 8px 4px;color:var(--muted);font-size:11px}
+@media(max-width:760px){
+ .gb-cashflow-panel>.panel-heading{display:flex;flex-direction:column;align-items:stretch;gap:10px;min-width:0}
+ .gb-cashflow-panel>.panel-heading .segmented{min-width:0;max-width:100%;width:100%;overflow-x:auto;justify-content:flex-start}
+ .gb-cashflow-panel>.panel-heading .segmented button{flex:1 1 auto;white-space:nowrap;min-width:0}
+ .gb-flow-graph-toolbar{padding:10px 12px;gap:7px}
+ .gb-flow-graph-toolbar>strong{flex:1 1 100%}
+ .gb-flow-graph-switch{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));width:100%;gap:6px}
+ .gb-flow-graph-switch .button{min-width:0;padding:8px 5px;font-size:11px;white-space:nowrap}
+ .gb-cashflow-panel .gb-native-bars{padding:9px 4px}
+ .gb-cashflow-panel .gb-native-bar-header{min-width:0;gap:7px}
+ .gb-cashflow-panel .gb-native-scroll{padding-top:8px}
+ .gb-cashflow-panel .gb-native-scroll svg{max-width:none}
+}
