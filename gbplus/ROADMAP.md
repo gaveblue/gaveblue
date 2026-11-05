@@ -131,3 +131,30 @@ O fechamento da 2.3.9 no repositório não equivale à confirmação da implanta
 - [ ] Confirmar publicação da compilação 59 no site oficial.
 
 Detalhes: [RELEASE-2.4.5.md](./RELEASE-2.4.5.md). A evolução maior permanece reservada para **2.5.0**, conforme planejamento.
+
+
+## GB+ 2.4.6 — instituições, códigos e pesquisa (código implementado)
+
+- [x] Ampliar o catálogo de 12 para **78 instituições** em ordem alfabética, usando o COMPE e ISPB da fonte consultada.
+- [x] Incluir Sicoob (756, termo de busca “Sicobi”), Banco do Nordeste (004) e Banco Pan (623).
+- [x] Incorporar localmente os **78 arquivos SVG** e incluí-los no manifesto de atualização do PWA.
+- [x] Buscar por nome, código COMPE, ISPB e apelidos na seleção visual de contas e cartões.
+- [x] Manter faixa horizontal filtrável com logos, além do seletor nativo opcional.
+- [x] Buscar instituições também no módulo Bancos, com exibição dos códigos.
+- [x] Preservar IDs internos antigos e permitir instituições personalizadas.
+- [x] Criar base read-only de leitura OFX/CSV e teste da lógica de comparação, sem ativar importação.
+- [ ] Homologar a publicação, seleção no celular, imagens offline e preservação das contas antigas.
+
+## GB+ 2.5.0 — Importação manual e conciliação bancária (planejada)
+
+- [ ] Interface de seleção da conta e upload local de OFX/CSV.
+- [ ] Prévia dos movimentos antes de gravar, com os valores em centavos e data de origem.
+- [ ] Sugestão de conciliação com baixas e transferências existentes, sem lançar em duplicidade.
+- [ ] Ações por movimento: vincular, criar título/baixa com confirmação, ignorar ou manter pendente.
+- [ ] Tratamento de reimportações, identificação FITID, duplicidades e histórico de auditoria.
+- [ ] Exibição de divergências entre saldos bancários e sistêmicos, sem modificar saldo de abertura.
+- [ ] Importação de planilhas CSV/XLSX para receitas e despesas, com mapeamento e revisão.
+- [ ] Persistência segura por conta/usuário com RLS, testes de isolamento e possibilidade de desfazer.
+- [ ] Homologação de arquivos bancários reais, múltiplos bancos, dispositivos e PWA offline.
+
+**Não antecipar a sincronização via Open Finance**: ela permanece candidata a uma versão estrutural posterior como a 3.0.0. Arquivo de design: [IMPORTACAO-2.5.0.md](./IMPORTACAO-2.5.0.md). A existência do parser não ativa a importação nesta versão.
