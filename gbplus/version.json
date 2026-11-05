@@ -1,13 +1,13 @@
 {
-  "version": "2.2.3",
-  "build": 40,
+  "version": "2.2.4",
+  "build": 41,
   "published_at": "2026-11-04",
-  "title": "Seletores e calendários refinados",
+  "title": "Lançamentos em duas etapas e vencimentos inteligentes",
   "notes": [
-    "Correção do alinhamento dos seletores, mantendo o visual anterior antes de abrir o menu.",
-    "Menus de período e categoria com ícones vetoriais livres; chave de alterar senha corrigida.",
-    "Calendário agora permite escolher mês diretamente e navegar por grades de anos.",
-    "Todo o período é o filtro padrão no início e em Lançamentos, até o usuário mudar."
+    "Formulário de lançamentos dividido em duas etapas: dados até vencimento; depois valor, periodicidade e observações.",
+    "Valor em reais digitado de centavo em centavo; telefone e CPF/CNPJ formatados enquanto o usuário digita.",
+    "Novas categorias podem receber um ícone personalizado, exibido na categoria selecionada e nos menus.",
+    "Prévia detalhada das parcelas e recorrências com opção de passar vencimentos para o próximo dia útil, considerando fins de semana e feriados nacionais."
   ],
   "assets": [
     "./index.html",
@@ -51,6 +51,9 @@
     "./js/pwa-install.js",
     "./overlays.css",
     "./js/gb-icons.js",
-    "./ICON_LICENSE.md"
+    "./ICON_LICENSE.md",
+    "./gb-entry-wizard.css",
+    "./js/gb-finance-input.js",
+    "./js/gb-calendar-rules.js"
   ]
 }
