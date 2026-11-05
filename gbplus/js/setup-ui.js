@@ -1,7 +1,7 @@
 import {esc,icon,button,field,select} from './ui.js?v=20261105-72';
 import {money} from './domain.js?v=20261105-72';
 import {MOBILE_SHORTCUTS,defaultMobileNav,effectiveMobileNav} from './store.js?v=20261105-72';
-import {bankOptions,bankName} from './banks.js?v=20261105-72';
+import {bankOptions,bankName,bankPicker} from './banks.js?v=20261105-72';
 
 // The fixed slots are never rendered as selectors and cannot be removed.
 const selectionOptions=MOBILE_SHORTCUTS.map(([key,label])=>[key,label]);
@@ -58,7 +58,7 @@ export function firstSetupView(d,db){
  if(stage==='account-details')body=panel('Primeira conta financeira','Informe os dados essenciais da sua conta. Agência e número são opcionais.',
   '<form id="setup-account-form"><div class="form-grid">'+
    field('Nome da conta','name',d.name,'text','required maxlength="120" placeholder="Ex.: Conta principal"')+
-   '<div class="full">'+select('Banco ou instituição','bankId',bankOptions(db),d.bankId||'')+'</div>'+
+   bankPicker(db,d.bankId||'')+
    field('Outra instituição (se não estiver na lista)','bank',d.bankId?'':d.bank,'text','maxlength="120" placeholder="Ex.: Cooperativa, dinheiro em caixa"')+
    field('Agência (opcional)','branch',d.branch,'text','maxlength="80"')+
    field('Número da conta (opcional)','number',d.number,'text','maxlength="80"')+
