@@ -62,7 +62,7 @@ function updateMobileNavPreview(form){
 function renderMobileShortcut(key){
  if(key==='menu')return ['menu','Mais','more'];
  const item=MOBILE_SHORTCUTS.find(([id])=>id===key);
- return item||['titles','Títulos','transfer'];
+ return item||['titles','Lançamentos','transfer'];
 }
 function rangeFor(period){const now=today();const [y,m]=now.split('-').map(Number);const date=(y,m,d)=>`${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;if(period==='all')return {from:'',to:''};if(period==='year')return {from:`${y}-01-01`,to:`${y}-12-31`};const dt=new Date(y,m-1-(period==='last'?1:0),1);const yy=dt.getFullYear(),mm=dt.getMonth()+1;return {from:date(yy,mm,1),to:date(yy,mm,new Date(yy,mm,0).getDate())};}
 async function commit(mutator,message='Salvo com sucesso.'){if(!db)throw Error('Entre ou abra o modo local antes de continuar.');if(busy)throw Error('Aguarde a gravação atual.');busy=true;document.body.classList.add('saving');try{const draft=structuredClone(db);await mutator(draft);db=await repository.save(draft);state.launchSelected=[];closeModal();render();toast(message);}finally{busy=false;document.body.classList.remove('saving');}}
