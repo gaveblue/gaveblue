@@ -838,3 +838,66 @@ body.auth-locked .mobile-nav-fade{display:none!important}
  .gb-bank-shortcut{flex-basis:74px;min-width:74px;max-width:74px}
  .gb-bank-shortcut small{font-size:9.5px}
 }
+
+
+/* GB+ 2.4.7 — notes de versão ilustradas, preservando identidade neutra do aplicativo. */
+.gb-update-notice .gb-update-eyebrow{
+ font-size:10px;line-height:1.35;font-weight:780;letter-spacing:.11em;
+ margin:17px 0 -8px;color:var(--muted);
+}
+.gb-update-notice .gb-update-description{font-size:12px;line-height:1.6}
+.gb-update-features{margin-top:15px;min-width:0}
+.gb-update-features[hidden]{display:none!important}
+.gb-update-features-top{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:9px}
+.gb-update-features-top strong{font-size:12px;font-weight:750;letter-spacing:-.1px}
+.gb-update-features-top small{font-size:10px;color:var(--muted);white-space:nowrap}
+.gb-update-notes{list-style:none;display:grid;gap:8px;margin:0;padding:0}
+.gb-update-notes .gb-update-feature{
+ display:flex;align-items:flex-start;gap:12px;padding:12px;
+ background:var(--soft);border:1px solid var(--border);
+ border-radius:13px;min-width:0;line-height:1.45
+}
+.gb-update-notes .gb-update-feature::before{display:none}
+.gb-update-feature-icon{
+ display:grid;place-items:center;flex:none;width:37px;height:37px;
+ border:1px solid transparent;border-radius:11px;
+ color:#486db2;background:#eaf0ff
+}
+.gb-update-feature-icon--shield,.gb-update-feature-icon--check{
+ color:#2b7764;background:#e4f5ed
+}
+.gb-update-feature-icon--file,.gb-update-feature-icon--card{
+ color:#976333;background:#fff0dc
+}
+.gb-update-feature-icon--sparkles,.gb-update-feature-icon--repeat{
+ color:#7752af;background:#f2eafe
+}
+.gb-update-feature-icon--bank,.gb-update-feature-icon--wallet{
+ color:#4269a5;background:#e7eefb
+}
+.gb-update-feature-icon--chart,.gb-update-feature-icon--bell,.gb-update-feature-icon--gear{
+ color:#486db2;background:#eaf0ff
+}
+.gb-update-feature-icon svg{display:block;max-width:100%;flex:none}
+.gb-update-feature-body{display:flex;flex-direction:column;gap:3px;min-width:0;flex:1}
+.gb-update-feature-body strong{
+ font-size:12px;font-weight:690;line-height:1.4;
+ color:var(--ink);overflow-wrap:anywhere
+}
+.gb-update-feature-body small{
+ font-size:11px;line-height:1.5;color:var(--muted);overflow-wrap:anywhere
+}
+@media(prefers-color-scheme:dark){
+ .gb-update-feature-icon--shield,.gb-update-feature-icon--check{background:#173d33;color:#8cdbb9}
+ .gb-update-feature-icon--file,.gb-update-feature-icon--card{background:#4c3624;color:#efc38e}
+ .gb-update-feature-icon--sparkles,.gb-update-feature-icon--repeat{background:#382d50;color:#d9b7ff}
+ .gb-update-feature-icon--bank,.gb-update-feature-icon--wallet,
+ .gb-update-feature-icon--chart,.gb-update-feature-icon--bell,.gb-update-feature-icon--gear{
+  background:#253654;color:#a4c4ff
+ }
+}
+@media(max-width:760px){
+ .gb-update-notice .gb-update-eyebrow{margin-top:12px}
+ .gb-update-notes .gb-update-feature{padding:10px;gap:10px;border-radius:12px}
+ .gb-update-feature-icon{width:34px;height:34px;border-radius:10px}
+}
