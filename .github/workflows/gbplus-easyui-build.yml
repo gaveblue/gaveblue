@@ -2,6 +2,7 @@ name: Compilar GB+ EasyUI Charts
 on:
   push:
     branches:
+      - main
       - feature/gbplus-easyui-charts-227
     paths:
       - "gbplus/react-charts/**"
@@ -48,7 +49,7 @@ jobs:
           test -s gbplus/charts-dist/gb-react-charts.css
           du -h gbplus/charts-dist/*
       - name: Publicar apenas os arquivos compilados nesta ramificação
-        if: startsWith(github.ref, 'refs/heads/feature/gbplus-easyui-charts-227')
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/feature/gbplus-easyui-charts-227'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
