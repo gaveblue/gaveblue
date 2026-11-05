@@ -45,10 +45,10 @@ export function readScenarioAmount(query){
  return Number.isFinite(n)&&n>0&&Number.isSafeInteger(Math.round(n*100))&&n*100<=1e12?Math.round(n*100):null;
 }
 function purchaseName(query){
- const s=normalizeAi(query);
- const match=s.match(/(?:comprar|compro|adquirir|adquiro|gastar\s+com|investir\s+em)\s+(?:(?:uma?|umas?|uns?|o|a|os|as)\s+)?(.+)/);
+ const raw=String(query||'').trim();
+ const match=raw.match(/(?:comprar|compro|adquirir|adquiro|gastar\s+com|investir\s+em)\s+(?:(?:uma?|umas?|uns?|o|a|os|as)\s+)?(.+)/i);
  if(!match)return null;
- const name=match[1].split(/\s+(?:(?:mes\s+que\s+vem|proximo\s+mes|daqui\s+a|dentro\s+de|em\s+(?:\d+|um|dois|tres)\s+mes|em\s+(?:janeiro|fevereiro|marco|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro)|por\s+r\$|por\s+\d+\s+reais|que\s+custa|custando|como\s+vai|qual\s+sera|quanto\s+vai|se\s+o\s+saldo|com\s+meu))\b/)[0];
+ const name=match[1].split(/\s+(?:m[eê]s\s+que\s+vem|pr[oó]ximo\s+m[eê]s|daqui\s+a|dentro\s+de|em\s+(?:\d+|um|dois|tr[eê]s|quatro|cinco|seis|sete|oito|nove|dez|onze|doze)\s+m[eê]s|em\s+(?:janeiro|fevereiro|mar[cç]o|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro)|por\s+r\$|por\s+\d+\s+reais|que\s+custa|custando|como\s+vai|qual\s+ser[aá]|quanto\s+vai|se\s+o\s+saldo|com\s+meu|e\s+gastar\s+r\$)/i)[0];
  const trimmed=name.replace(/[!?.,;:]+$/g,'').trim().slice(0,65);
  return trimmed||null;
 }
@@ -86,6 +86,7 @@ export function answerScenario(db,question,{asOf,bankCents,context=null}={}){
  const scenario={kind:'scenario',month,item,amount};
  if(!month)return {answer:'Para qual mês você quer fazer a projeção? Pode dizer “mês que vem” ou “daqui a três meses”. Não vou estimar datas sem você informar.',context:scenario};
  if(month<today.slice(0,7))return {answer:'Essa data já passou. Informe um mês atual ou futuro para simular.',context:scenario};
+ if(item&&/\b(?:parcelad[ao]s?|parcelas?|vezes|[2-9]x)\b/.test(normalized))return {answer:'Entendi a intenção de parcelar '+item+'. Ainda não calculo compras parceladas com segurança; não vou tratá-las como compra à vista. Essa simulação não criou nem alterou títulos. Para o momento, consulte a previsão sem esse parcelamento.',context:scenario};
  const p=projectCash(db,today,month,bankCents);
  const prefix='Projeção até o fim de '+monthLabel(month)+' (somente títulos cadastrados no GB+):\n'
   +'• Saldo bancário atual: '+brl(p.current)+'\n'
