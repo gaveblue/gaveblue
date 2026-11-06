@@ -2,6 +2,8 @@
 
 **Decisão proposta:** realizar a importação manual de extratos e planilhas na **2.5.0**. Reservar a **3.0.0** para a grande evolução da **IA do GB+**. A integração bancária automatizada via Open Finance é um projeto separado e não integra este escopo.
 
+**Base da 2.4.9:** o GB+ já apresenta saldo por conta e extrato diário (abertura, créditos, débitos e fechamento), calculado apenas a partir de baixas e transferências existentes. A 2.5.0 conectará movimentos importados a essa visualização sem confundir saldo bancário informado com saldo sistêmico. O esquema atual não guarda a data-base do saldo inicial; isso precisa ser tratado explicitamente antes de comparar históricos.
+
 **Estado em 05/11/2026:** o parser/simulador isolado está em `js/bank-import-preview.js`. Na **2.4.8**, o GB+ AI ganhou um botão de anexo no chat: OFX e CSV geram apenas resumo de leitura local, sem selecionar conta nem conciliar; Excel e PDF apenas mostram que a leitura está pendente. **Nenhum arquivo pode criar títulos, baixar contas ou alterar saldos nesta etapa.** A conciliação e a gravação controlada continuam reservadas à 2.5.0.
 
 ## Objetivo
@@ -62,3 +64,23 @@ Arquivo `js/bank-import-preview.js`:
 - [ ] Homologação em extratos reais de bancos distintos, inclusive Pix, TED, tarifas, estornos, transferências, parcelamentos e contas com centenas de lançamentos.
 
 **Importante:** a presença do parser no repositório não significa que a importação tenha sido habilitada no GB+. A gravação em produção exige implementação e homologação específicas da 2.5.0.
+
+## Plano executivo de implantação da 2.5.0
+
+| Fase | Entrega | Critério de aceite |
+|---|---|---|
+| 1. Entrada de arquivos | Seleção de conta + OFX/CSV + leitura local e validação | Arquivo inválido não altera dados; nenhum envio automático à IA |
+| 2. Normalização | Data, histórico, identificador, crédito/débito, centavos, mapeamento CSV | Conferência de valores, datas e totais com arquivos reais anonimizados |
+| 3. Conciliação sugerida | Cruzamento por conta, valor, direção, datas, identificadores; sinalização de ambiguidades | Nenhuma correspondência é aprovada silenciosamente |
+| 4. Revisão pelo usuário | Marcar individualmente conciliar, criar, ignorar ou deixar pendente; seleção múltipla | Prévia mostra efeitos no saldo e em títulos antes de gravar |
+| 5. Persistência segura | Gravar somente itens aprovados, histórico de lote, isolamento RLS e idempotência | Reimportação e repetição de confirmação não duplicam caixa |
+| 6. Extrato comparativo | Mostrar saldo do fim do dia do GB+ versus saldo bancário quando fornecido, e diferença | Não alterar saldo inicial para forçar conciliação |
+| 7. Planilhas | XLSX e CSV de receitas/despesas com mapeamento e prévia | Não executar fórmulas ou macros; não criar baixas sem autorização |
+| 8. PDF | Leitura textual local quando tecnicamente viável; revisão manual para PDFs digitalizados | Nunca afirmar leitura bem-sucedida se o documento não puder ser interpretado |
+| 9. Homologação | Pix, TED, tarifas, estornos, transferências, faturas, pagamentos parciais, múltiplos bancos | Testes em dispositivo real, auditoria, permissões e estorno controlado |
+
+**Prioridade de entrega:** OFX/CSV com conciliação completa primeiro; XLSX/planilhas e PDF somente após o núcleo financeiro estar seguro. Se a qualidade de leitura de PDF não atender aos critérios, o formato deverá ficar em prévia experimental, sem habilitar gravação.
+
+**Exemplo de comportamento:** o usuário importa 30 movimentos. O GB+ identifica 21 possíveis correspondências com baixas já registradas, 3 transferências internas, 4 movimentos não localizados e 2 ambiguidades. O usuário revisa cada grupo e escolhe quais dos quatro movimentos ausentes quer transformar em novos lançamentos. Nenhum dos 30 é lançado automaticamente; conciliar um já baixado não altera o saldo.
+
+**Pendências de decisão:** data-base do saldo inicial, período máximo por lote, regras de feriados/fins de semana para sugestão de correspondência, e modelo de histórico de importação que permita reverter somente os vínculos e lançamentos criados pelo lote.
