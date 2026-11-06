@@ -1,7 +1,7 @@
 {
   "version": "2.5.0",
   "build": 9,
-  "published_at": null,
+  "published_at": "2026-11-06T23:52:07Z",
   "title": "Mapeamento manual de extratos CSV de bancos",
   "notes": [
     "Permite relacionar cabeçalhos fora do padrão a data, descrição, valor, entrada, saída, tipo, identificador e saldo.",
@@ -10,7 +10,8 @@
     "Protege contra associação de uma coluna a dois campos, índices inválidos e tipos de lançamento não reconhecidos.",
     "Nenhum lançamento é gravado apenas por mapear: a prévia, a revisão individual e as confirmações explícitas continuam obrigatórias.",
     "Catálogo de serviços, streaming e delivery com logos está planejado para a 2.5.1.",
-    "GitHub Actions ainda exige investigação administrativa; o teste ponta a ponta do PWA instalado não foi comprovado."
+    "GitHub Actions ainda exige investigação administrativa; o teste ponta a ponta do PWA instalado não foi comprovado.",
+    "Compilação 9 publicada no GitHub Pages (run 42314574315). Todas as 11 suítes de regressão do pacote efetivamente implantado foram aprovadas em Node 22.16.0 real; nenhuma gravação acontece apenas pelo mapeamento CSV."
   ],
   "assets": [
     "./index.html",
@@ -179,9 +180,9 @@
       "description": "Compare saldos declarados no extrato, sem ajustes automáticos."
     }
   ],
-  "release_status": "development_assisted_reconciliation_csv_mapping_homologation_pending",
+  "release_status": "published_assisted_reconciliation_csv_mapping_ci_pwa_pending",
   "homologation": {
-    "status": "pendente",
-    "notes": "Compilação 9: mapeamento CSV em desenvolvimento, sem mudança na função de gravação. Exigir regressões antes de liberar."
+    "status": "node_regressions_passed_online_pwa_ci_pending",
+    "notes": "11/11 suítes executadas em Node 22.16.0 sobre o artefato exato do GitHub Pages build9. Publicação Pages confirmada (run 42314574315). GitHub Actions de regressões continua falhando antes do runner (issue #75) e fluxo integral PWA autenticado em aparelho físico segue não homologado."
   }
 }
