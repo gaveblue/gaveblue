@@ -21,7 +21,7 @@ Registro de mudanças do aplicativo localizado em `gbplus/`. Toda versão e toda
 - Defesa adicional em `js/app.js`: os comandos `bank-import-review`, `bank-import-commit` e `bank-import-undo` rejeitam a ação com a trava desativada. O restante do financeiro tradicional do GB+ permanece funcional.
 - A opção de habilitar gravação **não** está exposta em Configurações ou disponível para o usuário. Exigirá nova compilação com homologação das operações de persistência e reversão.
 - Criada suíte `tests/bank-import-readonly-release-regression.mjs`: verifica a ausência de botões de gravação e reversão, bloqueios no controlador, prévia funcional e manifest.
-- Verificações lógicas antes da liberação: **9/9** bloqueios e operações de leitura confirmados em simulação. As 7 suítes financeiras anteriores passaram em simulação JavaScript. **Não foram executadas em GitHub Actions/Node real** — job de regressão inicia sem etapas e falha.
+- Verificações lógicas antes da liberação: **9/9** bloqueios e operações de leitura confirmados em simulação. **As 8 suítes de regressão do ramo passaram na execução simulada** (financeiro, prévia, codec, conciliação, criação, pendências, persistência local e trava de publicação). **Não foram executadas em GitHub Actions/Node real** — o job de regressão inicia sem etapas e falha.
 - Atualizados `index.html` (versão 2.5.0, build 6), `version.json` e cache PWA `gb-plus-shell-v2506`.
 
 ### Homologação e limitações
