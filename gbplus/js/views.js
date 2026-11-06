@@ -6,13 +6,16 @@ import {bankBadge,bankForAccount,bankName} from './banks.js?v=20261105-87';
 export const routes=[['dashboard','Dashboard','home'],['titles','Lançamentos','titles'],['payable','Contas a pagar','down'],['receivable','Contas a receber','up'],['provisions','Provisões','layers'],['flow','Fluxo de caixa','chart'],['partners','Parceiros','people'],['accounts','Contas bancárias','wallet'],['cards','Cartões de crédito','credit-card'],['forecast','Previsão financeira','chart'],['banks','Bancos','building-2'],['categories','Categorias','category'],['reports','Relatórios','chart'],['notifications','Notificações','bell'],['settings','Configurações','settings']];
 const stat=(key,value,subtitle,ico,extra='',footer='')=>`<article class="stat ${extra}" data-indicator="${key}"><div class="stat-top"><span class="stat-icon">${icon(ico)}</span>${key==='balance'?'<span class="stat-tag">AGORA</span>':''}</div><p>${INDICATORS[key]}</p><strong>${money(value)}</strong><small>${subtitle}</small>${footer}</article>`;
 function balanceAccountStrip(db){
- if(!db.accounts?.length)return '';
- return '<div class="gb-balance-accounts" aria-label="Saldos por conta">'+
-  db.accounts.filter(a=>a.active!==false).map(a=>{const balance=accountBalance(db,a.id,today());return '<button type="button" class="gb-balance-bank" data-action="account-detail" data-id="'+esc(a.id)+'" '+
-   'title="'+esc(a.name)+' · '+money(balance)+'" aria-label="Ver extrato da conta '+esc(a.name)+', saldo '+money(balance)+'">'+
-   '<span class="gb-balance-bank-identity">'+bankBadge(bankForAccount(db,a))+'<span class="gb-balance-bank-name">'+esc(a.name)+'</span></span>'+
-   '<strong class="gb-balance-bank-amount">'+money(balance)+'</strong></button>';}).join('')+
-  '</div>';
+ const accounts=(db.accounts||[]).filter(a=>a.active!==false);
+ if(!accounts.length)return '';
+ return '<div class="gb-balance-accounts" role="group" aria-label="Saldos das contas">'+
+  accounts.map(a=>{
+   const amount=money(accountBalance(db,a.id,today()));
+   return '<button type="button" class="gb-balance-bank" data-action="account-detail" data-id="'+esc(a.id)+'" '+
+    'title="'+esc(a.name)+' · '+esc(amount)+'" aria-label="Abrir movimentações de '+esc(a.name)+'. Saldo: '+esc(amount)+'">'+
+    bankBadge(bankForAccount(db,a))+
+    '<span class="gb-balance-bank-amount">'+esc(amount)+'</span></button>';
+  }).join('')+'</div>';
 }
 export function periodBar(state){return `<div class="period-control">${icon('calendar')}<select id="period" aria-label="Período"><option value="month" ${state.period==='month'?'selected':''}>Este mês</option><option value="last" ${state.period==='last'?'selected':''}>Mês anterior</option><option value="year" ${state.period==='year'?'selected':''}>Este ano</option><option value="all" ${state.period==='all'?'selected':''}>Todo o período</option><option value="custom" ${state.period==='custom'?'selected':''}>Personalizado</option></select></div>`;}
 export function heading(title,subtitle,actions=''){return `<div class="page-heading"><div><h1>${title}</h1><p>${subtitle}</p></div><div class="heading-actions">${actions}</div></div>`;}
