@@ -167,20 +167,24 @@ export function parseBankCsv(value,{separator}={}){
   try{return entry(get('date'),get('description'),amount,get('id'),'csv');}
   catch(error){throw Error('CSV linha '+(index+2)+': '+error.message);}
  });
- // Saldo da própria instituição, quando existe coluna explícita.
- // O último registro do dia mais recente prevalece; nunca derivar de créditos/débitos.
+ // Uma coluna "Saldo" pode mostrar saldos parciais em linhas do mesmo dia.
+ // Sem horário/ordem garantida, nenhum deles é necessariamente o saldo final.
+ // Só comparar quando houver um valor único na data mais recente do extrato.
  let bankBalance=null;
+ const warnings=[];
  if(indexes.balance>=0){
+  const latestDate=records.reduce((latest,row)=>row.date>latest?row.date:latest,'');
+  const values=new Set();
   for(let index=0;index<rows.length;index++){
-   const text=clean(rows[index][indexes.balance]);
-   if(!text)continue;
-   const date=records[index].date;
-   if(!bankBalance||date>=bankBalance.date){
-    bankBalance={amount:statementCents(text),date,source:'csv-balance-column'};
-   }
+   if(records[index].date!==latestDate)continue;
+   const raw=clean(rows[index][indexes.balance]);
+   if(raw)values.add(statementCents(raw));
   }
+  if(values.size===1)bankBalance={amount:[...values][0],date:latestDate,source:'csv-balance-column'};
+  else if(values.size>1)warnings.push('Há saldos diferentes em movimentos do mesmo dia, sem horário para determinar o saldo final. A comparação foi omitida.');
+  else warnings.push('O CSV não informa saldo na data do movimento mais recente. A comparação foi omitida.');
  }
- return {format:'csv',records,warnings:[],accountHint:'',bankBalance};
+ return {format:'csv',records,warnings,accountHint:'',bankBalance};
 }
 export function parseBankStatement(contents,filename=''){
  const lower=clean(filename).toLowerCase();
@@ -218,7 +222,7 @@ export function proposeReconciliation(parsed,db,accountId,{dayWindow=3}={}){
    candidates:candidates.map(c=>({...c,daysApart:dayDistance(c.date,record.date)}))
     .sort((a,b)=>a.daysApart-b.daysApart)};
  });
- return {format:parsed.format,accountId,rows,bankBalance:parsed.bankBalance||null,
+ return {format:parsed.format,accountId,rows,bankBalance:parsed.bankBalance||null,warnings:parsed.warnings||[],
   totals:{
    credits:rows.filter(r=>r.record.amount>0).reduce((s,r)=>s+r.record.amount,0),
    debits:rows.filter(r=>r.record.amount<0).reduce((s,r)=>s-r.record.amount,0),
