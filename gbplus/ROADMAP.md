@@ -205,3 +205,12 @@ Detalhes: [RELEASE-2.4.5.md](./RELEASE-2.4.5.md). A evolução maior permanece r
 - [ ] Prévia e confirmação obrigatórias antes de qualquer gravação.
 - [ ] Permissões, histórico auditável, privacidade e testes da IA.
 - [ ] Não assumir Open Finance automático como parte desta versão.
+
+### 2.4.8 · Compilação 63 — Bancos em destaque
+
+- [x] Mostrar 20 instituições conhecidas nos seletores de contas e cartões, sem exibir os 78 logos de uma vez.
+- [x] Preservar o catálogo de 78 bancos e instituições para busca por nome/código e diretório completo.
+- [x] Preservar contas com bancos fora dos 20 destaques.
+- [x] Atualizador passou a reconhecer compilação (build) dentro da mesma versão numérica.
+- [x] Quinze testes específicos de bancos e atualizador.
+- [ ] Homologação visual e instalação no aparelho.
