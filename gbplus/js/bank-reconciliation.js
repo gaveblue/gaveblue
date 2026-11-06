@@ -143,7 +143,11 @@ export function undoReconciliationBatch(db,batchId,now=new Date().toISOString())
     t.accountId!==batch.accountId||t.amount!==Math.abs(item.amount)||p.amount!==Math.abs(item.amount)||
     t.type!==item.entryType||t.description!==item.description||t.categoryId!==item.categoryId||
     t.due!==item.date||t.issue!==item.date||p.date!==item.date||
-    (db.payments||[]).filter(x=>x.titleId===t.id).length!==1)
+    t.document!==item.externalId.slice(0,100)||t.partnerId!==''||
+    t.notes!=='Criado após confirmação de extrato bancário.'||
+    t.mode!=='single'||t.sequence!==1||t.count!==1||t.groupId!==null||
+    (db.payments||[]).filter(x=>x.titleId===t.id).length!==1||
+    history(db).some(other=>other.id!==batchId&&isActive(other)&&other.entries.some(e=>e.action==='link'&&e.targetType==='payment'&&e.targetId===p.id)))
     throw Error('Um lançamento do lote foi alterado ou estornado. Revise-o antes de reverter o lote.');
  }
  const titleIds=new Set(created.map(e=>e.createdTitleId)),paymentIds=new Set(created.map(e=>e.createdPaymentId));
