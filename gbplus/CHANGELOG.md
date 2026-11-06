@@ -12,10 +12,12 @@ Registro de mudanças do aplicativo localizado em `gbplus/`. Toda versão e toda
 - Arquivos CSV codificados em **Windows-1252** tinham caracteres inválidos ao serem lidos com `file.text()`, podendo ocultar colunas como `Descrição`. Agora o arquivo é lido em bytes: tenta decodificação UTF-8 estrita, depois Windows-1252.
 - O leitor também rejeita nomes com extensão disfarçada (por exemplo `.csv.exe`), arquivos vazios, maiores que 8 MB e arquivos cujo tamanho mude durante a leitura.
 - Atualizado `gbplus/tests/bank-import-codec-regression.mjs` e seu acionamento em `.github/workflows/gbplus-regression.yml`.
+- Criados extratos **inteiramente fictícios** em `gbplus/tests/fixtures/` (OFX e CSV), ambos conferidos no leitor: entrada de R$ 50,00, saída de R$ 12,50, líquido de +R$ 37,50. Adicionado protocolo `gbplus/HOMOLOGACAO-2.5.0.md` para verificar 10 critérios antes da aprovação.
 - Incrementado o build 3 → 4 com atualização da versão de JavaScript e do cache PWA. **A versão pública permanece a 2.4.9 build 68**.
 
 ### Verificações
 - Testes de funções em ambiente JavaScript de simulação confirmaram: nome OFX/CSV válido, rejeição de extensões disfarçadas, recuperação do cabeçalho `Descrição` em Windows-1252, cálculo do extrato e bloqueio de arquivos inválidos.
+- Suíte `bank-import-codec-regression.mjs` executada por meio de um ambiente JavaScript de simulação com emulação de decodificação; terminou sem erros. **Não substituir por evidência de execução em Node real.**
 - [ ] Executar todas as suítes em Node real / GitHub Actions e registrar o link de execução verde.
 - [ ] Validar upload real em Chrome/Android, iOS/Safari e desktop, com arquivos UTF-8, Windows-1252 e OFX.
 - [ ] Homologar a gravação e reversão dos lançamentos em uma **conta de teste**, sem dados reais.
