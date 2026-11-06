@@ -6,6 +6,15 @@
 
 **Decisão de escopo:** as fases complementares de mapeamento CSV manual, XLSX e PDF não foram cumpridas e ficam registradas para versão posterior. A build 8 entrega OFX/CSV assistidos; não chamar as outras fases de concluídas. Responsável pela homologação integral: **não registrado**. Data de aprovação integral: **não registrada**.
 
+## Encerramento funcional — mapeamento CSV na compilação 9
+
+- Mapeamento manual integrado no fluxo OFX/CSV: selecionar cabeçalhos desconhecidos, prévia, ajuste de colunas, escolha entre valor único (com sinal/tipo) e crédito/débito separados.
+- Campos obrigatórios: data, descrição e valor; identificador/saldo opcionais. Não são aceitos índices inválidos, a mesma coluna em dois campos, nem tipos não reconhecidos.
+- Separadores `;`, `,`, tabulação e `|`. Os arquivos continuam locais e o mapeamento não cria nenhuma transação automaticamente.
+- Teste `bank-import-mapping-regression.mjs` exercitado em ambiente JavaScript V8; as demais regressões do projeto preservadas. Execução completa em Node deve ser registrada em resultado específico.
+- **A homologação completa do PWA instalado e GitHub Actions CI verde continua pendente (issue #75)**. O fechamento desta funcionalidade não autoriza declarar esses testes concluídos.
+- XLSX, PDF e data-base do saldo inicial permanecem no [backlog #78](https://github.com/gaveblue/gaveblue/issues/78), separados do catálogo de serviços planejado para 2.5.1.
+
 ## Evidências mais recentes da compilação 7
 
 Consultar o relatório verificável em [HOMOLOGACAO-2.5.0-RELATORIO-B7.md](./HOMOLOGACAO-2.5.0-RELATORIO-B7.md).
