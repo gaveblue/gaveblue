@@ -1,0 +1,29 @@
+name: GB+ — regressões financeiras
+
+on:
+  pull_request:
+    paths:
+      - 'gbplus/**'
+      - '.github/workflows/gbplus-regression.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  financial-regressions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Regressões anteriores
+        run: node gbplus/tests/finance-regression.mjs
+      - name: Leitura OFX e CSV
+        run: node gbplus/tests/bank-import-preview-regression.mjs
+      - name: Conciliação e histórico
+        run: node gbplus/tests/bank-reconciliation-regression.mjs
