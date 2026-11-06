@@ -2,6 +2,33 @@
 
 Registro de mudanças do aplicativo localizado em `gbplus/`. Toda versão e toda compilação deve possuir uma entrada própria. **Uma alteração não deve ser considerada homologada apenas porque existe commit, teste escrito ou publicação.** A homologação exige evidências da execução e aprovação explícita.
 
+## [2.5.0 · compilação 5 — validação e correção de pendências] — 2026-11-06
+
+**Situação:** código implementado no PR #73, em ramo de desenvolvimento; **não publicado nem homologado**.  
+**Objetivo:** resolver bloqueios funcionais identificados na revisão antes da liberação de conciliações que podem alterar saldos.
+
+### Correções
+
+- Corrigida a contagem de decisões da interface: quando a única escolha era **Criar lançamento baixado**, o botão `Revisar decisões` permanecia desabilitado. A opção de criação agora é incluída corretamente.
+- **Manter pendente** não pode ser uma decisão irreversível. A reimportação do mesmo extrato permite retomar movimentos pendentes e decidir conciliar, criar ou ignorar, sem duplicar registros.
+- Ao resolver uma pendência em outro lote, o primeiro lote mantém evidências `resolvedByBatchId` e `resolvedAt`, verificadas pelo validador do documento financeiro.
+- A reversão exige respeitar a ordem de dependências: lote com pendência anteriormente resolvida não pode ser revertido enquanto o lote de resolução estiver ativo. Reverter a resolução reabre a pendência sem apagar seu histórico.
+- Histórico visual diferencia pendências abertas de pendências retomadas; a opção `Manter pendente` é ocultada para um movimento já pendente.
+- Atualizadas dependências e versões de cache do PWA, `version.json` para **2.5.0 build 5**. Versão pública permanece em **2.4.9 build 68**.
+
+### Evidências
+
+- Adicionada `gbplus/tests/bank-reconciliation-pending-regression.mjs`, cobrindo retomada, vínculo entre lotes, reversão encadeada, ausência de dupla baixa e integridade do documento.
+- Adicionada `gbplus/tests/bank-reconciliation-storage-regression.mjs`, cobrindo gravação local, revisão de transação, bloqueio de escrita concorrente, backup, reimportação e retorno do saldo após reversão.
+- **Sete suítes executadas e aprovadas em ambiente JavaScript de simulação**: `finance-regression.mjs`, `bank-import-preview-regression.mjs`, `bank-import-codec-regression.mjs`, `bank-reconciliation-regression.mjs`, `bank-reconciliation-create-regression.mjs`, `bank-reconciliation-pending-regression.mjs` e `bank-reconciliation-storage-regression.mjs`.
+- **A execução simulada usa adaptadores para APIs Node e decodificação**; não representa teste Node real, PWA real ou banco online. Nenhuma transação real foi criada.
+- [ ] CI: execução de referência `42263814138` terminou com `failure` e **nenhuma etapa executada** (`steps=[]`). É necessário diagnosticar configuração/execução do GitHub Actions e obter comprovação de testes Node reais: https://github.com/gaveblue/gaveblue/actions/runs/42263814138
+- [ ] Verificar importação, revisão e reversão em navegador real, incluindo 320/360/390/430px, claro/escuro, acessibilidade e foco.
+- [ ] Homologar integração com conta fictícia online, sessão dupla e histórico após recarregamento. Modo local foi simulado com armazenamento falso, não no navegador.
+- [ ] Registrar evidências, revisor, data/hora e aprovação final antes de publicar.
+
+**Decisão:** não marcar a build 5 como homologada ou liberada enquanto persistirem os itens pendentes. Não houve alteração de tabelas nem de dados reais de clientes.
+
 ## [2.5.0 · compilação 4 — endurecimento de homologação] — 2026-11-06
 
 **Situação:** correções aplicadas no PR #73; **não publicado, homologação de dispositivo e CI pendente**.  
