@@ -8,8 +8,12 @@
  const script=document.currentScript;
  const base=new URL('../',script?.src||location.href);
  const installed=(document.querySelector('meta[name="gbplus-version"]')?.content||'0.0.0').trim();
+ const installedBuild=Number(document.querySelector('meta[name="gbplus-build"]')?.content)||0;
  const numberParts=v=>String(v).split('.').slice(0,3).map(n=>Number(n)||0);
  const compare=(a,b)=>{const aa=numberParts(a),bb=numberParts(b);for(let i=0;i<3;i++){const d=(aa[i]||0)-(bb[i]||0);if(d)return d;}return 0;};
+ const compareRelease=(info,version,build=0)=>{const delta=compare(info.version,version);return delta||((Number(info.build)||0)-(Number(build)||0));};
+ const newerThanInstalled=info=>compareRelease(info,installed,installedBuild)>0;
+ const releaseId=info=>info.version+':'+info.build;
  const sIcon='<svg viewBox="0 0 24 24" aria-hidden="true" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m-5-5 5 5 5-5M5 18v3h14v-3"/></svg>';
 
  // Icon drawing is predefined; release data is always inserted using textContent.
@@ -112,7 +116,7 @@
  function dismiss(){
   if(active){put(els.feedback,'Conclua o download ou aguarde a operação terminar.');return;}
   if(box)box.hidden=true;document.body.classList.remove('gb-update-open');confirmRestart=false;
-  if(manifest&&compare(manifest.version,installed)>0)dismissedVersion=manifest.version;
+  if(manifest&&newerThanInstalled(manifest))dismissedVersion=releaseId(manifest);
  }
  function notes(info){
   els.notes.replaceChildren();
@@ -134,11 +138,11 @@
  }
  function available(info,force=false){
   if(active)return;
-  if(!force&&dismissedVersion===info.version)return;
+  if(!force&&dismissedVersion===releaseId(info))return;
   manifest=info;downloadReady=false;
   const isMajor=Number(info.version.split('.')[0])>Number(installed.split('.')[0]);
   show(isMajor?'Uma nova geração do GB+':'Novidades chegando ao GB+',
-   'Versão '+installed+'  →  '+info.version,
+   'Versão '+installed+(info.version===installed?' · compilação '+installedBuild:'')+'  →  '+info.version+(info.version===installed?' · compilação '+info.build:''),
    isMajor?'Uma atualização importante está pronta. Veja as novidades e decida quando instalar.':'Confira o que melhorou no aplicativo. Seus dados financeiros serão preservados.');
   notes(info);
   els.primary.hidden=false;els.primary.dataset.next='download';
@@ -148,7 +152,7 @@
   if(active)return;
   downloadReady=false;
   show('Tudo atualizado','GB+ versão '+installed,'Você já está utilizando a versão mais recente publicada.');
-  if(info&&info.version===installed)notes(info);
+  if(info&&compareRelease(info,installed,installedBuild)===0)notes(info);
   put(els.later,'Fechar');els.primary.hidden=true;els.primary.dataset.next='';
  }
  function trouble(message){
@@ -180,9 +184,9 @@
  function publicationPending(source,hosted=null){
   if(active)return;
   manifest=null;downloadReady=false;
-  const hostedLabel=hosted?.version||'não confirmada';
+  const hostedLabel=hosted?hosted.version+' · compilação '+hosted.build:'não confirmada';
   show('Atualização aguardando publicação',
-   'GitHub '+source.version+' · site '+hostedLabel,
+   'GitHub '+source.version+' · compilação '+source.build+' · site '+hostedLabel,
    'A nova versão já consta no repositório, mas o site ainda não a está entregando. Por segurança, o GB+ não vai instalar arquivos incompletos ou mostrar “Tudo atualizado”.');
   notes(['Sua conta, seus lançamentos e seus saldos não serão alterados.','É possível tentar renovar somente os arquivos antigos do aplicativo.']);
   put(els.later,'Fechar');put(els.primary,'Recuperar atualização');
@@ -207,9 +211,9 @@
    const source=results[1].status==='fulfilled'?results[1].value:null;
    // Install only versions actually available on the GB+ host; a newer
    // GitHub-only build is not ready for the app downloader yet.
-   if(hosted&&compare(hosted.version,installed)>0){available(hosted,manual);return;}
+   if(hosted&&newerThanInstalled(hosted)){available(hosted,manual);return;}
    // Check public source against hosted version before claiming "up to date".
-   if(source&&(!hosted||compare(source.version,hosted.version)>0)){
+   if(source&&(!hosted||compareRelease(source,hosted.version,hosted.build)>0)){
     publicationPending(source,hosted);return;
    }
    if(!hosted)throw Error('Não foi possível obter a versão publicada no site.');
