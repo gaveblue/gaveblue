@@ -119,8 +119,9 @@ export function parseBankCsv(value,{separator}={}){
   date:col(['data','dtmovimento','date','datamovimento']),
   description:col(['historico','descricao','detalhe','memo','lancamento','movimento','narrativa']),
   amount:col(['valor','amount','quantia']),
-  credit:col(['credito','credit']),
-  debit:col(['debito','debit']),
+  credit:col(['credito','credit','entrada','recebimento']),
+  debit:col(['debito','debit','saida','pagamento']),
+  kind:col(['tipo','natureza','sinal','operacao']),
   id:col(['identificador','fitid','transacao','nsu','idmovimento','id'])
  };
  if(indexes.date<0||indexes.description<0||(indexes.amount<0&&(indexes.credit<0||indexes.debit<0)))
@@ -132,8 +133,14 @@ export function parseBankCsv(value,{separator}={}){
   if(indexes.credit>=0&&indexes.debit>=0&&indexes.amount<0){
    const a=get('credit'),b=get('debit');
    if(a&&b)throw Error('CSV linha '+(index+2)+' tem crédito e débito simultaneamente.');
+   if(!a&&!b)throw Error('CSV linha '+(index+2)+' sem crédito ou débito.');
    amount=a?Math.abs(statementCents(a)):-Math.abs(statementCents(b));
-  }else amount=statementCents(get('amount'));
+  }else{
+   amount=statementCents(get('amount'));
+   const kind=norm(get('kind'));
+   if(['credito','credit','entrada','recebimento'].includes(kind))amount=Math.abs(amount);
+   if(['debito','debit','saida','pagamento'].includes(kind))amount=-Math.abs(amount);
+  }
   try{return entry(get('date'),get('description'),amount,get('id'),'csv');}
   catch(error){throw Error('CSV linha '+(index+2)+': '+error.message);}
  });
@@ -161,12 +168,16 @@ export function proposeReconciliation(parsed,db,accountId,{dayWindow=3}={}){
   if(t.to===accountId)return [{id:t.id,type:'transfer',date:t.date,amount:t.amount,description:'Transferência entre contas'}];
   return [];
  });
- const history=[...realPayments,...realTransfers],seen=new Map();
+ const history=[...realPayments,...realTransfers],seen=new Map(),byAmount=new Map();
+ for(const movement of history){
+  if(!byAmount.has(movement.amount))byAmount.set(movement.amount,[]);
+  byAmount.get(movement.amount).push(movement);
+ }
  const rows=parsed.records.map((record,index)=>{
   const fingerprint=[record.externalId||'',record.date,record.amount,norm(record.description)].join('|');
   const repeated=seen.has(fingerprint);
   seen.set(fingerprint,(seen.get(fingerprint)||0)+1);
-  const candidates=history.filter(p=>p.amount===record.amount&&dayDistance(p.date,record.date)<=dayWindow);
+  const candidates=(byAmount.get(record.amount)||[]).filter(p=>dayDistance(p.date,record.date)<=dayWindow);
   return {index,record,status:repeated?'possible_duplicate_in_file':candidates.length===1?'possible_match':candidates.length>1?'ambiguous':'not_found',
    candidates:candidates.map(c=>({...c,daysApart:dayDistance(c.date,record.date)}))
     .sort((a,b)=>a.daysApart-b.daysApart)};
