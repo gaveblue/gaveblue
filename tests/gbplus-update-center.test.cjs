@@ -9,11 +9,11 @@ const version=JSON.parse(fs.readFileSync(path.join(root,'version.json'),'utf8'))
 // Test pure code without invoking registrations, network checks, user-data writes or reload.
 function isolatedUpdate(){
  const prepared=source.replace('(function(){','return (function(){')
-  .replace(/\}\)\(\);\s*$/,'return {validRelease,releaseHighlights,notes,els};})();');
+  .replace(/\}\)\(\);\s*$/,'return {validRelease,releaseHighlights,notes,els,compareRelease,newerThanInstalled,releaseId};})();');
  const document={
   currentScript:{src:'https://gaveblue.com.br/gbplus/js/update.js'},
   readyState:'loading',
-  querySelector:()=>({content:'2.4.6'}),
+  querySelector:selector=>({content:selector.includes('gbplus-build')?'62':'2.4.8'}),
   addEventListener(){},
   createElement(tag){return new Element(tag);}
  };
@@ -63,8 +63,17 @@ test('release notes render with textContent, never injecting user-controlled mar
 });
 test('code preserves manual update check, download, progress and explicit restart',()=>{
  assert.match(source,/current\(hosted\)/);
- assert.match(source,/if\(info&&info\.version===installed\)notes\(info\)/);
+ assert.match(source,/if\(info&&compareRelease\(info,installed,installedBuild\)===0\)notes\(info\)/);
  assert.match(source,/manifest\.assets/);
  assert.match(source,/setProgress\(completed\/total\*92/);
  assert.match(source,/location\.assign\(destination\.href\)/);
+});
+
+test('app detects build 63 even when semantic version remains 2.4.8',()=>{
+ const core=isolatedUpdate();
+ assert.ok(core.newerThanInstalled({version:'2.4.8',build:63}));
+ assert.equal(core.compareRelease({version:'2.4.8',build:63},'2.4.8',62),1);
+ assert.equal(core.compareRelease({version:'2.4.8',build:62},'2.4.8',62),0);
+ assert.equal(core.compareRelease({version:'2.4.7',build:999},'2.4.8',62)<0,true);
+ assert.equal(core.releaseId({version:'2.4.8',build:63}),'2.4.8:63');
 });
