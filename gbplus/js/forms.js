@@ -107,7 +107,8 @@ export function accountDetail(db,a){
   (a.active!==false?'<div class="gb-statement-import"><button class="button" data-action="bank-import-open" data-id="'+esc(a.id)+'">'+icon('upload')+' Importar extrato OFX/CSV</button><small>Prévia local, sem alterar os saldos</small></div>':'')+ 
    '<div class="gb-statement-totals"><div><small>Créditos acumulados</small><strong class="gb-statement-credit">+ '+money(ledger.credits)+'</strong></div>'+
   '<div><small>Débitos acumulados</small><strong class="gb-statement-debit">− '+money(ledger.debits)+'</strong></div></div>'+
-  '<p class="gb-statement-note">Movimentações registradas no GB+. O saldo inicial cadastrado é a base dos cálculos. Extratos importados de bancos ainda não estão incluídos.</p>'+
+  '<div class="gb-statement-links"><button type="button" class="button" data-action="bank-import-history" data-id="'+esc(a.id)+'">Histórico de conciliações</button></div>'+ 
+   '<p class="gb-statement-note">Movimentações registradas no GB+. O saldo inicial cadastrado é a base dos cálculos. Os vínculos de conciliação não alteram estes valores.</p>'+
   '<div class="gb-statement-days">'+groups.map(day=>
    '<section class="gb-statement-day" aria-label="Movimentações de '+dateLabel(day.date)+'">'+
     '<div class="gb-statement-day-header"><time datetime="'+day.date+'">'+dateLabel(day.date)+'</time>'+
