@@ -59,7 +59,8 @@ const saved=recon.applyReconciliationBatch(database,parsed,'account-a',decisions
 });
 assert.equal(saved.batch.entries.length,2);
 assert.equal(JSON.stringify({titles:database.titles,payments:database.payments,transfers:database.transfers,accounts:database.accounts}),before,'No financial mutation');
-assert.equal(recon.knownReconciliationKeys(database,'account-a').size,2);
+assert.equal(recon.knownReconciliationKeys(database,'account-a').size,1,'Only final decisions block reimport');
+assert.equal(recon.pendingReconciliationKeys(database,'account-a').size,1,'Pending remains reviewable');
 assert.throws(()=>recon.reviewSelection(preview,decisions,database),'Reimport blocked');
 assert.throws(()=>recon.applyReconciliationBatch(database,parsed,'account-a',decisions,{
  propose:bank.proposeReconciliation,batchId:'batch-2'
