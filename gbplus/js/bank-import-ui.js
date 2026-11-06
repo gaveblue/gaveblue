@@ -51,16 +51,20 @@ export function bankImportMarkup(db,draft){
     summary('Conciliar',String(plan.totals.linked))+
     summary('Ignorar',String(plan.totals.ignored))+
     summary('Pendentes',String(plan.totals.pending))+
-    summary('Alteração de saldo','R$ 0,00')+'</div>'+
+    summary('Lançamentos novos',String(plan.totals.created||0))+
+    summary('Entradas a registrar',money(plan.totals.amountCreatedIn||0),'income')+
+    summary('Saídas a registrar',money(plan.totals.amountCreatedOut||0),'expense')+
+    summary('Alteração de saldo',money((plan.totals.amountCreatedIn||0)-(plan.totals.amountCreatedOut||0)))+'</div>'+
    '<div class="gb-import-confirm-rows">'+plan.entries.slice(0,50).map(row=>
      '<div class="gb-import-confirm-row"><span>'+dateLabel(row.date)+' · '+esc(row.description)+
-     '</span><b>'+fmtCents(row.amount)+'</b><small>'+({'link':'Conciliar','ignore':'Ignorar','pending':'Manter pendente'}[row.action])+'</small></div>'
+     '</span><b>'+fmtCents(row.amount)+'</b><small>'+({'link':'Conciliar','ignore':'Ignorar','pending':'Manter pendente','create':'Criar '+(row.amount>0?'receita recebida':'despesa paga')}[row.action])+'</small></div>'
     ).join('')+
     (plan.entries.length>50?'<p class="gb-import-hint">Mostrando 50 dos '+plan.entries.length+' movimentos selecionados.</p>':'')+
    '</div>'+
-   '<div class="gb-import-privacy">'+icon('shield')+'<p>Somente os registros revisados serão salvos no histórico da sua conta. Conciliar com uma baixa existente <strong>não cria uma segunda baixa</strong>. O arquivo original não será armazenado.</p></div>'+
+   '<div class="gb-import-privacy">'+icon('shield')+'<p>As conciliações usam vínculos existentes. Os movimentos escolhidos como <strong>Criar lançamento</strong> gerarão um título e uma baixa na conta, alterando o saldo. O arquivo original não será armazenado.</p></div>'+
+   (plan.totals.created?'<label class="gb-import-explicit-confirm"><input type="checkbox" id="gb-import-create-confirm" '+(draft.confirmCreation?'checked':'')+'><span>Confirmo a criação de '+plan.totals.created+' lançamento(s) já baixado(s), com efeito no saldo bancário do GB+.</span></label>':'')+
    '<div class="gb-import-footer"><button type="button" class="button" data-action="bank-import-back">Voltar à revisão</button>'+
-   '<button type="button" class="button primary" data-action="bank-import-commit">Confirmar '+plan.entries.length+' decisão(ões)</button></div></div>';
+   '<button type="button" class="button primary" data-action="bank-import-commit" '+(plan.totals.created&&!draft.confirmCreation?'disabled':'')+'>Confirmar '+plan.entries.length+' decisão(ões)</button></div></div>';
  }
  const page=Math.min(Math.max(Number(draft.page)||0,0),Math.max(0,Math.ceil(rows.length/BANK_IMPORT_PAGE_SIZE)-1));
  const visible=rows.slice(page*BANK_IMPORT_PAGE_SIZE,(page+1)*BANK_IMPORT_PAGE_SIZE);
@@ -75,8 +79,8 @@ export function bankImportMarkup(db,draft){
    esc(candidate.description|| (candidate.type==='transfer'?'Transferência':'Baixa'))+
    ' · '+dateLabel(candidate.date)+' · '+fmtCents(candidate.amount)+
    (item.candidates.length>1?' · '+item.candidates.length+' candidatos':'')+'</div>':'';
-  const actionOptions=[['skip','Sem decisão'],['link','Conciliar com registro'],['ignore','Ignorar'],['pending','Manter pendente']]
-    .filter(([key])=>key!=='link'||item.candidates.length>0&&item.status!=='possible_duplicate_in_file')
+  const actionOptions=[['skip','Sem decisão'],['link','Conciliar com registro'],['create','Criar lançamento baixado'],['ignore','Ignorar'],['pending','Manter pendente']]
+    .filter(([key])=>key==='link'?item.candidates.length>0&&item.status!=='possible_duplicate_in_file':key!=='create'||item.status==='not_found')
     .map(([key,label])=>'<option value="'+key+'" '+(decision.action===key?'selected':'')+'>'+label+'</option>').join('');
   const picker=decision.action==='link'&&!already?
    '<label class="gb-import-decision-label">Baixa ou transferência existente<select data-gb-native="true" class="gb-import-select gb-import-target" data-bank-review-target="'+item.index+'" aria-label="Selecionar movimento para conciliação">'+
@@ -84,6 +88,15 @@ export function bankImportMarkup(db,draft){
     item.candidates.map(c=>'<option value="'+esc(c.type+':'+c.id)+'" '+(choiceValue(decision,'target')===c.type+':'+c.id?'selected':'')+'>'+
      esc((c.type==='transfer'?'Transferência':'Baixa')+' · '+(c.description||'Movimento')+' · '+dateLabel(c.date)+' · '+fmtCents(c.amount))+'</option>').join('')+
    '</select></label>':'';
+  const creation=decision.action==='create'&&!already?
+   '<div class="gb-import-create-fields">'+
+    '<label class="gb-import-decision-label">Categoria obrigatória<select data-gb-native="true" class="gb-import-select" data-bank-create-category="'+item.index+'" aria-label="Categoria do lançamento '+(item.index+1)+'">'+
+      '<option value="">Escolha uma categoria</option>'+
+      (db.categories||[]).filter(c=>c.type===(record.amount>0?'income':'expense')).map(c=>
+       '<option value="'+esc(c.id)+'" '+(decision.categoryId===c.id?'selected':'')+'>'+esc(c.name)+'</option>').join('')+'</select></label>'+
+    '<label class="gb-import-decision-label">Descrição do lançamento<input type="text" maxlength="300" class="gb-import-create-description" data-bank-create-description="'+item.index+'" value="'+esc(decision.description??record.description.slice(0,300))+'" aria-label="Descrição do lançamento '+(item.index+1)+'" required></label>'+
+    '<p class="gb-import-hint">Será registrado como '+(record.amount>0?'receita recebida':'despesa paga')+' na data do extrato, com baixa na conta selecionada.</p>'+
+   '</div>':'';
   return '<article class="gb-import-row"><div class="gb-import-row-head">'+
    '<time datetime="'+record.date+'">'+dateLabel(record.date)+'</time>'+
    '<span class="gb-import-flag gb-import-'+(already?'match':info[1])+'">'+(already?'Já registrado':info[0])+'</span></div>'+
@@ -94,7 +107,7 @@ export function bankImportMarkup(db,draft){
    (already?'<p class="gb-import-locked">Movimento presente no histórico desta conta. Não será registrado novamente.</p>':
     '<div class="gb-import-review-controls"><label class="gb-import-decision-label">Decisão do movimento'+
     '<select data-gb-native="true" class="gb-import-select" data-bank-review-index="'+item.index+'" aria-label="Decisão para movimento '+(item.index+1)+'">'+
-    actionOptions+'</select></label>'+picker+'</div>')+
+    actionOptions+'</select></label>'+picker+creation+'</div>')+
    '</article>';
  }).join('');
  return head+
@@ -118,7 +131,7 @@ export function bankImportMarkup(db,draft){
    '<button type="button" data-action="bank-import-next" '+(page===Math.ceil(rows.length/BANK_IMPORT_PAGE_SIZE)-1?'disabled':'')+'>Próxima</button></div>':'')+
   (draft.error?'<p class="gb-import-error" role="alert">'+esc(draft.error)+'</p>':'')+
   '<div class="gb-import-privacy">'+icon('shield')+
-   '<p>Não há aprovação automática. Para conciliar, selecione a baixa ou transferência correspondente. Movimentos ainda não registrados não criam despesas ou receitas nesta etapa.</p></div>'+
+   '<p>As sugestões não são aprovadas automaticamente. Criar um lançamento registra imediatamente a receita recebida ou despesa paga, somente após revisão e confirmação explícita.</p></div>'+
   '<div class="gb-import-footer"><span><strong>'+choiceCount(draft)+'</strong> decisão(ões) selecionada(s)</span>'+
    '<button type="button" class="button primary" data-action="bank-import-review" '+(choiceCount(draft)?'':'disabled')+'>Revisar decisões</button></div></div>';
 }
@@ -126,18 +139,19 @@ export function bankImportHistoryMarkup(db,accountId){
  const account=db?.accounts?.find(a=>a.id===accountId);
  if(!account)return '<p class="muted">Conta não localizada.</p>';
  const batches=bankImportHistory(db,accountId);
- return '<div class="gb-import-history"><p class="gb-import-hint">Histórico de '+esc(account.name)+'. Reverter remove os vínculos da conciliação, mas não altera títulos, baixas ou saldos.</p>'+
+ return '<div class="gb-import-history"><p class="gb-import-hint">Histórico de '+esc(account.name)+'. Reverter vínculos não altera saldos; lotes com lançamentos criados podem estornar seus títulos e baixas apenas se permanecerem intactos.</p>'+
  (batches.length?batches.map(b=>{
   const linked=b.entries.filter(e=>e.action==='link').length;
   const ignored=b.entries.filter(e=>e.action==='ignore').length;
   const pending=b.entries.filter(e=>e.action==='pending').length;
+  const created=b.entries.filter(e=>e.action==='create').length;
   const reverted=b.status==='reverted';
   return '<section class="gb-import-history-row"><div class="gb-import-row-head"><strong>'+
    esc(new Date(b.createdAt).toLocaleDateString('pt-BR'))+' · '+esc(b.format.toUpperCase())+'</strong>'+
    '<span class="gb-import-flag">'+(reverted?'Revertido':'Confirmado')+'</span></div>'+
-   '<p>'+b.entries.length+' movimentos · '+linked+' vinculados · '+ignored+' ignorados · '+pending+' pendentes</p>'+
+   '<p>'+b.entries.length+' movimentos · '+linked+' vinculados · '+created+' criados · '+ignored+' ignorados · '+pending+' pendentes</p>'+
    (reverted?'<small>Revertido em '+esc(new Date(b.revertedAt).toLocaleDateString('pt-BR'))+'</small>':
-    '<button type="button" class="button" data-action="bank-import-undo" data-id="'+esc(b.id)+'">Reverter vínculos deste lote</button>')+
+    '<button type="button" class="button" data-action="bank-import-undo" data-id="'+esc(b.id)+'">'+(created?'Reverter lote e lançamentos criados':'Reverter vínculos deste lote')+'</button>')+
    '</section>';
  }).join(''):'<p class="gb-import-no-items">Nenhuma conciliação registrada para esta conta.</p>')+
  '</div>';
