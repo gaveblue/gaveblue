@@ -2,6 +2,32 @@
 
 Registro de mudanças do aplicativo localizado em `gbplus/`. Toda versão e toda compilação deve possuir uma entrada própria. **Uma alteração não deve ser considerada homologada apenas porque existe commit, teste escrito ou publicação.** A homologação exige evidências da execução e aprovação explícita.
 
+## [2.5.0 · compilação 2 — desenvolvimento] — 2026-11-06
+
+**Situação:** implementada na ramificação `feature/gbplus-250-importacao-previa`; **homologação pendente, não publicada**.  
+**Continuação da compilação 1:** adiciona decisões individuais e registro de vínculos sem alterar o fluxo financeiro.
+
+### Entregas
+- Para cada movimento: opções **Conciliar com baixa/transferência existente**, **Ignorar**, **Manter pendente** ou **Sem decisão**. Na conciliação, a correspondência deve ser selecionada explicitamente; não existe aprovação automática.
+- Tela de **revisão final** com quantidade de vínculos, ignorados e pendentes; confirmação individual do lote antes de gravar.
+- Persistência atômica de **metadados aprovados** no documento financeiro do usuário, por meio do `repository.save` existente, com checagem de revisão e autenticação. **Nenhum título, baixa, transferência ou saldo é criado ou modificado** por esta etapa.
+- Auditoria por conta, lote, data, formato, ação, vínculo e valores. Arquivo original não persistido; são guardados apenas os registros selecionados, com descrição reduzida.
+- Prevenção de reutilização de movimento importado, correspondência duplicada, dupla vinculação à mesma baixa e reimportação de movimento já confirmado; duplicidades idênticas exigem revisão e não são conciliadas silenciosamente.
+- Histórico de conciliações por conta e opção de **reverter vínculos do lote**, preservando um registro de reversão e sem estornar os pagamentos reais.
+- Compatibilidade do histórico com estornos financeiros legítimos: o vínculo permanece registrado mesmo quando a baixa ou transferência original é estornada.
+- Limite de 200 decisões por lote, 100 lotes e até 10.000 decisões históricas por documento; dados antigos sem histórico continuam compatíveis.
+- Interface ajustada ao celular, atualização do cache PWA e inclusão de `js/bank-reconciliation.js` e `tests/bank-reconciliation-regression.mjs`.
+
+### Verificações
+- **17 verificações lógicas simuladas concluídas com sucesso**: seleção válida, ausência de mutação financeira, gravação de metadados, bloqueio de reimportação e alvo inválido, validação de documento, confirmação, histórico e reversão.
+- [ ] Executar `node gbplus/tests/bank-reconciliation-regression.mjs` e regressões financeiras completas em ambiente Node.
+- [ ] Homologar Android/PWA, iOS e desktop, arquivos OFX/CSV reais, contraste, rolagem, temas e atualização de cache.
+- [ ] Verificar autenticação, isolamento de usuários, gravações concorrentes, restauro, histórico e reversões com contas de teste.
+- [ ] Testar cancelamento/estorno de pagamentos já conciliados e movimentos repetidos legítimos no mesmo dia.
+- [ ] Implementar aprovação para **criar lançamentos ausentes** e tratamento de divergências de saldo histórico; **fora desta compilação**.
+
+**Risco controlado:** a confirmação atual registra apenas metadados de conciliação; não executa baixa nem cria lançamento. A tela de criação de lançamentos ausentes continua bloqueada até homologação específica. A publicação depende de evidências adicionais.
+
 ## [2.5.0 · compilação 1 — desenvolvimento] — 2026-11-06
 
 **Situação:** código implementado em ramificação de desenvolvimento; **não publicado nem homologado**.  
