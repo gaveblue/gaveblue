@@ -1,13 +1,16 @@
 {
-  "version": "2.4.9",
-  "build": 68,
-  "published_at": "2026-11-06",
-  "title": "Fluxo de caixa responsivo com filtros por situação",
+  "version": "2.5.0",
+  "build": 6,
+  "published_at": null,
+  "title": "Prévia bancária OFX/CSV — liberação controlada somente leitura",
   "notes": [
-    "Fluxo de caixa com seletores Todos, Baixados e Pendentes em gráficos, tabela e exportação CSV.",
-    "Valores parcialmente baixados separados entre realizado e saldo pendente, sem duplicidade.",
-    "Gráficos SVG responsivos, legendas legíveis e tabelas com rolagem horizontal contida no cartão.",
-    "Janela do gráfico prioriza períodos próximos da data atual; a tabela continua com todos os períodos."
+    "Liberação controlada autorizada pelo usuário em 06/11/2026; a interface de extratos é disponibilizada exclusivamente para leitura local OFX/CSV.",
+    "Visualiza conta selecionada, entradas, saídas, possíveis correspondências, ambiguidades, movimentos não localizados, filtros e paginação.",
+    "Criação de receitas e despesas, conciliação confirmada e reversão de lotes pelo importador permanecem bloqueadas por trava dupla no controlador e na interface.",
+    "A leitura do extrato não grava dados no financeiro, não altera saldos e não envia o arquivo bruto para o servidor ou para IA.",
+    "Nove verificações da trava e oito suítes de regressão passaram em ambiente JavaScript de simulação; nenhum resultado Node real ou CI verde foi atribuído.",
+    "GitHub Actions para regressões ainda falha antes de executar testes; verificações em dispositivo real e armazenamento online são pendências conhecidas.",
+    "A liberação não equivale à homologação da conciliação bancária com escrita. A ativação exigirá compilação separada e testes registrados."
   ],
   "assets": [
     "./index.html",
@@ -154,32 +157,31 @@
     "./ai-lab/preview-card.css",
     "./ai-lab/file-stage.js",
     "./js/bank-import-preview.js",
-    "./js/daily-statement.js"
+    "./js/daily-statement.js",
+    "./bank-import.css",
+    "./js/bank-import-ui.js",
+    "./js/bank-reconciliation.js"
   ],
   "highlights": [
     {
       "icon": "wallet",
-      "title": "Saldo total em destaque",
-      "description": "Confira o valor consolidado de suas contas em um só lugar."
-    },
-    {
-      "icon": "bank",
-      "title": "Bancos em pílulas compactas",
-      "description": "Veja o símbolo e o saldo de cada conta sem ocupar espaço desnecessário."
+      "title": "Saldo total e contas",
+      "description": "Confira o saldo consolidado e os saldos por banco."
     },
     {
       "icon": "file",
-      "title": "Extrato com um toque",
-      "description": "Toque em uma conta para ver seus movimentos e saldos por dia."
+      "title": "Prévia de extrato OFX/CSV",
+      "description": "Importe localmente e confira os movimentos sem alterar seus lançamentos."
+    },
+    {
+      "icon": "shield",
+      "title": "Modo somente leitura",
+      "description": "Nenhuma baixa ou saldo é modificado durante a conferência bancária."
     }
   ],
-  "release_status": "publication_authorized_visual_homologation_pending",
+  "release_status": "publication_authorized_limited_readonly_deployment_pending",
   "homologation": {
-    "status": "parcial_autorizada_com_ressalvas",
-    "approved_for_publication_by": "responsavel_pelo_projeto",
-    "approved_for_publication_at": "2026-11-06",
-    "evidence": "27 combinacoes de montagem de graficos e verificacao sintetica de baixas parciais",
-    "pending": "testes visuais em aparelho real, tema escuro, CSV e experiencia do usuario",
-    "rollback_reference": "backup/gbplus-249-build67-before-build68"
+    "status": "parcial_autorizada_com_restricao",
+    "notes": "Publicação antecipada autorizada pelo usuário, limitada a leitura OFX/CSV; 9 verificações do bloqueio passaram. Sem homologação real de gravação, Node CI ou dispositivos. Liberação de escrita BLOQUEADA."
   }
 }

@@ -1,0 +1,127 @@
+/* GB+ 2.5.0 — independent read-only OFX/CSV preview. */
+#modal.gb-bank-import-modal{width:min(760px,calc(100% - 24px));max-height:calc(100dvh - 36px)}
+.gb-import-workspace{display:grid;gap:17px;min-width:0;color:var(--ink)}
+.gb-import-intro{display:flex;align-items:center;gap:13px;min-width:0}
+.gb-import-intro strong{font-size:14px;line-height:1.4}
+.gb-import-intro p{font-size:11px;line-height:1.55;color:var(--muted);margin-top:3px}
+.gb-import-symbol{display:grid;place-items:center;flex:0 0 39px;height:39px;border:1px solid var(--border);border-radius:13px;background:var(--soft)}
+.gb-import-step{display:flex;gap:9px;align-items:center;font-size:11px;font-weight:700;letter-spacing:.02em}
+.gb-import-step-number{display:grid;place-items:center;width:25px;height:25px;font-size:10px;background:#1b1b1f;color:#fff;border-radius:50%}
+.gb-import-label{font-size:11px;font-weight:600;color:var(--muted);margin-bottom:-10px}
+.gb-import-select{display:block;min-height:44px;width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:11px;background:var(--surface);color:var(--ink);font-size:12px}
+.gb-import-drop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:144px;padding:20px 14px;border:1px dashed #b9b9bf;border-radius:14px;background:var(--soft);text-align:center;cursor:pointer}
+.gb-import-drop .icon{width:25px;height:25px}
+.gb-import-drop strong{font-size:12px;font-weight:650}
+.gb-import-drop small{font-size:10px;color:var(--muted);line-height:1.4}
+.gb-import-drop:focus-within{outline:2px solid var(--ink)}
+.gb-import-file-input{display:block;width:100%;min-width:0;font-size:10px;color:var(--muted);margin-top:-9px}
+.gb-import-file-input::file-selector-button{border:1px solid var(--border);border-radius:8px;padding:7px 10px;background:var(--surface);margin-right:10px;color:var(--ink)}
+.gb-import-error{font-size:11px;color:#bb2929;background:#fff1f0;border:1px solid #ffc7c1;padding:12px;border-radius:10px;overflow-wrap:anywhere}
+.gb-import-privacy{display:flex;align-items:flex-start;gap:10px;padding:12px;border:1px solid var(--border);border-radius:11px;background:var(--soft);min-width:0}
+.gb-import-privacy .icon{width:16px;height:16px;flex:0 0 16px}
+.gb-import-privacy p{font-size:10px;line-height:1.55;color:var(--muted);min-width:0}
+.gb-import-file{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;border:1px solid var(--border);border-radius:11px;padding:11px 13px}
+.gb-import-file>span{display:flex;align-items:center;min-width:0;gap:5px;font-size:11px;color:var(--muted);overflow-wrap:anywhere}
+.gb-import-file>span strong{color:var(--ink);font-weight:650;overflow-wrap:anywhere;min-width:0}
+.gb-import-file .icon{width:15px;height:15px;flex:0 0 15px}
+.gb-import-text-button{border:0;background:none;color:var(--ink);text-decoration:underline;font-size:11px;font-weight:650;padding:5px}
+.gb-import-hint{font-size:10px;color:var(--muted);margin-top:-9px;overflow-wrap:anywhere}
+.gb-import-summary-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.gb-import-summary{display:flex;flex-direction:column;gap:6px;min-width:0;border:1px solid var(--border);border-radius:12px;padding:11px;background:var(--surface)}
+.gb-import-summary span{color:var(--muted);font-size:10px}
+.gb-import-summary strong{font-size:clamp(12px,1.45vw,16px);font-weight:700;line-height:1.3;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.gb-import-summary.income strong{color:#16a34a}
+.gb-import-summary.expense strong{color:#e34343}
+.gb-import-filters{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;padding:4px;border:1px solid var(--border);border-radius:12px;background:var(--soft);min-width:0}
+.gb-import-filters button{min-width:0;display:flex;align-items:center;justify-content:center;gap:4px;flex-wrap:wrap;border:0;background:transparent;color:var(--muted);border-radius:9px;min-height:36px;padding:7px 3px;font-size:10px;cursor:pointer}
+.gb-import-filters button.active{color:var(--ink);background:var(--surface);box-shadow:0 1px 4px #00000010;font-weight:650}
+.gb-import-filters button span{font-variant-numeric:tabular-nums;opacity:.7}
+.gb-import-records{display:grid;gap:7px;min-width:0}
+.gb-import-row{border:1px solid var(--border);border-radius:12px;padding:12px 13px;min-width:0}
+.gb-import-row-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.gb-import-row-head time{font-size:10px;color:var(--muted);flex-shrink:0}
+.gb-import-flag{display:inline-flex;align-items:center;border:1px solid var(--border);background:var(--soft);padding:3px 7px;border-radius:6px;font-size:9px;line-height:1.5;font-weight:650;text-align:center}
+.gb-import-match{color:#14754a}
+.gb-import-ambiguous{color:#8a6300}
+.gb-import-unmatched{color:var(--muted)}
+.gb-import-row-body{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding-top:9px;min-width:0}
+.gb-import-row-body>strong{min-width:0;overflow-wrap:anywhere;font-size:12px;font-weight:650}
+.gb-import-row-body>b{flex-shrink:0;font-size:12px;font-weight:700;font-variant-numeric:tabular-nums}
+.gb-import-positive{color:#16a34a}.gb-import-negative{color:#e34343}
+.gb-import-candidate,.gb-import-identifier{display:block;margin-top:8px;font-size:10px;color:var(--muted);overflow-wrap:anywhere;line-height:1.5}
+.gb-import-candidate{padding:8px 9px;border-radius:8px;background:var(--soft)}
+.gb-import-no-items{text-align:center;font-size:11px;padding:30px 12px;color:var(--muted)}
+.gb-import-pager{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.gb-import-pager button{border:1px solid var(--border);border-radius:9px;background:var(--surface);min-height:35px;padding:6px 12px;font-size:11px}
+.gb-import-pager button:disabled{opacity:.4}
+.gb-import-pager span{font-size:10px;color:var(--muted)}
+.gb-import-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;min-width:0}
+.gb-import-footer>span{font-size:10px;color:var(--muted)}
+.gb-import-empty{padding:15px}.gb-import-empty h3{font-size:14px}.gb-import-empty p{margin-top:10px;font-size:11px;color:var(--muted)}
+@media(max-width:760px){
+ #modal.gb-bank-import-modal{width:calc(100% - 18px);max-height:calc(100dvh - 22px);border-radius:19px}
+ #modal.gb-bank-import-modal .modal-heading{padding:17px 17px 13px}
+ #modal.gb-bank-import-modal .modal-body{padding:14px}
+ .gb-import-workspace{gap:14px}
+ .gb-import-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .gb-import-summary strong{font-size:15px}
+ .gb-import-filters{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .gb-import-row-body>b{font-size:11px}
+ .gb-import-footer{flex-wrap:wrap}
+}
+@media(max-width:360px){.gb-import-row-body{flex-wrap:wrap}.gb-import-row-body>b{width:100%;text-align:right}}
+
+/* Acesso à importação a partir do extrato diário. */
+.gb-statement-import{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 0;border-bottom:1px solid var(--border)}
+.gb-statement-import small{font-size:10px;color:var(--muted)}
+.gb-statement-import .button{min-height:38px}
+
+
+/* Build 2 — decisions, confirmation and audit history. */
+.gb-import-review-controls{display:grid;grid-template-columns:minmax(0,1fr);gap:10px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
+.gb-import-decision-label{display:grid;gap:6px;min-width:0;color:var(--muted);font-size:10px;font-weight:600}
+.gb-import-decision-label>.gb-import-select{font-size:11px;line-height:1.4;width:100%;min-width:0}
+.gb-import-target{border-style:solid}
+.gb-import-locked{margin:10px 0 0;font-size:10px;color:var(--muted);line-height:1.4;padding:9px 11px;background:var(--soft);border-radius:8px}
+.gb-import-review-heading{display:grid;gap:7px}
+.gb-import-review-heading h3{font-size:17px}
+.gb-import-review-heading p{color:var(--muted);font-size:11px;line-height:1.5}
+.gb-import-confirm-rows{display:grid;gap:5px;max-height:330px;overflow-y:auto;overscroll-behavior:contain}
+.gb-import-confirm-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px 10px;padding:9px 11px;border:1px solid var(--border);border-radius:10px}
+.gb-import-confirm-row span{font-size:10px;line-height:1.5;overflow-wrap:anywhere}
+.gb-import-confirm-row b{font-size:11px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.gb-import-confirm-row small{font-size:10px;color:var(--muted);grid-column:1/-1}
+.gb-import-footer .button:disabled{opacity:.42;cursor:not-allowed}
+.gb-import-history{display:grid;gap:12px}
+.gb-import-history-row{padding:14px;border:1px solid var(--border);border-radius:12px;display:grid;gap:11px}
+.gb-import-history-row strong{font-size:12px}
+.gb-import-history-row p,.gb-import-history-row small{font-size:11px;color:var(--muted)}
+.gb-import-history-row>.button{justify-self:start;white-space:normal;text-align:center}
+.gb-statement-links{display:flex;gap:8px;flex-wrap:wrap;padding:8px 0}
+@media (max-width:760px){
+ .gb-import-review-controls{gap:9px}
+ .gb-import-footer .button{min-width:0;flex:1 1 135px;white-space:normal}
+ .gb-import-confirm-row{grid-template-columns:minmax(0,1fr)}
+ .gb-import-confirm-row b{justify-self:end}
+}
+
+/* Preserve compact account-card actions with three controls on narrow screens. */
+.account-card .partner-bottom{display:flex;align-items:center;flex-wrap:wrap;gap:7px}
+.account-card .partner-bottom>.button{max-width:100%;white-space:normal;font-size:10px;text-align:center}
+.account-card .partner-bottom>.icon-button{margin-left:auto}
+
+
+/* GB+ 2.5.0 build 3 — safely confirmed title/payment creation */
+.gb-import-create-fields{display:grid;gap:10px;min-width:0;padding:12px;background:var(--soft);border:1px solid var(--border);border-radius:11px}
+.gb-import-create-description{display:block;width:100%;min-height:42px;min-width:0;padding:10px 12px;border:1px solid var(--border);border-radius:9px;color:var(--ink);background:var(--surface);font:inherit;font-size:12px}
+.gb-import-create-fields .gb-import-hint{line-height:1.45;margin:0}
+.gb-import-explicit-confirm{display:flex;align-items:flex-start;gap:10px;border:1px solid var(--border);border-radius:11px;background:var(--soft);padding:12px;cursor:pointer}
+.gb-import-explicit-confirm input{width:17px;height:17px;accent-color:var(--ink);flex:0 0 17px;margin-top:1px}
+.gb-import-explicit-confirm span{font-size:11px;font-weight:650;line-height:1.6;min-width:0}
+.gb-import-summary-grid .gb-import-summary{min-width:0}
+@media (max-width:760px){
+ .gb-import-create-fields{padding:10px;gap:9px}
+ .gb-import-explicit-confirm{padding:11px}
+}
+
+.gb-import-finance-warning{font-size:11px;line-height:1.55;color:var(--muted);padding:10px 12px;border-left:2px solid var(--muted);background:var(--soft);border-radius:0 8px 8px 0}

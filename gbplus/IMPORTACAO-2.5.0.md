@@ -6,6 +6,32 @@
 
 **Estado em 05/11/2026:** o parser/simulador isolado está em `js/bank-import-preview.js`. Na **2.4.8**, o GB+ AI ganhou um botão de anexo no chat: OFX e CSV geram apenas resumo de leitura local, sem selecionar conta nem conciliar; Excel e PDF apenas mostram que a leitura está pendente. **Nenhum arquivo pode criar títulos, baixar contas ou alterar saldos nesta etapa.** A conciliação e a gravação controlada continuam reservadas à 2.5.0.
 
+## Implementação iniciada em 06/11/2026 — compilação 1
+
+A primeira interface read-only está na ramificação `feature/gbplus-250-importacao-previa`, acessível em **Contas bancárias → Importar extrato** e **Movimentações da conta → Importar extrato**. Seleciona OFX/CSV, lê localmente, apresenta totais, prováveis correspondências, ambiguidades e não localizados, com paginação e filtros. **Não grava conciliações, títulos, baixas, dados no Supabase ou arquivo bruto**. A homologação da UI e de arquivos bancários reais continua pendente.
+
+## Continuação em 06/11/2026 — compilação 2
+
+A segunda compilação, no mesmo ramo de desenvolvimento, acrescenta revisão individual por movimento e confirmação final. Ações disponíveis: `conciliar` com baixa ou transferência existente, `ignorar` e `manter pendente`. **Sem decisão** não grava nada. O registro confirmado é armazenado como metadado por usuário, conta e lote em `bankImportBatches`, dentro de `gbplus_documents`, usando a gravação já existente com revisão concorrente.
+
+- Não há inserção de títulos, baixas, transferências nem ajustes de saldo; o histórico dos vínculos é uma camada de referência.
+- Um mesmo pagamento/transferência não pode ser vinculado duas vezes para a mesma conta; reimportações de chaves de movimento já confirmadas são bloqueadas.
+- Reverter um lote marca seu histórico como revertido; não remove títulos nem estorna pagamentos. Um pagamento estornado pela rotina financeira original não é impedido pelo histórico.
+- A função atual `gbplus_save` foi consultada **somente leitura**: verifica `auth.uid()` e a revisão esperada antes da substituição atômica do documento do usuário. A política de leitura de `gbplus_documents` limita o SELECT ao próprio `user_id`. Não houve DDL ou atualização dos dados reais.
+- O arquivo original segue sem armazenamento ou envio à IA. Apenas metadados normalizados dos movimentos efetivamente aprovados são salvos no documento do usuário (incluindo descrição resumida e identificador externo).
+- A criação de lançamentos ausentes, eventual tabela dedicada de auditoria e comparação de saldos históricos continuam etapas futuras; não antecipar essas operações sem testes e critérios de aceitação.
+- Homologação em dispositivo real e testes de concorrência persistem pendentes. O build 2 ainda não foi publicado.
+
+## Continuação em 06/11/2026 — compilação 3
+
+A compilação 3 permite selecionar a decisão **Criar lançamento baixado** para um movimento importado ainda não localizado, com categoria e descrição obrigatórias. A confirmação do lote exibe o impacto no saldo e exige concordância expressa. O GB+ grava **um título único e a respectiva baixa** na conta indicada, na data do movimento e pelo valor exato em centavos. É diferente de simplesmente vincular uma baixa existente: a criação altera o saldo.
+
+Restrições: somente movimentações não localizadas, sem duplicidade no arquivo nem título aberto semelhante; data de baixa não futura; categoria do mesmo tipo do lançamento; limite de 50 criações por lote. O resumo final e a caixa de confirmação são obrigatórios. Os arquivos brutos continuam locais; apenas os metadados aprovados ficam persistidos no documento do próprio usuário. A gravação é transacional pelo adaptador financeiro de revisão existente; nenhuma mudança de tabela SQL foi feita.
+
+A reversão do lote pode excluir exclusivamente os títulos e as baixas **criados por ele**, se permanecerem intactos e não tiverem vínculos posteriores; o histórico continua auditável. Se o usuário editar algum lançamento após a criação, o sistema recusa a reversão automática para evitar perdas e requer revisão manual.
+
+**Estado:** código da compilação 3 implementado no PR #73; verificações lógicas simuladas concluídas, mas testes reais em PWA, arquivos de bancos e integração com armazenamento online continuam pendentes. **Não confundir implementação com homologação ou publicação**.
+
 ## Objetivo
 
 Conciliar o movimento registrado nos bancos com as baixas, títulos e transferências já existentes no GB+, exibindo diferenças de forma auditável. Uma importação jamais deve presumir que todo débito é uma nova despesa nem que toda entrada é receita.

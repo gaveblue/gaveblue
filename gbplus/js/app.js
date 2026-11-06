@@ -1,17 +1,20 @@
+import {parseBankStatement,proposeReconciliation,readBankFileText} from './bank-import-preview.js?v=20261106-2504';
+import {bankImportMarkup,bankImportHistoryMarkup,BANK_IMPORT_PAGE_SIZE,BANK_IMPORT_WRITES_ENABLED} from './bank-import-ui.js?v=20261106-2506';
+import {reviewSelection,applyReconciliationBatch,undoReconciliationBatch} from './bank-reconciliation.js?v=20261106-2505';
 import {filterFlowRows} from './gb-flow-filters.js?v=20261106-68';
 import {uid,today,money,dateLabel,cents,addMonths,validDate,generateTitles,addPayment,transfer,updateTitle,pending,flow,within} from './domain.js?v=20261105-72';
-import {KEY,INDICATORS,defaultPanel,parseBackup,backupText,MOBILE_SHORTCUTS,defaultMobileNav,effectiveMobileNav,validMobileNav,shouldOfferSetup} from './store.js?v=20261105-87';
+import {KEY,INDICATORS,defaultPanel,parseBackup,backupText,MOBILE_SHORTCUTS,defaultMobileNav,effectiveMobileNav,validMobileNav,shouldOfferSetup} from './store.js?v=20261106-2505';
 import {esc,icon,button,field,select,formFooter,download,csv,titleTable} from './ui.js?v=20261105-72';
-import {routes,dashboard,titlesView,partnersView,accountsView,categoriesView,flowView,reportsView,settingsView,notificationsView,filteredTitles,reportData} from './views.js?v=20261106-68';
+import {routes,dashboard,titlesView,partnersView,accountsView,categoriesView,flowView,reportsView,settingsView,notificationsView,filteredTitles,reportData} from './views.js?v=20261106-2502';
 import {renderReactCharts,unmountReactCharts} from './gb-react-loader.js?v=20261105-45';
 import {mountNativeCharts} from './gb-charts-native.js?v=20261106-68';
-import {titleForm,partnerForm,accountForm,categoryForm,paymentForm,transferForm,titleDetail,customizeForm,accountDetail} from './forms.js?v=20261105-90';
+import {titleForm,partnerForm,accountForm,categoryForm,paymentForm,transferForm,titleDetail,customizeForm,accountDetail} from './forms.js?v=20261106-2502';
 import {toggleEntryMenu,chooseEntryOption,syncEntrySelect,closeEntryMenus} from './entry-select.js?v=20261104-42';
 import {installGbControls,enhanceGbControls} from './custom-controls.js?v=20261104-42';
 import {expectedDates,recurrenceAnchor} from './gb-calendar-rules.js?v=20261105-47';
 import {CATEGORY_ICON_OPTIONS,categoryIconFor,gbIcon} from './gb-icons.js?v=20261104-42';
 import {setupPwaInstallation,maybeOfferPwaInstall,showInstallHelp,isPwaInstalled} from './pwa-install.js?v=20261104-40';
-import {SupabaseRepository} from '../integrations/supabase/repository.js?v=20261105-87';
+import {SupabaseRepository} from '../integrations/supabase/repository.js?v=20261106-2505';
 import {initializeAuth,authClient,currentUser,showAuth,isRecovery,updatePersonalProfile,consumeAuthReturnMessage,consumeSessionNotice,signOutAccount,authError,emailCooldownSeconds,markAuthEmailSent} from './auth.js?v=20261105-69';
 import {profileView,validateProfile,validCPF,formatCPF} from './profile.js?v=20261105-59';
 import {firstSetupView,customMobileNavForm,shortcutsPreview,readMobileNav,firstStepsPanel} from './setup-ui.js?v=20261105-87';
@@ -35,6 +38,7 @@ function firstStepsDismissed(){
  try{return localStorage.getItem('gbplus-first-steps-dismissed:'+id)==='1';}catch{return false;}
 }
 let profileCpfStatus={userId:null,cpf:'',ready:false,loading:false,error:''};
+let bankImportDraft=null; // Memory-only preview; released on modal close.
 
 const state={route:'dashboard',period:'all',range:{},query:'',status:'',type:'',partner:'',category:'',partnerQuery:'',granularity:'month',flowChartMode:'bars',flowStatus:'all',report:'payable',reportPartner:'',moreFilters:false,launchSelected:[],launchStatusOpen:false,launchSearchOpen:false};
 const modal=document.querySelector('#modal');
@@ -54,9 +58,24 @@ function syncSidebarVisibility(hidden,save=false){
 try{syncSidebarVisibility(localStorage.getItem(sidebarPreferenceKey)==='1');}
 catch{syncSidebarVisibility(false);}
 function toast(message){const el=document.querySelector('#toast');el.textContent=message;el.classList.add('visible');clearTimeout(toast.timer);toast.timer=setTimeout(()=>el.classList.remove('visible'),4500);}
-function openModal(title,content){modal.classList.toggle("gb-entry-modal",content.includes('id="title-form"'));document.querySelector('#modal-content').innerHTML=`<div class="modal-heading"><h2 id="modal-title">${title}</h2><button class="icon-button" data-action="close" aria-label="Fechar">${icon('close')}</button></div><div class="modal-body">${content}</div>`;modal.setAttribute('aria-labelledby','modal-title');if(!modal.open)modal.showModal();enhanceGbControls(modal);}
-function closeModal(){if(modal.open)modal.close();pendingGeneration=null;confirmAction=null;if(pwaReady)setTimeout(()=>maybeOfferPwaInstall(),1100);}
+function openModal(title,content){modal.classList.toggle("gb-entry-modal",content.includes('id="title-form"'));modal.classList.toggle("gb-bank-import-modal",content.includes('id="gb-import-workspace"'));document.querySelector('#modal-content').innerHTML=`<div class="modal-heading"><h2 id="modal-title">${title}</h2><button class="icon-button" data-action="close" aria-label="Fechar">${icon('close')}</button></div><div class="modal-body">${content}</div>`;modal.setAttribute('aria-labelledby','modal-title');if(!modal.open)modal.showModal();enhanceGbControls(modal);}
+function closeModal(){if(modal.open)modal.close();bankImportDraft=null;pendingGeneration=null;confirmAction=null;if(pwaReady)setTimeout(()=>maybeOfferPwaInstall(),1100);}
 function confirm(title,message,callback){confirmAction=callback;openModal(title,`<p class="confirm-message">${esc(message)}</p><div class="form-error" role="alert"></div><div class="form-footer">${button('Cancelar','close')}${button('Confirmar','confirm','primary')}</div>`);}
+// 2.5.0: preview only, never invokes commit(), Supabase or AI.
+function redrawBankImport(){
+ if(!bankImportDraft)return;
+ const old=document.querySelector('#modal .modal-body');
+ const top=old?.scrollTop||0;
+ openModal('Importar extrato bancário',bankImportMarkup(db,bankImportDraft));
+ const fresh=document.querySelector('#modal .modal-body');
+ if(fresh)fresh.scrollTop=bankImportDraft.step==='confirm'?0:top;
+}
+function openBankImport(accountId=''){
+ const accounts=(db.accounts||[]).filter(a=>a.active!==false);
+ const account=accounts.find(a=>a.id===accountId)||accounts[0];
+ bankImportDraft={accountId:account?.id||'',parsed:null,preview:null,filename:'',accountHint:'',filter:'all',page:0,error:'',decisions:{},step:'review',review:null,confirmCreation:false};
+ redrawBankImport();
+}
 // Guided onboarding is opt-in. No financial records are created before final confirmation.
 let setupDraft=null;
 function startSetupWizard(){
@@ -392,6 +411,63 @@ const actions={
   'new-account':()=>openModal('Nova conta financeira',accountForm(db)),
   'edit-account':el=>openModal('Editar conta',accountForm(db,db.accounts.find(a=>a.id===el.dataset.id))),
   'account-detail':el=>openModal('Movimentações da conta',accountDetail(db,db.accounts.find(a=>a.id===el.dataset.id))),
+  'bank-import-open':el=>openBankImport(el.dataset.id||''),
+  'bank-import-reset':()=>{
+   if(!bankImportDraft)return;
+   Object.assign(bankImportDraft,{parsed:null,preview:null,filename:'',accountHint:'',filter:'all',page:0,error:'',decisions:{},step:'review',review:null,confirmCreation:false});
+   redrawBankImport();
+  },
+  'bank-import-filter':el=>{
+   if(!bankImportDraft?.preview||!['all','possible_match','ambiguous','not_found'].includes(el.dataset.value))return;
+   bankImportDraft.filter=el.dataset.value;bankImportDraft.page=0;redrawBankImport();
+  },
+  'bank-import-next':()=>{
+   if(!bankImportDraft?.preview)return;
+   const count=bankImportDraft.filter==='all'?bankImportDraft.preview.rows.length:
+     bankImportDraft.preview.rows.filter(row=>bankImportDraft.filter==='ambiguous'
+       ?['ambiguous','possible_duplicate_in_file'].includes(row.status):row.status===bankImportDraft.filter).length;
+   bankImportDraft.page=Math.min(Math.max(0,Math.ceil(count/BANK_IMPORT_PAGE_SIZE)-1),bankImportDraft.page+1);
+   redrawBankImport();
+  },
+  'bank-import-prev':()=>{
+   if(!bankImportDraft?.preview)return;
+   bankImportDraft.page=Math.max(0,bankImportDraft.page-1);redrawBankImport();
+  },
+  'bank-import-close':()=>closeModal(),
+  'bank-import-review':()=>{
+   if(!BANK_IMPORT_WRITES_ENABLED)return;
+   if(!bankImportDraft?.preview)return;
+   try{
+    bankImportDraft.review=reviewSelection(bankImportDraft.preview,bankImportDraft.decisions,db,{today:today()});
+    bankImportDraft.error='';bankImportDraft.step='confirm';bankImportDraft.confirmCreation=false;redrawBankImport();
+   }catch(error){bankImportDraft.error=error.message;redrawBankImport();}
+  },
+  'bank-import-back':()=>{
+   if(!bankImportDraft?.preview)return;
+   bankImportDraft.step='review';bankImportDraft.review=null;bankImportDraft.confirmCreation=false;redrawBankImport();
+  },
+  'bank-import-commit':async ()=>{
+   if(!BANK_IMPORT_WRITES_ENABLED)throw Error('A conciliação com gravação está bloqueada nesta versão de prévia.');
+   const draft=bankImportDraft;
+   if(!draft?.preview||draft.step!=='confirm'||!draft.review)return;
+   if(draft.review.totals.created>0&&!draft.confirmCreation)throw Error('Confirme expressamente a criação dos lançamentos e o impacto nos saldos.');
+   const batchId=uid(),accountId=draft.accountId,parsed=draft.parsed;
+   const decisions=structuredClone(draft.decisions);
+   // Recompute against the current account data in the optimistic revision save.
+   await commit(d=>applyReconciliationBatch(d,parsed,accountId,decisions,{
+    propose:proposeReconciliation,batchId,now:new Date().toISOString(),today:today(),makeId:uid
+   }),'Importação confirmada. Confira os lançamentos e saldos atualizados.');
+  },
+  'bank-import-history':el=>openModal('Histórico de conciliações',bankImportHistoryMarkup(db,el.dataset.id)),
+  'bank-import-undo':el=>{
+   if(!BANK_IMPORT_WRITES_ENABLED)throw Error('A reversão por importação está bloqueada nesta versão de prévia.');
+   const batchId=el.dataset.id;
+   const batch=(db.bankImportBatches||[]).find(b=>b.id===batchId&&b.status==='active');
+   if(!batch)throw Error('Lote já revertido ou não encontrado.');
+   confirm('Reverter vínculos de conciliação?',
+    batch.entries.some(e=>e.action==='create')?'O lote tem lançamentos criados. Se estiverem intactos, seus títulos e baixas serão estornados juntos, alterando o saldo. Deseja continuar?':'Os vínculos serão revertidos. As baixas e o saldo permanecerão iguais.',
+    ()=>commit(d=>{undoReconciliationBatch(d,batchId);},'Reversão concluída. Confira os saldos e o histórico.'));
+  },
   'new-category':()=>openModal('Nova categoria',categoryForm()),
   'edit-category':el=>openModal('Editar categoria',categoryForm(db.categories.find(c=>c.id===el.dataset.id))),
   'new-transfer':()=>openModal('Transferir entre contas',transferForm(db)),
@@ -526,7 +602,7 @@ const actions={
   'delete-title':el=>{const t=getTitle(el.dataset.id);if(t.cardInvoice)throw Error('Exclua as compras vinculadas ao cartão para ajustar a fatura.');if(db.payments.some(p=>p.titleId===t.id))throw Error('Estorne as baixas antes de excluir este título.');confirm('Excluir título?',`O lançamento “${t.description}” será removido. Os outros títulos da série serão mantidos.`,()=>commit(d=>{d.titles=d.titles.filter(x=>x.id!==t.id);},'Título excluído.'));},
   'delete-partner':el=>{const id=el.dataset.id;if(db.titles.some(t=>t.partnerId===id))throw Error('Este parceiro possui títulos. Altere sua situação para inativo para preservar o histórico.');confirm('Excluir parceiro?','O cadastro será removido.',()=>commit(d=>{d.partners=d.partners.filter(p=>p.id!==id);},'Parceiro excluído.'));},
   'delete-category':el=>{const id=el.dataset.id;if(db.titles.some(t=>t.categoryId===id))throw Error('Esta categoria está vinculada a títulos e não pode ser excluída.');confirm('Excluir categoria?','A categoria será removida.',()=>commit(d=>{d.categories=d.categories.filter(c=>c.id!==id);},'Categoria excluída.'));},
-  'delete-account':el=>{const id=el.dataset.id;if((db.cards||[]).some(card=>card.payAccountId===id))throw Error('Esta conta é a conta de pagamento prevista de um cartão. Altere o cartão antes de excluí-la.');if(db.titles.some(t=>t.accountId===id)||db.payments.some(p=>p.accountId===id)||db.transfers.some(t=>t.from===id||t.to===id))throw Error('Esta conta tem vínculos. Marque-a como inativa para manter o histórico.');confirm('Excluir conta?','A conta e seu saldo inicial serão removidos.',()=>commit(d=>{d.accounts=d.accounts.filter(a=>a.id!==id);},'Conta excluída.'));},
+  'delete-account':el=>{const id=el.dataset.id;if((db.cards||[]).some(card=>card.payAccountId===id))throw Error('Esta conta é a conta de pagamento prevista de um cartão. Altere o cartão antes de excluí-la.');if(db.titles.some(t=>t.accountId===id)||db.payments.some(p=>p.accountId===id)||db.transfers.some(t=>t.from===id||t.to===id))throw Error('Esta conta tem vínculos. Marque-a como inativa para manter o histórico.');if((db.bankImportBatches||[]).some(b=>b.accountId===id))throw Error('Esta conta possui histórico de conciliações. Marque-a como inativa para preservá-lo.');confirm('Excluir conta?','A conta e seu saldo inicial serão removidos.',()=>commit(d=>{d.accounts=d.accounts.filter(a=>a.id!==id);},'Conta excluída.'));},
   'undo-payment':el=>{const id=el.dataset.id;confirm('Estornar baixa?','A baixa será removida, o valor voltará a ficar pendente e o saldo da conta será recalculado.',()=>commit(d=>{d.payments=d.payments.filter(p=>p.id!==id);},'Baixa estornada.'));},
   'undo-transfer':el=>{const id=el.dataset.id;confirm('Estornar transferência?','A movimentação será removida das duas contas.',()=>commit(d=>{d.transfers=d.transfers.filter(t=>t.id!==id);},'Transferência estornada.'));},
   'save-generation':()=>{if(!pendingGeneration||busy)return;const generated=pendingGeneration;return commit(d=>{if(generated.some(t=>d.titles.some(x=>!x.cancelled&&x.type===t.type&&x.description===t.description&&x.due===t.due&&x.amount===t.amount&&x.partnerId===t.partnerId)))throw Error('Já existe um título igual (descrição, parceiro, valor e vencimento). Revise para evitar duplicidade.');d.titles.push(...generated);},`${generated.length} título(s) criado(s).`);},
@@ -553,10 +629,75 @@ const actions={
 };
 document.addEventListener('click',async e=>{const el=e.target.closest('[data-action]');if(!el||!db)return;if(el.tagName==='BUTTON')e.preventDefault();try{await actions[el.dataset.action]?.(el);}catch(error){fail(error);}});
 document.addEventListener('click',e=>{if(!e.target.closest('.gb-entry-select'))closeEntryMenus();});
+// User-selected file bytes stay local and are discarded with the modal.
+document.addEventListener('change',async e=>{
+ const el=e.target;
+ if(!bankImportDraft||!modal.open||!el?.closest?.('#modal'))return;
+ const draft=bankImportDraft;
+ if(el.id==='gb-import-account'){
+  const id=el.value;
+  if(!(db.accounts||[]).some(a=>a.id===id&&a.active!==false))return;
+  draft.accountId=id;
+  if(draft.parsed)draft.preview=proposeReconciliation(draft.parsed,db,id);
+  draft.filter='all';draft.page=0;draft.decisions={};draft.review=null;draft.confirmCreation=false;draft.step='review';redrawBankImport();return;
+ }
+ if(el.matches?.('[data-bank-review-index]')){
+  if(!draft.preview||draft.step!=='review')return;
+  const index=Number(el.dataset.bankReviewIndex);
+  if(!Number.isInteger(index)||!draft.preview.rows[index])return;
+  if(el.value==='skip')delete draft.decisions[index];
+  else if(['link','ignore','pending','create'].includes(el.value))draft.decisions[index]={action:el.value,target:'',...(el.value==='create'?{categoryId:'',description:draft.preview.rows[index].record.description.slice(0,300)}:{})};
+  draft.review=null;draft.confirmCreation=false;draft.error='';redrawBankImport();return;
+ }
+ if(el.matches?.('[data-bank-create-category]')){
+  if(!draft.preview||draft.step!=='review')return;
+  const index=Number(el.dataset.bankCreateCategory),choice=draft.decisions[index];
+  if(!Number.isInteger(index)||choice?.action!=='create')return;
+  choice.categoryId=el.value;draft.review=null;draft.confirmCreation=false;draft.error='';return;
+ }
+ if(el.id==='gb-import-create-confirm'){
+  if(draft.step!=='confirm')return;
+  draft.confirmCreation=Boolean(el.checked);
+  redrawBankImport();return;
+ }
+ if(el.matches?.('[data-bank-review-target]')){
+  if(!draft.preview||draft.step!=='review')return;
+  const index=Number(el.dataset.bankReviewTarget),choice=draft.decisions[index];
+  if(!Number.isInteger(index)||!draft.preview.rows[index]||choice?.action!=='link')return;
+  const valid=draft.preview.rows[index].candidates.some(c=>c.type+':'+c.id===el.value);
+  choice.target=valid?el.value:'';
+  draft.review=null;draft.error='';return;
+ }
+ if(el.id!=='gb-import-file')return;
+ const file=el.files?.[0];
+ if(!file)return;
+ draft.error='';
+ try{
+  const contents=await readBankFileText(file);
+  if(draft!==bankImportDraft||!modal.open)return;
+  const parsed=parseBankStatement(contents,file.name);
+  const preview=proposeReconciliation(parsed,db,draft.accountId);
+  draft.parsed=parsed;draft.preview=preview;draft.filename=file.name.slice(0,140);
+  draft.accountHint=parsed.accountHint||'';
+  draft.filter='all';draft.page=0;draft.decisions={};draft.review=null;draft.confirmCreation=false;draft.step='review';
+ }catch(error){
+  if(draft!==bankImportDraft||!modal.open)return;
+  Object.assign(draft,{parsed:null,preview:null,filename:'',accountHint:'',error:error?.message||'Não foi possível ler o extrato.'});
+ }
+ if(draft===bankImportDraft&&modal.open)redrawBankImport();
+});
 document.addEventListener('change',e=>{
  if(e.target?.matches?.('select[name="bankId"]')&&db)syncBankPicker(e.target.closest('.gb-bank-picker'),db);
 });
 document.addEventListener('input',e=>{
+ if(bankImportDraft?.step==='review'&&e.target?.matches?.('[data-bank-create-description]')){
+  const index=Number(e.target.dataset.bankCreateDescription),choice=bankImportDraft.decisions[index];
+  if(choice?.action==='create'){
+   choice.description=e.target.value;
+   bankImportDraft.review=null;bankImportDraft.confirmCreation=false;bankImportDraft.error='';
+  }
+  return;
+ }
  if(!db)return;
  if(e.target?.matches?.('.gb-bank-search')){
   filterBankPicker(e.target.closest('.gb-bank-picker'),e.target.value);
@@ -778,7 +919,8 @@ window.addEventListener('hashchange',route);
 matchMedia('(max-width: 760px)').addEventListener('change',()=>{if(db&&state.route==='dashboard')applyPanel();});
 window.addEventListener('gbplus-installed',()=>{if(db&&state.route==='settings')render();});
 window.addEventListener('storage',e=>{if(e.key===KEY&&!currentUser())toast('Dados alterados em outra aba. Atualize a página antes de continuar.');});
-modal.addEventListener('cancel',()=>{pendingGeneration=null;confirmAction=null;});
+modal.addEventListener('cancel',()=>{bankImportDraft=null;pendingGeneration=null;confirmAction=null;});
+modal.addEventListener('close',()=>{if(!modal.open)bankImportDraft=null;modal.classList.remove('gb-bank-import-modal');});
 
 function clearAccount(){
   db=null;repository?.dispose?.();closeModal();profileCpfStatus={userId:null,cpf:'',ready:false,loading:false,error:''};
