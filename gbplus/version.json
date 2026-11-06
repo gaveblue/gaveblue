@@ -1,13 +1,12 @@
 {
   "version": "2.4.9",
-  "build": 66,
+  "build": 67,
   "published_at": "2026-11-06",
-  "title": "Saldo geral e saldos por banco",
+  "title": "Saldos de contas com visual compacto",
   "notes": [
-    "O cartão principal mantém o saldo total de todas as contas.",
-    "Agora cada banco aparece com símbolo, nome da conta e seu saldo individual.",
-    "Toque em uma conta para consultar o extrato com fechamento diário.",
-    "Melhorias de legibilidade e rolagem dos saldos no celular."
+    "O saldo geral continua em destaque no início, reunindo todas as contas.",
+    "As contas aparecem abaixo do total em pílulas pequenas, com símbolo do banco e saldo.",
+    "Toque na pílula para consultar as movimentações e o extrato diário daquela conta."
   ],
   "assets": [
     "./index.html",
@@ -158,23 +157,18 @@
   "highlights": [
     {
       "icon": "wallet",
-      "title": "Saldo geral em destaque",
-      "description": "O saldo principal reúne o valor das contas do GB+."
+      "title": "Saldo total em destaque",
+      "description": "Confira o valor consolidado de suas contas em um só lugar."
     },
     {
       "icon": "bank",
-      "title": "Símbolo e saldo de cada conta",
-      "description": "Veja o ícone do banco, o nome e o saldo da conta logo abaixo do total."
+      "title": "Bancos em pílulas compactas",
+      "description": "Veja o símbolo e o saldo de cada conta sem ocupar espaço desnecessário."
     },
     {
       "icon": "calendar",
-      "title": "Extrato diário",
-      "description": "Toque na conta para conferir entradas, saídas e o saldo no fim do dia."
-    },
-    {
-      "icon": "check",
-      "title": "Sem alterar lançamentos",
-      "description": "Os valores usam os registros existentes e são exibidos somente para consulta."
+      "title": "Extrato com um toque",
+      "description": "Toque em uma conta para ver seus movimentos e saldos por dia."
     }
   ]
 }
