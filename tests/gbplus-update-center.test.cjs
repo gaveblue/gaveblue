@@ -83,5 +83,5 @@ test('user-facing release notes omit internal bank catalog counts and developer 
  const userCopy=[...(version.notes||[]),...(version.highlights||[]).flatMap(x=>[x.title,x.description])].join(' ');
  assert.doesNotMatch(userCopy,/\b(?:20|78|143)\b/);
  assert.doesNotMatch(userCopy,/\bCOMPE\b|\bISPB\b|compilação \d+|pré-selecionad/i);
- assert.ok(userCopy.includes('Pesquisar')||userCopy.includes('pesquisa'));
+ assert.ok(/saldo|contas|extrato/i.test(userCopy));
 });
