@@ -24,7 +24,8 @@ Registro de mudanças do aplicativo localizado em `gbplus/`. Toda versão e toda
 ### Verificações e evidências
 
 - Teste automatizável adicionado: `gbplus/tests/flow-visual-regression.mjs`, com cenário de baixas parciais, separação das situações e seleção de períodos.
-- Inspeção de sintaxe das funções de gráfico e fluxo executada na revisão; cálculo ilustrativo: receita de R$ 100,00 parcialmente recebida (R$ 25,00) mostra R$ 75,00 pendentes, sem duplicação.
+- Verificação de sintaxe das funções de gráfico e fluxo e execução simulada de **27 combinações** (3 tipos de gráfico × 3 granularidades × 3 situações), sem erro; não equivale a teste visual em dispositivo real.
+- Cálculo sintético conferido: receita de R$ 100,00 parcialmente recebida (R$ 25,00) mostra R$ 75,00 pendentes, sem duplicação.
 - **Execução em ambiente real com dispositivo móvel:** pendente.
 - **Teste visual em larguras de 320/360/390/430 px e desktop:** pendente.
 - **Teste interativo de Barras, Linhas, Resultado, Todos/Baixados/Pendentes e CSV com dados reais:** pendente.
