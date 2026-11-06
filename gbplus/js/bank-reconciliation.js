@@ -22,7 +22,15 @@ export function knownReconciliationKeys(db,accountId){
  const keys=new Set();
  for(const batch of history(db)){
   if(batch.accountId!==accountId||!isActive(batch))continue;
-  for(const row of batch.entries||[])keys.add(row.key);
+  for(const row of batch.entries||[])if(row.action!=='pending')keys.add(row.key);
+ }
+ return keys;
+}
+export function pendingReconciliationKeys(db,accountId){
+ const keys=new Set();
+ for(const batch of history(db)){
+  if(batch.accountId!==accountId||!isActive(batch))continue;
+  for(const row of batch.entries||[])if(row.action==='pending'&&!row.resolvedByBatchId)keys.add(row.key);
  }
  return keys;
 }
@@ -42,6 +50,7 @@ export function reviewSelection(preview,decisions,db,options={}){
  if(!db?.accounts?.some(a=>a.id===preview.accountId&&a.active!==false))throw Error('A conta bancária não está ativa.');
  const selection=decisions&&typeof decisions==='object'?decisions:{};
  const savedKeys=knownReconciliationKeys(db,preview.accountId);
+ const pendingKeys=pendingReconciliationKeys(db,preview.accountId);
  const chosenKeys=new Set(),chosenTargets=new Set(),entries=[];
  const usedTargets=new Set(history(db).filter(isActive).filter(b=>b.accountId===preview.accountId)
   .flatMap(b=>(b.entries||[]).filter(r=>r.action==='link').map(r=>r.targetType+':'+r.targetId)));
@@ -53,6 +62,7 @@ export function reviewSelection(preview,decisions,db,options={}){
   if(!['link','ignore','pending','create'].includes(choice.action))throw Error('Decisão de conciliação inválida.');
   const key=reconciliationRecordKey(row.record);
   if(savedKeys.has(key))throw Error('Movimento já registrado em uma importação anterior.');
+  if(choice.action==='pending'&&pendingKeys.has(key))throw Error('Este movimento já está pendente. Selecione uma decisão definitiva ou deixe sem decisão.');
   if(chosenKeys.has(key))throw Error('Movimentos iguais no arquivo precisam ser revisados individualmente em outro processo.');
   chosenKeys.add(key);
   const item={key,date:row.record.date,amount:row.record.amount,
@@ -128,12 +138,28 @@ export function applyReconciliationBatch(db,parsed,accountId,decisions,meta){
   db.titles.push(title);db.payments.push(payment);
   item.createdTitleId=titleId;item.createdPaymentId=paymentId;
  }
+ // The old pending record is preserved for audit and marked as resolved only
+ // when the new batch is confirmed. No duplicate entry is made for 'pending'.
+ for(const entry of batch.entries.filter(e=>e.action!=='pending')){
+  for(const oldBatch of history(db).filter(b=>b.accountId===accountId&&isActive(b))){
+   for(const prior of oldBatch.entries||[]){
+    if(prior.action==='pending'&&!prior.resolvedByBatchId&&prior.key===entry.key){
+     prior.resolvedByBatchId=batch.id;
+     prior.resolvedAt=batch.createdAt;
+    }
+   }
+  }
+ }
  db.bankImportBatches=[...history(db),batch];
  return {batch,totals:plan.totals};
 }
 export function undoReconciliationBatch(db,batchId,now=new Date().toISOString()){
  const batch=history(db).find(b=>b.id===batchId);
  if(!batch||batch.status!=='active')throw Error('Lote não encontrado ou já revertido.');
+ // A pending decision cannot be undone while its later resolution is active.
+ if(batch.entries.some(e=>e.action==='pending'&&e.resolvedByBatchId&&
+  history(db).some(other=>other.id===e.resolvedByBatchId&&isActive(other))))
+  throw Error('Este lote contém uma pendência resolvida posteriormente. Reverta primeiro o lote de resolução.');
  const created=batch.entries.filter(e=>e.action==='create');
  // Fail closed: no partial reversal. Edited/deleted records require manual review.
  for(const item of created){
@@ -153,6 +179,14 @@ export function undoReconciliationBatch(db,batchId,now=new Date().toISOString())
  const titleIds=new Set(created.map(e=>e.createdTitleId)),paymentIds=new Set(created.map(e=>e.createdPaymentId));
  db.payments=db.payments.filter(p=>!paymentIds.has(p.id));
  db.titles=db.titles.filter(t=>!titleIds.has(t.id));
+ for(const previous of history(db).filter(b=>b.accountId===batch.accountId&&isActive(b))){
+  for(const entry of previous.entries||[]){
+   if(entry.action==='pending'&&entry.resolvedByBatchId===batchId){
+    delete entry.resolvedByBatchId;
+    delete entry.resolvedAt;
+   }
+  }
+ }
  batch.status='reverted';
  batch.revertedAt=now;
  return batch;
