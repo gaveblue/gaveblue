@@ -6,7 +6,7 @@ Registro de mudanças do aplicativo localizado em `gbplus/`. Toda versão e toda
 
 **Autorização:** usuário autorizou expressamente publicação antecipada, condicionada à segurança.  
 **Decisão de segurança:** publicar **apenas a importação e a prévia OFX/CSV sem gravação**, mantendo a conciliação com alterações financeiras desligada.  
-**Situação neste commit:** publicação autorizada; aguardando merge e confirmação do GitHub Pages. **Não considerar homologação de gravação.**
+**Publicação confirmada:** GitHub Pages concluiu com `success` no run [42276855704](https://github.com/gaveblue/gaveblue/actions/runs/42276855704), implantando o merge do PR #73 (`48354b8b73b6d7336901834db434fc400c6a430d`). A liberação mantém escrita desativada. **Não considerar homologação da conciliação com gravação.**
 
 ### Disponível nesta liberação
 
