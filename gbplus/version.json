@@ -1,7 +1,7 @@
 {
   "version": "2.5.0",
   "build": 8,
-  "published_at": null,
+  "published_at": "2026-11-06T23:13:35Z",
   "title": "Conciliação assistida de extratos OFX/CSV com confirmação dupla",
   "notes": [
     "Extratos OFX/CSV podem ser revisados individualmente e vinculados a baixas ou transferências existentes.",
@@ -12,7 +12,8 @@
     "Testes financeiros e de persistência local aprovados em Node 22; contrato SQL de gravação cloud testado em transação fictícia com rollback obrigatório, sem dados persistidos.",
     "Conciliação é assistida, não automática. Compare atentamente saldo inicial e período: diferença de saldo bancário é indicativa, nunca ajusta contas automaticamente.",
     "XLSX, mapeamento manual de CSV não padrão e leitura de PDF seguem em backlog complementar para não bloquear ajustes da 2.5.1.",
-    "GitHub Actions ainda não inicia seus runners; bloqueio documentado na issue #75, distinto de deploy Pages."
+    "GitHub Actions ainda não inicia seus runners; bloqueio documentado na issue #75, distinto de deploy Pages.",
+    "Publicação confirmada pelo GitHub Pages no run 42310213381; merge PR #77. O núcleo OFX/CSV está disponível, enquanto formatos complementares permanecem fora do escopo na issue #78."
   ],
   "assets": [
     "./index.html",
@@ -181,9 +182,9 @@
       "description": "Compare saldos declarados no extrato, sem ajustes automáticos."
     }
   ],
-  "release_status": "development_assisted_reconciliation_homologation",
+  "release_status": "published_assisted_reconciliation_ci_pwa_pending",
   "homologation": {
-    "status": "tests_verified_functional_release_pending",
-    "notes": "Compilação 8: 10 suítes Node 22 reais aprovadas em ambiente de teste, regressões de criação/reversão e conta conferida; SQL de backend com identidade fictícia e rollback absoluto validou revisão/isolamento/idempotência. CI GitHub Actions e PWA autenticado em dispositivo real continuam pendentes."
+    "status": "core_functional_tests_passed_ci_and_pwa_pending",
+    "notes": "2.5.0 build 8 publicada após deploy GitHub Pages success (run 42310213381). 10 suítes Node reais passaram e teste transacional SQL com identidade fictícia foi revertido integralmente. Fluxo completo autenticado no PWA Android/iPhone e GitHub Actions não foram homologados; issue #75."
   }
 }
