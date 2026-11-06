@@ -13,7 +13,7 @@ const load=(name,deps,keys)=>{
 };
 const reconciler=load('bank-reconciliation',{},[
  'reviewSelection','applyReconciliationBatch','undoReconciliationBatch',
- 'knownReconciliationKeys','potentialExistingTitle','bankImportHistory'
+ 'knownReconciliationKeys','pendingReconciliationKeys','potentialExistingTitle','bankImportHistory'
 ]);
 const bank=load('bank-import-preview',{},['parseBankStatement','proposeReconciliation']);
 const store=load('store',{
