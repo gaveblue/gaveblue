@@ -70,3 +70,21 @@ Os **78 bancos** permanecem disponíveis pela busca (nome, apelido “Sicobi”,
 O módulo `banks.js` foi atualizado, junto aos importadores e ao cache do PWA; o manifesto permanece em **2.4.8**, com a compilação incrementada para **63**. A central de atualizações também passou a comparar a compilação, além da versão numérica, para aceitar ajustes sem pular a 2.4.9. Essa correção exige receber o JavaScript atualizado; em dispositivos com a versão anterior do atualizador pode ser necessário recarregar a página uma vez.
 
 **Homologação pendente:** confirmar a atualização no celular, o filtro dos 20 logos, a pesquisa por bancos fora do destaque e a seleção de bancos previamente vinculados. Nenhum registro financeiro, saldo ou fatura foi migrado ou alterado.
+
+## Compilação 64 — Faixa completa de bancos e pesquisa discreta
+
+**Decisão de produto:** manter todos os bancos no mesmo seletor horizontal, nos cadastros de novas contas, novos cartões e no primeiro acesso. A faixa não precisa exibir números de bancos, códigos de compensação ou instruções técnicas para o usuário final.
+
+- [x] Ícones de todas as instituições na faixa deslizável, sem recorte arbitrário.
+- [x] Ordem inicial dos mais conhecidos: **Banco do Brasil, Sicoob, Caixa, Bradesco, Itaú, C6 Bank e Nubank**; em seguida outros populares e o restante do catálogo em ordem alfabética.
+- [x] Remover o expansor “Ver lista completa de bancos”; manter o campo nativo de seleção fora da tela para acessibilidade e envio do formulário.
+- [x] Campo de busca com apenas **Pesquisar**, tanto em contas/cartões quanto no diretório Bancos.
+- [x] Retirar a contagem de instituições e a orientação técnica do seletor; contagem filtrada segue disponível apenas em aviso acessível a leitores de tela.
+- [x] A pesquisa por nome, código bancário, ISPB e apelido continua funcionando internamente, sem exibir essas instruções.
+- [x] A instituição anteriormente escolhida continua visível no resumo do campo mesmo quando não está entre as primeiras da faixa.
+- [x] Notas de versão no aplicativo reescritas em linguagem simples, sem números do catálogo nem decisões internas.
+- [x] Manter a mesma versão numérica **2.4.8**, avançando a compilação para **64**; atualizador por compilação e PWA sincronizados.
+
+**Não houve alteração de dados financeiros, contas, cartões ou saldos.** A nova faixa é um controle visual de seleção e não representa integração bancária.
+
+**Pendente:** homologação da rolagem horizontal e do teclado de pesquisa em Android/iPhone, especialmente nos formulários de cartões.
