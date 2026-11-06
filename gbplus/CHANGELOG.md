@@ -2,6 +2,40 @@
 
 Registro de mudanças do aplicativo localizado em `gbplus/`. Toda versão e toda compilação deve possuir uma entrada própria. **Uma alteração não deve ser considerada homologada apenas porque existe commit, teste escrito ou publicação.** A homologação exige evidências da execução e aprovação explícita.
 
+## [2.5.0 · compilação 6 — LIBERAÇÃO CONTROLADA SOMENTE LEITURA] — 2026-11-06
+
+**Autorização:** usuário autorizou expressamente publicação antecipada, condicionada à segurança.  
+**Decisão de segurança:** publicar **apenas a importação e a prévia OFX/CSV sem gravação**, mantendo a conciliação com alterações financeiras desligada.  
+**Situação neste commit:** publicação autorizada; aguardando merge e confirmação do GitHub Pages. **Não considerar homologação de gravação.**
+
+### Disponível nesta liberação
+
+- Acesso a **Contas bancárias → Importar extrato OFX/CSV** e no extrato individual.
+- Leitura do arquivo **localmente** (UTF-8 ou Windows-1252), seleção de conta, prévia, totais de créditos/débitos, sugestões de correspondências, ambiguidades, repetição no arquivo, filtros e paginação.
+- Nenhum envio do arquivo bancário à IA nem a serviços externos pela função de importação.
+- Mensagens visíveis de que a operação está em **modo somente leitura**, sem alteração de títulos, baixas, transferências ou saldos.
+
+### Proteção obrigatória da versão pública
+
+- `BANK_IMPORT_WRITES_ENABLED=false` fixado em `js/bank-import-ui.js`; a interface **não renderiza ações de conciliar, criar, confirmar gravação ou reverter lote**.
+- Defesa adicional em `js/app.js`: os comandos `bank-import-review`, `bank-import-commit` e `bank-import-undo` rejeitam a ação com a trava desativada. O restante do financeiro tradicional do GB+ permanece funcional.
+- A opção de habilitar gravação **não** está exposta em Configurações ou disponível para o usuário. Exigirá nova compilação com homologação das operações de persistência e reversão.
+- Criada suíte `tests/bank-import-readonly-release-regression.mjs`: verifica a ausência de botões de gravação e reversão, bloqueios no controlador, prévia funcional e manifest.
+- Verificações lógicas antes da liberação: **9/9** bloqueios e operações de leitura confirmados em simulação. As 7 suítes financeiras anteriores passaram em simulação JavaScript. **Não foram executadas em GitHub Actions/Node real** — job de regressão inicia sem etapas e falha.
+- Atualizados `index.html` (versão 2.5.0, build 6), `version.json` e cache PWA `gb-plus-shell-v2506`.
+
+### Homologação e limitações
+
+- **Homologação parcial com ressalvas:** validado por simulação lógica e bloqueio de gravação, não por teste real de navegadores/dispositivos/arquivos bancários completos.
+- [ ] Homologar upload em Android/desktop, modo escuro e PWA.
+- [ ] Obter execução Node real / CI verde, resolver problema do GitHub Actions.
+- [ ] Homologar conciliação de gravação em usuário e conta online **fictícios**, incluindo concorrência, idempotência, duplicidade, estorno e auditoria.
+- [ ] Habilitar escrita somente em build posterior com evidências de homologação; **esta build 6 não cria lançamentos a partir de extrato**.
+
+### Reversão segura
+
+**Backup de código anterior:** ramo `backup/gbplus-249-build68-before-250-readonly`, SHA `e6515126289997bb4ca7e8dff39eb73950315d91` (2.4.9, build 68). Em caso de problema de UI, fazer commit de reversão pontual; **não executar reset forçado nem apagar dados financeiros**. O rollback de código não remove quaisquer registros financeiros previamente gravados, mas o importador nesta build não cria registros.
+
 ## [2.5.0 · compilação 5 — validação e correção de pendências] — 2026-11-06
 
 **Situação:** código implementado no PR #73, em ramo de desenvolvimento; **não publicado nem homologado**.  
