@@ -1,7 +1,7 @@
 {
   "version": "2.5.0",
   "build": 6,
-  "published_at": null,
+  "published_at": "2026-11-06T19:08:22Z",
   "title": "Prévia bancária OFX/CSV — liberação controlada somente leitura",
   "notes": [
     "Liberação controlada autorizada pelo usuário em 06/11/2026; a interface de extratos é disponibilizada exclusivamente para leitura local OFX/CSV.",
@@ -9,7 +9,7 @@
     "Criação de receitas e despesas, conciliação confirmada e reversão de lotes pelo importador permanecem bloqueadas por trava dupla no controlador e na interface.",
     "A leitura do extrato não grava dados no financeiro, não altera saldos e não envia o arquivo bruto para o servidor ou para IA.",
     "Nove verificações da trava e oito suítes de regressão passaram em ambiente JavaScript de simulação; nenhum resultado Node real ou CI verde foi atribuído.",
-    "GitHub Actions para regressões ainda falha antes de executar testes; verificações em dispositivo real e armazenamento online são pendências conhecidas.",
+    "A implantação GitHub Pages inicial foi confirmada como success no run 42276855704; o workflow separado de regressões ainda falha antes de executar seus testes.",
     "A liberação não equivale à homologação da conciliação bancária com escrita. A ativação exigirá compilação separada e testes registrados."
   ],
   "assets": [
@@ -179,9 +179,9 @@
       "description": "Nenhuma baixa ou saldo é modificado durante a conferência bancária."
     }
   ],
-  "release_status": "publication_authorized_limited_readonly_deployment_pending",
+  "release_status": "published_limited_readonly",
   "homologation": {
     "status": "parcial_autorizada_com_restricao",
-    "notes": "Publicação antecipada autorizada pelo usuário, limitada a leitura OFX/CSV; 9 verificações do bloqueio passaram. Sem homologação real de gravação, Node CI ou dispositivos. Liberação de escrita BLOQUEADA."
+    "notes": "2.5.0 build 6 liberada em modo somente leitura por autorização do usuário. Deploy GitHub Pages 42276855704 concluído com sucesso. Oito suítes simuladas e nove verificações da trava passaram; testes Node CI, dispositivos e gravação real permanecem pendentes. Escrita bancária pelo importador BLOQUEADA."
   }
 }
