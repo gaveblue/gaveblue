@@ -1,13 +1,14 @@
 {
-  "version": "2.4.9",
-  "build": 68,
-  "published_at": "2026-11-06",
-  "title": "Fluxo de caixa responsivo com filtros por situação",
+  "version": "2.5.0",
+  "build": 1,
+  "published_at": null,
+  "title": "Importação bancária — seleção de conta e prévia OFX/CSV",
   "notes": [
-    "Fluxo de caixa com seletores Todos, Baixados e Pendentes em gráficos, tabela e exportação CSV.",
-    "Valores parcialmente baixados separados entre realizado e saldo pendente, sem duplicidade.",
-    "Gráficos SVG responsivos, legendas legíveis e tabelas com rolagem horizontal contida no cartão.",
-    "Janela do gráfico prioriza períodos próximos da data atual; a tabela continua com todos os períodos."
+    "Nova tela de importação a partir das Contas bancárias e do extrato individual.",
+    "Leitura local de OFX e CSV com seleção da conta, validação e resumo de créditos/débitos.",
+    "Identificação consultiva de possíveis vínculos, movimentos não localizados, ambiguidades e repetições.",
+    "Filtros e paginação de movimentos com apresentação adaptada ao celular.",
+    "Esta entrega não grava, não baixa títulos e não altera saldos; conciliação e persistência ficam para os próximos marcos da 2.5.0."
   ],
   "assets": [
     "./index.html",
@@ -154,7 +155,9 @@
     "./ai-lab/preview-card.css",
     "./ai-lab/file-stage.js",
     "./js/bank-import-preview.js",
-    "./js/daily-statement.js"
+    "./js/daily-statement.js",
+    "./bank-import.css",
+    "./js/bank-import-ui.js"
   ],
   "highlights": [
     {
@@ -173,13 +176,9 @@
       "description": "Toque em uma conta para ver seus movimentos e saldos por dia."
     }
   ],
-  "release_status": "publication_authorized_visual_homologation_pending",
+  "release_status": "development_homologation_pending",
   "homologation": {
-    "status": "parcial_autorizada_com_ressalvas",
-    "approved_for_publication_by": "responsavel_pelo_projeto",
-    "approved_for_publication_at": "2026-11-06",
-    "evidence": "27 combinacoes de montagem de graficos e verificacao sintetica de baixas parciais",
-    "pending": "testes visuais em aparelho real, tema escuro, CSV e experiencia do usuario",
-    "rollback_reference": "backup/gbplus-249-build67-before-build68"
+    "status": "pendente",
+    "notes": "Primeiro marco do desenvolvimento da 2.5.0. Sem implantação ou conciliação de produção."
   }
 }
