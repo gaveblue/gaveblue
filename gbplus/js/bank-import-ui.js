@@ -54,7 +54,7 @@ export function bankImportMarkup(db,draft){
     summary('Diferença indicativa',money(difference))+
    '</div>'+
    '<p class="gb-import-balance-note">Comparação indicativa, não uma conciliação confirmada: o saldo inicial do GB+ não tem data-base cadastrada. Confira se o extrato é da conta selecionada e se os períodos são equivalentes. Nenhum ajuste de saldo será feito.</p>';
- })():'<p class="gb-import-balance-note">Este arquivo não informa um saldo bancário final identificável. É possível conferir os movimentos, mas não calcular a diferença de saldos sem esse dado.</p>';
+ })():'<p class="gb-import-balance-note">'+esc(preview.warnings?.[0]||'Este arquivo não informa um saldo bancário final identificável. É possível conferir os movimentos, mas não calcular a diferença de saldos sem esse dado.')+'</p>';
  const saved=knownReconciliationKeys(db,preview.accountId);
  const outstanding=pendingReconciliationKeys(db,preview.accountId);
  const plan=draft.review;
