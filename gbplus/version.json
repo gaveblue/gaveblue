@@ -2,14 +2,14 @@
   "version": "2.5.0",
   "build": 7,
   "published_at": null,
-  "title": "Comparação indicativa de saldos bancários declarados no extrato",
+  "title": "Comparação indicativa de saldos de extratos OFX/CSV — somente leitura",
   "notes": [
-    "Em desenvolvimento: extratos OFX com LEDGERBAL ou CSV com coluna de saldo agora exibem o saldo declarado pelo banco e a diferença indicativa em relação ao saldo calculado pelo GB+ para a mesma data.",
-    "Não se presume o saldo bancário a partir de créditos e débitos; quando não há saldo declarado, o aplicativo deixa clara a limitação.",
-    "O saldo inicial do GB+ não possui data-base, portanto diferenças históricas são apenas indicativas e não autorizam ajustes automáticos.",
-    "A conciliação com gravação permanece desativada (BANK_IMPORT_WRITES_ENABLED=false) até homologação completa.",
-    "Testes automáticos de leitura, comparação, bloqueio de escrita e regressões financeiras foram ampliados. CI GitHub Actions continua sob investigação.",
-    "Esta compilação 7 não está publicada; a versão pública continua 2.5.0 build 6 somente leitura."
+    "Versão limitada de leitura: visualiza extratos OFX/CSV e compara saldo do banco declarado no arquivo com o saldo GB+ na data indicada.",
+    "Quando o CSV informa múltiplos saldos diferentes no mesmo dia sem horário, o GB+ não escolhe um valor arbitrário nem apresenta uma diferença potencialmente falsa.",
+    "Quando não existe saldo final declarado na data mais recente, a comparação de saldos é omitida com explicação.",
+    "Nenhuma alteração de títulos, pagamentos, transferências ou saldos é realizada pela importação; as funções de conciliar, criar ou reverter por extrato continuam bloqueadas.",
+    "Dez suítes regressivas concluídas com sucesso em Node 22 real; importação pelo seletor de arquivos e troca de contas testadas em Chromium 360/390/1200 px sem rolagem horizontal.",
+    "O workflow GitHub Actions ainda não inicia runners; ensaios com autenticação online e PWA instalado permanecem pendentes e estão documentados."
   ],
   "assets": [
     "./index.html",
@@ -178,9 +178,9 @@
       "description": "Nenhuma baixa ou saldo é modificado durante a conferência bancária."
     }
   ],
-  "release_status": "development_limited_readonly_homologation",
+  "release_status": "publication_authorized_limited_readonly_deployment_pending",
   "homologation": {
-    "status": "pendente",
-    "notes": "Build 7 em ramo de homologação. Testes lógicos da comparação de saldos aprovados; ainda pendentes teste Node via CI, navegador real e conta online de testes. Sem permissão de gravação."
+    "status": "parcial_autorizada_com_restricao",
+    "notes": "Publicação antecipada autorizada, limitada a leitura, comparação indicativa e proteção anti-duplicidade de saldos ambíguos. 10 testes Node reais e Chromium isolado passaram. Gravação por extrato BLOQUEADA; CI GitHub Actions e sessão online ainda pendentes."
   }
 }
