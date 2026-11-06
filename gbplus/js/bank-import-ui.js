@@ -16,7 +16,7 @@ const filtered=(preview,filter)=>filter==='all'?preview.rows:
  preview.rows.filter(row=>filter==='ambiguous'
   ?row.status==='ambiguous'||row.status==='possible_duplicate_in_file'
   :row.status===filter);
-const choiceCount=draft=>Object.values(draft?.decisions||{}).filter(d=>['link','ignore','pending'].includes(d?.action)).length;
+const choiceCount=draft=>Object.values(draft?.decisions||{}).filter(d=>['link','ignore','pending','create'].includes(d?.action)).length;
 const choiceValue=(choice,key)=>choice?.[key]??'';
 export function bankImportMarkup(db,draft){
  const accounts=(db?.accounts||[]).filter(account=>account.active!==false);
