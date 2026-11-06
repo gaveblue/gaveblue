@@ -1,13 +1,14 @@
 import {parseBankStatement,proposeReconciliation,BANK_IMPORT_MAX_BYTES} from './bank-import-preview.js?v=20261106-2501';
-import {bankImportMarkup,BANK_IMPORT_PAGE_SIZE} from './bank-import-ui.js?v=20261106-2501';
+import {bankImportMarkup,bankImportHistoryMarkup,BANK_IMPORT_PAGE_SIZE} from './bank-import-ui.js?v=20261106-2502';
+import {reviewSelection,applyReconciliationBatch,undoReconciliationBatch} from './bank-reconciliation.js?v=20261106-2502';
 import {filterFlowRows} from './gb-flow-filters.js?v=20261106-68';
 import {uid,today,money,dateLabel,cents,addMonths,validDate,generateTitles,addPayment,transfer,updateTitle,pending,flow,within} from './domain.js?v=20261105-72';
 import {KEY,INDICATORS,defaultPanel,parseBackup,backupText,MOBILE_SHORTCUTS,defaultMobileNav,effectiveMobileNav,validMobileNav,shouldOfferSetup} from './store.js?v=20261105-87';
 import {esc,icon,button,field,select,formFooter,download,csv,titleTable} from './ui.js?v=20261105-72';
-import {routes,dashboard,titlesView,partnersView,accountsView,categoriesView,flowView,reportsView,settingsView,notificationsView,filteredTitles,reportData} from './views.js?v=20261106-2501';
+import {routes,dashboard,titlesView,partnersView,accountsView,categoriesView,flowView,reportsView,settingsView,notificationsView,filteredTitles,reportData} from './views.js?v=20261106-2502';
 import {renderReactCharts,unmountReactCharts} from './gb-react-loader.js?v=20261105-45';
 import {mountNativeCharts} from './gb-charts-native.js?v=20261106-68';
-import {titleForm,partnerForm,accountForm,categoryForm,paymentForm,transferForm,titleDetail,customizeForm,accountDetail} from './forms.js?v=20261106-2501';
+import {titleForm,partnerForm,accountForm,categoryForm,paymentForm,transferForm,titleDetail,customizeForm,accountDetail} from './forms.js?v=20261106-2502';
 import {toggleEntryMenu,chooseEntryOption,syncEntrySelect,closeEntryMenus} from './entry-select.js?v=20261104-42';
 import {installGbControls,enhanceGbControls} from './custom-controls.js?v=20261104-42';
 import {expectedDates,recurrenceAnchor} from './gb-calendar-rules.js?v=20261105-47';
@@ -63,12 +64,16 @@ function confirm(title,message,callback){confirmAction=callback;openModal(title,
 // 2.5.0: preview only, never invokes commit(), Supabase or AI.
 function redrawBankImport(){
  if(!bankImportDraft)return;
+ const old=document.querySelector('#modal .modal-body');
+ const top=old?.scrollTop||0;
  openModal('Importar extrato bancário',bankImportMarkup(db,bankImportDraft));
+ const fresh=document.querySelector('#modal .modal-body');
+ if(fresh)fresh.scrollTop=bankImportDraft.step==='confirm'?0:top;
 }
 function openBankImport(accountId=''){
  const accounts=(db.accounts||[]).filter(a=>a.active!==false);
  const account=accounts.find(a=>a.id===accountId)||accounts[0];
- bankImportDraft={accountId:account?.id||'',parsed:null,preview:null,filename:'',accountHint:'',filter:'all',page:0,error:''};
+ bankImportDraft={accountId:account?.id||'',parsed:null,preview:null,filename:'',accountHint:'',filter:'all',page:0,error:'',decisions:{},step:'review',review:null};
  redrawBankImport();
 }
 // Guided onboarding is opt-in. No financial records are created before final confirmation.
@@ -409,7 +414,7 @@ const actions={
   'bank-import-open':el=>openBankImport(el.dataset.id||''),
   'bank-import-reset':()=>{
    if(!bankImportDraft)return;
-   Object.assign(bankImportDraft,{parsed:null,preview:null,filename:'',accountHint:'',filter:'all',page:0,error:''});
+   Object.assign(bankImportDraft,{parsed:null,preview:null,filename:'',accountHint:'',filter:'all',page:0,error:'',decisions:{},step:'review',review:null});
    redrawBankImport();
   },
   'bank-import-filter':el=>{
@@ -429,6 +434,36 @@ const actions={
    bankImportDraft.page=Math.max(0,bankImportDraft.page-1);redrawBankImport();
   },
   'bank-import-close':()=>closeModal(),
+  'bank-import-review':()=>{
+   if(!bankImportDraft?.preview)return;
+   try{
+    bankImportDraft.review=reviewSelection(bankImportDraft.preview,bankImportDraft.decisions,db);
+    bankImportDraft.error='';bankImportDraft.step='confirm';redrawBankImport();
+   }catch(error){bankImportDraft.error=error.message;redrawBankImport();}
+  },
+  'bank-import-back':()=>{
+   if(!bankImportDraft?.preview)return;
+   bankImportDraft.step='review';bankImportDraft.review=null;redrawBankImport();
+  },
+  'bank-import-commit':async ()=>{
+   const draft=bankImportDraft;
+   if(!draft?.preview||draft.step!=='confirm'||!draft.review)return;
+   const batchId=uid(),accountId=draft.accountId,parsed=draft.parsed;
+   const decisions=structuredClone(draft.decisions);
+   // Recompute against the current account data in the optimistic revision save.
+   await commit(d=>applyReconciliationBatch(d,parsed,accountId,decisions,{
+    propose:proposeReconciliation,batchId,now:new Date().toISOString()
+   }),'Decisões registradas. Nenhum saldo ou lançamento foi alterado.');
+  },
+  'bank-import-history':el=>openModal('Histórico de conciliações',bankImportHistoryMarkup(db,el.dataset.id)),
+  'bank-import-undo':el=>{
+   const batchId=el.dataset.id;
+   const batch=(db.bankImportBatches||[]).find(b=>b.id===batchId&&b.status==='active');
+   if(!batch)throw Error('Lote já revertido ou não encontrado.');
+   confirm('Reverter vínculos de conciliação?',
+    'O lote de '+batch.entries.length+' movimentos será marcado como revertido. As baixas e o saldo permanecerão iguais.',
+    ()=>commit(d=>{undoReconciliationBatch(d,batchId);},'Vínculos revertidos; valores financeiros preservados.'));
+  },
   'new-category':()=>openModal('Nova categoria',categoryForm()),
   'edit-category':el=>openModal('Editar categoria',categoryForm(db.categories.find(c=>c.id===el.dataset.id))),
   'new-transfer':()=>openModal('Transferir entre contas',transferForm(db)),
@@ -600,7 +635,23 @@ document.addEventListener('change',async e=>{
   if(!(db.accounts||[]).some(a=>a.id===id&&a.active!==false))return;
   draft.accountId=id;
   if(draft.parsed)draft.preview=proposeReconciliation(draft.parsed,db,id);
-  draft.filter='all';draft.page=0;redrawBankImport();return;
+  draft.filter='all';draft.page=0;draft.decisions={};draft.review=null;draft.step='review';redrawBankImport();return;
+ }
+ if(el.matches?.('[data-bank-review-index]')){
+  if(!draft.preview||draft.step!=='review')return;
+  const index=Number(el.dataset.bankReviewIndex);
+  if(!Number.isInteger(index)||!draft.preview.rows[index])return;
+  if(el.value==='skip')delete draft.decisions[index];
+  else if(['link','ignore','pending'].includes(el.value))draft.decisions[index]={action:el.value,target:''};
+  draft.review=null;draft.error='';redrawBankImport();return;
+ }
+ if(el.matches?.('[data-bank-review-target]')){
+  if(!draft.preview||draft.step!=='review')return;
+  const index=Number(el.dataset.bankReviewTarget),choice=draft.decisions[index];
+  if(!Number.isInteger(index)||!draft.preview.rows[index]||choice?.action!=='link')return;
+  const valid=draft.preview.rows[index].candidates.some(c=>c.type+':'+c.id===el.value);
+  choice.target=valid?el.value:'';
+  draft.review=null;draft.error='';return;
  }
  if(el.id!=='gb-import-file')return;
  const file=el.files?.[0];
@@ -615,7 +666,7 @@ document.addEventListener('change',async e=>{
   const preview=proposeReconciliation(parsed,db,draft.accountId);
   draft.parsed=parsed;draft.preview=preview;draft.filename=file.name.slice(0,140);
   draft.accountHint=parsed.accountHint||'';
-  draft.filter='all';draft.page=0;
+  draft.filter='all';draft.page=0;draft.decisions={};draft.review=null;draft.step='review';
  }catch(error){
   if(draft!==bankImportDraft||!modal.open)return;
   Object.assign(draft,{parsed:null,preview:null,filename:'',accountHint:'',error:error?.message||'Não foi possível ler o extrato.'});
