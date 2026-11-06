@@ -1,6 +1,6 @@
 # GB+ 2.5.0 — Protocolo de homologação
 
-**Estado durante a preparação da build 8:** build 7 pública somente leitura; build 8 contém conciliação assistida com confirmação dupla, testada em Node real e por transação SQL fictícia revertida, aguardando merge/deploy. A homologação integral em Android/iPhone e o workflow CI verde ainda não foram comprovados.
+**Estado atual:** build **2.5.0 compilação 8 publicada** após o deploy [42310213381](https://github.com/gaveblue/gaveblue/actions/runs/42310213381). A conciliação OFX/CSV assistida está habilitada, com revisão e confirmação dupla. **Não há homologação completa de PWA instalado nem CI GitHub Actions verde**; essas pendências não devem ser ocultadas.
 
 **Evidências de fechamento do núcleo:** [HOMOLOGACAO-2.5.0-RELATORIO-B8.md](./HOMOLOGACAO-2.5.0-RELATORIO-B8.md).
 
@@ -23,7 +23,7 @@ Consultar o relatório verificável em [HOMOLOGACAO-2.5.0-RELATORIO-B7.md](./HOM
 
 - Utilizar **conta de teste sem dados reais**, com saldo inicial de **R$ 100,00** e categorias fictícias `Recebimentos` e `Tarifas`. Não executar no financeiro pessoal do responsável ou de clientes.
 - Arquivos fictícios disponíveis em `tests/fixtures/extrato-homologacao-250.csv` e `tests/fixtures/extrato-homologacao-250.ofx`. **Use apenas um deles para a criação**, pois os dois representam os mesmos movimentos/IDs.
-- Abrir a futura prévia da build 7 quando houver ambiente de homologação disponível; uma ramificação/PR **não disponibiliza automaticamente uma página executável**.
+- Abrir a versão publicada 2.5.0 build 8 ou um ambiente de teste isolado; uma ramificação/PR **não disponibiliza automaticamente uma página executável**.
 - Fazer um backup antes da operação de gravação e documentar revisão, dispositivo e capturas de tela. Não incluir CPF, identificadores bancários ou dados pessoais nas evidências.
 
 ## Cenário reproduzível
