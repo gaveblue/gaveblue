@@ -931,3 +931,42 @@ body.auth-locked .mobile-nav-fade{display:none!important}
 @media(max-width:760px){
  .gb-bank-picker .gb-bank-shortcut{flex-basis:74px}
 }
+
+
+/* GB+ 2.4.9 — account icons in the existing balance card; daily ledger. */
+.stat.featured{min-width:0}
+.gb-balance-accounts{display:flex;gap:10px;align-items:flex-start;overflow-x:auto;max-width:100%;min-width:0;margin-top:16px;padding:12px 0 2px;border-top:1px solid #ffffff25;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
+.gb-balance-bank{appearance:none;border:0;background:transparent;color:inherit;display:flex;flex:0 0 64px;min-width:0;max-width:80px;align-items:center;flex-direction:column;gap:5px;cursor:pointer;padding:5px 2px;border-radius:12px;font:inherit}
+.gb-balance-bank:hover,.gb-balance-bank:focus-visible{background:#ffffff18;outline-offset:2px}
+.gb-balance-bank .gb-bank-badge{width:36px;height:36px;border-radius:11px}
+.gb-balance-bank>span:last-child{font-size:10px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.4}
+.gb-statement{min-width:0}
+.gb-statement-account{display:flex;flex-direction:column;gap:4px;padding:12px 0 18px}
+.gb-statement-account>span,.gb-statement-account>small{color:var(--muted)}
+.gb-statement-account>strong{font-size:clamp(23px,4vw,31px);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.gb-statement-totals{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:12px}
+.gb-statement-totals>div{border:1px solid var(--border);border-radius:13px;padding:12px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.gb-statement-totals small{color:var(--muted)}
+.gb-statement-totals strong{font-size:16px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.gb-statement-credit{color:#15803d}
+.gb-statement-debit{color:#c24136}
+.gb-statement-note{color:var(--muted);font-size:12px;line-height:1.55;margin:12px 0}
+.gb-statement-days{display:flex;flex-direction:column;gap:13px}
+.gb-statement-day{border:1px solid var(--border);border-radius:14px;overflow:hidden;min-width:0}
+.gb-statement-day-header{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px;background:var(--bg);font-size:12px;flex-wrap:wrap}
+.gb-statement-day-header time{font-weight:750}
+.gb-statement-day-header span{color:var(--muted)}
+.gb-statement-day-header strong{color:var(--ink)}
+.gb-statement-movements{display:flex;flex-direction:column}
+.gb-statement-movement{display:flex;align-items:center;gap:10px;padding:11px 12px;border-top:1px solid var(--border);min-width:0}
+.gb-statement-direction{width:27px;height:27px;display:grid;place-items:center;border-radius:9px;flex:none;background:var(--bg)}
+.gb-statement-direction.is-credit{color:#15803d}
+.gb-statement-direction.is-debit{color:#c24136}
+.gb-statement-description{display:flex;flex:1;flex-direction:column;min-width:0;gap:3px}
+.gb-statement-description strong{font-size:12px;overflow-wrap:anywhere}
+.gb-statement-description small{font-size:11px;color:var(--muted)}
+.gb-statement-movement>strong{font-size:12px;font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+.gb-statement-empty{padding:12px;color:var(--muted);font-size:12px}
+.gb-statement-day-footer{display:flex;gap:8px 14px;flex-wrap:wrap;align-items:center;padding:12px;background:var(--bg);border-top:1px solid var(--border);font-size:11px}
+.gb-statement-day-footer>strong{width:100%;text-align:right;font-size:13px;font-variant-numeric:tabular-nums}
+@media(max-width:480px){.gb-statement-totals{gap:7px}.gb-statement-totals>div{padding:9px}.gb-statement-totals strong{font-size:13px}.gb-statement-movement{gap:6px;padding:10px 8px}.gb-statement-day-footer{padding:10px}}
