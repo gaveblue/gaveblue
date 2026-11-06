@@ -14,7 +14,8 @@ function evaluate(name,deps,returnNames){
 const {expectedDates,recurrenceAnchor,nextBusinessDay,isBusinessDay}=evaluate('gb-calendar-rules',{},['expectedDates','recurrenceAnchor','nextBusinessDay','isBusinessDay']);
 const domain=evaluate('domain',{parseMoneyCentavos:()=>0,expectedDates,nextBusinessDay,recurrenceAnchor},['addMonths','updateTitle','generateTitles','flow']);
 const ai=evaluate('ai-scenarios',{},['readScenarioMonth','readScenarioAmount','answerScenario']);
-const {buildChartPayload}=evaluate('gb-charts-data',{},['buildChartPayload']);
+const {selectCashflowWindow}=evaluate('gb-flow-filters',{},['selectCashflowWindow']);
+const {buildChartPayload}=evaluate('gb-charts-data',{selectCashflowWindow},['buildChartPayload']);
 
 assert.equal(nextBusinessDay('2026-11-02'),'2026-11-03','Finados must be skipped');
 assert.equal(isBusinessDay('2026-11-15'),false);
