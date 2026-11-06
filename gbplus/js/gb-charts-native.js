@@ -95,7 +95,7 @@ export function mountNativeCharts(db,state,flowRows){
     };
     draw('30d');
   }
-  if(bars&&payload.bar.data.length){
+  if(bars){
     bars.hidden=false;
     const rows=payload.bar.data;
     const mode=['bars','lines','net'].includes(state?.flowChartMode)?state.flowChartMode:'bars';
