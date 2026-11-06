@@ -1,19 +1,16 @@
 {
   "version": "2.5.0",
-  "build": 8,
-  "published_at": "2026-11-06T23:13:35Z",
-  "title": "Conciliação assistida de extratos OFX/CSV com confirmação dupla",
+  "build": 9,
+  "published_at": null,
+  "title": "Mapeamento manual de extratos CSV de bancos",
   "notes": [
-    "Extratos OFX/CSV podem ser revisados individualmente e vinculados a baixas ou transferências existentes.",
-    "O usuário pode ignorar movimentações, mantê-las pendentes ou, mediante aprovação explícita, criar receitas/despesas já baixadas.",
-    "Nenhuma gravação acontece apenas ao importar arquivo: são exigidas revisão de decisões e confirmação da conta bancária; criação de títulos exige confirmação adicional do impacto no saldo.",
-    "A revisão refaz as correspondências no momento da gravação, impede reimportações registradas, bloqueia uso repetido de pagamentos e permite reverter lotes intactos.",
-    "Limites por lote de 200 decisões e 50 criações; importação local OFX/CSV até 8 MB e 20.000 linhas; arquivo bruto não é armazenado ou enviado à IA.",
-    "Testes financeiros e de persistência local aprovados em Node 22; contrato SQL de gravação cloud testado em transação fictícia com rollback obrigatório, sem dados persistidos.",
-    "Conciliação é assistida, não automática. Compare atentamente saldo inicial e período: diferença de saldo bancário é indicativa, nunca ajusta contas automaticamente.",
-    "XLSX, mapeamento manual de CSV não padrão e leitura de PDF seguem em backlog complementar para não bloquear ajustes da 2.5.1.",
-    "GitHub Actions ainda não inicia seus runners; bloqueio documentado na issue #75, distinto de deploy Pages.",
-    "Publicação confirmada pelo GitHub Pages no run 42310213381; merge PR #77. O núcleo OFX/CSV está disponível, enquanto formatos complementares permanecem fora do escopo na issue #78."
+    "Permite relacionar cabeçalhos fora do padrão a data, descrição, valor, entrada, saída, tipo, identificador e saldo.",
+    "Exibe amostra do arquivo e permite corrigir colunas reconhecidas automaticamente antes de revisar.",
+    "Suporta separadores vírgula, ponto e vírgula, tabulação e |, sem enviar o arquivo original para nuvem ou IA.",
+    "Protege contra associação de uma coluna a dois campos, índices inválidos e tipos de lançamento não reconhecidos.",
+    "Nenhum lançamento é gravado apenas por mapear: a prévia, a revisão individual e as confirmações explícitas continuam obrigatórias.",
+    "Catálogo de serviços, streaming e delivery com logos está planejado para a 2.5.1.",
+    "GitHub Actions ainda exige investigação administrativa; o teste ponta a ponta do PWA instalado não foi comprovado."
   ],
   "assets": [
     "./index.html",
@@ -182,9 +179,9 @@
       "description": "Compare saldos declarados no extrato, sem ajustes automáticos."
     }
   ],
-  "release_status": "published_assisted_reconciliation_ci_pwa_pending",
+  "release_status": "development_csv_manual_mapping_homologation_pending",
   "homologation": {
-    "status": "core_functional_tests_passed_ci_and_pwa_pending",
-    "notes": "2.5.0 build 8 publicada após deploy GitHub Pages success (run 42310213381). 10 suítes Node reais passaram e teste transacional SQL com identidade fictícia foi revertido integralmente. Fluxo completo autenticado no PWA Android/iPhone e GitHub Actions não foram homologados; issue #75."
+    "status": "pendente",
+    "notes": "Compilação 9: mapeamento CSV em desenvolvimento, sem mudança na função de gravação. Exigir regressões antes de liberar."
   }
 }
