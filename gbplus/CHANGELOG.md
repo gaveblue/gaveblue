@@ -23,7 +23,7 @@ Registro de mudanças do aplicativo localizado em `gbplus/`. Toda versão e toda
 
 ### Evidências e pendências
 
-- Testes unitários previstos em `tests/bank-import-preview-regression.mjs` para leitura, sinal, classificação, isolamento por conta, não mutação, segurança do HTML e paginação.
+- Testes regressivos adicionados em `tests/bank-import-preview-regression.mjs`. **22 verificações lógicas simuladas** da leitura OFX/CSV, sinais, correspondências por conta, não mutação, segurança HTML e paginação passaram em 06/11/2026; essa execução não substitui o teste em navegador real.
 - [ ] Registrar execução completa da regressão em Node.
 - [ ] Homologar upload e visualização em dispositivo real, incluindo tema escuro, PWA e contas com muitos lançamentos.
 - [ ] Validar OFX/CSV reais de instituições distintas e arquivos em outras codificações.
