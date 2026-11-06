@@ -10,7 +10,12 @@
 | **2.4.8** | GB+ AI: prévia visual e anexos | Prévia do lançamento integrada ao chat, vencimentos, edição antes de gravar e anexo OFX/CSV para leitura local. PDF e Excel ainda aguardam parser. | Validar no celular, conferir edição por comando e confirmar que nenhum arquivo cria lançamentos |
 | **2.4.9** | Saldos por conta e extrato diário | Ícones, nomes e saldos individuais abaixo do total; extrato por dia com abertura, créditos, débitos, fechamento e acumulados. Sem importação nem alteração de saldos. | Homologar no celular e conferir cálculos com baixas e transferências reais anonimizadas |
 | **2.5.0** | Importação e conciliação bancária | Interface de selecionar conta, importar OFX/CSV, visualizar movimentos, comparar com baixas/transferências, aprovar conciliação ou criação de títulos e conferir divergências | Testes ponta a ponta de autorização, RLS, idempotência/reimportação, reversão e ausência de dupla contabilização |
+| **2.5.1** | **Identificação de serviços e logos** | Catálogo compacto de streaming, delivery, música e serviços digitais no lançamento; busca, IDs estáveis, recorrência opcional e logos oficiais locais (com fallback) | Não criar títulos/recorrências ao selecionar; integrar com formulário, garantir compatibilidade e homologar logos, acessibilidade e salvamento; ver `PLANO-2.5.1-SERVICOS.md` |
 | **3.0.0** | **GB+ com IA financeira** | Assistente em linguagem natural para consultar e analisar dados, sugerir e preparar lançamentos; execução somente após prévia e confirmação do usuário | Política de segurança, permissões, histórico de ações, isolamento de dados, custo e testes de comandos reais |
+
+## 2.5.1 — Catálogo de serviços
+
+Após fechar a 2.5.0 com importação e mapeamento CSV, desenvolver identificação de serviços com logos discretos, começando por Netflix, HBO Max, iFood, 99Food e Plus Delivery. Catálogo detalhado e critérios estão em [`PLANO-2.5.1-SERVICOS.md`](PLANO-2.5.1-SERVICOS.md). **Este é um plano**, não confirmação de recurso publicado.
 
 ## 2.4.7 — Nova apresentação de atualizações
 
