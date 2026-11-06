@@ -1,9 +1,10 @@
+import {filterFlowRows} from './gb-flow-filters.js?v=20261106-68';
 import {uid,today,money,dateLabel,cents,addMonths,validDate,generateTitles,addPayment,transfer,updateTitle,pending,flow,within} from './domain.js?v=20261105-72';
 import {KEY,INDICATORS,defaultPanel,parseBackup,backupText,MOBILE_SHORTCUTS,defaultMobileNav,effectiveMobileNav,validMobileNav,shouldOfferSetup} from './store.js?v=20261105-87';
 import {esc,icon,button,field,select,formFooter,download,csv,titleTable} from './ui.js?v=20261105-72';
-import {routes,dashboard,titlesView,partnersView,accountsView,categoriesView,flowView,reportsView,settingsView,notificationsView,filteredTitles,reportData} from './views.js?v=20261106-94';
+import {routes,dashboard,titlesView,partnersView,accountsView,categoriesView,flowView,reportsView,settingsView,notificationsView,filteredTitles,reportData} from './views.js?v=20261106-68';
 import {renderReactCharts,unmountReactCharts} from './gb-react-loader.js?v=20261105-45';
-import {mountNativeCharts} from './gb-charts-native.js?v=20261105-75';
+import {mountNativeCharts} from './gb-charts-native.js?v=20261106-68';
 import {titleForm,partnerForm,accountForm,categoryForm,paymentForm,transferForm,titleDetail,customizeForm,accountDetail} from './forms.js?v=20261105-90';
 import {toggleEntryMenu,chooseEntryOption,syncEntrySelect,closeEntryMenus} from './entry-select.js?v=20261104-42';
 import {installGbControls,enhanceGbControls} from './custom-controls.js?v=20261104-42';
@@ -35,7 +36,7 @@ function firstStepsDismissed(){
 }
 let profileCpfStatus={userId:null,cpf:'',ready:false,loading:false,error:''};
 
-const state={route:'dashboard',period:'all',range:{},query:'',status:'',type:'',partner:'',category:'',partnerQuery:'',granularity:'month',flowChartMode:'bars',report:'payable',reportPartner:'',moreFilters:false,launchSelected:[],launchStatusOpen:false,launchSearchOpen:false};
+const state={route:'dashboard',period:'all',range:{},query:'',status:'',type:'',partner:'',category:'',partnerQuery:'',granularity:'month',flowChartMode:'bars',flowStatus:'all',report:'payable',reportPartner:'',moreFilters:false,launchSelected:[],launchStatusOpen:false,launchSearchOpen:false};
 const modal=document.querySelector('#modal');
 // Desktop-only sidebar preference; changing it never touches the finance database.
 const sidebarPreferenceKey='gbplus-sidebar-hidden-v1';
@@ -112,7 +113,8 @@ if(state.route==='dashboard'&&!firstStepsDismissed()){
  }
 }enhanceGbControls(document.querySelector('#main'));if(state.route==='profile'){initializeProfileDirtyState();if(!profileCpfStatus.ready&&!profileCpfStatus.loading&&!profileCpfStatus.error)void loadRegisteredCpf();}updateConnection();if(state.route==='dashboard')applyPanel();if(['dashboard','flow','provisions'].includes(state.route)){
   try{
-   const rows=flow(db,state.range,state.route==='dashboard'?'month':state.granularity);
+   const allRows=flow(db,state.range,state.route==='dashboard'?'month':state.granularity);
+   const rows=state.route==='dashboard'?allRows:filterFlowRows(allRows,state.flowStatus);
    mountNativeCharts(db,state,rows);
    renderReactCharts(db,state,rows);
   }catch(error){console.warn('GB+ gráficos indisponíveis; financeiro mantido.',error);}
@@ -531,6 +533,7 @@ const actions={
   'back-generation':()=>{if(pendingGeneration?.formHTML){openModal('Novo lançamento',pendingGeneration.formHTML);pendingGeneration=null;}},
   granularity:el=>{state.granularity=el.dataset.value;render();},
   'flow-chart-mode':el=>{const mode=el.dataset.mode;if(!['bars','lines','net'].includes(mode))return;state.flowChartMode=mode;render();},
+  'flow-status':el=>{const next=el.dataset.value;if(!['all','paid','pending'].includes(next))return;state.flowStatus=next;render();},
   'choose-bank':el=>{
    const select=el.closest('.gb-bank-picker')?.querySelector('select[name="bankId"]');
    if(!select||!findBank(db,el.dataset.bankId))return;
@@ -544,7 +547,7 @@ const actions={
   backup:()=>{download(`gb-plus-backup-${today()}.json`,backupText(db),'application/json');toast('Backup exportado. Guarde-o em um local seguro.');},
   restore:()=>document.querySelector('#backup-input').click(),
   'export-titles':()=>{const rows=filteredTitles(db,state);download(`gb-plus-titulos-${today()}.csv`,csv([['Descrição','Tipo','Parceiro','Categoria','Documento','Emissão','Vencimento','Valor (R$)','Pendente (R$)'],...rows.map(t=>[t.description,t.type==='income'?'Receita':'Despesa',db.partners.find(p=>p.id===t.partnerId)?.name||'',db.categories.find(c=>c.id===t.categoryId)?.name,t.document,dateLabel(t.issue),dateLabel(t.due),(t.amount/100).toFixed(2).replace('.',','),(pending(db,t)/100).toFixed(2).replace('.',',')])]),'text/csv;charset=utf-8');},
-  'export-flow':()=>download(`gb-plus-fluxo-${today()}.csv`,csv([['Período','Entradas previstas','Saídas previstas','Entradas realizadas','Saídas realizadas'],...flow(db,state.range,state.granularity).map(r=>[dateLabel(r.date),...[r.expectedIn,r.expectedOut,r.actualIn,r.actualOut].map(v=>(v/100).toFixed(2).replace('.',','))])]),'text/csv;charset=utf-8'),
+  'export-flow':()=>download(`gb-plus-fluxo-${today()}.csv`,csv([['Período','Entradas previstas','Saídas previstas','Entradas realizadas','Saídas realizadas'],...filterFlowRows(flow(db,state.range,state.granularity),state.flowStatus).map(r=>[dateLabel(r.date),...[r.expectedIn,r.expectedOut,r.actualIn,r.actualOut].map(v=>(v/100).toFixed(2).replace('.',','))])]),'text/csv;charset=utf-8'),
   'export-report':()=>download(`gb-plus-relatorio-${state.report}-${today()}.csv`,csv(reportData(db,state)),'text/csv;charset=utf-8'),
   install:()=>{if(isInstalledApp()){toast('GB+ já está instalado neste dispositivo.');return;}if(matchMedia('(max-width:760px) and (pointer:coarse)').matches){location.assign('./instalar.html');return;}showInstallHelp();},
 };
