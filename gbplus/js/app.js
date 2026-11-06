@@ -848,7 +848,7 @@ matchMedia('(max-width: 760px)').addEventListener('change',()=>{if(db&&state.rou
 window.addEventListener('gbplus-installed',()=>{if(db&&state.route==='settings')render();});
 window.addEventListener('storage',e=>{if(e.key===KEY&&!currentUser())toast('Dados alterados em outra aba. Atualize a página antes de continuar.');});
 modal.addEventListener('cancel',()=>{bankImportDraft=null;pendingGeneration=null;confirmAction=null;});
-modal.addEventListener('close',()=>{bankImportDraft=null;modal.classList.remove('gb-bank-import-modal');});
+modal.addEventListener('close',()=>{if(!modal.open)bankImportDraft=null;modal.classList.remove('gb-bank-import-modal');});
 
 function clearAccount(){
   db=null;repository?.dispose?.();closeModal();profileCpfStatus={userId:null,cpf:'',ready:false,loading:false,error:''};
