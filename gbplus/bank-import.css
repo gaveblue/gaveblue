@@ -75,3 +75,32 @@
 .gb-statement-import{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 0;border-bottom:1px solid var(--border)}
 .gb-statement-import small{font-size:10px;color:var(--muted)}
 .gb-statement-import .button{min-height:38px}
+
+
+/* Build 2 — decisions, confirmation and audit history. */
+.gb-import-review-controls{display:grid;grid-template-columns:minmax(0,1fr);gap:10px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
+.gb-import-decision-label{display:grid;gap:6px;min-width:0;color:var(--muted);font-size:10px;font-weight:600}
+.gb-import-decision-label>.gb-import-select{font-size:11px;line-height:1.4;width:100%;min-width:0}
+.gb-import-target{border-style:solid}
+.gb-import-locked{margin:10px 0 0;font-size:10px;color:var(--muted);line-height:1.4;padding:9px 11px;background:var(--soft);border-radius:8px}
+.gb-import-review-heading{display:grid;gap:7px}
+.gb-import-review-heading h3{font-size:17px}
+.gb-import-review-heading p{color:var(--muted);font-size:11px;line-height:1.5}
+.gb-import-confirm-rows{display:grid;gap:5px;max-height:330px;overflow-y:auto;overscroll-behavior:contain}
+.gb-import-confirm-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px 10px;padding:9px 11px;border:1px solid var(--border);border-radius:10px}
+.gb-import-confirm-row span{font-size:10px;line-height:1.5;overflow-wrap:anywhere}
+.gb-import-confirm-row b{font-size:11px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.gb-import-confirm-row small{font-size:10px;color:var(--muted);grid-column:1/-1}
+.gb-import-footer .button:disabled{opacity:.42;cursor:not-allowed}
+.gb-import-history{display:grid;gap:12px}
+.gb-import-history-row{padding:14px;border:1px solid var(--border);border-radius:12px;display:grid;gap:11px}
+.gb-import-history-row strong{font-size:12px}
+.gb-import-history-row p,.gb-import-history-row small{font-size:11px;color:var(--muted)}
+.gb-import-history-row>.button{justify-self:start;white-space:normal;text-align:center}
+.gb-statement-links{display:flex;gap:8px;flex-wrap:wrap;padding:8px 0}
+@media (max-width:760px){
+ .gb-import-review-controls{gap:9px}
+ .gb-import-footer .button{min-width:0;flex:1 1 135px;white-space:normal}
+ .gb-import-confirm-row{grid-template-columns:minmax(0,1fr)}
+ .gb-import-confirm-row b{justify-self:end}
+}
