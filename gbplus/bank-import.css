@@ -70,3 +70,8 @@
  .gb-import-footer{flex-wrap:wrap}
 }
 @media(max-width:360px){.gb-import-row-body{flex-wrap:wrap}.gb-import-row-body>b{width:100%;text-align:right}}
+
+/* Acesso à importação a partir do extrato diário. */
+.gb-statement-import{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 0;border-bottom:1px solid var(--border)}
+.gb-statement-import small{font-size:10px;color:var(--muted)}
+.gb-statement-import .button{min-height:38px}
