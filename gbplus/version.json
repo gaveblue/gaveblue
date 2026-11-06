@@ -1,14 +1,14 @@
 {
   "version": "2.5.0",
-  "build": 1,
+  "build": 2,
   "published_at": null,
-  "title": "Importação bancária — seleção de conta e prévia OFX/CSV",
+  "title": "Conciliação bancária com confirmação individual e histórico",
   "notes": [
-    "Nova tela de importação a partir das Contas bancárias e do extrato individual.",
-    "Leitura local de OFX e CSV com seleção da conta, validação e resumo de créditos/débitos.",
-    "Identificação consultiva de possíveis vínculos, movimentos não localizados, ambiguidades e repetições.",
-    "Filtros e paginação de movimentos com apresentação adaptada ao celular.",
-    "Esta entrega não grava, não baixa títulos e não altera saldos; conciliação e persistência ficam para os próximos marcos da 2.5.0."
+    "Selecione conciliar com uma baixa ou transferência existente, ignorar ou manter pendente em cada movimento.",
+    "Revisão e confirmação final antes de salvar exclusivamente os vínculos e decisões, sem alterar saldos.",
+    "Prevenção de vínculos duplicados com a mesma baixa, duplicações de arquivo e reimportação.",
+    "Histórico de conciliações por conta e reversão auditável sem estorno financeiro.",
+    "Persistência das decisões aprovadas no documento financeiro com controle de revisão; não armazena arquivo bruto."
   ],
   "assets": [
     "./index.html",
@@ -157,7 +157,8 @@
     "./js/bank-import-preview.js",
     "./js/daily-statement.js",
     "./bank-import.css",
-    "./js/bank-import-ui.js"
+    "./js/bank-import-ui.js",
+    "./js/bank-reconciliation.js"
   ],
   "highlights": [
     {
@@ -179,6 +180,6 @@
   "release_status": "development_homologation_pending",
   "homologation": {
     "status": "pendente",
-    "notes": "Primeiro marco do desenvolvimento da 2.5.0. Sem implantação ou conciliação de produção."
+    "notes": "Compilação 2 em desenvolvimento; confirmação e reversão requerem testes completos no PWA antes da liberação."
   }
 }
