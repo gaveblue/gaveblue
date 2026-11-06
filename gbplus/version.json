@@ -1,9 +1,12 @@
 {
   "version": "2.4.8",
-  "build": 62,
+  "build": 63,
   "published_at": "2026-11-05",
-  "title": "GB+ AI com prévia visual e anexos preparados",
+  "title": "GB+ AI e seleção simplificada de bancos",
   "notes": [
+    "Cadastro de contas e cartões simplificado: apenas 20 bancos conhecidos aparecem inicialmente na faixa de ícones.",
+    "Busca por nome, código bancário ou ISPB continua acessando as 78 instituições cadastradas, incluindo bancos personalizados.",
+    "Lista completa de bancos e instituições financeiras permanece disponível em Bancos e instituições.",
     "Prévia do lançamento integrada à conversa, com detalhes e vencimentos antes de confirmar.",
     "Botões Detalhar, Editar, Descartar e Confirmar e gravar em estilo minimalista, preservando a confirmação antes de qualquer gravação.",
     "Edição de descrição, tipo, valor, vencimento, periodicidade, quantidade e parceiro diretamente na prévia.",
@@ -157,6 +160,11 @@
     "./js/bank-import-preview.js"
   ],
   "highlights": [
+    {
+      "icon": "bank",
+      "title": "Escolha seu banco com mais facilidade",
+      "description": "Ao criar uma conta ou cartão, apenas 20 instituições conhecidas aparecem em destaque. Use a busca para encontrar qualquer uma das 78."
+    },
     {
       "icon": "sparkles",
       "title": "Uma conversa mais intuitiva",
