@@ -1,6 +1,6 @@
 # GB+ 2.4.9 — Saldos por conta e extrato diário
 
-**Código:** versão 2.4.9 · compilação 66 · 06/11/2026.
+**Código:** versão 2.4.9 · compilação 67 · 06/11/2026.
 **Status:** implementado no GitHub, pendente de publicação e homologação em navegador/aparelho real.
 
 ## O que mudou
@@ -26,7 +26,7 @@
 - js/views.js: ícones das contas sob o saldo no dashboard e na visão de fluxo.
 - js/forms.js: extrato por dia no modal de movimentações.
 - styles.css: rolagem horizontal e extrato responsivo.
-- version.json, index.html e sw.js: versão 2.4.9, build 66.
+- version.json, index.html e sw.js: versão 2.4.9, build 67.
 - tests/gbplus-daily-statement.test.cjs: onze testes simulados aprovados.
 
 ## Homologação pendente
@@ -49,3 +49,19 @@ A 2.5.0 implementará a importação manual de extratos e a conciliação bancá
 - Rolagem horizontal para várias contas, sem transformar a interface em uma lista extensa.
 - Os valores são calculados com a mesma função de saldo usada na tela de contas.
 - Cache do PWA atualizado e 11 testes específicos simulados aprovados.
+
+## Compilação 67 — Pílulas compactas de bancos
+
+- [x] Transformar a apresentação do saldo individual em pílulas pequenas e arredondadas, seguindo a referência visual fornecida.
+- [x] Mostrar somente o logo circular do banco e o valor da conta lado a lado. O nome completo da conta permanece no título e na descrição acessível.
+- [x] Preservar o saldo consolidado de todas as contas no topo do cartão preto, sem alternar o valor ao selecionar uma pílula.
+- [x] Preservar o comportamento existente: tocar na pílula abre **Movimentações da conta**, com o extrato diário.
+- [x] Manter a rolagem horizontal, o formato responsivo, o suporte a contas de diferentes bancos e o tratamento de saldo negativo.
+- [x] Atualizar manifesto para 2.4.9 / build 67, versões dos recursos e cache do PWA.
+- [x] Executar 21 testes simulados específicos de extrato, seleção, apresentação e atualização, sem erros.
+- [ ] Homologar a legibilidade das pílulas com diferentes valores e o clique no Android/iOS.
+- [ ] Confirmar que a versão 67 foi entregue pelo site em produção.
+
+**Fora do escopo desta compilação:** seleção de conta para substituir o saldo principal, botão de voltar, modificações de extrato e novas funções financeiras. A solicitação mais recente foi manter o clique para abrir as movimentações.
+
+Nenhum saldo, pagamento, transferência ou conta foi alterado na base de dados. O ajuste foi somente de apresentação, testes, manifesto e cache.
