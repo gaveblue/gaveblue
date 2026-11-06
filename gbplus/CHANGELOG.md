@@ -10,6 +10,7 @@ Registro de mudanças do aplicativo localizado em `gbplus/`. Toda versão e toda
 - Adicionada leitura opcional do saldo final **realmente informado** no OFX (`LEDGERBAL/BALAMT/DTASOF`) e na coluna de saldo do CSV, quando presente.
 - Exibida comparação indicativa entre saldo informado pelo banco e saldo calculado pelo GB+ **na mesma data**, sem modificar o saldo inicial ou gerar conciliação automática.
 - Quando o arquivo não informa saldo, a prévia explica que a diferença de saldos não pode ser calculada sem essa informação; não inventa valores.
+- CSV com múltiplos saldos **distintos na data mais recente**, sem horário/ordem confiável, não escolhe um saldo arbitrário; omite a diferença e explica a ambiguidade. Saldos informados apenas em datas anteriores também não são tratados como fechamento atual.
 - Alerta visível de que o saldo inicial cadastrado não tem data-base, impedindo afirmar equivalência histórica sem revisão.
 - Ajustados os textos da prévia para não sugerir criação de títulos/baixas enquanto `BANK_IMPORT_WRITES_ENABLED=false`.
 - Acrescentada `tests/bank-import-balance-regression.mjs` e chamada no workflow CI. Cache PWA, CSS, JavaScript e manifest versionados como build 7, preservando a trava de gravação.
@@ -18,6 +19,7 @@ Registro de mudanças do aplicativo localizado em `gbplus/`. Toda versão e toda
 - Recuperado o artefato `github-pages` da implantação oficial [42277197480](https://github.com/gaveblue/gaveblue/actions/runs/42277197480) (build 6). Código local da build 7 confrontado com blobs Git pelo `git hash-object`.
 - **10 suítes de regressão aprovadas em Node 22.16.0 real, zero falhas**: financeiro, gráficos, importação, codec, trava de publicação, leitura de saldo, conciliação, criação, pendências e armazenamento local/reversão.
 - Prévia renderizada em **Chromium real**, no componente isolado, em 360 px claro, 390 px escuro e 1200 px claro, sem rolagem horizontal nem controles de gravação.
+- Executado também **upload real de CSV pelo input de arquivo em Chromium**, com troca de conta, verificação de saldo comparativo e bloqueio de saldos intradiários ambíguos nas três larguras. Sem backend/autenticação nesse ensaio.
 - SQL de metadados em Supabase conferiu RLS de `gbplus_documents`, `auth.uid() = user_id` para SELECT, ausência de EXECUTE para anon na função `gbplus_save` e controle de revisão transacional. **Sem consulta ou modificação de dados financeiros reais.**
 
 ### Ainda bloqueado
