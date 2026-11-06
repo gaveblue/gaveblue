@@ -43,7 +43,7 @@ const repeat=parser.parseBankCsv('Data;Descrição;Valor\n06/11/2026;Tarifa;-5,0
 assert.equal(parser.proposeReconciliation(repeat,db,'bank-a').rows[1].status,'possible_duplicate_in_file');
 const initial=ui.bankImportMarkup(db,{accountId:'bank-a',preview:null,error:''});
 assert(initial.includes('id="gb-import-file"'));
-assert(initial.includes('read')===false||initial.includes('read')); // Smoke test for render without browser.
+assert(initial.includes('Somente visualização'),'Import must be read-only');
 const after=ui.bankImportMarkup(db,{accountId:'bank-a',preview,filename:'&<script>.csv',filter:'all',page:0});
 assert(after.includes('Possível vínculo'));
 assert(after.includes('&amp;&lt;script&gt;.csv'));
