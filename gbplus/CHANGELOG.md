@@ -2,6 +2,25 @@
 
 Registro de mudanças do aplicativo localizado em `gbplus/`. Toda versão e toda compilação deve possuir uma entrada própria. **Uma alteração não deve ser considerada homologada apenas porque existe commit, teste escrito ou publicação.** A homologação exige evidências da execução e aprovação explícita.
 
+## [2.5.0 · compilação 9 — MAPEAMENTO MANUAL DE CSV] — 2026-11-06
+
+**Situação:** preparação no ramo `feature/gbplus-250-b9-csv-mapeamento`, aguardando confirmação de implantação. Esta compilação **não altera** as regras de gravação, baixa, reversão ou isolamentos financeiros aprovadas na build 8.
+
+### Entregas
+- Agora existe etapa de **mapeamento manual** quando o banco entrega arquivo CSV com cabeçalhos desconhecidos. O usuário associa as colunas de data, descrição, valor com sinal (e natureza) **ou** crédito/débito separados; campos opcionais: identificador e saldo.
+- Uma amostra local das primeiras linhas permite verificar os valores antes da prévia; os conteúdos são escapados para HTML. O usuário pode clicar em **Ajustar colunas** na prévia mesmo quando o mapeamento automático funciona.
+- Leitura de delimitador `;`, `,`, tabulação e `|`. Colunas inexistentes, campos obrigatórios faltantes, índices fora do intervalo, mapeamentos repetidos, tipos desconhecidos e CSV com valores conflitantes são rejeitados com explicação.
+- O arquivo bruto permanece **apenas na memória da modal e no dispositivo** enquanto a revisão estiver aberta. Não é enviado à IA nem ao Supabase. Fechar/trocar arquivo descarta a cópia.
+- Nenhuma gravação ao mapear/gerar prévia. O usuário ainda deve escolher decisões, revisar, confirmar a conta e autorizar separadamente qualquer título novo que altere o saldo.
+- Corrigido texto desatualizado do extrato bancário para explicar que a prévia é local e a gravação só acontece após confirmação. Cache do PWA e manifest atualizados para build 9.
+- **XLSX, PDF, data-base histórica e auditoria completa PWA/CI** permanecem fora deste fechamento, documentados nas issues #78 e #75. A 2.5.1 receberá planejamento próprio de serviços.
+
+### Testes e limitações
+- Criada `tests/bank-import-mapping-regression.mjs` e adicionada ao workflow financeiro, cobrindo assinaturas de CSV, mapeamento duplicado, formato de valores, amostra maliciosa, sinais D/C, arquivo antigo e ausência de mutação financeira.
+- A nova suíte foi exercitada em JavaScript V8, com asserções aprovadas. **A execução Node integral e testes de navegador devem ser registrados separadamente**; nunca deduzir CI verde apenas da presença da suíte.
+- GitHub Actions ainda falha antes da alocação do runner (issue #75). Isso não significa que o GitHub Pages falhou.
+- Não classificar toda a homologação de dispositivos/PWA como concluída antes de evidência.
+
 ## [2.5.0 · compilação 8 — FECHAMENTO DO NÚCLEO OFX/CSV] — 2026-11-06
 
 **Publicação confirmada:** PR [#77](https://github.com/gaveblue/gaveblue/pull/77) mesclado e deploy GitHub Pages [42310213381](https://github.com/gaveblue/gaveblue/actions/runs/42310213381) concluído com `success` (commit `b868eb6792d6bf8db64ec372ab3c3f01fda3acf9`). **Conciliação assistida disponível**, sem confundir os 10 testes Node reais com GitHub Actions aprovado ou homologação completa do PWA.
