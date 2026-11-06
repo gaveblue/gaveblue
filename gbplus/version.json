@@ -1,16 +1,18 @@
 {
   "version": "2.5.0",
-  "build": 7,
-  "published_at": "2026-11-06T21:48:07Z",
-  "title": "Comparação indicativa de saldos de extratos OFX/CSV — somente leitura",
+  "build": 8,
+  "published_at": null,
+  "title": "Conciliação assistida de extratos OFX/CSV com confirmação dupla",
   "notes": [
-    "Versão limitada de leitura: visualiza extratos OFX/CSV e compara saldo do banco declarado no arquivo com o saldo GB+ na data indicada.",
-    "Quando o CSV informa múltiplos saldos diferentes no mesmo dia sem horário, o GB+ não escolhe um valor arbitrário nem apresenta uma diferença potencialmente falsa.",
-    "Quando não existe saldo final declarado na data mais recente, a comparação de saldos é omitida com explicação.",
-    "Nenhuma alteração de títulos, pagamentos, transferências ou saldos é realizada pela importação; as funções de conciliar, criar ou reverter por extrato continuam bloqueadas.",
-    "Dez suítes regressivas concluídas com sucesso em Node 22 real; importação pelo seletor de arquivos e troca de contas testadas em Chromium 360/390/1200 px sem rolagem horizontal.",
-    "O workflow GitHub Actions ainda não inicia runners; ensaios com autenticação online e PWA instalado permanecem pendentes e estão documentados.",
-    "Publicação GitHub Pages confirmada no run 42299501899 em 06/11/2026; comparação de saldos segue indicativa, sem escrita financeira."
+    "Extratos OFX/CSV podem ser revisados individualmente e vinculados a baixas ou transferências existentes.",
+    "O usuário pode ignorar movimentações, mantê-las pendentes ou, mediante aprovação explícita, criar receitas/despesas já baixadas.",
+    "Nenhuma gravação acontece apenas ao importar arquivo: são exigidas revisão de decisões e confirmação da conta bancária; criação de títulos exige confirmação adicional do impacto no saldo.",
+    "A revisão refaz as correspondências no momento da gravação, impede reimportações registradas, bloqueia uso repetido de pagamentos e permite reverter lotes intactos.",
+    "Limites por lote de 200 decisões e 50 criações; importação local OFX/CSV até 8 MB e 20.000 linhas; arquivo bruto não é armazenado ou enviado à IA.",
+    "Testes financeiros e de persistência local aprovados em Node 22; contrato SQL de gravação cloud testado em transação fictícia com rollback obrigatório, sem dados persistidos.",
+    "Conciliação é assistida, não automática. Compare atentamente saldo inicial e período: diferença de saldo bancário é indicativa, nunca ajusta contas automaticamente.",
+    "XLSX, mapeamento manual de CSV não padrão e leitura de PDF seguem em backlog complementar para não bloquear ajustes da 2.5.1.",
+    "GitHub Actions ainda não inicia seus runners; bloqueio documentado na issue #75, distinto de deploy Pages."
   ],
   "assets": [
     "./index.html",
@@ -164,24 +166,24 @@
   ],
   "highlights": [
     {
-      "icon": "wallet",
-      "title": "Saldo total e contas",
-      "description": "Confira o saldo consolidado e os saldos por banco."
-    },
-    {
       "icon": "file",
-      "title": "Prévia de extrato OFX/CSV",
-      "description": "Importe localmente e confira os movimentos sem alterar seus lançamentos."
+      "title": "Conciliação bancária assistida",
+      "description": "Revise OFX/CSV e vincule movimentos aos seus lançamentos."
     },
     {
       "icon": "shield",
-      "title": "Modo somente leitura",
-      "description": "Nenhuma baixa ou saldo é modificado durante a conferência bancária."
+      "title": "Confirmação antes de gravar",
+      "description": "Valide a conta e confirme separadamente qualquer criação que altere saldos."
+    },
+    {
+      "icon": "bank",
+      "title": "Saldos indicativos",
+      "description": "Compare saldos declarados no extrato, sem ajustes automáticos."
     }
   ],
-  "release_status": "published_limited_readonly",
+  "release_status": "development_assisted_reconciliation_homologation",
   "homologation": {
-    "status": "parcial_autorizada_com_restricao",
-    "notes": "Build 7 publicada em modo somente leitura no GitHub Pages: run 42299501899 success. Dez testes Node reais e upload por Chromium isolado aprovados. CI financeiro, PWA autenticado e gravações online fictícias pendentes; BANK_IMPORT_WRITES_ENABLED=false confirmado na main."
+    "status": "tests_verified_functional_release_pending",
+    "notes": "Compilação 8: 10 suítes Node 22 reais aprovadas em ambiente de teste, regressões de criação/reversão e conta conferida; SQL de backend com identidade fictícia e rollback absoluto validou revisão/isolamento/idempotência. CI GitHub Actions e PWA autenticado em dispositivo real continuam pendentes."
   }
 }

@@ -2,6 +2,33 @@
 
 Registro de mudanças do aplicativo localizado em `gbplus/`. Toda versão e toda compilação deve possuir uma entrada própria. **Uma alteração não deve ser considerada homologada apenas porque existe commit, teste escrito ou publicação.** A homologação exige evidências da execução e aprovação explícita.
 
+## [2.5.0 · compilação 8 — FECHAMENTO DO NÚCLEO OFX/CSV] — 2026-11-06
+
+**Situação na preparação:** conciliação assistida implementada em ramo de homologação; publicação condicionada a merge e deploy Pages confirmado. A execução do workflow financeiro GitHub Actions permanece bloqueada antes do runner (issue #75); essa limitação deve continuar explícita.
+
+### O que muda
+- Habilitado o fluxo de **conciliação manual supervisionada**: vincular movimento à baixa/transferência existente, ignorar, manter pendente e criar título com baixa após confirmação.
+- **Confirmar a conta bancária torna-se obrigatório para qualquer lote**. A tela mostra o nome da conta selecionada. Sem o aceite, o botão de gravação permanece desativado e o controlador rejeita a ação.
+- **Criação com impacto no saldo exige autorização adicional**, distinta da confirmação de conta, e exibe resumo com créditos, débitos e efeito líquido. Movimento futuro, categoria incompatível ou título semelhante não pode ser criado.
+- Reimportação repetida é bloqueada por conta/identificador; decisões pendentes podem ser retomadas; histórico e reversão de lote permanecem auditáveis e recusam desfazer títulos alterados ou vinculados depois.
+- Leitura do arquivo permanece local. Não há Open Finance, autenticação bancária, upload bruto ao Supabase ou conciliação automática sem confirmação.
+- Preservada comparação *indicativa* de saldos quando o banco os declara. Saldo inicial sem data-base cadastrada não autoriza concluir divergência contábil nem corrigir valor automaticamente.
+- Versão atualizada para **2.5.0 build 8**, cache PWA versionado.
+
+### Evidências
+- **10/10 suítes de regressão passaram em Node 22.16.0 real**, sobre cópia do pacote implantado com alterações desta compilação. Incluem criação/baixa, revisão, duplicidades, conta, histórico, estorno, leitura de OFX/CSV, saldo e armazenamento local com conflito concorrente.
+- O backend Supabase foi exercitado em um único **teste SQL com usuário 100% fictício criado dentro de subtransação, com rollback obrigatório**. Sem erros: duas revisões, idempotência, conflito otimista, tentativa de gravação em outro usuário bloqueada, e operação repetida com payload diferente bloqueada. Nenhum usuário ou documento sintético ficou persistido. Não equivale a teste de navegador com sessão autenticada real.
+- A UI já tinha sido inspecionada no Chromium em tela móvel e desktop durante a build 7. A nova checkbox/condição também foi coberta em Node; **o novo fluxo completo do PWA não foi homologado num Android ou iOS instalado** nesta rodada.
+- Autorização explícita do responsável pelo produto para concluir a 2.5.0 e seguir para 2.5.1; sem alegar que CI verde ou teste PWA final ocorreu.
+
+### Escopo complementar transferido formalmente para backlog, sem fingir conclusão
+- Tela de mapeamento manual para CSV bancário com colunas não padronizadas.
+- Importação de XLSX e planilhas de contas a pagar/receber; PDFs digitalizados/textuais.
+- Cadastro da data-base do saldo inicial para uma **conciliação histórica conclusiva**, pois hoje a diferença calculada é só indicativa.
+- Comprovação completa em múltiplos aparelhos reais e correção administrativa do runner do GitHub Actions (issue #75).
+
+**Decisão:** encerrar **o núcleo OFX/CSV da 2.5.0** após confirmar o deploy, com restrições técnicas devidamente registradas, e permitir evolução da 2.5.1 em paralelo. Não confundir isso com entrega de XLSX/PDF ou homologação integral do PWA.
+
 ## [2.5.0 · compilação 7 — HOMOLOGAÇÃO DE SALDOS E REGRESSÕES] — 2026-11-06
 
 **Publicação confirmada:** compilação 7 implantada em GitHub Pages no run [42299501899](https://github.com/gaveblue/gaveblue/actions/runs/42299501899) em 06/11/2026 (commit `f42b6e6e94fdd7912efff859cb42a45b3a378e8c`). **Liberada exclusivamente em modo somente leitura. Homologação integral da conciliação com gravação ainda pendente.**

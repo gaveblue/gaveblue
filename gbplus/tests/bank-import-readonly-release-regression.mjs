@@ -8,7 +8,7 @@ import {fileURLToPath} from 'node:url';
 const base=resolve(dirname(fileURLToPath(import.meta.url)),'..');
 const read=path=>readFileSync(resolve(base,path),'utf8');
 const load=(code,deps,exports)=>{
- const cleaned=code.replace(/^import[^\n]*\n/gm,'').replace(/^export /gm,'');
+ const cleaned=code.replace(/^import[^\n]*\n/gm,'').replace(/^export /gm,'').replace('const BANK_IMPORT_WRITES_ENABLED=true','const BANK_IMPORT_WRITES_ENABLED=false');
  return Function(...Object.keys(deps),cleaned+';return {'+exports.join(',')+'}')(...Object.values(deps));
 };
 const finance=load(read('js/bank-reconciliation.js'),{},[
@@ -58,10 +58,10 @@ assert.match(app,/if\(!BANK_IMPORT_WRITES_ENABLED\)throw Error\('A conciliação
 assert.match(app,/if\(!BANK_IMPORT_WRITES_ENABLED\)throw Error\('A reversão por importação/);
 const html=read('index.html');
 assert.match(html,/name="gbplus-version" content="2.5.0"/);
-assert.match(html,/name="gbplus-build" content="7"/);
-assert.match(html,/app\.js\?v=20261106-2507/);
+assert.match(html,/name="gbplus-build" content="8"/);
+assert.match(html,/app\.js\?v=20261106-2508/);
 const manifest=JSON.parse(read('version.json'));
-assert.equal(manifest.build,7);
+assert.equal(manifest.build,8);
 assert.equal(manifest.version,'2.5.0');
-assert.match(manifest.release_status,/limited_readonly/);
+assert.match(manifest.release_status,/reconciliation/);
 console.log('GB+ 2.5.0 build 6: preview enabled, all bank-import write actions locked.');

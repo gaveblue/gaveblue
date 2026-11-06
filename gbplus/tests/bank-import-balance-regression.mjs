@@ -24,7 +24,7 @@ const balance=(db,id,date)=>{
 const ui=load('bank-import-ui',{
  money:n=>'R$ '+(n/100).toFixed(2),dateLabel:d=>d,esc,icon:()=>'',accountBalance:balance,...rec
 },['bankImportMarkup','BANK_IMPORT_WRITES_ENABLED']);
-assert.equal(ui.BANK_IMPORT_WRITES_ENABLED,false,'Build 7 must remain read only');
+assert.equal(ui.BANK_IMPORT_WRITES_ENABLED,true,'Build 8 enables assisted reconciliation with approval');
 const db={
  accounts:[{id:'A',name:'Conta A',initial:10000,active:true},{id:'B',name:'Outra conta',initial:20000,active:true}],
  titles:[],payments:[],transfers:[],categories:[]
