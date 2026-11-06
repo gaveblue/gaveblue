@@ -8,9 +8,10 @@ const stat=(key,value,subtitle,ico,extra='',footer='')=>`<article class="stat ${
 function balanceAccountStrip(db){
  if(!db.accounts?.length)return '';
  return '<div class="gb-balance-accounts" aria-label="Saldos por conta">'+
-  db.accounts.map(a=>'<button type="button" class="gb-balance-bank" data-action="account-detail" data-id="'+esc(a.id)+'" '+
-   'title="'+esc(a.name)+' · '+money(accountBalance(db,a.id,today()))+'" aria-label="Ver extrato e saldo da conta '+esc(a.name)+'">'+
-   bankBadge(bankForAccount(db,a))+'<span>'+esc(a.name)+'</span></button>').join('')+
+  db.accounts.filter(a=>a.active!==false).map(a=>{const balance=accountBalance(db,a.id,today());return '<button type="button" class="gb-balance-bank" data-action="account-detail" data-id="'+esc(a.id)+'" '+
+   'title="'+esc(a.name)+' · '+money(balance)+'" aria-label="Ver extrato da conta '+esc(a.name)+', saldo '+money(balance)+'">'+
+   '<span class="gb-balance-bank-identity">'+bankBadge(bankForAccount(db,a))+'<span class="gb-balance-bank-name">'+esc(a.name)+'</span></span>'+
+   '<strong class="gb-balance-bank-amount">'+money(balance)+'</strong></button>';}).join('')+
   '</div>';
 }
 export function periodBar(state){return `<div class="period-control">${icon('calendar')}<select id="period" aria-label="Período"><option value="month" ${state.period==='month'?'selected':''}>Este mês</option><option value="last" ${state.period==='last'?'selected':''}>Mês anterior</option><option value="year" ${state.period==='year'?'selected':''}>Este ano</option><option value="all" ${state.period==='all'?'selected':''}>Todo o período</option><option value="custom" ${state.period==='custom'?'selected':''}>Personalizado</option></select></div>`;}
