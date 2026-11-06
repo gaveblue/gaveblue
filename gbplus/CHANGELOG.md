@@ -4,7 +4,7 @@ Registro de mudanças do aplicativo localizado em `gbplus/`. Toda versão e toda
 
 ## [2.5.0 · compilação 8 — FECHAMENTO DO NÚCLEO OFX/CSV] — 2026-11-06
 
-**Situação na preparação:** conciliação assistida implementada em ramo de homologação; publicação condicionada a merge e deploy Pages confirmado. A execução do workflow financeiro GitHub Actions permanece bloqueada antes do runner (issue #75); essa limitação deve continuar explícita.
+**Publicação confirmada:** PR [#77](https://github.com/gaveblue/gaveblue/pull/77) mesclado e deploy GitHub Pages [42310213381](https://github.com/gaveblue/gaveblue/actions/runs/42310213381) concluído com `success` (commit `b868eb6792d6bf8db64ec372ab3c3f01fda3acf9`). **Conciliação assistida disponível**, sem confundir os 10 testes Node reais com GitHub Actions aprovado ou homologação completa do PWA.
 
 ### O que muda
 - Habilitado o fluxo de **conciliação manual supervisionada**: vincular movimento à baixa/transferência existente, ignorar, manter pendente e criar título com baixa após confirmação.
