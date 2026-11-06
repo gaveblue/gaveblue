@@ -1,3 +1,4 @@
+import {selectCashflowWindow} from './gb-flow-filters.js?v=20261106-68';
 // Read-only adapter: money is stored as integer centavos in GB+.
 // Chart input is expressed in BRL (number) without changing financial records.
 const iso = date => {
@@ -14,8 +15,9 @@ const addMonths = (date,months) => {
   const utc = new Date(Date.UTC(y,m-1+months,1,12));
   return utc.toISOString().slice(0,10);
 };
-const fmtDay = date => new Date(date+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'short'});
-const fmtMonth = date => new Date(date+'T12:00:00').toLocaleDateString('pt-BR',{month:'short',year:'2-digit'});
+const MONTHS=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+const fmtDay = date => date.slice(8,10)+' '+MONTHS[Number(date.slice(5,7))-1];
+const fmtMonth = date => MONTHS[Number(date.slice(5,7))-1]+'/'+date.slice(2,4);
 const validAmount = cents => Number.isSafeInteger(cents) && cents > 0;
 const moneyNumber = cents => Math.round(cents)/100;
 const COLORS = ['#16a34a','#10b981','#047857','#84cc16','#059669'];
@@ -57,13 +59,17 @@ function buildPeriods(db,allRecords){
 export function buildChartPayload(db, state, flowRows, options={}){
   // Avoid rescanning payment history on the bar-chart-only screens.
   const records=options.includeEarnings===false?[]:cleanRows(db);
-  const barData=(flowRows||[]).slice(-36).map(r=>({
+  const all=Array.isArray(flowRows)?flowRows:[];
+  const status=['all','paid','pending'].includes(state?.flowStatus)?state.flowStatus:'all';
+  const mode=(state?.route==='flow'||state?.route==='provisions')?status:'paid';
+  const visible=selectCashflowWindow(all,state?.granularity,Boolean(options.mobile));
+  const barData=visible.map(r=>({
     label:state?.granularity==='month'?fmtMonth(r.date):fmtDay(r.date),
-    income:moneyNumber(r.actualIn),
-    expense:moneyNumber(r.actualOut)
+    income:moneyNumber((mode==='paid'?0:r.expectedIn)+ (mode==='pending'?0:r.actualIn)),
+    expense:moneyNumber((mode==='paid'?0:r.expectedOut)+(mode==='pending'?0:r.actualOut))
   }));
   return {
     earnings: { periods:options.includeEarnings===false?[]:buildPeriods(db,records), hasRecords:records.some(row=>row.type==='income') },
-    bar: { data:barData, count:(flowRows||[]).length, periodLabel:state?.granularity==='day'?'diários':state?.granularity==='week'?'semanais':'mensais' }
+    bar: { data:barData, count:all.length, shown:barData.length, status:mode, periodLabel:state?.granularity==='day'?'diários':state?.granularity==='week'?'semanais':'mensais' }
   };
 }
