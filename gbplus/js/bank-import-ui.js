@@ -31,6 +31,41 @@ export function bankImportMarkup(db,draft){
   '<div class="gb-import-intro"><div class="gb-import-symbol">'+icon('wallet')+'</div><div><strong>Conferência de extrato bancário</strong>'+
   '<p>Confira os movimentos do extrato, sem alterar o financeiro.</p></div></div>'+
   '<div class="gb-import-step"><span class="gb-import-step-number">01</span><span>Conta bancária</span></div>'+accountSelect;
+
+ if(draft?.step==='mapping'&&draft.csvMapping){
+  const mapping=draft.csvMapping;
+  const mode=mapping.mode==='split'?'split':'amount';
+  const fields=[['date','Data',true],['description','Histórico/descrição',true],
+   ...(mode==='amount'?[['amount','Valor com sinal',true],['kind','Tipo (crédito/débito)',false]]:
+       [['credit','Coluna de créditos',true],['debit','Coluna de débitos',true]]),
+   ['id','Identificador da transação',false],['balance','Saldo bancário',false]];
+  const selectors=fields.map(([key,label,required])=>{
+   const selected=mapping.columns?.[key]??-1;
+   return '<label class="gb-import-map-field"><span>'+esc(label)+(required?' *':'')+'</span><select data-gb-native="true" class="gb-import-select" data-bank-map-field="'+key+'" aria-label="Coluna: '+esc(label)+'">'+
+    '<option value="">Não usar</option>'+
+    mapping.headers.map((header,index)=>'<option value="'+index+'" '+(selected===index?'selected':'')+'>'+esc(header)+' (coluna '+(index+1)+')</option>').join('')+
+    '</select></label>';
+  }).join('');
+  const maxColumns=Math.min(mapping.headers.length,8);
+  const rows=mapping.sample||[];
+  return head+
+   '<div class="gb-import-step"><span class="gb-import-step-number">02</span><span>Mapear colunas do CSV</span></div>'+
+   '<p class="gb-import-map-hint">Este banco usa nomes diferentes para as colunas. Selecione os campos correspondentes antes de conferir os lançamentos. O arquivo continua somente neste dispositivo.</p>'+
+   '<p class="gb-import-hint">'+esc(draft.filename||'CSV')+' · '+mapping.rowCount+' movimentos · '+mapping.headers.length+' colunas</p>'+
+   '<label class="gb-import-map-field"><span>Como o banco apresenta os valores?</span><select class="gb-import-select" data-gb-native="true" data-bank-map-mode aria-label="Formato dos valores">'+
+    '<option value="amount" '+(mode==='amount'?'selected':'')+'>Uma coluna de valor (com sinal ou coluna Tipo)</option>'+
+    '<option value="split" '+(mode==='split'?'selected':'')+'>Duas colunas: crédito e débito</option></select></label>'+
+   '<div class="gb-import-map-fields">'+selectors+'</div>'+
+   '<div class="gb-import-map-preview" role="region" aria-label="Amostra do CSV" tabindex="0">'+
+    '<table><thead><tr>'+mapping.headers.slice(0,maxColumns).map(h=>'<th>'+esc(h)+'</th>').join('')+'</tr></thead><tbody>'+
+     rows.map(row=>'<tr>'+row.slice(0,maxColumns).map(cell=>'<td>'+esc(cell)+'</td>').join('')+'</tr>').join('')+
+    '</tbody></table></div>'+
+   (mapping.headers.length>maxColumns?'<p class="gb-import-hint">Mostrando '+maxColumns+' colunas na amostra; todas estão disponíveis nos seletores.</p>':'')+
+   '<p class="gb-import-map-hint">Confira os sinais: sem Tipo ou valores negativos, todo Valor positivo será entendido como entrada. A prévia não altera saldos.</p>'+
+   (draft.error?'<p class="gb-import-error" role="alert">'+esc(draft.error)+'</p>':'')+
+   '<div class="gb-import-footer"><button type="button" class="button" data-action="bank-import-reset">Trocar arquivo</button>'+
+    '<button type="button" class="button primary" data-action="bank-import-apply-map">Gerar prévia</button></div></div>';
+ }
  if(!draft?.preview){
   return head+
    '<div class="gb-import-step"><span class="gb-import-step-number">02</span><span>Arquivo do banco</span></div>'+
@@ -132,6 +167,7 @@ export function bankImportMarkup(db,draft){
  return head+
   '<div class="gb-import-step"><span class="gb-import-step-number">02</span><span>Prévia da leitura</span></div>'+
   '<div class="gb-import-file"><span>'+icon('titles')+' <strong>'+esc(draft.filename||'Extrato selecionado')+'</strong> · '+esc(preview.format.toUpperCase())+'</span>'+
+   (draft.csvMapping?'<button type="button" class="gb-import-text-button" data-action="bank-import-map">Ajustar colunas</button>':'')+
    '<button type="button" class="gb-import-text-button" data-action="bank-import-reset">Trocar arquivo</button></div>'+
   (draft.accountHint?'<p class="gb-import-hint">Conta indicada pelo arquivo (oculta): '+esc(draft.accountHint)+'</p>':'')+
   '<div class="gb-import-summary-grid" aria-label="Resumo do extrato">'+
