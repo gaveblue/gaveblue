@@ -8,7 +8,7 @@
     "Visualiza conta selecionada, entradas, saídas, possíveis correspondências, ambiguidades, movimentos não localizados, filtros e paginação.",
     "Criação de receitas e despesas, conciliação confirmada e reversão de lotes pelo importador permanecem bloqueadas por trava dupla no controlador e na interface.",
     "A leitura do extrato não grava dados no financeiro, não altera saldos e não envia o arquivo bruto para o servidor ou para IA.",
-    "Nove verificações estáticas/lógicas do bloqueio de gravação passaram; sete suítes de regras financeiras passaram em simulação JavaScript, não em CI Node real.",
+    "Nove verificações da trava e oito suítes de regressão passaram em ambiente JavaScript de simulação; nenhum resultado Node real ou CI verde foi atribuído.",
     "GitHub Actions para regressões ainda falha antes de executar testes; verificações em dispositivo real e armazenamento online são pendências conhecidas.",
     "A liberação não equivale à homologação da conciliação bancária com escrita. A ativação exigirá compilação separada e testes registrados."
   ],
