@@ -2,6 +2,35 @@
 
 Registro de mudanças do aplicativo localizado em `gbplus/`. Toda versão e toda compilação deve possuir uma entrada própria. **Uma alteração não deve ser considerada homologada apenas porque existe commit, teste escrito ou publicação.** A homologação exige evidências da execução e aprovação explícita.
 
+## [2.5.0 · compilação 7 — HOMOLOGAÇÃO DE SALDOS E REGRESSÕES] — 2026-11-06
+
+**Situação:** em desenvolvimento no ramo `feature/gbplus-250-build7-homologacao`, **não publicada, não homologada integralmente**. Versão pública continua **2.5.0 build 6 somente leitura**.
+
+### Alterações
+- Adicionada leitura opcional do saldo final **realmente informado** no OFX (`LEDGERBAL/BALAMT/DTASOF`) e na coluna de saldo do CSV, quando presente.
+- Exibida comparação indicativa entre saldo informado pelo banco e saldo calculado pelo GB+ **na mesma data**, sem modificar o saldo inicial ou gerar conciliação automática.
+- Quando o arquivo não informa saldo, a prévia explica que a diferença de saldos não pode ser calculada sem essa informação; não inventa valores.
+- CSV com múltiplos saldos **distintos na data mais recente**, sem horário/ordem confiável, não escolhe um saldo arbitrário; omite a diferença e explica a ambiguidade. Saldos informados apenas em datas anteriores também não são tratados como fechamento atual.
+- Alerta visível de que o saldo inicial cadastrado não tem data-base, impedindo afirmar equivalência histórica sem revisão.
+- Ajustados os textos da prévia para não sugerir criação de títulos/baixas enquanto `BANK_IMPORT_WRITES_ENABLED=false`.
+- Acrescentada `tests/bank-import-balance-regression.mjs` e chamada no workflow CI. Cache PWA, CSS, JavaScript e manifest versionados como build 7, preservando a trava de gravação.
+
+### Homologação executada
+- Recuperado o artefato `github-pages` da implantação oficial [42277197480](https://github.com/gaveblue/gaveblue/actions/runs/42277197480) (build 6). Código local da build 7 confrontado com blobs Git pelo `git hash-object`.
+- **10 suítes de regressão aprovadas em Node 22.16.0 real, zero falhas**: financeiro, gráficos, importação, codec, trava de publicação, leitura de saldo, conciliação, criação, pendências e armazenamento local/reversão.
+- Prévia renderizada em **Chromium real**, no componente isolado, em 360 px claro, 390 px escuro e 1200 px claro, sem rolagem horizontal nem controles de gravação.
+- Executado também **upload real de CSV pelo input de arquivo em Chromium**, com troca de conta, verificação de saldo comparativo e bloqueio de saldos intradiários ambíguos nas três larguras. Sem backend/autenticação nesse ensaio.
+- SQL de metadados em Supabase conferiu RLS de `gbplus_documents`, `auth.uid() = user_id` para SELECT, ausência de EXECUTE para anon na função `gbplus_save` e controle de revisão transacional. **Sem consulta ou modificação de dados financeiros reais.**
+
+### Ainda bloqueado
+- **CI do GitHub Actions**: falha antes de executar passos mesmo com disparo por `push` e `runs-on: ubuntu-24.04`. Última execução [42293673029](https://github.com/gaveblue/gaveblue/actions/runs/42293673029); incidente [issue #75](https://github.com/gaveblue/gaveblue/issues/75). Não registrar falsamente CI verde.
+- O Chromium neste ambiente bloqueia navegação de rede, inclusive localhost; os testes feitos renderizaram o componente, **não** o fluxo ponta a ponta no PWA instalado.
+- Homologação de armazenamento online em **contas de teste fictícias**, com usuários independentes, concorrência, idempotência e estorno real, ainda pendente.
+- Data-base do saldo inicial e homologação de equivalência de saldos históricos ainda pendentes.
+- Falta registrar aprovação funcional/revisor/data para habilitar escrita financeira. `BANK_IMPORT_WRITES_ENABLED=false` permanece obrigatório.
+
+**Relatório detalhado:** [HOMOLOGACAO-2.5.0-RELATORIO-B7.md](HOMOLOGACAO-2.5.0-RELATORIO-B7.md).
+
 ## [2.5.0 · compilação 6 — LIBERAÇÃO CONTROLADA SOMENTE LEITURA] — 2026-11-06
 
 **Autorização:** usuário autorizou expressamente publicação antecipada, condicionada à segurança.  

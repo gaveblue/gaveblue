@@ -1,16 +1,15 @@
 {
   "version": "2.5.0",
-  "build": 6,
-  "published_at": "2026-11-06T19:08:22Z",
-  "title": "Prévia bancária OFX/CSV — liberação controlada somente leitura",
+  "build": 7,
+  "published_at": null,
+  "title": "Comparação indicativa de saldos de extratos OFX/CSV — somente leitura",
   "notes": [
-    "Liberação controlada autorizada pelo usuário em 06/11/2026; a interface de extratos é disponibilizada exclusivamente para leitura local OFX/CSV.",
-    "Visualiza conta selecionada, entradas, saídas, possíveis correspondências, ambiguidades, movimentos não localizados, filtros e paginação.",
-    "Criação de receitas e despesas, conciliação confirmada e reversão de lotes pelo importador permanecem bloqueadas por trava dupla no controlador e na interface.",
-    "A leitura do extrato não grava dados no financeiro, não altera saldos e não envia o arquivo bruto para o servidor ou para IA.",
-    "Nove verificações da trava e oito suítes de regressão passaram em ambiente JavaScript de simulação; nenhum resultado Node real ou CI verde foi atribuído.",
-    "A implantação GitHub Pages inicial foi confirmada como success no run 42276855704; o workflow separado de regressões ainda falha antes de executar seus testes.",
-    "A liberação não equivale à homologação da conciliação bancária com escrita. A ativação exigirá compilação separada e testes registrados."
+    "Versão limitada de leitura: visualiza extratos OFX/CSV e compara saldo do banco declarado no arquivo com o saldo GB+ na data indicada.",
+    "Quando o CSV informa múltiplos saldos diferentes no mesmo dia sem horário, o GB+ não escolhe um valor arbitrário nem apresenta uma diferença potencialmente falsa.",
+    "Quando não existe saldo final declarado na data mais recente, a comparação de saldos é omitida com explicação.",
+    "Nenhuma alteração de títulos, pagamentos, transferências ou saldos é realizada pela importação; as funções de conciliar, criar ou reverter por extrato continuam bloqueadas.",
+    "Dez suítes regressivas concluídas com sucesso em Node 22 real; importação pelo seletor de arquivos e troca de contas testadas em Chromium 360/390/1200 px sem rolagem horizontal.",
+    "O workflow GitHub Actions ainda não inicia runners; ensaios com autenticação online e PWA instalado permanecem pendentes e estão documentados."
   ],
   "assets": [
     "./index.html",
@@ -179,9 +178,9 @@
       "description": "Nenhuma baixa ou saldo é modificado durante a conferência bancária."
     }
   ],
-  "release_status": "published_limited_readonly",
+  "release_status": "publication_authorized_limited_readonly_deployment_pending",
   "homologation": {
     "status": "parcial_autorizada_com_restricao",
-    "notes": "2.5.0 build 6 liberada em modo somente leitura por autorização do usuário. Deploy GitHub Pages 42276855704 concluído com sucesso. Oito suítes simuladas e nove verificações da trava passaram; testes Node CI, dispositivos e gravação real permanecem pendentes. Escrita bancária pelo importador BLOQUEADA."
+    "notes": "Publicação antecipada autorizada, limitada a leitura, comparação indicativa e proteção anti-duplicidade de saldos ambíguos. 10 testes Node reais e Chromium isolado passaram. Gravação por extrato BLOQUEADA; CI GitHub Actions e sessão online ainda pendentes."
   }
 }

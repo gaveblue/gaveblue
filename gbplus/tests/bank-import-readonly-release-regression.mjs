@@ -58,10 +58,10 @@ assert.match(app,/if\(!BANK_IMPORT_WRITES_ENABLED\)throw Error\('A conciliação
 assert.match(app,/if\(!BANK_IMPORT_WRITES_ENABLED\)throw Error\('A reversão por importação/);
 const html=read('index.html');
 assert.match(html,/name="gbplus-version" content="2.5.0"/);
-assert.match(html,/name="gbplus-build" content="6"/);
-assert.match(html,/app\.js\?v=20261106-2506/);
+assert.match(html,/name="gbplus-build" content="7"/);
+assert.match(html,/app\.js\?v=20261106-2507/);
 const manifest=JSON.parse(read('version.json'));
-assert.equal(manifest.build,6);
+assert.equal(manifest.build,7);
 assert.equal(manifest.version,'2.5.0');
 assert.match(manifest.release_status,/limited_readonly/);
 console.log('GB+ 2.5.0 build 6: preview enabled, all bank-import write actions locked.');

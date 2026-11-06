@@ -1,5 +1,5 @@
 // GB+ 2.5.0 — import, individual review, explicit confirmation and audit UI.
-import {money,dateLabel} from './domain.js?v=20261105-72';
+import {money,dateLabel,accountBalance} from './domain.js?v=20261105-72';
 import {esc,icon} from './ui.js?v=20261105-72';
 import {reconciliationRecordKey,knownReconciliationKeys,pendingReconciliationKeys,bankImportHistory} from './bank-reconciliation.js?v=20261106-2505';
 
@@ -43,6 +43,18 @@ export function bankImportMarkup(db,draft){
     '<p>O arquivo permanece no dispositivo. Nenhum lançamento, baixa ou saldo será alterado pela leitura.</p></div></div>';
  }
  const preview=draft.preview,rows=filtered(preview,draft.filter||'all');
+ const reported=preview.bankBalance;
+ const comparison=reported?(()=>{
+  const internal=accountBalance(db,preview.accountId,reported.date);
+  const difference=reported.amount-internal;
+  return '<div class="gb-import-step"><span class="gb-import-step-number">03</span><span>Saldo informado no extrato</span></div>'+
+   '<div class="gb-import-balance-comparison" aria-label="Comparação indicativa de saldos">'+
+    summary('Banco · '+dateLabel(reported.date),money(reported.amount))+
+    summary('GB+ · mesma data',money(internal))+
+    summary('Diferença indicativa',money(difference))+
+   '</div>'+
+   '<p class="gb-import-balance-note">Comparação indicativa, não uma conciliação confirmada: o saldo inicial do GB+ não tem data-base cadastrada. Confira se o extrato é da conta selecionada e se os períodos são equivalentes. Nenhum ajuste de saldo será feito.</p>';
+ })():'<p class="gb-import-balance-note">'+esc(preview.warnings?.[0]||'Este arquivo não informa um saldo bancário final identificável. É possível conferir os movimentos, mas não calcular a diferença de saldos sem esse dado.')+'</p>';
  const saved=knownReconciliationKeys(db,preview.accountId);
  const outstanding=pendingReconciliationKeys(db,preview.accountId);
  const plan=draft.review;
@@ -126,7 +138,8 @@ export function bankImportMarkup(db,draft){
    summary('Débitos',money(preview.totals.debits),'expense')+
    summary('Movimentos',String(preview.rows.length))+
    summary('Possíveis vínculos',String(preview.totals.possibleMatches))+'</div>'+
-  '<div class="gb-import-step"><span class="gb-import-step-number">03</span><span>Revisar movimentações</span></div>'+
+  comparison+
+  '<div class="gb-import-step"><span class="gb-import-step-number">04</span><span>Revisar movimentações</span></div>'+
   '<div class="gb-import-filters" role="group" aria-label="Filtrar movimentos importados">'+
    filters.map(([key,label,count])=>'<button type="button" data-action="bank-import-filter" data-value="'+key+
     '" aria-pressed="'+((draft.filter||'all')===key)+'" class="'+((draft.filter||'all')===key?'active':'')+'">'+label+' <span>'+count+'</span></button>').join('')+
@@ -137,7 +150,7 @@ export function bankImportMarkup(db,draft){
    '<button type="button" data-action="bank-import-next" '+(page===Math.ceil(rows.length/BANK_IMPORT_PAGE_SIZE)-1?'disabled':'')+'>Próxima</button></div>':'')+
   (draft.error?'<p class="gb-import-error" role="alert">'+esc(draft.error)+'</p>':'')+
   '<div class="gb-import-privacy">'+icon('shield')+
-   '<p>As sugestões não são aprovadas automaticamente. Criar um lançamento registra imediatamente a receita recebida ou despesa paga, somente após revisão e confirmação explícita.</p></div>'+
+   '<p>'+(BANK_IMPORT_WRITES_ENABLED?'As sugestões não são aprovadas automaticamente. Criar um lançamento exige revisão e confirmação explícita.':'As correspondências são apenas sugestões. Esta prévia não cria receitas, despesas ou baixas.')+'</p></div>'+
   (BANK_IMPORT_WRITES_ENABLED?
    '<div class="gb-import-footer"><span><strong>'+choiceCount(draft)+'</strong> decisão(ões) selecionada(s)</span>'+
    '<button type="button" class="button primary" data-action="bank-import-review" '+(choiceCount(draft)?'':'disabled')+'>Revisar decisões</button></div>':

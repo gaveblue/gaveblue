@@ -1,12 +1,25 @@
 # GB+ 2.5.0 — Protocolo de homologação
 
-**Estado atual:** builds 1–5 no PR #73, ainda não publicados. Responsável pela homologação: **não registrado**. Data de aprovação: **não registrada**.
+**Estado atual:** build 6 **publicada em modo somente leitura**; build 7 em homologação (não publicada); conciliação com gravação ainda bloqueada. Responsável pela homologação integral: **não registrado**. Data de aprovação integral: **não registrada**.
+
+## Evidências mais recentes da compilação 7
+
+Consultar o relatório verificável em [HOMOLOGACAO-2.5.0-RELATORIO-B7.md](./HOMOLOGACAO-2.5.0-RELATORIO-B7.md).
+
+- **10/10 suítes aprovadas em Node 22.16.0 real**, a partir do pacote GitHub Pages publicado da build 6 com as alterações do ramo 7 aplicadas e conferidas por hash Git. Esta é uma evidência melhor que as simulações anteriores.
+- Chromium headless renderizou o componente de prévia com 360 px (claro), 390 px (escuro) e 1200 px, sem rolagem horizontal nem controles de gravação. **Não foi um teste do PWA integral**: a navegação do navegador foi bloqueada pelo ambiente.
+- Importação OFX com `LEDGERBAL` ou CSV com coluna `Saldo` pode exibir **comparação indicativa** com o saldo GB+ na data declarada, sem alterar o saldo inicial; quando o arquivo não informa saldo, a diferença não é inventada.
+- Estrutura de RLS/Supabase e função de gravação conferidas em **modo somente leitura**. Nenhuma baixa ou título de cliente foi acessado ou modificado.
+- O GitHub Actions segue falhando antes de iniciar os testes em `push`, `pull_request`, `ubuntu-latest` e `ubuntu-24.04`; bloqueio rastreado na [issue #75](https://github.com/gaveblue/gaveblue/issues/75).
+- **Permanecem pendentes** os testes do aplicativo real em Android/iOS, a gravação/reversão em ambiente online fictício e a aprovação final. Não liberar gravação por extrato sem essas etapas.
+
+
 
 ## Ambiente e dados permitidos
 
 - Utilizar **conta de teste sem dados reais**, com saldo inicial de **R$ 100,00** e categorias fictícias `Recebimentos` e `Tarifas`. Não executar no financeiro pessoal do responsável ou de clientes.
 - Arquivos fictícios disponíveis em `tests/fixtures/extrato-homologacao-250.csv` e `tests/fixtures/extrato-homologacao-250.ofx`. **Use apenas um deles para a criação**, pois os dois representam os mesmos movimentos/IDs.
-- Abrir a futura prévia da build 5 quando houver ambiente de homologação disponível; uma ramificação/PR **não disponibiliza automaticamente uma página executável**.
+- Abrir a futura prévia da build 7 quando houver ambiente de homologação disponível; uma ramificação/PR **não disponibiliza automaticamente uma página executável**.
 - Fazer um backup antes da operação de gravação e documentar revisão, dispositivo e capturas de tela. Não incluir CPF, identificadores bancários ou dados pessoais nas evidências.
 
 ## Cenário reproduzível
@@ -34,7 +47,7 @@ O arquivo contém duas transações em 06/11/2026 (data de teste; para testes em
 - [ ] **07. Gravação:** após confirmar na conta fictícia, surgem **2 títulos e 2 baixas**, com R$ 137,50 de saldo. Verificar com persistência online (usuario de teste) e modo local.
 - [ ] **08. Anti-duplicidade:** reimportar o arquivo não pode criar novas baixas; um título parcial aberto semelhante também bloqueia criação indevida.
 - [ ] **09. Reversão e integridade:** reverter lote sem edição restaura R$ 100,00 e mantém histórico; se algum título foi editado, reversão automática falha **sem apagar nada**.
-- [ ] **10. Interface e regressões:** verificar Chrome Android (320/360/390/430 px), desktop, tema escuro, focos, modais, rolagem e executar todas as sete suítes em Node real com resultados verdes.
+- [ ] **10. Interface e regressões:** verificar Chrome Android (320/360/390/430 px), desktop, tema escuro, focos, modais, rolagem e executar as dez suítes em Node real (concluído na compilação 7) e, separadamente, obter resultados CI verdes e homologar o PWA real.
 
 **Nota:** não marcar o item 10 como aprovado sem resultados visuais e testes de regressão executados. O CI atual falha com `runner_id=0`, `steps=[]` e sem logs de etapas; isso indica que o runner não executou os comandos, **não confirma a causa raiz**.
 
@@ -69,7 +82,7 @@ Run de referência: https://github.com/gaveblue/gaveblue/actions/runs/4225018909
 
 ## Segurança de liberação e rollback
 
-A build 5 atual é **desenvolvimento**, com `published_at=null`. A versão pública é a **2.4.9, compilação 68**, e não deverá ser modificada sem autorização explícita de publicação.
+A build 7 atual é **desenvolvimento**, com `published_at=null`. A versão pública é a **2.4.9, compilação 68**, e não deverá ser modificada sem autorização explícita de publicação.
 
 Se uma versão que crie títulos e baixas for publicada no futuro, **reverter apenas o código não reverte nem apaga lançamentos financeiros já gravados**. A reversão de dados deve ser feita pelo histórico do lote, sob validação de integridade, e com backup e conferência do saldo. Nunca executar `git reset --hard` ou excluir dados de usuários como método de rollback.
 
