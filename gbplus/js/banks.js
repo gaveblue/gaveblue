@@ -175,7 +175,7 @@ export function filterBankPicker(picker,term){
  const noResults=picker.querySelector('[data-bank-no-results]');
  if(noResults)noResults.hidden=count>0;
  const strip=picker.querySelector('.gb-bank-shortcuts');
- if(strip&&typeof strip.scrollTo==='function')strip.scrollTo({left:0,behavior:'instant'});
+ if(strip)strip.scrollLeft=0;
  return count;
 }
 export function syncBankPicker(picker,db){
