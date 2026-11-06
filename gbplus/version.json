@@ -1,7 +1,7 @@
 {
   "version": "2.4.9",
   "build": 68,
-  "published_at": "2026-11-06",
+  "published_at": null,
   "title": "Fluxo de caixa responsivo com filtros por situação",
   "notes": [
     "Fluxo de caixa com seletores Todos, Baixados e Pendentes em gráficos, tabela e exportação CSV.",
@@ -172,5 +172,6 @@
       "title": "Extrato com um toque",
       "description": "Toque em uma conta para ver seus movimentos e saldos por dia."
     }
-  ]
+  ],
+  "release_status": "homologation_pending"
 }
