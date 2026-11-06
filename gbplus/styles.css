@@ -971,12 +971,46 @@ body.auth-locked .mobile-nav-fade{display:none!important}
 .gb-statement-day-footer>strong{width:100%;text-align:right;font-size:13px;font-variant-numeric:tabular-nums}
 @media(max-width:480px){.gb-statement-totals{gap:7px}.gb-statement-totals>div{padding:9px}.gb-statement-totals strong{font-size:13px}.gb-statement-movement{gap:6px;padding:10px 8px}.gb-statement-day-footer{padding:10px}}
 
-/* GB+ 2.4.9 / build 66 — logo + name + balance, beneath the consolidated total. */
-.gb-balance-accounts{gap:8px;align-items:stretch;padding:13px 0 4px}
-.gb-balance-bank{flex:0 0 142px;max-width:165px;min-width:128px;align-items:stretch;gap:8px;padding:10px 11px;text-align:left;border:1px solid #ffffff24;background:#ffffff0a;border-radius:13px}
-.gb-balance-bank:hover,.gb-balance-bank:focus-visible{background:#ffffff1d;border-color:#ffffff55}
-.gb-balance-bank-identity{display:flex;align-items:center;gap:8px;min-width:0}
-.gb-balance-bank .gb-bank-badge{width:30px;height:30px;border-radius:9px}
-.gb-balance-bank-name{font-size:11px;font-weight:550;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1}
-.gb-balance-bank-amount{font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.25px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;line-height:1.35}
-@media(max-width:480px){.gb-balance-bank{flex-basis:136px;min-width:128px;padding:9px 10px}.gb-balance-bank-amount{font-size:13px}}
+/* GB+ 2.4.9 / build 67 — small bank balance pills inside the consolidated card. */
+.stat.featured{min-width:0}
+.gb-balance-accounts{
+ display:flex;align-items:center;flex-wrap:nowrap;gap:7px;
+ min-width:0;max-width:100%;width:100%;
+ overflow-x:auto;overflow-y:hidden;
+ margin-top:13px;padding:12px 1px 5px;
+ border-top:1px solid #ffffff27;
+ overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;
+ touch-action:pan-x;scrollbar-width:thin;
+}
+.gb-balance-bank{
+ appearance:none;box-sizing:border-box;
+ display:inline-flex;flex:0 0 auto;align-items:center;justify-content:flex-start;
+ flex-direction:row;gap:8px;min-width:0;max-width:none;
+ height:40px;margin:0;padding:5px 12px 5px 6px;
+ border:1px solid #ffffff16;border-radius:999px;
+ background:#484950;color:#fff;box-shadow:none;
+ text-align:left;white-space:nowrap;cursor:pointer;
+ transition:background .14s ease,border-color .14s ease;
+}
+.gb-balance-bank:hover{background:#55565f;border-color:#ffffff45}
+.gb-balance-bank:focus-visible{background:#55565f;outline:2px solid #f3f4f7;outline-offset:2px}
+.gb-balance-bank .gb-bank-badge{
+ flex:none;display:inline-grid;width:27px;height:27px;
+ min-width:27px;min-height:27px;max-width:27px;max-height:27px;
+ border-radius:50%;overflow:hidden;
+}
+.gb-balance-bank .gb-bank-badge img{border-radius:50%}
+.gb-balance-bank>.gb-balance-bank-amount{
+ display:inline-block;flex:none;
+ min-width:0;max-width:none;
+ overflow:visible;text-overflow:clip;white-space:nowrap;
+ color:#fff;font-size:13px;line-height:1;
+ font-weight:750;letter-spacing:-.25px;
+ font-variant-numeric:tabular-nums;
+}
+@media(max-width:480px){
+ .gb-balance-accounts{gap:6px;margin-top:11px;padding-top:10px}
+ .gb-balance-bank{height:38px;gap:7px;padding:4px 10px 4px 5px}
+ .gb-balance-bank .gb-bank-badge{width:26px;height:26px;min-width:26px;min-height:26px;max-width:26px;max-height:26px}
+ .gb-balance-bank>.gb-balance-bank-amount{font-size:12px}
+}
