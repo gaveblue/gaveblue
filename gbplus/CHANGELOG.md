@@ -15,7 +15,7 @@ Registro de mudanças do aplicativo localizado em `gbplus/`. Toda versão e toda
 - Para data válida e não futura, criação **conjunta** de um título único e da respectiva baixa na conta selecionada, usando o valor exato em centavos.
 - Bloqueio de categoria incompatível, descrição vazia, data futura, mesmo movimento já importado, identificação repetida e possível título ainda em aberto com **saldo residual equivalente**, histórico e vencimento próximo (inclusive baixa parcial).
 - Limite de **50 lançamentos criados por lote**, além dos limites da conciliação existentes.
-- Revisão final mostra quantidade de criações, entradas, saídas e efeito projetado no saldo. Exige caixa de seleção independente confirmando a criação e a atualização financeira antes de liberar o botão de gravação.
+- Revisão final mostra quantidade de criações, entradas, saídas e efeito projetado no saldo, incluindo a categoria escolhida. Exige caixa de seleção independente confirmando a criação e a atualização financeira antes de liberar o botão de gravação. Também alerta para movimentos já incluídos no saldo inicial e transferências internas, que não são receitas/despesas.
 - Persistência atômica por `commit` / `repository.save`, com verificação da revisão financeira existente: título, baixa e histórico só são gravados juntos se o lote inteiro passar pela validação.
 - Histórico registra identificadores dos títulos e pagamentos criados; evita novo processamento do mesmo movimento.
 - **Reversão segura:** lotes com criação podem estornar apenas seus próprios títulos e baixas, na mesma operação, desde que não tenham sido editados ou vinculados posteriormente em outra conciliação. Caso contrário, recusa a reversão e preserva os dados. O histórico de reversão permanece.
@@ -25,6 +25,7 @@ Registro de mudanças do aplicativo localizado em `gbplus/`. Toda versão e toda
 
 - **22 verificações lógicas simuladas** foram aprovadas em 06/11/2026 para criação de receitas/despesas, centavos, categorias, conta, título em aberto semelhante, data futura, duplicidade, confirmação explícita, reversão atômica e proteção contra registros editados. Essas verificações **não equivalem** a homologação em dispositivo ou teste de banco online.
 - Criada suíte reproduzível `gbplus/tests/bank-reconciliation-create-regression.mjs` e adicionada ao workflow `.github/workflows/gbplus-regression.yml`.
+- Em 06/11/2026 foram executados os **quatro scripts regressivos completos em um ambiente JavaScript de simulação**, com substitutos para utilitários Node e geração de UUID; os quatro concluíram seus testes sem erros. Essa evidência não substitui execução em Node real nem homologação no navegador.
 - [ ] Executar as quatro suítes de regressão em Node na automação CI; o GitHub Actions tem retornado falha **antes de mostrar etapas executadas**, ainda sem evidência de execução confiável.
 - [ ] Homologar OFX/CSV reais, conta errada, troca de conta, tema escuro, dispositivos móveis, confirmação, reimportação e saldo após gravação.
 - [ ] Testar simultaneidade de duas sessões, modo local e conta online, reversão de lote com título alterado, importação repetida e backup/restauração.
