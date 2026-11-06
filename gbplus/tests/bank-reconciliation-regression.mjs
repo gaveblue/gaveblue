@@ -10,7 +10,7 @@ const load=(name,deps,names)=>{
  const js=source(name).replace(/^import[^\n]*\n/gm,'').replace(/^export /gm,'');
  return Function(...Object.keys(deps),js+';return {'+names.join(',')+'}')( ...Object.values(deps) );
 };
-const recon=load('bank-reconciliation',{},['reconciliationRecordKey','knownReconciliationKeys','reviewSelection','applyReconciliationBatch','undoReconciliationBatch','bankImportHistory']);
+const recon=load('bank-reconciliation',{},['reconciliationRecordKey','knownReconciliationKeys','pendingReconciliationKeys','reviewSelection','applyReconciliationBatch','undoReconciliationBatch','bankImportHistory']);
 const bank=load('bank-import-preview',{},['parseBankStatement','proposeReconciliation']);
 const store=load('store',{
  uid:()=> 'u',validDate:x=>/^\d{4}-\d{2}-\d{2}$/.test(x),paid:()=>0,
