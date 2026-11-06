@@ -1,12 +1,12 @@
 # GB+ 2.5.0 — Protocolo de homologação
 
-**Estado atual:** builds 1–4 no PR #73, ainda não publicados. Responsável pela homologação: **não registrado**. Data de aprovação: **não registrada**.
+**Estado atual:** builds 1–5 no PR #73, ainda não publicados. Responsável pela homologação: **não registrado**. Data de aprovação: **não registrada**.
 
 ## Ambiente e dados permitidos
 
 - Utilizar **conta de teste sem dados reais**, com saldo inicial de **R$ 100,00** e categorias fictícias `Recebimentos` e `Tarifas`. Não executar no financeiro pessoal do responsável ou de clientes.
 - Arquivos fictícios disponíveis em `tests/fixtures/extrato-homologacao-250.csv` e `tests/fixtures/extrato-homologacao-250.ofx`. **Use apenas um deles para a criação**, pois os dois representam os mesmos movimentos/IDs.
-- Abrir a futura prévia da build 4 quando houver ambiente de homologação disponível; uma ramificação/PR **não disponibiliza automaticamente uma página executável**.
+- Abrir a futura prévia da build 5 quando houver ambiente de homologação disponível; uma ramificação/PR **não disponibiliza automaticamente uma página executável**.
 - Fazer um backup antes da operação de gravação e documentar revisão, dispositivo e capturas de tela. Não incluir CPF, identificadores bancários ou dados pessoais nas evidências.
 
 ## Cenário reproduzível
@@ -34,9 +34,28 @@ O arquivo contém duas transações em 06/11/2026 (data de teste; para testes em
 - [ ] **07. Gravação:** após confirmar na conta fictícia, surgem **2 títulos e 2 baixas**, com R$ 137,50 de saldo. Verificar com persistência online (usuario de teste) e modo local.
 - [ ] **08. Anti-duplicidade:** reimportar o arquivo não pode criar novas baixas; um título parcial aberto semelhante também bloqueia criação indevida.
 - [ ] **09. Reversão e integridade:** reverter lote sem edição restaura R$ 100,00 e mantém histórico; se algum título foi editado, reversão automática falha **sem apagar nada**.
-- [ ] **10. Interface e regressões:** verificar Chrome Android (320/360/390/430 px), desktop, tema escuro, focos, modais, rolagem e executar todas as suítes em Node real com resultados verdes.
+- [ ] **10. Interface e regressões:** verificar Chrome Android (320/360/390/430 px), desktop, tema escuro, focos, modais, rolagem e executar todas as sete suítes em Node real com resultados verdes.
 
 **Nota:** não marcar o item 10 como aprovado sem resultados visuais e testes de regressão executados. O CI atual falha com `runner_id=0`, `steps=[]` e sem logs de etapas; isso indica que o runner não executou os comandos, **não confirma a causa raiz**.
+
+## Evidências técnicas — compilação 5
+
+**Testes executados em simulação JavaScript:** sete suítes passaram, incluindo a regressão financeira anterior, leitura OFX/CSV, UTF-8/Windows-1252, vínculo e bloqueio de duplicidades, criação de títulos com baixa, retomada de pendências, gravação local com revisão concorrente, backup e estorno. A simulação usou adaptadores para APIs Node, `TextDecoder` e geração de identificadores. **Não é uma execução Node real nem uma homologação em navegador real.**
+
+Foram corrigidos defeitos encontrados nos próprios testes:
+- O botão `Revisar decisões` ficava desabilitado quando o único movimento selecionado era `Criar lançamento baixado`.
+- A decisão `Manter pendente` bloqueava a conclusão futura; agora a reimportação pode retomar o movimento, com vínculo auditável entre lotes e reversão encadeada.
+- A validação de extensão rejeitava OFX/CSV reais; corrigida na compilação 4.
+- Regressões permanentes incluem agora `bank-reconciliation-pending-regression.mjs` e `bank-reconciliation-storage-regression.mjs` (além das outras cinco).
+
+**Último CI tentado:** [run #42263995585](https://github.com/gaveblue/gaveblue/actions/runs/42263995585), duas tentativas com `failure` sem nenhuma etapa executada (`steps=[]`). **O bloqueio depende do ambiente do GitHub Actions e a causa específica ainda não foi obtida.**
+
+### Ações que exigem ambiente de homologação
+
+1. **GitHub Actions:** alguém com acesso às configurações do repositório deve consultar as anotações da execução e as páginas `Settings → Actions → General` e `Settings → Billing`. Confirmar se runners, políticas e cobrança permitem a execução. Não supor a causa apenas por `steps=[]`.
+2. **Navegador/PWA:** abrir uma cópia de homologação da build 5 e validar upload real no Android, desktop e temas claro/escuro. A ramificação GitHub não é um site de testes por si só.
+3. **Conta de teste:** usar somente dados fictícios e verificar saldo inicial de R$ 100,00, saldo de R$ 137,50 após importação, R$ 100,00 após reversão, reimportação sem duplicidade e duas sessões simultâneas.
+4. **Aprovação:** gravar links, capturas sem dados sensíveis, revisor e data antes de mesclar/publicar. O rollback de código **não** estorna dados que já foram gravados.
 
 ## Falha atual do GitHub Actions
 
@@ -50,7 +69,7 @@ Run de referência: https://github.com/gaveblue/gaveblue/actions/runs/4225018909
 
 ## Segurança de liberação e rollback
 
-A build 4 atual é **desenvolvimento**, com `published_at=null`. A versão pública é a **2.4.9, compilação 68**, e não deverá ser modificada sem autorização explícita de publicação.
+A build 5 atual é **desenvolvimento**, com `published_at=null`. A versão pública é a **2.4.9, compilação 68**, e não deverá ser modificada sem autorização explícita de publicação.
 
 Se uma versão que crie títulos e baixas for publicada no futuro, **reverter apenas o código não reverte nem apaga lançamentos financeiros já gravados**. A reversão de dados deve ser feita pelo histórico do lote, sob validação de integridade, e com backup e conferência do saldo. Nunca executar `git reset --hard` ou excluir dados de usuários como método de rollback.
 
