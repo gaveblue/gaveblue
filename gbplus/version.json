@@ -1,14 +1,14 @@
 {
-  "version": "2.4.8",
-  "build": 64,
+  "version": "2.4.9",
+  "build": 65,
   "published_at": "2026-11-05",
-  "title": "GB+ AI e seleção de bancos mais simples",
+  "title": "Saldos por conta e extrato diário",
   "notes": [
-    "Escolher a instituição financeira ficou mais fácil: deslize pelos ícones e encontre o banco desejado.",
-    "Pesquisa simplificada nos cadastros de contas e cartões de crédito.",
-    "Confira todos os vencimentos e os valores antes de confirmar um lançamento.",
-    "Edite os dados do lançamento diretamente na prévia do assistente financeiro.",
-    "Anexe arquivos OFX e CSV no assistente para visualizar uma prévia inicial dos movimentos, sem criar lançamentos."
+    "Consulte os saldos de suas contas tocando nos ícones dos bancos abaixo do saldo principal.",
+    "Veja o extrato de cada conta organizado por dia, com entradas, saídas e saldo do fim do dia.",
+    "Acompanhe o saldo no início de cada dia e os créditos e débitos acumulados.",
+    "Transferências entre suas contas aparecem nos dois extratos sem duplicar receitas ou despesas.",
+    "O assistente financeiro continua com prévia e confirmação antes de registrar lançamentos."
   ],
   "assets": [
     "./index.html",
@@ -153,33 +153,29 @@
     "./ai-lab/preview-card.js",
     "./ai-lab/preview-card.css",
     "./ai-lab/file-stage.js",
-    "./js/bank-import-preview.js"
+    "./js/bank-import-preview.js",
+    "./js/daily-statement.js"
   ],
   "highlights": [
     {
       "icon": "bank",
-      "title": "Seu banco, mais fácil de encontrar",
-      "description": "Deslize pelos bancos disponíveis ou use a pesquisa para localizar sua instituição."
+      "title": "Todas as suas contas em um só lugar",
+      "description": "Toque no ícone de uma conta para conferir seu saldo e suas movimentações."
     },
     {
-      "icon": "card",
-      "title": "Cadastro de cartões mais prático",
-      "description": "Escolha o banco vinculado ao cartão diretamente na faixa de ícones."
+      "icon": "calendar",
+      "title": "Extrato por dia",
+      "description": "Veja o saldo no início e no fim de cada dia, com entradas e saídas separadas."
     },
     {
-      "icon": "sparkles",
-      "title": "Prévia completa de lançamentos",
-      "description": "Confira descrição, valor, periodicidade e vencimentos antes de confirmar."
+      "icon": "chart",
+      "title": "Créditos e débitos",
+      "description": "Acompanhe os totais acumulados e confira como o saldo mudou."
     },
     {
       "icon": "check",
-      "title": "Edite antes de gravar",
-      "description": "Ajuste os detalhes na conversa e mantenha o controle sobre cada lançamento."
-    },
-    {
-      "icon": "file",
-      "title": "Anexos no assistente",
-      "description": "Abra arquivos OFX e CSV para uma prévia inicial dos movimentos, sem alterar seu financeiro."
+      "title": "Seu financeiro continua sob controle",
+      "description": "Os extratos usam os registros existentes, sem criar ou alterar lançamentos."
     }
   ]
 }
