@@ -1,12 +1,13 @@
 {
   "version": "2.4.9",
-  "build": 67,
+  "build": 68,
   "published_at": "2026-11-06",
-  "title": "Saldos de contas com visual compacto",
+  "title": "Fluxo de caixa responsivo com filtros por situação",
   "notes": [
-    "O saldo geral continua em destaque no início, reunindo todas as contas.",
-    "As contas aparecem abaixo do total em pílulas pequenas, com símbolo do banco e saldo.",
-    "Toque na pílula para consultar as movimentações e o extrato diário daquela conta."
+    "Fluxo de caixa com seletores Todos, Baixados e Pendentes em gráficos, tabela e exportação CSV.",
+    "Valores parcialmente baixados separados entre realizado e saldo pendente, sem duplicidade.",
+    "Gráficos SVG responsivos, legendas legíveis e tabelas com rolagem horizontal contida no cartão.",
+    "Janela do gráfico prioriza períodos próximos da data atual; a tabela continua com todos os períodos."
   ],
   "assets": [
     "./index.html",
@@ -59,6 +60,7 @@
     "./js/gb-react-loader.js",
     "./js/gb-charts-data.js",
     "./js/gb-charts-native.js",
+    "./js/gb-flow-filters.js",
     "./instalar.html",
     "./instalar.css",
     "./js/install-landing.js",
