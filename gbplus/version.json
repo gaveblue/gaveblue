@@ -166,7 +166,7 @@
       "description": "Veja o símbolo e o saldo de cada conta sem ocupar espaço desnecessário."
     },
     {
-      "icon": "calendar",
+      "icon": "file",
       "title": "Extrato com um toque",
       "description": "Toque em uma conta para ver seus movimentos e saldos por dia."
     }
