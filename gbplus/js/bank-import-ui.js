@@ -21,7 +21,7 @@ export function bankImportMarkup(db,draft){
  if(!accounts.length)return '<div class="gb-import-empty"><h3>Cadastre uma conta financeira antes de importar</h3><p>A leitura de um extrato sempre precisa de uma conta do GB+ selecionada. Nenhum dado será alterado.</p></div>';
  const accountId=accounts.some(account=>account.id===draft?.accountId)?draft.accountId:accounts[0].id;
  const accountSelect='<label class="gb-import-label" for="gb-import-account">Conta que será conferida</label>'+
-  '<select id="gb-import-account" class="gb-import-select" aria-label="Selecionar conta financeira">'+
+  '<select id="gb-import-account" class="gb-import-select" data-gb-native="true" aria-label="Selecionar conta financeira">'+
   accounts.map(account=>'<option value="'+esc(account.id)+'" '+(account.id===accountId?'selected':'')+'>'+esc(account.name)+'</option>').join('')+'</select>';
  const head='<div id="gb-import-workspace" class="gb-import-workspace">'+
   '<div class="gb-import-intro"><div class="gb-import-symbol">'+icon('wallet')+'</div><div><strong>Conferência de extrato bancário</strong>'+
