@@ -6,6 +6,10 @@
 
 **Estado em 05/11/2026:** o parser/simulador isolado está em `js/bank-import-preview.js`. Na **2.4.8**, o GB+ AI ganhou um botão de anexo no chat: OFX e CSV geram apenas resumo de leitura local, sem selecionar conta nem conciliar; Excel e PDF apenas mostram que a leitura está pendente. **Nenhum arquivo pode criar títulos, baixar contas ou alterar saldos nesta etapa.** A conciliação e a gravação controlada continuam reservadas à 2.5.0.
 
+## Implementação iniciada em 06/11/2026 — compilação 1
+
+A primeira interface read-only está na ramificação `feature/gbplus-250-importacao-previa`, acessível em **Contas bancárias → Importar extrato** e **Movimentações da conta → Importar extrato**. Seleciona OFX/CSV, lê localmente, apresenta totais, prováveis correspondências, ambiguidades e não localizados, com paginação e filtros. **Não grava conciliações, títulos, baixas, dados no Supabase ou arquivo bruto**. A homologação da UI e de arquivos bancários reais continua pendente.
+
 ## Objetivo
 
 Conciliar o movimento registrado nos bancos com as baixas, títulos e transferências já existentes no GB+, exibindo diferenças de forma auditável. Uma importação jamais deve presumir que todo débito é uma nova despesa nem que toda entrada é receita.
