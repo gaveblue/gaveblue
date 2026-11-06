@@ -54,7 +54,7 @@ const csv='Data;Descrição;Valor;Saldo\n06/11/2026;Pix;50,00;137,50\n05/11/2026
 const csvResult=parser.parseBankStatement(csv,'banco.csv');
 assert.deepEqual(csvResult.bankBalance,{date:'2026-11-06',amount:13750,source:'csv-balance-column'});
 const ambiguous=parser.parseBankStatement(
- 'Data;Descrição;Valor;Saldo\\n06/11/2026;Pix;50,00;137,50\\n06/11/2026;Tarifa;-12,50;87,50','banco.csv'
+ 'Data;Descrição;Valor;Saldo\n06/11/2026;Pix;50,00;137,50\n06/11/2026;Tarifa;-12,50;87,50','banco.csv'
 );
 assert.equal(ambiguous.bankBalance,null,'Multiple intraday balances without time cannot be called final');
 assert.match(ambiguous.warnings[0],/saldos diferentes/);
@@ -64,7 +64,7 @@ const ambiguityView=ui.bankImportMarkup(db,{
 assert.match(ambiguityView,/A comparação foi omitida/);
 assert(!ambiguityView.includes('Diferença indicativa'));
 const missingLatest=parser.parseBankStatement(
- 'Data;Descrição;Valor;Saldo\\n06/11/2026;Pix;50,00;\\n05/11/2026;Tarifa;-12,50;87,50','banco.csv'
+ 'Data;Descrição;Valor;Saldo\n06/11/2026;Pix;50,00;\n05/11/2026;Tarifa;-12,50;87,50','banco.csv'
 );
 assert.equal(missingLatest.bankBalance,null,'Past-day balance is not the latest closing balance');
 
