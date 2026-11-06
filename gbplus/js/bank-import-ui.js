@@ -57,7 +57,8 @@ export function bankImportMarkup(db,draft){
     summary('Alteração de saldo',money((plan.totals.amountCreatedIn||0)-(plan.totals.amountCreatedOut||0)))+'</div>'+
    '<div class="gb-import-confirm-rows">'+plan.entries.slice(0,50).map(row=>
      '<div class="gb-import-confirm-row"><span>'+dateLabel(row.date)+' · '+esc(row.description)+
-     '</span><b>'+fmtCents(row.amount)+'</b><small>'+({'link':'Conciliar','ignore':'Ignorar','pending':'Manter pendente','create':'Criar '+(row.amount>0?'receita recebida':'despesa paga')}[row.action])+'</small></div>'
+     '</span><b>'+fmtCents(row.amount)+'</b><small>'+({'link':'Conciliar','ignore':'Ignorar','pending':'Manter pendente','create':'Criar '+(row.amount>0?'receita recebida':'despesa paga')}[row.action])+
+     (row.action==='create'?' · '+esc(db.categories.find(c=>c.id===row.categoryId)?.name||'Categoria não localizada'):'')+'</small></div>'
     ).join('')+
     (plan.entries.length>50?'<p class="gb-import-hint">Mostrando 50 dos '+plan.entries.length+' movimentos selecionados.</p>':'')+
    '</div>'+
