@@ -2,6 +2,37 @@
 
 Registro de mudanças do aplicativo localizado em `gbplus/`. Toda versão e toda compilação deve possuir uma entrada própria. **Uma alteração não deve ser considerada homologada apenas porque existe commit, teste escrito ou publicação.** A homologação exige evidências da execução e aprovação explícita.
 
+## [2.5.0 · compilação 3 — desenvolvimento] — 2026-11-06
+
+**Situação:** implementada no ramo `feature/gbplus-250-importacao-previa`, PR #73; **não publicada, homologação pendente**.  
+**Objetivo:** permitir criar títulos e baixas de movimentos bancários não localizados **somente após aprovação expressa**.  
+**Isolamento:** os arquivos brutos continuam exclusivamente na memória local; nenhum envio automático ao servidor, à IA ou a terceiros.
+
+### Funcionalidades
+
+- Nova decisão por movimento: **Criar lançamento baixado**, disponível apenas quando o extrato não tem baixa/transferência correspondente e não há repetição no próprio arquivo.
+- Exigência de categoria compatível com a natureza do movimento (entrada = receita; saída = despesa) e descrição editável até 300 caracteres.
+- Para data válida e não futura, criação **conjunta** de um título único e da respectiva baixa na conta selecionada, usando o valor exato em centavos.
+- Bloqueio de categoria incompatível, descrição vazia, data futura, mesmo movimento já importado, identificação repetida e possível título ainda em aberto com mesmo valor, histórico e vencimento próximo.
+- Limite de **50 lançamentos criados por lote**, além dos limites da conciliação existentes.
+- Revisão final mostra quantidade de criações, entradas, saídas e efeito projetado no saldo. Exige caixa de seleção independente confirmando a criação e a atualização financeira antes de liberar o botão de gravação.
+- Persistência atômica por `commit` / `repository.save`, com verificação da revisão financeira existente: título, baixa e histórico só são gravados juntos se o lote inteiro passar pela validação.
+- Histórico registra identificadores dos títulos e pagamentos criados; evita novo processamento do mesmo movimento.
+- **Reversão segura:** lotes com criação podem estornar apenas seus próprios títulos e baixas, na mesma operação, desde que não tenham sido editados ou vinculados posteriormente em outra conciliação. Caso contrário, recusa a reversão e preserva os dados. O histórico de reversão permanece.
+- Nenhuma alteração do esquema SQL de produção; a informação é validada no documento financeiro por usuário. O fluxo anterior de conciliar, ignorar e deixar pendente continua disponível.
+
+### Verificações e riscos
+
+- **22 verificações lógicas simuladas** foram aprovadas em 06/11/2026 para criação de receitas/despesas, centavos, categorias, conta, título em aberto semelhante, data futura, duplicidade, confirmação explícita, reversão atômica e proteção contra registros editados. Essas verificações **não equivalem** a homologação em dispositivo ou teste de banco online.
+- Criada suíte reproduzível `gbplus/tests/bank-reconciliation-create-regression.mjs` e adicionada ao workflow `.github/workflows/gbplus-regression.yml`.
+- [ ] Executar as quatro suítes de regressão em Node na automação CI; o GitHub Actions tem retornado falha **antes de mostrar etapas executadas**, ainda sem evidência de execução confiável.
+- [ ] Homologar OFX/CSV reais, conta errada, troca de conta, tema escuro, dispositivos móveis, confirmação, reimportação e saldo após gravação.
+- [ ] Testar simultaneidade de duas sessões, modo local e conta online, reversão de lote com título alterado, importação repetida e backup/restauração.
+- [ ] Validar tratamento do saldo inicial sem data-base histórica antes de implementar comparação entre saldo do banco e GB+.
+- [ ] Registrar responsável, data, evidências e aprovação para a liberação.
+
+**Importante:** esta entrega **efetivamente pode alterar saldos** ao criar títulos e baixas, mas só após confirmação individual e do lote. A versão pública permanece na 2.4.9 compilação 68 até publicação explicitamente autorizada e verificada. Em caso de falha, corrigir/reverter o código da compilação 3 sem resetar dados financeiros nem forçar histórico Git.
+
 ## [2.5.0 · compilação 2 — desenvolvimento] — 2026-11-06
 
 **Situação:** implementada na ramificação `feature/gbplus-250-importacao-previa`; **homologação pendente, não publicada**.  
