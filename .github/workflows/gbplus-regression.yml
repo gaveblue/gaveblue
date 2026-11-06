@@ -27,6 +27,8 @@ jobs:
         run: node gbplus/tests/bank-import-preview-regression.mjs
       - name: Leitura de extratos em codificações bancárias
         run: node gbplus/tests/bank-import-codec-regression.mjs
+      - name: Garantia de bloqueio financeiro na liberação pública
+        run: node gbplus/tests/bank-import-readonly-release-regression.mjs
       - name: Conciliação e histórico
         run: node gbplus/tests/bank-reconciliation-regression.mjs
       - name: Criação e reversão de lançamentos importados
