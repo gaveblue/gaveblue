@@ -125,3 +125,9 @@
 }
 
 .gb-import-finance-warning{font-size:11px;line-height:1.55;color:var(--muted);padding:10px 12px;border-left:2px solid var(--muted);background:var(--soft);border-radius:0 8px 8px 0}
+
+/* Build 7 — comparação indicativa de saldo informado pelo banco. */
+.gb-import-balance-comparison{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.gb-import-balance-comparison .gb-import-summary{min-width:0}
+.gb-import-balance-note{font-size:11px;line-height:1.55;color:var(--muted);padding:10px 12px;border-left:2px solid var(--border);background:var(--soft);border-radius:0 8px 8px 0}
+@media(max-width:760px){.gb-import-balance-comparison{grid-template-columns:minmax(0,1fr)}}
