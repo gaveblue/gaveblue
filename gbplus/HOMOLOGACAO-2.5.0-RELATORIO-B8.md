@@ -1,6 +1,6 @@
 # GB+ 2.5.0 — Homologação do núcleo OFX/CSV, build 8
 
-**Situação:** preparado para publicação assistida, sem homologação completa de dispositivos/CI. O usuário autorizou a liberação para prosseguir à 2.5.1.
+**Situação:** compilação 8 **publicada** após merge do [PR #77](https://github.com/gaveblue/gaveblue/pull/77) e deploy [42310213381](https://github.com/gaveblue/gaveblue/actions/runs/42310213381) bem-sucedido. A liberação foi autorizada, mas a homologação completa de PWA e CI permanece pendente.
 
 ## Testes executados em 06/11/2026
 
