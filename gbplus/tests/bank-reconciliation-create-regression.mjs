@@ -30,6 +30,7 @@ const ui=load('bank-import-ui',{
  money:n=>'R$ '+(n/100).toFixed(2),dateLabel:s=>s,esc,icon:()=>'', 
  reconciliationRecordKey:load('bank-reconciliation',{},['reconciliationRecordKey']).reconciliationRecordKey,
  knownReconciliationKeys:reconciler.knownReconciliationKeys,
+ pendingReconciliationKeys:reconciler.pendingReconciliationKeys,
  bankImportHistory:reconciler.bankImportHistory
 },['bankImportMarkup','bankImportHistoryMarkup']);
 const domain=load('domain',{
