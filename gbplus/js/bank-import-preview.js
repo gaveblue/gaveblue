@@ -130,14 +130,37 @@ function inferSeparator(first){
  }
  return best;
 }
-export function parseBankCsv(value,{separator}={}){
+export const CSV_IMPORT_FIELDS=['date','description','amount','credit','debit','kind','id','balance'];
+export function inspectBankCsv(value,{separator}={}){
+ const text=safeInput(value);
+ if(!text.trim())throw Error('Arquivo CSV vazio.');
+ const inferred=separator||inferSeparator(text.split(/\r?\n/,1)[0]);
+ if(![';',',','\t'].includes(inferred))throw Error('Separador de CSV não suportado.');
+ const rows=splitCsv(text,inferred);
+ const headers=(rows[0]||[]).map((cell,i)=>clean(cell).slice(0,100)||('Coluna '+(i+1)));
+ if(headers.length<2||headers.length>80||rows.length<2)throw Error('CSV precisa de cabeçalho e pelo menos um movimento (até 80 colunas).');
+ const guess=names=>headers.findIndex(h=>names.some(n=>norm(h)===n||norm(h).startsWith(n)));
+ const columns={
+  date:guess(['data','dtmovimento','date','datamovimento']),
+  description:guess(['historico','descricao','detalhe','memo','lancamento','movimento','narrativa']),
+  amount:guess(['valor','amount','quantia']),
+  credit:guess(['credito','credit','entrada','recebimento']),
+  debit:guess(['debito','debit','saida','pagamento']),
+  kind:guess(['tipo','natureza','sinal','operacao']),
+  id:guess(['identificador','fitid','transacao','nsu','idmovimento','id']),
+  balance:guess(['saldo','balance'])
+ };
+ return {separator:inferred,headers,columns,sample:rows.slice(1,4).map(r=>headers.map((_,i)=>clean(r[i]).slice(0,55))),rowCount:rows.length-1,
+  mode:columns.amount>=0?'amount':'split'};
+}
+export function parseBankCsv(value,{separator,indexes:manualIndexes}={}){
  const text=safeInput(value);
  if(!text.trim())throw Error('Arquivo CSV vazio.');
  const inferred=separator||inferSeparator(text.split(/\r?\n/,1)[0]);
  if(![';',',','\t'].includes(inferred))throw Error('Separador de CSV não suportado.');
  const rows=splitCsv(text,inferred),headers=(rows.shift()||[]).map(norm);
  const col=names=>headers.findIndex(h=>names.some(n=>h===n||h.startsWith(n)));
- const indexes={
+ const detected={
   date:col(['data','dtmovimento','date','datamovimento']),
   description:col(['historico','descricao','detalhe','memo','lancamento','movimento','narrativa']),
   amount:col(['valor','amount','quantia']),
@@ -147,9 +170,24 @@ export function parseBankCsv(value,{separator}={}){
   id:col(['identificador','fitid','transacao','nsu','idmovimento','id']),
   balance:col(['saldo','balance'])
  };
+ let indexes=detected;
+ if(manualIndexes!==undefined){
+  if(!manualIndexes||typeof manualIndexes!=='object')throw Error('Mapeamento CSV inválido.');
+  indexes=Object.fromEntries(CSV_IMPORT_FIELDS.map(k=>{
+   const value=manualIndexes[k];
+   if(value===undefined||value===null||value===''||value===-1)return [k,-1];
+   const i=Number(value);
+   if(!Number.isInteger(i)||i<0||i>=headers.length)throw Error('A coluna '+k+' não existe no CSV.');
+   return [k,i];
+  }));
+  const selected=Object.values(indexes).filter(i=>i>=0);
+  if(new Set(selected).size!==selected.length)throw Error('Não utilize a mesma coluna para dois campos diferentes.');
+  if(indexes.amount>=0&&(indexes.credit>=0||indexes.debit>=0))throw Error('Escolha Valor único ou Crédito/Débito separados.');
+ }
  if(indexes.date<0||indexes.description<0||(indexes.amount<0&&(indexes.credit<0||indexes.debit<0)))
   throw Error('Colunas obrigatórias não identificadas. Informe Data, Descrição e Valor (ou Crédito/Débito).');
  if(!rows.length)throw Error('CSV sem movimentos.');
+ if(headers.length>80)throw Error('CSV com mais de 80 colunas: revise o arquivo.');
  const records=rows.map((cells,index)=>{
   const get=key=>indexes[key]<0?'':clean(cells[indexes[key]]);
   let amount;
