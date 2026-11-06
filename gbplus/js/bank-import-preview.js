@@ -123,7 +123,7 @@ function splitCsv(text,separator){
 }
 function inferSeparator(first){
  let best=';',max=-1;
- for(const sep of [';',',','\t']){
+ for(const sep of [';',',','\t','|']){
   let found=0,quoted=false;
   for(const char of first){if(char==='"')quoted=!quoted;if(char===sep&&!quoted)found++;}
   if(found>max){max=found;best=sep;}
@@ -135,7 +135,7 @@ export function inspectBankCsv(value,{separator}={}){
  const text=safeInput(value);
  if(!text.trim())throw Error('Arquivo CSV vazio.');
  const inferred=separator||inferSeparator(text.split(/\r?\n/,1)[0]);
- if(![';',',','\t'].includes(inferred))throw Error('Separador de CSV não suportado.');
+ if(![';',',','\t','|'].includes(inferred))throw Error('Separador de CSV não suportado.');
  const rows=splitCsv(text,inferred);
  const headers=(rows[0]||[]).map((cell,i)=>clean(cell).slice(0,100)||('Coluna '+(i+1)));
  if(headers.length<2||headers.length>80||rows.length<2)throw Error('CSV precisa de cabeçalho e pelo menos um movimento (até 80 colunas).');
@@ -157,7 +157,7 @@ export function parseBankCsv(value,{separator,indexes:manualIndexes}={}){
  const text=safeInput(value);
  if(!text.trim())throw Error('Arquivo CSV vazio.');
  const inferred=separator||inferSeparator(text.split(/\r?\n/,1)[0]);
- if(![';',',','\t'].includes(inferred))throw Error('Separador de CSV não suportado.');
+ if(![';',',','\t','|'].includes(inferred))throw Error('Separador de CSV não suportado.');
  const rows=splitCsv(text,inferred),headers=(rows.shift()||[]).map(norm);
  const col=names=>headers.findIndex(h=>names.some(n=>h===n||h.startsWith(n)));
  const detected={
@@ -199,8 +199,11 @@ export function parseBankCsv(value,{separator,indexes:manualIndexes}={}){
   }else{
    amount=statementCents(get('amount'));
    const kind=norm(get('kind'));
-   if(['credito','credit','entrada','recebimento'].includes(kind))amount=Math.abs(amount);
-   if(['debito','debit','saida','pagamento'].includes(kind))amount=-Math.abs(amount);
+   const incomeKinds=['credito','credit','entrada','recebimento','c','cr','creditado'];
+   const expenseKinds=['debito','debit','saida','pagamento','d','dr','debitado'];
+   if(incomeKinds.includes(kind))amount=Math.abs(amount);
+   else if(expenseKinds.includes(kind))amount=-Math.abs(amount);
+   else if(kind)throw Error('CSV linha '+(index+2)+': tipo de movimento não reconhecido. Revise a coluna Tipo ou use valores com sinal.');
   }
   try{return entry(get('date'),get('description'),amount,get('id'),'csv');}
   catch(error){throw Error('CSV linha '+(index+2)+': '+error.message);}
