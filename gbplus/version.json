@@ -1,14 +1,15 @@
 {
   "version": "2.5.0",
-  "build": 2,
+  "build": 3,
   "published_at": null,
-  "title": "Conciliação bancária com confirmação individual e histórico",
+  "title": "Importação OFX/CSV: criação autorizada de lançamentos e baixas",
   "notes": [
-    "Selecione conciliar com uma baixa ou transferência existente, ignorar ou manter pendente em cada movimento.",
-    "Revisão e confirmação final antes de salvar exclusivamente os vínculos e decisões, sem alterar saldos.",
-    "Prevenção de vínculos duplicados com a mesma baixa, duplicações de arquivo e reimportação.",
-    "Histórico de conciliações por conta e reversão auditável sem estorno financeiro.",
-    "Persistência das decisões aprovadas no documento financeiro com controle de revisão; não armazena arquivo bruto."
+    "Movimentos não localizados no extrato podem ser transformados em títulos únicos com a baixa correspondente, após seleção explícita da categoria e revisão da descrição.",
+    "Criações limitadas a movimentos com data de hoje ou anterior e sem título aberto equivalente; receitas e despesas respeitam os centavos e a conta selecionada.",
+    "A revisão apresenta o número de lançamentos novos, entradas, saídas e o impacto no saldo. Uma confirmação adicional é exigida quando existirem criações.",
+    "O registro da conciliação é atômico com os títulos e baixas criados, com proteção contra reimportação e vínculos duplicados.",
+    "Reversão de lote elimina exclusivamente os registros criados por ele e mantém o histórico; recusa reversão quando registros tiverem sido modificados.",
+    "Em desenvolvimento e com homologação pendente. Não publicado na versão principal."
   ],
   "assets": [
     "./index.html",
@@ -180,6 +181,6 @@
   "release_status": "development_homologation_pending",
   "homologation": {
     "status": "pendente",
-    "notes": "Compilação 2 em desenvolvimento; confirmação e reversão requerem testes completos no PWA antes da liberação."
+    "notes": "Build 3 com teste lógico simulado de criação/reversão. GitHub Actions ainda falhou antes da execução dos passos; homologação de navegador e armazenamento real pendente."
   }
 }
