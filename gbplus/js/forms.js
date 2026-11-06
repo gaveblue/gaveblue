@@ -3,7 +3,7 @@ import {esc,field,select,textarea,formFooter,button,icon,titleTable,empty} from 
 import {INDICATORS} from './store.js?v=20261105-78';
 import {entrySelect} from './entry-select.js?v=20261104-42';
 import {gbIcon,CATEGORY_ICON_OPTIONS,categoryIconFor} from './gb-icons.js?v=20261104-42';
-import {bankOptions,findBank,bankPicker} from './banks.js?v=20261105-78';
+import {bankOptions,findBank,bankPicker} from './banks.js?v=20261105-84';
 const required='required maxlength="200"';
 export function titleForm(db,t,type='expense'){
  type=t?.type||type;
