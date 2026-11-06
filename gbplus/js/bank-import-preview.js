@@ -6,6 +6,19 @@
  */
 export const BANK_IMPORT_MAX_BYTES=8_000_000;
 export const BANK_IMPORT_MAX_ROWS=20000;
+export const bankImportFileNameSupported = name=>/\.(?:ofx|csv|txt)$/i.test(String(name||'').trim());
+
+export async function readBankFileText(file){
+ if(!file||!bankImportFileNameSupported(file.name))throw Error('Selecione um arquivo OFX ou CSV.');
+ if(!Number.isSafeInteger(file.size)||file.size<1||file.size>BANK_IMPORT_MAX_BYTES)
+  throw Error('O arquivo precisa ter até 8 MB e não pode estar vazio.');
+ const raw=await file.arrayBuffer();
+ if(raw.byteLength!==file.size)throw Error('O arquivo foi modificado durante a leitura. Selecione-o novamente.');
+ // UTF-8 is preferred. Older Brazilian banking exports often use Windows-1252.
+ try{return new TextDecoder('utf-8',{fatal:true}).decode(raw);}
+ catch{return new TextDecoder('windows-1252',{fatal:true}).decode(raw);}
+}
+
 
 const clean=value=>String(value??'').replace(/^\uFEFF/,'').trim();
 const norm=text=>clean(text).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');
