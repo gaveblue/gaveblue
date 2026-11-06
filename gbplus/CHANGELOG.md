@@ -2,6 +2,27 @@
 
 Registro de mudanças do aplicativo localizado em `gbplus/`. Toda versão e toda compilação deve possuir uma entrada própria. **Uma alteração não deve ser considerada homologada apenas porque existe commit, teste escrito ou publicação.** A homologação exige evidências da execução e aprovação explícita.
 
+## [2.5.0 · compilação 4 — endurecimento de homologação] — 2026-11-06
+
+**Situação:** correções aplicadas no PR #73; **não publicado, homologação de dispositivo e CI pendente**.  
+**Objetivo:** eliminar falhas de importação antes de disponibilizar operações que alteram dados financeiros.
+
+### Corrigido
+- A validação de extensão no carregamento tinha barras invertidas excedentes no regex e poderia rejeitar **todos os arquivos OFX/CSV/TXT válidos**. Corrigida e centralizada na função `bankImportFileNameSupported`.
+- Arquivos CSV codificados em **Windows-1252** tinham caracteres inválidos ao serem lidos com `file.text()`, podendo ocultar colunas como `Descrição`. Agora o arquivo é lido em bytes: tenta decodificação UTF-8 estrita, depois Windows-1252.
+- O leitor também rejeita nomes com extensão disfarçada (por exemplo `.csv.exe`), arquivos vazios, maiores que 8 MB e arquivos cujo tamanho mude durante a leitura.
+- Atualizado `gbplus/tests/bank-import-codec-regression.mjs` e seu acionamento em `.github/workflows/gbplus-regression.yml`.
+- Incrementado o build 3 → 4 com atualização da versão de JavaScript e do cache PWA. **A versão pública permanece a 2.4.9 build 68**.
+
+### Verificações
+- Testes de funções em ambiente JavaScript de simulação confirmaram: nome OFX/CSV válido, rejeição de extensões disfarçadas, recuperação do cabeçalho `Descrição` em Windows-1252, cálculo do extrato e bloqueio de arquivos inválidos.
+- [ ] Executar todas as suítes em Node real / GitHub Actions e registrar o link de execução verde.
+- [ ] Validar upload real em Chrome/Android, iOS/Safari e desktop, com arquivos UTF-8, Windows-1252 e OFX.
+- [ ] Homologar a gravação e reversão dos lançamentos em uma **conta de teste**, sem dados reais.
+- [ ] Revisar configurações/permissões de execução do GitHub Actions. Os jobs verificados terminam com **runner_id=0, sem passos**, de modo que os testes não foram efetivamente executados pelo CI.
+
+**Nota de segurança:** nenhuma gravação em produção foi realizada nesta revisão, e não existe evidência suficiente para registrar homologação ou liberação.
+
 ## [2.5.0 · compilação 3 — desenvolvimento] — 2026-11-06
 
 **Situação:** implementada no ramo `feature/gbplus-250-importacao-previa`, PR #73; **não publicada, homologação pendente**.  
