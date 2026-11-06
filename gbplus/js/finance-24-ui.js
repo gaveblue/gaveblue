@@ -8,12 +8,11 @@ const heading=(title,subtitle,buttons='')=>'<div class="page-heading"><div><h1>'
 export function banksView(db){
  const custom=db.banks||[];
  const all=bankCatalog(db);
- return heading('Bancos e instituições','Identifique suas contas e cartões com ícones das principais instituições brasileiras.',
+ return heading('Bancos e instituições','Consulte as instituições disponíveis ou cadastre a sua.',
   button(icon('plus')+'Cadastrar instituição','new-bank','primary'))+
- '<div class="gb-finance24-intro">As instituições aparecem em ordem alfabética, com código bancário COMPE quando disponível. Os logos não representam integração bancária.</div>'+
- '<div class="gb-bank-directory-search"><label for="gb-bank-directory-query">Buscar banco por nome, código COMPE ou ISPB</label>'+
- '<input id="gb-bank-directory-query" class="gb-bank-directory-search-input" type="search" autocomplete="off" placeholder="Ex.: Sicoob, Sicobi, Nordeste, Pan, 623, 756" aria-controls="gb-bank-directory-results">'+
- '<small data-bank-directory-count>'+all.length+' instituições disponíveis.</small></div>'+
+ '<div class="gb-bank-directory-search"><label for="gb-bank-directory-query">Pesquisar</label>'+
+ '<input id="gb-bank-directory-query" class="gb-bank-directory-search-input" type="search" autocomplete="off" placeholder="Pesquisar" aria-label="Pesquisar instituições financeiras" aria-controls="gb-bank-directory-results">'+
+ '<small class="gb-visually-hidden" data-bank-directory-count aria-live="polite"></small></div>'+
  '<p data-bank-directory-empty class="gb-bank-no-results" hidden>Nenhuma instituição encontrada. Cadastre seu banco personalizado.</p>'+
  '<div id="gb-bank-directory-results" class="gb-bank-directory">'+all.map(b=>{
   const removable=custom.some(x=>x.id===b.id);
