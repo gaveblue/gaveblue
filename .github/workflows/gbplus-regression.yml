@@ -1,6 +1,12 @@
 name: GB+ — regressões financeiras
 
 on:
+  push:
+    branches:
+      - 'feature/gbplus-250-build7-homologacao'
+    paths:
+      - 'gbplus/**'
+      - '.github/workflows/gbplus-regression.yml'
   pull_request:
     paths:
       - 'gbplus/**'
@@ -29,6 +35,8 @@ jobs:
         run: node gbplus/tests/bank-import-codec-regression.mjs
       - name: Garantia de bloqueio financeiro na liberação pública
         run: node gbplus/tests/bank-import-readonly-release-regression.mjs
+      - name: Comparação indicativa de saldos OFX/CSV
+        run: node gbplus/tests/bank-import-balance-regression.mjs
       - name: Conciliação e histórico
         run: node gbplus/tests/bank-reconciliation-regression.mjs
       - name: Criação e reversão de lançamentos importados
