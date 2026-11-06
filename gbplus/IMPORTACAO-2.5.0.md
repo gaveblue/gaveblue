@@ -1,5 +1,7 @@
 # GB+ 2.5.0 — Projeto de importação e conciliação de extratos
 
+**Situação em 06/11/2026:** o núcleo OFX/CSV foi publicado na **compilação 8**, com conciliação assistida, criação mediante confirmação dupla, trilha de auditoria e reversão de lotes intactos. Testes Node reais e teste SQL transacional fictício foram aprovados; CI GitHub Actions e PWA autenticado real permanecem com ressalvas. **CSV manual não padronizado, XLSX, PDF e data-base histórica** não estão entregues: acompanhar [issue #78](https://github.com/gaveblue/gaveblue/issues/78). O restante deste arquivo preserva o escopo e histórico originalmente acordados.
+
 **Decisão proposta:** realizar a importação manual de extratos e planilhas na **2.5.0**. Reservar a **3.0.0** para a grande evolução da **IA do GB+**. A integração bancária automatizada via Open Finance é um projeto separado e não integra este escopo.
 
 **Base da 2.4.9:** o GB+ já apresenta saldo por conta e extrato diário (abertura, créditos, débitos e fechamento), calculado apenas a partir de baixas e transferências existentes. A 2.5.0 conectará movimentos importados a essa visualização sem confundir saldo bancário informado com saldo sistêmico. O esquema atual não guarda a data-base do saldo inicial; isso precisa ser tratado explicitamente antes de comparar históricos.
