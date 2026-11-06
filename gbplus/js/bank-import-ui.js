@@ -79,8 +79,9 @@ export function bankImportMarkup(db,draft){
    '</div>'+
    '<div class="gb-import-privacy">'+icon('shield')+'<p>As conciliações usam vínculos existentes. Os movimentos escolhidos como <strong>Criar lançamento</strong> gerarão um título e uma baixa na conta, alterando o saldo. O arquivo original não será armazenado.</p></div>'+
    (plan.totals.created?'<p class="gb-import-finance-warning">Antes de confirmar: verifique se essas movimentações já fazem parte do saldo inicial informado. Transferências entre suas próprias contas não devem ser classificadas como receitas ou despesas.</p><label class="gb-import-explicit-confirm"><input type="checkbox" id="gb-import-create-confirm" '+(draft.confirmCreation?'checked':'')+'><span>Confirmo a criação de '+plan.totals.created+' lançamento(s) já baixado(s), com efeito no saldo bancário do GB+.</span></label>':'')+
+   '<label class="gb-import-explicit-confirm"><input type="checkbox" id="gb-import-account-confirm" '+(draft.confirmAccount?'checked':'')+'><span>Confirmo que o extrato pertence à conta <strong>'+esc(db.accounts.find(a=>a.id===plan.accountId)?.name||'selecionada')+'</strong> e que revisei as decisões.</span></label>'+
    '<div class="gb-import-footer"><button type="button" class="button" data-action="bank-import-back">Voltar à revisão</button>'+
-   '<button type="button" class="button primary" data-action="bank-import-commit" '+(plan.totals.created&&!draft.confirmCreation?'disabled':'')+'>Confirmar '+plan.entries.length+' decisão(ões)</button></div></div>';
+   '<button type="button" class="button primary" data-action="bank-import-commit" '+(!draft.confirmAccount||(plan.totals.created&&!draft.confirmCreation)?'disabled':'')+'>Confirmar '+plan.entries.length+' decisão(ões)</button></div></div>';
  }
  const page=Math.min(Math.max(Number(draft.page)||0,0),Math.max(0,Math.ceil(rows.length/BANK_IMPORT_PAGE_SIZE)-1));
  const visible=rows.slice(page*BANK_IMPORT_PAGE_SIZE,(page+1)*BANK_IMPORT_PAGE_SIZE);
