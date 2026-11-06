@@ -636,15 +636,26 @@ document.addEventListener('change',async e=>{
   if(!(db.accounts||[]).some(a=>a.id===id&&a.active!==false))return;
   draft.accountId=id;
   if(draft.parsed)draft.preview=proposeReconciliation(draft.parsed,db,id);
-  draft.filter='all';draft.page=0;draft.decisions={};draft.review=null;draft.step='review';redrawBankImport();return;
+  draft.filter='all';draft.page=0;draft.decisions={};draft.review=null;draft.confirmCreation=false;draft.step='review';redrawBankImport();return;
  }
  if(el.matches?.('[data-bank-review-index]')){
   if(!draft.preview||draft.step!=='review')return;
   const index=Number(el.dataset.bankReviewIndex);
   if(!Number.isInteger(index)||!draft.preview.rows[index])return;
   if(el.value==='skip')delete draft.decisions[index];
-  else if(['link','ignore','pending'].includes(el.value))draft.decisions[index]={action:el.value,target:''};
-  draft.review=null;draft.error='';redrawBankImport();return;
+  else if(['link','ignore','pending','create'].includes(el.value))draft.decisions[index]={action:el.value,target:'',...(el.value==='create'?{categoryId:'',description:draft.preview.rows[index].record.description.slice(0,300)}:{})};
+  draft.review=null;draft.confirmCreation=false;draft.error='';redrawBankImport();return;
+ }
+ if(el.matches?.('[data-bank-create-category]')){
+  if(!draft.preview||draft.step!=='review')return;
+  const index=Number(el.dataset.bankCreateCategory),choice=draft.decisions[index];
+  if(!Number.isInteger(index)||choice?.action!=='create')return;
+  choice.categoryId=el.value;draft.review=null;draft.confirmCreation=false;draft.error='';return;
+ }
+ if(el.id==='gb-import-create-confirm'){
+  if(draft.step!=='confirm')return;
+  draft.confirmCreation=Boolean(el.checked);
+  redrawBankImport();return;
  }
  if(el.matches?.('[data-bank-review-target]')){
   if(!draft.preview||draft.step!=='review')return;
@@ -667,7 +678,7 @@ document.addEventListener('change',async e=>{
   const preview=proposeReconciliation(parsed,db,draft.accountId);
   draft.parsed=parsed;draft.preview=preview;draft.filename=file.name.slice(0,140);
   draft.accountHint=parsed.accountHint||'';
-  draft.filter='all';draft.page=0;draft.decisions={};draft.review=null;draft.step='review';
+  draft.filter='all';draft.page=0;draft.decisions={};draft.review=null;draft.confirmCreation=false;draft.step='review';
  }catch(error){
   if(draft!==bankImportDraft||!modal.open)return;
   Object.assign(draft,{parsed:null,preview:null,filename:'',accountHint:'',error:error?.message||'Não foi possível ler o extrato.'});
@@ -678,6 +689,14 @@ document.addEventListener('change',e=>{
  if(e.target?.matches?.('select[name="bankId"]')&&db)syncBankPicker(e.target.closest('.gb-bank-picker'),db);
 });
 document.addEventListener('input',e=>{
+ if(bankImportDraft?.step==='review'&&e.target?.matches?.('[data-bank-create-description]')){
+  const index=Number(e.target.dataset.bankCreateDescription),choice=bankImportDraft.decisions[index];
+  if(choice?.action==='create'){
+   choice.description=e.target.value;
+   bankImportDraft.review=null;bankImportDraft.confirmCreation=false;bankImportDraft.error='';
+  }
+  return;
+ }
  if(!db)return;
  if(e.target?.matches?.('.gb-bank-search')){
   filterBankPicker(e.target.closest('.gb-bank-picker'),e.target.value);
