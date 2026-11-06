@@ -4,10 +4,11 @@ Registro de mudanças do aplicativo localizado em `gbplus/`. Toda versão e toda
 
 ## [2.4.9 · compilação 68] — 2026-11-06
 
-**Situação:** em revisão / **homologação pendente**.  
+**Situação:** publicação autorizada pelo responsável em 2026-11-06; **homologação funcional completa ainda pendente de evidências**.  
 **Origem:** solicitação de correções de responsividade e filtros no fluxo de caixa.  
-**Ramo de trabalho:** `fix/gbplus-249-fluxo-responsivo-build68`.  
-**Publicação no ambiente principal:** não autorizada enquanto a homologação não estiver concluída.
+**Ramo de implementação:** `fix/gbplus-249-fluxo-responsivo-build68` (PR #72).  
+**Autorização de publicação:** o responsável pelo GB+ solicitou expressamente liberar a compilação 68 antes de concluir a homologação visual, aceitando a possibilidade de correções ou retorno à compilação 67. **Não equivale a afirmar que todas as verificações passaram.**  
+**Ponto de retorno:** `backup/gbplus-249-build67-before-build68` (SHA `bb2bd690639d76a78fde7eda95340a6342f2558f`).
 
 ### Alterações previstas e implementadas no ramo
 
@@ -48,4 +49,6 @@ Confirmar margens sem cortes, rolagem apenas dentro da tabela/gráfico quando ne
 
 Cada **versão ou compilação**, inclusive correções pequenas, deve acrescentar uma seção com identificador, data, resumo da alteração, arquivos impactados, risco, testes, evidências, responsável e estado de homologação. Estados sugeridos: `em desenvolvimento`, `em revisão`, `homologação pendente`, `homologado`, `liberado`, `reprovado`.
 
-**Fluxo de liberação:** implementar em ramo separado → registrar CHANGELOG → executar testes e registrar evidências → obter homologação explícita → aprovar merge/publicação. Um PR ou commit isoladamente não constitui aprovação.
+**Fluxo padrão de liberação:** implementar em ramo separado → registrar CHANGELOG → executar testes e registrar evidências → obter homologação explícita → aprovar merge/publicação. Um PR ou commit isoladamente não constitui aprovação.
+
+**Exceção documentada da compilação 68:** autorização explícita do responsável para publicação antecipada com riscos aceitos; a homologação funcional visual permanece pendente e deverá ser concluída com evidências no uso. Em caso de falha, preferir um commit de reversão dos arquivos específicos do GB+; não fazer reset forçado do ramo principal nem apagar dados financeiros.
