@@ -179,7 +179,7 @@
       "description": "Compare saldos declarados no extrato, sem ajustes automáticos."
     }
   ],
-  "release_status": "development_csv_manual_mapping_homologation_pending",
+  "release_status": "development_assisted_reconciliation_csv_mapping_homologation_pending",
   "homologation": {
     "status": "pendente",
     "notes": "Compilação 9: mapeamento CSV em desenvolvimento, sem mudança na função de gravação. Exigir regressões antes de liberar."
