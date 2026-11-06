@@ -82,6 +82,10 @@ export const BANKS=Object.freeze([
  {id:"xp-investimentos",name:"XP Investimentos",ispb:"02332886",code:"102",logoIspb:"02332886",color:"#405b77"},
  {id:"yamaha",name:"Yamaha",ispb:"10371492",code:"475",logoIspb:"10371492",color:"#405b77"}
 ]);;
+// Show these 20 familiar Brazilian institutions in the initial shortcuts.
+// All 78 remain searchable and available through the full list.
+export const FEATURED_BANK_IDS=Object.freeze(["bb","banco-do-nordeste","banco-pan","banrisul","bradesco","btg","bv","c6","caixa","inter","itau","mercado-pago","neon","nubank","pagbank","picpay","safra","santander","sicoob","sicredi"]);
+const FEATURED_BANK_SET=new Set(FEATURED_BANK_IDS);
 const normalize=text=>String(text||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');
 const collator=new Intl.Collator('pt-BR',{sensitivity:'base'});
 export const bankCatalog=db=>[...BANKS,...(db?.banks||[])].sort((a,b)=>collator.compare(a.name,b.name));
@@ -129,12 +133,12 @@ export function bankPicker(db,value='',label='Banco ou instituição'){
  return '<div class="gb-bank-picker full"><div class="gb-bank-picker-heading"><strong>'+esc(label)+'</strong>'+
  '<span class="gb-bank-selected" data-bank-selected>'+(selected?bankBadge(selected):'<span class="gb-bank-placeholder" aria-hidden="true">B</span>')+
  '<small>'+esc(selected?.name||'Selecione um banco')+'</small></span></div>'+
- '<label class="gb-bank-search-label" for="gb-bank-search-'+esc(label.replace(/[^a-z]/gi,'').toLowerCase())+'">Buscar instituição por nome, código bancário ou ISPB</label>'+
+ '<label class="gb-bank-search-label" for="gb-bank-search-'+esc(label.replace(/[^a-z]/gi,'').toLowerCase())+'">Buscar outros bancos por nome ou código</label>'+
  '<input id="gb-bank-search-'+esc(label.replace(/[^a-z]/gi,'').toLowerCase())+'" class="gb-bank-search" type="search" name="bankLookup" autocomplete="off" placeholder="Ex.: Sicoob, Nordeste, Pan, 623 ou 756" aria-label="Buscar banco por nome, COMPE ou ISPB">'+
  '<details class="gb-bank-native-select"><summary>Ver lista completa de bancos</summary>'+select(label,'bankId',bankOptions(db),value)+'</details>'+
- '<div class="gb-bank-search-summary" data-bank-count aria-live="polite">'+bankCards.length+' instituições disponíveis em ordem alfabética. Deslize ou pesquise.</div>'+
- '<div class="gb-bank-shortcuts" role="group" aria-label="Instituições financeiras em ordem alfabética">'+bankCards.map(bank=>
-  '<button type="button" class="gb-bank-shortcut" data-action="choose-bank" data-bank-id="'+esc(bank.id)+'" data-bank-search="'+
+ '<div class="gb-bank-search-summary" data-bank-count aria-live="polite">'+FEATURED_BANK_IDS.length+' bancos em destaque. Deslize ou pesquise no catálogo completo de '+bankCards.length+' instituições.</div>'+
+ '<div class="gb-bank-shortcuts" role="group" aria-label="20 bancos em destaque, em ordem alfabética">'+bankCards.map(bank=>
+  '<button type="button" class="gb-bank-shortcut" '+(FEATURED_BANK_SET.has(bank.id)?'':'hidden ')+'data-bank-featured="'+String(FEATURED_BANK_SET.has(bank.id))+'" data-action="choose-bank" data-bank-id="'+esc(bank.id)+'" data-bank-search="'+
   esc([bank.name,bank.code,bank.ispb,bank.aliases].filter(Boolean).map(normalize).join(' '))+
   '" data-bank-code="'+esc(bank.code||'')+'" data-bank-ispb="'+esc(bank.ispb||'')+'" aria-pressed="'+String(bank.id===value)+'" title="'+esc(bank.name+(bank.code?' · '+bank.code:''))+'">'+
   bankBadge(bank)+'<small>'+esc(bank.name)+'</small>'+(bank.code?'<span class="gb-bank-code">'+esc(bank.code)+'</span>':'')+'</button>').join('')+'</div>'+
@@ -148,7 +152,7 @@ export function filterBankPicker(picker,term){
   const key=String(button.dataset.bankSearch||''),code=String(button.dataset.bankCode||'');
   const ispb=String(button.dataset.bankIspb||'');
   let matches;
-  if(!query)matches=true;
+  if(!query)matches=button.dataset.bankFeatured==='true';
   else if(/^\d{1,3}$/.test(query))matches=query.length===3?code===query:
    code.startsWith(query)||code.replace(/^0+/,'').startsWith(query.replace(/^0+/,''));
   else if(/^0\d{3}$/.test(query))matches=code===query.slice(1);
@@ -158,7 +162,9 @@ export function filterBankPicker(picker,term){
   if(matches)count++;
  });
  const summary=picker.querySelector('[data-bank-count]');
- if(summary)summary.textContent=count+' '+(count===1?'instituição encontrada':'instituições encontradas')+'.';
+ if(summary)summary.textContent=query?
+  count+' '+(count===1?'instituição encontrada':'instituições encontradas')+'.':
+  count+' bancos em destaque. Pesquise para encontrar outros ou abra a lista completa.';
  const noResults=picker.querySelector('[data-bank-no-results]');
  if(noResults)noResults.hidden=count>0;
  return count;
