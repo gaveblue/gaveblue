@@ -8,7 +8,7 @@
 |---|---|---|---|
 | **2.4.7** | Central de atualizações | Novidades ilustradas por cartões com ícones, títulos e descrições; mostrar todas as melhorias; manter download e reinício com confirmação; corrigir validação de pacotes com mais de 80 assets | Publicar versão e conferir painel no Android/PWA, notas e download real sem perder dados |
 | **2.4.8** | GB+ AI: prévia visual e anexos | Prévia do lançamento integrada ao chat, vencimentos, edição antes de gravar e anexo OFX/CSV para leitura local. PDF e Excel ainda aguardam parser. | Validar no celular, conferir edição por comando e confirmar que nenhum arquivo cria lançamentos |
-| **2.4.9** | Preparação da importação | Ampliar parser e prévia OFX/CSV em modo somente leitura; detectar transações duplicadas e ambíguas; reconhecer formatos diferentes; validar segurança e volume | Testar extratos reais anonimizados de bancos distintos, sem escrita de lançamentos |
+| **2.4.9** | Saldos por conta e extrato diário | Ícones das contas no cartão de saldo; extrato por dia com abertura, créditos, débitos, fechamento e acumulados. Sem importação nem alteração de saldos. | Homologar no celular e conferir cálculos com baixas e transferências reais anonimizadas |
 | **2.5.0** | Importação e conciliação bancária | Interface de selecionar conta, importar OFX/CSV, visualizar movimentos, comparar com baixas/transferências, aprovar conciliação ou criação de títulos e conferir divergências | Testes ponta a ponta de autorização, RLS, idempotência/reimportação, reversão e ausência de dupla contabilização |
 | **3.0.0** | **GB+ com IA financeira** | Assistente em linguagem natural para consultar e analisar dados, sugerir e preparar lançamentos; execução somente após prévia e confirmação do usuário | Política de segurança, permissões, histórico de ações, isolamento de dados, custo e testes de comandos reais |
 
@@ -39,15 +39,24 @@ A expressão “lançamentos automáticos” foi esclarecida: trata-se de **cria
 - [ ] Homologar em aparelho real o formulário, a rolagem dos vencimentos, o PWA e a sincronização.
 - [ ] A importação em lote e a conciliação bancária real continuam reservadas à 2.5.0.
 
-## 2.4.9 — Preparação segura da importação
+## 2.4.9 — Saldos por conta e extrato diário (implementado no GitHub)
 
-- Parser local de arquivos OFX/CSV, com tratamento de data, centavos e múltiplos layouts de bancos.
-- Prévia read-only por conta; informações de `FITID`, histórico, direção, data e valor.
-- Candidatos de conciliação, duplicidades, transferências internas, valores iguais em datas próximas e movimentos ambíguos.
-- Homologação de OFX e CSV reais **anonimizados**, sem gravar.
-- Definição da arquitetura de armazenamento, RLS, revisão e testes de reimportação.
+- [x] Ícones das contas no rodapé do cartão de saldo, com rolagem horizontal e acesso direto ao extrato.
+- [x] Preservar o saldo total do dashboard, sem mudar sua composição.
+- [x] Extrato individual por dia: saldo de abertura, movimentações, créditos, débitos e saldo de fechamento.
+- [x] Acumulados de créditos e débitos por conta, considerando baixas e transferências.
+- [x] Dia atual visível mesmo sem movimentações.
+- [x] Transferências entram com sinais opostos nas contas de origem e destino, sem criar receita ou despesa.
+- [x] Não incluir títulos pendentes, compras no cartão não baixadas nem lançamentos futuros no saldo realizado.
+- [x] Visualização somente leitura, sem mutações de dados.
+- [x] Manifesto 2.4.9 / build 65 e cache do PWA atualizados.
+- [x] Nove testes específicos do extrato diário.
+- [ ] Homologar em aparelho real o card, a rolagem e o modal com contas de diferentes bancos.
+- [ ] Conferir extratos reais anonimizados e equivalência do saldo com o módulo Contas.
 
-**Base existente:** `js/bank-import-preview.js`, criada na preparação da 2.4.6. Esse código não é acessível como importação ativa no aplicativo.
+**Limitação herdada:** o esquema guarda o saldo inicial da conta, mas não a data de abertura desse saldo. O extrato calcula a evolução a partir do saldo inicial cadastrado; não pode afirmar o saldo histórico anterior à origem desse valor. A 2.5.0 deverá tratar essa informação ao importar períodos históricos.
+
+**Replanejamento:** a ampliação dos parsers OFX/CSV e a detecção de duplicidades passam para a 2.5.0, junto à conciliação bancária.
 
 ## 2.5.0 — Importação e conciliação bancária
 
