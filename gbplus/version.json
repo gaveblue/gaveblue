@@ -1,16 +1,15 @@
 {
   "version": "2.5.0",
-  "build": 6,
-  "published_at": "2026-11-06T19:08:22Z",
-  "title": "Prévia bancária OFX/CSV — liberação controlada somente leitura",
+  "build": 7,
+  "published_at": null,
+  "title": "Comparação indicativa de saldos bancários declarados no extrato",
   "notes": [
-    "Liberação controlada autorizada pelo usuário em 06/11/2026; a interface de extratos é disponibilizada exclusivamente para leitura local OFX/CSV.",
-    "Visualiza conta selecionada, entradas, saídas, possíveis correspondências, ambiguidades, movimentos não localizados, filtros e paginação.",
-    "Criação de receitas e despesas, conciliação confirmada e reversão de lotes pelo importador permanecem bloqueadas por trava dupla no controlador e na interface.",
-    "A leitura do extrato não grava dados no financeiro, não altera saldos e não envia o arquivo bruto para o servidor ou para IA.",
-    "Nove verificações da trava e oito suítes de regressão passaram em ambiente JavaScript de simulação; nenhum resultado Node real ou CI verde foi atribuído.",
-    "A implantação GitHub Pages inicial foi confirmada como success no run 42276855704; o workflow separado de regressões ainda falha antes de executar seus testes.",
-    "A liberação não equivale à homologação da conciliação bancária com escrita. A ativação exigirá compilação separada e testes registrados."
+    "Em desenvolvimento: extratos OFX com LEDGERBAL ou CSV com coluna de saldo agora exibem o saldo declarado pelo banco e a diferença indicativa em relação ao saldo calculado pelo GB+ para a mesma data.",
+    "Não se presume o saldo bancário a partir de créditos e débitos; quando não há saldo declarado, o aplicativo deixa clara a limitação.",
+    "O saldo inicial do GB+ não possui data-base, portanto diferenças históricas são apenas indicativas e não autorizam ajustes automáticos.",
+    "A conciliação com gravação permanece desativada (BANK_IMPORT_WRITES_ENABLED=false) até homologação completa.",
+    "Testes automáticos de leitura, comparação, bloqueio de escrita e regressões financeiras foram ampliados. CI GitHub Actions continua sob investigação.",
+    "Esta compilação 7 não está publicada; a versão pública continua 2.5.0 build 6 somente leitura."
   ],
   "assets": [
     "./index.html",
@@ -179,9 +178,9 @@
       "description": "Nenhuma baixa ou saldo é modificado durante a conferência bancária."
     }
   ],
-  "release_status": "published_limited_readonly",
+  "release_status": "development_limited_readonly_homologation",
   "homologation": {
-    "status": "parcial_autorizada_com_restricao",
-    "notes": "2.5.0 build 6 liberada em modo somente leitura por autorização do usuário. Deploy GitHub Pages 42276855704 concluído com sucesso. Oito suítes simuladas e nove verificações da trava passaram; testes Node CI, dispositivos e gravação real permanecem pendentes. Escrita bancária pelo importador BLOQUEADA."
+    "status": "pendente",
+    "notes": "Build 7 em ramo de homologação. Testes lógicos da comparação de saldos aprovados; ainda pendentes teste Node via CI, navegador real e conta online de testes. Sem permissão de gravação."
   }
 }
