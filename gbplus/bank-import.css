@@ -123,3 +123,5 @@
  .gb-import-create-fields{padding:10px;gap:9px}
  .gb-import-explicit-confirm{padding:11px}
 }
+
+.gb-import-finance-warning{font-size:11px;line-height:1.55;color:var(--muted);padding:10px 12px;border-left:2px solid var(--muted);background:var(--soft);border-radius:0 8px 8px 0}
