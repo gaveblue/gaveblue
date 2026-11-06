@@ -78,6 +78,15 @@ function ofxField(block,name){
  const match=block.match(new RegExp('<'+name+'(?:\\s[^>]*)?>([^<\\r\\n]*)','i'));
  return match?clean(match[1]):'';
 }
+function ofxClosingBalance(text){
+ // Saldo bancário só é conhecido quando o arquivo o informa explicitamente.
+ // A origem de saldo não pode ser estimada a partir da soma de movimentos.
+ const match=text.match(/<LEDGERBAL(?:\s[^>]*)?>([\s\S]*?)(?=<\/LEDGERBAL\s*>|<\/STMTRS\s*>|<\/CCSTMTRS\s*>)/i);
+ if(!match)return null;
+ const amount=ofxField(match[1],'BALAMT'),asOf=ofxField(match[1],'DTASOF');
+ if(!amount||!asOf)return null;
+ return {amount:statementCents(amount),date:statementDate(asOf),source:'ofx-ledger'};
+}
 export function parseBankOfx(value){
  const text=safeInput(value);
  if(!/<OFX(?:\s|>)/i.test(text))throw Error('O arquivo não parece ser um extrato OFX.');
@@ -90,7 +99,7 @@ export function parseBankOfx(value){
   const description=ofxField(b,'MEMO')||ofxField(b,'NAME')||ofxField(b,'TRNTYPE');
   return entry(date,description,statementCents(value),ofxField(b,'FITID'),'ofx');
  });
- return {format:'ofx',records,warnings:[],accountHint:ofxField(text,'ACCTID').replace(/.(?=.{4})/g,'•')};
+ return {format:'ofx',records,warnings:[],accountHint:ofxField(text,'ACCTID').replace(/.(?=.{4})/g,'•'),bankBalance:ofxClosingBalance(text)};
 }
 function splitCsv(text,separator){
  const rows=[],row=[];let cell='',quoted=false;
@@ -135,7 +144,8 @@ export function parseBankCsv(value,{separator}={}){
   credit:col(['credito','credit','entrada','recebimento']),
   debit:col(['debito','debit','saida','pagamento']),
   kind:col(['tipo','natureza','sinal','operacao']),
-  id:col(['identificador','fitid','transacao','nsu','idmovimento','id'])
+  id:col(['identificador','fitid','transacao','nsu','idmovimento','id']),
+  balance:col(['saldo','balance'])
  };
  if(indexes.date<0||indexes.description<0||(indexes.amount<0&&(indexes.credit<0||indexes.debit<0)))
   throw Error('Colunas obrigatórias não identificadas. Informe Data, Descrição e Valor (ou Crédito/Débito).');
@@ -157,7 +167,20 @@ export function parseBankCsv(value,{separator}={}){
   try{return entry(get('date'),get('description'),amount,get('id'),'csv');}
   catch(error){throw Error('CSV linha '+(index+2)+': '+error.message);}
  });
- return {format:'csv',records,warnings:[],accountHint:''};
+ // Saldo da própria instituição, quando existe coluna explícita.
+ // O último registro do dia mais recente prevalece; nunca derivar de créditos/débitos.
+ let bankBalance=null;
+ if(indexes.balance>=0){
+  for(let index=0;index<rows.length;index++){
+   const text=clean(rows[index][indexes.balance]);
+   if(!text)continue;
+   const date=records[index].date;
+   if(!bankBalance||date>=bankBalance.date){
+    bankBalance={amount:statementCents(text),date,source:'csv-balance-column'};
+   }
+  }
+ }
+ return {format:'csv',records,warnings:[],accountHint:'',bankBalance};
 }
 export function parseBankStatement(contents,filename=''){
  const lower=clean(filename).toLowerCase();
@@ -195,7 +218,7 @@ export function proposeReconciliation(parsed,db,accountId,{dayWindow=3}={}){
    candidates:candidates.map(c=>({...c,daysApart:dayDistance(c.date,record.date)}))
     .sort((a,b)=>a.daysApart-b.daysApart)};
  });
- return {format:parsed.format,accountId,rows,
+ return {format:parsed.format,accountId,rows,bankBalance:parsed.bankBalance||null,
   totals:{
    credits:rows.filter(r=>r.record.amount>0).reduce((s,r)=>s+r.record.amount,0),
    debits:rows.filter(r=>r.record.amount<0).reduce((s,r)=>s-r.record.amount,0),
