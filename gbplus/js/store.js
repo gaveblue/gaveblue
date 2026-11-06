@@ -77,7 +77,7 @@ function validateCreditData(db){
 function validateReconciliationHistory(db){
  const batches=db.bankImportBatches||[];
  assert(Array.isArray(batches)&&batches.length<=100,'histórico de importações.');
- const batchIds=new Set(),linkKeys=new Set(),recordKeys=new Set();
+ const batchIds=new Set(),linkKeys=new Set(),recordKeys=new Set(),pendingKeys=new Set();
  let total=0;
  for(const b of batches){
   assert(b&&entityId(b.id)&&!batchIds.has(b.id)&&
@@ -97,8 +97,13 @@ function validateReconciliationHistory(db){
    keysThisBatch.add(row.key);
    if(b.status==='active'){
     const key=b.accountId+'|'+row.key;
-    assert(!recordKeys.has(key),'movimento importado repetido.');
-    recordKeys.add(key);
+    if(row.action==='pending'){
+     assert(!pendingKeys.has(key),'pendência importada repetida.');
+     pendingKeys.add(key);
+    }else{
+     assert(!recordKeys.has(key),'movimento importado repetido.');
+     recordKeys.add(key);
+    }
    }
    if(row.action==='create'){
     assert(entityId(row.categoryId)&&db.categories.some(c=>c.id===row.categoryId&&c.type===row.entryType)&&
@@ -117,6 +122,11 @@ function validateReconciliationHistory(db){
     continue;
    }
    if(row.action!=='link'){
+    if(row.action==='pending'){
+     assert((row.resolvedByBatchId===undefined&&row.resolvedAt===undefined)||
+      (entityId(row.resolvedByBatchId)&&typeof row.resolvedAt==='string'&&
+       /^\d{4}-\d{2}-\d{2}T/.test(row.resolvedAt)),'resolução de pendência.');
+    }else assert(row.resolvedByBatchId===undefined&&row.resolvedAt===undefined,'decisão não pendente.');
     assert(row.targetType===undefined&&row.targetId===undefined,'movimento não vinculado.');
     continue;
    }
@@ -142,6 +152,17 @@ function validateReconciliationHistory(db){
     if(transfer)assert(transfer.from===b.accountId&&row.amount===-transfer.amount||
      transfer.to===b.accountId&&row.amount===transfer.amount,'transferência da conta importada.');
    }
+  }
+ }
+ // Preserve pending provenance while allowing final resolution in another batch.
+ for(const batch of batches.filter(b=>b.status==='active')){
+  for(const entry of batch.entries.filter(e=>e.action==='pending')){
+   const key=batch.accountId+'|'+entry.key;
+   if(entry.resolvedByBatchId){
+    const resolver=batches.find(b=>b.id===entry.resolvedByBatchId&&b.status==='active');
+    assert(resolver&&resolver.accountId===batch.accountId&&resolver.entries.some(e=>e.key===entry.key&&e.action!=='pending')&&
+     entry.resolvedAt===resolver.createdAt,'resolução de pendência sem lote correspondente.');
+   }else assert(!recordKeys.has(key),'pendência ainda aberta já possui decisão definitiva.');
   }
  }
  assert(total<=10000,'histórico de importações excedeu limite.');
