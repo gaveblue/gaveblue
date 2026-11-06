@@ -223,3 +223,11 @@ Detalhes: [RELEASE-2.4.5.md](./RELEASE-2.4.5.md). A evolução maior permanece r
 - [x] Reduzir os destaques do resumo de atualização ao que é relevante para o usuário final.
 - [x] Preservar instituições personalizadas e bancos selecionados em contas anteriores.
 - [ ] Homologar a faixa no celular, busca, rolagem e publicação da compilação 64.
+
+### 2.4.9 · Compilação 67 — Pílulas de saldo bancário
+
+- [x] Substituir os mini-cartões por pílulas compactas com logo redondo e valor da conta.
+- [x] Manter saldo consolidado no cartão principal e rolagem horizontal dos bancos.
+- [x] Preservar clique para abrir as movimentações da conta, sem alternar saldo principal nem adicionar botão de voltar.
+- [x] Atualizar versão PWA e testes de regressão.
+- [ ] Homologar visualmente no celular e confirmar publicação.
