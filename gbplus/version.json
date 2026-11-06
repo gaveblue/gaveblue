@@ -1,14 +1,13 @@
 {
   "version": "2.4.9",
-  "build": 65,
-  "published_at": "2026-11-05",
-  "title": "Saldos por conta e extrato diário",
+  "build": 66,
+  "published_at": "2026-11-06",
+  "title": "Saldo geral e saldos por banco",
   "notes": [
-    "Consulte os saldos de suas contas tocando nos ícones dos bancos abaixo do saldo principal.",
-    "Veja o extrato de cada conta organizado por dia, com entradas, saídas e saldo do fim do dia.",
-    "Acompanhe o saldo no início de cada dia e os créditos e débitos acumulados.",
-    "Transferências entre suas contas aparecem nos dois extratos sem duplicar receitas ou despesas.",
-    "O assistente financeiro continua com prévia e confirmação antes de registrar lançamentos."
+    "O cartão principal mantém o saldo total de todas as contas.",
+    "Agora cada banco aparece com símbolo, nome da conta e seu saldo individual.",
+    "Toque em uma conta para consultar o extrato com fechamento diário.",
+    "Melhorias de legibilidade e rolagem dos saldos no celular."
   ],
   "assets": [
     "./index.html",
@@ -158,24 +157,24 @@
   ],
   "highlights": [
     {
+      "icon": "wallet",
+      "title": "Saldo geral em destaque",
+      "description": "O saldo principal reúne o valor das contas do GB+."
+    },
+    {
       "icon": "bank",
-      "title": "Todas as suas contas em um só lugar",
-      "description": "Toque no ícone de uma conta para conferir seu saldo e suas movimentações."
+      "title": "Símbolo e saldo de cada conta",
+      "description": "Veja o ícone do banco, o nome e o saldo da conta logo abaixo do total."
     },
     {
       "icon": "calendar",
-      "title": "Extrato por dia",
-      "description": "Veja o saldo no início e no fim de cada dia, com entradas e saídas separadas."
-    },
-    {
-      "icon": "chart",
-      "title": "Créditos e débitos",
-      "description": "Acompanhe os totais acumulados e confira como o saldo mudou."
+      "title": "Extrato diário",
+      "description": "Toque na conta para conferir entradas, saídas e o saldo no fim do dia."
     },
     {
       "icon": "check",
-      "title": "Seu financeiro continua sob controle",
-      "description": "Os extratos usam os registros existentes, sem criar ou alterar lançamentos."
+      "title": "Sem alterar lançamentos",
+      "description": "Os valores usam os registros existentes e são exibidos somente para consulta."
     }
   ]
 }
