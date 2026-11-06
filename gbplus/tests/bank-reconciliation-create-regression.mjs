@@ -103,6 +103,12 @@ const previewUI=ui.bankImportMarkup({...db,bankImportBatches:[]},{
 });
 assert.match(previewUI,/data-bank-create-category="0"/);
 assert.match(previewUI,/data-bank-create-description="1"/);
+assert.match(previewUI,/data-action="bank-import-review"/,'Review button must exist with created titles');
+const singleCreateUI=ui.bankImportMarkup({...db,bankImportBatches:[]},{
+ accountId:'a',preview,decisions:{0:choices[0]},step:'review',filter:'all',page:0
+});
+assert.match(singleCreateUI,/1<\/strong> decisão/,'One create decision must be counted');
+assert.match(singleCreateUI,/data-action="bank-import-review"[^>]*>Revisar decisões/,'Review button must not be disabled with a single create');
 const confirmUI=ui.bankImportMarkup(db,{
  accountId:'a',preview,decisions:choices,step:'confirm',review:plan,confirmCreation:false
 });
