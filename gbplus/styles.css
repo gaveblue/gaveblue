@@ -901,3 +901,33 @@ body.auth-locked .mobile-nav-fade{display:none!important}
  .gb-update-notes .gb-update-feature{padding:10px;gap:10px;border-radius:12px}
  .gb-update-feature-icon{width:34px;height:34px;border-radius:10px}
 }
+
+
+/* Bank selection: a single uncluttered horizontal strip for every institution. */
+.gb-visually-hidden,
+.gb-bank-native-select{
+ position:absolute!important;
+ width:1px!important;height:1px!important;
+ padding:0!important;margin:-1px!important;
+ overflow:hidden!important;clip:rect(0 0 0 0)!important;
+ white-space:nowrap!important;border:0!important;
+ clip-path:inset(50%)!important;
+}
+.gb-bank-picker{width:100%;min-width:0;max-width:100%}
+.gb-bank-picker .gb-bank-shortcuts{
+ display:flex;flex-wrap:nowrap;
+ width:100%;max-width:100%;min-width:0;
+ overflow-x:auto;overflow-y:hidden;
+ overscroll-behavior-x:contain;
+ -webkit-overflow-scrolling:touch;
+ touch-action:pan-x;
+ scroll-snap-type:x proximity;
+ gap:8px;
+}
+.gb-bank-picker .gb-bank-shortcut{
+ flex:0 0 78px;scroll-snap-align:start;
+}
+.gb-bank-picker .gb-bank-shortcut[hidden]{display:none!important}
+@media(max-width:760px){
+ .gb-bank-picker .gb-bank-shortcut{flex-basis:74px}
+}
