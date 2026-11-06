@@ -1,15 +1,15 @@
 {
   "version": "2.5.0",
-  "build": 4,
+  "build": 5,
   "published_at": null,
-  "title": "Homologação de importações OFX/CSV: validação de extensão e codificação",
+  "title": "Importação OFX/CSV: retomada segura de pendências e revisão de regressões",
   "notes": [
-    "Corrige bloqueio indevido que rejeitava arquivos OFX e CSV legítimos por expressão regular incorreta.",
-    "Centraliza validação de tipo e tamanho de arquivo, com verificação adicional de tamanho após leitura.",
-    "Permite ler extratos antigos codificados em Windows-1252, com preferência por UTF-8 e sem substituir silenciosamente caracteres inválidos.",
-    "Inclui regressão automatizável para extensões OFX/CSV, arquivos renomeados, UTF-8, Windows-1252 e limites de arquivo.",
-    "Mantém a confirmação explícita de criação financeira e a proteção contra lançamentos duplicados.",
-    "Versão em desenvolvimento, não publicada nem homologada em navegador real."
+    "Corrige revisão desabilitada quando o único item selecionado é a criação de uma receita ou despesa.",
+    "Permite reimportar e resolver movimentos anteriormente marcados como pendentes, preservando o histórico de origem e a decisão final.",
+    "Impede duplicar marcações pendentes, bloqueia reversão de lote de origem enquanto a resolução estiver ativa e restabelece pendências quando a decisão posterior é revertida.",
+    "Adiciona checagens de integridade do histórico e regressão específica de retomada e reversão encadeada.",
+    "Mantém as correções de leitura UTF-8/Windows-1252 e validação de extensões da compilação 4.",
+    "Publicação e homologação de armazenamento/Android ainda pendentes."
   ],
   "assets": [
     "./index.html",
@@ -181,6 +181,6 @@
   "release_status": "development_homologation_pending",
   "homologation": {
     "status": "pendente",
-    "notes": "Build 4: validações lógicas/sintaxe executadas; CI GitHub Actions aborta antes de alocar runner; validar no navegador e contas de teste."
+    "notes": "Compilação 5: testes lógicos simulados de pendências aprovados; teste CI e dispositivo real ainda pendentes."
   }
 }
