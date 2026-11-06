@@ -57,3 +57,16 @@ A interface permite abrir a lista, editar o vencimento, descartar ou confirmar. 
 **Nota:** implementação no repositório não equivale à publicação ou homologação em dispositivos reais.
 
 Veja o [cronograma até a 3.0.0](./PLANO-VERSOES-2.4.7-A-3.0.0.md).
+
+
+## Ajuste da compilação 63 — bancos em destaque
+
+Para diminuir a poluição visual na criação de contas bancárias e cartões de crédito, a faixa horizontal agora exibe **20 instituições pré-selecionadas como mais conhecidas**, em ordem alfabética: Banco do Brasil, Banco do Nordeste, Banco Pan, Banrisul, Bradesco, BTG Pactual, BV, C6 Bank, Caixa, Inter, Itaú, Mercado Pago, Neon, Nubank, PagBank, PicPay, Safra, Santander, Sicoob e Sicredi.
+
+Esta é uma **seleção de interface** baseada em reconhecimento e uso amplo, não uma classificação estatística oficial das 20 maiores.
+
+Os **78 bancos** permanecem disponíveis pela busca (nome, apelido “Sicobi”, COMPE ou ISPB), pelo seletor “Ver lista completa de bancos” e na página Bancos e instituições. Instituições personalizadas seguem acessíveis. Ao editar conta ou cartão com banco fora dos 20, o banco atual continua identificado no campo selecionado.
+
+O módulo `banks.js` foi atualizado, junto aos importadores e ao cache do PWA; o manifesto permanece em **2.4.8**, com a compilação incrementada para **63**. A central de atualizações também passou a comparar a compilação, além da versão numérica, para aceitar ajustes sem pular a 2.4.9. Essa correção exige receber o JavaScript atualizado; em dispositivos com a versão anterior do atualizador pode ser necessário recarregar a página uma vez.
+
+**Homologação pendente:** confirmar a atualização no celular, o filtro dos 20 logos, a pesquisa por bancos fora do destaque e a seleção de bancos previamente vinculados. Nenhum registro financeiro, saldo ou fatura foi migrado ou alterado.
