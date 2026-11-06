@@ -2,7 +2,7 @@
 
 **Data:** 06/11/2026  
 **Ramo:** `feature/gbplus-250-build7-homologacao`  
-**Publicação atual:** 2.5.0 build 6 em modo **somente leitura**. A build 7 permanece **não publicada e não homologada integralmente**.  
+**Publicação atual:** 2.5.0 build 7 em modo **somente leitura**, com implantação GitHub Pages concluída no [run 42299501899](https://github.com/gaveblue/gaveblue/actions/runs/42299501899). A conciliação com gravação **não foi homologada nem liberada**.  
 **Alteração da build 7:** comparação **indicativa**, não transacional, de saldo final declarado por arquivo OFX (`LEDGERBAL/BALAMT/DTASOF`) ou CSV (coluna `Saldo`) com saldo do GB+ na mesma data. Sem saldo declarado, não há comparação; sem data-base do saldo inicial, a divergência não confirma erro contábil.
 
 ## Testes reais em Node 22.16.0
@@ -84,4 +84,4 @@ Isso confirma que o GitHub Actions ainda **não oferece a evidência de CI verde
 | Verificação da data-base histórica do saldo inicial | **Pendente** |
 | Aprovação funcional com responsável e data | **Pendente** |
 
-**Decisão:** não habilitar a conciliação com escrita nem considerar concluída a homologação integral da 2.5.0 nesta compilação. A compilação 7 continua somente leitura, com melhorias comprovadas de apresentação e cálculo.
+**Decisão:** não habilitar a conciliação com escrita nem considerar concluída a homologação integral da 2.5.0 nesta compilação. A compilação 7 está publicada **somente leitura**, com melhorias comprovadas de apresentação e cálculo; a conciliação com gravação não está habilitada.
