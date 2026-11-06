@@ -1,11 +1,13 @@
+import {parseBankStatement,proposeReconciliation,BANK_IMPORT_MAX_BYTES} from './bank-import-preview.js?v=20261106-2501';
+import {bankImportMarkup,BANK_IMPORT_PAGE_SIZE} from './bank-import-ui.js?v=20261106-2501';
 import {filterFlowRows} from './gb-flow-filters.js?v=20261106-68';
 import {uid,today,money,dateLabel,cents,addMonths,validDate,generateTitles,addPayment,transfer,updateTitle,pending,flow,within} from './domain.js?v=20261105-72';
 import {KEY,INDICATORS,defaultPanel,parseBackup,backupText,MOBILE_SHORTCUTS,defaultMobileNav,effectiveMobileNav,validMobileNav,shouldOfferSetup} from './store.js?v=20261105-87';
 import {esc,icon,button,field,select,formFooter,download,csv,titleTable} from './ui.js?v=20261105-72';
-import {routes,dashboard,titlesView,partnersView,accountsView,categoriesView,flowView,reportsView,settingsView,notificationsView,filteredTitles,reportData} from './views.js?v=20261106-68';
+import {routes,dashboard,titlesView,partnersView,accountsView,categoriesView,flowView,reportsView,settingsView,notificationsView,filteredTitles,reportData} from './views.js?v=20261106-2501';
 import {renderReactCharts,unmountReactCharts} from './gb-react-loader.js?v=20261105-45';
 import {mountNativeCharts} from './gb-charts-native.js?v=20261106-68';
-import {titleForm,partnerForm,accountForm,categoryForm,paymentForm,transferForm,titleDetail,customizeForm,accountDetail} from './forms.js?v=20261105-90';
+import {titleForm,partnerForm,accountForm,categoryForm,paymentForm,transferForm,titleDetail,customizeForm,accountDetail} from './forms.js?v=20261106-2501';
 import {toggleEntryMenu,chooseEntryOption,syncEntrySelect,closeEntryMenus} from './entry-select.js?v=20261104-42';
 import {installGbControls,enhanceGbControls} from './custom-controls.js?v=20261104-42';
 import {expectedDates,recurrenceAnchor} from './gb-calendar-rules.js?v=20261105-47';
@@ -35,6 +37,7 @@ function firstStepsDismissed(){
  try{return localStorage.getItem('gbplus-first-steps-dismissed:'+id)==='1';}catch{return false;}
 }
 let profileCpfStatus={userId:null,cpf:'',ready:false,loading:false,error:''};
+let bankImportDraft=null; // Memory-only preview; released on modal close.
 
 const state={route:'dashboard',period:'all',range:{},query:'',status:'',type:'',partner:'',category:'',partnerQuery:'',granularity:'month',flowChartMode:'bars',flowStatus:'all',report:'payable',reportPartner:'',moreFilters:false,launchSelected:[],launchStatusOpen:false,launchSearchOpen:false};
 const modal=document.querySelector('#modal');
@@ -54,9 +57,20 @@ function syncSidebarVisibility(hidden,save=false){
 try{syncSidebarVisibility(localStorage.getItem(sidebarPreferenceKey)==='1');}
 catch{syncSidebarVisibility(false);}
 function toast(message){const el=document.querySelector('#toast');el.textContent=message;el.classList.add('visible');clearTimeout(toast.timer);toast.timer=setTimeout(()=>el.classList.remove('visible'),4500);}
-function openModal(title,content){modal.classList.toggle("gb-entry-modal",content.includes('id="title-form"'));document.querySelector('#modal-content').innerHTML=`<div class="modal-heading"><h2 id="modal-title">${title}</h2><button class="icon-button" data-action="close" aria-label="Fechar">${icon('close')}</button></div><div class="modal-body">${content}</div>`;modal.setAttribute('aria-labelledby','modal-title');if(!modal.open)modal.showModal();enhanceGbControls(modal);}
-function closeModal(){if(modal.open)modal.close();pendingGeneration=null;confirmAction=null;if(pwaReady)setTimeout(()=>maybeOfferPwaInstall(),1100);}
+function openModal(title,content){modal.classList.toggle("gb-entry-modal",content.includes('id="title-form"'));modal.classList.toggle("gb-bank-import-modal",content.includes('id="gb-import-workspace"'));document.querySelector('#modal-content').innerHTML=`<div class="modal-heading"><h2 id="modal-title">${title}</h2><button class="icon-button" data-action="close" aria-label="Fechar">${icon('close')}</button></div><div class="modal-body">${content}</div>`;modal.setAttribute('aria-labelledby','modal-title');if(!modal.open)modal.showModal();enhanceGbControls(modal);}
+function closeModal(){if(modal.open)modal.close();bankImportDraft=null;pendingGeneration=null;confirmAction=null;if(pwaReady)setTimeout(()=>maybeOfferPwaInstall(),1100);}
 function confirm(title,message,callback){confirmAction=callback;openModal(title,`<p class="confirm-message">${esc(message)}</p><div class="form-error" role="alert"></div><div class="form-footer">${button('Cancelar','close')}${button('Confirmar','confirm','primary')}</div>`);}
+// 2.5.0: preview only, never invokes commit(), Supabase or AI.
+function redrawBankImport(){
+ if(!bankImportDraft)return;
+ openModal('Importar extrato bancário',bankImportMarkup(db,bankImportDraft));
+}
+function openBankImport(accountId=''){
+ const accounts=(db.accounts||[]).filter(a=>a.active!==false);
+ const account=accounts.find(a=>a.id===accountId)||accounts[0];
+ bankImportDraft={accountId:account?.id||'',parsed:null,preview:null,filename:'',accountHint:'',filter:'all',page:0,error:''};
+ redrawBankImport();
+}
 // Guided onboarding is opt-in. No financial records are created before final confirmation.
 let setupDraft=null;
 function startSetupWizard(){
@@ -392,6 +406,29 @@ const actions={
   'new-account':()=>openModal('Nova conta financeira',accountForm(db)),
   'edit-account':el=>openModal('Editar conta',accountForm(db,db.accounts.find(a=>a.id===el.dataset.id))),
   'account-detail':el=>openModal('Movimentações da conta',accountDetail(db,db.accounts.find(a=>a.id===el.dataset.id))),
+  'bank-import-open':el=>openBankImport(el.dataset.id||''),
+  'bank-import-reset':()=>{
+   if(!bankImportDraft)return;
+   Object.assign(bankImportDraft,{parsed:null,preview:null,filename:'',accountHint:'',filter:'all',page:0,error:''});
+   redrawBankImport();
+  },
+  'bank-import-filter':el=>{
+   if(!bankImportDraft?.preview||!['all','possible_match','ambiguous','not_found'].includes(el.dataset.value))return;
+   bankImportDraft.filter=el.dataset.value;bankImportDraft.page=0;redrawBankImport();
+  },
+  'bank-import-next':()=>{
+   if(!bankImportDraft?.preview)return;
+   const count=bankImportDraft.filter==='all'?bankImportDraft.preview.rows.length:
+     bankImportDraft.preview.rows.filter(row=>bankImportDraft.filter==='ambiguous'
+       ?['ambiguous','possible_duplicate_in_file'].includes(row.status):row.status===bankImportDraft.filter).length;
+   bankImportDraft.page=Math.min(Math.max(0,Math.ceil(count/BANK_IMPORT_PAGE_SIZE)-1),bankImportDraft.page+1);
+   redrawBankImport();
+  },
+  'bank-import-prev':()=>{
+   if(!bankImportDraft?.preview)return;
+   bankImportDraft.page=Math.max(0,bankImportDraft.page-1);redrawBankImport();
+  },
+  'bank-import-close':()=>closeModal(),
   'new-category':()=>openModal('Nova categoria',categoryForm()),
   'edit-category':el=>openModal('Editar categoria',categoryForm(db.categories.find(c=>c.id===el.dataset.id))),
   'new-transfer':()=>openModal('Transferir entre contas',transferForm(db)),
