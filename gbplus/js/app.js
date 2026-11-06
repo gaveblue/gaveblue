@@ -1,4 +1,4 @@
-import {parseBankStatement,proposeReconciliation,BANK_IMPORT_MAX_BYTES} from './bank-import-preview.js?v=20261106-2501';
+import {parseBankStatement,proposeReconciliation,readBankFileText} from './bank-import-preview.js?v=20261106-2504';
 import {bankImportMarkup,bankImportHistoryMarkup,BANK_IMPORT_PAGE_SIZE} from './bank-import-ui.js?v=20261106-2503';
 import {reviewSelection,applyReconciliationBatch,undoReconciliationBatch} from './bank-reconciliation.js?v=20261106-2503';
 import {filterFlowRows} from './gb-flow-filters.js?v=20261106-68';
@@ -670,9 +670,7 @@ document.addEventListener('change',async e=>{
  if(!file)return;
  draft.error='';
  try{
-  if(!/\.(ofx|csv|txt)$/i.test(file.name))throw Error('Selecione um arquivo OFX ou CSV.');
-  if(file.size<1||file.size>BANK_IMPORT_MAX_BYTES)throw Error('O arquivo precisa ter até 8 MB e não pode estar vazio.');
-  const contents=await file.text();
+  const contents=await readBankFileText(file);
   if(draft!==bankImportDraft||!modal.open)return;
   const parsed=parseBankStatement(contents,file.name);
   const preview=proposeReconciliation(parsed,db,draft.accountId);
