@@ -1,7 +1,13 @@
 // GB+ 2.5.0 build 4 — validate import file extension and legacy bank encodings.
 // Run: node gbplus/tests/bank-import-codec-regression.mjs
 import assert from 'node:assert/strict';
-import {bankImportFileNameSupported,readBankFileText,parseBankStatement} from '../js/bank-import-preview.js';
+import {readFileSync} from 'node:fs';
+import {resolve,dirname} from 'node:path';
+import {fileURLToPath} from 'node:url';
+const here=dirname(fileURLToPath(import.meta.url));
+const source=readFileSync(resolve(here,'../js/bank-import-preview.js'),'utf8').replace(/^export /gm,'');
+const {bankImportFileNameSupported,readBankFileText,parseBankStatement}=
+ Function(source+';return {bankImportFileNameSupported,readBankFileText,parseBankStatement}')();
 
 assert.equal(bankImportFileNameSupported('extrato.ofx'),true);
 assert.equal(bankImportFileNameSupported('EXTRATO.CSV'),true);
