@@ -1,18 +1,14 @@
 {
   "version": "2.4.8",
-  "build": 63,
+  "build": 64,
   "published_at": "2026-11-05",
-  "title": "GB+ AI e seleção simplificada de bancos",
+  "title": "GB+ AI e seleção de bancos mais simples",
   "notes": [
-    "Cadastro de contas e cartões simplificado: apenas 20 bancos conhecidos aparecem inicialmente na faixa de ícones.",
-    "Busca por nome, código bancário ou ISPB continua acessando as 78 instituições cadastradas, incluindo bancos personalizados.",
-    "Lista completa de bancos e instituições financeiras permanece disponível em Bancos e instituições.",
-    "Prévia do lançamento integrada à conversa, com detalhes e vencimentos antes de confirmar.",
-    "Botões Detalhar, Editar, Descartar e Confirmar e gravar em estilo minimalista, preservando a confirmação antes de qualquer gravação.",
-    "Edição de descrição, tipo, valor, vencimento, periodicidade, quantidade e parceiro diretamente na prévia.",
-    "Correção da interpretação de pedidos como alterar vencimento para o dia 20, sem modificar acidentalmente o valor.",
-    "Botão de anexo no GB+ AI, com leitura local demonstrativa de OFX e CSV e preparação visual para PDF e Excel.",
-    "Arquivos anexados não criam nem conciliam títulos nesta versão. A conciliação e a importação final seguem programadas para a 2.5.0."
+    "Escolher a instituição financeira ficou mais fácil: deslize pelos ícones e encontre o banco desejado.",
+    "Pesquisa simplificada nos cadastros de contas e cartões de crédito.",
+    "Confira todos os vencimentos e os valores antes de confirmar um lançamento.",
+    "Edite os dados do lançamento diretamente na prévia do assistente financeiro.",
+    "Anexe arquivos OFX e CSV no assistente para visualizar uma prévia inicial dos movimentos, sem criar lançamentos."
   ],
   "assets": [
     "./index.html",
@@ -162,28 +158,28 @@
   "highlights": [
     {
       "icon": "bank",
-      "title": "Escolha seu banco com mais facilidade",
-      "description": "Ao criar uma conta ou cartão, apenas 20 instituições conhecidas aparecem em destaque. Use a busca para encontrar qualquer uma das 78."
+      "title": "Seu banco, mais fácil de encontrar",
+      "description": "Deslize pelos bancos disponíveis ou use a pesquisa para localizar sua instituição."
+    },
+    {
+      "icon": "card",
+      "title": "Cadastro de cartões mais prático",
+      "description": "Escolha o banco vinculado ao cartão diretamente na faixa de ícones."
     },
     {
       "icon": "sparkles",
-      "title": "Uma conversa mais intuitiva",
-      "description": "A prévia do lançamento aparece dentro do chat, inspirada no novo visual minimalista do GB+ AI."
-    },
-    {
-      "icon": "repeat",
-      "title": "Vencimentos antes de gravar",
-      "description": "Confira todas as datas, a quantidade de títulos e o valor total antes de confirmar."
+      "title": "Prévia completa de lançamentos",
+      "description": "Confira descrição, valor, periodicidade e vencimentos antes de confirmar."
     },
     {
       "icon": "check",
-      "title": "Detalhar, editar ou descartar",
-      "description": "Ajuste valor, tipo, data e periodicidade sem sair do assistente. A gravação continua exigindo confirmação."
+      "title": "Edite antes de gravar",
+      "description": "Ajuste os detalhes na conversa e mantenha o controle sobre cada lançamento."
     },
     {
       "icon": "file",
-      "title": "Anexos preparados para a importação",
-      "description": "OFX e CSV mostram uma prévia local; Excel e PDF serão interpretados em uma próxima etapa. Nenhum anexo altera os saldos."
+      "title": "Anexos no assistente",
+      "description": "Abra arquivos OFX e CSV para uma prévia inicial dos movimentos, sem alterar seu financeiro."
     }
   ]
 }
