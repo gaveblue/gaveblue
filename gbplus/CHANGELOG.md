@@ -21,6 +21,7 @@ Registro de mudanças do aplicativo localizado em `gbplus/`. Toda versão e toda
 ### Verificações
 - **17 verificações lógicas simuladas concluídas com sucesso**: seleção válida, ausência de mutação financeira, gravação de metadados, bloqueio de reimportação e alvo inválido, validação de documento, confirmação, histórico e reversão.
 - [ ] Executar `node gbplus/tests/bank-reconciliation-regression.mjs` e regressões financeiras completas em ambiente Node.
+- [ ] CI do GitHub: workflow adicionado em `.github/workflows/gbplus-regression.yml`; execuções iniciais em 06/11/2026 retornaram `failure` sem etapas de trabalho registradas (sem logs utilizáveis). **Não há evidência de que as suítes Node tenham executado**. Diagnosticar configuração/ambiente de execução e repetir antes da homologação.
 - [ ] Homologar Android/PWA, iOS e desktop, arquivos OFX/CSV reais, contraste, rolagem, temas e atualização de cache.
 - [ ] Verificar autenticação, isolamento de usuários, gravações concorrentes, restauro, histórico e reversões com contas de teste.
 - [ ] Testar cancelamento/estorno de pagamentos já conciliados e movimentos repetidos legítimos no mesmo dia.
