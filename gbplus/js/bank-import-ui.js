@@ -150,7 +150,7 @@ export function bankImportMarkup(db,draft){
    '<button type="button" data-action="bank-import-next" '+(page===Math.ceil(rows.length/BANK_IMPORT_PAGE_SIZE)-1?'disabled':'')+'>Próxima</button></div>':'')+
   (draft.error?'<p class="gb-import-error" role="alert">'+esc(draft.error)+'</p>':'')+
   '<div class="gb-import-privacy">'+icon('shield')+
-   '<p>As sugestões não são aprovadas automaticamente. Criar um lançamento registra imediatamente a receita recebida ou despesa paga, somente após revisão e confirmação explícita.</p></div>'+
+   '<p>'+(BANK_IMPORT_WRITES_ENABLED?'As sugestões não são aprovadas automaticamente. Criar um lançamento exige revisão e confirmação explícita.':'As correspondências são apenas sugestões. Esta prévia não cria receitas, despesas ou baixas.')+'</p></div>'+
   (BANK_IMPORT_WRITES_ENABLED?
    '<div class="gb-import-footer"><span><strong>'+choiceCount(draft)+'</strong> decisão(ões) selecionada(s)</span>'+
    '<button type="button" class="button primary" data-action="bank-import-review" '+(choiceCount(draft)?'':'disabled')+'>Revisar decisões</button></div>':
