@@ -590,6 +590,38 @@ const actions={
 };
 document.addEventListener('click',async e=>{const el=e.target.closest('[data-action]');if(!el||!db)return;if(el.tagName==='BUTTON')e.preventDefault();try{await actions[el.dataset.action]?.(el);}catch(error){fail(error);}});
 document.addEventListener('click',e=>{if(!e.target.closest('.gb-entry-select'))closeEntryMenus();});
+// User-selected file bytes stay local and are discarded with the modal.
+document.addEventListener('change',async e=>{
+ const el=e.target;
+ if(!bankImportDraft||!modal.open||!el?.closest?.('#modal'))return;
+ const draft=bankImportDraft;
+ if(el.id==='gb-import-account'){
+  const id=el.value;
+  if(!(db.accounts||[]).some(a=>a.id===id&&a.active!==false))return;
+  draft.accountId=id;
+  if(draft.parsed)draft.preview=proposeReconciliation(draft.parsed,db,id);
+  draft.filter='all';draft.page=0;redrawBankImport();return;
+ }
+ if(el.id!=='gb-import-file')return;
+ const file=el.files?.[0];
+ if(!file)return;
+ draft.error='';
+ try{
+  if(!/\\.(ofx|csv|txt)$/i.test(file.name))throw Error('Selecione um arquivo OFX ou CSV.');
+  if(file.size<1||file.size>BANK_IMPORT_MAX_BYTES)throw Error('O arquivo precisa ter até 8 MB e não pode estar vazio.');
+  const contents=await file.text();
+  if(draft!==bankImportDraft||!modal.open)return;
+  const parsed=parseBankStatement(contents,file.name);
+  const preview=proposeReconciliation(parsed,db,draft.accountId);
+  draft.parsed=parsed;draft.preview=preview;draft.filename=file.name.slice(0,140);
+  draft.accountHint=parsed.accountHint||'';
+  draft.filter='all';draft.page=0;
+ }catch(error){
+  if(draft!==bankImportDraft||!modal.open)return;
+  Object.assign(draft,{parsed:null,preview:null,filename:'',accountHint:'',error:error?.message||'Não foi possível ler o extrato.'});
+ }
+ if(draft===bankImportDraft&&modal.open)redrawBankImport();
+});
 document.addEventListener('change',e=>{
  if(e.target?.matches?.('select[name="bankId"]')&&db)syncBankPicker(e.target.closest('.gb-bank-picker'),db);
 });
@@ -815,7 +847,8 @@ window.addEventListener('hashchange',route);
 matchMedia('(max-width: 760px)').addEventListener('change',()=>{if(db&&state.route==='dashboard')applyPanel();});
 window.addEventListener('gbplus-installed',()=>{if(db&&state.route==='settings')render();});
 window.addEventListener('storage',e=>{if(e.key===KEY&&!currentUser())toast('Dados alterados em outra aba. Atualize a página antes de continuar.');});
-modal.addEventListener('cancel',()=>{pendingGeneration=null;confirmAction=null;});
+modal.addEventListener('cancel',()=>{bankImportDraft=null;pendingGeneration=null;confirmAction=null;});
+modal.addEventListener('close',()=>{bankImportDraft=null;modal.classList.remove('gb-bank-import-modal');});
 
 function clearAccount(){
   db=null;repository?.dispose?.();closeModal();profileCpfStatus={userId:null,cpf:'',ready:false,loading:false,error:''};
