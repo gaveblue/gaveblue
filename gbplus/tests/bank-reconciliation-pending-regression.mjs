@@ -8,7 +8,8 @@ import {fileURLToPath} from 'node:url';
 const here=dirname(fileURLToPath(import.meta.url));
 const load=(name,deps,keys)=>{
  const raw=readFileSync(resolve(here,'../js/'+name+'.js'),'utf8')
-  .replace(/^import[^\n]*\n/gm,'').replace(/^export /gm,'');
+  .replace(/^import[^\n]*\n/gm,'').replace(/^export /gm,'')
+  .replace('const BANK_IMPORT_WRITES_ENABLED=false','const BANK_IMPORT_WRITES_ENABLED=true');
  return Function(...Object.keys(deps),raw+';return {'+keys.join(',')+'}')(...Object.values(deps));
 };
 const r=load('bank-reconciliation',{},[
