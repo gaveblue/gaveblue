@@ -32,6 +32,9 @@ const ui=load('bank-import-ui',{
  knownReconciliationKeys:reconciler.knownReconciliationKeys,
  bankImportHistory:reconciler.bankImportHistory
 },['bankImportMarkup','bankImportHistoryMarkup']);
+const domain=load('domain',{
+ parseMoneyCentavos:()=>0,expectedDates:()=>[],nextBusinessDay:x=>x,recurrenceAnchor:x=>x
+},['accountBalance']);
 const clone=value=>structuredClone(value);
 const db={
  schemaVersion:1,revision:0,
@@ -57,6 +60,7 @@ assert.equal(plan.totals.created,2);
 assert.equal(plan.totals.amountCreatedIn,5000);
 assert.equal(plan.totals.amountCreatedOut,1250);
 assert.equal(db.titles.length,0,'Reading and review never write finance');
+assert.equal(domain.accountBalance(db,'a','2026-11-06'),10000,'Opening balance is unchanged before approval');
 assert.throws(()=>reconciler.reviewSelection(preview,{0:{action:'create',categoryId:'',description:'Pix'}},db,{today:'2026-11-06'}));
 assert.throws(()=>reconciler.reviewSelection(preview,{1:{action:'create',categoryId:'income-cat',description:'Tarifa'}},db,{today:'2026-11-06'}));
 assert.throws(()=>reconciler.reviewSelection(preview,choices,db,{today:'2026-11-05'}),'Future payment date rejected');
@@ -78,6 +82,7 @@ const saved=reconciler.applyReconciliationBatch(db,parsed,'a',choices,{
  propose:bank.proposeReconciliation
 });
 assert.equal(saved.totals.created,2);
+assert.equal(domain.accountBalance(db,'a','2026-11-06'),13750,'Paid income minus paid expense updates bank balance exactly once');
 assert.equal(db.titles.length,2);
 assert.equal(db.payments.length,2);
 assert.deepEqual(db.titles.map(t=>t.type),['income','expense']);
@@ -110,6 +115,7 @@ assert.equal(altered.bankImportBatches[0].status,'active');
 reconciler.undoReconciliationBatch(db,'batch-3','2026-11-06T18:00:00Z');
 assert.equal(db.payments.length,0,'Reversal removes only its own payments');
 assert.equal(db.titles.length,0,'Reversal removes only its own titles');
+assert.equal(domain.accountBalance(db,'a','2026-11-06'),10000,'Reversing lot restores previous balance');
 assert.equal(db.bankImportBatches[0].status,'reverted');
 assert.equal(store.validateDatabase(db),db,'Reverted audit preserves valid schema');
 assert.equal(reconciler.knownReconciliationKeys(db,'a').size,0);
