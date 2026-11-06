@@ -104,7 +104,7 @@ export function accountDetail(db,a){
  const groups=ledger.days;
  return '<div class="gb-statement" aria-label="Extrato da conta">'+
   '<div class="gb-statement-account"><span>'+esc(a.name)+'</span><strong>'+money(ledger.closing)+'</strong><small>Saldo atual · Saldo inicial cadastrado: '+money(a.initial)+'</small></div>'+
-  '<div class="gb-statement-import"><button class="button" data-action="bank-import-open" data-id="'+esc(a.id)+'">'+icon('upload')+' Importar extrato OFX/CSV</button><small>Prévia local, sem alterar os saldos</small></div>'+ 
+  (a.active!==false?'<div class="gb-statement-import"><button class="button" data-action="bank-import-open" data-id="'+esc(a.id)+'">'+icon('upload')+' Importar extrato OFX/CSV</button><small>Prévia local, sem alterar os saldos</small></div>':'')+ 
    '<div class="gb-statement-totals"><div><small>Créditos acumulados</small><strong class="gb-statement-credit">+ '+money(ledger.credits)+'</strong></div>'+
   '<div><small>Débitos acumulados</small><strong class="gb-statement-debit">− '+money(ledger.debits)+'</strong></div></div>'+
   '<p class="gb-statement-note">Movimentações registradas no GB+. O saldo inicial cadastrado é a base dos cálculos. Extratos importados de bancos ainda não estão incluídos.</p>'+
