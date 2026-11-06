@@ -53,6 +53,16 @@ Consultas de metadados em projeto já existente, sem selecionar lançamentos, cr
 - `anon` não possui EXECUTE; `authenticated` possui EXECUTE.
 - **Não foi executada nenhuma gravação em Supabase**. Esses controles estruturais não substituem ensaios com usuários fictícios diferentes.
 
+## Verificação adicional de upload real no Chromium
+
+Foi utilizado o **seletor de arquivos do navegador**, com `File.arrayBuffer()`, `TextDecoder`, `parseBankStatement()`, `proposeReconciliation()` e `bankImportMarkup()` originais, integrados a um contêiner de teste isolado com dados fictícios. Não foi necessário acessar contas reais.
+
+- Em **360 px claro, 390 px escuro e 1200 px claro**, um arquivo CSV foi selecionado no input real, lido e renderizado. A troca entre duas contas recalculou o saldo GB+ da conta selecionada. Nenhuma rolagem horizontal e nenhum botão de gravação.
+- O teste identificou ambiguidade de saldo final em CSV: **duas movimentações na mesma data e com saldos diferentes, sem horário**, podem corresponder a qualquer ordem. A build 7 agora **omite a comparação**, explica o motivo e preserva todos os lançamentos.
+- Quando há **um único saldo informado na data mais recente**, a comparação indicativa é exibida. Se o saldo só existe em data antiga, a comparação é omitida.
+- O teste de regressão `bank-import-balance-regression.mjs` foi ampliado para cobrir as duas ambiguidades; a bateria completa de **10 suítes Node** voltou a passar.
+- O upload testado foi no **componente real com controlador de teste** — não incluiu login, Supabase ou instalação completa do PWA. Essa distinção permanece obrigatória na homologação.
+
 ## CI do GitHub Actions — problema externo ainda aberto
 
 O workflow de regressões falha **antes de executar passos** em `pull_request` e também em `push`, com `ubuntu-latest` e `ubuntu-24.04`. Evidência: [run 42293673029](https://github.com/gaveblue/gaveblue/actions/runs/42293673029), issue [#75](https://github.com/gaveblue/gaveblue/issues/75).
