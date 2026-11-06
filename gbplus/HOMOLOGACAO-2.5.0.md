@@ -1,10 +1,10 @@
 # GB+ 2.5.0 — Protocolo de homologação
 
-**Estado atual:** build **2.5.0 compilação 8 publicada** após o deploy [42310213381](https://github.com/gaveblue/gaveblue/actions/runs/42310213381). A conciliação OFX/CSV assistida está habilitada, com revisão e confirmação dupla. **Não há homologação completa de PWA instalado nem CI GitHub Actions verde**; essas pendências não devem ser ocultadas.
+**Estado atual:** build **2.5.0 compilação 9 publicada** após o deploy [42314574315](https://github.com/gaveblue/gaveblue/actions/runs/42314574315). A conciliação OFX/CSV assistida e o mapeamento manual de CSV estão disponíveis. **11/11 suítes Node reais passaram sobre o pacote implantado**. **A homologação completa do PWA instalado e o CI GitHub Actions verde continuam pendentes**.
 
 **Evidências de fechamento do núcleo:** [HOMOLOGACAO-2.5.0-RELATORIO-B8.md](./HOMOLOGACAO-2.5.0-RELATORIO-B8.md).
 
-**Decisão de escopo:** as fases complementares de mapeamento CSV manual, XLSX e PDF não foram cumpridas e ficam registradas para versão posterior. A build 8 entrega OFX/CSV assistidos; não chamar as outras fases de concluídas. Responsável pela homologação integral: **não registrado**. Data de aprovação integral: **não registrada**.
+**Decisão de escopo:** o mapeamento CSV manual foi entregue na build 9. **XLSX e PDF permanecem não entregues**, no backlog da issue #78. A build 8 entrega OFX/CSV assistidos; não chamar as outras fases de concluídas. Responsável pela homologação integral: **não registrado**. Data de aprovação integral: **não registrada**.
 
 ## Encerramento funcional — mapeamento CSV na compilação 9
 
