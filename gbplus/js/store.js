@@ -74,6 +74,59 @@ function validateCreditData(db){
  }
  for(const a of db.accounts)if(a.bankId!==undefined)assert(str(a.bankId,100)&&(!a.bankId||ids.has(a.bankId)),'instituição da conta.');
 }
+function validateReconciliationHistory(db){
+ const batches=db.bankImportBatches||[];
+ assert(Array.isArray(batches)&&batches.length<=100,'histórico de importações.');
+ const batchIds=new Set(),linkKeys=new Set(),recordKeys=new Set();
+ let total=0;
+ for(const b of batches){
+  assert(b&&entityId(b.id)&&!batchIds.has(b.id)&&
+   db.accounts.some(a=>a.id===b.accountId)&&['ofx','csv'].includes(b.format)&&
+   typeof b.createdAt==='string'&&/^\\d{4}-\\d{2}-\\d{2}T/.test(b.createdAt)&&
+   ['active','reverted'].includes(b.status)&&
+   (b.status==='active'||typeof b.revertedAt==='string'&&/^\\d{4}-\\d{2}-\\d{2}T/.test(b.revertedAt))&&
+   Array.isArray(b.entries)&&b.entries.length>0&&b.entries.length<=200,'lote de conciliação.');
+  batchIds.add(b.id);total+=b.entries.length;
+  const keysThisBatch=new Set(),targetsThisBatch=new Set();
+  for(const row of b.entries){
+   assert(row&&str(row.key,800)&&row.key.length>0&&
+    validDate(row.date)&&amount(row.amount)&&row.amount!==0&&
+    str(row.description,300)&&row.description.trim()&&
+    str(row.externalId,180)&&['link','ignore','pending'].includes(row.action),'movimento conciliado.');
+   assert(!keysThisBatch.has(row.key),'duplicidade de movimento no lote.');
+   keysThisBatch.add(row.key);
+   if(b.status==='active'){
+    const key=b.accountId+'|'+row.key;
+    assert(!recordKeys.has(key),'movimento importado repetido.');
+    recordKeys.add(key);
+   }
+   if(row.action!=='link'){
+    assert(row.targetType===undefined&&row.targetId===undefined,'movimento não vinculado.');
+    continue;
+   }
+   assert(['payment','transfer'].includes(row.targetType)&&entityId(row.targetId),'vínculo de conciliação.');
+   const target=row.targetType+':'+row.targetId;
+   assert(!targetsThisBatch.has(target),'baixa duplicada no lote.');
+   targetsThisBatch.add(target);
+   if(b.status==='active'){
+    const link=b.accountId+'|'+target;
+    assert(!linkKeys.has(link),'baixa vinculada em mais de um lote.');
+    linkKeys.add(link);
+   }
+   if(row.targetType==='payment'){
+    const payment=db.payments.find(p=>p.id===row.targetId);
+    const title=db.titles.find(t=>t.id===payment?.titleId);
+    assert(payment&&payment.accountId===b.accountId&&title&&!title.cancelled&&
+     row.amount===(title.type==='income'?payment.amount:-payment.amount),'baixa da conta importada.');
+   }else{
+    const transfer=db.transfers.find(t=>t.id===row.targetId);
+    assert(transfer&&(transfer.from===b.accountId&&row.amount===-transfer.amount||
+     transfer.to===b.accountId&&row.amount===transfer.amount),'transferência da conta importada.');
+   }
+  }
+ }
+ assert(total<=10000,'histórico de importações excedeu limite.');
+}
 export function validateDatabase(db){
   assert(db&&db.schemaVersion===1,'versão não suportada.');
   for(const key of ['titles','payments','partners','accounts','transfers','categories']) {assert(Array.isArray(db[key])&&db[key].length<=100000,`lista ${key}.`); const ids=new Set(); for(const row of db[key]){assert(row&&str(row.id,100)&&/^[A-Za-z0-9_-]+$/.test(row.id)&&!ids.has(row.id),`identificador em ${key}.`);ids.add(row.id);}}
@@ -90,6 +143,7 @@ export function validateDatabase(db){
   if(db.settings.mobileNav!==undefined)assert(validMobileNav(db.settings.mobileNav),'atalhos da barra inferior.');
   if(db.settings.setupCompleted!==undefined)assert(typeof db.settings.setupCompleted==='boolean','configuração inicial.');
   validateCreditData(db);
+  validateReconciliationHistory(db);
   assert(Number.isSafeInteger(db.revision)&&db.revision>=0,'revisão.');return db;
 }
 // Repository boundary: replace this adapter to migrate persistence without changing financial rules.
