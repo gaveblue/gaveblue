@@ -2,6 +2,36 @@
 
 Registro de mudanças do aplicativo localizado em `gbplus/`. Toda versão e toda compilação deve possuir uma entrada própria. **Uma alteração não deve ser considerada homologada apenas porque existe commit, teste escrito ou publicação.** A homologação exige evidências da execução e aprovação explícita.
 
+## [2.5.0 · compilação 1 — desenvolvimento] — 2026-11-06
+
+**Situação:** código implementado em ramificação de desenvolvimento; **não publicado nem homologado**.  
+**Origem:** início da 2.5.0 após a liberação da 2.4.9 build 68.  
+**Escopo:** prévia de importação de OFX/CSV, sem qualquer gravação financeira.  
+**Ramificação:** `feature/gbplus-250-importacao-previa`.
+
+### Alterações
+
+- Nova entrada **Importar extrato OFX/CSV** em Contas bancárias e no extrato individual.
+- Tela minimalista para selecionar a conta, escolher arquivo local (até 8 MB) e visualizar a conferência.
+- Resumo de créditos, débitos, quantidade de movimentos e possíveis vínculos com baixas ou transferências existentes.
+- Classificação consultiva: possível vínculo, ambiguidade, possível repetição no arquivo e não localizado.
+- Filtros Todos / Prováveis / Revisar / Não localizados e paginação limitada a 20 movimentos por tela.
+- Suporte adicional a colunas de entrada/saída e ao campo Tipo em arquivos CSV, com valores íntegros em centavos.
+- Otimização da pesquisa de correspondências por valor para arquivos maiores.
+- Arquivo original não é enviado a IA nem ao servidor; conteúdo analisado apenas em memória e descartado ao fechar a prévia. Não há operação de baixa, título, ajuste de saldo ou persistência.
+- Novos arquivos: `js/bank-import-ui.js`, `bank-import.css`, `tests/bank-import-preview-regression.mjs`. Atualizados `js/app.js`, `js/views.js`, `js/forms.js`, `js/bank-import-preview.js`, `index.html`, `version.json` e `sw.js`.
+
+### Evidências e pendências
+
+- Testes unitários previstos em `tests/bank-import-preview-regression.mjs` para leitura, sinal, classificação, isolamento por conta, não mutação, segurança do HTML e paginação.
+- [ ] Registrar execução completa da regressão em Node.
+- [ ] Homologar upload e visualização em dispositivo real, incluindo tema escuro, PWA e contas com muitos lançamentos.
+- [ ] Validar OFX/CSV reais de instituições distintas e arquivos em outras codificações.
+- [ ] Implementar e homologar mapeamento manual de CSV.
+- [ ] Conciliação selecionada pelo usuário, persistência transacional, auditoria, isolamento RLS e prevenção de dupla contabilização (próximos marcos).
+
+**Critério de avanço:** nenhuma importação deve alterar dados do GB+ antes de confirmação específica. Esta compilação **não representa conciliação bancária pronta**; é a interface segura de prévia para análise.
+
 ## [2.4.9 · compilação 68] — 2026-11-06
 
 **Situação:** publicação autorizada pelo responsável em 2026-11-06; **homologação funcional completa ainda pendente de evidências**.  
