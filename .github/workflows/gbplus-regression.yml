@@ -31,3 +31,5 @@ jobs:
         run: node gbplus/tests/bank-reconciliation-regression.mjs
       - name: Criação e reversão de lançamentos importados
         run: node gbplus/tests/bank-reconciliation-create-regression.mjs
+      - name: Pendências retomáveis e reversão encadeada
+        run: node gbplus/tests/bank-reconciliation-pending-regression.mjs
