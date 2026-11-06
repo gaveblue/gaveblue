@@ -92,13 +92,29 @@ function validateReconciliationHistory(db){
    assert(row&&str(row.key,800)&&row.key.length>0&&
     validDate(row.date)&&amount(row.amount)&&row.amount!==0&&
     str(row.description,300)&&row.description.trim()&&
-    str(row.externalId,180)&&['link','ignore','pending'].includes(row.action),'movimento conciliado.');
+    str(row.externalId,180)&&['link','ignore','pending','create'].includes(row.action),'movimento conciliado.');
    assert(!keysThisBatch.has(row.key),'duplicidade de movimento no lote.');
    keysThisBatch.add(row.key);
    if(b.status==='active'){
     const key=b.accountId+'|'+row.key;
     assert(!recordKeys.has(key),'movimento importado repetido.');
     recordKeys.add(key);
+   }
+   if(row.action==='create'){
+    assert(entityId(row.categoryId)&&db.categories.some(c=>c.id===row.categoryId&&c.type===row.entryType)&&
+     row.entryType===(row.amount>0?'income':'expense')&&
+     entityId(row.createdTitleId)&&entityId(row.createdPaymentId)&&
+     row.createdTitleId!==row.createdPaymentId&&
+     (!row.targetType&&!row.targetId),'lançamento importado.');
+    if(b.status==='active'){
+     const t=db.titles.find(t=>t.id===row.createdTitleId);
+     const p=db.payments.find(p=>p.id===row.createdPaymentId);
+     // The user may later reverse the payment through the ordinary finance
+     // screen; retain the audit even if that happens.
+     if(t)assert(t.type===row.entryType&&t.accountId===b.accountId,'tipo/conta do título importado.');
+     if(p)assert(p.accountId===b.accountId&&p.titleId===row.createdTitleId,'conta da baixa importada.');
+    }
+    continue;
    }
    if(row.action!=='link'){
     assert(row.targetType===undefined&&row.targetId===undefined,'movimento não vinculado.');
