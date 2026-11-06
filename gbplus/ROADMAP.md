@@ -214,3 +214,12 @@ Detalhes: [RELEASE-2.4.5.md](./RELEASE-2.4.5.md). A evolução maior permanece r
 - [x] Atualizador passou a reconhecer compilação (build) dentro da mesma versão numérica.
 - [x] Quinze testes específicos de bancos e atualizador.
 - [ ] Homologação visual e instalação no aparelho.
+
+### 2.4.8 · Compilação 64 — Pesquisa e escolha de bancos simplificadas
+
+- [x] Mostrar todas as instituições na faixa horizontal de contas, cartões e primeiro acesso.
+- [x] Posicionar os bancos mais conhecidos no início, mantendo os demais disponíveis pela rolagem.
+- [x] Unificar o campo “Pesquisar” e retirar textos técnicos, contagens e opção de abrir lista extra.
+- [x] Reduzir os destaques do resumo de atualização ao que é relevante para o usuário final.
+- [x] Preservar instituições personalizadas e bancos selecionados em contas anteriores.
+- [ ] Homologar a faixa no celular, busca, rolagem e publicação da compilação 64.
