@@ -10,6 +10,18 @@
 
 A primeira interface read-only está na ramificação `feature/gbplus-250-importacao-previa`, acessível em **Contas bancárias → Importar extrato** e **Movimentações da conta → Importar extrato**. Seleciona OFX/CSV, lê localmente, apresenta totais, prováveis correspondências, ambiguidades e não localizados, com paginação e filtros. **Não grava conciliações, títulos, baixas, dados no Supabase ou arquivo bruto**. A homologação da UI e de arquivos bancários reais continua pendente.
 
+## Continuação em 06/11/2026 — compilação 2
+
+A segunda compilação, no mesmo ramo de desenvolvimento, acrescenta revisão individual por movimento e confirmação final. Ações disponíveis: `conciliar` com baixa ou transferência existente, `ignorar` e `manter pendente`. **Sem decisão** não grava nada. O registro confirmado é armazenado como metadado por usuário, conta e lote em `bankImportBatches`, dentro de `gbplus_documents`, usando a gravação já existente com revisão concorrente.
+
+- Não há inserção de títulos, baixas, transferências nem ajustes de saldo; o histórico dos vínculos é uma camada de referência.
+- Um mesmo pagamento/transferência não pode ser vinculado duas vezes para a mesma conta; reimportações de chaves de movimento já confirmadas são bloqueadas.
+- Reverter um lote marca seu histórico como revertido; não remove títulos nem estorna pagamentos. Um pagamento estornado pela rotina financeira original não é impedido pelo histórico.
+- A função atual `gbplus_save` foi consultada **somente leitura**: verifica `auth.uid()` e a revisão esperada antes da substituição atômica do documento do usuário. A política de leitura de `gbplus_documents` limita o SELECT ao próprio `user_id`. Não houve DDL ou atualização dos dados reais.
+- O arquivo original segue sem armazenamento ou envio à IA. Apenas metadados normalizados dos movimentos efetivamente aprovados são salvos no documento do usuário (incluindo descrição resumida e identificador externo).
+- A criação de lançamentos ausentes, eventual tabela dedicada de auditoria e comparação de saldos históricos continuam etapas futuras; não antecipar essas operações sem testes e critérios de aceitação.
+- Homologação em dispositivo real e testes de concorrência persistem pendentes. O build 2 ainda não foi publicado.
+
 ## Objetivo
 
 Conciliar o movimento registrado nos bancos com as baixas, títulos e transferências já existentes no GB+, exibindo diferenças de forma auditável. Uma importação jamais deve presumir que todo débito é uma nova despesa nem que toda entrada é receita.
