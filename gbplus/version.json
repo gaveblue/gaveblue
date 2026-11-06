@@ -1,7 +1,7 @@
 {
   "version": "2.5.0",
   "build": 7,
-  "published_at": null,
+  "published_at": "2026-11-06T21:48:07Z",
   "title": "Comparação indicativa de saldos de extratos OFX/CSV — somente leitura",
   "notes": [
     "Versão limitada de leitura: visualiza extratos OFX/CSV e compara saldo do banco declarado no arquivo com o saldo GB+ na data indicada.",
@@ -9,7 +9,8 @@
     "Quando não existe saldo final declarado na data mais recente, a comparação de saldos é omitida com explicação.",
     "Nenhuma alteração de títulos, pagamentos, transferências ou saldos é realizada pela importação; as funções de conciliar, criar ou reverter por extrato continuam bloqueadas.",
     "Dez suítes regressivas concluídas com sucesso em Node 22 real; importação pelo seletor de arquivos e troca de contas testadas em Chromium 360/390/1200 px sem rolagem horizontal.",
-    "O workflow GitHub Actions ainda não inicia runners; ensaios com autenticação online e PWA instalado permanecem pendentes e estão documentados."
+    "O workflow GitHub Actions ainda não inicia runners; ensaios com autenticação online e PWA instalado permanecem pendentes e estão documentados.",
+    "Publicação GitHub Pages confirmada no run 42299501899 em 06/11/2026; comparação de saldos segue indicativa, sem escrita financeira."
   ],
   "assets": [
     "./index.html",
@@ -178,9 +179,9 @@
       "description": "Nenhuma baixa ou saldo é modificado durante a conferência bancária."
     }
   ],
-  "release_status": "publication_authorized_limited_readonly_deployment_pending",
+  "release_status": "published_limited_readonly",
   "homologation": {
     "status": "parcial_autorizada_com_restricao",
-    "notes": "Publicação antecipada autorizada, limitada a leitura, comparação indicativa e proteção anti-duplicidade de saldos ambíguos. 10 testes Node reais e Chromium isolado passaram. Gravação por extrato BLOQUEADA; CI GitHub Actions e sessão online ainda pendentes."
+    "notes": "Build 7 publicada em modo somente leitura no GitHub Pages: run 42299501899 success. Dez testes Node reais e upload por Chromium isolado aprovados. CI financeiro, PWA autenticado e gravações online fictícias pendentes; BANK_IMPORT_WRITES_ENABLED=false confirmado na main."
   }
 }
