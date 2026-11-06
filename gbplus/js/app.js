@@ -437,7 +437,7 @@ const actions={
   'bank-import-review':()=>{
    if(!bankImportDraft?.preview)return;
    try{
-    bankImportDraft.review=reviewSelection(bankImportDraft.preview,bankImportDraft.decisions,db);
+    bankImportDraft.review=reviewSelection(bankImportDraft.preview,bankImportDraft.decisions,db,{today:today()});
     bankImportDraft.error='';bankImportDraft.step='confirm';bankImportDraft.confirmCreation=false;redrawBankImport();
    }catch(error){bankImportDraft.error=error.message;redrawBankImport();}
   },
