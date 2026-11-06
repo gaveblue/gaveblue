@@ -8,7 +8,7 @@ const source=fs.readFileSync(path.join(__dirname,'../gbplus/js/banks.js'),'utf8'
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const select=(label,name,options,value)=>'<label>'+esc(label)+'<select name="'+esc(name)+'">'+
  options.map(([id,title])=>'<option value="'+esc(id)+'" '+(value===id?'selected':'')+'>'+esc(title)+'</option>').join('')+'</select></label>';
-const bank=new Function('esc','select',source+';return {BANKS,bankCatalog,findBank,matchesBank,bankPicker,bankBadge,filterBankPicker,filterBankDirectory};')(esc,select);
+const bank=new Function('esc','select',source+';return {BANKS,FEATURED_BANK_IDS,bankCatalog,findBank,matchesBank,bankPicker,bankBadge,filterBankPicker,filterBankDirectory};')(esc,select);
 const normalized=text=>String(text??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');
 test('at least 50 Brazilian institutions, unique IDs, official 3-digit codes, alphabetical',()=>{
  assert.ok(bank.BANKS.length>=50);
@@ -41,11 +41,14 @@ test('native selection remains available while visual bank shortcuts and search 
  assert.match(html,/Ver lista completa de bancos/);
  assert.match(html,/select name="bankId"/);
  assert.match(html,/aria-pressed="true"/);
- assert.ok((html.match(/class="gb-bank-shortcut"/g)||[]).length>=50);
+ assert.equal((html.match(/class="gb-bank-shortcut"/g)||[]).length,bank.BANKS.length);
+ assert.equal((html.match(/data-bank-featured="true"/g)||[]).length,20);
+ assert.equal((html.match(/class="gb-bank-shortcut" hidden/g)||[]).length,bank.BANKS.length-20);
+ assert.match(html,/20 bancos em destaque/);
 });
 test('filter limits visual chips to matching institution without changing saved bank ID',()=>{
  const buttons=bank.BANKS.map(b=>({
-  dataset:{bankId:b.id,bankCode:b.code,bankIspb:b.ispb,bankSearch:[b.name,b.code,b.ispb,b.aliases].filter(Boolean).map(normalized).join(' ')},
+  dataset:{bankId:b.id,bankCode:b.code,bankIspb:b.ispb,bankFeatured:String(bank.FEATURED_BANK_IDS.includes(b.id)),bankSearch:[b.name,b.code,b.ispb,b.aliases].filter(Boolean).map(normalized).join(' ')},
   hidden:false
  }));
  const summary={textContent:''},none={hidden:true};
@@ -59,7 +62,9 @@ test('filter limits visual chips to matching institution without changing saved 
  assert.equal(buttons.filter(b=>!b.hidden)[0].dataset.bankId,'banco-pan');
  assert.equal(bank.filterBankPicker(picker,'notabank'),0);
  assert.equal(none.hidden,false);
- assert.equal(bank.filterBankPicker(picker,''),bank.BANKS.length);
+ assert.equal(bank.filterBankPicker(picker,''),20);
+ assert.equal(buttons.filter(b=>!b.hidden).length,20);
+ assert.ok(summary.textContent.includes('20 bancos em destaque'));
 });
 test('directory search filters alphabetically without mutating accounts',()=>{
  const rows=bank.BANKS.map(b=>({dataset:{directoryBankId:b.id},hidden:false}));
@@ -73,4 +78,39 @@ test('directory search filters alphabetically without mutating accounts',()=>{
  assert.equal(bank.filterBankDirectory(container,db,'004'),1);
  assert.equal(rows.filter(r=>!r.hidden)[0].dataset.directoryBankId,bank.findBank(null,'004').id);
  assert.equal(JSON.stringify(db),before);
+});
+
+test('shortcuts use 20 familiar banks while the full catalog remains searchable',()=>{
+ assert.equal(bank.FEATURED_BANK_IDS.length,20);
+ assert.equal(new Set(bank.FEATURED_BANK_IDS).size,20);
+ const expected=['bb','bradesco','itau','caixa','santander','nubank','inter','c6','btg','sicredi','sicoob','picpay','mercado-pago','pagbank'];
+ for(const id of expected)assert.ok(bank.FEATURED_BANK_IDS.includes(id),id);
+ assert.ok(bank.FEATURED_BANK_IDS.every(id=>bank.BANKS.some(b=>b.id===id)));
+ assert.ok(bank.BANKS.length>=78);
+ const html=bank.bankPicker(null,'');
+ assert.equal((html.match(/data-bank-featured="true"/g)||[]).length,20);
+ assert.ok(html.includes('value="99pay"'),'other banks must remain available in the native selector');
+});
+test('search finds banks outside the shortcuts and clearing search returns exactly 20',()=>{
+ const buttons=bank.BANKS.map(b=>({
+  dataset:{bankId:b.id,bankCode:b.code,bankIspb:b.ispb,bankFeatured:String(bank.FEATURED_BANK_IDS.includes(b.id)),
+   bankSearch:[b.name,b.code,b.ispb,b.aliases].filter(Boolean).map(normalized).join(' ')},
+  hidden:!bank.FEATURED_BANK_IDS.includes(b.id)
+ }));
+ const summary={textContent:''},empty={hidden:true};
+ const picker={querySelectorAll:()=>buttons,querySelector:q=>q==='[data-bank-count]'?summary:q==='[data-bank-no-results]'?empty:null};
+ assert.equal(bank.filterBankPicker(picker,'99Pay'),1);
+ assert.equal(buttons.filter(b=>!b.hidden)[0].dataset.bankId,'99pay');
+ assert.equal(bank.filterBankPicker(picker,'769'),1);
+ assert.equal(buttons.filter(b=>!b.hidden)[0].dataset.bankId,'99pay');
+ assert.equal(bank.filterBankPicker(picker,''),20);
+ assert.equal(buttons.filter(b=>!b.hidden).length,20);
+ assert.ok(buttons.some(b=>b.dataset.bankId==='99pay'&&b.hidden));
+});
+test('non-featured bank remains selected and named while its shortcut stays hidden',()=>{
+ const html=bank.bankPicker(null,'banestes');
+ assert.match(html,/gb-bank-selected/);
+ assert.match(html,/<small>Banestes<\/small>/);
+ assert.match(html,/option value="banestes" selected/);
+ assert.match(html,/class="gb-bank-shortcut" hidden data-bank-featured="false" data-action="choose-bank" data-bank-id="banestes"/);
 });
