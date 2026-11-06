@@ -115,6 +115,13 @@ const confirmUI=ui.bankImportMarkup(db,{
 });
 assert.match(confirmUI,/gb-import-create-confirm/);
 assert.match(confirmUI,/data-action="bank-import-commit" disabled/);
+assert.match(confirmUI,/gb-import-account-confirm/,'Bank account must be explicitly confirmed');
+const confirmedUI=ui.bankImportMarkup(db,{accountId:'a',preview,decisions:choices,step:'confirm',review:plan,confirmCreation:true,confirmAccount:true});
+assert.match(confirmedUI,/id="gb-import-account-confirm" checked/);
+assert.match(confirmedUI,/data-action="bank-import-commit"[^>]*>Confirmar/);
+assert(!confirmedUI.includes('data-action="bank-import-commit" disabled'),'Both confirmations enable financial write');
+const notAccountUI=ui.bankImportMarkup(db,{accountId:'a',preview,decisions:choices,step:'confirm',review:plan,confirmCreation:true,confirmAccount:false});
+assert.match(notAccountUI,/data-action="bank-import-commit" disabled/,'Account confirmation is required even when creation was approved');
 const altered=clone(db);
 altered.titles[0].description='Título alterado pelo usuário';
 assert.throws(()=>reconciler.undoReconciliationBatch(altered,'batch-3'),'Edited imported title cannot be deleted silently');
