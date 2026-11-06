@@ -13,7 +13,7 @@ Registro de mudanças do aplicativo localizado em `gbplus/`. Toda versão e toda
 - Nova decisão por movimento: **Criar lançamento baixado**, disponível apenas quando o extrato não tem baixa/transferência correspondente e não há repetição no próprio arquivo.
 - Exigência de categoria compatível com a natureza do movimento (entrada = receita; saída = despesa) e descrição editável até 300 caracteres.
 - Para data válida e não futura, criação **conjunta** de um título único e da respectiva baixa na conta selecionada, usando o valor exato em centavos.
-- Bloqueio de categoria incompatível, descrição vazia, data futura, mesmo movimento já importado, identificação repetida e possível título ainda em aberto com mesmo valor, histórico e vencimento próximo.
+- Bloqueio de categoria incompatível, descrição vazia, data futura, mesmo movimento já importado, identificação repetida e possível título ainda em aberto com **saldo residual equivalente**, histórico e vencimento próximo (inclusive baixa parcial).
 - Limite de **50 lançamentos criados por lote**, além dos limites da conciliação existentes.
 - Revisão final mostra quantidade de criações, entradas, saídas e efeito projetado no saldo. Exige caixa de seleção independente confirmando a criação e a atualização financeira antes de liberar o botão de gravação.
 - Persistência atômica por `commit` / `repository.save`, com verificação da revisão financeira existente: título, baixa e histórico só são gravados juntos se o lote inteiro passar pela validação.
