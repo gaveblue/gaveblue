@@ -31,11 +31,11 @@ const deltaDays=(a,b)=>Math.abs(Date.parse(a+'T12:00:00Z')-Date.parse(b+'T12:00:
 export function potentialExistingTitle(db,accountId,record){
  const sign=record.amount>0?'income':'expense';
  const expected=Math.abs(record.amount),name=normalized(record.description);
- return (db.titles||[]).some(t=>!t.cancelled&&t.type===sign&&t.amount===expected&&
+ return (db.titles||[]).some(t=>!t.cancelled&&t.type===sign&&
   (!t.accountId||t.accountId===accountId)&&validDate(t.due)&&deltaDays(t.due,record.date)<=3&&
   (normalized(t.description)===name||
    Boolean(record.externalId&&t.document===record.externalId))&&
-  (db.payments||[]).filter(p=>p.titleId===t.id).reduce((sum,p)=>sum+p.amount,0)<t.amount);
+  t.amount-(db.payments||[]).filter(p=>p.titleId===t.id).reduce((sum,p)=>sum+p.amount,0)===expected);
 }
 export function reviewSelection(preview,decisions,db,options={}){
  if(!preview||!Array.isArray(preview.rows))throw Error('Não há extrato para conciliar.');
