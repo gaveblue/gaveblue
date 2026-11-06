@@ -1,5 +1,5 @@
-import {parseBankStatement,proposeReconciliation,readBankFileText} from './bank-import-preview.js?v=20261106-2507';
-import {bankImportMarkup,bankImportHistoryMarkup,BANK_IMPORT_PAGE_SIZE,BANK_IMPORT_WRITES_ENABLED} from './bank-import-ui.js?v=20261106-2508';
+import {parseBankStatement,parseBankCsv,inspectBankCsv,proposeReconciliation,readBankFileText} from './bank-import-preview.js?v=20261106-2509';
+import {bankImportMarkup,bankImportHistoryMarkup,BANK_IMPORT_PAGE_SIZE,BANK_IMPORT_WRITES_ENABLED} from './bank-import-ui.js?v=20261106-2509';
 import {reviewSelection,applyReconciliationBatch,undoReconciliationBatch} from './bank-reconciliation.js?v=20261106-2505';
 import {filterFlowRows} from './gb-flow-filters.js?v=20261106-68';
 import {uid,today,money,dateLabel,cents,addMonths,validDate,generateTitles,addPayment,transfer,updateTitle,pending,flow,within} from './domain.js?v=20261105-72';
@@ -8,7 +8,7 @@ import {esc,icon,button,field,select,formFooter,download,csv,titleTable} from '.
 import {routes,dashboard,titlesView,partnersView,accountsView,categoriesView,flowView,reportsView,settingsView,notificationsView,filteredTitles,reportData} from './views.js?v=20261106-2502';
 import {renderReactCharts,unmountReactCharts} from './gb-react-loader.js?v=20261105-45';
 import {mountNativeCharts} from './gb-charts-native.js?v=20261106-68';
-import {titleForm,partnerForm,accountForm,categoryForm,paymentForm,transferForm,titleDetail,customizeForm,accountDetail} from './forms.js?v=20261106-2502';
+import {titleForm,partnerForm,accountForm,categoryForm,paymentForm,transferForm,titleDetail,customizeForm,accountDetail} from './forms.js?v=20261106-2509';
 import {toggleEntryMenu,chooseEntryOption,syncEntrySelect,closeEntryMenus} from './entry-select.js?v=20261104-42';
 import {installGbControls,enhanceGbControls} from './custom-controls.js?v=20261104-42';
 import {expectedDates,recurrenceAnchor} from './gb-calendar-rules.js?v=20261105-47';
@@ -73,7 +73,7 @@ function redrawBankImport(){
 function openBankImport(accountId=''){
  const accounts=(db.accounts||[]).filter(a=>a.active!==false);
  const account=accounts.find(a=>a.id===accountId)||accounts[0];
- bankImportDraft={accountId:account?.id||'',parsed:null,preview:null,filename:'',accountHint:'',filter:'all',page:0,error:'',decisions:{},step:'review',review:null,confirmCreation:false,confirmAccount:false};
+ bankImportDraft={accountId:account?.id||'',parsed:null,preview:null,filename:'',accountHint:'',filter:'all',page:0,error:'',decisions:{},step:'review',review:null,confirmCreation:false,confirmAccount:false,csvSource:null,csvMapping:null};
  redrawBankImport();
 }
 // Guided onboarding is opt-in. No financial records are created before final confirmation.
@@ -414,7 +414,28 @@ const actions={
   'bank-import-open':el=>openBankImport(el.dataset.id||''),
   'bank-import-reset':()=>{
    if(!bankImportDraft)return;
-   Object.assign(bankImportDraft,{parsed:null,preview:null,filename:'',accountHint:'',filter:'all',page:0,error:'',decisions:{},step:'review',review:null,confirmCreation:false,confirmAccount:false});
+   Object.assign(bankImportDraft,{parsed:null,preview:null,filename:'',accountHint:'',filter:'all',page:0,error:'',decisions:{},step:'review',review:null,confirmCreation:false,confirmAccount:false,csvSource:null,csvMapping:null});
+   redrawBankImport();
+  },
+
+  'bank-import-map':()=>{
+   if(!bankImportDraft?.csvSource||!bankImportDraft.csvMapping)return;
+   Object.assign(bankImportDraft,{parsed:null,preview:null,step:'mapping',error:'',decisions:{},review:null,confirmCreation:false,confirmAccount:false});
+   redrawBankImport();
+  },
+  'bank-import-apply-map':()=>{
+   const draft=bankImportDraft;
+   if(!draft?.csvSource||!draft.csvMapping||draft.step!=='mapping')return;
+   try{
+    const m=draft.csvMapping,mode=m.mode,columns={...m.columns};
+    if(mode==='split'){columns.amount=-1;columns.kind=-1;}
+    else{columns.credit=-1;columns.debit=-1;}
+    const parsed=parseBankCsv(draft.csvSource,{separator:m.separator,indexes:columns});
+    draft.parsed=parsed;
+    draft.preview=proposeReconciliation(parsed,db,draft.accountId);
+    draft.accountHint=parsed.accountHint||'';
+    Object.assign(draft,{error:'',filter:'all',page:0,decisions:{},review:null,confirmCreation:false,confirmAccount:false,step:'review'});
+   }catch(error){draft.error=error?.message||'Confira o mapeamento do CSV.';}
    redrawBankImport();
   },
   'bank-import-filter':el=>{
@@ -640,7 +661,19 @@ document.addEventListener('change',async e=>{
   if(!(db.accounts||[]).some(a=>a.id===id&&a.active!==false))return;
   draft.accountId=id;
   if(draft.parsed)draft.preview=proposeReconciliation(draft.parsed,db,id);
-  draft.filter='all';draft.page=0;draft.decisions={};draft.review=null;draft.confirmCreation=false;draft.confirmAccount=false;draft.step='review';redrawBankImport();return;
+  draft.filter='all';draft.page=0;draft.decisions={};draft.review=null;draft.confirmCreation=false;draft.confirmAccount=false;draft.step=draft.csvMapping&&!draft.preview?'mapping':'review';redrawBankImport();return;
+ }
+
+ if(el.matches?.('[data-bank-map-field]')){
+  if(draft.step!=='mapping'||!draft.csvMapping)return;
+  const field=el.dataset.bankMapField;
+  if(!['date','description','amount','credit','debit','kind','id','balance'].includes(field))return;
+  draft.csvMapping.columns[field]=el.value===''?-1:Number(el.value);
+  draft.error='';return;
+ }
+ if(el.matches?.('[data-bank-map-mode]')){
+  if(draft.step!=='mapping'||!draft.csvMapping||!['amount','split'].includes(el.value))return;
+  draft.csvMapping.mode=el.value;draft.error='';redrawBankImport();return;
  }
  if(el.matches?.('[data-bank-review-index]')){
   if(!draft.preview||draft.step!=='review')return;
@@ -680,14 +713,23 @@ document.addEventListener('change',async e=>{
  try{
   const contents=await readBankFileText(file);
   if(draft!==bankImportDraft||!modal.open)return;
-  const parsed=parseBankStatement(contents,file.name);
-  const preview=proposeReconciliation(parsed,db,draft.accountId);
-  draft.parsed=parsed;draft.preview=preview;draft.filename=file.name.slice(0,140);
-  draft.accountHint=parsed.accountHint||'';
-  draft.filter='all';draft.page=0;draft.decisions={};draft.review=null;draft.confirmCreation=false;draft.confirmAccount=false;draft.step='review';
+  const isCsv=/\.(csv|txt)$/i.test(file.name);
+  const mapping=isCsv?inspectBankCsv(contents):null;
+  draft.csvSource=isCsv?contents:null;
+  draft.csvMapping=mapping;
+  draft.filename=file.name.slice(0,140);
+  try{
+   const parsed=parseBankStatement(contents,file.name);
+   const preview=proposeReconciliation(parsed,db,draft.accountId);
+   draft.parsed=parsed;draft.preview=preview;draft.accountHint=parsed.accountHint||'';
+   Object.assign(draft,{error:'',filter:'all',page:0,decisions:{},review:null,confirmCreation:false,confirmAccount:false,step:'review'});
+  }catch(parseError){
+   if(!mapping)throw parseError;
+   Object.assign(draft,{parsed:null,preview:null,step:'mapping',error:'Colunas não reconhecidas automaticamente. Selecione as correspondências para conferir o arquivo.'});
+  }
  }catch(error){
   if(draft!==bankImportDraft||!modal.open)return;
-  Object.assign(draft,{parsed:null,preview:null,filename:'',accountHint:'',error:error?.message||'Não foi possível ler o extrato.'});
+  Object.assign(draft,{parsed:null,preview:null,csvSource:null,csvMapping:null,filename:'',accountHint:'',error:error?.message||'Não foi possível ler o extrato.'});
  }
  if(draft===bankImportDraft&&modal.open)redrawBankImport();
 });

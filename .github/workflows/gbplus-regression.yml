@@ -31,6 +31,8 @@ jobs:
         run: node gbplus/tests/finance-regression.mjs
       - name: Leitura OFX e CSV
         run: node gbplus/tests/bank-import-preview-regression.mjs
+      - name: Mapeamento manual de CSV não padronizado
+        run: node gbplus/tests/bank-import-mapping-regression.mjs
       - name: Leitura de extratos em codificações bancárias
         run: node gbplus/tests/bank-import-codec-regression.mjs
       - name: Garantia de bloqueio financeiro na liberação pública
