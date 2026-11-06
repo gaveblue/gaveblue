@@ -1,6 +1,6 @@
 # GB+ 2.5.0 — Protocolo de homologação
 
-**Estado atual:** build 6 **publicada em modo somente leitura**; build 7 em homologação (não publicada); conciliação com gravação ainda bloqueada. Responsável pela homologação integral: **não registrado**. Data de aprovação integral: **não registrada**.
+**Estado atual:** build 7 **publicada em modo somente leitura**, deploy confirmado no [GitHub Pages run 42299501899](https://github.com/gaveblue/gaveblue/actions/runs/42299501899). Conciliação com gravação ainda bloqueada; a homologação integral permanece pendente. Responsável pela homologação integral: **não registrado**. Data de aprovação integral: **não registrada**.
 
 ## Evidências mais recentes da compilação 7
 
@@ -11,7 +11,7 @@ Consultar o relatório verificável em [HOMOLOGACAO-2.5.0-RELATORIO-B7.md](./HOM
 - Importação OFX com `LEDGERBAL` ou CSV com coluna `Saldo` pode exibir **comparação indicativa** com o saldo GB+ na data declarada, sem alterar o saldo inicial; quando o arquivo não informa saldo, a diferença não é inventada.
 - Estrutura de RLS/Supabase e função de gravação conferidas em **modo somente leitura**. Nenhuma baixa ou título de cliente foi acessado ou modificado.
 - O GitHub Actions segue falhando antes de iniciar os testes em `push`, `pull_request`, `ubuntu-latest` e `ubuntu-24.04`; bloqueio rastreado na [issue #75](https://github.com/gaveblue/gaveblue/issues/75).
-- **Permanecem pendentes** os testes do aplicativo real em Android/iOS, a gravação/reversão em ambiente online fictício e a aprovação final. Não liberar gravação por extrato sem essas etapas.
+- **Permanecem pendentes** os testes completos do aplicativo autenticado em Android/iOS, a gravação/reversão em ambiente online fictício e a aprovação final para habilitar escrita. A compilação 7 foi publicada com a trava `BANK_IMPORT_WRITES_ENABLED=false`.
 
 
 
