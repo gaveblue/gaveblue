@@ -1,6 +1,6 @@
 import {parseBankStatement,proposeReconciliation,BANK_IMPORT_MAX_BYTES} from './bank-import-preview.js?v=20261106-2501';
-import {bankImportMarkup,bankImportHistoryMarkup,BANK_IMPORT_PAGE_SIZE} from './bank-import-ui.js?v=20261106-2502';
-import {reviewSelection,applyReconciliationBatch,undoReconciliationBatch} from './bank-reconciliation.js?v=20261106-2502';
+import {bankImportMarkup,bankImportHistoryMarkup,BANK_IMPORT_PAGE_SIZE} from './bank-import-ui.js?v=20261106-2503';
+import {reviewSelection,applyReconciliationBatch,undoReconciliationBatch} from './bank-reconciliation.js?v=20261106-2503';
 import {filterFlowRows} from './gb-flow-filters.js?v=20261106-68';
 import {uid,today,money,dateLabel,cents,addMonths,validDate,generateTitles,addPayment,transfer,updateTitle,pending,flow,within} from './domain.js?v=20261105-72';
 import {KEY,INDICATORS,defaultPanel,parseBackup,backupText,MOBILE_SHORTCUTS,defaultMobileNav,effectiveMobileNav,validMobileNav,shouldOfferSetup} from './store.js?v=20261106-2502';
@@ -73,7 +73,7 @@ function redrawBankImport(){
 function openBankImport(accountId=''){
  const accounts=(db.accounts||[]).filter(a=>a.active!==false);
  const account=accounts.find(a=>a.id===accountId)||accounts[0];
- bankImportDraft={accountId:account?.id||'',parsed:null,preview:null,filename:'',accountHint:'',filter:'all',page:0,error:'',decisions:{},step:'review',review:null};
+ bankImportDraft={accountId:account?.id||'',parsed:null,preview:null,filename:'',accountHint:'',filter:'all',page:0,error:'',decisions:{},step:'review',review:null,confirmCreation:false};
  redrawBankImport();
 }
 // Guided onboarding is opt-in. No financial records are created before final confirmation.
@@ -414,7 +414,7 @@ const actions={
   'bank-import-open':el=>openBankImport(el.dataset.id||''),
   'bank-import-reset':()=>{
    if(!bankImportDraft)return;
-   Object.assign(bankImportDraft,{parsed:null,preview:null,filename:'',accountHint:'',filter:'all',page:0,error:'',decisions:{},step:'review',review:null});
+   Object.assign(bankImportDraft,{parsed:null,preview:null,filename:'',accountHint:'',filter:'all',page:0,error:'',decisions:{},step:'review',review:null,confirmCreation:false});
    redrawBankImport();
   },
   'bank-import-filter':el=>{
@@ -438,22 +438,23 @@ const actions={
    if(!bankImportDraft?.preview)return;
    try{
     bankImportDraft.review=reviewSelection(bankImportDraft.preview,bankImportDraft.decisions,db);
-    bankImportDraft.error='';bankImportDraft.step='confirm';redrawBankImport();
+    bankImportDraft.error='';bankImportDraft.step='confirm';bankImportDraft.confirmCreation=false;redrawBankImport();
    }catch(error){bankImportDraft.error=error.message;redrawBankImport();}
   },
   'bank-import-back':()=>{
    if(!bankImportDraft?.preview)return;
-   bankImportDraft.step='review';bankImportDraft.review=null;redrawBankImport();
+   bankImportDraft.step='review';bankImportDraft.review=null;bankImportDraft.confirmCreation=false;redrawBankImport();
   },
   'bank-import-commit':async ()=>{
    const draft=bankImportDraft;
    if(!draft?.preview||draft.step!=='confirm'||!draft.review)return;
+   if(draft.review.totals.created>0&&!draft.confirmCreation)throw Error('Confirme expressamente a criação dos lançamentos e o impacto nos saldos.');
    const batchId=uid(),accountId=draft.accountId,parsed=draft.parsed;
    const decisions=structuredClone(draft.decisions);
    // Recompute against the current account data in the optimistic revision save.
    await commit(d=>applyReconciliationBatch(d,parsed,accountId,decisions,{
-    propose:proposeReconciliation,batchId,now:new Date().toISOString()
-   }),'Decisões registradas. Nenhum saldo ou lançamento foi alterado.');
+    propose:proposeReconciliation,batchId,now:new Date().toISOString(),today:today(),makeId:uid
+   }),'Importação confirmada. Confira os lançamentos e saldos atualizados.');
   },
   'bank-import-history':el=>openModal('Histórico de conciliações',bankImportHistoryMarkup(db,el.dataset.id)),
   'bank-import-undo':el=>{
@@ -461,8 +462,8 @@ const actions={
    const batch=(db.bankImportBatches||[]).find(b=>b.id===batchId&&b.status==='active');
    if(!batch)throw Error('Lote já revertido ou não encontrado.');
    confirm('Reverter vínculos de conciliação?',
-    'O lote de '+batch.entries.length+' movimentos será marcado como revertido. As baixas e o saldo permanecerão iguais.',
-    ()=>commit(d=>{undoReconciliationBatch(d,batchId);},'Vínculos revertidos; valores financeiros preservados.'));
+    batch.entries.some(e=>e.action==='create')?'O lote tem lançamentos criados. Se estiverem intactos, seus títulos e baixas serão estornados juntos, alterando o saldo. Deseja continuar?':'Os vínculos serão revertidos. As baixas e o saldo permanecerão iguais.',
+    ()=>commit(d=>{undoReconciliationBatch(d,batchId);},'Reversão concluída. Confira os saldos e o histórico.'));
   },
   'new-category':()=>openModal('Nova categoria',categoryForm()),
   'edit-category':el=>openModal('Editar categoria',categoryForm(db.categories.find(c=>c.id===el.dataset.id))),
