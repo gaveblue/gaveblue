@@ -4,6 +4,8 @@ import {esc,icon} from './ui.js?v=20261105-72';
 import {reconciliationRecordKey,knownReconciliationKeys,pendingReconciliationKeys,bankImportHistory} from './bank-reconciliation.js?v=20261106-2505';
 
 export const BANK_IMPORT_PAGE_SIZE=20;
+// Read-only release lock. Turn on only in a separate build with real-browser and storage homologation.
+export const BANK_IMPORT_WRITES_ENABLED=false;
 const statusInfo={
  possible_match:['Possível vínculo','match'],
  ambiguous:['Verificar candidatos','ambiguous'],
@@ -27,7 +29,7 @@ export function bankImportMarkup(db,draft){
   accounts.map(account=>'<option value="'+esc(account.id)+'" '+(account.id===accountId?'selected':'')+'>'+esc(account.name)+'</option>').join('')+'</select>';
  const head='<div id="gb-import-workspace" class="gb-import-workspace">'+
   '<div class="gb-import-intro"><div class="gb-import-symbol">'+icon('wallet')+'</div><div><strong>Conferência de extrato bancário</strong>'+
-  '<p>Compare os movimentos e escolha o que deseja registrar.</p></div></div>'+
+  '<p>Confira os movimentos do extrato, sem alterar o financeiro.</p></div></div>'+
   '<div class="gb-import-step"><span class="gb-import-step-number">01</span><span>Conta bancária</span></div>'+accountSelect;
  if(!draft?.preview){
   return head+
@@ -44,7 +46,7 @@ export function bankImportMarkup(db,draft){
  const saved=knownReconciliationKeys(db,preview.accountId);
  const outstanding=pendingReconciliationKeys(db,preview.accountId);
  const plan=draft.review;
- if(draft.step==='confirm'&&plan){
+ if(BANK_IMPORT_WRITES_ENABLED&&draft.step==='confirm'&&plan){
   return head+
    '<div class="gb-import-step"><span class="gb-import-step-number">02</span><span>Confirmar decisões</span></div>'+
    '<div class="gb-import-review-heading"><h3>Revisão final</h3><p>Você selecionou '+plan.entries.length+' movimento(s). Confira antes de salvar os vínculos e decisões.</p></div>'+
@@ -108,7 +110,7 @@ export function bankImportMarkup(db,draft){
    '<b class="'+(record.amount>0?'gb-import-positive':'gb-import-negative')+'">'+fmtCents(record.amount)+'</b></div>'+
    (record.externalId?'<small class="gb-import-identifier">Identificador: '+esc(record.externalId)+'</small>':'')+
    match+
-   (already?'<p class="gb-import-locked">Movimento presente no histórico desta conta. Não será registrado novamente.</p>':
+   (already?'<p class="gb-import-locked">Movimento presente no histórico desta conta. Não será registrado novamente.</p>':!BANK_IMPORT_WRITES_ENABLED?'':
     '<div class="gb-import-review-controls"><label class="gb-import-decision-label">Decisão do movimento'+
     '<select data-gb-native="true" class="gb-import-select" data-bank-review-index="'+item.index+'" aria-label="Decisão para movimento '+(item.index+1)+'">'+
     actionOptions+'</select></label>'+picker+creation+'</div>')+
@@ -136,8 +138,11 @@ export function bankImportMarkup(db,draft){
   (draft.error?'<p class="gb-import-error" role="alert">'+esc(draft.error)+'</p>':'')+
   '<div class="gb-import-privacy">'+icon('shield')+
    '<p>As sugestões não são aprovadas automaticamente. Criar um lançamento registra imediatamente a receita recebida ou despesa paga, somente após revisão e confirmação explícita.</p></div>'+
-  '<div class="gb-import-footer"><span><strong>'+choiceCount(draft)+'</strong> decisão(ões) selecionada(s)</span>'+
-   '<button type="button" class="button primary" data-action="bank-import-review" '+(choiceCount(draft)?'':'disabled')+'>Revisar decisões</button></div></div>';
+  (BANK_IMPORT_WRITES_ENABLED?
+   '<div class="gb-import-footer"><span><strong>'+choiceCount(draft)+'</strong> decisão(ões) selecionada(s)</span>'+
+   '<button type="button" class="button primary" data-action="bank-import-review" '+(choiceCount(draft)?'':'disabled')+'>Revisar decisões</button></div>':
+   '<div class="gb-import-privacy" role="status">'+icon('shield')+'<p><strong>Liberação segura:</strong> esta versão permite apenas visualizar e comparar o extrato. Conciliar, criar títulos, baixar e reverter por importação permanecem desativados até a homologação.</p></div>'+
+   '<div class="gb-import-footer"><span>Nenhum dado financeiro foi alterado.</span><button type="button" class="button" data-action="bank-import-close">Fechar prévia</button></div>')+'</div>';
 }
 export function bankImportHistoryMarkup(db,accountId){
  const account=db?.accounts?.find(a=>a.id===accountId);
@@ -156,7 +161,7 @@ export function bankImportHistoryMarkup(db,accountId){
    '<span class="gb-import-flag">'+(reverted?'Revertido':'Confirmado')+'</span></div>'+
    '<p>'+b.entries.length+' movimentos · '+linked+' vinculados · '+created+' criados · '+ignored+' ignorados · '+pending+' pendentes · '+resolved+' retomados</p>'+
    (reverted?'<small>Revertido em '+esc(new Date(b.revertedAt).toLocaleDateString('pt-BR'))+'</small>':
-    '<button type="button" class="button" data-action="bank-import-undo" data-id="'+esc(b.id)+'">'+(created?'Reverter lote e lançamentos criados':'Reverter vínculos deste lote')+'</button>')+
+    (BANK_IMPORT_WRITES_ENABLED?'<button type="button" class="button" data-action="bank-import-undo" data-id="'+esc(b.id)+'">'+(created?'Reverter lote e lançamentos criados':'Reverter vínculos deste lote')+'</button>':'<small>Reversão pelo importador indisponível nesta liberação.</small>'))+
    '</section>';
  }).join(''):'<p class="gb-import-no-items">Nenhuma conciliação registrada para esta conta.</p>')+
  '</div>';
