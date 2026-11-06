@@ -1,0 +1,43 @@
+# GB+ 2.4.9 — Saldos por conta e extrato diário
+
+**Código:** versão 2.4.9 · compilação 65 · 05/11/2026.
+**Status:** implementado no GitHub, pendente de publicação e homologação em navegador/aparelho real.
+
+## O que mudou
+
+1. No cartão principal de saldo, uma faixa horizontal mostra os ícones das contas cadastradas. O saldo total permanece inalterado.
+2. Ao tocar no ícone, abre o extrato individual da conta, com o saldo atual.
+3. O extrato agrupa os registros por dia, exibindo saldo no início, créditos, débitos e saldo no fim do dia.
+4. O resumo mostra os totais acumulados de entradas e saídas da conta.
+5. Transferências internas aparecem como débito na origem e crédito no destino.
+
+## Regras de saldo
+
+- Base: saldo inicial cadastrado + baixas efetivamente registradas + transferências internas até a data consultada.
+- Não entram títulos pendentes, compras no cartão ainda não pagas nem previsões.
+- Cada dia com movimentos apresenta abertura, movimentos e fechamento. O dia atual também aparece quando não há movimentos.
+- Créditos e débitos incluem transferências, que não são receita/despesa no fluxo geral.
+- O extrato é calculado sobre os dados existentes, sem alterar registros ou saldos.
+- O esquema anterior não registra a data de abertura do saldo inicial; não se pode afirmar o saldo histórico antes da origem desse valor.
+
+## Implementação
+
+- Novo módulo: js/daily-statement.js.
+- js/views.js: ícones das contas sob o saldo no dashboard e na visão de fluxo.
+- js/forms.js: extrato por dia no modal de movimentações.
+- styles.css: rolagem horizontal e extrato responsivo.
+- version.json, index.html e sw.js: versão 2.4.9, build 65.
+- tests/gbplus-daily-statement.test.cjs: nove testes simulados aprovados.
+
+## Homologação pendente
+
+- [ ] Confirmar publicação no domínio do GB+.
+- [ ] Testar a faixa de ícones no celular e desktop, incluindo várias contas do mesmo banco.
+- [ ] Conferir saldo por conta contra a tela Contas bancárias.
+- [ ] Conferir crédito, débito, transferência, dia sem movimentos, baixa parcial e estorno.
+- [ ] Verificar acessibilidade, modo escuro e modal com muitos dias.
+- [ ] Confirmar isolamento dos registros por usuário e ausência de alterações financeiras.
+
+## Próxima versão
+
+A 2.5.0 implementará a importação manual de extratos e a conciliação bancária com sugestões de lançamentos ausentes, revisão e confirmação explícita. PDF e Excel serão integrados por fases, conforme segurança e confiabilidade do parser. Ver IMPORTACAO-2.5.0.md.
