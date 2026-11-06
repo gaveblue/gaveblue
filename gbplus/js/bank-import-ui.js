@@ -1,7 +1,7 @@
 // GB+ 2.5.0 — import, individual review, explicit confirmation and audit UI.
 import {money,dateLabel} from './domain.js?v=20261105-72';
 import {esc,icon} from './ui.js?v=20261105-72';
-import {reconciliationRecordKey,knownReconciliationKeys,bankImportHistory} from './bank-reconciliation.js?v=20261106-2502';
+import {reconciliationRecordKey,knownReconciliationKeys,pendingReconciliationKeys,bankImportHistory} from './bank-reconciliation.js?v=20261106-2505';
 
 export const BANK_IMPORT_PAGE_SIZE=20;
 const statusInfo={
@@ -42,6 +42,7 @@ export function bankImportMarkup(db,draft){
  }
  const preview=draft.preview,rows=filtered(preview,draft.filter||'all');
  const saved=knownReconciliationKeys(db,preview.accountId);
+ const outstanding=pendingReconciliationKeys(db,preview.accountId);
  const plan=draft.review;
  if(draft.step==='confirm'&&plan){
   return head+
@@ -74,14 +75,16 @@ export function bankImportMarkup(db,draft){
  const cards=visible.map(item=>{
   const record=item.record,info=statusInfo[item.status]||['Revisar','unmatched'];
   const decision=draft.decisions?.[item.index]||{action:'skip',target:''};
-  const already=saved.has(reconciliationRecordKey(record));
+  const key=reconciliationRecordKey(record);
+  const already=saved.has(key),wasPending=outstanding.has(key);
   const candidate=item.candidates[0];
   const match=candidate?'<div class="gb-import-candidate">Sugestão: '+
    esc(candidate.description|| (candidate.type==='transfer'?'Transferência':'Baixa'))+
    ' · '+dateLabel(candidate.date)+' · '+fmtCents(candidate.amount)+
    (item.candidates.length>1?' · '+item.candidates.length+' candidatos':'')+'</div>':'';
   const actionOptions=[['skip','Sem decisão'],['link','Conciliar com registro'],['create','Criar lançamento baixado'],['ignore','Ignorar'],['pending','Manter pendente']]
-    .filter(([key])=>key==='link'?item.candidates.length>0&&item.status!=='possible_duplicate_in_file':key!=='create'||item.status==='not_found')
+    .filter(([action])=>action==='link'?item.candidates.length>0&&item.status!=='possible_duplicate_in_file':
+     action==='create'?item.status==='not_found':action!=='pending'||!wasPending)
     .map(([key,label])=>'<option value="'+key+'" '+(decision.action===key?'selected':'')+'>'+label+'</option>').join('');
   const picker=decision.action==='link'&&!already?
    '<label class="gb-import-decision-label">Baixa ou transferência existente<select data-gb-native="true" class="gb-import-select gb-import-target" data-bank-review-target="'+item.index+'" aria-label="Selecionar movimento para conciliação">'+
@@ -100,7 +103,7 @@ export function bankImportMarkup(db,draft){
    '</div>':'';
   return '<article class="gb-import-row"><div class="gb-import-row-head">'+
    '<time datetime="'+record.date+'">'+dateLabel(record.date)+'</time>'+
-   '<span class="gb-import-flag gb-import-'+(already?'match':info[1])+'">'+(already?'Já registrado':info[0])+'</span></div>'+
+   '<span class="gb-import-flag gb-import-'+(already?'match':wasPending?'ambiguous':info[1])+'">'+(already?'Já registrado':wasPending?'Pendente · retomar':info[0])+'</span></div>'+
    '<div class="gb-import-row-body"><strong>'+esc(record.description)+'</strong>'+
    '<b class="'+(record.amount>0?'gb-import-positive':'gb-import-negative')+'">'+fmtCents(record.amount)+'</b></div>'+
    (record.externalId?'<small class="gb-import-identifier">Identificador: '+esc(record.externalId)+'</small>':'')+
@@ -140,17 +143,18 @@ export function bankImportHistoryMarkup(db,accountId){
  const account=db?.accounts?.find(a=>a.id===accountId);
  if(!account)return '<p class="muted">Conta não localizada.</p>';
  const batches=bankImportHistory(db,accountId);
- return '<div class="gb-import-history"><p class="gb-import-hint">Histórico de '+esc(account.name)+'. Reverter vínculos não altera saldos; lotes com lançamentos criados podem estornar seus títulos e baixas apenas se permanecerem intactos.</p>'+
+ return '<div class="gb-import-history"><p class="gb-import-hint">Histórico de '+esc(account.name)+'. Para retomar pendências, importe novamente o extrato e escolha outra decisão. Reverter vínculos não altera saldos; lotes com lançamentos criados podem estornar seus títulos e baixas apenas se permanecerem intactos.</p>'+
  (batches.length?batches.map(b=>{
   const linked=b.entries.filter(e=>e.action==='link').length;
   const ignored=b.entries.filter(e=>e.action==='ignore').length;
-  const pending=b.entries.filter(e=>e.action==='pending').length;
+  const pending=b.entries.filter(e=>e.action==='pending'&&!e.resolvedByBatchId).length;
+  const resolved=b.entries.filter(e=>e.action==='pending'&&e.resolvedByBatchId).length;
   const created=b.entries.filter(e=>e.action==='create').length;
   const reverted=b.status==='reverted';
   return '<section class="gb-import-history-row"><div class="gb-import-row-head"><strong>'+
    esc(new Date(b.createdAt).toLocaleDateString('pt-BR'))+' · '+esc(b.format.toUpperCase())+'</strong>'+
    '<span class="gb-import-flag">'+(reverted?'Revertido':'Confirmado')+'</span></div>'+
-   '<p>'+b.entries.length+' movimentos · '+linked+' vinculados · '+created+' criados · '+ignored+' ignorados · '+pending+' pendentes</p>'+
+   '<p>'+b.entries.length+' movimentos · '+linked+' vinculados · '+created+' criados · '+ignored+' ignorados · '+pending+' pendentes · '+resolved+' retomados</p>'+
    (reverted?'<small>Revertido em '+esc(new Date(b.revertedAt).toLocaleDateString('pt-BR'))+'</small>':
     '<button type="button" class="button" data-action="bank-import-undo" data-id="'+esc(b.id)+'">'+(created?'Reverter lote e lançamentos criados':'Reverter vínculos deste lote')+'</button>')+
    '</section>';
