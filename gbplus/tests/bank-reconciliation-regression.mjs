@@ -82,4 +82,4 @@ const afterUndo=structuredClone(database);
 afterUndo.payments=[];
 assert.equal(store.validateDatabase(afterUndo),afterUndo,'Financial payment reversal must not be blocked by history');
 assert.equal(JSON.stringify({titles:database.titles,payments:database.payments,transfers:database.transfers,accounts:database.accounts}),before);
-console.log('GB+ 2.5.0 build 2: 24 checks for review, audit, duplicate prevention and reversal passed.');
+console.log('GB+ 2.5.0 build 2: checks for review, audit, duplicate prevention and reversal passed.');
