@@ -12,7 +12,7 @@ const load=(name,deps,exports)=>{
 };
 const parser=load('bank-import-preview',{},['parseBankStatement','parseBankCsv','parseBankOfx','proposeReconciliation','BANK_IMPORT_MAX_ROWS','statementCents']);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const reconciliation=load('bank-reconciliation',{},['reconciliationRecordKey','knownReconciliationKeys','bankImportHistory']);
+const reconciliation=load('bank-reconciliation',{},['reconciliationRecordKey','knownReconciliationKeys','pendingReconciliationKeys','bankImportHistory']);
 const ui=load('bank-import-ui',{money:cents=>'R$ '+(cents/100).toFixed(2),dateLabel:x=>x,esc,icon:()=>'◇',...reconciliation},['bankImportMarkup','BANK_IMPORT_PAGE_SIZE']);
 assert.equal(parser.statementCents('1.234,56'),123456);
 assert.equal(parser.statementCents('-12.34'),-1234);
