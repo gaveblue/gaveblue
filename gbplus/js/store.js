@@ -116,12 +116,15 @@ function validateReconciliationHistory(db){
    if(row.targetType==='payment'){
     const payment=db.payments.find(p=>p.id===row.targetId);
     const title=db.titles.find(t=>t.id===payment?.titleId);
-    assert(payment&&payment.accountId===b.accountId&&title&&!title.cancelled&&
+    // A baixa pode ter sido estornada depois de conciliar. O vínculo permanece
+    // como evidência histórica, mas não pode impedir a rotina de estorno.
+    if(payment&&title)assert(payment.accountId===b.accountId&&
      row.amount===(title.type==='income'?payment.amount:-payment.amount),'baixa da conta importada.');
    }else{
     const transfer=db.transfers.find(t=>t.id===row.targetId);
-    assert(transfer&&(transfer.from===b.accountId&&row.amount===-transfer.amount||
-     transfer.to===b.accountId&&row.amount===transfer.amount),'transferência da conta importada.');
+    // Transferências também podem ser estornadas por suas próprias rotinas.
+    if(transfer)assert(transfer.from===b.accountId&&row.amount===-transfer.amount||
+     transfer.to===b.accountId&&row.amount===transfer.amount,'transferência da conta importada.');
    }
   }
  }
