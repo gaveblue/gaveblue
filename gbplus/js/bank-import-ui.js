@@ -62,7 +62,7 @@ export function bankImportMarkup(db,draft){
  }).join('');
  return head+
   '<div class="gb-import-step"><span class="gb-import-step-number">02</span><span>Prévia da leitura</span></div>'+
-  '<div class="gb-import-file"><span>'+icon('file-text')+' <strong>'+esc(draft.filename||'Extrato selecionado')+'</strong> · '+esc(preview.format.toUpperCase())+'</span>'+
+  '<div class="gb-import-file"><span>'+icon('titles')+' <strong>'+esc(draft.filename||'Extrato selecionado')+'</strong> · '+esc(preview.format.toUpperCase())+'</span>'+
    '<button type="button" class="gb-import-text-button" data-action="bank-import-reset">Trocar arquivo</button></div>'+
   (draft.accountHint?'<p class="gb-import-hint">Conta indicada pelo arquivo (oculta): '+esc(draft.accountHint)+'</p>':'')+
   '<div class="gb-import-summary-grid" aria-label="Resumo do extrato">'+
