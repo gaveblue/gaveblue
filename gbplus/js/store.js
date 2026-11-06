@@ -82,9 +82,9 @@ function validateReconciliationHistory(db){
  for(const b of batches){
   assert(b&&entityId(b.id)&&!batchIds.has(b.id)&&
    db.accounts.some(a=>a.id===b.accountId)&&['ofx','csv'].includes(b.format)&&
-   typeof b.createdAt==='string'&&/^\\d{4}-\\d{2}-\\d{2}T/.test(b.createdAt)&&
+   typeof b.createdAt==='string'&&/^\d{4}-\d{2}-\d{2}T/.test(b.createdAt)&&
    ['active','reverted'].includes(b.status)&&
-   (b.status==='active'||typeof b.revertedAt==='string'&&/^\\d{4}-\\d{2}-\\d{2}T/.test(b.revertedAt))&&
+   (b.status==='active'||typeof b.revertedAt==='string'&&/^\d{4}-\d{2}-\d{2}T/.test(b.revertedAt))&&
    Array.isArray(b.entries)&&b.entries.length>0&&b.entries.length<=200,'lote de conciliação.');
   batchIds.add(b.id);total+=b.entries.length;
   const keysThisBatch=new Set(),targetsThisBatch=new Set();
