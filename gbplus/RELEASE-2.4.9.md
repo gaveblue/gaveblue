@@ -1,11 +1,11 @@
 # GB+ 2.4.9 — Saldos por conta e extrato diário
 
-**Código:** versão 2.4.9 · compilação 65 · 05/11/2026.
+**Código:** versão 2.4.9 · compilação 66 · 06/11/2026.
 **Status:** implementado no GitHub, pendente de publicação e homologação em navegador/aparelho real.
 
 ## O que mudou
 
-1. No cartão principal de saldo, uma faixa horizontal mostra os ícones das contas cadastradas. O saldo total permanece inalterado.
+1. No cartão principal de saldo, uma faixa horizontal mostra os ícones, os nomes e os saldos das contas cadastradas. O saldo total consolidado permanece em destaque e sua composição não foi alterada.
 2. Ao tocar no ícone, abre o extrato individual da conta, com o saldo atual.
 3. O extrato agrupa os registros por dia, exibindo saldo no início, créditos, débitos e saldo no fim do dia.
 4. O resumo mostra os totais acumulados de entradas e saídas da conta.
@@ -26,8 +26,8 @@
 - js/views.js: ícones das contas sob o saldo no dashboard e na visão de fluxo.
 - js/forms.js: extrato por dia no modal de movimentações.
 - styles.css: rolagem horizontal e extrato responsivo.
-- version.json, index.html e sw.js: versão 2.4.9, build 65.
-- tests/gbplus-daily-statement.test.cjs: nove testes simulados aprovados.
+- version.json, index.html e sw.js: versão 2.4.9, build 66.
+- tests/gbplus-daily-statement.test.cjs: onze testes simulados aprovados.
 
 ## Homologação pendente
 
@@ -41,3 +41,11 @@
 ## Próxima versão
 
 A 2.5.0 implementará a importação manual de extratos e a conciliação bancária com sugestões de lançamentos ausentes, revisão e confirmação explícita. PDF e Excel serão integrados por fases, conforme segurança e confiabilidade do parser. Ver IMPORTACAO-2.5.0.md.
+
+## Compilação 66
+
+- Cartão preto: saldo geral consolidado acima dos cartões das contas.
+- Cada conta ativa exibe símbolo do banco, nome e saldo individual em reais.
+- Rolagem horizontal para várias contas, sem transformar a interface em uma lista extensa.
+- Os valores são calculados com a mesma função de saldo usada na tela de contas.
+- Cache do PWA atualizado e 11 testes específicos simulados aprovados.
