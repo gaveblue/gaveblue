@@ -7,7 +7,8 @@ import {fileURLToPath} from 'node:url';
 const here=dirname(fileURLToPath(import.meta.url));
 const source=name=>readFileSync(resolve(here,'../js/'+name+'.js'),'utf8');
 const load=(name,deps,names)=>{
- const js=source(name).replace(/^import[^\n]*\n/gm,'').replace(/^export /gm,'');
+ const js=source(name).replace(/^import[^\n]*\n/gm,'').replace(/^export /gm,'')
+  .replace('const BANK_IMPORT_WRITES_ENABLED=false','const BANK_IMPORT_WRITES_ENABLED=true');
  return Function(...Object.keys(deps),js+';return {'+names.join(',')+'}')( ...Object.values(deps) );
 };
 const recon=load('bank-reconciliation',{},['reconciliationRecordKey','knownReconciliationKeys','pendingReconciliationKeys','reviewSelection','applyReconciliationBatch','undoReconciliationBatch','bankImportHistory']);
