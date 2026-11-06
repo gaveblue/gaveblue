@@ -4,8 +4,8 @@ import {esc,icon} from './ui.js?v=20261105-72';
 import {reconciliationRecordKey,knownReconciliationKeys,pendingReconciliationKeys,bankImportHistory} from './bank-reconciliation.js?v=20261106-2505';
 
 export const BANK_IMPORT_PAGE_SIZE=20;
-// Read-only release lock. Turn on only in a separate build with real-browser and storage homologation.
-export const BANK_IMPORT_WRITES_ENABLED=false;
+// Assited reconciliation: account and any new payments require two explicit confirmations.
+export const BANK_IMPORT_WRITES_ENABLED=true;
 const statusInfo={
  possible_match:['Possível vínculo','match'],
  ambiguous:['Verificar candidatos','ambiguous'],
