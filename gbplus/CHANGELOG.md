@@ -4,7 +4,7 @@ Registro de mudanças do aplicativo localizado em `gbplus/`. Toda versão e toda
 
 ## [2.5.0 · compilação 7 — HOMOLOGAÇÃO DE SALDOS E REGRESSÕES] — 2026-11-06
 
-**Situação:** em desenvolvimento no ramo `feature/gbplus-250-build7-homologacao`, **não publicada, não homologada integralmente**. Versão pública continua **2.5.0 build 6 somente leitura**.
+**Publicação confirmada:** compilação 7 implantada em GitHub Pages no run [42299501899](https://github.com/gaveblue/gaveblue/actions/runs/42299501899) em 06/11/2026 (commit `f42b6e6e94fdd7912efff859cb42a45b3a378e8c`). **Liberada exclusivamente em modo somente leitura. Homologação integral da conciliação com gravação ainda pendente.**
 
 ### Alterações
 - Adicionada leitura opcional do saldo final **realmente informado** no OFX (`LEDGERBAL/BALAMT/DTASOF`) e na coluna de saldo do CSV, quando presente.
@@ -30,6 +30,8 @@ Registro de mudanças do aplicativo localizado em `gbplus/`. Toda versão e toda
 - Falta registrar aprovação funcional/revisor/data para habilitar escrita financeira. `BANK_IMPORT_WRITES_ENABLED=false` permanece obrigatório.
 
 **Relatório detalhado:** [HOMOLOGACAO-2.5.0-RELATORIO-B7.md](HOMOLOGACAO-2.5.0-RELATORIO-B7.md).
+
+**Verificação pós-merge:** versão 2.5.0 build 7 na `main`, interface com `BANK_IMPORT_WRITES_ENABLED=false` preservada; a implantação oficial concluiu com `success`. Não foram feitos ajustes de dados financeiros reais.
 
 ## [2.5.0 · compilação 6 — LIBERAÇÃO CONTROLADA SOMENTE LEITURA] — 2026-11-06
 
