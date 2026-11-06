@@ -12,7 +12,8 @@ const load=(name,deps,exports)=>{
 };
 const parser=load('bank-import-preview',{},['parseBankStatement','parseBankCsv','parseBankOfx','proposeReconciliation','BANK_IMPORT_MAX_ROWS','statementCents']);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const ui=load('bank-import-ui',{money:cents=>'R$ '+(cents/100).toFixed(2),dateLabel:x=>x,esc,icon:()=>'◇'},['bankImportMarkup','BANK_IMPORT_PAGE_SIZE']);
+const reconciliation=load('bank-reconciliation',{},['reconciliationRecordKey','knownReconciliationKeys','bankImportHistory']);
+const ui=load('bank-import-ui',{money:cents=>'R$ '+(cents/100).toFixed(2),dateLabel:x=>x,esc,icon:()=>'◇',...reconciliation},['bankImportMarkup','BANK_IMPORT_PAGE_SIZE']);
 assert.equal(parser.statementCents('1.234,56'),123456);
 assert.equal(parser.statementCents('-12.34'),-1234);
 const csv='Data;Histórico;Valor;Tipo;Identificador\n06/11/2026;"Pix recebido";"15,63";Crédito;PIX-1\n06/11/2026;Tarifa;"5,00";Débito;T-2';
@@ -43,7 +44,7 @@ const repeat=parser.parseBankCsv('Data;Descrição;Valor\n06/11/2026;Tarifa;-5,0
 assert.equal(parser.proposeReconciliation(repeat,db,'bank-a').rows[1].status,'possible_duplicate_in_file');
 const initial=ui.bankImportMarkup(db,{accountId:'bank-a',preview:null,error:''});
 assert(initial.includes('id="gb-import-file"'));
-assert(initial.includes('Somente visualização'),'Import must be read-only');
+assert(initial.includes('Nenhum lançamento, baixa ou saldo será alterado'),'Import must be read-only');
 const after=ui.bankImportMarkup(db,{accountId:'bank-a',preview,filename:'&<script>.csv',filter:'all',page:0});
 assert(after.includes('Possível vínculo'));
 assert(after.includes('&amp;&lt;script&gt;.csv'));
