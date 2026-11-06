@@ -33,3 +33,5 @@ jobs:
         run: node gbplus/tests/bank-reconciliation-create-regression.mjs
       - name: Pendências retomáveis e reversão encadeada
         run: node gbplus/tests/bank-reconciliation-pending-regression.mjs
+      - name: Persistência local, concorrência e rollback de saldo
+        run: node gbplus/tests/bank-reconciliation-storage-regression.mjs
