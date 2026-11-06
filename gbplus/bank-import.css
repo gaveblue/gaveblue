@@ -104,3 +104,8 @@
  .gb-import-confirm-row{grid-template-columns:minmax(0,1fr)}
  .gb-import-confirm-row b{justify-self:end}
 }
+
+/* Preserve compact account-card actions with three controls on narrow screens. */
+.account-card .partner-bottom{display:flex;align-items:center;flex-wrap:wrap;gap:7px}
+.account-card .partner-bottom>.button{max-width:100%;white-space:normal;font-size:10px;text-align:center}
+.account-card .partner-bottom>.icon-button{margin-left:auto}
