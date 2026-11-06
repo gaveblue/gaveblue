@@ -1,5 +1,5 @@
 import {parseBankStatement,proposeReconciliation,readBankFileText} from './bank-import-preview.js?v=20261106-2504';
-import {bankImportMarkup,bankImportHistoryMarkup,BANK_IMPORT_PAGE_SIZE} from './bank-import-ui.js?v=20261106-2505';
+import {bankImportMarkup,bankImportHistoryMarkup,BANK_IMPORT_PAGE_SIZE,BANK_IMPORT_WRITES_ENABLED} from './bank-import-ui.js?v=20261106-2506';
 import {reviewSelection,applyReconciliationBatch,undoReconciliationBatch} from './bank-reconciliation.js?v=20261106-2505';
 import {filterFlowRows} from './gb-flow-filters.js?v=20261106-68';
 import {uid,today,money,dateLabel,cents,addMonths,validDate,generateTitles,addPayment,transfer,updateTitle,pending,flow,within} from './domain.js?v=20261105-72';
@@ -435,6 +435,7 @@ const actions={
   },
   'bank-import-close':()=>closeModal(),
   'bank-import-review':()=>{
+   if(!BANK_IMPORT_WRITES_ENABLED)return;
    if(!bankImportDraft?.preview)return;
    try{
     bankImportDraft.review=reviewSelection(bankImportDraft.preview,bankImportDraft.decisions,db,{today:today()});
@@ -446,6 +447,7 @@ const actions={
    bankImportDraft.step='review';bankImportDraft.review=null;bankImportDraft.confirmCreation=false;redrawBankImport();
   },
   'bank-import-commit':async ()=>{
+   if(!BANK_IMPORT_WRITES_ENABLED)throw Error('A conciliação com gravação está bloqueada nesta versão de prévia.');
    const draft=bankImportDraft;
    if(!draft?.preview||draft.step!=='confirm'||!draft.review)return;
    if(draft.review.totals.created>0&&!draft.confirmCreation)throw Error('Confirme expressamente a criação dos lançamentos e o impacto nos saldos.');
@@ -458,6 +460,7 @@ const actions={
   },
   'bank-import-history':el=>openModal('Histórico de conciliações',bankImportHistoryMarkup(db,el.dataset.id)),
   'bank-import-undo':el=>{
+   if(!BANK_IMPORT_WRITES_ENABLED)throw Error('A reversão por importação está bloqueada nesta versão de prévia.');
    const batchId=el.dataset.id;
    const batch=(db.bankImportBatches||[]).find(b=>b.id===batchId&&b.status==='active');
    if(!batch)throw Error('Lote já revertido ou não encontrado.');
