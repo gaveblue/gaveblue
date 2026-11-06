@@ -58,3 +58,23 @@ test('daily statement is available from the account detail modal and dashboard a
  assert.match(views,/data-action="account-detail"/);
  assert.match(views,/balanceAccountStrip\(db\)/);
 });
+
+test('dashboard balance keeps total while each account shows logo, name and balance',()=>{
+ const views=fs.readFileSync(path.join(__dirname,'../gbplus/js/views.js'),'utf8');
+ assert.match(views,/stat\('balance',m\.balance/);
+ assert.match(views,/bankBadge\(bankForAccount\(db,a\)\)/);
+ assert.match(views,/gb-balance-bank-amount/);
+ assert.match(views,/money\(balance\)/);
+ assert.match(views,/data-action="account-detail"/);
+});
+test('build 66 invalidates cached UI and includes updated per-account styling',()=>{
+ const version=JSON.parse(fs.readFileSync(path.join(__dirname,'../gbplus/version.json'),'utf8'));
+ const html=fs.readFileSync(path.join(__dirname,'../gbplus/index.html'),'utf8');
+ const sw=fs.readFileSync(path.join(__dirname,'../gbplus/sw.js'),'utf8');
+ const css=fs.readFileSync(path.join(__dirname,'../gbplus/styles.css'),'utf8');
+ assert.equal(version.version,'2.4.9');assert.equal(version.build,66);
+ assert.match(html,/gbplus-build" content="66"/);
+ assert.match(html,/styles\.css\?v=20261106-91/);
+ assert.match(sw,/gb-plus-shell-v66/);
+ assert.match(css,/\.gb-balance-bank-amount/);
+});
