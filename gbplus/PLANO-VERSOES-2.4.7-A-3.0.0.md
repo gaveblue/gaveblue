@@ -8,7 +8,7 @@
 |---|---|---|---|
 | **2.4.7** | Central de atualizações | Novidades ilustradas por cartões com ícones, títulos e descrições; mostrar todas as melhorias; manter download e reinício com confirmação; corrigir validação de pacotes com mais de 80 assets | Publicar versão e conferir painel no Android/PWA, notas e download real sem perder dados |
 | **2.4.8** | GB+ AI: prévia visual e anexos | Prévia do lançamento integrada ao chat, vencimentos, edição antes de gravar e anexo OFX/CSV para leitura local. PDF e Excel ainda aguardam parser. | Validar no celular, conferir edição por comando e confirmar que nenhum arquivo cria lançamentos |
-| **2.4.9** | Saldos por conta e extrato diário | Ícones das contas no cartão de saldo; extrato por dia com abertura, créditos, débitos, fechamento e acumulados. Sem importação nem alteração de saldos. | Homologar no celular e conferir cálculos com baixas e transferências reais anonimizadas |
+| **2.4.9** | Saldos por conta e extrato diário | Ícones, nomes e saldos individuais abaixo do total; extrato por dia com abertura, créditos, débitos, fechamento e acumulados. Sem importação nem alteração de saldos. | Homologar no celular e conferir cálculos com baixas e transferências reais anonimizadas |
 | **2.5.0** | Importação e conciliação bancária | Interface de selecionar conta, importar OFX/CSV, visualizar movimentos, comparar com baixas/transferências, aprovar conciliação ou criação de títulos e conferir divergências | Testes ponta a ponta de autorização, RLS, idempotência/reimportação, reversão e ausência de dupla contabilização |
 | **3.0.0** | **GB+ com IA financeira** | Assistente em linguagem natural para consultar e analisar dados, sugerir e preparar lançamentos; execução somente após prévia e confirmação do usuário | Política de segurança, permissões, histórico de ações, isolamento de dados, custo e testes de comandos reais |
 
@@ -41,7 +41,7 @@ A expressão “lançamentos automáticos” foi esclarecida: trata-se de **cria
 
 ## 2.4.9 — Saldos por conta e extrato diário (implementado no GitHub)
 
-- [x] Ícones das contas no rodapé do cartão de saldo, com rolagem horizontal e acesso direto ao extrato.
+- [x] Ícones das contas no rodapé do cartão de saldo, com rolagem horizontal e acesso direto ao extrato. Na compilação 66, cada ícone acompanha o nome e o saldo individual da conta, mantendo o total consolidado no alto.
 - [x] Preservar o saldo total do dashboard, sem mudar sua composição.
 - [x] Extrato individual por dia: saldo de abertura, movimentações, créditos, débitos e saldo de fechamento.
 - [x] Acumulados de créditos e débitos por conta, considerando baixas e transferências.
@@ -49,8 +49,8 @@ A expressão “lançamentos automáticos” foi esclarecida: trata-se de **cria
 - [x] Transferências entram com sinais opostos nas contas de origem e destino, sem criar receita ou despesa.
 - [x] Não incluir títulos pendentes, compras no cartão não baixadas nem lançamentos futuros no saldo realizado.
 - [x] Visualização somente leitura, sem mutações de dados.
-- [x] Manifesto 2.4.9 / build 65 e cache do PWA atualizados.
-- [x] Nove testes específicos do extrato diário.
+- [x] Manifesto 2.4.9 / build 66 e cache do PWA atualizados.
+- [x] Onze testes específicos do extrato diário e do saldo por conta.
 - [ ] Homologar em aparelho real o card, a rolagem e o modal com contas de diferentes bancos.
 - [ ] Conferir extratos reais anonimizados e equivalência do saldo com o módulo Contas.
 
