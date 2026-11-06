@@ -64,6 +64,12 @@ const pending=clone(db);
 pending.titles.push({type:'income',amount:5000,due:'2026-11-06',cancelled:false,description:'Pix cliente',accountId:'a'});
 assert.equal(reconciler.potentialExistingTitle(pending,'a',preview.rows[0].record),true);
 assert.throws(()=>reconciler.reviewSelection(preview,choices,pending,{today:'2026-11-06'}),'Potential duplicate title must be reviewed');
+const partial=clone(db);
+partial.titles.push({id:'old-pending',type:'income',amount:10000,due:'2026-11-06',cancelled:false,description:'Pix cliente',accountId:'a'});
+partial.payments.push({id:'partial-payment',titleId:'old-pending',accountId:'a',amount:5000,date:'2026-11-06'});
+assert.equal(reconciler.potentialExistingTitle(partial,'a',preview.rows[0].record),true,'Do not duplicate remaining amount of a partially paid title');
+assert.throws(()=>reconciler.reviewSelection(preview,choices,partial,{today:'2026-11-06'}));
+
 const before=JSON.stringify({accounts:db.accounts,titles:db.titles,payments:db.payments,transfers:db.transfers});
 let sequence=0;
 const saved=reconciler.applyReconciliationBatch(db,parsed,'a',choices,{
