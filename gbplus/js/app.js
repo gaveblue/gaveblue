@@ -670,7 +670,7 @@ document.addEventListener('change',async e=>{
  if(!file)return;
  draft.error='';
  try{
-  if(!/\\.(ofx|csv|txt)$/i.test(file.name))throw Error('Selecione um arquivo OFX ou CSV.');
+  if(!/\.(ofx|csv|txt)$/i.test(file.name))throw Error('Selecione um arquivo OFX ou CSV.');
   if(file.size<1||file.size>BANK_IMPORT_MAX_BYTES)throw Error('O arquivo precisa ter até 8 MB e não pode estar vazio.');
   const contents=await file.text();
   if(draft!==bankImportDraft||!modal.open)return;
