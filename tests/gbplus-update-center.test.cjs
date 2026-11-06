@@ -13,7 +13,7 @@ function isolatedUpdate(){
  const document={
   currentScript:{src:'https://gaveblue.com.br/gbplus/js/update.js'},
   readyState:'loading',
-  querySelector:selector=>({content:selector.includes('gbplus-build')?'63':'2.4.8'}),
+  querySelector:selector=>({content:selector.includes('gbplus-build')?'66':'2.4.9'}),
   addEventListener(){},
   createElement(tag){return new Element(tag);}
  };
@@ -38,7 +38,8 @@ test('structured highlighted release notes retain each title, description and ic
  assert.ok(highlights.every((item,i)=>item.title===version.highlights[i].title));
  assert.ok(highlights.every(x=>x.description.length>0));
  assert.ok(highlights.some(x=>x.icon==='file'));
- assert.ok(highlights.some(x=>x.icon==='card'));
+ assert.ok(highlights.some(x=>x.icon==='bank'));
+ assert.ok(highlights.some(x=>x.icon==='wallet'));
 });
 test('legacy plain-text notes still work; no more first-three truncation',()=>{
  const core=isolatedUpdate();
@@ -69,13 +70,13 @@ test('code preserves manual update check, download, progress and explicit restar
  assert.match(source,/location\.assign\(destination\.href\)/);
 });
 
-test('app detects build 64 even when semantic version remains 2.4.8',()=>{
+test('app detects build 67 even when semantic version remains 2.4.9',()=>{
  const core=isolatedUpdate();
- assert.ok(core.newerThanInstalled({version:'2.4.8',build:64}));
- assert.equal(core.compareRelease({version:'2.4.8',build:64},'2.4.8',63),1);
- assert.equal(core.compareRelease({version:'2.4.8',build:63},'2.4.8',63),0);
- assert.equal(core.compareRelease({version:'2.4.7',build:999},'2.4.8',63)<0,true);
- assert.equal(core.releaseId({version:'2.4.8',build:64}),'2.4.8:64');
+ assert.ok(core.newerThanInstalled({version:'2.4.9',build:67}));
+ assert.equal(core.compareRelease({version:'2.4.9',build:67},'2.4.9',66),1);
+ assert.equal(core.compareRelease({version:'2.4.9',build:66},'2.4.9',66),0);
+ assert.equal(core.compareRelease({version:'2.4.8',build:999},'2.4.9',66)<0,true);
+ assert.equal(core.releaseId({version:'2.4.9',build:67}),'2.4.9:67');
 });
 
 test('user-facing release notes omit internal bank catalog counts and developer codes',()=>{
