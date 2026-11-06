@@ -22,6 +22,16 @@ A segunda compilação, no mesmo ramo de desenvolvimento, acrescenta revisão in
 - A criação de lançamentos ausentes, eventual tabela dedicada de auditoria e comparação de saldos históricos continuam etapas futuras; não antecipar essas operações sem testes e critérios de aceitação.
 - Homologação em dispositivo real e testes de concorrência persistem pendentes. O build 2 ainda não foi publicado.
 
+## Continuação em 06/11/2026 — compilação 3
+
+A compilação 3 permite selecionar a decisão **Criar lançamento baixado** para um movimento importado ainda não localizado, com categoria e descrição obrigatórias. A confirmação do lote exibe o impacto no saldo e exige concordância expressa. O GB+ grava **um título único e a respectiva baixa** na conta indicada, na data do movimento e pelo valor exato em centavos. É diferente de simplesmente vincular uma baixa existente: a criação altera o saldo.
+
+Restrições: somente movimentações não localizadas, sem duplicidade no arquivo nem título aberto semelhante; data de baixa não futura; categoria do mesmo tipo do lançamento; limite de 50 criações por lote. O resumo final e a caixa de confirmação são obrigatórios. Os arquivos brutos continuam locais; apenas os metadados aprovados ficam persistidos no documento do próprio usuário. A gravação é transacional pelo adaptador financeiro de revisão existente; nenhuma mudança de tabela SQL foi feita.
+
+A reversão do lote pode excluir exclusivamente os títulos e as baixas **criados por ele**, se permanecerem intactos e não tiverem vínculos posteriores; o histórico continua auditável. Se o usuário editar algum lançamento após a criação, o sistema recusa a reversão automática para evitar perdas e requer revisão manual.
+
+**Estado:** código da compilação 3 implementado no PR #73; verificações lógicas simuladas concluídas, mas testes reais em PWA, arquivos de bancos e integração com armazenamento online continuam pendentes. **Não confundir implementação com homologação ou publicação**.
+
 ## Objetivo
 
 Conciliar o movimento registrado nos bancos com as baixas, títulos e transferências já existentes no GB+, exibindo diferenças de forma auditável. Uma importação jamais deve presumir que todo débito é uma nova despesa nem que toda entrada é receita.
