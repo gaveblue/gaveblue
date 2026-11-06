@@ -21,6 +21,7 @@ const ui=load('bank-import-ui',{
  money:n=> 'R$ '+(n/100).toFixed(2),dateLabel:x=>x,esc,icon:()=>'<svg></svg>',
  reconciliationRecordKey:recon.reconciliationRecordKey,
  knownReconciliationKeys:recon.knownReconciliationKeys,
+ pendingReconciliationKeys:recon.pendingReconciliationKeys,
  bankImportHistory:recon.bankImportHistory
 },['bankImportMarkup','bankImportHistoryMarkup']);
 const database={
