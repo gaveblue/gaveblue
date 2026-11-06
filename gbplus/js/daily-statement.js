@@ -34,5 +34,9 @@ export function dailyStatement(db,accountId,until){
   day.closing=balance;
   day.items.push(event);
  }
- return {accountId,opening:account.initial,closing:balance,credits,debits,days:days.reverse()};
+ // The current day always has a visible opening and closing balance, even
+ // when no payment or transfer has been recorded today.
+ if(!days.some(d=>d.date===until))days.push({date:until,opening:balance,credits:0,debits:0,closing:balance,items:[]});
+ days.sort((a,b)=>b.date.localeCompare(a.date));
+ return {accountId,opening:account.initial,closing:balance,credits,debits,days};
 }
