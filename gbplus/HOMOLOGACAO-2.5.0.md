@@ -1,6 +1,10 @@
 # GB+ 2.5.0 — Protocolo de homologação
 
-**Estado atual:** build 7 **publicada em modo somente leitura**, deploy confirmado no [GitHub Pages run 42299501899](https://github.com/gaveblue/gaveblue/actions/runs/42299501899). Conciliação com gravação ainda bloqueada; a homologação integral permanece pendente. Responsável pela homologação integral: **não registrado**. Data de aprovação integral: **não registrada**.
+**Estado durante a preparação da build 8:** build 7 pública somente leitura; build 8 contém conciliação assistida com confirmação dupla, testada em Node real e por transação SQL fictícia revertida, aguardando merge/deploy. A homologação integral em Android/iPhone e o workflow CI verde ainda não foram comprovados.
+
+**Evidências de fechamento do núcleo:** [HOMOLOGACAO-2.5.0-RELATORIO-B8.md](./HOMOLOGACAO-2.5.0-RELATORIO-B8.md).
+
+**Decisão de escopo:** as fases complementares de mapeamento CSV manual, XLSX e PDF não foram cumpridas e ficam registradas para versão posterior. A build 8 entrega OFX/CSV assistidos; não chamar as outras fases de concluídas. Responsável pela homologação integral: **não registrado**. Data de aprovação integral: **não registrada**.
 
 ## Evidências mais recentes da compilação 7
 
@@ -11,7 +15,7 @@ Consultar o relatório verificável em [HOMOLOGACAO-2.5.0-RELATORIO-B7.md](./HOM
 - Importação OFX com `LEDGERBAL` ou CSV com coluna `Saldo` pode exibir **comparação indicativa** com o saldo GB+ na data declarada, sem alterar o saldo inicial; quando o arquivo não informa saldo, a diferença não é inventada.
 - Estrutura de RLS/Supabase e função de gravação conferidas em **modo somente leitura**. Nenhuma baixa ou título de cliente foi acessado ou modificado.
 - O GitHub Actions segue falhando antes de iniciar os testes em `push`, `pull_request`, `ubuntu-latest` e `ubuntu-24.04`; bloqueio rastreado na [issue #75](https://github.com/gaveblue/gaveblue/issues/75).
-- **Permanecem pendentes** os testes completos do aplicativo autenticado em Android/iOS, a gravação/reversão em ambiente online fictício e a aprovação final para habilitar escrita. A compilação 7 foi publicada com a trava `BANK_IMPORT_WRITES_ENABLED=false`.
+- **Evidência adicional da build 8:** circuito financeiro aprovado em 10 suítes Node, teste do caminho SQL de gravação com usuário e documento fictícios revertidos, confirmação de conta para qualquer lote e confirmação adicional de criação com baixa. O fluxo web autenticado real e o PWA instalado **não** foram testados ponta a ponta; GitHub Actions segue bloqueado. Consulte o relatório B8.
 
 
 
