@@ -1,5 +1,16 @@
 # CHANGELOG — GB+ Gestão Financeira
 
+## [2.7.3 — LANÇAMENTO COM AÇÕES NO TOPO E PERÍODO MEMORIZADO] — PROPOSTA 2026-11-07
+
+**STATUS: branch de revisão. Ainda não publicada nem homologada.**
+
+- Navegação de etapas no topo do modal com ações compactas Voltar, Próximo e Revisar/Salvar; X no cabeçalho substitui o Cancelar redundante do rodapé. Associação do botão submit ao formulário mantida mesmo após realocação; nenhuma ação financeira ocorre ao trocar de etapa.
+- Modal de primeira etapa abre mais acima no celular, preservando rolagem em telas pequenas e com fontes ampliadas.
+- Filtro de período salvo por ID autenticado no armazenamento deste navegador: Este mês, Mês anterior, Este ano, Todo o período e datas personalizadas. Meses/anos relativos recalculam na abertura; intervalos personalizados mantêm datas fixas.
+- Preferência de interface não exige gravação no banco financeiro e não é compartilhada automaticamente entre dispositivos. Valores malformados ou de outra conta não são aproveitados.
+- Pendente: regressão da navegação externa ao form, execução de testes completos, verificação visual em Android/PWA, revisão e aprovação. Registro de proposta não implica homologação nem liberação.
+
+
 Registro de mudanças do aplicativo localizado em `gbplus/`. Toda versão e toda compilação deve possuir uma entrada própria. **Uma alteração não deve ser considerada homologada apenas porque existe commit, teste escrito ou publicação.** A homologação exige evidências da execução e aprovação explícita.
 
 ## [2.7.2 — SERVIÇOS AUTOMÁTICOS E LANÇAMENTO MAIS COMPACTO] — 2026-11-07
