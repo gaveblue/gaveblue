@@ -175,6 +175,17 @@ export function validateDatabase(db){
   for(const a of db.accounts)assert(str(a.name,120)&&a.name.trim()&&str(a.bank,120)&&str(a.branch,80)&&str(a.number,80)&&amount(a.initial)&&typeof a.active==='boolean','conta.');
   for(const p of db.partners)assert(str(p.name,200)&&p.name.trim()&&['tradeName','document','phone','email','address','notes'].every(k=>str(p[k]))&&typeof p.active==='boolean'&&Array.isArray(p.roles)&&p.roles.length>0&&p.roles.every(r=>['Cliente','Fornecedor','Transportadora','Funcionário','Outros'].includes(r)),'parceiro.');
   for(const t of db.titles){assert(str(t.description,300)&&t.description.trim()&&str(t.document,100)&&str(t.notes)&&['income','expense'].includes(t.type)&&amount(t.amount)&&t.amount>0&&validDate(t.issue)&&validDate(t.due)&&typeof t.cancelled==='boolean','título.');assert((!t.partnerId||has('partners',t.partnerId))&&(!t.accountId||has('accounts',t.accountId))&&db.categories.some(c=>c.id===t.categoryId&&c.type===t.type),'referência do título.');assert(['single','installment','recurring'].includes(t.mode)&&Number.isInteger(t.sequence)&&Number.isInteger(t.count)&&t.sequence>=1&&t.sequence<=t.count&&t.count<=120&&(t.groupId===null||str(t.groupId,100)),'série do título.');}
+  // Optional service identity: preserved by local backups and Supabase JSON payloads.
+  // Never confuses a service label with a payment, subscription, bank account or partner.
+  for(const title of db.titles){
+   if(title.serviceId===undefined&&title.serviceName===undefined)continue;
+   const serviceId=title.serviceId??'',serviceName=title.serviceName??'';
+   assert(str(serviceId,100)&&str(serviceName,120),'identificação do serviço.');
+   assert(!serviceId||title.type==='expense','serviço associado apenas a despesa.');
+   assert(!serviceId||serviceId==='custom'||/^(streaming|music|delivery|mobility|digital)-[a-z0-9-]+$/.test(serviceId),'identificador do serviço.');
+   assert(serviceId!=='custom'||serviceName.trim().length>0,'nome do serviço personalizado.');
+   assert(serviceId==='custom'||serviceName==='','nome de serviço não personalizado.');
+  }
   for(const p of db.payments)assert(has('titles',p.titleId)&&has('accounts',p.accountId)&&validDate(p.date)&&p.date<=today()&&amount(p.amount)&&p.amount>0,'baixa.');
   for(const t of db.titles)assert(paid(db,t.id)<=t.amount&&(!t.cancelled||paid(db,t.id)===0),'baixas maiores que o título ou título cancelado com baixa.');
   for(const t of db.transfers)assert(has('accounts',t.from)&&has('accounts',t.to)&&t.from!==t.to&&validDate(t.date)&&t.date<=today()&&amount(t.amount)&&t.amount>0,'transferência.');
