@@ -107,7 +107,7 @@ export function openGbPickerSheet({kind,items=[],selected='',onPick}){
  root.innerHTML='<div class="gb-sheet-body">'+
   '<button type="button" class="gb-sheet-grab" data-sheet-grab aria-label="Expandir painel" aria-expanded="false"><span aria-hidden="true"></span></button>'+
   '<div class="gb-sheet-header"><div><h2 id="gb-sheet-title">'+title+'</h2>'+
-    '<p>Arraste a barra para ver mais opções.</p></div>'+
+    '<p>Arraste a barra para baixo se quiser reduzir o painel.</p></div>'+
    '<button type="button" class="gb-sheet-close" data-sheet-close aria-label="Fechar seleção">'+icon('close')+'</button></div>'+
   '<label class="gb-sheet-search">'+icon('search')+
    '<input type="search" data-sheet-search-input aria-label="'+esc(searchHint)+
