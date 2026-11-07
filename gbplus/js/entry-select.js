@@ -26,11 +26,11 @@ export function entrySelect(label,name,options,value='',id='',required=false){
  const renderValue=(o)=>type
   ? (o.value==='income'?'<span class="gb-entry-direction income">'+icon('up')+'</span>':'<span class="gb-entry-direction expense">'+icon('down')+'</span>')+'<span>'+esc(o.text)+'</span>'
    :(name==='categoryId'?'<span class="gb-entry-chosen-icon">'+gbIcon(o.icon||gbOptionIcon(name,o.value,o.text))+'</span>':'')+'<span>'+esc(o?.text||'Selecione')+'</span>';
- const optionsHtml=optionRows.map(o=>'<button type="button" role="option" class="gb-entry-option'+(o.value===selected?' is-selected':'')+'" data-action="entry-option" data-value="'+esc(o.value)+'" aria-selected="'+(o.value===selected)+'">'+menuOptionLabel(name,o)+
+ const optionsHtml=(name==='categoryId'?[]:optionRows).map(o=>'<button type="button" role="option" class="gb-entry-option'+(o.value===selected?' is-selected':'')+'" data-action="entry-option" data-value="'+esc(o.value)+'" aria-selected="'+(o.value===selected)+'">'+menuOptionLabel(name,o)+
   (o.value===selected?icon('check','gb-entry-option-check'):'')+'</button>').join('');
  return '<div class="gb-entry-select'+(type?' gb-entry-type':'')+'" data-entry-name="'+esc(name)+'">'+
   '<span class="gb-entry-label" id="label-entry-'+esc(name)+'">'+esc(label)+(required?' <span class="gb-entry-required" aria-hidden="true"></span>':'')+'</span>'+source+
-  '<button type="button" class="gb-entry-trigger" data-action="entry-toggle" role="combobox" aria-labelledby="label-entry-'+esc(name)+'" aria-label="'+esc(label+': '+(chosen?.text||'Selecione'))+'" aria-controls="entry-options-'+esc(name)+'" aria-haspopup="listbox" aria-expanded="false">'+
+  '<button type="button" class="gb-entry-trigger" data-action="entry-toggle" role="combobox" aria-labelledby="label-entry-'+esc(name)+'" aria-label="'+esc(label+': '+(chosen?.text||'Selecione'))+'" aria-controls="'+(name==='categoryId'?'gb-picker-sheet':'entry-options-'+esc(name))+'" aria-haspopup="'+(name==='categoryId'?'dialog':'listbox')+'" aria-expanded="false">'+
    '<span class="gb-entry-current">'+renderValue(chosen||{value:'',text:'Selecione'})+'</span>'+icon('chevron')+
   '</button>'+
   '<div class="gb-entry-options" id="entry-options-'+esc(name)+'" role="listbox" aria-label="'+esc(label)+'" hidden>'+optionsHtml+'</div></div>';
@@ -45,7 +45,7 @@ export function syncEntrySelect(select){
  const trigger=wrap.querySelector('.gb-entry-trigger');
  if(trigger)trigger.setAttribute('aria-label',(wrap.querySelector('.gb-entry-label')?.textContent||'Campo')+': '+(chosen?.textContent||'Selecione'));
  const optionsTarget=wrap.querySelector('.gb-entry-options');
- if(optionsTarget)optionsTarget.innerHTML=options.map(o=>'<button type="button" role="option" class="gb-entry-option'+(o.selected?' is-selected':'')+'" data-action="entry-option" data-value="'+esc(o.value)+'" aria-selected="'+o.selected+'">'+menuOptionLabel(entryName,o)+(o.selected?icon('check','gb-entry-option-check'):'')+'</button>').join('');
+ if(optionsTarget)optionsTarget.innerHTML=(entryName==='categoryId'?[]:options).map(o=>'<button type="button" role="option" class="gb-entry-option'+(o.selected?' is-selected':'')+'" data-action="entry-option" data-value="'+esc(o.value)+'" aria-selected="'+o.selected+'">'+menuOptionLabel(entryName,o)+(o.selected?icon('check','gb-entry-option-check'):'')+'</button>').join('');
 }
 export function closeEntryMenus(except=null){
  document.querySelectorAll('#modal .gb-entry-select').forEach(wrap=>{
