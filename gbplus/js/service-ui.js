@@ -37,7 +37,7 @@ export function servicePickerMarkup(title=null){
   '<input type="text" maxlength="120" name="serviceName" value="'+esc(custom?title?.serviceName||'':'')+'" placeholder="Ex.: Serviço local" '+(custom?'required':'')+'></label>'+
   '<div class="gb-service-picker" id="gb-service-options" hidden>'+
    '<label class="gb-service-search-label">Buscar serviço<input type="search" id="gb-service-search" placeholder="Netflix, iFood, Spotify..." autocomplete="off"></label>'+
-   '<label class="gb-service-group-label">Categoria<select id="gb-service-group"><option value="all">Todos os serviços</option>'+
+   '<label class="gb-service-group-label">Categoria<select id="gb-service-group" data-gb-native="true"><option value="all">Todos os serviços</option>'+
     Object.entries(SERVICE_GROUPS).map(([key,value])=>'<option value="'+esc(key)+'">'+esc(value)+'</option>').join('')+'</select></label>'+
    '<div class="gb-service-options" role="group" aria-label="Serviços disponíveis">'+
     SERVICE_CATALOG.map(service=>
