@@ -2,12 +2,11 @@
 
 ## [2.7.4 — SEGURANÇA ADMINISTRATIVA E REVISÃO DE CI] — 2026-11-07 (CANDIDATA)
 
-**NÃO HOMOLOGADA E NÃO LIBERADA.** A função `gbplus-admin` foi republicada em Supabase Edge Function v2 com o código anterior preservado e `verify_jwt=true` no gateway. Sua verificação adicional de usuário ao vivo por `auth.getUser()` e permissão por `app_metadata.gbplus_admin` foi mantida. O arquivo `supabase/config.toml` deve refletir esse estado para não reverter no próximo deploy.
+**NÃO HOMOLOGADA E NÃO LIBERADA.** A função `gbplus-admin` foi republicada no Supabase (Edge Function v2), com código inalterado e `verify_jwt=true` no gateway. Permanece a validação da sessão em tempo real por `auth.getUser()` e o controle de acesso em `app_metadata.gbplus_admin`.
 
-**Pendências de homologação:** o workflow financeiro da 2.7.3 e uma reexecução falharam antes de qualquer etapa. A proposta inclui runner alternativo, disparos de CI na `main`, testes automatizados administrativos e de fluxo; evidência de execução bem-sucedida da CI, teste real do login administrativo, PWA Android e aprovação explícita continuam obrigatórios. Publicação do GitHub Pages não equivale a homologação.
+**Verificações propostas:** registrar essa configuração em `supabase/config.toml` e ampliar o workflow de regressões para rodar na `main` e em PRs, com testes administrativos, financeiros e de configuração de segurança.
 
-**Senhas vazadas:** proteção nativa do Supabase Auth ainda desativada. O recurso depende do plano Pro ou superior e a organização está no Free; não houve autorização de cobrança, upgrade ou implementação substituta.
-
+**Bloqueio de homologação:** verificações do GitHub Actions falham antes da inicialização do runner, inclusive workflow mínimo e reexecução, com zero etapas. Trocar a versão do Ubuntu não resolveu, então a configuração original do runner foi restaurada e o diagnóstico temporário foi retirado. Necessário resolver a execução no GitHub, realizar testes reais de login administrativo e PWA/Android, e obter aprovação final antes da liberação. O deploy do GitHub Pages não substitui esses testes.
 
 ## [2.7.3 — LANÇAMENTO COM AÇÕES NO TOPO E PERÍODO MEMORIZADO] — 2026-11-07
 
