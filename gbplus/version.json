@@ -1,18 +1,20 @@
 {
-  "version": "2.6.3",
+  "version": "2.7.0",
   "build": 1,
-  "published_at": "2026-11-07T03:04:30Z",
-  "title": "Valor centralizado e serviços integrados à categoria",
+  "published_at": null,
+  "title": "Nova experiência visual com painéis arrastáveis e ícones aprimorados",
   "notes": [
-    "O valor do Novo lançamento está centralizado como um conjunto R$ + valor com largura ajustada ao conteúdo, sem a linha divisória inferior.",
-    "O campo Parceiro deixou de aparecer na interface PF; o identificador de parceiro existente continua preservado internamente em títulos antigos, para uso futuro na modalidade PJ.",
-    "O serviço/aplicativo agora integra o fluxo de Categoria: ao escolher uma categoria de despesa Serviços, Assinaturas, Streaming ou Aplicativos, aparece a pergunta Qual serviço? imediatamente abaixo da categoria.",
-    "Se a categoria selecionada não for de serviços, a escolha de aplicativo fica totalmente oculta. Alterar explicitamente a categoria para uma não relacionada a serviço limpa a seleção anterior, evitando gravações inconsistentes.",
-    "Prestação de serviços e outras categorias de receita não exibem o seletor, pois o catálogo se refere a despesas pessoais.",
-    "Netflix, Spotify, iFood e os demais 26 serviços continuam com nome automático, marcas coloridas quando identificadas e regras financeiras originais.",
-    "Nenhum título, conta, baixa ou login é alterado pela atualização de interface; não há novas migrações ou operações de banco.",
-    "Testes de regressão isolados verificam categorias de serviços, preservação do parceiro e alinhamento do valor.",
-    "Versão 2.6.3 integrada pela PR #87 (commit 29cfae04); implantação GitHub Pages #42332219181 concluída com success em 07/11/2026 às 03:04 UTC."
+    "A versão 2.7.0 introduz um Bottom Sheet reutilizável, arrastável e pesquisável para categorias e serviços, com foco na experiência móvel e adaptação à tela de computador.",
+    "A escolha de categoria apresenta todas as categorias reais da conta, com ícones, ordem alfabética e busca; nenhuma categoria artificial é inserida no banco.",
+    "A lista de serviços apresenta os 26 serviços cadastrados em cinco grupos, com busca, marcas, opção personalizada e opção Sem serviço.",
+    "Toque no puxador ou arraste para cima para expandir a seleção; arraste para baixo para recolher ou fechar, retornando ao formulário sem perder o valor, a descrição e as datas preenchidas.",
+    "O formulário Novo lançamento passa a ter puxador próprio no celular e três alturas para compactar, usar normalmente ou expandir, sem remover dados nem sair do fluxo.",
+    "As listas podem ser roladas independentemente do gesto de arrastar; seleção por toque, teclado, pesquisa e fechamento por Escape continuam disponíveis.",
+    "Os logotipos de bancos agora ocupam todo o espaço do selo com fundo claro consistente mesmo no modo escuro; se um arquivo estiver indisponível, continuam aparecendo as iniciais.",
+    "Os ícones de serviços aumentam dentro do selo, com preenchimento baseado nas cores de referência das marcas e contraste de símbolo adaptado a fundos claros ou escuros.",
+    "Os 26 serviços continuam opcionais; ao escolher Serviços ou categoria equivalente a identificação fica integrada à categoria, e a descrição usa o nome escolhido.",
+    "Sem mudanças no motor financeiro, contas, títulos, saldos, segurança, migrações ou cobranças. Nenhum lançamento é gerado pela abertura de um painel.",
+    "Testes de regressão com dados fictícios cobrem categoria dinâmica, 26 serviços, navegação por busca, teclas, comportamento de arrastar e salvaguardas do formulário."
   ],
   "assets": [
     "./index.html",
@@ -169,28 +171,30 @@
     "./js/service-ui.js",
     "./js/account-safety.js",
     "./js/account-safety-ui.js",
-    "./js/service-brand-colors.js"
+    "./js/service-brand-colors.js",
+    "./js/bottom-sheet.js",
+    "./bottom-sheet.css"
   ],
   "highlights": [
     {
-      "icon": "wallet",
-      "title": "Valor centralizado",
-      "description": "R$ e valor juntos, no centro, sem linha divisória."
-    },
-    {
       "icon": "layers",
-      "title": "Serviços dentro da categoria",
-      "description": "Escolha Serviços para selecionar Netflix e outros aplicativos ali mesmo."
+      "title": "Painéis arrastáveis",
+      "description": "Categorias e serviços com busca e lista completa em um painel que expande com o gesto."
     },
     {
-      "icon": "building-2",
-      "title": "Parceiro reservado ao PJ",
-      "description": "Não aparece na interface pessoal, mas os dados antigos permanecem preservados."
+      "icon": "smartphone",
+      "title": "Novo lançamento mais flexível",
+      "description": "Expanda ou recolha o formulário no celular, sem perder o preenchimento."
+    },
+    {
+      "icon": "palette",
+      "title": "Ícones melhores nos dois temas",
+      "description": "Marcas de bancos e aplicativos maiores, legíveis e adaptadas ao modo escuro."
     }
   ],
-  "release_status": "published_github_pages_ci_device_validation_pending",
+  "release_status": "candidate_2_7_0_pending_pages_deployment",
   "homologation": {
-    "status": "isolated_tests_passed_pages_success_ci_runner_unavailable_pwa_pending",
-    "notes": "Testes pf-entry-ui-regression.mjs e services-regression.mjs passaram em avaliação isolada de JavaScript com dados fictícios; GitHub Pages #42332219181 publicou o código com sucesso. CI financeira #42332188995 falhou antes de executar qualquer etapa (0 passos), sem evidência de testes integrais. PWA instalado ainda não verificado em aparelho real."
+    "status": "isolated_sheet_service_and_pfu_tests_passed_complete_ci_device_pending",
+    "notes": "Testes isolados de interface, serviços e formulário com dados sintéticos passaram; a execução integral dos testes Node/GitHub Actions e inspeção visual manual de arraste no Android/PWA continuam pendentes de evidência. Nenhum dado de usuários foi alterado."
   }
 }
