@@ -81,6 +81,7 @@ function openModal(title,content){
  if(!modal.open)modal.showModal();
  enhanceGbControls(modal);
  fitEntryAmount(modal.querySelector('#entry-amount'));
+ if(isEntry){syncEntrySettlement(modal.querySelector('#title-form'));if(modal.querySelector('#title-form')?.dataset.step==='3')refreshEntrySchedule(modal.querySelector('#title-form'));}
 }
 function closeModal(){if(modal.open)modal.close();bankImportDraft=null;pendingGeneration=null;confirmAction=null;if(pwaReady)setTimeout(()=>maybeOfferPwaInstall(),1100);}
 function confirm(title,message,callback){confirmAction=callback;openModal(title,`<p class="confirm-message">${esc(message)}</p><div class="form-error" role="alert"></div><div class="form-footer">${button('Cancelar','close')}${button('Confirmar','confirm','primary')}</div>`);}
@@ -897,7 +898,15 @@ const actions={
   'delete-account':el=>{const id=el.dataset.id;if((db.cards||[]).some(card=>card.payAccountId===id))throw Error('Esta conta é a conta de pagamento prevista de um cartão. Altere o cartão antes de excluí-la.');if(db.titles.some(t=>t.accountId===id)||db.payments.some(p=>p.accountId===id)||db.transfers.some(t=>t.from===id||t.to===id))throw Error('Esta conta tem vínculos. Marque-a como inativa para manter o histórico.');if((db.bankImportBatches||[]).some(b=>b.accountId===id))throw Error('Esta conta possui histórico de conciliações. Marque-a como inativa para preservá-lo.');confirm('Excluir conta?','A conta e seu saldo inicial serão removidos.',()=>commit(d=>{d.accounts=d.accounts.filter(a=>a.id!==id);},'Conta excluída.'));},
   'undo-payment':el=>{const id=el.dataset.id;confirm('Estornar baixa?','A baixa será removida, o valor voltará a ficar pendente e o saldo da conta será recalculado.',()=>commit(d=>{d.payments=d.payments.filter(p=>p.id!==id);},'Baixa estornada.'));},
   'undo-transfer':el=>{const id=el.dataset.id;confirm('Estornar transferência?','A movimentação será removida das duas contas.',()=>commit(d=>{d.transfers=d.transfers.filter(t=>t.id!==id);},'Transferência estornada.'));},
-  'save-generation':()=>{if(!pendingGeneration||busy)return;const generated=pendingGeneration;return commit(d=>{if(generated.some(t=>d.titles.some(x=>!x.cancelled&&x.type===t.type&&x.description===t.description&&x.due===t.due&&x.amount===t.amount&&x.partnerId===t.partnerId)))throw Error('Já existe um título igual (descrição, parceiro, valor e vencimento). Revise para evitar duplicidade.');d.titles.push(...generated);},`${generated.length} título(s) criado(s).`);},
+  'save-generation':()=>{if(!pendingGeneration||busy)return;const generated=pendingGeneration;return commit(d=>{
+   if(generated.some(t=>d.titles.some(x=>!x.cancelled&&x.type===t.type&&x.description===t.description&&x.due===t.due&&x.amount===t.amount&&x.partnerId===t.partnerId)))
+    throw Error('Já existe um título igual (descrição, parceiro, valor e vencimento). Revise para evitar duplicidade.');
+   d.titles.push(...generated);
+   if(generated.settlement){
+    if(generated.length!==1||generated[0].mode!=='single')throw Error('Baixa imediata somente para lançamento único.');
+    addPayment(d,{titleId:generated[0].id,accountId:generated.settlement.accountId,date:generated.settlement.date,amount:generated[0].amount});
+   }
+  },generated.settlement?'Lançamento criado e baixado. Saldo atualizado.':`${generated.length} título(s) criado(s) pendente(s).`);},
   'back-generation':()=>{if(pendingGeneration?.formHTML){openModal('Novo lançamento',pendingGeneration.formHTML);pendingGeneration=null;}},
   granularity:el=>{state.granularity=el.dataset.value;render();},
   'flow-chart-mode':el=>{const mode=el.dataset.mode;if(!['bars','lines','net'].includes(mode))return;state.flowChartMode=mode;render();},
@@ -1127,16 +1136,20 @@ document.addEventListener('submit',async e=>{e.preventDefault();if(busy||!db)ret
    return;
   }
   if(form.id==='title-form'){
-   if(form.dataset.step!=='2')throw Error('Conclua as duas etapas do lançamento.');
+   if(form.dataset.step!=='3')throw Error('Conclua as três etapas do lançamento.');
    validateEntryStepOne(form);
+   validateEntryStepTwo(form);
+   validateEntryStepThree(form);
    const serviceId=v.type==='expense'?String(v.serviceId||''):'';
    if(serviceId&&!serviceById(serviceId)&&serviceId!=='custom')throw Error('Serviço inválido.');
    const serviceName=serviceId==='custom'?String(v.serviceName||'').trim():'';
    if(serviceId==='custom'&&(!serviceName||serviceName.length>120))throw Error('Informe o nome do serviço.');
    const description=serviceId?serviceDisplayName(serviceId,serviceName,''):v.description.trim();
+   const isPaid=!id&&v.settlement==='paid';
    const input={type:v.type,description,categoryId:v.categoryId,partnerId:v.partnerId||'',
     document:v.document.trim(),issue:v.issue,due:v.due,amount:cents(v.amount),
-    accountId:v.accountId||'',notes:v.notes.trim(),serviceId,serviceName};
+    accountId:isPaid?v.settleAccountId:(v.accountId||''),notes:v.notes.trim(),serviceId,serviceName,
+    paymentMethod:v.paymentMethod==='debit'?'debit':'account'};
    if(id){
     const original=getTitle(id);
     const businessDays=original.mode!=='single'&&v.businessDays==='true';
@@ -1145,6 +1158,7 @@ document.addEventListener('submit',async e=>{e.preventDefault();if(busy||!db)ret
    }
    const businessDays=v.mode!=='single'&&v.businessDays==='true';
    const generated=generateTitles(input,v.mode,v.mode==='single'?1:Number(v.count),{businessDays});
+   if(isPaid)generated.settlement={accountId:v.settleAccountId,date:v.settleDate};
    const clone=form.cloneNode(true);
    const originals=[...form.querySelectorAll('input,select,textarea')],destinations=[...clone.querySelectorAll('input,select,textarea')];
    originals.forEach((el,i)=>{
@@ -1157,6 +1171,7 @@ document.addEventListener('submit',async e=>{e.preventDefault();if(busy||!db)ret
    generated.formHTML=clone.outerHTML;
    pendingGeneration=generated;
    const shifted=generated.filter(t=>t.shiftedToBusinessDay).length;
+   const accountName=isPaid?db.accounts.find(a=>a.id===v.settleAccountId)?.name||'':'';
    openModal('Revise antes de confirmar',
     '<div class="preview-summary"><span>'+generated.length+' título(s) · '+
     (v.mode==='installment'?'Parcelado':v.mode==='recurring'?'Recorrente':'Único')+
@@ -1164,6 +1179,9 @@ document.addEventListener('submit',async e=>{e.preventDefault();if(busy||!db)ret
     '</strong><p>Valor total da operação</p></div>'+
     (businessDays?'<p class="gb-entry-review-note">Somente dias úteis nacionais. '+shifted+
     ' vencimento(s) ajustado(s) ao próximo dia útil.</p>':'')+
+    (isPaid?'<p class="gb-entry-review-note">Baixa imediata de '+money(input.amount)+' em '+esc(accountName)+
+     ', em '+dateLabel(v.settleDate)+'. O saldo bancário será alterado na confirmação.</p>':
+     '<p class="gb-entry-review-note">Os lançamentos serão criados como pendentes, sem movimentar o saldo.</p>')+
     '<div class="preview-list">'+generated.map(t=>
      '<div><span>'+esc(t.description)+(t.count>1?' · '+t.sequence+'/'+t.count:'')+
      '<small>'+dateLabel(t.due)+(t.shiftedToBusinessDay?' · ajustado do dia '+dateLabel(t.originalDue):'')+
@@ -1242,10 +1260,13 @@ document.addEventListener('change',async e=>{if(!db)return;const el=e.target;try
     syncEntrySelect(select);
    }
    syncEntryServiceCategory(el.form);
+   const credit=el.form?.querySelector('.gb-credit-entry-link');if(credit)credit.hidden=el.value!=='expense';
+   const refund=el.form?.querySelector('.gb-entry-refund-hint');if(refund)refund.hidden=el.value!=='income';
   }
   if(el.id==='entry-category')syncEntryServiceCategory(el.form);
   if(el.id==='gb-service-group')filterServicesInForm(el.closest('#title-form'));
-  if(el.id==='entry-mode'){refreshEntrySchedule(el.form);}
+  if(el.id==='entry-mode'){refreshEntrySchedule(el.form);syncEntrySettlement(el.form);}
+  if(el.form?.id==='title-form'&&el.name==='settlement')syncEntrySettlement(el.form);
   if(el.id==='period'){if(el.value==='custom'){openModal('Escolher período',`<form id="period-form"><div class="form-grid">${field('De','from',state.range.from||today(),'date','required')}${field('Até','to',state.range.to||today(),'date','required')}</div>${formFooter('Aplicar período')}</form>`);el.value=state.period;}else{state.period=el.value;state.range=rangeFor(el.value);state.launchSelected=[];state.launchStatusOpen=false;render();}}
   if(el.dataset.filter){state[el.dataset.filter]=el.value;if(['partner','category'].includes(el.dataset.filter))state.moreFilters=true;state.launchSelected=[];render();}
   if(el.id==='report-type'){state.report=el.value;render();}
