@@ -23,6 +23,7 @@ const form=load('forms',{
  esc,today:()=>todayString,money,paid:()=>0,pending:()=>0,
  field:(label,name,value='',type='text',attrs='')=>'<label class="field">'+label+
   '<input name="'+name+'" type="'+type+'" value="'+esc(value)+'" '+attrs+'></label>',
+ select:(label,name,options,value='')=>'<label>'+esc(label)+'<select name="'+name+'">'+options.map(o=>'<option value="'+esc(o[0])+'"'+(o[0]===value?' selected':'')+'>'+esc(o[1])+'</option>').join('')+'</select></label>',
  entrySelect:(label,name,options)=>'<div class="entry-'+name+'">'+label+
   '<select name="'+name+'">'+options.map(o=>'<option>'+o[1]+'</option>').join('')+'</select></div>',
  servicePickerMarkup:()=>'<div class="service-picker">Qual serviço?</div>',
