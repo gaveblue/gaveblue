@@ -5,7 +5,7 @@ import {entrySelect} from './entry-select.js?v=20261104-42';
 import {gbIcon,CATEGORY_ICON_OPTIONS,categoryIconFor} from './gb-icons.js?v=20261104-42';
 import {bankOptions,findBank,bankPicker} from './banks.js?v=20261105-87';
 import {dailyStatement} from './daily-statement.js?v=20261105-90';
-import {servicePickerMarkup,serviceIdentityMarkup} from './service-ui.js?v=20261106-2600';
+import {servicePickerMarkup,serviceIdentityMarkup,serviceDisplayName} from './service-ui.js?v=20261106-2620';
 const required='required maxlength="200"';
 export function titleForm(db,t,type='expense'){
  type=t?.type||type;
@@ -44,7 +44,7 @@ export function titleForm(db,t,type='expense'){
    </div>
    <div class="form-grid gb-entry-grid">
     <div class="full">${categoryField}</div>
-    <div class="full">${field('Descrição','description',t?.description||'','text','required maxlength="300" placeholder="Ex.: Energia do escritório"')}</div>
+    <div class="full">${field('Descrição','description',t?.serviceId?serviceDisplayName(t.serviceId,t.serviceName,t.description):t?.description||'','text','required maxlength="300" placeholder="Ex.: Energia do escritório" '+(t?.serviceId?'readonly aria-describedby="gb-service-naming-hint"':''))}</div>
     <div class="full gb-service-area" ${type==='expense'?'':'hidden'}>${servicePickerMarkup(t)}</div>
     ${partnerField}
     ${field('Documento','document',t?.document||'','text','maxlength="100" placeholder="Nº do documento"')}
