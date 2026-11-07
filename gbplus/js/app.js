@@ -11,7 +11,7 @@ import {renderReactCharts,unmountReactCharts} from './gb-react-loader.js?v=20261
 import {mountNativeCharts} from './gb-charts-native.js?v=20261106-68';
 import {titleForm,partnerForm,accountForm,categoryForm,paymentForm,transferForm,titleDetail,customizeForm,accountDetail} from './forms.js?v=20261107-2710';
 import {serviceById,serviceSearchKey,isServiceExpenseCategory} from './service-catalog.js?v=20261106-2630';
-import {serviceIconMarkup,serviceIdentityMarkup,serviceDisplayName} from './service-ui.js?v=20261107-2710';
+import {serviceIconMarkup,serviceIdentityMarkup,serviceDisplayName} from './service-ui.js?v=20261107-2720';
 import {openGbPickerSheet,installGbPickerSheet,installEntryFormDrag} from './bottom-sheet.js?v=20261107-2710';
 import {toggleEntryMenu,chooseEntryOption,syncEntrySelect,closeEntryMenus} from './entry-select.js?v=20261107-2710';
 import {installGbControls,enhanceGbControls} from './custom-controls.js?v=20261104-42';
@@ -316,7 +316,12 @@ function updateServicePicker(form,id){
    description.readOnly=false;
   }
  }
- if(toggle)toggle.textContent=id?'Alterar':'Selecionar';
+ if(toggle){
+  toggle.classList.toggle('is-chosen',Boolean(id));
+  toggle.classList.toggle('is-empty',!id);
+  toggle.setAttribute('aria-label',id?'Alterar serviço: '+label:'Escolher serviço ou aplicativo');
+ }
+ form.dataset.hasService=String(Boolean(id));
  const info=form.querySelector('.gb-service-help');
  if(info)info.textContent=service?.billingMode==='subscription'?
   'Assinatura? Se desejar, escolha Recorrente na etapa Detalhes. Nada será agendado automaticamente.':
@@ -334,6 +339,23 @@ function syncEntryServiceCategory(form){
  if(!area)return;
  area.hidden=!visible;
  if(!visible&&form.elements.serviceId?.value)updateServicePicker(form,'');
+ if(!visible)form.dataset.hasService='false';
+}
+function openEntryServiceSheet(form){
+ if(!form||form.id!=='title-form'||!form.isConnected||!modal.open)return false;
+ const area=form.querySelector('.gb-service-area');
+ if(!area||area.hidden||form.elements.type?.value!=='expense')return false;
+ const trigger=form.querySelector('[data-action="title-service-toggle"]');
+ if(trigger){
+  trigger.focus({preventScroll:true});
+  trigger.setAttribute('aria-expanded','true');
+ }
+ const shown=openGbPickerSheet({
+  kind:'service',selected:form.elements.serviceId?.value||'',
+  onPick:id=>{if(form.isConnected)updateServicePicker(form,id);}
+ });
+ if(!shown&&trigger)trigger.setAttribute('aria-expanded','false');
+ return shown;
 }
 function filterServicesInForm(form){
  if(!form||form.id!=='title-form')return;
@@ -537,6 +559,10 @@ const actions={
       source.value=id;
       syncEntrySelect(source);
       source.dispatchEvent(new Event('change',{bubbles:true}));
+      // Only an explicit category selection opens the service panel.
+      // Editing an existing title or changing Despesa/Receita never does.
+      if(isServiceExpenseCategory(db.categories.find(c=>c.id===id))&&
+         form.elements.type?.value==='expense')openEntryServiceSheet(form);
      }
     });
     if(!shown){el.setAttribute('aria-expanded','false');toggleEntryMenu(el);}
@@ -560,16 +586,7 @@ const actions={
   },
   'title-next':el=>{const form=el.closest('#title-form');toggleEntryStep(form,Math.min(3,Number(form?.dataset.step||1)+1));},
   'title-back':el=>{const form=el.closest('#title-form');toggleEntryStep(form,Math.max(1,Number(form?.dataset.step||1)-1));},
-  'title-service-toggle':el=>{
-   const form=el.closest('#title-form');
-   if(!form)return;
-   el.setAttribute('aria-expanded','true');
-   const shown=openGbPickerSheet({
-    kind:'service',selected:form.elements.serviceId?.value||'',
-    onPick:id=>{if(form.isConnected)updateServicePicker(form,id);}
-   });
-   if(!shown)el.setAttribute('aria-expanded','false');
-  },
+  'title-service-toggle':el=>openEntryServiceSheet(el.closest('#title-form')),
   'title-service-pick':el=>updateServicePicker(el.closest('#title-form'),el.dataset.serviceId),
   'title-service-clear':el=>updateServicePicker(el.closest('#title-form'),''),
   'category-icon':el=>{
