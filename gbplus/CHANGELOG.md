@@ -2,6 +2,25 @@
 
 Registro de mudanças do aplicativo localizado em `gbplus/`. Toda versão e toda compilação deve possuir uma entrada própria. **Uma alteração não deve ser considerada homologada apenas porque existe commit, teste escrito ou publicação.** A homologação exige evidências da execução e aprovação explícita.
 
+## [2.6.3 — VALOR CENTRALIZADO E SERVIÇOS DENTRO DA CATEGORIA] — 2026-11-06
+
+**Status: CANDIDATA À PUBLICAÇÃO.** Versão incremental, sem compilação pública. Não inclui migrações financeiras.
+
+### Ajustes do Novo lançamento (PF)
+- Campo de valor **centralizado como um conjunto R$ + valor**, com largura que acompanha o número digitado. Removida a linha divisória/traço inferior.
+- Parceiro **totalmente oculto** na interface PF, não apenas bloqueado/desabilitado visualmente. O `partnerId` de registros antigos continua em um input oculto para edição sem perda de vínculos; uso do campo poderá retornar no módulo futuro PJ, sobre a mesma base.
+- Aplicativos/serviços deixaram de ser uma seção genérica abaixo da descrição. Agora aparecem **dentro do bloco Categoria**, imediatamente após o seletor de categoria e antes da descrição.
+- Ao selecionar categoria de despesa **Serviços** (ou categorias personalizadas claramente chamadas Assinaturas, Streaming ou Aplicativos), o usuário vê **Qual serviço?** e escolhe um dos 26 serviços; nome e logotipo seguem vinculados ao lançamento.
+- Para outras categorias de despesas ou qualquer categoria de receita, a lista de serviços fica oculta. Ao trocar explicitamente a categoria para uma não relacionada a serviços, é desfeita uma escolha de aplicativo feita naquele formulário, evitando associação escondida.
+- Edições de registros antigos preservam serviço e parceiro já existentes sem migrar dados; a categoria atual pode ser alterada pelo usuário, e o novo fluxo reage à alteração.
+- A mudança de tipo Despesa/Receita continua atualizando as categorias com o evento nativo `change`.
+
+### Testes e limites
+- `tests/pf-entry-ui-regression.mjs` ampliado com categoria Serviços, categoria Água, categoria de receita, centralização, Parceiro oculto e reação à troca de categoria.
+- `tests/services-regression.mjs` preserva as verificações do catálogo de 26 serviços, cores, nome automático e validação de persistência.
+- Os testes isolados foram executados com dados fictícios e passaram. A execução completa do GitHub Actions e teste visual no PWA instalado continuam dependendo de evidência.
+- O `version.json`, o cache PWA e as importações receberam a identificação **2.6.3**.
+
 ## [2.6.2 — NOVO LANÇAMENTO PF E SERVIÇOS COM CORES] — 2026-11-06
 
 **PUBLICAÇÃO CONFIRMADA:** PR [#86](https://github.com/gaveblue/gaveblue/pull/86) integrada à `main` (commit `7019f01ff73ee79ac2bb397ddc50bc0195deed07`); deploy GitHub Pages [42331328476](https://github.com/gaveblue/gaveblue/actions/runs/42331328476) concluído com `success` em **07/11/2026 02:53 UTC**. Testes isolados de formulário PF e serviços passaram; workflow financeiro [42331303473](https://github.com/gaveblue/gaveblue/actions/runs/42331303473) não executou nenhuma etapa (falha de infraestrutura anterior, 0 passos). A validação manual de PWA instalado permanece pendente. Nenhum registro financeiro foi apagado ou alterado pela atualização.
