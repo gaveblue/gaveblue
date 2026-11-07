@@ -1,7 +1,7 @@
 {
   "version": "2.6.1",
   "build": 1,
-  "published_at": null,
+  "published_at": "2026-11-07T02:15:16Z",
   "title": "Limpeza de dados e exclusão de conta com confirmação de segurança",
   "notes": [
     "Nas Configurações, adicionada a opção Limpar todos os dados, separada de Excluir conta.",
@@ -12,7 +12,8 @@
     "Para excluir, o usuário precisa informar seu e-mail, digitar EXCLUIR e marcar a confirmação; o servidor valida o JWT e exclui somente o próprio usuário.",
     "A exclusão remove cadastro e dados do GB+ vinculados ao usuário; cópias de backup já exportadas e arquivos em outros dispositivos não são apagados automaticamente.",
     "Adicionados testes de segurança específicos e atualizados os esclarecimentos na política de privacidade.",
-    "Ações destrutivas não são executadas durante a instalação ou atualização: dependem de decisão e confirmação do usuário."
+    "Ações destrutivas não são executadas durante a instalação ou atualização: dependem de decisão e confirmação do usuário.",
+    "Versão 2.6.1 publicada após PR #85, com GitHub Pages #42328190490 concluído com success em 07/11/2026 02:15 UTC."
   ],
   "assets": [
     "./index.html",
@@ -187,9 +188,9 @@
       "description": "Exporte uma cópia dos seus dados diretamente na tela de confirmação."
     }
   ],
-  "release_status": "candidate_2_6_1_pending_pages",
+  "release_status": "published_pages_edge_active_ci_pwa_pending",
   "homologation": {
-    "status": "isolated_tests_passed_edge_deployed_ci_pwa_pending",
-    "notes": "Verificados os fluxos de validação em JS com dados fictícios, sem apagar contas reais. A Edge Function gbplus-delete-account foi implantada no Supabase com verify_jwt=true. Ainda não foi realizado teste de exclusão autenticada ponta a ponta em usuário descartável; execução completa CI e PWA real pendentes."
+    "status": "isolated_checks_passed_pages_success_edge_active_ci_runner_failed_pwa_pending",
+    "notes": "Confirmado GitHub Pages #42328190490 (success) para merge #85. Edge Function gbplus-delete-account ACTIVE com verify_jwt=true. Teste isolado account-safety-regression passou em JavaScript usando dados fictícios; GitHub Actions financeira #42328163557 falhou antes de qualquer etapa (0 passos), sem teste Node completo. Exclusão autenticada em conta descartável e PWA real ainda não verificados."
   }
 }
