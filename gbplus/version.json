@@ -1,7 +1,7 @@
 {
   "version": "2.6.0",
   "build": 1,
-  "published_at": null,
+  "published_at": "2026-11-07T01:33:41Z",
   "title": "Contas e cartões, extratos mais claros e serviços no lançamento",
   "notes": [
     "Contas e Cartões agora compartilham uma tela, com alternância fixa durante a rolagem, cabeçalho uniforme e ações específicas em cada aba.",
@@ -13,7 +13,8 @@
     "Periodicidade e valor sempre dependem de escolha e confirmação do usuário. Selecionar serviço não cria título ou despesa automaticamente.",
     "Convenção pública de versões X.Y.Z: não são exibidas compilações nas mensagens de atualização.",
     "A remodelação completa do formulário Novo lançamento continua no planejamento para avaliação após o envio da inspiração visual.",
-    "Validação Node, GitHub Actions e conferência em aparelho real são registradas em separado das alterações do código."
+    "Validação Node, GitHub Actions e conferência em aparelho real são registradas em separado das alterações do código.",
+    "Versão 2.6.0 integrada pela PR #84 (commit d6ec0df7) e implantação do GitHub Pages #42324669146 concluída com sucesso em 07/11/2026 01:33 UTC."
   ],
   "assets": [
     "./index.html",
@@ -191,9 +192,9 @@
       "description": "Nenhuma ação de serviço ou seleção bancária grava dinheiro sem autorização."
     }
   ],
-  "release_status": "candidate_2_6_0_pending_publication",
+  "release_status": "published_github_pages_ci_pwa_validation_pending",
   "homologation": {
-    "status": "isolated_service_and_import_checks_passed_full_ci_device_pending",
-    "notes": "Testes de conteúdo e verificações isoladas com dados sintéticos realizados, sem impacto financeiro. A execução completa do pipeline Node/CI e a validação visual do PWA continuam pendentes até evidência. Publicação autorizada pelo responsável do produto."
+    "status": "isolated_tests_passed_pages_success_ci_runner_failed_pwa_pending",
+    "notes": "Confirmado deploy GitHub Pages #42324669146 (success) do commit d6ec0df7. Os testes isolados de Contas/Cartões, Importações e Serviços passaram em JavaScript com dados fictícios; workflow GB+ regressões #42324622731 falhou antes de iniciar qualquer etapa, sem evidência de erro no código, issue #75. Android/iOS PWA real ainda não testados; não confundir publicação com homologação integral."
   }
 }
