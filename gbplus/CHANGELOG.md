@@ -1,5 +1,16 @@
 # CHANGELOG — GB+ Gestão Financeira
 
+## [2.7.8 — CORREÇÃO DE RODAPÉ APÓS VOLTAR DA REVISÃO] — 2026-11-07
+
+**Hotfix de navegação:** após avançar pela terceira etapa para a prévia final, o botão Voltar restaurava apenas o `<form>`, mas os três conjuntos de botões Próximo/Voltar/Revisar haviam sido movidos para fora dele, para o rodapé fixo. Assim, a cópia destinada à volta não incluía a navegação e ela desaparecia.
+
+- `js/app.js`: criada `serializeEntryFormForReview(form)`, que copia os campos preenchidos (inclusive radios, checkboxes e seletores) e reinsere, **apenas na cópia**, os três rodapés destacados. O `openModal` move os rodapés de volta para a área fixa, sem alterar a estrutura visual da versão 2.7.7. A restauração reativa a etapa indicada.
+- **Cobertura:** tanto revisão de despesa/receita normal quanto revisão de compra em cartão usam a mesma serialização. Dados mantidos sem gravar títulos ou movimentações durante a navegação.
+- **Regressão:** `tests/entry-review-navigation-regression.mjs` executou 72 asserções no código real em V8 adaptado, incluindo prévia, retorno, valores, radios, seleção de conta, checkbox e sequência 3→2→1→2→3. Testes de rodapé fixo, preferências, etapa final, três etapas, cartão e seletores também passaram no ambiente isolado.
+- `index.html`, `sw.js` e `version.json`: versão 2.7.8 build 1 e atualização do cache da PWA.
+- **Limite de homologação:** não foi realizada navegação visual em Android/PWA real nem execução nativa de toda a suíte no Node.js; não declarar homologação integral só pelo sucesso do deploy.
+
+
 ## [2.7.7 — PAINÉIS EXPANDIDOS E VALOR LIVRE] — 2026-11-07
 
 **Correção visual do lançamento e dos seletores.** A altura compacta do formulário e os botões fixos no rodapé continuam iguais. O campo numérico da primeira etapa fica sem contorno, sublinhado ou borda mesmo em foco. Retirado o bloco persistente de erro abaixo da descrição; erros de validação seguem visíveis apenas quando ocorrerem, em aviso temporário, sem dispensar regras financeiras.
