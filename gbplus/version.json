@@ -1,14 +1,14 @@
 {
-  "version": "2.7.4",
+  "version": "2.7.5",
   "build": 1,
-  "published_at": "2026-11-07T20:19:51.702Z",
-  "title": "Segurança administrativa e testes independentes do GitHub Actions",
+  "published_at": "2026-11-07T20:29:35.436Z",
+  "title": "Navegação do lançamento com botões fixos no rodapé",
   "notes": [
-    "A API administrativa ganhou verificação JWT adicional no gateway Supabase, mantendo a validação de identidade e autorização no servidor.",
-    "O projeto passou a incluir um executor local de testes financeiros e administrativos em Node.js, com relatório de resultados e documentação própria.",
-    "O workflow financeiro do GitHub Actions foi removido da configuração de projeto; o processo de publicação GitHub Pages permanece independente.",
-    "22 arquivos de regressão foram verificados em JavaScript isolado com adaptadores. A execução integral no Node.js, a validação Android/PWA e o teste de login administrativo com usuário real ainda requerem evidências.",
-    "Nenhuma alteração automática de dados, saldos, parcelas ou transações financeiras foi incluída."
+    "Os botões Voltar, Próximo e Revisar/Salvar voltaram à parte inferior do formulário para facilitar a navegação no celular.",
+    "O rodapé de navegação fica sempre visível; somente os campos do lançamento rolam quando necessário.",
+    "A altura compacta do painel e o botão de fechar (X) no cabeçalho foram preservados.",
+    "Fluxos de três etapas, informações digitadas, baixa, parcelas e lançamentos financeiros não tiveram suas regras alteradas.",
+    "Quatro regressões específicas foram verificadas em JavaScript isolado; a validação visual do PWA Android e a suíte integral em Node.js continuam pendentes."
   ],
   "assets": [
     "./index.html",
