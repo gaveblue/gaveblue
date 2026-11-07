@@ -4,7 +4,7 @@ Registro de mudanças do aplicativo localizado em `gbplus/`. Toda versão e toda
 
 ## [2.7.0 — BOTTOM SHEETS ARRASTÁVEIS E IDENTIDADE VISUAL DOS ÍCONES] — 2026-11-07
 
-**Status inicial: CANDIDATA À PUBLICAÇÃO.** Atualização intermediária de interface (2.6.3 → 2.7.0), sem uso de 2.7.3 para o primeiro lançamento desta série.
+**PUBLICAÇÃO CONFIRMADA:** PR [#88](https://github.com/gaveblue/gaveblue/pull/88) integrada à `main` (commit `31af5d5b3321c4f7ce4576b3875728f5105951f5`). GitHub Pages [42334207915](https://github.com/gaveblue/gaveblue/actions/runs/42334207915) concluído com `success` em **07/11/2026 03:29 UTC**. Testes isolados do bottom sheet, serviços e formulário PF passaram, mas o workflow financeiro [42334177960](https://github.com/gaveblue/gaveblue/actions/runs/42334177960) falhou antes de executar etapas (0 passos). A validação real dos gestos em Android/PWA e a homologação integral continuam pendentes. **Versão 2.7.0 publicada não equivale a homologação completa.**
 
 ### Painéis de categoria e serviço
 - Novo componente reutilizável em `js/bottom-sheet.js` e `bottom-sheet.css`: `<dialog>` nativo com foco controlado, botões acessíveis, toque, teclado e gesto de arrastar pelo puxador; ESC e toque no fundo fecham o seletor, sem desmontar nem perder o formulário.
