@@ -141,7 +141,10 @@ export function installGbPickerSheet(){
  root.addEventListener('close',()=>{
   const focus=active?.returnFocus;
   active=null;drag=null;
-  if(focus?.isConnected)focus.focus({preventScroll:true});
+  if(focus?.isConnected){
+   focus.setAttribute?.('aria-expanded','false');
+   focus.focus({preventScroll:true});
+  }
  });
  root.addEventListener('pointerdown',event=>{
   const handle=event.target.closest('[data-sheet-grab]');
@@ -159,6 +162,7 @@ export function installGbPickerSheet(){
   drag=null;
   if(Math.abs(delta)<48)return;
   suppressGrabClick=true;
+  setTimeout(()=>{suppressGrabClick=false;},0);
   if(delta<0){snap(root,'expanded');return;}
   if(root.dataset.snap==='expanded')snap(root,'partial');
   else closePicker();
@@ -191,6 +195,7 @@ export function installEntryFormDrag(modal){
   const delta=event.clientY-pointer.start;pointer=null;
   if(Math.abs(delta)<48)return;
   suppressClick=true;
+  setTimeout(()=>{suppressClick=false;},0);
   if(delta<0)setHeight('expanded');
   else setHeight(modal.dataset.gbSnap==='expanded'?'partial':'compact');
  });
