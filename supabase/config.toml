@@ -1,9 +1,9 @@
 [functions.gbplus-delete-account]
 verify_jwt = true
 
-# Validates JWT and live administrator authorization inside the function.
+# Supabase gateway verifies JWT; handler also validates live user and app_metadata on every request.
 [functions.gbplus-admin]
-verify_jwt = false
+verify_jwt = true
 
 [functions.platform-admin]
 verify_jwt = false
