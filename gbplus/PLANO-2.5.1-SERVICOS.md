@@ -1,4 +1,6 @@
-# GB+ 2.5.1 — Serviços com identificação visual e catálogo de aplicativos
+# GB+ — Histórico do plano de serviços (iniciado na 2.5.1)
+
+> **Situação atual (06/11/2026):** o catálogo de 26 serviços foi integrado e publicado na **versão 2.6.0**. Treze marcas usam pictogramas locais de referência e treze usam identificação neutra por iniciais. O formulário já permite escolher e cadastrar serviço personalizado. O redesenho completo do Novo lançamento aguarda referência visual. As seções abaixo registram as decisões históricas do planejamento.
 
 > **Atualização de planejamento — 06/11/2026:** pelo novo padrão de versionamento (`PADRAO-VERSIONAMENTO.md`), a entrega do catálogo de serviços, seus logos autorizados e integração ao fluxo de "Novo lançamento" passam a ser planejados para a **versão 2.5.2**. O documento abaixo preserva o planejamento histórico da 2.5.1; serviços ainda **não estão disponíveis no aplicativo**. O redesenho do formulário dependerá da referência visual enviada pelo responsável do produto.
 
