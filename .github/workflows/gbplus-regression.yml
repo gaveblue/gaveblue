@@ -41,6 +41,8 @@ jobs:
         run: node gbplus/tests/bank-import-readonly-release-regression.mjs
       - name: Comparação indicativa de saldos OFX/CSV
         run: node gbplus/tests/bank-import-balance-regression.mjs
+      - name: Bottom sheet arrastável e ícones (2.7.0)
+        run: node gbplus/tests/bottom-sheet-regression.mjs
       - name: Formulário PF e serviços dentro da categoria (2.6.3)
         run: node gbplus/tests/pf-entry-ui-regression.mjs
       - name: Redefinição financeira e exclusão de conta (2.6.1)
