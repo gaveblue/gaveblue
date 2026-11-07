@@ -432,39 +432,58 @@ function syncEntrySettlement(form){
  const mode=form.elements.mode?.value||'single';
  const isSeries=mode!=='single';
  const accounts=(db?.accounts||[]).filter(a=>a.active);
+ const cards=(db?.cards||[]).filter(c=>c.active);
  const paid=group.querySelector('input[value="paid"]');
+ const card=group.querySelector('input[value="card"]');
  const pending=group.querySelector('input[value="pending"]');
- if(paid){
-  paid.disabled=isSeries||accounts.length===0;
-  if(paid.disabled&&paid.checked&&pending)pending.checked=true;
+ if(paid)paid.disabled=isSeries||accounts.length===0;
+ if(card)card.disabled=form.elements.type?.value!=='expense'||mode==='recurring'||cards.length===0||
+  (mode==='installment'&&Number(form.elements.count?.value)>36);
+ if((paid?.disabled&&paid?.checked)||(card?.disabled&&card?.checked)){
+  if(pending)pending.checked=true;
  }
- const show=!!paid?.checked&&!paid.disabled;
+ const payNow=!!paid?.checked&&!paid.disabled;
+ const chargeCard=!!card?.checked&&!card.disabled;
  const details=group.querySelector('.gb-entry-settlement-details');
+ const cardDetails=group.querySelector('.gb-entry-settlement-card');
  const warn=group.querySelector('.gb-entry-settlement-series');
- if(details)details.hidden=!show;
+ if(details)details.hidden=!payNow;
+ if(cardDetails)cardDetails.hidden=!chargeCard;
  if(warn){
-  warn.hidden=!isSeries&&accounts.length>0;
+  warn.hidden=!(isSeries||accounts.length===0||cards.length===0);
   warn.textContent=isSeries?
-   'Parcelamentos e recorrências devem ser baixados por título, depois da criação.':
-   'Cadastre uma conta financeira ativa para habilitar a baixa imediata.';
+   'Para parcelas em conta, crie os títulos como pendentes e registre cada baixa depois. No cartão, até 36 parcelas entram nas faturas.':
+   accounts.length===0?'Cadastre uma conta para baixar agora; ainda é possível deixar pendente ou usar cartão.':
+   'Cadastre um cartão ativo para lançar compras na fatura.';
  }
  const account=form.elements.settleAccountId;
  const date=form.elements.settleDate;
- if(account)account.required=show;
- if(date)date.required=show;
+ const cardId=form.elements.settleCardId;
+ if(account)account.required=payNow;
+ if(date)date.required=payNow;
+ if(cardId)cardId.required=chargeCard;
 }
 function validateEntryStepThree(form){
- if(!validDate(form.elements.issue?.value))throw Error('Informe uma data de emissão válida.');
- if(!validDate(form.elements.due?.value))throw Error('Informe uma data de vencimento válida.');
- if(form.dataset.id)return;
  const choice=form.elements.settlement?.value||'pending';
- if(!['pending','paid'].includes(choice))throw Error('Escolha como registrar o lançamento.');
+ if(!validDate(form.elements.issue?.value))throw Error('Informe uma data de emissão válida.');
+ if(choice!=='card'&&!validDate(form.elements.due?.value))throw Error('Informe uma data de vencimento válida.');
+ if(form.dataset.id)return;
+ if(!['pending','paid','card'].includes(choice))throw Error('Escolha como registrar o lançamento.');
  if(choice==='paid'){
   if(form.elements.mode?.value!=='single')throw Error('Baixa imediata disponível apenas para lançamento único.');
   if(!db.accounts.some(a=>a.id===form.elements.settleAccountId?.value&&a.active))
    throw Error('Selecione uma conta financeira ativa para a baixa.');
   if(!validDate(form.elements.settleDate?.value)||form.elements.settleDate.value>today())
    throw Error('A data da baixa deve ser válida e não pode ser futura.');
+ }
+ if(choice==='card'){
+  if(form.elements.type?.value!=='expense')throw Error('O cartão de crédito registra compras de despesas, não recebimentos.');
+  if(form.elements.mode?.value==='recurring')throw Error('Lançamento recorrente no cartão deve ser registrado mensalmente; escolha Único ou Parcelado.');
+  if(!db.cards?.some(c=>c.id===form.elements.settleCardId?.value&&c.active))
+   throw Error('Selecione um cartão de crédito ativo.');
+  if(form.elements.issue?.value>today())throw Error('A compra no cartão não pode ter data futura.');
+  if(form.elements.mode?.value==='installment'&&Number(form.elements.count?.value)>36)
+   throw Error('O cartão permite no máximo 36 parcelas.');
  }
 }
 function toggleEntryStep(form,step){
@@ -1314,14 +1333,14 @@ document.addEventListener('change',async e=>{if(!db)return;const el=e.target;try
     syncEntrySelect(select);
    }
    syncEntryServiceCategory(el.form);
-   const credit=el.form?.querySelector('.gb-credit-entry-link');if(credit)credit.hidden=el.value!=='expense';
+   syncEntrySettlement(el.form);
    const refund=el.form?.querySelector('.gb-entry-refund-hint');if(refund)refund.hidden=el.value!=='income';
    const related=el.form?.querySelector('.gb-entry-refund-card');if(related)related.hidden=el.value!=='income';
   }
   if(el.id==='entry-category')syncEntryServiceCategory(el.form);
   if(el.id==='gb-service-group')filterServicesInForm(el.closest('#title-form'));
-  if(el.id==='entry-mode'){refreshEntrySchedule(el.form);syncEntrySettlement(el.form);}
-  if(el.form?.id==='title-form'&&el.name==='settlement')syncEntrySettlement(el.form);
+  if(el.id==='entry-mode'){syncEntrySettlement(el.form);refreshEntrySchedule(el.form);}
+  if(el.form?.id==='title-form'&&['settlement','settleCardId'].includes(el.name)){syncEntrySettlement(el.form);refreshEntrySchedule(el.form);}
   if(el.id==='period'){if(el.value==='custom'){openModal('Escolher período',`<form id="period-form"><div class="form-grid">${field('De','from',state.range.from||today(),'date','required')}${field('Até','to',state.range.to||today(),'date','required')}</div>${formFooter('Aplicar período')}</form>`);el.value=state.period;}else{state.period=el.value;state.range=rangeFor(el.value);savePeriodPreference();state.launchSelected=[];state.launchStatusOpen=false;render();}}
   if(el.dataset.filter){state[el.dataset.filter]=el.value;if(['partner','category'].includes(el.dataset.filter))state.moreFilters=true;state.launchSelected=[];render();}
   if(el.id==='report-type'){state.report=el.value;render();}
