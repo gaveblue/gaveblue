@@ -148,3 +148,18 @@ html[data-theme=dark] .gb-launch-state.late{background:#513526;color:#f4aa70}
  .gb-launch-action{width:35px;height:35px}
 }
 @media(prefers-reduced-motion:reduce){.gb-launch-card{transition:none}}
+
+
+/* GB+ 2.7.6 — distinguish overdue days from ordinary pending titles. */
+.gb-launch-card-meta .gb-launch-overdue{
+ display:inline-flex;align-items:center;max-width:100%;
+ padding:5px 8px;border:1px solid #f6b8c1;border-radius:8px;
+ background:#ffe9ee;color:#a91835;font-size:10px;font-weight:750;
+ line-height:1.25;text-align:right;
+}
+html[data-theme=dark] .gb-launch-card-meta .gb-launch-overdue{
+ border-color:#873547;background:#4c1f2b;color:#ff9db0;
+}
+@media(max-width:760px){
+ .gb-launch-card-meta .gb-launch-overdue{font-size:9px;padding:4px 6px}
+}
