@@ -51,8 +51,8 @@ for(const service of ['Netflix','HBO Max','Spotify','iFood','Plus Delivery','Cha
 assert(fakeDialog.innerHTML.includes('data-sheet-choice=""'),'Allow leaving the service unselected');
 assert(fakeDialog.innerHTML.includes('data-sheet-choice="custom"'),'Allow custom services');
 assert(fakeDialog.innerHTML.includes('role="listbox"'));
-assert.equal(fakeDialog.dataset.snap,'partial');
-assert.equal(handle.attributes['aria-expanded'],'false');
+assert.equal(fakeDialog.dataset.snap,'expanded','Service picker opens tall on first tap');
+assert.equal(handle.attributes['aria-expanded'],'true');
 const fakeItem={dataset:{sheetChoice:'music-spotify'}};
 listeners.click({target:{closest:selector=>selector==='[data-sheet-choice]'?fakeItem:null}});
 assert.equal(picked,'music-spotify');
