@@ -1,19 +1,19 @@
 {
-  "version": "2.6.1",
+  "version": "2.6.2",
   "build": 1,
-  "published_at": "2026-11-07T02:15:16Z",
-  "title": "Limpeza de dados e exclusão de conta com confirmação de segurança",
+  "published_at": null,
+  "title": "Novo lançamento mais simples para PF e serviços com cores",
   "notes": [
-    "Nas Configurações, adicionada a opção Limpar todos os dados, separada de Excluir conta.",
-    "A limpeza mostra contagens de títulos, baixas, contas, cartões, compras, parceiros, transferências, importações e bancos personalizados.",
-    "Para limpar é necessário marcar uma declaração e digitar LIMPAR; o botão só é ativado com as duas confirmações.",
-    "A limpeza restaura o documento financeiro inicial por gravação atômica, com controle de revisão; login, e-mail e perfil continuam ativos.",
-    "Excluir conta deixa de abrir um simples e-mail de suporte: agora utiliza a função autenticada gbplus-delete-account no Supabase.",
-    "Para excluir, o usuário precisa informar seu e-mail, digitar EXCLUIR e marcar a confirmação; o servidor valida o JWT e exclui somente o próprio usuário.",
-    "A exclusão remove cadastro e dados do GB+ vinculados ao usuário; cópias de backup já exportadas e arquivos em outros dispositivos não são apagados automaticamente.",
-    "Adicionados testes de segurança específicos e atualizados os esclarecimentos na política de privacidade.",
-    "Ações destrutivas não são executadas durante a instalação ou atualização: dependem de decisão e confirmação do usuário.",
-    "Versão 2.6.1 publicada após PR #85, com GitHub Pages #42328190490 concluído com success em 07/11/2026 02:15 UTC."
+    "Novo lançamento no GB+ Personal agora começa com seletor horizontal Despesa/Receita e campo de valor centralizado logo abaixo, inspirado na organização visual de referência.",
+    "O valor continua usando a máscara de centavos e as regras de validação existentes; é obrigatório informar valor maior que zero antes de avançar.",
+    "O formulário mantém duas etapas para não perder funções de periodicidade, parcelas, dias úteis, vencimentos e observações; a segunda etapa agora destaca detalhes e recorrência.",
+    "O campo Parceiro está visualmente desativado para PF e reservado à futura modalidade PJ; vínculos antigos são mantidos sem permitir edição acidental.",
+    "Selecionar um serviço definido, como Netflix, determina automaticamente a descrição do lançamento, que aparece na lista e nos detalhes com seu nome canônico.",
+    "O nome de serviço personalizado acompanha o campo Outro serviço; remover serviço libera a descrição para edição manual.",
+    "Logotipos vetoriais disponíveis (13) e identificações por iniciais dos demais serviços agora usam cores de referência de suas marcas quando conhecidas; não são criadas imagens falsas.",
+    "Os lançamentos mostram o logo colorido ao lado do nome do serviço, evitando duplicação de Netflix Netflix.",
+    "O atalho de compra no cartão é mostrado somente para despesas e na primeira etapa do lançamento; não altera o motor financeiro.",
+    "Sem alteração em schema, saldos, dados cadastrados ou regras de confirmação. Mudanças são de interface e identificação opcional."
   ],
   "assets": [
     "./index.html",
@@ -169,28 +169,29 @@
     "./js/service-brand-paths.js",
     "./js/service-ui.js",
     "./js/account-safety.js",
-    "./js/account-safety-ui.js"
+    "./js/account-safety-ui.js",
+    "./js/service-brand-colors.js"
   ],
   "highlights": [
     {
-      "icon": "shield",
-      "title": "Limpar o financeiro com segurança",
-      "description": "Recomece do zero, com confirmação digitada e sem perder o login."
+      "icon": "wallet",
+      "title": "Despesa ou receita, com valor em destaque",
+      "description": "Escolha o tipo e digite o valor no início do lançamento."
     },
     {
-      "icon": "trash",
-      "title": "Exclusão de conta funcional",
-      "description": "Remova sua conta e os dados associados usando uma confirmação protegida."
+      "icon": "lock",
+      "title": "Personal organizado",
+      "description": "Parceiro fica reservado à futura experiência PJ, sem apagar cadastros antigos."
     },
     {
-      "icon": "download",
-      "title": "Backup antes de apagar",
-      "description": "Exporte uma cópia dos seus dados diretamente na tela de confirmação."
+      "icon": "sparkles",
+      "title": "Serviços reconhecíveis",
+      "description": "Netflix, Spotify e outros com nome automático e ícones nas cores das marcas."
     }
   ],
-  "release_status": "published_pages_edge_active_ci_pwa_pending",
+  "release_status": "candidate_2_6_2_awaiting_deploy",
   "homologation": {
-    "status": "isolated_checks_passed_pages_success_edge_active_ci_runner_failed_pwa_pending",
-    "notes": "Confirmado GitHub Pages #42328190490 (success) para merge #85. Edge Function gbplus-delete-account ACTIVE com verify_jwt=true. Teste isolado account-safety-regression passou em JavaScript usando dados fictícios; GitHub Actions financeira #42328163557 falhou antes de qualquer etapa (0 passos), sem teste Node completo. Exclusão autenticada em conta descartável e PWA real ainda não verificados."
+    "status": "isolated_pfu_and_service_tests_passed_ci_pwa_pending",
+    "notes": "Testes isolados pf-entry-ui-regression.mjs e services-regression.mjs passaram com dados sintéticos; teste integral Node/CI e validação no aparelho real aguardam execução. A versão não é publicada até verificar o GitHub Pages."
   }
 }
