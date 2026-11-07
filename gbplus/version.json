@@ -1,7 +1,7 @@
 {
   "version": "2.7.1",
   "build": 1,
-  "published_at": null,
+  "published_at": "2026-11-07T03:56:30Z",
   "title": "Novo lançamento em três etapas com baixa imediata e prévia de serviços",
   "notes": [
     "O Novo lançamento passa a ter três etapas: 1 — Lançamento (Despesa/Receita, valor, categoria, serviço e descrição); 2 — Detalhes (periodicidade, parcelas, documento, observações e forma de movimentação); 3 — Confirmação (emissão, vencimento, dias úteis, prévia das parcelas e situação da baixa).",
@@ -14,7 +14,8 @@
     "A criação do título e sua baixa imediata acontecem na mesma gravação do repositório, evitando criar um título pago sem registrar a movimentação; duplicações e falhas invalidam toda a operação.",
     "Em parcelamentos e recorrências a baixa imediata fica indisponível para evitar liquidar várias parcelas de uma só vez; o usuário pode baixar os títulos individualmente depois.",
     "Na edição de títulos antigos, a terceira etapa preserva datas e orienta a usar Detalhes do lançamento para qualquer baixa ou estorno, evitando duplicidade em pagamentos.",
-    "Não há alterações em tabelas Supabase nem migração de dados antigos. O vínculo cartão-conta para pagamento da fatura continua como já existente no cadastro de cartões."
+    "Não há alterações em tabelas Supabase nem migração de dados antigos. O vínculo cartão-conta para pagamento da fatura continua como já existente no cadastro de cartões.",
+    "A versão 2.7.1 foi integrada pela PR #89 (commit 191f44e2b4cfc00038391e2dcbfdc339bbf8e63b) e publicada no GitHub Pages #42336177501 com success em 07/11/2026 03:56 UTC."
   ],
   "assets": [
     "./index.html",
@@ -197,9 +198,9 @@
       "description": "Compra no crédito sem duplicar despesa e reembolso com vínculo informativo ao cartão."
     }
   ],
-  "release_status": "candidate_2_7_1_pending_deployment",
+  "release_status": "published_github_pages_ci_device_validation_pending",
   "homologation": {
-    "status": "isolated_three_step_financial_ui_tests_passed_ci_device_pending",
-    "notes": "Testes isolados com dados sintéticos: 3 etapas, pagamento atômico, bloqueio de baixa em séries, miniaturas e seletores. A execução integral de Node/CI GitHub Actions e validação no aparelho Android/PWA continuam pendentes; publicação não é homologação integral."
+    "status": "isolated_regressions_passed_pages_success_ci_runner_unavailable_pwa_pending",
+    "notes": "Quatro regressões isoladas com dados fictícios (três etapas, formulário PF, serviços, bottom sheet) passaram, assim como verificação estática de 17 requisitos do PWA e controles de baixa com conta única/parcelada/sem conta. GitHub Pages #42336177501: success. CI financeiro #42336147557: failure sem iniciar nenhuma etapa (0 steps). Não há teste real de baixa ou experiência no PWA Android; homologação integral pendente."
   }
 }
