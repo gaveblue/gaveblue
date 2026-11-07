@@ -118,11 +118,11 @@ const form={
   if(s==='.gb-entry-progress')return progress;
   if(s==='.form-error')return {textContent:''};
   if(s==='.gb-entry-amount-recap strong')return {textContent:''};
+  if(s.includes('#gb-entry-step-two .gb-entry-trigger'))return null;
   if(s.includes('#gb-entry-step-')){
    const id=s.includes('-one')?1:s.includes('-two')?2:3;
    return stage[id];
   }
-  if(s.includes('#gb-entry-step-two .gb-entry-trigger'))return null;
   return null;
  }
 };
