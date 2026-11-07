@@ -1,6 +1,6 @@
 // GB+ 2.6.0 — optional service identities for expense titles.
 // The picker does not submit, subscribe, pay or reconcile anything.
-import {SERVICE_CATALOG,SERVICE_GROUPS,serviceById,serviceSearchKey} from './service-catalog.js?v=20261106-2600';
+import {serviceById} from './service-catalog.js?v=20261107-2700';
 import {SERVICE_BRAND_PATHS} from './service-brand-paths.js?v=20261106-2600';
 import {SERVICE_BRAND_COLORS} from './service-brand-colors.js?v=20261106-2620';
 import {esc} from './ui.js?v=20261105-72';
@@ -32,34 +32,23 @@ export function serviceIdentityMarkup(id,name=''){
  return '<span class="gb-service-identity">'+serviceIconMarkup(item)+
   '<span>'+esc(title)+'</span></span>';
 }
+// Compact field inside Categoria. The full 26-service list is displayed only
+// in the separate draggable sheet, keeping FormData and custom names intact.
 export function servicePickerMarkup(title=null){
  const id=String(title?.serviceId||'');
  const item=serviceById(id),custom=id==='custom';
- const display=item?.name||(custom?title?.serviceName||'Outro serviço':'Nenhum serviço escolhido');
- return '<section class="gb-service-field" aria-label="Identificação opcional do serviço">'+
+ const display=item?.name||(custom?title?.serviceName||'Outro serviço':'Nenhum serviço selecionado');
+ return '<section class="gb-service-field" aria-label="Escolher serviço ou aplicativo">'+
   '<div class="gb-service-heading"><div><strong>Qual serviço?</strong>'+
-  '<p>Opcional · escolha o aplicativo ou serviço desta despesa.</p></div></div>'+
+  '<p>Escolha um aplicativo ou assinatura desta categoria.</p></div></div>'+
   '<input type="hidden" name="serviceId" value="'+esc(item?.id||(custom?'custom':''))+'">'+
   '<div class="gb-service-selected">'+
    '<span class="gb-service-selected-content">'+(item?serviceIconMarkup(item):'<span class="gb-service-monogram" aria-hidden="true">+</span>')+
-   '<span class="gb-service-selected-name">'+esc(display)+'</span></span>'+
-   '<button type="button" class="button small" data-action="title-service-toggle" aria-expanded="false" aria-controls="gb-service-options">'+
-   (id?'Alterar':'Escolher serviço')+'</button></div>'+
-  '<label class="gb-service-custom" '+(custom?'':'hidden')+'><span>Nome do seu serviço</span>'+
-  '<input type="text" maxlength="120" name="serviceName" value="'+esc(custom?title?.serviceName||'':'')+'" placeholder="Ex.: Serviço local" '+(custom?'required':'')+'></label>'+
-  '<div class="gb-service-picker" id="gb-service-options" hidden>'+
-   '<label class="gb-service-search-label">Buscar serviço<input type="search" id="gb-service-search" placeholder="Netflix, iFood, Spotify..." autocomplete="off"></label>'+
-   '<label class="gb-service-group-label">Tipo de serviço<select id="gb-service-group" data-gb-native="true"><option value="all">Todos os serviços</option>'+
-    Object.entries(SERVICE_GROUPS).map(([key,value])=>'<option value="'+esc(key)+'">'+esc(value)+'</option>').join('')+'</select></label>'+
-   '<div class="gb-service-options" role="group" aria-label="Serviços disponíveis">'+
-    SERVICE_CATALOG.map(service=>
-     '<button type="button" class="gb-service-option" data-action="title-service-pick" data-service-id="'+esc(service.id)+'" data-service-group="'+esc(service.group)+'" data-service-search="'+esc(serviceSearchKey(service.name))+'">'+
-      serviceIconMarkup(service)+'<span>'+esc(service.name)+'</span></button>').join('')+
-    '<button type="button" class="gb-service-option" data-action="title-service-pick" data-service-id="custom" data-service-group="custom" data-service-search="outro personalizado custom"> '+
-     '<span class="gb-service-monogram" aria-hidden="true">+</span><span>Outro serviço</span></button>'+
-   '</div><p class="gb-service-empty" hidden>Nenhum serviço encontrado. Você pode usar "Outro serviço".</p>'+
-   '<button type="button" class="gb-service-clear" data-action="title-service-clear">Não identificar serviço</button>'+
-  '</div>'+
-  '<p class="gb-service-help" id="gb-service-naming-hint">O serviço escolhido define o nome do lançamento. Nenhuma assinatura ou baixa é criada automaticamente.</p>'+
+    '<span class="gb-service-selected-name">'+esc(display)+'</span></span>'+
+   '<button type="button" class="button small" data-action="title-service-toggle" aria-haspopup="dialog" aria-controls="gb-picker-sheet" aria-expanded="false">'+
+    (id?'Alterar':'Selecionar')+'</button></div>'+
+  '<label class="gb-service-custom" '+(custom?'':'hidden')+'><span>Nome do serviço personalizado</span>'+
+   '<input type="text" maxlength="120" name="serviceName" value="'+esc(custom?title?.serviceName||'':'')+'" placeholder="Ex.: Aplicativo local" '+(custom?'required':'')+'></label>'+
+  '<p class="gb-service-help" id="gb-service-naming-hint">O serviço define o nome do lançamento. Nenhuma assinatura ou baixa é criada automaticamente.</p>'+
  '</section>';
 }
