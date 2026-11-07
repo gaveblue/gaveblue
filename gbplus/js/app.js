@@ -464,6 +464,7 @@ function syncEntrySettlement(form){
  if(cardId)cardId.required=chargeCard;
  const dueField=form.querySelector('.gb-entry-date-due');
  if(dueField)dueField.hidden=chargeCard;
+ if(form.elements.due)form.elements.due.disabled=chargeCard;
  const businessDays=form.querySelector('.gb-entry-business-switch');
  if(businessDays)businessDays.hidden=chargeCard;
 }
@@ -579,7 +580,7 @@ const actions={
    const ids=launchSelectedIds();
    if(ids.length!==1)throw Error('A edição é individual. Selecione apenas um lançamento.');
    const target=getTitle(ids[0]);
-   if(target.cardInvoice)throw Error('Edite compras e parcelas pelo cartão. A fatura não pode ser alterada manualmente.');
+   if(target.cardInvoice){openModal('Compras da fatura',titleDetail(db,target));return;}
    openModal('Editar lançamento',titleForm(db,target));
   },
   'launch-pay':()=>startLaunchPayment(launchSelectedIds()),
@@ -706,7 +707,7 @@ const actions={
   'forecast-simulate':()=>openModal('Simular vencimento',forecastScenarioForm(db,forecastDays)),
   'edit-title':el=>{
    const title=getTitle(el.dataset.id);
-   if(title.cardInvoice)throw Error('Faturas são atualizadas pelas compras do cartão; não podem ser editadas como títulos comuns.');
+   if(title.cardInvoice){openModal('Compras da fatura',titleDetail(db,title));return;}
    openModal('Editar lançamento',titleForm(db,title));
   },
   'title-detail':el=>openModal('Detalhes do título',titleDetail(db,getTitle(el.dataset.id))),
