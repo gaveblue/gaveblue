@@ -143,3 +143,40 @@
 .gb-import-map-preview th,.gb-import-map-preview td{padding:9px 11px;text-align:left;white-space:nowrap;border-bottom:1px solid var(--border);max-width:180px;overflow:hidden;text-overflow:ellipsis}
 .gb-import-map-preview th{font-weight:700}
 @media(max-width:600px){.gb-import-map-fields{grid-template-columns:1fr}}
+
+/* GB+ 2.5.2 — resumo guiado e seleção segura de movimentações. */
+.gb-import-overview{display:grid;gap:10px;padding:14px;background:var(--soft);border:1px solid var(--border);border-radius:15px}
+.gb-import-overview-heading h3{font-size:15px;font-weight:700}
+.gb-import-overview-heading p,.gb-import-overview-note,.gb-import-explainer{font-size:11px;line-height:1.65;color:var(--muted)}
+.gb-import-overview-note{margin:0}
+.gb-import-overview .gb-import-summary{background:var(--surface)}
+.gb-import-help{border:1px solid var(--border);background:var(--soft);border-radius:10px;padding:10px 13px}
+.gb-import-help summary{cursor:pointer;font-size:11px;font-weight:650;list-style-position:inside}
+.gb-import-help p{font-size:11px;line-height:1.7;color:var(--muted);margin:8px 0 0}
+.gb-import-filters{display:flex;flex-wrap:wrap;gap:5px}
+.gb-import-filters button{flex:0 0 auto;padding:8px 11px;min-height:36px}
+.gb-import-selection{display:grid;gap:10px;border:1px solid var(--border);border-radius:13px;background:var(--surface);padding:13px}
+.gb-import-selection-heading{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.gb-import-selection-heading strong{font-size:12px}
+.gb-import-selection-heading span{font-size:10px;color:var(--muted)}
+.gb-import-selection-buttons{display:flex;gap:8px;flex-wrap:wrap}
+.gb-import-selection-buttons .button{font-size:10px}
+.gb-import-selection-total,.gb-import-selection-disclaimer{font-size:10px;line-height:1.6;color:var(--muted)}
+.gb-import-selection-total strong{color:var(--ink)}
+.gb-import-bulk-fields{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;gap:10px;align-items:end}
+.gb-import-bulk-fields>.gb-import-decision-label:first-child{grid-column:1}
+.gb-import-bulk-fields>.button{min-height:44px;white-space:normal}
+.gb-import-row.is-selected{border-color:var(--ink);box-shadow:0 0 0 1px var(--border)}
+.gb-import-row-select{display:inline-flex;align-items:center;gap:6px;font-size:10px;color:var(--muted);cursor:pointer;margin-right:auto}
+.gb-import-row-select input{width:17px;height:17px;accent-color:var(--ink)}
+.gb-import-row-select input:disabled{opacity:.45;cursor:not-allowed}
+.gb-import-confirm-rows{max-height:50dvh}
+@media(max-width:760px){
+ .gb-import-overview{padding:12px}
+ .gb-import-filters button{padding:7px 9px;font-size:10px}
+ .gb-import-bulk-fields{grid-template-columns:1fr}
+ .gb-import-bulk-fields>.gb-import-decision-label:first-child{grid-column:auto}
+ .gb-import-bulk-fields>.button{width:100%}
+ .gb-import-selection{padding:11px}
+ .gb-import-row-head{flex-wrap:wrap}
+}
