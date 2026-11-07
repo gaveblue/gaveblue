@@ -46,3 +46,16 @@ export function searchServices(query='',group='all'){
  return SERVICE_CATALOG.filter(s=>(group==='all'||s.group===group)&&(!key||
    serviceSearchKey(s.name).includes(key)||serviceSearchKey(s.id).includes(key)));
 }
+
+/**
+ * A personal-expense category opens the service list only when its name
+ * clearly identifies a service, subscription, streaming or an application.
+ * Categories are user-editable and have random UUIDs, so never test an ID.
+ * Other categories, especially income (e.g. "Prestação de serviços"),
+ * must never open the service picker.
+ */
+export function isServiceExpenseCategory(category){
+ if(!category||category.type!=='expense'||typeof category.name!=='string')return false;
+ const label=category.name.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+ return /\b(servicos?|assinaturas?|streaming|aplicativos?|apps?)\b/.test(label);
+}

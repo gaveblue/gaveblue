@@ -133,7 +133,7 @@
 .gb-entry-flow-icon .icon{width:19px;height:19px}
 .gb-entry-flow-icon.is-expense{color:#df3347;background:#fceef1}
 .gb-entry-flow-icon.is-income{color:#159b67;background:#eaf8f1}
-.gb-entry-amount-hero{display:grid;gap:3px;justify-items:center;padding:13px 6px 18px;margin:0 0 9px;border-bottom:1px solid var(--border)}
+.gb-entry-amount-hero{display:grid;gap:3px;justify-items:center;padding:13px 6px 18px;margin:0 0 9px;border:0}
 .gb-entry-amount-hero>label{font-size:10px;letter-spacing:.03em;font-weight:650;color:var(--muted)}
 .gb-entry-amount-control{display:flex;justify-content:center;align-items:center;gap:8px;width:100%;max-width:420px;color:var(--ink)}
 .gb-entry-amount-control>span{font-size:clamp(24px,5vw,36px);font-weight:600;letter-spacing:-1px;white-space:nowrap}
@@ -175,3 +175,32 @@
 
 /* Card shortcut belongs to the expense details step, never to income or the review stage. */
 .gb-entry-wizard[data-step="2"]>.gb-credit-entry-link,.gb-entry-wizard[data-entry-type="income"]>.gb-credit-entry-link{display:none!important}
+
+/* GB+ 2.6.3 — centered monetary value without underline/divider. */
+.gb-entry-wizard .gb-entry-amount-hero{border:0!important;box-shadow:none!important;justify-items:center}
+.gb-entry-wizard .gb-entry-amount-control{
+ display:inline-flex;align-items:center;justify-content:center;
+ width:max-content;max-width:100%;margin-inline:auto;gap:8px;
+}
+.gb-entry-wizard .gb-entry-amount-control>span{flex:none}
+.gb-entry-wizard .gb-entry-amount-control input{
+ display:block;flex:0 1 auto;width:6ch;min-width:4.7ch;
+ max-width:min(70vw,18ch);text-align:center!important;
+ border:0!important;border-bottom:0!important;
+ outline-offset:4px;box-shadow:none!important;background:transparent!important;
+}
+/* The service selector belongs to the chosen category, not a separate field. */
+.gb-entry-category-block{display:grid;gap:8px;min-width:0}
+.gb-entry-category-block .gb-service-area{min-width:0}
+.gb-entry-category-block .gb-service-area[hidden]{display:none!important}
+.gb-entry-category-block .gb-service-field{
+ padding:12px;border:1px solid var(--border);border-radius:12px;
+ background:var(--soft);
+}
+.gb-entry-category-block .gb-service-heading strong{font-size:12px}
+.gb-entry-category-block .gb-service-heading p{font-size:10px}
+@media(max-width:760px){
+ .gb-entry-wizard .gb-entry-amount-control{gap:6px}
+ .gb-entry-wizard .gb-entry-amount-control input{max-width:min(69vw,17ch)}
+ .gb-entry-category-block .gb-service-field{padding:10px}
+}

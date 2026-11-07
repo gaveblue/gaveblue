@@ -37,8 +37,8 @@ export function servicePickerMarkup(title=null){
  const item=serviceById(id),custom=id==='custom';
  const display=item?.name||(custom?title?.serviceName||'Outro serviço':'Nenhum serviço escolhido');
  return '<section class="gb-service-field" aria-label="Identificação opcional do serviço">'+
-  '<div class="gb-service-heading"><div><strong>Serviço ou aplicativo</strong>'+
-  '<p>Opcional · o serviço escolhido define o nome do lançamento.</p></div></div>'+
+  '<div class="gb-service-heading"><div><strong>Qual serviço?</strong>'+
+  '<p>Opcional · escolha o aplicativo ou serviço desta despesa.</p></div></div>'+
   '<input type="hidden" name="serviceId" value="'+esc(item?.id||(custom?'custom':''))+'">'+
   '<div class="gb-service-selected">'+
    '<span class="gb-service-selected-content">'+(item?serviceIconMarkup(item):'<span class="gb-service-monogram" aria-hidden="true">+</span>')+
@@ -49,7 +49,7 @@ export function servicePickerMarkup(title=null){
   '<input type="text" maxlength="120" name="serviceName" value="'+esc(custom?title?.serviceName||'':'')+'" placeholder="Ex.: Serviço local" '+(custom?'required':'')+'></label>'+
   '<div class="gb-service-picker" id="gb-service-options" hidden>'+
    '<label class="gb-service-search-label">Buscar serviço<input type="search" id="gb-service-search" placeholder="Netflix, iFood, Spotify..." autocomplete="off"></label>'+
-   '<label class="gb-service-group-label">Categoria<select id="gb-service-group" data-gb-native="true"><option value="all">Todos os serviços</option>'+
+   '<label class="gb-service-group-label">Tipo de serviço<select id="gb-service-group" data-gb-native="true"><option value="all">Todos os serviços</option>'+
     Object.entries(SERVICE_GROUPS).map(([key,value])=>'<option value="'+esc(key)+'">'+esc(value)+'</option>').join('')+'</select></label>'+
    '<div class="gb-service-options" role="group" aria-label="Serviços disponíveis">'+
     SERVICE_CATALOG.map(service=>
