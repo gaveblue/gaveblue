@@ -9,7 +9,7 @@ import {routes,dashboard,titlesView,partnersView,categoriesView,flowView,reports
 import {accountsCardsView} from './accounts-cards-view.js?v=20261106-2513';
 import {renderReactCharts,unmountReactCharts} from './gb-react-loader.js?v=20261105-45';
 import {mountNativeCharts} from './gb-charts-native.js?v=20261106-68';
-import {titleForm,partnerForm,accountForm,categoryForm,paymentForm,transferForm,titleDetail,customizeForm,accountDetail} from './forms.js?v=20261107-2720';
+import {titleForm,partnerForm,accountForm,categoryForm,paymentForm,transferForm,titleDetail,customizeForm,accountDetail} from './forms.js?v=20261107-2760';
 import {serviceById,serviceSearchKey,isServiceExpenseCategory} from './service-catalog.js?v=20261106-2630';
 import {serviceIconMarkup,serviceIdentityMarkup,serviceDisplayName} from './service-ui.js?v=20261107-2720';
 import {openGbPickerSheet,openGbScheduleSheet,installGbPickerSheet,installEntryFormDrag} from './bottom-sheet.js?v=20261107-2760';
@@ -27,8 +27,8 @@ import {firstSetupView,customMobileNavForm,shortcutsPreview,readMobileNav,firstS
 import {BANKS,bankCatalog,findBank,bankName,syncBankPicker,filterBankPicker,filterBankDirectory} from './banks.js?v=20261105-87';
 import {addCardPurchase,updateCardPurchase,removeCardPurchase,ensureCardMayChange,creditCards,cardPurchases,cardCycle,shiftCardCycle,cardDue} from './credit-cards.js?v=20261107-2760';
 import {cashForecast} from './forecast.js?v=20261105-72';
-import {banksView,bankForm,cardForm,cardPurchaseForm,forecastView,forecastSummary,forecastScenarioForm,forecastResult} from './finance-24-ui.js?v=20261106-2511';
-import {launchesView} from './launches-view.js?v=20261106-2620';
+import {banksView,bankForm,cardForm,cardPurchaseForm,forecastView,forecastSummary,forecastScenarioForm,forecastResult} from './finance-24-ui.js?v=20261107-2760';
+import {launchesView} from './launches-view.js?v=20261107-2760';
 import {installLaunchGestures} from './launches-gestures.js?v=20261104-38';
 import {launchSelection,paymentSelection,paymentSummary,applyLaunchPayments,reversedSelection,applyLaunchReversals,deletionSelection,applyLaunchDeletions} from './launch-actions.js?v=20261105-72';
 import {readPeriodPreference,writePeriodPreference} from './period-preference.js?v=20261107-2730';
