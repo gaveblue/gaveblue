@@ -29,7 +29,7 @@ const form=load('forms',{
  serviceDisplayName:(id,name,description)=>id==='streaming-netflix'?'Netflix':description,
  categoryIconFor:()=> 'tag',isServiceExpenseCategory,
  icon:()=>'<svg></svg>',
- textarea:(label,name,value)=>'<textarea name="'+name+'">'+esc(value||'')+'</textarea>'
+ textarea:(label,name,value)=>'<label>'+esc(label)+'<textarea name="'+name+'">'+esc(value||'')+'</textarea></label>'
 },['titleForm']);
 const html=form.titleForm(dummy);
 assert(html.includes('Etapa 1 de 3'),'Three-step form needs progress');
