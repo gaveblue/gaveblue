@@ -5,11 +5,14 @@ import {entrySelect} from './entry-select.js?v=20261104-42';
 import {gbIcon,CATEGORY_ICON_OPTIONS,categoryIconFor} from './gb-icons.js?v=20261104-42';
 import {bankOptions,findBank,bankPicker} from './banks.js?v=20261105-87';
 import {dailyStatement} from './daily-statement.js?v=20261105-90';
-import {servicePickerMarkup,serviceIdentityMarkup,serviceDisplayName} from './service-ui.js?v=20261106-2620';
+import {servicePickerMarkup,serviceIdentityMarkup,serviceDisplayName} from './service-ui.js?v=20261106-2630';
+import {isServiceExpenseCategory} from './service-catalog.js?v=20261106-2630';
 const required='required maxlength="200"';
 export function titleForm(db,t,type='expense'){
  type=t?.type||type;
  const categoryOptions=db.categories.filter(c=>c.type===type).map(c=>[c.id,c.name,categoryIconFor(c)]);
+ const selectedCategory=db.categories.find(c=>c.id===(t?.categoryId||categoryOptions[0]?.[0]));
+ const showService=type==='expense'&&isServiceExpenseCategory(selectedCategory);
  const typeField='<div class="gb-entry-flow-switch" role="group" aria-label="Tipo de lançamento">'+
   '<select id="entry-type" name="type" class="gb-entry-type-source" data-gb-native="true" aria-hidden="true" tabindex="-1">'+
    '<option value="expense"'+(type==='expense'?' selected':'')+'>Despesa</option>'+
@@ -21,9 +24,10 @@ export function titleForm(db,t,type='expense'){
  const categoryField=entrySelect('Categoria','categoryId',categoryOptions,t?.categoryId,'entry-category',true);
  // PF does not expose partner editing. Preserve any pre-existing partner on edit
  // so that older records remain intact until a dedicated PJ profile is shipped.
- const partnerField='<div class="gb-entry-partner-disabled"><span class="gb-entry-label">Parceiro <small>Em breve para PJ</small></span>'+
-  '<div class="gb-entry-disabled-input" aria-disabled="true">'+icon('lock')+'<span>Desativado para PF</span></div>'+
-  '<input type="hidden" name="partnerId" value="'+esc(t?.partnerId||'')+'"></div>';
+ // Keep legacy partner data in FormData without showing a PF field.
+ // The partner editor can be restored in the future PJ module without
+ // changing the persisted title schema.
+ const partnerField='<input type="hidden" name="partnerId" value="'+esc(t?.partnerId||'')+'">';
  const periodicity=t?
    entrySelect('Situação','cancelled',[['false','Ativo'],['true','Cancelado']],String(t.cancelled),'entry-cancelled'):
    entrySelect('Periodicidade','mode',[['single','Único'],['installment','Parcelado'],['recurring','Recorrente']],'single','entry-mode',true);
@@ -43,9 +47,11 @@ export function titleForm(db,t,type='expense'){
     </div>
    </div>
    <div class="form-grid gb-entry-grid">
-    <div class="full">${categoryField}</div>
-    <div class="full">${field('Descrição','description',t?.serviceId?serviceDisplayName(t.serviceId,t.serviceName,t.description):t?.description||'','text','required maxlength="300" placeholder="Ex.: Energia do escritório" '+(t?.serviceId?'readonly aria-describedby="gb-service-naming-hint"':''))}</div>
-    <div class="full gb-service-area" ${type==='expense'?'':'hidden'}>${servicePickerMarkup(t)}</div>
+    <div class="full gb-entry-category-block">
+     ${categoryField}
+     <div class="gb-service-area" ${showService?'':'hidden'}>${servicePickerMarkup(t)}</div>
+    </div>
+    <div class="full">${field('Descrição','description',t?.serviceId?serviceDisplayName(t.serviceId,t.serviceName,t.description):t?.description||'','text','required maxlength="300" placeholder="Ex.: Energia do escritório" '+(t?.serviceId&&showService?'readonly aria-describedby="gb-service-naming-hint"':''))}</div>
     ${partnerField}
     ${field('Documento','document',t?.document||'','text','maxlength="100" placeholder="Nº do documento"')}
     <div class="gb-entry-date">${field('Emissão','issue',t?.issue||today(),'date','required')}</div>
