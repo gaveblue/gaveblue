@@ -1,7 +1,7 @@
 {
   "version": "2.7.2",
   "build": 1,
-  "published_at": null,
+  "published_at": "2026-11-07T04:14:07Z",
   "title": "Serviços abrem automaticamente na categoria e lançamento mais compacto",
   "notes": [
     "Na primeira etapa do Novo lançamento, a escolha explícita de uma categoria de despesa relacionada a Serviços, Assinaturas, Streaming ou Aplicativos abre automaticamente a listagem completa de serviços no Bottom Sheet.",
@@ -11,7 +11,8 @@
     "Ao trocar para categoria sem serviços, a associação anterior é limpa e a descrição manual volta a ficar visível; uma receita não abre um catálogo de serviços de despesas.",
     "A primeira etapa do formulário e o diálogo ficaram mais compactos e com espaçamentos menores em celular e desktop, buscando evitar rolagem na altura de tela comum sem remover a rolagem acessível em telas pequenas ou com texto ampliado.",
     "O catálogo de 26 serviços, miniaturas sobrepostas na categoria Serviços, periodicidade, datas, faturas, saldos e regras de baixa da 2.7.1 permanecem inalterados.",
-    "Sem migração de banco, alteração de títulos existentes nem gravação financeira causada pela seleção de categoria ou aplicativo."
+    "Sem migração de banco, alteração de títulos existentes nem gravação financeira causada pela seleção de categoria ou aplicativo.",
+    "GB+ 2.7.2 integrada pela PR #90 (commit 6bf9ecb9d733cd69b7185a80347cdd586e4848ed), com GitHub Pages #42337480435 concluído com success em 07/11/2026 às 04:14 UTC."
   ],
   "assets": [
     "./index.html",
@@ -189,9 +190,9 @@
       "description": "Primeira etapa reduzida para diminuir a necessidade de rolagem no celular."
     }
   ],
-  "release_status": "candidate_2_7_2_pending_pages_deploy",
+  "release_status": "published_github_pages_ci_device_validation_pending",
   "homologation": {
-    "status": "isolated_category_service_and_financial_tests_passed_ci_device_pending",
-    "notes": "Cinco regressões isoladas com dados fictícios passaram (categoria abre serviços automaticamente, três etapas e baixa, PF, 26 serviços e bottom sheet); inspeção real em navegador/Android PWA e CI financeiro completo continuam pendentes. Nenhuma movimentação financeira real executada."
+    "status": "isolated_five_regressions_passed_pages_success_ci_runner_unavailable_pwa_pending",
+    "notes": "Cinco regressões isoladas com dados fictícios passaram: seleção automática de serviços, três etapas e baixa atômica, formulário PF, catálogo e bottom sheet. Auditoria estática de 19 condições passou. GitHub Pages #42337480435 success. CI financeiro #42337441986 failure sem executar nenhuma etapa (0 passos), impedindo homologação integral; comportamento visual e gestos em PWA Android real ainda não verificados. Nenhuma movimentação financeira real foi executada."
   }
 }
