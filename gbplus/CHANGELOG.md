@@ -2,6 +2,35 @@
 
 Registro de mudanças do aplicativo localizado em `gbplus/`. Toda versão e toda compilação deve possuir uma entrada própria. **Uma alteração não deve ser considerada homologada apenas porque existe commit, teste escrito ou publicação.** A homologação exige evidências da execução e aprovação explícita.
 
+## [2.7.0 — BOTTOM SHEETS ARRASTÁVEIS E IDENTIDADE VISUAL DOS ÍCONES] — 2026-11-07
+
+**Status inicial: CANDIDATA À PUBLICAÇÃO.** Atualização intermediária de interface (2.6.3 → 2.7.0), sem uso de 2.7.3 para o primeiro lançamento desta série.
+
+### Painéis de categoria e serviço
+- Novo componente reutilizável em `js/bottom-sheet.js` e `bottom-sheet.css`: `<dialog>` nativo com foco controlado, botões acessíveis, toque, teclado e gesto de arrastar pelo puxador; ESC e toque no fundo fecham o seletor, sem desmontar nem perder o formulário.
+- **Categorias:** toda categoria já cadastrada para o tipo selecionado (Despesa/Receita) aparece em lista alfabética pesquisável, com ícone e indicação da seleção atual. Não cria nem renomeia categorias automaticamente.
+- **Serviços:** os 26 itens do catálogo permanecem organizados em cinco grupos. A seleção é feita no mesmo padrão arrastável, com busca, logo/monograma, **Outro serviço** e **Sem serviço**.
+- A seleção altera apenas os campos de formulário já existentes e dispara a mesma rotina de `change` responsável pelas categorias e validações. Não salva, baixa, assina ou concilia automaticamente.
+- O seletor de categoria mantém seu `select` HTML de origem como transportador de `FormData`, mas a lista visual não fica mais espremida em dropdown pequeno.
+- A lista rola de forma independente, enquanto a barra de arrastar pode levar o painel de parcial a expandido e recolher ou fechar. Controles funcionam com toque, mouse, Escape, teclado e leitor de tela.
+
+### Formulário móvel
+- O **Novo lançamento** também passa a funcionar como painel inferior móvel com puxador próprio, permitindo estado compacto, normal e expandido. Os valores digitados e a etapa do formulário permanecem intactos ao arrastar.
+- A visualização desktop continua adaptada à largura disponível; o seletor de categorias e serviços abre em um painel centralizado na parte inferior.
+- A preferência por movimento reduzido desativa animações, sem desativar os controles.
+
+### Ícones de bancos e aplicativos
+- Os símbolos de serviços passam a preencher aproximadamente 76% dos blocos, com fundos nas cores de referência e ícones/monogramas de alto contraste no tema claro e escuro.
+- Os vetores locais de marcas existentes permanecem associados aos seus titulares. Serviços sem vetor verificado continuam usando iniciais legíveis, sem inventar logotipos oficiais.
+- Logotipos de bancos preenchem o selo sem `padding` artificial e mantêm fundo claro de alto contraste no modo escuro. Falhas nos arquivos preservam a identidade textual por iniciais. Os arquivos SVG originais não são alterados.
+
+### Testes, compatibilidade e próximos passos
+- Novo `tests/bottom-sheet-regression.mjs` cobre 26 serviços, categorias dinâmicas e conteúdo potencialmente malicioso, busca com acentos, estados parcial/expandido/compacto, foco, seleção, rolagem independente e presença das salvaguardas.
+- Atualizado `tests/services-regression.mjs` para o novo seletor compacto e contraste dos ícones.
+- `tests/pf-entry-ui-regression.mjs` continua garantindo parceiro oculto no PF, valor centralizado, categorias de Serviços e preservação de vínculo antigo.
+- Testes isolados com dados sintéticos e checagens estáticas realizados. CI completo e inspeção visual de PWA no aparelho real **não devem ser descritos como homologados sem evidências**.
+- A publicação depende de merge/implantação do Pages e da documentação dos resultados, nunca apenas do número da versão.
+
 ## [2.6.3 — VALOR CENTRALIZADO E SERVIÇOS DENTRO DA CATEGORIA] — 2026-11-06
 
 **PUBLICAÇÃO CONFIRMADA:** PR [#87](https://github.com/gaveblue/gaveblue/pull/87) integrada à `main` (commit `29cfae047aa78cbe9f7d48c489bff08d2f28dc56`) e GitHub Pages [42332219181](https://github.com/gaveblue/gaveblue/actions/runs/42332219181) concluído com `success` em 07/11/2026 às 03:04 UTC. Testes isolados do formulário PF e de serviços passaram. O workflow financeiro [42332188995](https://github.com/gaveblue/gaveblue/actions/runs/42332188995) falhou antes de executar etapas (0 passos); o PWA ainda aguarda teste manual em aparelho real. **Publicação não significa homologação integral.**
