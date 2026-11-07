@@ -1,5 +1,5 @@
 import {parseBankStatement,parseBankCsv,inspectBankCsv,proposeReconciliation,readBankFileText} from './bank-import-preview.js?v=20261106-2509';
-import {bankImportMarkup,bankImportHistoryMarkup,bankImportFilteredRows,bankImportBulkDecisions,BANK_IMPORT_PAGE_SIZE,BANK_IMPORT_WRITES_ENABLED} from './bank-import-ui.js?v=20261106-2520';
+import {bankImportMarkup,bankImportHistoryMarkup,bankImportFilteredRows,bankImportBulkDecisions,BANK_IMPORT_PAGE_SIZE,BANK_IMPORT_WRITES_ENABLED} from './bank-import-ui.js?v=20261106-2600';
 import {reviewSelection,applyReconciliationBatch,undoReconciliationBatch,reconciliationRecordKey,knownReconciliationKeys} from './bank-reconciliation.js?v=20261106-2505';
 import {filterFlowRows} from './gb-flow-filters.js?v=20261106-68';
 import {uid,today,money,dateLabel,cents,addMonths,validDate,generateTitles,addPayment,transfer,updateTitle,pending,flow,within} from './domain.js?v=20261105-72';
@@ -9,7 +9,9 @@ import {routes,dashboard,titlesView,partnersView,categoriesView,flowView,reports
 import {accountsCardsView} from './accounts-cards-view.js?v=20261106-2513';
 import {renderReactCharts,unmountReactCharts} from './gb-react-loader.js?v=20261105-45';
 import {mountNativeCharts} from './gb-charts-native.js?v=20261106-68';
-import {titleForm,partnerForm,accountForm,categoryForm,paymentForm,transferForm,titleDetail,customizeForm,accountDetail} from './forms.js?v=20261106-2509';
+import {titleForm,partnerForm,accountForm,categoryForm,paymentForm,transferForm,titleDetail,customizeForm,accountDetail} from './forms.js?v=20261106-2600';
+import {serviceById,serviceSearchKey} from './service-catalog.js?v=20261106-2600';
+import {serviceIconMarkup,serviceIdentityMarkup} from './service-ui.js?v=20261106-2600';
 import {toggleEntryMenu,chooseEntryOption,syncEntrySelect,closeEntryMenus} from './entry-select.js?v=20261104-42';
 import {installGbControls,enhanceGbControls} from './custom-controls.js?v=20261104-42';
 import {expectedDates,recurrenceAnchor} from './gb-calendar-rules.js?v=20261105-47';
@@ -257,11 +259,50 @@ function requestLaunchDeletion(ids){
   ()=>commit(d=>applyLaunchDeletions(d,ids),selected.length+' lançamento(s) excluído(s).'));
 }
 
+function updateServicePicker(form,id){
+ if(!form||form.id!=='title-form')return;
+ const service=serviceById(id),custom=id==='custom';
+ if(id&&!service&&!custom)throw Error('Serviço não localizado.');
+ const hidden=form.querySelector('[name="serviceId"]');
+ const name=form.querySelector('[name="serviceName"]');
+ const wrap=form.querySelector('.gb-service-custom');
+ const current=form.querySelector('.gb-service-selected-content');
+ const toggle=form.querySelector('[data-action="title-service-toggle"]');
+ const options=form.querySelector('#gb-service-options');
+ hidden.value=service?.id||(custom?'custom':'');
+ if(!custom)name.value='';
+ wrap.hidden=!custom;name.required=custom;
+ const label=service?.name||(custom?'Outro serviço':'Nenhum serviço escolhido');
+ current.innerHTML=(service?serviceIconMarkup(service):'<span class="gb-service-monogram" aria-hidden="true">+</span>')+
+  '<span class="gb-service-selected-name">'+esc(label)+'</span>';
+ if(service&&!form.elements.description.value.trim())form.elements.description.value=service.name;
+ toggle.textContent=id?'Alterar':'Escolher serviço';
+ toggle.setAttribute('aria-expanded','false');options.hidden=true;
+ if(custom)name.focus({preventScroll:true});
+}
+function filterServicesInForm(form){
+ if(!form||form.id!=='title-form')return;
+ const search=serviceSearchKey(form.querySelector('#gb-service-search')?.value||'');
+ const group=form.querySelector('#gb-service-group')?.value||'all';
+ let found=0;
+ form.querySelectorAll('.gb-service-option').forEach(option=>{
+  const matchText=!search||option.dataset.serviceSearch?.includes(search);
+  const matchGroup=group==='all'||option.dataset.serviceGroup===group||option.dataset.serviceGroup==='custom';
+  option.hidden=!(matchText&&matchGroup);if(!option.hidden)found++;
+ });
+ const noResult=form.querySelector('.gb-service-empty');
+ if(noResult)noResult.hidden=found>0;
+}
 function validateEntryStepOne(form){
  const type=form.elements.type?.value;
  const categoryId=form.elements.categoryId?.value;
  if(!['income','expense'].includes(type)||!db.categories.some(c=>c.id===categoryId&&c.type===type))throw Error('Selecione o tipo e uma categoria válida.');
  if(!form.elements.description?.value.trim())throw Error('Informe a descrição do lançamento.');
+ const serviceId=form.elements.serviceId?.value||'';
+ const customName=form.elements.serviceName?.value.trim()||'';
+ if(serviceId&&type!=='expense')throw Error('Serviços só podem ser associados a despesas.');
+ if(serviceId&&!serviceById(serviceId)&&serviceId!=='custom')throw Error('Escolha um serviço válido.');
+ if(serviceId==='custom'&&(!customName||customName.length>120))throw Error('Informe o nome do serviço personalizado (até 120 caracteres).');
  if(!validDate(form.elements.issue?.value))throw Error('Informe uma data de emissão válida.');
  if(!validDate(form.elements.due?.value))throw Error('Informe uma data de vencimento válida.');
 }
@@ -362,6 +403,14 @@ const actions={
   'entry-option':el=>chooseEntryOption(el),
   'title-next':el=>toggleEntryStep(el.closest('#title-form'),2),
   'title-back':el=>toggleEntryStep(el.closest('#title-form'),1),
+  'title-service-toggle':el=>{
+   const form=el.closest('#title-form'),picker=form?.querySelector('#gb-service-options');
+   if(!picker)return;
+   picker.hidden=!picker.hidden;el.setAttribute('aria-expanded',String(!picker.hidden));
+   if(!picker.hidden)form.querySelector('#gb-service-search')?.focus({preventScroll:true});
+  },
+  'title-service-pick':el=>updateServicePicker(el.closest('#title-form'),el.dataset.serviceId),
+  'title-service-clear':el=>updateServicePicker(el.closest('#title-form'),''),
   'category-icon':el=>{
    const form=el.closest('#category-form'),value=el.dataset.icon;
    if(!form||!CATEGORY_ICON_OPTIONS.some(([key])=>key===value))return;
@@ -889,9 +938,13 @@ document.addEventListener('submit',async e=>{e.preventDefault();if(busy||!db)ret
   if(form.id==='title-form'){
    if(form.dataset.step!=='2')throw Error('Conclua as duas etapas do lançamento.');
    validateEntryStepOne(form);
+   const serviceId=v.type==='expense'?String(v.serviceId||''):'';
+   if(serviceId&&!serviceById(serviceId)&&serviceId!=='custom')throw Error('Serviço inválido.');
+   const serviceName=serviceId==='custom'?String(v.serviceName||'').trim():'';
+   if(serviceId==='custom'&&(!serviceName||serviceName.length>120))throw Error('Informe o nome do serviço.');
    const input={type:v.type,description:v.description.trim(),categoryId:v.categoryId,partnerId:v.partnerId||'',
     document:v.document.trim(),issue:v.issue,due:v.due,amount:cents(v.amount),
-    accountId:v.accountId||'',notes:v.notes.trim()};
+    accountId:v.accountId||'',notes:v.notes.trim(),serviceId,serviceName};
    if(id){
     const original=getTitle(id);
     const businessDays=original.mode!=='single'&&v.businessDays==='true';
@@ -989,7 +1042,8 @@ document.addEventListener('change',async e=>{if(!db)return;const el=e.target;try
   if(el.form?.id==='profile-form')syncProfileSaveState(el.form);
   if(el.form?.id==='title-form'&&['mode','scope','count','due','businessDays'].includes(el.name))refreshEntrySchedule(el.form);
   if(el.name?.startsWith('slot')&&el.form?.id==='mobile-nav-form')updateMobileNavPreview(el.form);
-  if(el.id==='entry-type'){const select=document.querySelector('#entry-category');if(select){select.innerHTML=db.categories.filter(c=>c.type===el.value).map(c=>`<option value="${esc(c.id)}" data-icon="${esc(categoryIconFor(c))}">${esc(c.name)}</option>`).join('');syncEntrySelect(select);}}
+  if(el.id==='entry-type'){const select=document.querySelector('#entry-category');if(select){select.innerHTML=db.categories.filter(c=>c.type===el.value).map(c=>`<option value="${esc(c.id)}" data-icon="${esc(categoryIconFor(c))}">${esc(c.name)}</option>`).join('');syncEntrySelect(select);}const area=el.form?.querySelector('.gb-service-area');if(area){area.hidden=el.value!=='expense';if(el.value!=='expense')updateServicePicker(el.form,'');}}
+  if(el.id==='gb-service-group')filterServicesInForm(el.closest('#title-form'));
   if(el.id==='entry-mode'){refreshEntrySchedule(el.form);}
   if(el.id==='period'){if(el.value==='custom'){openModal('Escolher período',`<form id="period-form"><div class="form-grid">${field('De','from',state.range.from||today(),'date','required')}${field('Até','to',state.range.to||today(),'date','required')}</div>${formFooter('Aplicar período')}</form>`);el.value=state.period;}else{state.period=el.value;state.range=rangeFor(el.value);state.launchSelected=[];state.launchStatusOpen=false;render();}}
   if(el.dataset.filter){state[el.dataset.filter]=el.value;if(['partner','category'].includes(el.dataset.filter))state.moreFilters=true;state.launchSelected=[];render();}
@@ -997,7 +1051,7 @@ document.addEventListener('change',async e=>{if(!db)return;const el=e.target;try
   if(el.id==='report-partner'){state.reportPartner=el.value;render();}
   if(el.id==='backup-input'&&el.files[0]){const file=el.files[0];el.value='';if(file.size>15*1024*1024)throw Error('O backup deve ter no máximo 15 MB.');const restored=parseBackup(await file.text());confirm('Restaurar backup?',`Este arquivo contém ${restored.titles.length} títulos, ${restored.partners.length} parceiros e ${restored.accounts.length} contas. Os registros atuais serão substituídos. Exporte um backup antes de continuar, se necessário.`,()=>commit(d=>{Object.keys(d).forEach(k=>delete d[k]);Object.assign(d,restored);},'Backup restaurado com sucesso.'));}
 }catch(error){fail(error);}});
-document.addEventListener('input',e=>{if(e.target.form?.id==='title-form'&&['amount','count','due'].includes(e.target.name))refreshEntrySchedule(e.target.form);if(e.target.form?.id==='profile-form'){
+document.addEventListener('input',e=>{if(e.target.id==='gb-service-search')filterServicesInForm(e.target.closest('#title-form'));if(e.target.form?.id==='title-form'&&['amount','count','due'].includes(e.target.name))refreshEntrySchedule(e.target.form);if(e.target.form?.id==='profile-form'){
  const field=e.target;
  if(field.name==='cpf'){
   const digits=field.value.replace(/\D/g,'').slice(0,11);
