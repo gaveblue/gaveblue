@@ -12,7 +12,7 @@ import {mountNativeCharts} from './gb-charts-native.js?v=20261106-68';
 import {titleForm,partnerForm,accountForm,categoryForm,paymentForm,transferForm,titleDetail,customizeForm,accountDetail} from './forms.js?v=20261107-2720';
 import {serviceById,serviceSearchKey,isServiceExpenseCategory} from './service-catalog.js?v=20261106-2630';
 import {serviceIconMarkup,serviceIdentityMarkup,serviceDisplayName} from './service-ui.js?v=20261107-2720';
-import {openGbPickerSheet,installGbPickerSheet,installEntryFormDrag} from './bottom-sheet.js?v=20261107-2720';
+import {openGbPickerSheet,openGbScheduleSheet,installGbPickerSheet,installEntryFormDrag} from './bottom-sheet.js?v=20261107-2760';
 import {toggleEntryMenu,chooseEntryOption,syncEntrySelect,closeEntryMenus} from './entry-select.js?v=20261107-2720';
 import {installGbControls,enhanceGbControls} from './custom-controls.js?v=20261104-42';
 import {expectedDates,recurrenceAnchor} from './gb-calendar-rules.js?v=20261105-47';
@@ -25,7 +25,7 @@ import {canResetFinancialData,canDeleteAccount,clearFinancialDocument} from './a
 import {resetAccountModal,deleteAccountModal,syncAccountDangerConfirm} from './account-safety-ui.js?v=20261106-2610';
 import {firstSetupView,customMobileNavForm,shortcutsPreview,readMobileNav,firstStepsPanel} from './setup-ui.js?v=20261105-87';
 import {BANKS,bankCatalog,findBank,bankName,syncBankPicker,filterBankPicker,filterBankDirectory} from './banks.js?v=20261105-87';
-import {addCardPurchase,updateCardPurchase,removeCardPurchase,ensureCardMayChange,creditCards,cardPurchases} from './credit-cards.js?v=20261107-2760';
+import {addCardPurchase,updateCardPurchase,removeCardPurchase,ensureCardMayChange,creditCards,cardPurchases,cardCycle,shiftCardCycle,cardDue} from './credit-cards.js?v=20261107-2760';
 import {cashForecast} from './forecast.js?v=20261105-72';
 import {banksView,bankForm,cardForm,cardPurchaseForm,forecastView,forecastSummary,forecastScenarioForm,forecastResult} from './finance-24-ui.js?v=20261106-2511';
 import {launchesView} from './launches-view.js?v=20261106-2620';
@@ -462,6 +462,10 @@ function syncEntrySettlement(form){
  if(account)account.required=payNow;
  if(date)date.required=payNow;
  if(cardId)cardId.required=chargeCard;
+ const dueField=form.querySelector('.gb-entry-date-due');
+ if(dueField)dueField.hidden=chargeCard;
+ const businessDays=form.querySelector('.gb-entry-business-switch');
+ if(businessDays)businessDays.hidden=chargeCard;
 }
 function validateEntryStepThree(form){
  const choice=form.elements.settlement?.value||'pending';
@@ -529,14 +533,22 @@ function refreshEntrySchedule(form){
  section.hidden=mode==='single'||(!!form.dataset.id&&form.elements.scope?.value!=='future');
  if(section.hidden)return;
  const target=form.querySelector('#gb-entry-schedule'),summary=form.querySelector('#gb-entry-schedule-count');
- const due=form.elements.due?.value;
+ const due=form.elements.settlement?.value==='card'?form.elements.issue?.value:form.elements.due?.value;
  const count=form.elements.count?Number(form.elements.count.value):(Number(form.dataset.count)||1);
- if(!validDate(due)){target.textContent='Defina um vencimento válido na terceira etapa.';return;}
+ if(!validDate(due)){target.textContent='Defina uma data válida na terceira etapa.';return;}
  if(!Number.isInteger(count)||count<1||count>120){target.textContent='Informe de 1 a 120 parcelas ou meses.';return;}
  try{
   const source=form.dataset.id?getTitle(form.dataset.id):null;
   const anchor=source?recurrenceAnchor(due,source):due;
-  const dates=expectedDates(anchor,mode,count,!!form.elements.businessDays?.checked,addMonths);
+  const cardChoice=form.elements.settlement?.value==='card';
+  const card=db.cards?.find(c=>c.id===form.elements.settleCardId?.value&&c.active);
+  const dates=cardChoice&&card?
+   Array.from({length:count},(_,i)=>{
+    const cycle=shiftCardCycle(cardCycle(form.elements.issue?.value,card.closingDay),i);
+    const dueOn=cardDue(cycle,card.closingDay,card.dueDay);
+    return {index:i+1,date:dueOn,nominal:dueOn,shifted:false};
+   }):
+   expectedDates(anchor,mode,count,!!form.elements.businessDays?.checked,addMonths);
   let amount=0;
   try{amount=cents(form.elements.amount?.value||'0,00');}catch{}
   summary.textContent=count+' vencimento'+(count!==1?'s':'');
@@ -630,6 +642,14 @@ const actions={
    });
    form.dataset.entryType=type;
    select.dispatchEvent(new Event('change',{bubbles:true}));
+  },
+  'title-schedule-detail':()=>{
+   const form=modal.querySelector('#title-form');
+   if(!form||form.dataset.step!=='3')return;
+   refreshEntrySchedule(form);
+   const rows=form.querySelector('#gb-entry-schedule');
+   const count=Number(form.elements.count?.value||form.dataset.count||1);
+   if(rows)openGbScheduleSheet(rows.innerHTML||'<p>Defina vencimentos válidos para continuar.</p>',count);
   },
   'title-next':el=>{const form=el.closest('#title-form')||modal.querySelector('#title-form');toggleEntryStep(form,Math.min(3,Number(form?.dataset.step||1)+1));},
   'title-back':el=>{const form=el.closest('#title-form')||modal.querySelector('#title-form');toggleEntryStep(form,Math.max(1,Number(form?.dataset.step||1)-1));},
