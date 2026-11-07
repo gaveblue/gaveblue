@@ -1,6 +1,10 @@
 name: GB+ - diagnostico de runner
 
 on:
+  push:
+    branches: ['fix/gbplus-security-ci-20261107']
+    paths:
+      - '.github/workflows/gbplus-runner-diagnostic.yml'
   pull_request:
     branches: [main]
     paths:
