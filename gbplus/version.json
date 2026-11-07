@@ -1,20 +1,18 @@
 {
-  "version": "2.6.0",
+  "version": "2.6.1",
   "build": 1,
-  "published_at": "2026-11-07T01:33:41Z",
-  "title": "Contas e cartões, extratos mais claros e serviços no lançamento",
+  "published_at": null,
+  "title": "Limpeza de dados e exclusão de conta com confirmação de segurança",
   "notes": [
-    "Contas e Cartões agora compartilham uma tela, com alternância fixa durante a rolagem, cabeçalho uniforme e ações específicas em cada aba.",
-    "Importações OFX/CSV exibem resumo amigável, filtros de entradas e saídas e seleção de movimentos por página.",
-    "Decisões em lote permitem ignorar, manter pendente ou preparar despesa paga, com confirmação dupla antes de qualquer alteração financeira.",
-    "O formulário Novo lançamento oferece catálogo de 26 serviços de streaming, música, delivery, mobilidade e serviços digitais, inclusive Outro serviço.",
-    "13 marcas têm pictogramas locais de referência e 13 usam iniciais neutras; não há integração automática com plataformas nem parceria declarada.",
-    "A identificação de serviço é opcional, editável e preservada nos lançamentos, nos detalhes, no histórico e em backup.",
-    "Periodicidade e valor sempre dependem de escolha e confirmação do usuário. Selecionar serviço não cria título ou despesa automaticamente.",
-    "Convenção pública de versões X.Y.Z: não são exibidas compilações nas mensagens de atualização.",
-    "A remodelação completa do formulário Novo lançamento continua no planejamento para avaliação após o envio da inspiração visual.",
-    "Validação Node, GitHub Actions e conferência em aparelho real são registradas em separado das alterações do código.",
-    "Versão 2.6.0 integrada pela PR #84 (commit d6ec0df7) e implantação do GitHub Pages #42324669146 concluída com sucesso em 07/11/2026 01:33 UTC."
+    "Nas Configurações, adicionada a opção Limpar todos os dados, separada de Excluir conta.",
+    "A limpeza mostra contagens de títulos, baixas, contas, cartões, compras, parceiros, transferências, importações e bancos personalizados.",
+    "Para limpar é necessário marcar uma declaração e digitar LIMPAR; o botão só é ativado com as duas confirmações.",
+    "A limpeza restaura o documento financeiro inicial por gravação atômica, com controle de revisão; login, e-mail e perfil continuam ativos.",
+    "Excluir conta deixa de abrir um simples e-mail de suporte: agora utiliza a função autenticada gbplus-delete-account no Supabase.",
+    "Para excluir, o usuário precisa informar seu e-mail, digitar EXCLUIR e marcar a confirmação; o servidor valida o JWT e exclui somente o próprio usuário.",
+    "A exclusão remove cadastro e dados do GB+ vinculados ao usuário; cópias de backup já exportadas e arquivos em outros dispositivos não são apagados automaticamente.",
+    "Adicionados testes de segurança específicos e atualizados os esclarecimentos na política de privacidade.",
+    "Ações destrutivas não são executadas durante a instalação ou atualização: dependem de decisão e confirmação do usuário."
   ],
   "assets": [
     "./index.html",
@@ -168,33 +166,30 @@
     "./js/accounts-cards-view.js",
     "./js/service-catalog.js",
     "./js/service-brand-paths.js",
-    "./js/service-ui.js"
+    "./js/service-ui.js",
+    "./js/account-safety.js",
+    "./js/account-safety-ui.js"
   ],
   "highlights": [
     {
-      "icon": "credit-card",
-      "title": "Contas e cartões em harmonia",
-      "description": "Troque entre as duas abas sem perder a navegação e com ações organizadas."
-    },
-    {
-      "icon": "wallet",
-      "title": "Importação mais simples",
-      "description": "Filtre movimentações, selecione despesas e confira tudo antes da baixa."
-    },
-    {
-      "icon": "sparkles",
-      "title": "26 serviços identificáveis",
-      "description": "Netflix, iFood, Spotify e outros em um catálogo opcional no lançamento."
-    },
-    {
       "icon": "shield",
-      "title": "Seu saldo sob controle",
-      "description": "Nenhuma ação de serviço ou seleção bancária grava dinheiro sem autorização."
+      "title": "Limpar o financeiro com segurança",
+      "description": "Recomece do zero, com confirmação digitada e sem perder o login."
+    },
+    {
+      "icon": "trash",
+      "title": "Exclusão de conta funcional",
+      "description": "Remova sua conta e os dados associados usando uma confirmação protegida."
+    },
+    {
+      "icon": "download",
+      "title": "Backup antes de apagar",
+      "description": "Exporte uma cópia dos seus dados diretamente na tela de confirmação."
     }
   ],
-  "release_status": "published_github_pages_ci_pwa_validation_pending",
+  "release_status": "candidate_2_6_1_pending_pages",
   "homologation": {
-    "status": "isolated_tests_passed_pages_success_ci_runner_failed_pwa_pending",
-    "notes": "Confirmado deploy GitHub Pages #42324669146 (success) do commit d6ec0df7. Os testes isolados de Contas/Cartões, Importações e Serviços passaram em JavaScript com dados fictícios; workflow GB+ regressões #42324622731 falhou antes de iniciar qualquer etapa, sem evidência de erro no código, issue #75. Android/iOS PWA real ainda não testados; não confundir publicação com homologação integral."
+    "status": "isolated_tests_passed_edge_deployed_ci_pwa_pending",
+    "notes": "Verificados os fluxos de validação em JS com dados fictícios, sem apagar contas reais. A Edge Function gbplus-delete-account foi implantada no Supabase com verify_jwt=true. Ainda não foi realizado teste de exclusão autenticada ponta a ponta em usuário descartável; execução completa CI e PWA real pendentes."
   }
 }
