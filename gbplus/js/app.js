@@ -25,7 +25,7 @@ import {canResetFinancialData,canDeleteAccount,clearFinancialDocument} from './a
 import {resetAccountModal,deleteAccountModal,syncAccountDangerConfirm} from './account-safety-ui.js?v=20261106-2610';
 import {firstSetupView,customMobileNavForm,shortcutsPreview,readMobileNav,firstStepsPanel} from './setup-ui.js?v=20261105-87';
 import {BANKS,bankCatalog,findBank,bankName,syncBankPicker,filterBankPicker,filterBankDirectory} from './banks.js?v=20261105-87';
-import {addCardPurchase,removeCardPurchase,ensureCardMayChange,creditCards,cardPurchases} from './credit-cards.js?v=20261105-72';
+import {addCardPurchase,updateCardPurchase,removeCardPurchase,ensureCardMayChange,creditCards,cardPurchases} from './credit-cards.js?v=20261107-2760';
 import {cashForecast} from './forecast.js?v=20261105-72';
 import {banksView,bankForm,cardForm,cardPurchaseForm,forecastView,forecastSummary,forecastScenarioForm,forecastResult} from './finance-24-ui.js?v=20261106-2511';
 import {launchesView} from './launches-view.js?v=20261106-2620';
@@ -401,7 +401,7 @@ function validateEntryStepOne(form){
  const type=form.elements.type?.value;
  const categoryId=form.elements.categoryId?.value;
  if(!['income','expense'].includes(type)||!db.categories.some(c=>c.id===categoryId&&c.type===type))throw Error('Selecione o tipo e uma categoria válida.');
- if(!form.elements.description?.value.trim())throw Error('Informe a descrição do lançamento.');
+ // A descrição é opcional: a categoria é usada como identificação na gravação.
  if(cents(form.elements.amount?.value||'0')<1)throw Error('Informe um valor maior que R$ 0,00.');
  const serviceId=form.elements.serviceId?.value||'';
  const customName=form.elements.serviceName?.value.trim()||'';
@@ -649,6 +649,11 @@ const actions={
    openModal('Editar cartão de crédito',cardForm(db,card));
   },
   'new-card-purchase':el=>openModal('Compra no cartão de crédito',cardPurchaseForm(db,el?.dataset?.id||'')),
+  'edit-card-purchase':el=>{
+   const purchase=cardPurchases(db).find(p=>p.id===el.dataset.id);
+   if(!purchase)throw Error('Compra não encontrada.');
+   openModal('Editar compra no cartão',cardPurchaseForm(db,purchase.cardId,purchase));
+  },
   'delete-card-purchase':el=>{
    const purchase=cardPurchases(db).find(x=>x.id===el.dataset.id);
    if(!purchase)throw Error('Compra não encontrada.');
@@ -1189,7 +1194,7 @@ document.addEventListener('submit',async e=>{e.preventDefault();if(busy||!db)ret
    if(serviceId&&!serviceById(serviceId)&&serviceId!=='custom')throw Error('Serviço inválido.');
    const serviceName=serviceId==='custom'?String(v.serviceName||'').trim():'';
    if(serviceId==='custom'&&(!serviceName||serviceName.length>120))throw Error('Informe o nome do serviço.');
-   const description=serviceId?serviceDisplayName(serviceId,serviceName,''):v.description.trim();
+   const description=serviceId?serviceDisplayName(serviceId,serviceName,''):(v.description.trim()||db.categories.find(c=>c.id===v.categoryId)?.name||'Lançamento');
    const relatedCardId=v.type==='income'?String(v.relatedCardId||''):'';
    if(relatedCardId&&!(db.cards||[]).some(card=>card.id===relatedCardId))throw Error('Selecione um cartão válido para o reembolso.');
    const isPaid=!id&&v.settlement==='paid';
@@ -1269,8 +1274,10 @@ document.addEventListener('submit',async e=>{e.preventDefault();if(busy||!db)ret
   else if(form.id==='card-purchase-form'){
    const amount=cents(v.amount),count=Number(v.count||1);
    if(!Number.isInteger(count)||count<1||count>36)throw Error('Informe de 1 a 36 parcelas.');
-   await commit(d=>addCardPurchase(d,{cardId:v.cardId,date:v.date,amount,description:v.description,categoryId:v.categoryId,partnerId:v.partnerId,count}),
-    'Compra registrada. As faturas correspondentes foram atualizadas.');
+   await commit(d=>id?
+    updateCardPurchase(d,id,{cardId:v.cardId,date:v.date,amount,description:v.description,categoryId:v.categoryId,partnerId:v.partnerId,count}):
+    addCardPurchase(d,{cardId:v.cardId,date:v.date,amount,description:v.description,categoryId:v.categoryId,partnerId:v.partnerId,count}),
+    id?'Compra atualizada. Faturas conferidas, sem duplicidade.':'Compra registrada. As faturas correspondentes foram atualizadas.');
   }
   else if(form.id==='forecast-scenario-form'){
    const title=db.titles.find(t=>t.id===v.titleId&&pending(db,t)>0);
