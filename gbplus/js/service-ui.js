@@ -12,7 +12,7 @@ export function serviceIconMarkup(service,size='small'){
  const hex=SERVICE_BRAND_COLORS[item.id]||'';
  const valid=/^[A-F0-9]{6}$/.test(hex);
  const rgb=valid?[0,2,4].map(n=>parseInt(hex.slice(n,n+2),16)):[];
- const bright=valid&&(rgb[0]*.2126+rgb[1]*.7152+rgb[2]*.0722)>170;
+ const bright=valid&&(rgb[0]*.2126+rgb[1]*.7152+rgb[2]*.0722)>150;
  const style=valid?' style="--gb-service-color:#'+hex+';--gb-service-fg:'+(bright?'#151515':'#ffffff')+'"':'';
  const dark=hex==='000000'?' gb-service-logo-dark':'';
  const path=SERVICE_BRAND_PATHS[item.id];
