@@ -1,5 +1,16 @@
 # CHANGELOG — GB+ Gestão Financeira
 
+## [2.7.3 — LANÇAMENTO COM AÇÕES NO TOPO E PERÍODO MEMORIZADO] — 2026-11-07
+
+**APROVAÇÃO DE PUBLICAÇÃO EXPRESSA EM 07/11/2026.** Integração e implantação ainda aguardam conferência. Testes de integração e uso em PWA Android permanecem sem evidência; não declarar homologação integral.
+
+- Navegação de etapas no topo do modal com ações compactas Voltar, Próximo e Revisar/Salvar; X no cabeçalho substitui o Cancelar redundante do rodapé. Associação do botão submit ao formulário mantida mesmo após realocação; nenhuma ação financeira ocorre ao trocar de etapa.
+- Modal de primeira etapa abre mais acima no celular, preservando rolagem em telas pequenas e com fontes ampliadas.
+- Filtro de período salvo por ID autenticado no armazenamento deste navegador: Este mês, Mês anterior, Este ano, Todo o período e datas personalizadas. Meses/anos relativos recalculam na abertura; intervalos personalizados mantêm datas fixas.
+- Preferência de interface não exige gravação no banco financeiro e não é compartilhada automaticamente entre dispositivos. Valores malformados ou de outra conta não são aproveitados.
+- Regressão isolada de preferências e validações estáticas realizadas; CI financeiro do GitHub falhou antes de executar qualquer etapa. Pendente: verificação visual no PWA Android, evidências de integração financeira e confirmação efetiva da implantação. Aprovação de publicação não equivale à homologação integral.
+
+
 Registro de mudanças do aplicativo localizado em `gbplus/`. Toda versão e toda compilação deve possuir uma entrada própria. **Uma alteração não deve ser considerada homologada apenas porque existe commit, teste escrito ou publicação.** A homologação exige evidências da execução e aprovação explícita.
 
 ## [2.7.2 — SERVIÇOS AUTOMÁTICOS E LANÇAMENTO MAIS COMPACTO] — 2026-11-07

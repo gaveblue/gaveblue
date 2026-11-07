@@ -1,18 +1,14 @@
 {
-  "version": "2.7.2",
+  "version": "2.7.3",
   "build": 1,
-  "published_at": "2026-11-07T04:14:07Z",
-  "title": "Serviços abrem automaticamente na categoria e lançamento mais compacto",
+  "published_at": null,
+  "title": "Navegação compacta e preferência de período",
   "notes": [
-    "Na primeira etapa do Novo lançamento, a escolha explícita de uma categoria de despesa relacionada a Serviços, Assinaturas, Streaming ou Aplicativos abre automaticamente a listagem completa de serviços no Bottom Sheet.",
-    "A transição entre as duas listas acontece somente depois que o painel anterior é fechado, preservando foco, acessibilidade e todos os campos já digitados; cancelar a escolha mantém o formulário, sem salvar lançamentos.",
-    "O campo grande Qual serviço? foi eliminado; o serviço selecionado fica em um chip pequeno com seu logo e nome, que pode ser tocado para trocar a escolha.",
-    "Quando o aplicativo já define a descrição (Netflix, Spotify, iFood etc.), o campo de descrição redundante deixa de ocupar espaço no formulário, mas continua preservado e submetido ao motor financeiro.",
-    "Ao trocar para categoria sem serviços, a associação anterior é limpa e a descrição manual volta a ficar visível; uma receita não abre um catálogo de serviços de despesas.",
-    "A primeira etapa do formulário e o diálogo ficaram mais compactos e com espaçamentos menores em celular e desktop, buscando evitar rolagem na altura de tela comum sem remover a rolagem acessível em telas pequenas ou com texto ampliado.",
-    "O catálogo de 26 serviços, miniaturas sobrepostas na categoria Serviços, periodicidade, datas, faturas, saldos e regras de baixa da 2.7.1 permanecem inalterados.",
-    "Sem migração de banco, alteração de títulos existentes nem gravação financeira causada pela seleção de categoria ou aplicativo.",
-    "GB+ 2.7.2 integrada pela PR #90 (commit 6bf9ecb9d733cd69b7185a80347cdd586e4848ed), com GitHub Pages #42337480435 concluído com success em 07/11/2026 às 04:14 UTC."
+    "Atualização aprovada para publicação em 07/11/2026: as ações Próximo, Voltar e Revisar/Salvar aparecem no cabeçalho do Novo lançamento, liberando o antigo espaço inferior; fechar continua disponível no X.",
+    "A primeira etapa do modal móvel abre um pouco acima, mantendo rolagem quando necessário para acessibilidade e telas menores.",
+    "Este mês, Mês anterior, Este ano, Todo o período e datas personalizadas são lembrados por conta autenticada neste navegador, inclusive após reabrir o aplicativo.",
+    "Datas relativas se atualizam com o calendário; datas personalizadas ficam fixas até o usuário trocar o filtro.",
+    "Nenhum título, saldo, parcela, cartão ou baixa foi alterado automaticamente. Homologação integral não declarada: execução do CI financeiro e teste PWA Android ainda sem evidência."
   ],
   "assets": [
     "./index.html",
@@ -171,28 +167,29 @@
     "./js/account-safety-ui.js",
     "./js/service-brand-colors.js",
     "./js/bottom-sheet.js",
-    "./bottom-sheet.css"
+    "./bottom-sheet.css",
+    "./js/period-preference.js"
   ],
   "highlights": [
     {
-      "icon": "layers",
-      "title": "Serviços abrem automaticamente",
-      "description": "Escolha Serviços na Categoria e veja os aplicativos imediatamente."
+      "icon": "minimize-2",
+      "title": "Formulário mais curto",
+      "description": "Botões compactos no cabeçalho liberam espaço no lançamento."
+    },
+    {
+      "icon": "calendar",
+      "title": "Período lembrado",
+      "description": "A escolha de período fica salva para cada usuário neste navegador."
     },
     {
       "icon": "smartphone",
-      "title": "Campo de serviço compacto",
-      "description": "Após escolher o aplicativo, somente o logo e o nome ficam visíveis, em um seletor discreto."
-    },
-    {
-      "icon": "minimize-2",
-      "title": "Novo lançamento mais enxuto",
-      "description": "Primeira etapa reduzida para diminuir a necessidade de rolagem no celular."
+      "title": "Abertura mais alta",
+      "description": "Formulário móvel abre um pouco mais acima."
     }
   ],
-  "release_status": "published_github_pages_ci_device_validation_pending",
+  "release_status": "approved_for_release_deploy_pending",
   "homologation": {
-    "status": "isolated_five_regressions_passed_pages_success_ci_runner_unavailable_pwa_pending",
-    "notes": "Cinco regressões isoladas com dados fictícios passaram: seleção automática de serviços, três etapas e baixa atômica, formulário PF, catálogo e bottom sheet. Auditoria estática de 19 condições passou. GitHub Pages #42337480435 success. CI financeiro #42337441986 failure sem executar nenhuma etapa (0 passos), impedindo homologação integral; comportamento visual e gestos em PWA Android real ainda não verificados. Nenhuma movimentação financeira real foi executada."
+    "status": "limited_static_checks_approved_publication_ci_runner_unavailable_device_pending",
+    "notes": "Aprovação expressa de publicação pelo responsável em 07/11/2026. Inspeção estática e testes isolados de persistência passaram; CI financeira não iniciou etapas e teste real do PWA Android não foi realizado. Publicação não implica homologação integral."
   }
 }
