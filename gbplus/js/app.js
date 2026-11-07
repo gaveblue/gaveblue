@@ -10,8 +10,8 @@ import {accountsCardsView} from './accounts-cards-view.js?v=20261106-2513';
 import {renderReactCharts,unmountReactCharts} from './gb-react-loader.js?v=20261105-45';
 import {mountNativeCharts} from './gb-charts-native.js?v=20261106-68';
 import {titleForm,partnerForm,accountForm,categoryForm,paymentForm,transferForm,titleDetail,customizeForm,accountDetail} from './forms.js?v=20261106-2620';
-import {serviceById,serviceSearchKey} from './service-catalog.js?v=20261106-2600';
-import {serviceIconMarkup,serviceIdentityMarkup,serviceDisplayName} from './service-ui.js?v=20261106-2620';
+import {serviceById,serviceSearchKey,isServiceExpenseCategory} from './service-catalog.js?v=20261106-2630';
+import {serviceIconMarkup,serviceIdentityMarkup,serviceDisplayName} from './service-ui.js?v=20261106-2630';
 import {toggleEntryMenu,chooseEntryOption,syncEntrySelect,closeEntryMenus} from './entry-select.js?v=20261104-42';
 import {installGbControls,enhanceGbControls} from './custom-controls.js?v=20261104-42';
 import {expectedDates,recurrenceAnchor} from './gb-calendar-rules.js?v=20261105-47';
@@ -63,7 +63,7 @@ function syncSidebarVisibility(hidden,save=false){
 try{syncSidebarVisibility(localStorage.getItem(sidebarPreferenceKey)==='1');}
 catch{syncSidebarVisibility(false);}
 function toast(message){const el=document.querySelector('#toast');el.textContent=message;el.classList.add('visible');clearTimeout(toast.timer);toast.timer=setTimeout(()=>el.classList.remove('visible'),4500);}
-function openModal(title,content){modal.classList.toggle("gb-entry-modal",content.includes('id="title-form"'));modal.classList.toggle("gb-bank-import-modal",content.includes('id="gb-import-workspace"'));document.querySelector('#modal-content').innerHTML=`<div class="modal-heading"><h2 id="modal-title">${title}</h2><button class="icon-button" data-action="close" aria-label="Fechar">${icon('close')}</button></div><div class="modal-body">${content}</div>`;modal.setAttribute('aria-labelledby','modal-title');if(!modal.open)modal.showModal();enhanceGbControls(modal);}
+function openModal(title,content){modal.classList.toggle("gb-entry-modal",content.includes('id="title-form"'));modal.classList.toggle("gb-bank-import-modal",content.includes('id="gb-import-workspace"'));document.querySelector('#modal-content').innerHTML=`<div class="modal-heading"><h2 id="modal-title">${title}</h2><button class="icon-button" data-action="close" aria-label="Fechar">${icon('close')}</button></div><div class="modal-body">${content}</div>`;modal.setAttribute('aria-labelledby','modal-title');if(!modal.open)modal.showModal();enhanceGbControls(modal);fitEntryAmount(modal.querySelector('#entry-amount'));}
 function closeModal(){if(modal.open)modal.close();bankImportDraft=null;pendingGeneration=null;confirmAction=null;if(pwaReady)setTimeout(()=>maybeOfferPwaInstall(),1100);}
 function confirm(title,message,callback){confirmAction=callback;openModal(title,`<p class="confirm-message">${esc(message)}</p><div class="form-error" role="alert"></div><div class="form-footer">${button('Cancelar','close')}${button('Confirmar','confirm','primary')}</div>`);}
 // 2.5.0: preview only, never invokes commit(), Supabase or AI.
@@ -261,6 +261,12 @@ function requestLaunchDeletion(ids){
   ()=>commit(d=>applyLaunchDeletions(d,ids),selected.length+' lançamento(s) excluído(s).'));
 }
 
+/** Center the entire R$ + formatted amount group, including larger values. */
+function fitEntryAmount(input){
+ if(!input||input.id!=='entry-amount')return;
+ const length=String(input.value||'0,00').length;
+ input.style.width=Math.max(4.7,Math.min(18,length+0.8))+'ch';
+}
 function updateServicePicker(form,id){
  if(!form||form.id!=='title-form')return;
  const service=serviceById(id),custom=id==='custom';
@@ -299,6 +305,17 @@ function updateServicePicker(form,id){
  toggle.setAttribute('aria-expanded','false');options.hidden=true;
  if(custom)name.focus({preventScroll:true});
 }
+/** Service choice is a second level of the selected expense category. */
+function syncEntryServiceCategory(form){
+ if(!form||form.id!=='title-form')return;
+ const categoryId=form.elements.categoryId?.value;
+ const category=db.categories.find(c=>c.id===categoryId);
+ const visible=form.elements.type?.value==='expense'&&isServiceExpenseCategory(category);
+ const area=form.querySelector('.gb-service-area');
+ if(!area)return;
+ area.hidden=!visible;
+ if(!visible&&form.elements.serviceId?.value)updateServicePicker(form,'');
+}
 function filterServicesInForm(form){
  if(!form||form.id!=='title-form')return;
  const search=serviceSearchKey(form.querySelector('#gb-service-search')?.value||'');
@@ -321,6 +338,10 @@ function validateEntryStepOne(form){
  const serviceId=form.elements.serviceId?.value||'';
  const customName=form.elements.serviceName?.value.trim()||'';
  if(serviceId&&type!=='expense')throw Error('Serviços só podem ser associados a despesas.');
+ // Old titles may already contain a service in another category; preserve them
+ // when editing, but a new service must be chosen under a service category.
+ if(serviceId&&!form.dataset.id&&!isServiceExpenseCategory(db.categories.find(c=>c.id===categoryId)))
+  throw Error('Selecione a categoria Serviços para identificar o aplicativo.');
  if(serviceId&&!serviceById(serviceId)&&serviceId!=='custom')throw Error('Escolha um serviço válido.');
  if(serviceId==='custom'&&(!customName||customName.length>120))throw Error('Informe o nome do serviço personalizado (até 120 caracteres).');
  if(!validDate(form.elements.issue?.value))throw Error('Informe uma data de emissão válida.');
@@ -1111,7 +1132,16 @@ document.addEventListener('change',async e=>{if(!db)return;const el=e.target;try
   if(el.form?.id==='profile-form')syncProfileSaveState(el.form);
   if(el.form?.id==='title-form'&&['mode','scope','count','due','businessDays'].includes(el.name))refreshEntrySchedule(el.form);
   if(el.name?.startsWith('slot')&&el.form?.id==='mobile-nav-form')updateMobileNavPreview(el.form);
-  if(el.id==='entry-type'){const select=document.querySelector('#entry-category');if(select){select.innerHTML=db.categories.filter(c=>c.type===el.value).map(c=>`<option value="${esc(c.id)}" data-icon="${esc(categoryIconFor(c))}">${esc(c.name)}</option>`).join('');syncEntrySelect(select);}const area=el.form?.querySelector('.gb-service-area');if(area){area.hidden=el.value!=='expense';if(el.value!=='expense')updateServicePicker(el.form,'');}}
+  if(el.id==='entry-type'){
+   const select=el.form?.querySelector('#entry-category');
+   if(select){
+    select.innerHTML=db.categories.filter(c=>c.type===el.value).map(c=>
+     `<option value="${esc(c.id)}" data-icon="${esc(categoryIconFor(c))}">${esc(c.name)}</option>`).join('');
+    syncEntrySelect(select);
+   }
+   syncEntryServiceCategory(el.form);
+  }
+  if(el.id==='entry-category')syncEntryServiceCategory(el.form);
   if(el.id==='gb-service-group')filterServicesInForm(el.closest('#title-form'));
   if(el.id==='entry-mode'){refreshEntrySchedule(el.form);}
   if(el.id==='period'){if(el.value==='custom'){openModal('Escolher período',`<form id="period-form"><div class="form-grid">${field('De','from',state.range.from||today(),'date','required')}${field('Até','to',state.range.to||today(),'date','required')}</div>${formFooter('Aplicar período')}</form>`);el.value=state.period;}else{state.period=el.value;state.range=rangeFor(el.value);state.launchSelected=[];state.launchStatusOpen=false;render();}}
@@ -1120,7 +1150,7 @@ document.addEventListener('change',async e=>{if(!db)return;const el=e.target;try
   if(el.id==='report-partner'){state.reportPartner=el.value;render();}
   if(el.id==='backup-input'&&el.files[0]){const file=el.files[0];el.value='';if(file.size>15*1024*1024)throw Error('O backup deve ter no máximo 15 MB.');const restored=parseBackup(await file.text());confirm('Restaurar backup?',`Este arquivo contém ${restored.titles.length} títulos, ${restored.partners.length} parceiros e ${restored.accounts.length} contas. Os registros atuais serão substituídos. Exporte um backup antes de continuar, se necessário.`,()=>commit(d=>{Object.keys(d).forEach(k=>delete d[k]);Object.assign(d,restored);},'Backup restaurado com sucesso.'));}
 }catch(error){fail(error);}});
-document.addEventListener('input',e=>{if(e.target.form?.id==='title-form'&&e.target.name==='serviceName'&&e.target.form.elements.serviceId?.value==='custom')e.target.form.elements.description.value=e.target.value.trim();if(['gb-reset-form','gb-delete-form'].includes(e.target.form?.id))syncAccountDangerConfirm(e.target.form,currentUser(),busy);if(e.target.id==='gb-service-search')filterServicesInForm(e.target.closest('#title-form'));if(e.target.form?.id==='title-form'&&['amount','count','due'].includes(e.target.name))refreshEntrySchedule(e.target.form);if(e.target.form?.id==='profile-form'){
+document.addEventListener('input',e=>{if(e.target.id==='entry-amount')fitEntryAmount(e.target);if(e.target.form?.id==='title-form'&&e.target.name==='serviceName'&&e.target.form.elements.serviceId?.value==='custom')e.target.form.elements.description.value=e.target.value.trim();if(['gb-reset-form','gb-delete-form'].includes(e.target.form?.id))syncAccountDangerConfirm(e.target.form,currentUser(),busy);if(e.target.id==='gb-service-search')filterServicesInForm(e.target.closest('#title-form'));if(e.target.form?.id==='title-form'&&['amount','count','due'].includes(e.target.name))refreshEntrySchedule(e.target.form);if(e.target.form?.id==='profile-form'){
  const field=e.target;
  if(field.name==='cpf'){
   const digits=field.value.replace(/\D/g,'').slice(0,11);
