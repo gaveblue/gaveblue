@@ -4,7 +4,7 @@ Registro de mudanças do aplicativo localizado em `gbplus/`. Toda versão e toda
 
 ## [2.6.1 — LIMPEZA FINANCEIRA E EXCLUSÃO AUTENTICADA] — 2026-11-06
 
-**Status inicial: publicação solicitada; homologação ponta a ponta pendente.** Nenhum dado real foi apagado durante a implementação ou os testes.
+**PUBLICAÇÃO CONFIRMADA:** PR [#85](https://github.com/gaveblue/gaveblue/pull/85) integrada à `main` (commit `9a23aca2dae3ca275744d42b6ae6d5a7b664c880`). Implantação do GitHub Pages [42328190490](https://github.com/gaveblue/gaveblue/actions/runs/42328190490) concluída com `success` em **07/11/2026 02:15 UTC**. Edge Function `gbplus-delete-account` ativa no Supabase com JWT obrigatório. Teste isolado passou; workflow financeiro [42328163557](https://github.com/gaveblue/gaveblue/actions/runs/42328163557) falhou antes de iniciar as etapas (0 etapas). Ainda não há teste ponta a ponta de exclusão em conta descartável nem homologação PWA no celular. **Nenhum dado real foi apagado durante a implementação ou os testes.**
 
 ### Duas operações distintas em Configurações
 - **Limpar todos os dados:** mostra os totais de lançamentos, baixas, contas, cartões, compras, transferências, parceiros, importações e instituições personalizadas. Exige marcar uma declaração e digitar **LIMPAR** para habilitar a confirmação; oferece exportação de backup. Recomeça o documento financeiro de forma atômica via repositório com controle de revisão. **Mantém Supabase Auth, e-mail e perfil pessoal**.
