@@ -34,8 +34,12 @@ const serviceUI=load('service-ui',{
  SERVICE_BRAND_PATHS:logos,SERVICE_BRAND_COLORS:accents,esc
 },['servicePickerMarkup','serviceIconMarkup','serviceIdentityMarkup','serviceDisplayName']);
 const page=serviceUI.servicePickerMarkup();
-for(const word of ['name="serviceId"','name="serviceName"','Netflix','HBO Max','iFood','Plus Delivery',
- 'Outro serviço','id="gb-service-options" hidden','data-action="title-service-pick"'])assert(page.includes(word),'Missing '+word);
+for(const word of ['name="serviceId"','name="serviceName"','Qual serviço?',
+ 'aria-haspopup="dialog"','aria-controls="gb-picker-sheet"','data-action="title-service-toggle"']){
+ assert(page.includes(word),'Missing '+word);
+}
+assert(!page.includes('gb-service-options'),'The 26 options now belong to the full-height sheet');
+assert(src('bottom-sheet').includes('SERVICE_CATALOG.filter'),'The full catalog must be in the sheet');
 const chosen=serviceUI.servicePickerMarkup({serviceId:'streaming-netflix'});
 assert(chosen.includes('value="streaming-netflix"'));
 const other=serviceUI.servicePickerMarkup({serviceId:'custom',serviceName:'Local <img onerror=alert(1)>'});
@@ -44,6 +48,8 @@ assert(other.includes('&lt;img'));
 assert(serviceUI.serviceIdentityMarkup('streaming-netflix').includes('<svg'));
 assert(serviceUI.serviceIconMarkup('streaming-netflix').includes('#E50914'));
 assert(serviceUI.serviceIconMarkup('music-spotify').includes('#1ED760'));
+assert(serviceUI.serviceIconMarkup('music-spotify').includes('--gb-service-fg:#151515'),'Spotify mark must contrast on its original green');
+assert(serviceUI.serviceIconMarkup('streaming-netflix').includes('--gb-service-fg:#ffffff'),'Netflix mark must contrast on red');
 assert.equal(serviceUI.serviceDisplayName('streaming-netflix','','outro'),'Netflix');
 assert.equal(serviceUI.serviceDisplayName('custom','Serviço local','outro'),'Serviço local');
 assert(serviceUI.serviceIdentityMarkup('delivery-plusdelivery').includes('PD'));
@@ -77,8 +83,9 @@ assert(formSource.includes('serviceIdentityMarkup(t.serviceId,t.serviceName)'),'
 const app=src('app');
 assert(app.includes("serviceId,serviceName"),'Form save must include service metadata');
 assert(app.includes("serviceById(serviceId)"),'Unknown service IDs must be rejected');
-assert(app.includes('title-service-clear'),'User must be able to clear service');
+assert(app.includes("kind:'service',selected:form.elements.serviceId"),'Service must open the separate sheet');
+assert(src('bottom-sheet').includes('data-sheet-choice=""'),'User must be able to clear service in the sheet');
 assert(app.includes('description.value=serviceDisplayName(hidden.value,name.value'), 'Selected service defines description');
 assert(app.includes('description.readOnly=true'),'PF service descriptions are read-only while selected');
 assert(app.includes('const description=serviceId?serviceDisplayName(serviceId,serviceName'), 'Saved title uses canonical service name');
-console.log('GB+ 2.6.0: 26 serviços, 13 ícones locais, validação, edição e segurança OK.');
+console.log('GB+ 2.7.0: serviços opcionais, nomes, marcas e seleção por sheet verificados.');
