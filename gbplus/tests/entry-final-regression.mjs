@@ -28,7 +28,7 @@ assert(css.includes('gb-entry-amount-control input:focus-visible'));
 assert(css.includes('outline:0!important'));
 assert(css.includes('gb-entry-settlement-card[hidden]'));
 assert(purchaseUI.includes("button('Editar','edit-card-purchase'"));
-assert(purchaseUI.includes('data-id="'+esc(p.id)'),'Edit button must carry the purchase id');
+assert(purchaseUI.includes('aria-label="Editar compra"'),'Edit action must be labeled');
 assert(app.includes('updateCardPurchase(d,id,'));
 const amountStart=launches.indexOf('export function launchOverdueDays(');
 const amountEnd=launches.indexOf('\nfunction launchCard(',amountStart);
