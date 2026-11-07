@@ -10,10 +10,20 @@ const required='required maxlength="200"';
 export function titleForm(db,t,type='expense'){
  type=t?.type||type;
  const categoryOptions=db.categories.filter(c=>c.type===type).map(c=>[c.id,c.name,categoryIconFor(c)]);
- const partnerOptions=[['','Sem parceiro'],...db.partners.filter(p=>p.active||p.id===t?.partnerId).map(p=>[p.id,p.name])];
- const typeField=entrySelect('Tipo','type',[['expense','Despesa'],['income','Receita']],type,'entry-type',true);
+ const typeField='<div class="gb-entry-flow-switch" role="group" aria-label="Tipo de lançamento">'+
+  '<select id="entry-type" name="type" class="gb-entry-type-source" data-gb-native="true" aria-hidden="true" tabindex="-1">'+
+   '<option value="expense"'+(type==='expense'?' selected':'')+'>Despesa</option>'+
+   '<option value="income"'+(type==='income'?' selected':'')+'>Receita</option></select>'+
+  '<button type="button" data-action="entry-type-pick" data-value="expense" class="gb-entry-flow-option'+(type==='expense'?' is-active':'')+'" aria-pressed="'+(type==='expense')+'">'+
+   '<span class="gb-entry-flow-icon is-expense">'+icon('down')+'</span>Despesa</button>'+
+  '<button type="button" data-action="entry-type-pick" data-value="income" class="gb-entry-flow-option'+(type==='income'?' is-active':'')+'" aria-pressed="'+(type==='income')+'">'+
+   '<span class="gb-entry-flow-icon is-income">'+icon('up')+'</span>Receita</button></div>';
  const categoryField=entrySelect('Categoria','categoryId',categoryOptions,t?.categoryId,'entry-category',true);
- const partnerField=entrySelect('Parceiro','partnerId',partnerOptions,t?.partnerId,'entry-partner');
+ // PF does not expose partner editing. Preserve any pre-existing partner on edit
+ // so that older records remain intact until a dedicated PJ profile is shipped.
+ const partnerField='<div class="gb-entry-partner-disabled"><span class="gb-entry-label">Parceiro <small>Em breve para PJ</small></span>'+
+  '<div class="gb-entry-disabled-input" aria-disabled="true">'+icon('lock')+'<span>Desativado para PF</span></div>'+
+  '<input type="hidden" name="partnerId" value="'+esc(t?.partnerId||'')+'"></div>';
  const periodicity=t?
    entrySelect('Situação','cancelled',[['false','Ativo'],['true','Cancelado']],String(t.cancelled),'entry-cancelled'):
    entrySelect('Periodicidade','mode',[['single','Único'],['installment','Parcelado'],['recurring','Recorrente']],'single','entry-mode',true);
@@ -22,11 +32,18 @@ export function titleForm(db,t,type='expense'){
    '';
  const isSeries=!t||t.mode==='recurring';
  return `<form id="title-form" class="gb-entry-form gb-entry-wizard" data-id="${esc(t?.id||'')}" data-mode="${esc(t?.mode||'single')}" data-count="${Number(t?Math.max(1,t.count-t.sequence+1):1)}" data-step="1">
-  <div class="gb-entry-progress" aria-label="Etapa 1 de 2"><span class="active">1 · Dados</span><span>2 · Valores</span></div>
+  <div class="gb-entry-progress" aria-label="Etapa 1 de 2"><span class="active">1 · Lançamento</span><span>2 · Detalhes</span></div>
   <section id="gb-entry-step-one" class="gb-entry-stage" data-entry-stage="1" aria-label="Dados do lançamento">
+   ${typeField}
+   <div class="gb-entry-amount-hero">
+    <label for="entry-amount">Valor do lançamento</label>
+    <div class="gb-entry-amount-control"><span aria-hidden="true">R$</span>
+     <input id="entry-amount" name="amount" type="number" value="${t?t.amount/100:''}" data-mask="money" inputmode="numeric"
+      required min="0.01" max="10000000000" step="0.01" placeholder="0,00" aria-label="Valor do lançamento em reais">
+    </div>
+   </div>
    <div class="form-grid gb-entry-grid">
-    ${typeField}
-    ${categoryField}
+    <div class="full">${categoryField}</div>
     <div class="full">${field('Descrição','description',t?.description||'','text','required maxlength="300" placeholder="Ex.: Energia do escritório"')}</div>
     <div class="full gb-service-area" ${type==='expense'?'':'hidden'}>${servicePickerMarkup(t)}</div>
     ${partnerField}
@@ -35,9 +52,9 @@ export function titleForm(db,t,type='expense'){
     <div class="gb-entry-date">${field('Vencimento','due',t?.due||today(),'date','required')}</div>
    </div>
   </section>
-  <section id="gb-entry-step-two" class="gb-entry-stage" data-entry-stage="2" aria-label="Valores e periodicidade" hidden>
+  <section id="gb-entry-step-two" class="gb-entry-stage" data-entry-stage="2" aria-label="Periodicidade e observações" hidden>
    <div class="form-grid gb-entry-grid">
-    <div class="full">${field('Valor (R$)','amount',t?t.amount/100:'','number','required min="0.01" max="10000000000" step="0.01" placeholder="0,00"')}</div>
+    <p class="full gb-entry-amount-recap">Valor informado: <strong>${money(t?.amount||0)}</strong></p>
     <div class="full">${periodicity}</div>
     ${!t?'<div id="count-field" class="full" hidden>'+field('Parcelas / meses','count',2,'number','min="2" max="120" step="1"')+'</div>':''}
     ${extra?'<div class="full">'+extra+'</div>':''}
