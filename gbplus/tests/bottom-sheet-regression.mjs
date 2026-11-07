@@ -20,7 +20,7 @@ const fakeDialog={
  innerHTML:'',dataset:{},open:false,
  showModal(){this.open=true;},
  close(){this.open=false;listeners.close?.();},
- querySelector(selector){return selector==='[data-sheet-grab]'?handle:null;},
+ querySelector(selector){return ['[data-sheet-grab]','.gb-sheet-grab'].includes(selector)?handle:null;},
  addEventListener(type,fn){listeners[type]=fn;},
  querySelectorAll(){return [];}
 };
