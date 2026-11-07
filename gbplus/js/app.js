@@ -11,7 +11,8 @@ import {renderReactCharts,unmountReactCharts} from './gb-react-loader.js?v=20261
 import {mountNativeCharts} from './gb-charts-native.js?v=20261106-68';
 import {titleForm,partnerForm,accountForm,categoryForm,paymentForm,transferForm,titleDetail,customizeForm,accountDetail} from './forms.js?v=20261106-2630';
 import {serviceById,serviceSearchKey,isServiceExpenseCategory} from './service-catalog.js?v=20261106-2630';
-import {serviceIconMarkup,serviceIdentityMarkup,serviceDisplayName} from './service-ui.js?v=20261106-2630';
+import {serviceIconMarkup,serviceIdentityMarkup,serviceDisplayName} from './service-ui.js?v=20261107-2700';
+import {openGbPickerSheet,installGbPickerSheet,installEntryFormDrag} from './bottom-sheet.js?v=20261107-2700';
 import {toggleEntryMenu,chooseEntryOption,syncEntrySelect,closeEntryMenus} from './entry-select.js?v=20261104-42';
 import {installGbControls,enhanceGbControls} from './custom-controls.js?v=20261104-42';
 import {expectedDates,recurrenceAnchor} from './gb-calendar-rules.js?v=20261105-47';
@@ -47,6 +48,8 @@ let bankImportDraft=null; // Memory-only preview; released on modal close.
 
 const state={route:'dashboard',accountCardsTab:'accounts',period:'all',range:{},query:'',status:'',type:'',partner:'',category:'',partnerQuery:'',granularity:'month',flowChartMode:'bars',flowStatus:'all',report:'payable',reportPartner:'',moreFilters:false,launchSelected:[],launchStatusOpen:false,launchSearchOpen:false};
 const modal=document.querySelector('#modal');
+installGbPickerSheet();
+installEntryFormDrag(modal);
 // Desktop-only sidebar preference; changing it never touches the finance database.
 const sidebarPreferenceKey='gbplus-sidebar-hidden-v1';
 function syncSidebarVisibility(hidden,save=false){
@@ -63,7 +66,22 @@ function syncSidebarVisibility(hidden,save=false){
 try{syncSidebarVisibility(localStorage.getItem(sidebarPreferenceKey)==='1');}
 catch{syncSidebarVisibility(false);}
 function toast(message){const el=document.querySelector('#toast');el.textContent=message;el.classList.add('visible');clearTimeout(toast.timer);toast.timer=setTimeout(()=>el.classList.remove('visible'),4500);}
-function openModal(title,content){modal.classList.toggle("gb-entry-modal",content.includes('id="title-form"'));modal.classList.toggle("gb-bank-import-modal",content.includes('id="gb-import-workspace"'));document.querySelector('#modal-content').innerHTML=`<div class="modal-heading"><h2 id="modal-title">${title}</h2><button class="icon-button" data-action="close" aria-label="Fechar">${icon('close')}</button></div><div class="modal-body">${content}</div>`;modal.setAttribute('aria-labelledby','modal-title');if(!modal.open)modal.showModal();enhanceGbControls(modal);fitEntryAmount(modal.querySelector('#entry-amount'));}
+function openModal(title,content){
+ const isEntry=content.includes('id="title-form"');
+ modal.classList.toggle('gb-entry-modal',isEntry);
+ modal.classList.toggle('gb-bank-import-modal',content.includes('id="gb-import-workspace"'));
+ if(isEntry)modal.dataset.gbSnap='partial';
+ else delete modal.dataset.gbSnap;
+ const grab=isEntry?'<button type="button" class="gb-entry-sheet-grab" data-entry-sheet-grab aria-label="Expandir formulário" aria-expanded="false"><span aria-hidden="true"></span></button>':'';
+ document.querySelector('#modal-content').innerHTML=
+  '<div class="modal-heading">'+grab+'<h2 id="modal-title">'+esc(title)+'</h2>'+
+  '<button class="icon-button" data-action="close" aria-label="Fechar">'+icon('close')+'</button></div>'+
+  '<div class="modal-body">'+content+'</div>';
+ modal.setAttribute('aria-labelledby','modal-title');
+ if(!modal.open)modal.showModal();
+ enhanceGbControls(modal);
+ fitEntryAmount(modal.querySelector('#entry-amount'));
+}
 function closeModal(){if(modal.open)modal.close();bankImportDraft=null;pendingGeneration=null;confirmAction=null;if(pwaReady)setTimeout(()=>maybeOfferPwaInstall(),1100);}
 function confirm(title,message,callback){confirmAction=callback;openModal(title,`<p class="confirm-message">${esc(message)}</p><div class="form-error" role="alert"></div><div class="form-footer">${button('Cancelar','close')}${button('Confirmar','confirm','primary')}</div>`);}
 // 2.5.0: preview only, never invokes commit(), Supabase or AI.
@@ -279,7 +297,7 @@ function updateServicePicker(form,id){
  const wrap=form.querySelector('.gb-service-custom');
  const current=form.querySelector('.gb-service-selected-content');
  const toggle=form.querySelector('[data-action="title-service-toggle"]');
- const options=form.querySelector('#gb-service-options');
+
  hidden.value=service?.id||(custom?'custom':'');
  if(!custom)name.value='';
  wrap.hidden=!custom;name.required=custom;
@@ -297,12 +315,12 @@ function updateServicePicker(form,id){
    description.readOnly=false;
   }
  }
- toggle.textContent=id?'Alterar':'Escolher serviço';
+ if(toggle)toggle.textContent=id?'Alterar':'Selecionar';
  const info=form.querySelector('.gb-service-help');
  if(info)info.textContent=service?.billingMode==='subscription'?
-  'Assinatura? Se desejar, escolha Recorrente na etapa Valores. Nada será agendado automaticamente.':
+  'Assinatura? Se desejar, escolha Recorrente na etapa Detalhes. Nada será agendado automaticamente.':
   'A identificação não cria assinatura, cobrança, despesa ou baixa. Você decide os valores e vencimentos.';
- toggle.setAttribute('aria-expanded','false');options.hidden=true;
+ if(toggle)toggle.setAttribute('aria-expanded','false');
  if(custom)name.focus({preventScroll:true});
 }
 /** Service choice is a second level of the selected expense category. */
@@ -444,7 +462,28 @@ const actions={
   'toggle-title-filters':()=>{state.moreFilters=!state.moreFilters;state.launchSelected=[];render();},
   'clear-title-filters':()=>{state.query='';state.status='';state.partner='';state.category='';state.type=state.route==='payable'?'expense':state.route==='receivable'?'income':'';state.period='all';state.range=rangeFor('all');state.moreFilters=false;state.launchSelected=[];state.launchStatusOpen=false;render();},
   'set-theme':el=>commit(d=>{d.settings.theme=el.dataset.value;},'Tema atualizado.'),
-  'entry-toggle':el=>toggleEntryMenu(el),
+  'entry-toggle':el=>{
+   const wrap=el.closest('.gb-entry-select'),form=el.closest('#title-form');
+   if(form&&wrap?.dataset.entryName==='categoryId'){
+    const source=form.querySelector('#entry-category');
+    closeEntryMenus();
+    el.setAttribute('aria-expanded','true');
+    const shown=openGbPickerSheet({
+     kind:'category',
+     items:db.categories.filter(c=>c.type===form.elements.type?.value),
+     selected:source?.value||'',
+     onPick:id=>{
+      if(!form.isConnected||!source||![...source.options].some(o=>o.value===id))return;
+      source.value=id;
+      syncEntrySelect(source);
+      source.dispatchEvent(new Event('change',{bubbles:true}));
+     }
+    });
+    if(!shown){el.setAttribute('aria-expanded','false');toggleEntryMenu(el);}
+    return;
+   }
+   toggleEntryMenu(el);
+  },
   'entry-option':el=>chooseEntryOption(el),
   'entry-type-pick':el=>{
    const form=el.closest('#title-form'),select=form?.querySelector('#entry-type');
@@ -462,10 +501,14 @@ const actions={
   'title-next':el=>toggleEntryStep(el.closest('#title-form'),2),
   'title-back':el=>toggleEntryStep(el.closest('#title-form'),1),
   'title-service-toggle':el=>{
-   const form=el.closest('#title-form'),picker=form?.querySelector('#gb-service-options');
-   if(!picker)return;
-   picker.hidden=!picker.hidden;el.setAttribute('aria-expanded',String(!picker.hidden));
-   if(!picker.hidden)form.querySelector('#gb-service-search')?.focus({preventScroll:true});
+   const form=el.closest('#title-form');
+   if(!form)return;
+   el.setAttribute('aria-expanded','true');
+   const shown=openGbPickerSheet({
+    kind:'service',selected:form.elements.serviceId?.value||'',
+    onPick:id=>{if(form.isConnected)updateServicePicker(form,id);}
+   });
+   if(!shown)el.setAttribute('aria-expanded','false');
   },
   'title-service-pick':el=>updateServicePicker(el.closest('#title-form'),el.dataset.serviceId),
   'title-service-clear':el=>updateServicePicker(el.closest('#title-form'),''),
