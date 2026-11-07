@@ -135,7 +135,7 @@ export function bankImportMarkup(db,draft){
  if(BANK_IMPORT_WRITES_ENABLED&&draft.step==='confirm'&&plan){
   return head+
    '<div class="gb-import-step"><span class="gb-import-step-number">02</span><span>Confirmar decisões</span></div>'+
-   '<div class="gb-import-review-heading"><h3>Revisão final</h3><p>Você selecionou '+plan.entries.length+' movimento(s). Confira antes de salvar os vínculos e decisões.</p></div>'+
+   '<div class="gb-import-review-heading"><h3>Revisão final</h3><p>Revise cada decisão antes de confirmar. Somente lançamentos novos marcados para criação e baixa poderão alterar o saldo.</p></div>'+
    '<div class="gb-import-summary-grid">'+
     summary('Conciliar',String(plan.totals.linked))+
     summary('Ignorar',String(plan.totals.ignored))+
@@ -144,12 +144,12 @@ export function bankImportMarkup(db,draft){
     summary('Entradas a registrar',money(plan.totals.amountCreatedIn||0),'income')+
     summary('Saídas a registrar',money(plan.totals.amountCreatedOut||0),'expense')+
     summary('Alteração de saldo',money((plan.totals.amountCreatedIn||0)-(plan.totals.amountCreatedOut||0)))+'</div>'+
-   '<div class="gb-import-confirm-rows">'+plan.entries.slice(0,50).map(row=>
+   '<div class="gb-import-confirm-rows">'+plan.entries.map(row=>
      '<div class="gb-import-confirm-row"><span>'+dateLabel(row.date)+' · '+esc(row.description)+
      '</span><b>'+fmtCents(row.amount)+'</b><small>'+({'link':'Conciliar','ignore':'Ignorar','pending':'Manter pendente','create':'Criar '+(row.amount>0?'receita recebida':'despesa paga')}[row.action])+
      (row.action==='create'?' · '+esc(db.categories.find(c=>c.id===row.categoryId)?.name||'Categoria não localizada'):'')+'</small></div>'
     ).join('')+
-    (plan.entries.length>50?'<p class="gb-import-hint">Mostrando 50 dos '+plan.entries.length+' movimentos selecionados.</p>':'')+
+
    '</div>'+
    '<div class="gb-import-privacy">'+icon('shield')+'<p>As conciliações usam vínculos existentes. Os movimentos escolhidos como <strong>Criar lançamento</strong> gerarão um título e uma baixa na conta, alterando o saldo. O arquivo original não será armazenado.</p></div>'+
    (plan.totals.created?'<p class="gb-import-finance-warning">Antes de confirmar: verifique se essas movimentações já fazem parte do saldo inicial informado. Transferências entre suas próprias contas não devem ser classificadas como receitas ou despesas.</p><label class="gb-import-explicit-confirm"><input type="checkbox" id="gb-import-create-confirm" '+(draft.confirmCreation?'checked':'')+'><span>Confirmo a criação de '+plan.totals.created+' lançamento(s) já baixado(s), com efeito no saldo bancário do GB+.</span></label>':'')+
@@ -159,8 +159,18 @@ export function bankImportMarkup(db,draft){
  }
  const page=Math.min(Math.max(Number(draft.page)||0,0),Math.max(0,Math.ceil(rows.length/BANK_IMPORT_PAGE_SIZE)-1));
  const visible=rows.slice(page*BANK_IMPORT_PAGE_SIZE,(page+1)*BANK_IMPORT_PAGE_SIZE);
- const filters=[['all','Todos',preview.rows.length],['possible_match','Prováveis',preview.totals.possibleMatches],
-  ['ambiguous','Revisar',preview.totals.ambiguous],['not_found','Não localizados',preview.totals.unmatched]];
+ const counts={expense:preview.rows.filter(r=>r.record.amount<0).length,
+  income:preview.rows.filter(r=>r.record.amount>0).length,decided:choiceCount(draft)};
+ const filters=[['all','Todos',preview.rows.length],['expense','Saídas',counts.expense],
+  ['income','Entradas',counts.income],['possible_match','Possíveis vínculos',preview.totals.possibleMatches],
+  ['ambiguous','Conferir',preview.totals.ambiguous],['not_found','Sem vínculo',preview.totals.unmatched],
+  ['decided','Com decisão',counts.decided]];
+ const selected=new Set(Array.isArray(draft.selectedRows)?draft.selectedRows:[]);
+ const selectable=visible.filter(row=>!saved.has(reconciliationRecordKey(row.record))&&row.status!=='possible_duplicate_in_file');
+ const checked=selectable.filter(row=>selected.has(row.index)).length;
+ const selectedCount=selected.size;
+ const selectedTotal=preview.rows.filter(row=>selected.has(row.index)&&row.record.amount<0)
+  .reduce((sum,row)=>sum+Math.abs(row.record.amount),0);
  const cards=visible.map(item=>{
   const record=item.record,info=statusInfo[item.status]||['Revisar','unmatched'];
   const decision=draft.decisions?.[item.index]||{action:'skip',target:''};
@@ -171,7 +181,9 @@ export function bankImportMarkup(db,draft){
    esc(candidate.description|| (candidate.type==='transfer'?'Transferência':'Baixa'))+
    ' · '+dateLabel(candidate.date)+' · '+fmtCents(candidate.amount)+
    (item.candidates.length>1?' · '+item.candidates.length+' candidatos':'')+'</div>':'';
-  const actionOptions=[['skip','Sem decisão'],['link','Conciliar com registro'],['create','Criar lançamento baixado'],['ignore','Ignorar'],['pending','Manter pendente']]
+  const actionOptions=[['skip','Sem decisão'],['link','Vincular à baixa existente'],
+    ['create',record.amount<0?'Criar despesa e registrar baixa':'Criar receita e registrar recebimento'],
+    ['ignore','Ignorar'],['pending','Manter para depois']]
     .filter(([action])=>action==='link'?item.candidates.length>0&&item.status!=='possible_duplicate_in_file':
      action==='create'?item.status==='not_found':action!=='pending'||!wasPending)
     .map(([key,label])=>'<option value="'+key+'" '+(decision.action===key?'selected':'')+'>'+label+'</option>').join('');
@@ -190,8 +202,13 @@ export function bankImportMarkup(db,draft){
     '<label class="gb-import-decision-label">Descrição do lançamento<input type="text" maxlength="300" class="gb-import-create-description" data-bank-create-description="'+item.index+'" value="'+esc(decision.description??record.description.slice(0,300))+'" aria-label="Descrição do lançamento '+(item.index+1)+'" required></label>'+
     '<p class="gb-import-hint">Será registrado como '+(record.amount>0?'receita recebida':'despesa paga')+' na data do extrato, com baixa na conta selecionada.</p>'+
    '</div>':'';
-  return '<article class="gb-import-row"><div class="gb-import-row-head">'+
-   '<time datetime="'+record.date+'">'+dateLabel(record.date)+'</time>'+
+  const selectableRow=!already&&item.status!=='possible_duplicate_in_file';
+  const toggle=BANK_IMPORT_WRITES_ENABLED?'<label class="gb-import-row-select">'+
+   '<input type="checkbox" data-bank-select-index="'+item.index+'" '+(selected.has(item.index)?'checked ':'')+
+   (selectableRow?'':'disabled ')+'aria-label="Selecionar movimento '+(item.index+1)+': '+esc(record.description.slice(0,70))+'">'+
+   '<span>Selecionar</span></label>':'';
+  return '<article class="gb-import-row'+(selected.has(item.index)?' is-selected':'')+'"><div class="gb-import-row-head">'+
+   toggle+'<time datetime="'+record.date+'">'+dateLabel(record.date)+'</time>'+
    '<span class="gb-import-flag gb-import-'+(already?'match':wasPending?'ambiguous':info[1])+'">'+(already?'Já registrado':wasPending?'Pendente · retomar':info[0])+'</span></div>'+
    '<div class="gb-import-row-body"><strong>'+esc(record.description)+'</strong>'+
    '<b class="'+(record.amount>0?'gb-import-positive':'gb-import-negative')+'">'+fmtCents(record.amount)+'</b></div>'+
