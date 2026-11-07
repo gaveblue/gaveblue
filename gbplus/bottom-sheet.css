@@ -2,7 +2,7 @@
    Native <dialog> preserves focus management, ESC and the underlying FormData. */
 dialog#gb-picker-sheet{
  position:fixed;inset:auto 0 0;width:min(570px,100vw);max-width:100vw;
- height:min(67dvh,710px);max-height:calc(100dvh - 12px);min-height:280px;
+ height:min(52dvh,520px);max-height:calc(100dvh - 12px);min-height:280px;
  margin:0 auto;padding:0;overflow:hidden;color:var(--ink);
  border:1px solid var(--border);border-bottom:0;
  border-radius:25px 25px 0 0;background:var(--surface);
@@ -98,7 +98,7 @@ dialog#gb-picker-sheet[data-snap="expanded"]{height:calc(100dvh - 10px - env(saf
 /* Mobile launch form itself is a resizable bottom sheet. */
 .gb-entry-sheet-grab{display:none}
 @media(max-width:760px){
- dialog#gb-picker-sheet{width:100vw;max-width:100vw;height:66dvh;
+ dialog#gb-picker-sheet{width:100vw;max-width:100vw;height:52dvh;
   border-left:0;border-right:0;border-radius:25px 25px 0 0}
  dialog#gb-picker-sheet[data-snap="expanded"]{height:calc(100dvh - 8px - env(safe-area-inset-top))}
  .gb-sheet-header{padding:5px 20px 14px}
@@ -280,4 +280,25 @@ dialog#gb-picker-sheet[data-snap="expanded"]{height:calc(100dvh - 10px - env(saf
  #modal.gb-entry-modal .gb-entry-bottom-nav .gb-entry-wizard-footer>.button{
   font-size:11px;padding-inline:8px;
  }
+}
+
+
+/* GB+ 2.7.7 — financial selectors share the category/service full-height sheet. */
+.gb-sheet-finance-choice{gap:12px;min-height:74px}
+.gb-sheet-finance-badge,.gb-entry-finance-badge{display:grid;place-items:center;flex:none;width:44px;height:44px}
+.gb-sheet-finance-badge .gb-bank-badge,.gb-entry-finance-badge .gb-bank-badge{
+ width:44px;height:44px;border-radius:13px;flex:none;
+}
+.gb-sheet-finance-fallback{
+ display:grid;place-items:center;width:44px;height:44px;border-radius:13px;
+ background:var(--soft);color:var(--ink);
+}
+.gb-sheet-finance-fallback .icon{width:23px;height:23px}
+.gb-sheet-finance-text{min-width:0;flex:1;display:flex;flex-direction:column;gap:5px}
+.gb-sheet-finance-text strong{font-size:14px;font-weight:690;overflow-wrap:anywhere}
+.gb-sheet-finance-text small{font-size:11px;font-weight:450;color:var(--muted);line-height:1.35}
+@media(max-width:760px){
+ .gb-sheet-finance-choice{min-height:76px}
+ .gb-sheet-finance-text strong{font-size:14px}
+ .gb-sheet-finance-text small{font-size:11px}
 }
