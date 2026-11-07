@@ -1,15 +1,14 @@
 {
-  "version": "2.7.3",
+  "version": "2.7.4",
   "build": 1,
-  "published_at": "2026-11-07T04:40:39Z",
-  "title": "Navegação compacta e preferência de período",
+  "published_at": "2026-11-07T20:19:51.702Z",
+  "title": "Segurança administrativa e testes independentes do GitHub Actions",
   "notes": [
-    "Atualização publicada em 07/11/2026: as ações Próximo, Voltar e Revisar/Salvar aparecem no cabeçalho do Novo lançamento, liberando o antigo espaço inferior; fechar continua disponível no X.",
-    "A primeira etapa do modal móvel abre um pouco acima, mantendo rolagem quando necessário para acessibilidade e telas menores.",
-    "Este mês, Mês anterior, Este ano, Todo o período e datas personalizadas são lembrados por conta autenticada neste navegador, inclusive após reabrir o aplicativo.",
-    "Datas relativas se atualizam com o calendário; datas personalizadas ficam fixas até o usuário trocar o filtro.",
-    "Nenhum título, saldo, parcela, cartão ou baixa foi alterado automaticamente. Homologação integral não declarada: execução do CI financeiro e teste PWA Android ainda sem evidência.",
-    "GitHub Pages publicou a integração do PR #91 com sucesso no run #42339423278 (commit b24253d6d48f4056e2cd5b75faacbedd7cda58db; 07/11/2026 às 04:40 UTC)."
+    "A API administrativa ganhou verificação JWT adicional no gateway Supabase, mantendo a validação de identidade e autorização no servidor.",
+    "O projeto passou a incluir um executor local de testes financeiros e administrativos em Node.js, com relatório de resultados e documentação própria.",
+    "O workflow financeiro do GitHub Actions foi removido da configuração de projeto; o processo de publicação GitHub Pages permanece independente.",
+    "22 arquivos de regressão foram verificados em JavaScript isolado com adaptadores. A execução integral no Node.js, a validação Android/PWA e o teste de login administrativo com usuário real ainda requerem evidências.",
+    "Nenhuma alteração automática de dados, saldos, parcelas ou transações financeiras foi incluída."
   ],
   "assets": [
     "./index.html",
