@@ -4,7 +4,7 @@ Registro de mudanças do aplicativo localizado em `gbplus/`. Toda versão e toda
 
 ## [2.6.3 — VALOR CENTRALIZADO E SERVIÇOS DENTRO DA CATEGORIA] — 2026-11-06
 
-**Status: CANDIDATA À PUBLICAÇÃO.** Versão incremental, sem compilação pública. Não inclui migrações financeiras.
+**PUBLICAÇÃO CONFIRMADA:** PR [#87](https://github.com/gaveblue/gaveblue/pull/87) integrada à `main` (commit `29cfae047aa78cbe9f7d48c489bff08d2f28dc56`) e GitHub Pages [42332219181](https://github.com/gaveblue/gaveblue/actions/runs/42332219181) concluído com `success` em 07/11/2026 às 03:04 UTC. Testes isolados do formulário PF e de serviços passaram. O workflow financeiro [42332188995](https://github.com/gaveblue/gaveblue/actions/runs/42332188995) falhou antes de executar etapas (0 passos); o PWA ainda aguarda teste manual em aparelho real. **Publicação não significa homologação integral.**
 
 ### Ajustes do Novo lançamento (PF)
 - Campo de valor **centralizado como um conjunto R$ + valor**, com largura que acompanha o número digitado. Removida a linha divisória/traço inferior.
