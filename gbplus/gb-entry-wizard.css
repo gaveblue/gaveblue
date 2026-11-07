@@ -310,3 +310,49 @@
  .gb-entry-wizard .gb-entry-settlement-option small{font-size:10px}
  .gb-entry-wizard .gb-entry-settlement-card select{font-size:16px}
 }
+
+
+/* GB+ 2.7.7 — the amount remains plain typography, including while typing. */
+.gb-entry-wizard .gb-entry-amount-control,
+.gb-entry-wizard .gb-entry-amount-control:focus,
+.gb-entry-wizard .gb-entry-amount-control:focus-within{
+ border:0!important;border-bottom:0!important;outline:0!important;
+ box-shadow:none!important;padding-bottom:0!important;
+}
+.gb-entry-wizard .gb-entry-amount-control input,
+.gb-entry-wizard .gb-entry-amount-control input:focus,
+.gb-entry-wizard .gb-entry-amount-control input:focus-visible{
+ border:0!important;border-bottom:0!important;outline:0!important;
+ box-shadow:none!important;background:transparent!important;border-radius:0!important;
+ text-decoration:none!important;
+}
+/* Keep native form values for submission, but show a full-height icon/balance picker. */
+.gb-entry-wizard .gb-entry-finance-select{display:grid;gap:8px;min-width:0}
+.gb-entry-wizard .gb-entry-finance-native{display:none!important}
+.gb-entry-wizard .gb-entry-finance-label{
+ color:var(--ink);font-size:12px;font-weight:680;
+}
+.gb-entry-wizard .gb-entry-finance-trigger{
+ width:100%;display:flex;align-items:center;justify-content:space-between;
+ text-align:left;gap:12px;padding:10px 13px;min-height:58px;
+ border:1px solid var(--border);border-radius:12px;
+ background:var(--surface);color:var(--ink);font:inherit;cursor:pointer;
+}
+.gb-entry-wizard .gb-entry-finance-trigger:focus-visible{
+ outline:2px solid var(--ink);outline-offset:2px;
+}
+.gb-entry-wizard .gb-entry-finance-trigger>.icon{
+ flex:none;color:var(--muted);width:19px;height:19px;
+}
+.gb-entry-wizard .gb-entry-finance-current{
+ display:flex;align-items:center;gap:10px;min-width:0;flex:1;
+ font-size:13px;font-weight:620;
+}
+.gb-entry-wizard .gb-entry-finance-copy{
+ min-width:0;display:flex;flex-direction:column;gap:3px;
+}
+.gb-entry-wizard .gb-entry-finance-copy strong{font-size:13px;font-weight:720;overflow-wrap:anywhere}
+.gb-entry-wizard .gb-entry-finance-copy small{color:var(--muted);font-size:10px;font-weight:450;line-height:1.4}
+@media(max-width:760px){
+ .gb-entry-wizard .gb-entry-finance-trigger{min-height:61px}
+}
