@@ -41,6 +41,8 @@ jobs:
         run: node gbplus/tests/bank-import-readonly-release-regression.mjs
       - name: Comparação indicativa de saldos OFX/CSV
         run: node gbplus/tests/bank-import-balance-regression.mjs
+      - name: Importação intuitiva e seleção múltipla (2.5.2)
+        run: node gbplus/tests/bank-import-usability-regression.mjs
       - name: Conciliação e histórico
         run: node gbplus/tests/bank-reconciliation-regression.mjs
       - name: Criação e reversão de lançamentos importados
