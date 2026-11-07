@@ -4,7 +4,7 @@ Registro de mudanças do aplicativo localizado em `gbplus/`. Toda versão e toda
 
 ## [2.6.0 — INTERFACE UNIFICADA, IMPORTAÇÃO INTUITIVA E CATÁLOGO DE SERVIÇOS] — 2026-11-06
 
-**Status inicial: CANDIDATA À PUBLICAÇÃO.** Publicação solicitada e autorizada pelo responsável do produto neste chat. Evidências de testes e resultado do GitHub Pages devem ser registrados posteriormente, sem confundir merge/deploy com homologação integral.
+**PUBLICAÇÃO CONFIRMADA:** PR [#84](https://github.com/gaveblue/gaveblue/pull/84) integrada à `main` (commit `d6ec0df762f54f0a1c87a0ad4beebcd8dad101b8`); deploy GitHub Pages [42324669146](https://github.com/gaveblue/gaveblue/actions/runs/42324669146) concluído com `success` em 07/11/2026 01:33 UTC. Três testes funcionais isolados com dados fictícios passaram. O workflow financeiro [42324622731](https://github.com/gaveblue/gaveblue/actions/runs/42324622731) falhou **antes de iniciar as etapas**, impedindo homologação CI (issue #75). A verificação em PWA Android/iOS real continua pendente; publicação não equivale à homologação integral.
 
 ### Entregas consolidadas
 - Unificação de **Contas e Cartões** com seletor sticky, cabeçalho padronizado, cadastro no mesmo local e ações contextuais, preservando os componentes financeiros originais (implementação iniciada na 2.5.1).
