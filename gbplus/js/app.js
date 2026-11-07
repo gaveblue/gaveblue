@@ -362,32 +362,91 @@ function validateEntryStepOne(form){
   throw Error('Selecione a categoria Serviços para identificar o aplicativo.');
  if(serviceId&&!serviceById(serviceId)&&serviceId!=='custom')throw Error('Escolha um serviço válido.');
  if(serviceId==='custom'&&(!customName||customName.length>120))throw Error('Informe o nome do serviço personalizado (até 120 caracteres).');
+ // Emissão e vencimento serão validados na terceira etapa.
+}
+function validateEntryStepTwo(form){
+ if(form.dataset.id)return;
+ const mode=form.elements.mode?.value||'single';
+ if(!['single','installment','recurring'].includes(mode))throw Error('Escolha uma periodicidade válida.');
+ if(mode!=='single'){
+  const count=Number(form.elements.count?.value);
+  if(!Number.isInteger(count)||count<2||count>120)throw Error('Informe de 2 a 120 parcelas ou meses.');
+  if(mode==='installment'&&cents(form.elements.amount.value)<count)
+   throw Error('O valor precisa comportar ao menos R$ 0,01 por parcela.');
+ }
+}
+function syncEntrySettlement(form){
+ if(!form||form.id!=='title-form')return;
+ const group=form.querySelector('.gb-entry-settlement');
+ if(!group)return;
+ const mode=form.elements.mode?.value||'single';
+ const isSeries=mode!=='single';
+ const accounts=(db?.accounts||[]).filter(a=>a.active);
+ const paid=group.querySelector('input[value="paid"]');
+ const pending=group.querySelector('input[value="pending"]');
+ if(paid){
+  paid.disabled=isSeries||accounts.length===0;
+  if(paid.disabled&&paid.checked&&pending)pending.checked=true;
+ }
+ const show=!!paid?.checked&&!paid.disabled;
+ const details=group.querySelector('.gb-entry-settlement-details');
+ const warn=group.querySelector('.gb-entry-settlement-series');
+ if(details)details.hidden=!show;
+ if(warn){
+  warn.hidden=!isSeries&&accounts.length>0;
+  warn.textContent=isSeries?
+   'Parcelamentos e recorrências devem ser baixados por título, depois da criação.':
+   'Cadastre uma conta financeira ativa para habilitar a baixa imediata.';
+ }
+ const account=form.elements.settleAccountId;
+ const date=form.elements.settleDate;
+ if(account)account.required=show;
+ if(date)date.required=show;
+}
+function validateEntryStepThree(form){
  if(!validDate(form.elements.issue?.value))throw Error('Informe uma data de emissão válida.');
  if(!validDate(form.elements.due?.value))throw Error('Informe uma data de vencimento válida.');
+ if(form.dataset.id)return;
+ const choice=form.elements.settlement?.value||'pending';
+ if(!['pending','paid'].includes(choice))throw Error('Escolha como registrar o lançamento.');
+ if(choice==='paid'){
+  if(form.elements.mode?.value!=='single')throw Error('Baixa imediata disponível apenas para lançamento único.');
+  if(!db.accounts.some(a=>a.id===form.elements.settleAccountId?.value&&a.active))
+   throw Error('Selecione uma conta financeira ativa para a baixa.');
+  if(!validDate(form.elements.settleDate?.value)||form.elements.settleDate.value>today())
+   throw Error('A data da baixa deve ser válida e não pode ser futura.');
+ }
 }
 function toggleEntryStep(form,step){
- if(!form||form.id!=='title-form')return;
- const forward=step===2;
- if(forward)validateEntryStepOne(form);
+ if(!form||form.id!=='title-form'||![1,2,3].includes(step))return;
+ const current=Number(form.dataset.step||1);
+ if(step>current){
+  if(current===1)validateEntryStepOne(form);
+  if(current===2)validateEntryStepTwo(form);
+ }
  form.dataset.step=String(step);
- form.querySelector('#gb-entry-step-one').hidden=forward;
- form.querySelector('#gb-entry-step-two').hidden=!forward;
- form.querySelector('[data-entry-footer="1"]').hidden=forward;
- form.querySelector('[data-entry-footer="2"]').hidden=!forward;
+ for(let number=1;number<=3;number++){
+  const stage=form.querySelector('#gb-entry-step-'+['','one','two','three'][number]);
+  if(stage)stage.hidden=number!==step;
+  const footer=form.querySelector('[data-entry-footer="'+number+'"]');
+  if(footer)footer.hidden=number!==step;
+ }
  const progress=form.querySelector('.gb-entry-progress');
  if(progress){
-  progress.setAttribute('aria-label','Etapa '+step+' de 2');
+  progress.setAttribute('aria-label','Etapa '+step+' de 3');
   [...progress.children].forEach((item,i)=>item.classList.toggle('active',i===step-1));
  }
  const error=form.querySelector('.form-error');if(error)error.textContent='';
- if(forward){
+ if(step===2){
   const recap=form.querySelector('.gb-entry-amount-recap strong');
   if(recap)recap.textContent=money(cents(form.elements.amount.value));
-  refreshEntrySchedule(form);
  }
+ if(step===3){syncEntrySettlement(form);refreshEntrySchedule(form);}
  const scroll=modal.querySelector('.modal-body')||modal;
  scroll.scrollTo({top:0,behavior:'instant'});
- const focus=forward?(form.querySelector('#gb-entry-step-two .gb-entry-trigger')||form.elements.notes):form.elements.amount;
+ const focus=step===1?form.elements.amount:
+  step===2?(form.querySelector('#gb-entry-step-two .gb-entry-trigger')||form.elements.document):
+  form.elements.issue;
  requestAnimationFrame(()=>focus?.focus({preventScroll:true}));
 }
 function refreshEntrySchedule(form){
@@ -402,7 +461,7 @@ function refreshEntrySchedule(form){
  const target=form.querySelector('#gb-entry-schedule'),summary=form.querySelector('#gb-entry-schedule-count');
  const due=form.elements.due?.value;
  const count=form.elements.count?Number(form.elements.count.value):(Number(form.dataset.count)||1);
- if(!validDate(due)){target.textContent='Defina um vencimento válido na primeira etapa.';return;}
+ if(!validDate(due)){target.textContent='Defina um vencimento válido na terceira etapa.';return;}
  if(!Number.isInteger(count)||count<1||count>120){target.textContent='Informe de 1 a 120 parcelas ou meses.';return;}
  try{
   const source=form.dataset.id?getTitle(form.dataset.id):null;
@@ -498,8 +557,8 @@ const actions={
    form.dataset.entryType=type;
    select.dispatchEvent(new Event('change',{bubbles:true}));
   },
-  'title-next':el=>toggleEntryStep(el.closest('#title-form'),2),
-  'title-back':el=>toggleEntryStep(el.closest('#title-form'),1),
+  'title-next':el=>{const form=el.closest('#title-form');toggleEntryStep(form,Math.min(3,Number(form?.dataset.step||1)+1));},
+  'title-back':el=>{const form=el.closest('#title-form');toggleEntryStep(form,Math.max(1,Number(form?.dataset.step||1)-1));},
   'title-service-toggle':el=>{
    const form=el.closest('#title-form');
    if(!form)return;
