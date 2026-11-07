@@ -1,15 +1,15 @@
 {
-  "version": "2.7.7",
+  "version": "2.7.8",
   "build": 1,
-  "published_at": "2026-11-07T21:59:52.530Z",
-  "title": "Seletores expansíveis, serviços em destaque e valor livre no lançamento",
+  "published_at": "2026-11-07T22:53:55.573Z",
+  "title": "Correção da navegação ao voltar da prévia de lançamentos",
   "notes": [
-    "O valor do lançamento não mostra mais linha, borda ou caixa durante a digitação. A validação de valor inválido aparece somente quando necessária, como aviso temporário.",
-    "No seletor de categorias, Serviços aparece primeiro; categorias e serviços já abrem em um painel alto e podem ser recolhidos até meia tela arrastando para baixo.",
-    "Na terceira etapa, a escolha da conta e do cartão utiliza o mesmo painel alto. Exibe ícone da instituição, nome e saldo da conta ou limite disponível do cartão.",
-    "Os saldos e limites são os valores calculados pelas movimentações registradas no GB+, sem conexão automática com bancos, sem baixa adicional e sem alterar o cálculo financeiro.",
-    "As escolhas permanecem associadas aos campos de gravação, preservando pendente, baixa em conta e compra em cartão nas três etapas.",
-    "As 26 regressões .mjs passaram em JavaScript V8 isolado com adaptadores de Node. Testes visuais no Android/PWA e a execução integral nativa em Node.js ainda não foram comprovados."
+    "Corrigido o desaparecimento dos botões Próximo, Voltar e Revisar ao retornar da prévia final para editar um lançamento.",
+    "A prévia guarda agora as três barras de botões que ficam fixas fora da área rolável, recriando-as corretamente ao voltar para a terceira etapa.",
+    "A alteração também preserva valores, campos selecionados, conta, cartão, opção de baixa e estados de caixas/radios entre prévia e edição.",
+    "Não houve alteração em saldos, faturas, lançamentos, regras de parcelamento ou aparência da navegação inferior.",
+    "Teste específico reproduziu retorno da prévia e navegação 3→2→1→2→3 (72 asserções), com regressões complementares aprovadas em JS V8 isolado.",
+    "A publicação não substitui o teste visual real Android/PWA nem a execução nativa integral em Node.js."
   ],
   "assets": [
     "./index.html",
