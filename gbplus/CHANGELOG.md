@@ -2,6 +2,22 @@
 
 Registro de mudanças do aplicativo localizado em `gbplus/`. Toda versão e toda compilação deve possuir uma entrada própria. **Uma alteração não deve ser considerada homologada apenas porque existe commit, teste escrito ou publicação.** A homologação exige evidências da execução e aprovação explícita.
 
+## [2.5.1 · compilação 3 — CABEÇALHO PADRONIZADO E SELETOR FIXO] — 2026-11-06
+
+**Status: CANDIDATA, SEM PUBLICAÇÃO E SEM HOMOLOGAÇÃO FINAL.** Implementação isolada em `feature/gbplus-251-ajustes-seguintes`. Não alterar a `main` nem considerar a compilação 3 liberada até obter evidências e aprovação explícita.
+
+### Ajustes de usabilidade
+- Contas e Cartões passam a usar o mesmo título de página **Contas e cartões**, a mesma hierarquia de cabeçalho, o mesmo alinhamento para botão principal de cadastro e a mesma área para ações secundárias.
+- O seletor compacto **Contas | Cartões** fica **sticky** no alto da área visível ao rolar a página, incluindo layouts móveis com suporte a *safe area*; mantém navegação por teclado e atributos de acessibilidade.
+- **Contas:** `Nova conta`, `Bancos e ícones`, `Transferir`; **Cartões:** `Novo cartão`, `Nova compra`. Cada ação mantém o formulário original, sem repetir ações que não se aplicam à aba.
+- Permanecem intocados o cálculo de saldos, a conta bancária, as transações, limites, faturas, compras, importação bancária, cadastros e regras de segurança/isolamento.
+- Atualizados os identificadores de assets/cache e o manifesto da compilação candidata, sem publicação em produção.
+- Acrescentadas verificações ao teste `tests/accounts-cards-unified-regression.mjs` para estrutura uniforme, ações contextuais e CSS sticky.
+
+### Validação pendente
+- Verificação funcional isolada com dados fictícios em JavaScript apontou cabeçalhos e ações esperados; **não equivale à execução completa de Node 22 ou à homologação do PWA**.
+- Executar regressões Node, revisar comportamento do seletor em rolagem e modal nos navegadores móveis, executar CI quando o runner estiver disponível (issue #75), registrar resultados e obter aprovação explícita antes da liberação.
+
 ## [2.5.1 · compilação 2 — AJUSTE DE REGRESSÃO E HOMOLOGAÇÃO] — 2026-11-06
 
 **Publicação confirmada:** PR [#81](https://github.com/gaveblue/gaveblue/pull/81) integrado e deploy GitHub Pages [42317536214](https://github.com/gaveblue/gaveblue/actions/runs/42317536214) concluído com sucesso (commit `f52f43b47746138a5cfd63480bf3d7fadbf7c70b`). Nenhuma mudança adicional no layout de Contas/Cartões nem no mecanismo financeiro.
