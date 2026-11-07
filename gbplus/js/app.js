@@ -5,7 +5,8 @@ import {filterFlowRows} from './gb-flow-filters.js?v=20261106-68';
 import {uid,today,money,dateLabel,cents,addMonths,validDate,generateTitles,addPayment,transfer,updateTitle,pending,flow,within} from './domain.js?v=20261105-72';
 import {KEY,INDICATORS,defaultPanel,parseBackup,backupText,MOBILE_SHORTCUTS,defaultMobileNav,effectiveMobileNav,validMobileNav,shouldOfferSetup} from './store.js?v=20261106-2505';
 import {esc,icon,button,field,select,formFooter,download,csv,titleTable} from './ui.js?v=20261105-72';
-import {routes,dashboard,titlesView,partnersView,accountsView,categoriesView,flowView,reportsView,settingsView,notificationsView,filteredTitles,reportData} from './views.js?v=20261106-2502';
+import {routes,dashboard,titlesView,partnersView,accountsView,categoriesView,flowView,reportsView,settingsView,notificationsView,filteredTitles,reportData} from './views.js?v=20261106-2511';
+import {accountsCardsView} from './accounts-cards-view.js?v=20261106-2511';
 import {renderReactCharts,unmountReactCharts} from './gb-react-loader.js?v=20261105-45';
 import {mountNativeCharts} from './gb-charts-native.js?v=20261106-68';
 import {titleForm,partnerForm,accountForm,categoryForm,paymentForm,transferForm,titleDetail,customizeForm,accountDetail} from './forms.js?v=20261106-2509';
@@ -21,7 +22,7 @@ import {firstSetupView,customMobileNavForm,shortcutsPreview,readMobileNav,firstS
 import {BANKS,bankCatalog,findBank,bankName,syncBankPicker,filterBankPicker,filterBankDirectory} from './banks.js?v=20261105-87';
 import {addCardPurchase,removeCardPurchase,ensureCardMayChange,creditCards,cardPurchases} from './credit-cards.js?v=20261105-72';
 import {cashForecast} from './forecast.js?v=20261105-72';
-import {banksView,bankForm,cardsView,cardForm,cardPurchaseForm,forecastView,forecastSummary,forecastScenarioForm,forecastResult} from './finance-24-ui.js?v=20261105-87';
+import {banksView,bankForm,cardsView,cardForm,cardPurchaseForm,forecastView,forecastSummary,forecastScenarioForm,forecastResult} from './finance-24-ui.js?v=20261106-2511';
 import {launchesView} from './launches-view.js?v=20261105-75';
 import {installLaunchGestures} from './launches-gestures.js?v=20261104-38';
 import {launchSelection,paymentSelection,paymentSummary,applyLaunchPayments,reversedSelection,applyLaunchReversals,deletionSelection,applyLaunchDeletions} from './launch-actions.js?v=20261105-72';
@@ -40,7 +41,7 @@ function firstStepsDismissed(){
 let profileCpfStatus={userId:null,cpf:'',ready:false,loading:false,error:''};
 let bankImportDraft=null; // Memory-only preview; released on modal close.
 
-const state={route:'dashboard',period:'all',range:{},query:'',status:'',type:'',partner:'',category:'',partnerQuery:'',granularity:'month',flowChartMode:'bars',flowStatus:'all',report:'payable',reportPartner:'',moreFilters:false,launchSelected:[],launchStatusOpen:false,launchSearchOpen:false};
+const state={route:'dashboard',accountCardsTab:'accounts',period:'all',range:{},query:'',status:'',type:'',partner:'',category:'',partnerQuery:'',granularity:'month',flowChartMode:'bars',flowStatus:'all',report:'payable',reportPartner:'',moreFilters:false,launchSelected:[],launchStatusOpen:false,launchSearchOpen:false};
 const modal=document.querySelector('#modal');
 // Desktop-only sidebar preference; changing it never touches the finance database.
 const sidebarPreferenceKey='gbplus-sidebar-hidden-v1';
@@ -118,8 +119,8 @@ function updateSystemAppearance(theme){
 function render(){if(!db)return;updateSystemAppearance(db.settings.theme);document.querySelector('#navigation').innerHTML=routes.map(([key,label,ico])=>`<a href="#${key}" class="nav-item ${state.route===key?'active':''}" ${state.route===key?'aria-current="page"':''}>${icon(ico)}<span>${label}</span></a>`).join('');document.querySelector('#breadcrumb').textContent=state.route==='profile'?'Minha conta':routes.find(r=>r[0]===state.route)?.[1]||'Visão geral';document.querySelector('.theme-button').innerHTML=`${icon(db.settings.theme==='light'?'moon':'sun')}<span>Modo ${db.settings.theme==='light'?'escuro':'claro'}</span><span class="theme-switch"></span>`;document.querySelector('[data-action="search"]').innerHTML=icon('search');const notificationBell=document.querySelector('[data-action="notifications"]');const dueNotifications=db.titles.filter(t=>!t.cancelled&&pending(db,t)>0&&t.due<=today()).length;notificationBell.innerHTML=icon('bell')+(dueNotifications?'<span class="notification-dot" aria-hidden="true"></span>':'');notificationBell.setAttribute('aria-label','Notificações'+(dueNotifications?' · '+dueNotifications+' títulos vencidos ou vencendo hoje':''));const topTheme=document.querySelector('[data-action="top-theme"]');if(topTheme){const dark=db.settings.theme==='dark';topTheme.innerHTML=icon(dark?'sun':'moon');topTheme.setAttribute('aria-label',dark?'Ativar modo claro':'Ativar modo escuro');topTheme.title=dark?'Ativar modo claro':'Ativar modo escuro';topTheme.setAttribute('aria-pressed',String(dark));}document.querySelector('#mobile-navigation').innerHTML=(()=>{
  const custom=effectiveMobileNav(db.settings);
  const slots=[['dashboard','Início','home'],renderMobileShortcut(custom[0]),['new','Novo','plus'],renderMobileShortcut(custom[1]),renderMobileShortcut(custom[2])];
- return slots.map(([key,label,ico])=>key==='new'||key==='menu'?`<button type="button" data-action="${key==='new'?'new-title':'mobile-menu'}" class="${key==='new'?'mobile-new':''}" aria-label="${label}">${icon(ico)}<span>${label}</span></button>`:`<a href="#${key}" class="${state.route===key?'active':''}" ${state.route===key?'aria-current="page"':''}>${icon(ico)}<span>${label}</span></a>`).join('');
-})();const views={dashboard:()=>dashboard(db,state,!!currentUser(),currentUser()),titles:()=>launchesView(db,state),payable:()=>titlesView(db,state),receivable:()=>titlesView(db,state),partners:()=>partnersView(db,state),accounts:()=>accountsView(db),categories:()=>categoriesView(db),flow:()=>flowView(db,state),provisions:()=>flowView(db,state),reports:()=>reportsView(db,state),settings:()=>settingsView(db,!isInstalledApp(),!!currentUser(),currentUser(),isInstalledApp()),notifications:()=>notificationsView(db),banks:()=>banksView(db),cards:()=>cardsView(db),forecast:()=>forecastView(db,forecastDays),profile:()=>profileView(currentUser(),profileCpfStatus.userId===currentUser()?.id?profileCpfStatus:{ready:false,cpf:'',error:''})};document.body.classList.toggle('gb-settings-page',state.route==='settings');unmountReactCharts();document.querySelector('#main').innerHTML=(views[state.route]||views.dashboard)();if(state.route==='dashboard'){
+ return slots.map(([key,label,ico])=>key==='new'||key==='menu'?`<button type="button" data-action="${key==='new'?'new-title':'mobile-menu'}" class="${key==='new'?'mobile-new':''}" aria-label="${label}">${icon(ico)}<span>${label}</span></button>`:`<a href="#${key}" class="${(key==='accounts'||key==='cards'?state.route==='accounts'&&state.accountCardsTab===key:state.route===key)?'active':''}" ${(key==='accounts'||key==='cards'?state.route==='accounts'&&state.accountCardsTab===key:state.route===key)?'aria-current="page"':''}>${icon(ico)}<span>${label}</span></a>`).join('');
+})();const views={dashboard:()=>dashboard(db,state,!!currentUser(),currentUser()),titles:()=>launchesView(db,state),payable:()=>titlesView(db,state),receivable:()=>titlesView(db,state),partners:()=>partnersView(db,state),accounts:()=>accountsCardsView(db,state.accountCardsTab),categories:()=>categoriesView(db),flow:()=>flowView(db,state),provisions:()=>flowView(db,state),reports:()=>reportsView(db,state),settings:()=>settingsView(db,!isInstalledApp(),!!currentUser(),currentUser(),isInstalledApp()),notifications:()=>notificationsView(db),banks:()=>banksView(db),cards:()=>accountsCardsView(db,'cards'),forecast:()=>forecastView(db,forecastDays),profile:()=>profileView(currentUser(),profileCpfStatus.userId===currentUser()?.id?profileCpfStatus:{ready:false,cpf:'',error:''})};document.body.classList.toggle('gb-settings-page',state.route==='settings');unmountReactCharts();document.querySelector('#main').innerHTML=(views[state.route]||views.dashboard)();if(state.route==='dashboard'){
  const flowSection=document.querySelector('#main .dashboard-middle');
  if(flowSection)flowSection.insertAdjacentHTML('beforebegin',forecastSummary(db));
 }
@@ -210,7 +211,7 @@ function initializeProfileDirtyState(){
  syncProfileSaveState(form);
 }
 function applyPanel(){const device=matchMedia('(max-width: 760px)').matches?'mobile':'desktop';document.querySelectorAll('[data-indicator]').forEach(el=>{el.hidden=!db.settings.panel[device][el.dataset.indicator];});document.querySelectorAll('.dashboard-middle,.results-grid,.stats-grid').forEach(el=>el.hidden=![...el.children].some(x=>!x.hidden));}
-function route(){if(!db)return;const next=location.hash.slice(1);if(next==='main'&&document.querySelector('#main').childElementCount)return;const previous=state.route;state.route=next==='profile'||routes.some(r=>r[0]===next)?next:'dashboard';if(previous!==state.route){state.launchSelected=[];state.launchStatusOpen=false;}state.type=state.route==='payable'?'expense':state.route==='receivable'?'income':'';closeModal();render();window.scrollTo(0,0);}
+function route(){if(!db)return;const requested=location.hash.slice(1);const next=requested==='cards'?'accounts':requested;if(requested==='cards'){state.accountCardsTab='cards';history.replaceState(null,'','#accounts');}if(next==='main'&&document.querySelector('#main').childElementCount)return;const previous=state.route;state.route=next==='profile'||routes.some(r=>r[0]===next)?next:'dashboard';if(previous!==state.route){state.launchSelected=[];state.launchStatusOpen=false;}state.type=state.route==='payable'?'expense':state.route==='receivable'?'income':'';closeModal();render();window.scrollTo(0,0);}
 function formValues(form){return Object.fromEntries(new FormData(form));}
 function getTitle(id){const t=db.titles.find(t=>t.id===id);if(!t)throw Error('Título não encontrado.');return t;}
 function fail(error){if(currentUser()&&['SESSION','CONFLICT','SAVE','RELOAD'].includes(error.code)){document.querySelector('#sync-alert').hidden=false;}const area=modal.open?modal.querySelector('.form-error'):null;if(area){area.textContent=error.message;area.scrollIntoView({block:'nearest'});}else toast(error.message||'Não foi possível concluir a operação.');}
@@ -373,7 +374,13 @@ const actions={
   },
   'new-title':()=>openModal('Novo lançamento',titleForm(db,null,state.type||'expense')),
   'open-banks':()=>{location.hash='banks';if(state.route==='banks')render();},
-  'open-cards':()=>{location.hash='cards';if(state.route==='cards')render();},
+  'accounts-cards-tab':el=>{
+   const tab=el.dataset.tab;
+   if(state.route!=='accounts'||!['accounts','cards'].includes(tab)||tab===state.accountCardsTab)return;
+   state.accountCardsTab=tab;render();
+   document.querySelector('#gb-finance-tab-'+tab)?.focus({preventScroll:true});
+  },
+  'open-cards':()=>{state.accountCardsTab='cards';location.hash='accounts';if(state.route==='accounts')render();},
   'new-bank':()=>openModal('Cadastrar banco ou instituição',bankForm()),
   'edit-bank':el=>{
    const bank=(db.banks||[]).find(x=>x.id===el.dataset.id);
