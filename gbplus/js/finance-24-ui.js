@@ -57,7 +57,8 @@ export function cardsView(db,{embedded=false}={}){
    '<h3>Compras recentes</h3>'+(related.length?related.slice().sort((a,b)=>b.date.localeCompare(a.date)).slice(0,10).map(p=>
     '<div class="gb-credit-purchase"><div><strong>'+esc(p.description)+'</strong><small>'+dateLabel(p.date)+
     ' · parcela '+p.sequence+'/'+p.count+'</small></div><span>'+money(p.amount)+'</span>'+
-    button(icon('trash'),'delete-card-purchase','small','data-id="'+esc(p.id)+'" aria-label="Excluir compra"')+'</div>').join(''):
+    '<div class="gb-credit-purchase-actions">'+button('Editar','edit-card-purchase','small','data-id="'+esc(p.id)+'" aria-label="Editar compra"')+
+    button(icon('trash'),'delete-card-purchase','small','data-id="'+esc(p.id)+'" aria-label="Excluir compra"')+'</div></div>').join(''):
     '<p class="muted">Nenhuma compra cadastrada neste cartão.</p>')+'</section>';
  }).join('')+'</div>':empty('Cadastre seu primeiro cartão','Informe limite e dias de fechamento e vencimento para gerar suas faturas.','new-card','Cadastrar cartão'));
 }
@@ -75,20 +76,25 @@ export function cardForm(db,card){
   '</div><p class="form-hint">A conta escolhida é usada somente para prever o saldo das novas faturas; o dinheiro sai apenas quando a baixa for registrada. Use dias de 1 a 28. Após registrar compras, fechamento e vencimento ficam fixos. Não informe número completo, CVV ou senha.</p>'+
   formFooter(card?'Salvar cartão':'Cadastrar cartão')+'</form>';
 }
-export function cardPurchaseForm(db,cardId=''){
- const active=creditCards(db).filter(c=>c.active);
+export function cardPurchaseForm(db,cardId='',purchase=null){
+ const active=creditCards(db).filter(c=>c.active||c.id===purchase?.cardId);
  if(!active.length)return empty('Cadastre um cartão primeiro','Para registrar a compra, informe o limite e as datas da fatura.','new-card','Cadastrar cartão');
- const selected=active.some(c=>c.id===cardId)?cardId:active[0].id;
- return '<form id="card-purchase-form"><div class="form-grid">'+
-  '<div class="full">'+select('Cartão utilizado','cardId',active.map(c=>[c.id,c.name]),selected,'required')+'</div>'+
-  '<div class="full">'+field('Descrição da despesa','description','','text','required maxlength="300" placeholder="Ex.: Compra no supermercado"')+'</div>'+
-  '<div class="full">'+select('Categoria da despesa','categoryId',db.categories.filter(c=>c.type==='expense').map(c=>[c.id,c.name]),'','required')+'</div>'+
-  '<div class="full">'+select('Parceiro (opcional)','partnerId',[['','Sem parceiro'],...db.partners.filter(p=>p.active).map(p=>[p.id,p.name])],'')+'</div>'+
-  field('Data da compra','date',today(),'date','required max="'+today()+'"')+
-  field('Valor total (R$)','amount','','number','required min="0.01" step="0.01" max="10000000000"')+
-  field('Número de parcelas','count',1,'number','required min="1" max="36" step="1"')+
-  '</div><p class="form-hint">O valor total consome o limite imediatamente. Cada parcela entra na fatura correspondente, que será criada em Contas a pagar. Não cria despesa duplicada.</p>'+
-  formFooter('Registrar compra')+'</form>';
+ const selected=active.some(c=>c.id===(purchase?.cardId||cardId))?(purchase?.cardId||cardId):active[0].id;
+ const group=purchase?(purchase.groupId?cardPurchases(db).filter(p=>p.groupId===purchase.groupId):[purchase]):[];
+ const total=group.reduce((sum,p)=>sum+p.amount,0);
+ const locked=group.some(p=>db.payments?.some(row=>row.titleId===p.invoiceId));
+ return '<form id="card-purchase-form" data-id="'+esc(purchase?.id||'')+'"><div class="form-grid">'+
+  '<div class="full">'+select('Cartão utilizado','cardId',active.map(c=>[c.id,c.name+(c.active?'':' (inativo)')]),selected,'required')+'</div>'+
+  '<div class="full">'+field('Descrição da despesa','description',purchase?.description||'','text','required maxlength="300" placeholder="Ex.: Compra no supermercado"')+'</div>'+
+  '<div class="full">'+select('Categoria da despesa','categoryId',db.categories.filter(c=>c.type==='expense').map(c=>[c.id,c.name]),purchase?.categoryId||'','required')+'</div>'+
+  '<div class="full">'+select('Parceiro (opcional)','partnerId',[['','Sem parceiro'],...db.partners.filter(p=>p.active||p.id===purchase?.partnerId).map(p=>[p.id,p.name])],purchase?.partnerId||'')+'</div>'+
+  field('Data da compra','date',purchase?.date||today(),'date','required max="'+today()+'"')+
+  field('Valor total (R$)','amount',purchase?total/100:'','number','required min="0.01" step="0.01" max="10000000000"')+
+  field('Número de parcelas','count',group.length||1,'number','required min="1" max="36" step="1"')+
+  '</div><p class="form-hint">'+(locked?
+   'Esta compra possui fatura paga. Você pode ajustar descrição, categoria e parceiro; para mudar valores ou parcelas, estorne a baixa da fatura primeiro.':
+   'Alterações de cartão, data, valor ou parcelas recalculam as faturas correspondentes sem duplicar despesas ou afetar o caixa antes da baixa.')+
+  '</p>'+formFooter(purchase?'Salvar alterações':'Registrar compra')+'</form>';
 }
 export function forecastSummary(db,days=30){
  const f=cashForecast(db,days);
