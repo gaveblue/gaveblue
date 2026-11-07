@@ -172,3 +172,6 @@
  .gb-entry-flow-option{font-size:12px;gap:4px}
  .gb-entry-amount-control input{width:70%}
 }
+
+/* Card shortcut belongs to the expense details step, never to income or the review stage. */
+.gb-entry-wizard[data-step="2"]>.gb-credit-entry-link,.gb-entry-wizard[data-entry-type="income"]>.gb-credit-entry-link{display:none!important}
