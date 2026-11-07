@@ -967,7 +967,12 @@ const actions={
   'delete-account':el=>{const id=el.dataset.id;if((db.cards||[]).some(card=>card.payAccountId===id))throw Error('Esta conta é a conta de pagamento prevista de um cartão. Altere o cartão antes de excluí-la.');if(db.titles.some(t=>t.accountId===id)||db.payments.some(p=>p.accountId===id)||db.transfers.some(t=>t.from===id||t.to===id))throw Error('Esta conta tem vínculos. Marque-a como inativa para manter o histórico.');if((db.bankImportBatches||[]).some(b=>b.accountId===id))throw Error('Esta conta possui histórico de conciliações. Marque-a como inativa para preservá-lo.');confirm('Excluir conta?','A conta e seu saldo inicial serão removidos.',()=>commit(d=>{d.accounts=d.accounts.filter(a=>a.id!==id);},'Conta excluída.'));},
   'undo-payment':el=>{const id=el.dataset.id;confirm('Estornar baixa?','A baixa será removida, o valor voltará a ficar pendente e o saldo da conta será recalculado.',()=>commit(d=>{d.payments=d.payments.filter(p=>p.id!==id);},'Baixa estornada.'));},
   'undo-transfer':el=>{const id=el.dataset.id;confirm('Estornar transferência?','A movimentação será removida das duas contas.',()=>commit(d=>{d.transfers=d.transfers.filter(t=>t.id!==id);},'Transferência estornada.'));},
-  'save-generation':()=>{if(!pendingGeneration||busy)return;const generated=pendingGeneration;return commit(d=>{
+  'save-generation':()=>{
+   if(!pendingGeneration||busy)return;
+   const generated=pendingGeneration;
+   if(generated.cardPurchase)return commit(d=>addCardPurchase(d,generated.cardPurchase),
+    'Compra registrada no cartão. Faturas atualizadas, sem baixa bancária duplicada.');
+   return commit(d=>{
    if(generated.some(t=>d.titles.some(x=>!x.cancelled&&x.type===t.type&&x.description===t.description&&x.due===t.due&&x.amount===t.amount&&x.partnerId===t.partnerId)))
     throw Error('Já existe um título igual (descrição, parceiro, valor e vencimento). Revise para evitar duplicidade.');
    d.titles.push(...generated);
@@ -1220,7 +1225,7 @@ document.addEventListener('submit',async e=>{e.preventDefault();if(busy||!db)ret
    const input={type:v.type,description,categoryId:v.categoryId,partnerId:v.partnerId||'',
     document:v.document.trim(),issue:v.issue,due:v.due,amount:cents(v.amount),
     accountId:isPaid?v.settleAccountId:(v.accountId||''),notes:v.notes.trim(),serviceId,serviceName,
-    paymentMethod:v.paymentMethod==='debit'?'debit':'account',relatedCardId};
+    paymentMethod:id?(getTitle(id).paymentMethod||'account'):'account',relatedCardId};
    if(id){
     const original=getTitle(id);
     const businessDays=original.mode!=='single'&&v.businessDays==='true';
@@ -1228,6 +1233,34 @@ document.addEventListener('submit',async e=>{e.preventDefault();if(busy||!db)ret
     return;
    }
    const businessDays=v.mode!=='single'&&v.businessDays==='true';
+   if(v.settlement==='card'){
+    // A credit-card purchase must only create card installments and invoices.
+    // Never create a second ordinary expense or a cash payment.
+    const installmentCount=v.mode==='installment'?Number(v.count):1;
+    const draft={cardId:v.settleCardId,date:v.issue,amount:input.amount,
+      description:input.description,categoryId:input.categoryId,partnerId:input.partnerId,count:installmentCount};
+    const clone=form.cloneNode(true);
+    const originalFields=[...form.querySelectorAll('input,select,textarea')];
+    const copiedFields=[...clone.querySelectorAll('input,select,textarea')];
+    originalFields.forEach((element,index)=>{
+     const dest=copiedFields[index];if(!dest)return;
+     if(element.tagName==='SELECT'){[...dest.options].forEach(o=>o.toggleAttribute('selected',o.value===element.value));}
+     else if(element.type==='checkbox'||element.type==='radio')dest.toggleAttribute('checked',element.checked);
+     else if(element.tagName==='TEXTAREA')dest.textContent=element.value;
+     else dest.setAttribute('value',element.value);
+    });
+    pendingGeneration={cardPurchase:draft,formHTML:clone.outerHTML};
+    const card=db.cards.find(c=>c.id===draft.cardId);
+    openModal('Revise a compra no cartão',
+     '<div class="preview-summary"><span>Compra no cartão · '+installmentCount+
+     (installmentCount===1?' parcela':' parcelas')+'</span><strong>'+money(input.amount)+
+     '</strong><p>'+esc(card?.name||'Cartão de crédito')+'</p></div>'+
+     '<p class="gb-entry-review-note">A compra será distribuída nas faturas do cartão. Não haverá baixa na conta agora e nenhuma despesa será duplicada.</p>'+
+     '<p>'+esc(input.description)+' · '+dateLabel(draft.date)+'</p>'+
+     '<div class="form-error" role="alert"></div><div class="form-footer">'+
+     button('Voltar','back-generation')+button('Confirmar compra','save-generation','primary')+'</div>');
+    return;
+   }
    const generated=generateTitles(input,v.mode,v.mode==='single'?1:Number(v.count),{businessDays});
    if(isPaid)generated.settlement={accountId:v.settleAccountId,date:v.settleDate};
    const clone=form.cloneNode(true);
