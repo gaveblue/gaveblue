@@ -1145,11 +1145,13 @@ document.addEventListener('submit',async e=>{e.preventDefault();if(busy||!db)ret
    const serviceName=serviceId==='custom'?String(v.serviceName||'').trim():'';
    if(serviceId==='custom'&&(!serviceName||serviceName.length>120))throw Error('Informe o nome do serviço.');
    const description=serviceId?serviceDisplayName(serviceId,serviceName,''):v.description.trim();
+   const relatedCardId=v.type==='income'?String(v.relatedCardId||''):'';
+   if(relatedCardId&&!(db.cards||[]).some(card=>card.id===relatedCardId))throw Error('Selecione um cartão válido para o reembolso.');
    const isPaid=!id&&v.settlement==='paid';
    const input={type:v.type,description,categoryId:v.categoryId,partnerId:v.partnerId||'',
     document:v.document.trim(),issue:v.issue,due:v.due,amount:cents(v.amount),
     accountId:isPaid?v.settleAccountId:(v.accountId||''),notes:v.notes.trim(),serviceId,serviceName,
-    paymentMethod:v.paymentMethod==='debit'?'debit':'account'};
+    paymentMethod:v.paymentMethod==='debit'?'debit':'account',relatedCardId};
    if(id){
     const original=getTitle(id);
     const businessDays=original.mode!=='single'&&v.businessDays==='true';
@@ -1262,6 +1264,7 @@ document.addEventListener('change',async e=>{if(!db)return;const el=e.target;try
    syncEntryServiceCategory(el.form);
    const credit=el.form?.querySelector('.gb-credit-entry-link');if(credit)credit.hidden=el.value!=='expense';
    const refund=el.form?.querySelector('.gb-entry-refund-hint');if(refund)refund.hidden=el.value!=='income';
+   const related=el.form?.querySelector('.gb-entry-refund-card');if(related)related.hidden=el.value!=='income';
   }
   if(el.id==='entry-category')syncEntryServiceCategory(el.form);
   if(el.id==='gb-service-group')filterServicesInForm(el.closest('#title-form'));
