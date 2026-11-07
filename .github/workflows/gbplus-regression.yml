@@ -63,6 +63,8 @@ jobs:
         run: node gbplus/tests/account-safety-regression.mjs
       - name: Autorização administrativa real e isolamento de privilégios
         run: node --test gbplus/tests/admin-security.test.mjs
+      - name: Exigir verificação JWT nas funções sensíveis
+        run: node --test gbplus/tests/admin-gateway-config.test.mjs
       - name: Catálogo de serviços e identificação opcional (2.6.0)
         run: node gbplus/tests/services-regression.mjs
       - name: Importação intuitiva e seleção múltipla (2.5.2)
