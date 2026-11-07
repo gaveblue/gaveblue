@@ -44,14 +44,22 @@ export function titleForm(db,t,type='expense'){
    '<label class="gb-entry-settlement-option gb-entry-card-option"><input type="radio" name="settlement" value="card"><span><strong>Lançar no cartão de crédito</strong><small>A compra entra na fatura, sem baixar a conta agora.</small></span></label>'+
    '<p class="gb-entry-settlement-series" hidden>Parcelas e recorrências bancárias ficam pendentes; compras no cartão geram faturas próprias.</p>'+
    '<div class="gb-entry-settlement-details" hidden>'+
-    '<label class="field">Conta da baixa<select name="settleAccountId" data-gb-native="true"><option value="">Selecione uma conta</option>'+
-     activeAccounts.map(a=>'<option value="'+esc(a.id)+'">'+esc(a.name)+'</option>').join('')+'</select></label>'+
+    '<div class="gb-entry-finance-select" data-finance-kind="account">'+
+     '<span class="gb-entry-finance-label" id="gb-entry-account-label">Conta da baixa</span>'+
+     '<select name="settleAccountId" class="gb-entry-finance-native" data-gb-native="true" aria-hidden="true" tabindex="-1"><option value="">Selecione uma conta</option>'+
+      activeAccounts.map(a=>'<option value="'+esc(a.id)+'">'+esc(a.name)+'</option>').join('')+'</select>'+
+     '<button type="button" class="gb-entry-finance-trigger" data-action="title-finance-picker" data-kind="account" aria-haspopup="dialog" aria-controls="gb-picker-sheet" aria-expanded="false" aria-label="Selecionar conta da baixa">'+
+      '<span class="gb-entry-finance-current">Selecione uma conta</span>'+icon('chevron')+'</button></div>'+
     field('Data da baixa','settleDate',today(),'date','max="'+today()+'"')+
     '<p class="gb-entry-settlement-message">A baixa será gravada junto do título, após confirmar.</p>'+
    '</div>'+
    '<div class="gb-entry-settlement-card" hidden>'+
-    '<label class="field">Cartão de crédito<select name="settleCardId" data-gb-native="true"><option value="">Selecione um cartão</option>'+
-     activeCards.map(c=>'<option value="'+esc(c.id)+'">'+esc(c.name)+'</option>').join('')+'</select></label>'+
+    '<div class="gb-entry-finance-select" data-finance-kind="card">'+
+     '<span class="gb-entry-finance-label" id="gb-entry-card-label">Cartão de crédito</span>'+
+     '<select name="settleCardId" class="gb-entry-finance-native" data-gb-native="true" aria-hidden="true" tabindex="-1"><option value="">Selecione um cartão</option>'+
+      activeCards.map(c=>'<option value="'+esc(c.id)+'">'+esc(c.name)+'</option>').join('')+'</select>'+
+     '<button type="button" class="gb-entry-finance-trigger" data-action="title-finance-picker" data-kind="card" aria-haspopup="dialog" aria-controls="gb-picker-sheet" aria-expanded="false" aria-label="Selecionar cartão de crédito">'+
+      '<span class="gb-entry-finance-current">Selecione um cartão</span>'+icon('chevron')+'</button></div>'+
     '<p class="gb-entry-settlement-message">Compra única ou até 36 parcelas. Vencimentos serão calculados pelas regras de fechamento e vencimento do cartão; o saldo da conta só muda ao pagar a fatura.</p>'+
    '</div>'+
   '</fieldset>':
@@ -107,7 +115,6 @@ export function titleForm(db,t,type='expense'){
    </section>
   </section>
   <input type="hidden" name="accountId" value="${esc(t?.accountId||'')}">
-  <div class="form-error" role="alert"></div>
   <div class="gb-entry-wizard-footer" data-entry-footer="1">
    <button type="button" class="button" data-action="close">Cancelar</button>
    <button type="button" class="button primary" data-action="title-next">Próximo ${icon('arrow')}</button>

@@ -1,5 +1,17 @@
 # CHANGELOG — GB+ Gestão Financeira
 
+## [2.7.7 — PAINÉIS EXPANDIDOS E VALOR LIVRE] — 2026-11-07
+
+**Correção visual do lançamento e dos seletores.** A altura compacta do formulário e os botões fixos no rodapé continuam iguais. O campo numérico da primeira etapa fica sem contorno, sublinhado ou borda mesmo em foco. Retirado o bloco persistente de erro abaixo da descrição; erros de validação seguem visíveis apenas quando ocorrerem, em aviso temporário, sem dispensar regras financeiras.
+
+- **Categorias:** Serviços passa a ser listado primeiro nas despesas; as demais categorias permanecem ordenadas alfabeticamente. Selecionar Serviços continua abrindo automaticamente o painel de serviços, sem perder o que já foi digitado.
+- **Painéis de categorias e serviços:** abrem expandidos no primeiro toque. Arrastar a alça para baixo recolhe o seletor até aproximadamente metade da tela; busca, foco, fechamento e seleção foram preservados.
+- **Contas e cartões na 3ª etapa:** as listas nativas foram substituídas visualmente por gatilhos que abrem o mesmo painel alto. Os campos originais permanecem no formulário para gravação, sem alteração de contrato. Cada opção mostra instituição/banco (quando cadastrado), nome e saldo disponível da conta calculado pelo GB+ ou limite disponível calculado do cartão, incluindo identificação dos quatro últimos dígitos quando existente. Sem sincronização bancária em tempo real.
+- **Usabilidade/acessibilidade:** seletores atualizam o resumo da escolha e o rótulo acessível; os campos ocultos não acionam validação nativa de `required`, mas seguem sujeitos à validação de negócio da terceira etapa.
+- **Cache e versão:** `index.html`, imports de módulos, `sw.js` e `version.json` atualizados para 2.7.7 build 1.
+- **Evidências de regressão antes da integração:** 26/26 arquivos de teste `.mjs` aprovados em V8 isolado, com adaptadores de módulos Node e fontes reais da branch. O teste novo `picker-expanded-regression.mjs` verificou ordenação, expansão inicial, gesto de recolher, dados das contas/cartões e ausência de aviso persistente. Limitação: execução nativa completa no Node e testes visuais em dispositivo Android/PWA real ainda não estão comprovados; publicação não equivale a homologação integral.
+
+
 ## [2.7.6 — LANÇAMENTOS, CARTÕES E ALERTAS DE ATRASO] — 2026-11-07
 
 **VERIFICAÇÃO PRÉ-PUBLICAÇÃO:** 25 de 25 arquivos de regressão existentes foram executados com seus códigos reais em JavaScript V8 e adaptações para leitura de arquivos, asserções e recursos Node; todos passaram. Cinco cenários financeiros extras de edição e redistribuição entre cartões também passaram. **Homologação integral ainda pendente:** não houve execução nativa da suíte em checkout Node.js, nem teste visual real do Android/PWA ou sessão Supabase autenticada. A publicação, quando realizada, não deve ser descrita como homologação integral.

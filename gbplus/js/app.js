@@ -2,17 +2,17 @@ import {parseBankStatement,parseBankCsv,inspectBankCsv,proposeReconciliation,rea
 import {bankImportMarkup,bankImportHistoryMarkup,bankImportFilteredRows,bankImportBulkDecisions,BANK_IMPORT_PAGE_SIZE,BANK_IMPORT_WRITES_ENABLED} from './bank-import-ui.js?v=20261106-2600';
 import {reviewSelection,applyReconciliationBatch,undoReconciliationBatch,reconciliationRecordKey,knownReconciliationKeys} from './bank-reconciliation.js?v=20261106-2505';
 import {filterFlowRows} from './gb-flow-filters.js?v=20261106-68';
-import {uid,today,money,dateLabel,cents,addMonths,validDate,generateTitles,addPayment,transfer,updateTitle,pending,flow,within} from './domain.js?v=20261105-72';
+import {uid,today,money,dateLabel,cents,addMonths,validDate,generateTitles,addPayment,transfer,updateTitle,pending,accountBalance,flow,within} from './domain.js?v=20261105-72';
 import {KEY,INDICATORS,defaultPanel,parseBackup,backupText,MOBILE_SHORTCUTS,defaultMobileNav,effectiveMobileNav,validMobileNav,shouldOfferSetup} from './store.js?v=20261106-2600';
 import {esc,icon,button,field,select,formFooter,download,csv,titleTable} from './ui.js?v=20261105-72';
 import {routes,dashboard,titlesView,partnersView,categoriesView,flowView,reportsView,settingsView,notificationsView,filteredTitles,reportData} from './views.js?v=20261107-admin1';
 import {accountsCardsView} from './accounts-cards-view.js?v=20261106-2513';
 import {renderReactCharts,unmountReactCharts} from './gb-react-loader.js?v=20261105-45';
 import {mountNativeCharts} from './gb-charts-native.js?v=20261106-68';
-import {titleForm,partnerForm,accountForm,categoryForm,paymentForm,transferForm,titleDetail,customizeForm,accountDetail} from './forms.js?v=20261107-2760';
+import {titleForm,partnerForm,accountForm,categoryForm,paymentForm,transferForm,titleDetail,customizeForm,accountDetail} from './forms.js?v=20261107-2770';
 import {serviceById,serviceSearchKey,isServiceExpenseCategory} from './service-catalog.js?v=20261106-2630';
 import {serviceIconMarkup,serviceIdentityMarkup,serviceDisplayName} from './service-ui.js?v=20261107-2720';
-import {openGbPickerSheet,openGbScheduleSheet,installGbPickerSheet,installEntryFormDrag} from './bottom-sheet.js?v=20261107-2760';
+import {openGbPickerSheet,openGbScheduleSheet,installGbPickerSheet,installEntryFormDrag} from './bottom-sheet.js?v=20261107-2770';
 import {toggleEntryMenu,chooseEntryOption,syncEntrySelect,closeEntryMenus} from './entry-select.js?v=20261107-2720';
 import {installGbControls,enhanceGbControls} from './custom-controls.js?v=20261104-42';
 import {expectedDates,recurrenceAnchor} from './gb-calendar-rules.js?v=20261105-47';
@@ -24,8 +24,8 @@ import {profileView,validateProfile,validCPF,formatCPF} from './profile.js?v=202
 import {canResetFinancialData,canDeleteAccount,clearFinancialDocument} from './account-safety.js?v=20261106-2610';
 import {resetAccountModal,deleteAccountModal,syncAccountDangerConfirm} from './account-safety-ui.js?v=20261106-2610';
 import {firstSetupView,customMobileNavForm,shortcutsPreview,readMobileNav,firstStepsPanel} from './setup-ui.js?v=20261105-87';
-import {BANKS,bankCatalog,findBank,bankName,syncBankPicker,filterBankPicker,filterBankDirectory} from './banks.js?v=20261105-87';
-import {addCardPurchase,updateCardPurchase,removeCardPurchase,ensureCardMayChange,creditCards,cardPurchases,cardCycle,shiftCardCycle,cardDue} from './credit-cards.js?v=20261107-2760';
+import {BANKS,bankCatalog,findBank,bankForAccount,bankBadge,bankName,syncBankPicker,filterBankPicker,filterBankDirectory} from './banks.js?v=20261105-87';
+import {addCardPurchase,updateCardPurchase,removeCardPurchase,ensureCardMayChange,creditCards,cardPurchases,cardAvailable,cardCycle,shiftCardCycle,cardDue} from './credit-cards.js?v=20261107-2760';
 import {cashForecast} from './forecast.js?v=20261105-72';
 import {banksView,bankForm,cardForm,cardPurchaseForm,forecastView,forecastSummary,forecastScenarioForm,forecastResult} from './finance-24-ui.js?v=20261107-2760';
 import {launchesView} from './launches-view.js?v=20261107-2760';
@@ -264,7 +264,17 @@ function applyPanel(){const device=matchMedia('(max-width: 760px)').matches?'mob
 function route(){if(!db)return;const requested=location.hash.slice(1);const next=requested==='cards'?'accounts':requested;if(requested==='cards'){state.accountCardsTab='cards';history.replaceState(null,'','#accounts');}if(next==='main'&&document.querySelector('#main').childElementCount)return;const previous=state.route;state.route=next==='profile'||routes.some(r=>r[0]===next)?next:'dashboard';if(previous!==state.route){state.launchSelected=[];state.launchStatusOpen=false;}state.type=state.route==='payable'?'expense':state.route==='receivable'?'income':'';closeModal();render();window.scrollTo(0,0);}
 function formValues(form){return Object.fromEntries(new FormData(form));}
 function getTitle(id){const t=db.titles.find(t=>t.id===id);if(!t)throw Error('Título não encontrado.');return t;}
-function fail(error){if(currentUser()&&['SESSION','CONFLICT','SAVE','RELOAD'].includes(error.code)){document.querySelector('#sync-alert').hidden=false;}const area=modal.open?modal.querySelector('.form-error'):null;if(area){area.textContent=error.message;area.scrollIntoView({block:'nearest'});}else toast(error.message||'Não foi possível concluir a operação.');}
+function fail(error){
+ if(currentUser()&&['SESSION','CONFLICT','SAVE','RELOAD'].includes(error.code)){
+  const alert=document.querySelector('#sync-alert');if(alert)alert.hidden=false;
+ }
+ // Do not place a permanent warning card below the amount/category fields.
+ // Guidance is shown only after an invalid attempt and then disappears.
+ if(modal.open&&modal.querySelector('#title-form')){toast(error?.message||'Confira o lançamento.');return;}
+ const area=modal.open?modal.querySelector('.form-error'):null;
+ if(area){area.textContent=error?.message||'Confira os dados.';area.scrollIntoView({block:'nearest'});}
+ else toast(error?.message||'Não foi possível concluir a operação.');
+}
 function launchSelectedIds(){
  const visible=new Set(filteredTitles(db,state).map(t=>t.id));
  return state.launchSelected.filter(id=>visible.has(id));
@@ -425,6 +435,45 @@ function validateEntryStepTwo(form){
    throw Error('O valor precisa comportar ao menos R$ 0,01 por parcela.');
  }
 }
+/** All figures come from the financial model; the picker never changes balances. */
+function entryFinanceItems(kind){
+ if(kind==='account'){
+  return (db?.accounts||[]).filter(row=>row.active).map(row=>{
+   const bank=bankForAccount(db,row);
+   const balance=accountBalance(db,row.id,today());
+   return {id:row.id,name:row.name,
+    subtitle:'Saldo disponível · '+money(balance),
+    search:bank?.name||row.bank||'',
+    badgeMarkup:bank?bankBadge(bank):'<span class="gb-sheet-finance-fallback">'+icon('wallet')+'</span>'};
+  });
+ }
+ return creditCards(db).filter(row=>row.active).map(row=>{
+  const bank=findBank(db,row.bankId);
+  const available=cardAvailable(db,row);
+  return {id:row.id,name:row.name,
+   subtitle:'Limite disponível · '+money(available)+(row.last4?' · final '+row.last4:''),
+   search:bank?.name||'',
+   badgeMarkup:bank?bankBadge(bank):'<span class="gb-sheet-finance-fallback">'+icon('credit-card')+'</span>'};
+ });
+}
+function syncEntryFinanceChoice(form,kind){
+ if(!form||form.id!=='title-form'||!['account','card'].includes(kind))return;
+ const source=form.elements[kind==='account'?'settleAccountId':'settleCardId'];
+ const wrap=form.querySelector('.gb-entry-finance-select[data-finance-kind="'+kind+'"]');
+ const trigger=wrap?.querySelector('.gb-entry-finance-trigger');
+ const current=wrap?.querySelector('.gb-entry-finance-current');
+ if(!source||!trigger||!current)return;
+ const selected=entryFinanceItems(kind).find(row=>row.id===source.value);
+ if(!selected){
+  current.textContent=kind==='account'?'Selecione uma conta':'Selecione um cartão';
+ }else{
+  current.innerHTML='<span class="gb-entry-finance-badge" aria-hidden="true">'+selected.badgeMarkup+'</span>'+
+   '<span class="gb-entry-finance-copy"><strong>'+esc(selected.name)+'</strong><small>'+esc(selected.subtitle)+'</small></span>';
+ }
+ trigger.setAttribute('aria-label',(kind==='account'?'Conta da baixa: ':'Cartão de crédito: ')+
+  (selected?selected.name+' · '+selected.subtitle:'Selecionar'));
+ trigger.setAttribute('aria-expanded','false');
+}
 function syncEntrySettlement(form){
  if(!form||form.id!=='title-form')return;
  const group=form.querySelector('.gb-entry-settlement');
@@ -459,9 +508,13 @@ function syncEntrySettlement(form){
  const account=form.elements.settleAccountId;
  const date=form.elements.settleDate;
  const cardId=form.elements.settleCardId;
- if(account)account.required=payNow;
+ // Hidden native fields still travel with FormData. Validation occurs in
+ // validateEntryStepThree, avoiding browser errors on invisible required selects.
+ if(account)account.required=false;
  if(date)date.required=payNow;
- if(cardId)cardId.required=chargeCard;
+ if(cardId)cardId.required=false;
+ syncEntryFinanceChoice(form,'account');
+ syncEntryFinanceChoice(form,'card');
  const dueField=form.querySelector('.gb-entry-date-due');
  if(dueField)dueField.hidden=chargeCard;
  if(form.elements.due)form.elements.due.disabled=chargeCard;
@@ -643,6 +696,26 @@ const actions={
    });
    form.dataset.entryType=type;
    select.dispatchEvent(new Event('change',{bubbles:true}));
+  },
+  'title-finance-picker':el=>{
+   const form=el.closest('#title-form'),kind=el.dataset.kind;
+   if(!form||form.dataset.step!=='3'||!['account','card'].includes(kind))return;
+   const source=form.elements[kind==='account'?'settleAccountId':'settleCardId'];
+   const activeOption=form.querySelector('.gb-entry-settlement input[value="'+(kind==='account'?'paid':'card')+'"]');
+   if(!source||!activeOption?.checked||activeOption.disabled)return;
+   const items=entryFinanceItems(kind);
+   if(!items.length){toast(kind==='account'?'Cadastre uma conta ativa.':'Cadastre um cartão de crédito ativo.');return;}
+   el.setAttribute('aria-expanded','true');
+   const shown=openGbPickerSheet({
+    kind,items,selected:source.value||'',
+    onPick:id=>{
+     if(!form.isConnected||![...source.options].some(option=>option.value===id))return;
+     source.value=id;
+     syncEntryFinanceChoice(form,kind);
+     source.dispatchEvent(new Event('change',{bubbles:true}));
+    }
+   });
+   if(!shown)el.setAttribute('aria-expanded','false');
   },
   'title-schedule-detail':()=>{
    const form=modal.querySelector('#title-form');
@@ -1394,7 +1467,7 @@ document.addEventListener('change',async e=>{if(!db)return;const el=e.target;try
   if(el.id==='entry-category')syncEntryServiceCategory(el.form);
   if(el.id==='gb-service-group')filterServicesInForm(el.closest('#title-form'));
   if(el.id==='entry-mode'){syncEntrySettlement(el.form);refreshEntrySchedule(el.form);}
-  if(el.form?.id==='title-form'&&['settlement','settleCardId'].includes(el.name)){syncEntrySettlement(el.form);refreshEntrySchedule(el.form);}
+  if(el.form?.id==='title-form'&&['settlement','settleCardId','settleAccountId'].includes(el.name)){syncEntrySettlement(el.form);refreshEntrySchedule(el.form);}
   if(el.id==='period'){if(el.value==='custom'){openModal('Escolher período',`<form id="period-form"><div class="form-grid">${field('De','from',state.range.from||today(),'date','required')}${field('Até','to',state.range.to||today(),'date','required')}</div>${formFooter('Aplicar período')}</form>`);el.value=state.period;}else{state.period=el.value;state.range=rangeFor(el.value);savePeriodPreference();state.launchSelected=[];state.launchStatusOpen=false;render();}}
   if(el.dataset.filter){state[el.dataset.filter]=el.value;if(['partner','category'].includes(el.dataset.filter))state.moreFilters=true;state.launchSelected=[];render();}
   if(el.id==='report-type'){state.report=el.value;render();}
