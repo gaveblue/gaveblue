@@ -20,6 +20,8 @@ import {setupPwaInstallation,maybeOfferPwaInstall,showInstallHelp,isPwaInstalled
 import {SupabaseRepository} from '../integrations/supabase/repository.js?v=20261106-2505';
 import {initializeAuth,authClient,currentUser,showAuth,isRecovery,updatePersonalProfile,consumeAuthReturnMessage,consumeSessionNotice,signOutAccount,authError,emailCooldownSeconds,markAuthEmailSent} from './auth.js?v=20261105-69';
 import {profileView,validateProfile,validCPF,formatCPF} from './profile.js?v=20261105-59';
+import {canResetFinancialData,canDeleteAccount,clearFinancialDocument} from './account-safety.js?v=20261106-2610';
+import {resetAccountModal,deleteAccountModal,syncAccountDangerConfirm} from './account-safety-ui.js?v=20261106-2610';
 import {firstSetupView,customMobileNavForm,shortcutsPreview,readMobileNav,firstStepsPanel} from './setup-ui.js?v=20261105-87';
 import {BANKS,bankCatalog,findBank,bankName,syncBankPicker,filterBankPicker,filterBankDirectory} from './banks.js?v=20261105-87';
 import {addCardPurchase,removeCardPurchase,ensureCardMayChange,creditCards,cardPurchases} from './credit-cards.js?v=20261105-72';
@@ -656,12 +658,39 @@ const actions={
     '<p><strong>GB+ · Gestão Financeira</strong></p>'+
     '<p class="muted" style="margin-top:10px">Versão '+esc(document.querySelector('meta[name="gbplus-version"]')?.content||'')+'. Um aplicativo para organizar seu financeiro.</p>'+
     '<p style="margin-top:18px"><a href="./privacidade.html" class="button">Política de Privacidade</a></p>'),
-  'settings-delete':()=>openModal('Excluir conta',
-    '<p><strong>Esta ação pode remover permanentemente seu acesso e seus dados financeiros.</strong></p>'+
-    '<p style="margin-top:12px" class="muted">A exclusão automática ainda não está disponível nesta versão. Para proteger sua conta, a solicitação é atendida após confirmação de titularidade. Nada será excluído ao abrir esta opção.</p>'+
-    '<div class="button-stack" style="margin-top:20px">'+
-    button(icon('download')+' Fazer backup antes','backup')+
-    '<a class="button danger" href="mailto:contato@gaveblue.com.br?subject=Solicita%C3%A7%C3%A3o%20de%20exclus%C3%A3o%20da%20conta%20GB%2B">Solicitar exclusão de conta</a></div>'),
+  'settings-reset':()=>openModal('Limpar todos os dados',resetAccountModal(db,!!currentUser())),
+  'settings-reset-execute':async()=>{
+   const form=modal.querySelector('#gb-reset-form');
+   if(!form||!canResetFinancialData(form.elements.confirmation?.value,form.elements.acknowledged?.checked))
+    throw Error('Digite LIMPAR e confirme que deseja apagar os registros financeiros.');
+   if(currentUser()&&!navigator.onLine)throw Error('Conecte-se para apagar os dados sincronizados com segurança.');
+   await commit(d=>clearFinancialDocument(d),'Dados financeiros limpos. Seu login permanece ativo.');
+  },
+  'settings-delete':()=>openModal('Excluir conta',deleteAccountModal(currentUser())),
+  'settings-delete-execute':async()=>{
+   const form=modal.querySelector('#gb-delete-form'),user=currentUser();
+   if(!user?.id||!user.email)throw Error('Entre na sua conta novamente para solicitar a exclusão.');
+   if(!form||!canDeleteAccount(form.elements.confirmation?.value,form.elements.email?.value,user.email,form.elements.acknowledged?.checked))
+    throw Error('Digite EXCLUIR, confirme seu e-mail e marque a declaração de segurança.');
+   if(!navigator.onLine)throw Error('Conecte-se à internet para excluir a conta.');
+   if(busy)throw Error('Aguarde a operação anterior.');
+   busy=true;document.body.classList.add('saving');
+   const submit=form.querySelector('#gb-delete-execute');
+   if(submit)submit.disabled=true;
+   try{
+    const {data,error}=await authClient().functions.invoke('gbplus-delete-account',{
+     body:{confirmation:'EXCLUIR',email:form.elements.email.value.trim()}
+    });
+    if(error||data?.deleted!==true)throw Error('Não foi possível confirmar a exclusão no servidor. Confira sua conexão e tente novamente ou contate o suporte.');
+    // The server has deleted this user's Auth identity and cascaded their data.
+    try{await authClient().auth.signOut({scope:'local'});}catch{}
+    try{sessionStorage.removeItem('gbplus-recovery');}catch{}
+    location.replace('./?web=1');
+   }finally{
+    busy=false;document.body.classList.remove('saving');
+    if(submit?.isConnected)syncAccountDangerConfirm(form,currentUser(),busy);
+   }
+  },
   customize:()=>openModal('Personalizar painel',customizeForm(db)),
   'customize-mobile-nav':()=>openModal('Personalizar barra de ações',customMobileNavForm(db)),
   'reset-mobile-nav':()=>{
@@ -748,6 +777,7 @@ document.addEventListener('click',e=>{if(!e.target.closest('.gb-entry-select'))c
 // User-selected file bytes stay local and are discarded with the modal.
 document.addEventListener('change',async e=>{
  const el=e.target;
+ if(['gb-reset-form','gb-delete-form'].includes(el.form?.id))syncAccountDangerConfirm(el.form,currentUser(),busy);
  if(!bankImportDraft||!modal.open||!el?.closest?.('#modal'))return;
  const draft=bankImportDraft;
  if(el.matches?.('[data-bank-select-index]')){
@@ -1055,7 +1085,7 @@ document.addEventListener('change',async e=>{if(!db)return;const el=e.target;try
   if(el.id==='report-partner'){state.reportPartner=el.value;render();}
   if(el.id==='backup-input'&&el.files[0]){const file=el.files[0];el.value='';if(file.size>15*1024*1024)throw Error('O backup deve ter no máximo 15 MB.');const restored=parseBackup(await file.text());confirm('Restaurar backup?',`Este arquivo contém ${restored.titles.length} títulos, ${restored.partners.length} parceiros e ${restored.accounts.length} contas. Os registros atuais serão substituídos. Exporte um backup antes de continuar, se necessário.`,()=>commit(d=>{Object.keys(d).forEach(k=>delete d[k]);Object.assign(d,restored);},'Backup restaurado com sucesso.'));}
 }catch(error){fail(error);}});
-document.addEventListener('input',e=>{if(e.target.id==='gb-service-search')filterServicesInForm(e.target.closest('#title-form'));if(e.target.form?.id==='title-form'&&['amount','count','due'].includes(e.target.name))refreshEntrySchedule(e.target.form);if(e.target.form?.id==='profile-form'){
+document.addEventListener('input',e=>{if(['gb-reset-form','gb-delete-form'].includes(e.target.form?.id))syncAccountDangerConfirm(e.target.form,currentUser(),busy);if(e.target.id==='gb-service-search')filterServicesInForm(e.target.closest('#title-form'));if(e.target.form?.id==='title-form'&&['amount','count','due'].includes(e.target.name))refreshEntrySchedule(e.target.form);if(e.target.form?.id==='profile-form'){
  const field=e.target;
  if(field.name==='cpf'){
   const digits=field.value.replace(/\D/g,'').slice(0,11);
