@@ -137,6 +137,18 @@ export function installGbPickerSheet(){
  root.addEventListener('input',event=>{
   if(event.target.matches('[data-sheet-search-input]'))filterGbPickerSheet(root,event.target.value);
  });
+ root.addEventListener('keydown',event=>{
+  const selected=event.target.closest?.('[data-sheet-choice]');
+  if(!selected||!['ArrowDown','ArrowUp','Home','End'].includes(event.key))return;
+  const visible=[...root.querySelectorAll('[data-sheet-choice]')].filter(item=>!item.hidden&&
+   !item.closest('.gb-sheet-group')?.hidden);
+  const index=visible.indexOf(selected);
+  if(index<0)return;
+  const target=event.key==='Home'?0:event.key==='End'?visible.length-1:
+   event.key==='ArrowDown'?Math.min(visible.length-1,index+1):Math.max(0,index-1);
+  event.preventDefault();
+  visible[target]?.focus({preventScroll:true});
+ });
  root.addEventListener('cancel',event=>{event.preventDefault();closePicker();});
  root.addEventListener('close',()=>{
   const focus=active?.returnFocus;
