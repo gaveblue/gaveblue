@@ -55,4 +55,5 @@ assert.match(app,/requested==='cards'\?'accounts':requested/,'Legacy #cards link
 assert.match(app,/state.accountCardsTab='cards'/);
 assert.match(app,/'accounts-cards-tab':el=>/);
 assert.match(app,/location.hash='accounts'/);
+assert.match(app,/\['ArrowLeft','ArrowRight','Home','End'\]/,'Keyboard navigation is available');
 console.log('GB+ 2.5.1: abas, atalhos antigos, acessibilidade, conteúdo e integridade OK.');
