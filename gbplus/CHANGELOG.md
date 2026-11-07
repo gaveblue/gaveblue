@@ -4,7 +4,7 @@ Registro de mudanças do aplicativo localizado em `gbplus/`. Toda versão e toda
 
 ## [2.6.2 — NOVO LANÇAMENTO PF E SERVIÇOS COM CORES] — 2026-11-06
 
-**Status inicial: CANDIDATA A PUBLICAÇÃO.** Alteração visual solicitada expressamente no aplicativo, não em mockup; a publicação pela `main` depende de confirmação do deploy.
+**PUBLICAÇÃO CONFIRMADA:** PR [#86](https://github.com/gaveblue/gaveblue/pull/86) integrada à `main` (commit `7019f01ff73ee79ac2bb397ddc50bc0195deed07`); deploy GitHub Pages [42331328476](https://github.com/gaveblue/gaveblue/actions/runs/42331328476) concluído com `success` em **07/11/2026 02:53 UTC**. Testes isolados de formulário PF e serviços passaram; workflow financeiro [42331303473](https://github.com/gaveblue/gaveblue/actions/runs/42331303473) não executou nenhuma etapa (falha de infraestrutura anterior, 0 passos). A validação manual de PWA instalado permanece pendente. Nenhum registro financeiro foi apagado ou alterado pela atualização.
 
 ### Interface do Novo lançamento
 - Novo seletor segmentado horizontal **Despesa | Receita** no topo. O controle mantém um `select` nativo oculto apenas como transportador de `FormData`, com seleção via botões acessíveis `aria-pressed`, e dispara o evento de `change` para atualizar categorias e serviços existentes.
