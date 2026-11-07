@@ -14,10 +14,49 @@ const statusInfo={
 };
 const summary=(label,value,modifier='')=>'<div class="gb-import-summary '+modifier+'"><span>'+label+'</span><strong>'+value+'</strong></div>';
 const fmtCents=amount=>(amount>0?'+ ':'− ')+money(Math.abs(amount));
-const filtered=(preview,filter)=>filter==='all'?preview.rows:
- preview.rows.filter(row=>filter==='ambiguous'
-  ?row.status==='ambiguous'||row.status==='possible_duplicate_in_file'
-  :row.status===filter);
+/** Filtered views are read-only; they never save payments. */
+export function bankImportFilteredRows(preview,filter='all',decisions={}){
+ return (preview?.rows||[]).filter(row=>{
+  if(filter==='all')return true;
+  if(filter==='expense')return row.record.amount<0;
+  if(filter==='income')return row.record.amount>0;
+  if(filter==='decided')return ['link','ignore','pending','create'].includes(decisions?.[row.index]?.action);
+  if(filter==='ambiguous')return ['ambiguous','possible_duplicate_in_file'].includes(row.status);
+  return row.status===filter;
+ });
+}
+/** Prepare decisions only for explicitly selected indices. Never commits financial data. */
+export function bankImportBulkDecisions(preview,selection,action,categoryId,db,accountId,decisions={},currentDate='9999-12-31'){
+ if(!preview||!Array.isArray(preview.rows)||preview.accountId!==accountId)throw Error('Confira a conta bancária antes de aplicar as decisões.');
+ const ids=[...new Set((Array.isArray(selection)?selection:[]).map(Number))];
+ if(!ids.length)throw Error('Selecione ao menos um movimento do extrato.');
+ if(ids.length>200)throw Error('Selecione no máximo 200 movimentos por vez.');
+ if(!['ignore','pending','create'].includes(action))throw Error('Escolha uma ação para os movimentos selecionados.');
+ if(action==='create'){
+  if(ids.length>50)throw Error('É possível preparar no máximo 50 despesas pagas por lote.');
+  if(!db.categories?.some(c=>c.id===categoryId&&c.type==='expense'))throw Error('Escolha uma categoria de despesas válida.');
+ }
+ const saved=knownReconciliationKeys(db,accountId);
+ const alreadyPending=pendingReconciliationKeys(db,accountId);
+ const next={...decisions};
+ for(const index of ids){
+  const row=preview.rows[index];
+  if(!Number.isSafeInteger(index)||index<0||!row||row.index!==index)throw Error('Seleção de movimento inválida.');
+  const key=reconciliationRecordKey(row.record);
+  if(saved.has(key))throw Error('Um movimento selecionado já está registrado. Desmarque-o.');
+  if(row.status==='possible_duplicate_in_file')throw Error('Há movimento repetido no arquivo: confira individualmente.');
+  if(action==='pending'&&alreadyPending.has(key))throw Error('Um movimento já está pendente. Desmarque-o ou tome outra decisão.');
+  if(action==='create'){
+   if(row.record.amount>=0||row.status!=='not_found')throw Error('Prepare baixas apenas para saídas não localizadas e sem vínculo.');
+   if(row.record.date>currentDate)throw Error('Movimentos futuros não podem receber baixa.');
+  }
+  next[index]=action==='create'?
+   {action:'create',target:'',categoryId,description:row.record.description.slice(0,300)}:
+   {action,target:''};
+ }
+ return next;
+}
+
 const choiceCount=draft=>Object.values(draft?.decisions||{}).filter(d=>['link','ignore','pending','create'].includes(d?.action)).length;
 const choiceValue=(choice,key)=>choice?.[key]??'';
 export function bankImportMarkup(db,draft){
@@ -77,7 +116,7 @@ export function bankImportMarkup(db,draft){
    '<div class="gb-import-privacy">'+icon('shield')+
     '<p>O arquivo permanece no dispositivo. Nenhum lançamento, baixa ou saldo será alterado pela leitura.</p></div></div>';
  }
- const preview=draft.preview,rows=filtered(preview,draft.filter||'all');
+ const preview=draft.preview,rows=bankImportFilteredRows(preview,draft.filter||'all',draft.decisions);
  const reported=preview.bankBalance;
  const comparison=reported?(()=>{
   const internal=accountBalance(db,preview.accountId,reported.date);
