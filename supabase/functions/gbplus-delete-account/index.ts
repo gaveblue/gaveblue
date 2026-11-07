@@ -64,7 +64,14 @@ Deno.serve(async (req: Request) => {
 
   const url = Deno.env.get('SUPABASE_URL');
   // Supabase injects this secret into Edge Functions. Never embed in browser files.
-  const roleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+  const legacyKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+  let currentKey: string | undefined;
+  try {
+    const namedSecrets = JSON.parse(Deno.env.get('SUPABASE_SECRET_KEYS') || '{}');
+    const value = namedSecrets?.default;
+    if (typeof value === 'string') currentKey = Deno.env.get(value) || value;
+  } catch { /* legacy env remains supported */ }
+  const roleKey = legacyKey || currentKey;
   if (!url || !roleKey) {
     return response(origin, 503, { error: 'A exclusão automática está indisponível. Contate o suporte.' });
   }
