@@ -77,8 +77,9 @@ function openModal(title,content){
  document.querySelector('#modal-content').innerHTML=
   '<div class="modal-heading">'+grab+'<h2 id="modal-title">'+esc(title)+'</h2>'+
   '<button class="icon-button" data-action="close" aria-label="Fechar">'+icon('close')+'</button></div>'+
-  '<div class="modal-body">'+content+'</div>';
- if(isEntry)mountEntryHeaderActions();
+  '<div class="modal-body">'+content+'</div>'+
+  (isEntry?'<nav class="gb-entry-bottom-nav" aria-label="Navegação entre etapas do lançamento"></nav>':'');
+ if(isEntry)mountEntryBottomActions();
  modal.setAttribute('aria-labelledby','modal-title');
  if(!modal.open)modal.showModal();
  if(isEntry)modal.dataset.gbEntryStep=modal.querySelector('#title-form')?.dataset.step||'1';
@@ -86,23 +87,22 @@ function openModal(title,content){
  fitEntryAmount(modal.querySelector('#entry-amount'));
  if(isEntry){syncEntrySettlement(modal.querySelector('#title-form'));if(modal.querySelector('#title-form')?.dataset.step==='3')refreshEntrySchedule(modal.querySelector('#title-form'));}
 }
-function mountEntryHeaderActions(){
- const form=modal.querySelector('#title-form'),heading=modal.querySelector('.modal-heading');
- if(!form||!heading)return;
- const nav=document.createElement('nav');
- nav.className='gb-entry-header-actions';
- nav.setAttribute('aria-label','Etapas do lançamento');
+function mountEntryBottomActions(){
+ const form=modal.querySelector('#title-form'),nav=modal.querySelector('.gb-entry-bottom-nav');
+ if(!form||!nav)return;
+ // Keep the controls outside the scrolling form, always reachable at the
+ // bottom of the fixed-height sheet. The X in the heading remains the close action.
  for(const footer of form.querySelectorAll('[data-entry-footer]')){
   footer.querySelector('[data-action="close"]')?.remove();
   const back=footer.querySelector('[data-action="title-back"]');
-  if(back){back.textContent='‹';back.setAttribute('aria-label','Voltar à etapa anterior');back.title='Voltar';}
+  if(back){back.textContent='Voltar';back.setAttribute('aria-label','Voltar à etapa anterior');back.title='Voltar';}
   const next=footer.querySelector('[data-action="title-next"]');
   if(next){next.textContent='Próximo';next.setAttribute('aria-label','Avançar para a próxima etapa');}
   const submit=footer.querySelector('[type="submit"]');
+  // A submit button outside <form> must reference its owner explicitly.
   if(submit){submit.setAttribute('form',form.id);submit.textContent=form.dataset.id?'Salvar':'Revisar';}
   nav.appendChild(footer);
  }
- heading.querySelector('[data-action="close"]')?.before(nav);
 }
 function closeModal(){if(modal.open)modal.close();bankImportDraft=null;pendingGeneration=null;confirmAction=null;if(pwaReady)setTimeout(()=>maybeOfferPwaInstall(),1100);}
 function confirm(title,message,callback){confirmAction=callback;openModal(title,`<p class="confirm-message">${esc(message)}</p><div class="form-error" role="alert"></div><div class="form-footer">${button('Cancelar','close')}${button('Confirmar','confirm','primary')}</div>`);}
