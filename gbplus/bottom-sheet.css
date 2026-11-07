@@ -131,3 +131,90 @@ dialog#gb-picker-sheet[data-snap="expanded"]{height:calc(100dvh - 10px - env(saf
 @media(prefers-reduced-motion:reduce){
  dialog#gb-picker-sheet,#modal.gb-entry-modal{transition:none!important}
 }
+
+/* GB+ 2.7.2 — the category opens the service sheet directly; after picking,
+   display only a small, accessible chip instead of a large nested field. */
+.gb-entry-wizard .gb-service-area[hidden],
+.gb-entry-wizard .gb-service-custom[hidden]{display:none!important}
+.gb-entry-wizard .gb-service-field-compact{
+ display:grid;gap:6px;padding:0!important;margin:0!important;
+ border:0!important;background:transparent!important;border-radius:0!important;
+ box-shadow:none!important;
+}
+.gb-entry-wizard .gb-service-field-compact .gb-service-compact{
+ width:100%;min-height:38px;max-height:46px;display:flex;
+ align-items:center;justify-content:space-between;gap:8px;
+ border:1px solid var(--border);border-radius:10px;
+ background:var(--soft);color:var(--ink);cursor:pointer;
+ padding:4px 9px;box-shadow:none;text-align:left;
+}
+.gb-entry-wizard .gb-service-compact.is-empty{border-style:dashed;color:var(--muted)}
+.gb-entry-wizard .gb-service-compact:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.gb-entry-wizard .gb-service-compact:hover{background:var(--surface)}
+.gb-entry-wizard .gb-service-compact .gb-service-selected-content{gap:8px;min-width:0;flex:1}
+.gb-entry-wizard .gb-service-compact .gb-service-selected-name{
+ overflow:hidden;white-space:nowrap;text-overflow:ellipsis;
+ font-size:11px;font-weight:640;
+}
+.gb-entry-wizard .gb-service-compact .gb-service-logo,
+.gb-entry-wizard .gb-service-compact .gb-service-monogram{
+ display:grid;place-items:center;flex:none;width:26px;height:26px;min-width:26px;
+ border-radius:8px;
+}
+.gb-entry-wizard .gb-service-compact .gb-service-logo svg{width:75%;height:75%}
+.gb-entry-wizard .gb-service-compact-chevron{flex:none;color:var(--muted);font-size:18px;line-height:1}
+.gb-entry-wizard .gb-service-field-compact .gb-service-custom{
+ margin:2px 0 0!important;font-size:11px;
+}
+.gb-entry-wizard .gb-service-field-compact .gb-service-custom input{min-height:40px}
+.gb-entry-wizard .gb-visually-hidden{
+ position:absolute!important;width:1px!important;height:1px!important;
+ padding:0!important;margin:-1px!important;overflow:hidden!important;
+ clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important;
+}
+/* When a service defines the launch name, keep its value in FormData but
+   avoid repeating it in a second tall description field. */
+.gb-entry-wizard[data-has-service="true"] #gb-entry-step-one .gb-entry-description-field{
+ display:none!important;
+}
+/* Tighter first stage only: other stages retain room for payment validation,
+   installments, due dates and confirmations. */
+.gb-entry-wizard[data-step="1"] .gb-entry-progress{margin-bottom:9px}
+.gb-entry-wizard #gb-entry-step-one .gb-entry-flow-switch{min-height:50px;margin-bottom:7px}
+.gb-entry-wizard #gb-entry-step-one .gb-entry-flow-option{min-height:43px}
+.gb-entry-wizard #gb-entry-step-one .gb-entry-amount-hero{padding:4px 3px 9px;margin-bottom:6px}
+.gb-entry-wizard #gb-entry-step-one .gb-entry-grid{row-gap:10px;column-gap:10px}
+.gb-entry-wizard #gb-entry-step-one .gb-entry-category-block{gap:5px}
+.gb-entry-wizard #gb-entry-step-one .gb-entry-trigger,
+.gb-entry-wizard #gb-entry-step-one .gb-entry-description-field input{min-height:43px;padding:9px 12px}
+.gb-entry-wizard #gb-entry-step-one .gb-entry-select,
+.gb-entry-wizard #gb-entry-step-one .field{gap:5px;font-size:12px}
+.gb-entry-wizard[data-step="1"]>.gb-entry-wizard-footer:not([hidden]){
+ margin-top:13px;padding-top:12px;gap:8px;
+}
+.gb-entry-wizard[data-step="1"]>.gb-entry-wizard-footer:not([hidden])>.button{
+ min-height:45px;padding:9px 12px;
+}
+@media(min-width:761px){
+ #modal.gb-entry-modal[data-gb-entry-step="1"]{width:min(555px,calc(100vw - 28px))}
+ #modal.gb-entry-modal[data-gb-entry-step="1"] .modal-heading{padding:17px 23px 14px}
+ #modal.gb-entry-modal[data-gb-entry-step="1"] .modal-body{padding:15px 23px 18px}
+}
+@media(max-width:760px){
+ /* Fits the common first-step controls on mobile without forcing a full
+    screen sheet. Short displays and enlarged text can still scroll. */
+ #modal.gb-entry-modal[data-gb-snap="partial"][data-gb-entry-step="1"]{
+  height:min(535px,84dvh);
+ }
+ #modal.gb-entry-modal[data-gb-entry-step="1"] .modal-heading{padding-top:34px;padding-bottom:9px}
+ #modal.gb-entry-modal[data-gb-entry-step="1"] .modal-heading h2{font-size:19px}
+ #modal.gb-entry-modal[data-gb-entry-step="1"] .modal-body{
+  padding-top:11px;padding-bottom:calc(12px + env(safe-area-inset-bottom));
+ }
+ .gb-entry-wizard[data-step="1"] .gb-entry-progress{margin-bottom:8px}
+ .gb-entry-wizard #gb-entry-step-one .gb-entry-flow-switch{min-height:48px;margin-bottom:6px}
+ .gb-entry-wizard #gb-entry-step-one .gb-entry-flow-option{min-height:41px}
+ .gb-entry-wizard #gb-entry-step-one .gb-entry-amount-hero{padding-top:3px;padding-bottom:8px}
+ .gb-entry-wizard #gb-entry-step-one .gb-entry-grid{row-gap:9px}
+ .gb-entry-wizard .gb-service-compact .gb-service-selected-name{font-size:12px}
+}
