@@ -2,6 +2,30 @@
 
 Registro de mudanças do aplicativo localizado em `gbplus/`. Toda versão e toda compilação deve possuir uma entrada própria. **Uma alteração não deve ser considerada homologada apenas porque existe commit, teste escrito ou publicação.** A homologação exige evidências da execução e aprovação explícita.
 
+## [2.5.2 — IMPORTAÇÕES MAIS CLARAS E SELEÇÃO CONTROLADA] — 2026-11-06
+
+**Status: EM DESENVOLVIMENTO — SEM HOMOLOGAÇÃO OU PUBLICAÇÃO.** Branch `feature/gbplus-252-importacao-clara`. Esta atualização depende da integração/homologação anterior da 2.5.1; não foi incorporada à `main`.
+
+### Objetivo: compreensão no primeiro uso
+- Resumo do extrato com rótulos claros de **Entradas no banco**, **Saídas do banco**, quantidade de movimentos e possíveis vínculos. Texto explícito evita confundir dados do banco com receitas/despesas já registradas.
+- Filtros por **Todos, Saídas, Entradas, Possíveis vínculos, Conferir, Sem vínculo e Com decisão**. Paginação permanece para não sobrecarregar dispositivos com milhares de movimentos.
+- Lista de movimentos com seleção por checkbox e **Selecionar esta página**, com desmarcação disponível; seleções não são o mesmo que decisões e não alteram saldos.
+- Ações coletivas apenas preparatórias: **Manter pendente**, **Ignorar** e **Preparar despesas pagas (com baixa)**. A última exige categoria de despesas e só aceita movimentos negativos que estejam sem vínculo; entradas, duplicidades e movimentos com correspondência não podem passar por baixa coletiva.
+- Manter **Vincular à baixa existente** como decisão individual, prevenindo associação incorreta de muitas movimentações a um mesmo pagamento.
+- Ajuda discreta explica cada ação e quando ela pode modificar o saldo; revisão final passa a listar todas as decisões do lote (até o limite de 200), não somente as 50 primeiras.
+
+### Salvaguardas
+- Apenas a decisão **Criar despesa e registrar baixa**, validada no `reviewSelection`, pode gerar título e pagamento. A aplicação em lote é **somente memória**, sem `commit()`, gravação de saldo ou envio do arquivo bancário a terceiros.
+- Continuam exigidas duas confirmações distintas: conta bancária correta e, para criação de título/baixa, consentimento explícito sobre impacto financeiro.
+- Persistem limites e barreiras do núcleo 2.5.0: até 50 novos títulos por lote, 200 decisões por lote, rejeição de movimento futuro, duplicado, incompatível ou semelhante a título existente.
+- Sem alteração no backend, esquema de dados, liquidação de faturas ou regras de conciliação.
+- `tests/bank-import-usability-regression.mjs` acrescentado à pipeline de regressões, cobrindo filtros, seleção, erros e confirmação; testes completos e interface real ainda **não executados/homologados** nesta rodada.
+- Metadados e cache de teste versionados como **2.5.2**; o identificador interno `build` continua para compatibilidade técnica, mas deixou de ser exibido ao usuário no atualizador.
+
+### Pendente antes da liberação
+- Validar teste Node e regressões financeiras, CI quando runner disponível (issue #75), UI em Android/PWA e desktop, acessibilidade e o vínculo correto com o plano de serviços/Novo lançamento.
+- Pedir a aprovação explícita do responsável pelo produto antes da implantação.
+
 ## [2.5.1 · compilação 3 — CABEÇALHO PADRONIZADO E SELETOR FIXO] — 2026-11-06
 
 **Status: CANDIDATA, SEM PUBLICAÇÃO E SEM HOMOLOGAÇÃO FINAL.** Implementação isolada em `feature/gbplus-251-ajustes-seguintes`. Não alterar a `main` nem considerar a compilação 3 liberada até obter evidências e aprovação explícita.
