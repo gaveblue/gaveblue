@@ -1,3 +1,6 @@
+[functions.gbplus-delete-account]
+verify_jwt = true
+
 [functions.platform-admin]
 verify_jwt = false
 
