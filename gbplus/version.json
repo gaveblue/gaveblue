@@ -1,16 +1,17 @@
 {
-  "version": "2.5.0",
-  "build": 9,
+  "version": "2.5.1",
+  "build": 1,
   "published_at": null,
-  "title": "Mapeamento manual de extratos CSV de bancos",
+  "title": "Contas e cartões — uma tela, duas abas",
   "notes": [
-    "Permite relacionar cabeçalhos fora do padrão a data, descrição, valor, entrada, saída, tipo, identificador e saldo.",
-    "Exibe amostra do arquivo e permite corrigir colunas reconhecidas automaticamente antes de revisar.",
-    "Suporta separadores vírgula, ponto e vírgula, tabulação e |, sem enviar o arquivo original para nuvem ou IA.",
-    "Protege contra associação de uma coluna a dois campos, índices inválidos e tipos de lançamento não reconhecidos.",
-    "Nenhum lançamento é gravado apenas por mapear: a prévia, a revisão individual e as confirmações explícitas continuam obrigatórias.",
-    "Catálogo de serviços, streaming e delivery com logos está planejado para a 2.5.1.",
-    "GitHub Actions ainda exige investigação administrativa; o teste ponta a ponta do PWA instalado não foi comprovado."
+    "Unificamos as páginas de Contas bancárias e Cartões de crédito em uma única tela Contas e cartões, com duas abas compactas no topo.",
+    "Mantemos sem mudanças os saldos, logos dos bancos, conta, faturas, compras de cartão, limites, botões e formulários já existentes.",
+    "No topo da tela, o usuário alterna entre Contas e Cartões sem abrir outra área do sistema.",
+    "Links antigos #cards e atalhos móveis antigos continuam abrindo a aba Cartões dentro da página unificada.",
+    "A alternância é apenas visual e não altera contas, faturas, pagamentos, títulos nem limites.",
+    "O catálogo de 26 serviços para streaming, música, delivery e mobilidade foi preparado no planejamento da 2.5.1; ainda não é um seletor implantado e nenhum logo de serviços foi publicado.",
+    "A área de conciliação bancária da 2.5.0 build 9 permanece preservada, incluindo mapeamento manual de CSV.",
+    "O GitHub Actions de regressões e o teste ponta a ponta do PWA instalado continuam pendentes e são acompanhados em issues separadas."
   ],
   "assets": [
     "./index.html",
@@ -160,28 +161,30 @@
     "./js/daily-statement.js",
     "./bank-import.css",
     "./js/bank-import-ui.js",
-    "./js/bank-reconciliation.js"
+    "./js/bank-reconciliation.js",
+    "./js/accounts-cards-view.js",
+    "./js/service-catalog.js"
   ],
   "highlights": [
     {
-      "icon": "file",
-      "title": "Conciliação bancária assistida",
-      "description": "Revise OFX/CSV e vincule movimentos aos seus lançamentos."
+      "icon": "wallet",
+      "title": "Contas e cartões juntos",
+      "description": "Uma única tela para saldos bancários, cartões de crédito, limites e faturas."
+    },
+    {
+      "icon": "credit-card",
+      "title": "Troca rápida por abas",
+      "description": "Alternância discreta entre Contas e Cartões, preservando todos os controles existentes."
     },
     {
       "icon": "shield",
-      "title": "Confirmação antes de gravar",
-      "description": "Valide a conta e confirme separadamente qualquer criação que altere saldos."
-    },
-    {
-      "icon": "bank",
-      "title": "Saldos indicativos",
-      "description": "Compare saldos declarados no extrato, sem ajustes automáticos."
+      "title": "Sem alteração financeira",
+      "description": "A mudança é de organização e navegação; não altera saldos, limites nem faturas."
     }
   ],
-  "release_status": "development_assisted_reconciliation_csv_mapping_homologation_pending",
+  "release_status": "development_accounts_cards_unified_homologation_pending",
   "homologation": {
     "status": "pendente",
-    "notes": "Compilação 9: mapeamento CSV em desenvolvimento, sem mudança na função de gravação. Exigir regressões antes de liberar."
+    "notes": "Build 1 de 2.5.1: testes de navegação, compatibilidade de links e regressões do núcleo financeiro antes de publicação. Login PWA integral e CI GitHub Actions ainda pendentes."
   }
 }
