@@ -1,14 +1,15 @@
 {
-  "version": "2.7.5",
+  "version": "2.7.6",
   "build": 1,
-  "published_at": "2026-11-07T20:29:35.436Z",
-  "title": "Navegação do lançamento com botões fixos no rodapé",
+  "published_at": "2026-11-07T20:53:22.020Z",
+  "title": "Lançamentos mais simples, atraso visível e edição de compras no cartão",
   "notes": [
-    "Os botões Voltar, Próximo e Revisar/Salvar voltaram à parte inferior do formulário para facilitar a navegação no celular.",
-    "O rodapé de navegação fica sempre visível; somente os campos do lançamento rolam quando necessário.",
-    "A altura compacta do painel e o botão de fechar (X) no cabeçalho foram preservados.",
-    "Fluxos de três etapas, informações digitadas, baixa, parcelas e lançamentos financeiros não tiveram suas regras alteradas.",
-    "Quatro regressões específicas foram verificadas em JavaScript isolado; a validação visual do PWA Android e a suíte integral em Node.js continuam pendentes."
+    "A etapa final passou a oferecer Deixar pendente, Baixar em uma conta ou Lançar no cartão de crédito, com escolhas condicionadas ao tipo e à periodicidade.",
+    "A descrição do lançamento é opcional; quando vazia, a categoria identifica o título. A caixa de foco do valor foi substituída por um sublinhado discreto.",
+    "O detalhamento de parcelas fica oculto e abre em painel próprio. Compras parceladas no cartão mostram vencimentos calculados pelas regras de fechamento da fatura.",
+    "A tela Lançamentos informa em vermelho Em atraso há X dias para títulos vencidos e com saldo pendente.",
+    "Compras no cartão de crédito agora podem ser editadas; faturas são recalculadas sem duplicidade, e alterações financeiras em faturas já pagas continuam protegidas.",
+    "Regressões isoladas do fluxo, dos avisos e da edição de compras foram executadas com dados fictícios. Testes completos em Node.js e revisão visual no Android continuam pendentes."
   ],
   "assets": [
     "./index.html",
