@@ -1,12 +1,12 @@
 # CHANGELOG — GB+ Gestão Financeira
 
-## [2.7.4 — SEGURANÇA ADMINISTRATIVA E REVISÃO DE CI] — 2026-11-07 (CANDIDATA)
+## [2.7.4 — SEGURANÇA ADMINISTRATIVA E HOMOLOGAÇÃO LOCAL] — 2026-11-07 (CANDIDATA)
 
-**NÃO HOMOLOGADA E NÃO LIBERADA.** A função `gbplus-admin` foi republicada no Supabase (Edge Function v2), com código inalterado e `verify_jwt=true` no gateway. Permanece a validação da sessão em tempo real por `auth.getUser()` e o controle de acesso em `app_metadata.gbplus_admin`.
+**NÃO HOMOLOGADA / NÃO PUBLICADA.** A API administrativa `gbplus-admin` já foi reforçada separadamente no Supabase (Edge Function v2) com `verify_jwt=true` no gateway e autorização adicional de usuário ao vivo por `auth.getUser()`, sem alterar o corpo da função. Esta PR registra a configuração em `supabase/config.toml` e inclui teste de regressão correspondente.
 
-**Verificações propostas:** registrar essa configuração em `supabase/config.toml` e ampliar o workflow de regressões para rodar na `main` e em PRs, com testes administrativos, financeiros e de configuração de segurança.
+**Novo processo de homologação sem GitHub Actions:** o workflow de regressões financeiras do GB+ foi retirado desta proposta, sem modificar o mecanismo de publicação do GitHub Pages. Adicionado `gbplus/scripts/homologar-local.mjs` para executar todos os testes `.mjs` do projeto com Node.js 22, registrar aprovação/falha individual e gerar evidência JSON local (não publicada pelo Git). O procedimento está em `gbplus/HOMOLOGACAO-SEM-ACTIONS.md`.
 
-**Bloqueio de homologação:** verificações do GitHub Actions falham antes da inicialização do runner, inclusive workflow mínimo e reexecução, com zero etapas. Trocar a versão do Ubuntu não resolveu, então a configuração original do runner foi restaurada e o diagnóstico temporário foi retirado. Necessário resolver a execução no GitHub, realizar testes reais de login administrativo e PWA/Android, e obter aprovação final antes da liberação. O deploy do GitHub Pages não substitui esses testes.
+**Evidências e pendências:** a rotina de execução local foi verificada com dois arquivos sintéticos, mas a suíte completa do GB+ **ainda não foi executada neste ambiente**. Continuam pendentes: execução comprovada da suíte real, teste de login administrativo com sessão real, validação visual PWA/Android e aprovação explícita de homologação. Até lá, manter a versão 2.7.4 como candidata e a publicação principal em 2.7.3. Não confundir teste escrito com teste aprovado.
 
 ## [2.7.3 — LANÇAMENTO COM AÇÕES NO TOPO E PERÍODO MEMORIZADO] — 2026-11-07
 
