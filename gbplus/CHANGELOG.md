@@ -2,6 +2,28 @@
 
 Registro de mudanças do aplicativo localizado em `gbplus/`. Toda versão e toda compilação deve possuir uma entrada própria. **Uma alteração não deve ser considerada homologada apenas porque existe commit, teste escrito ou publicação.** A homologação exige evidências da execução e aprovação explícita.
 
+## [2.7.2 — SERVIÇOS AUTOMÁTICOS E LANÇAMENTO MAIS COMPACTO] — 2026-11-07
+
+**Status inicial: CANDIDATA À PUBLICAÇÃO.** Incremento visual 2.7.2, sem migração nem ações automáticas de pagamento.
+
+### Categoria → serviço, sem etapa visual redundante
+- Selecionar explicitamente uma categoria de despesa de **Serviços, Assinaturas, Streaming ou Aplicativos** abre, em sequência, o **Bottom Sheet com os 26 serviços**. A pessoa não precisa tocar em um segundo campo “Qual serviço?”.
+- O painel de categoria conclui seu fechamento nativo **antes** de iniciar o painel de serviço. Evita dois diálogos simultâneos, preserva foco, rótulos acessíveis e conteúdo digitado no formulário. Categoria comum, receita e cancelamento não abrem o catálogo desnecessariamente.
+- O antigo bloco grande “Qual serviço?” foi substituído por um **chip discreto, de uma linha**, com logo, nome e indicador para alterar; continua permitindo seleção personalizada e remoção do serviço.
+- Quando o serviço determina automaticamente o nome do lançamento (ex.: Netflix), o campo redundante **Descrição** fica oculto visualmente, mantendo o valor real no `FormData` e as regras de validação financeira. Ao retirar o serviço, a descrição pode voltar a ser digitada.
+- A seleção de categoria ou serviço, por si só, não cria títulos, assinaturas, faturas, pagamentos nem baixas.
+
+### Primeira etapa com menos rolagem
+- Reduzidos os espaços verticais do seletor Despesa/Receita, valor, categoria, chip de serviço, descrição e botões; diminuição da largura de diálogo no desktop.
+- No celular, o modal no estado parcial da **etapa 1** recebeu limite de altura menor (`min(535px,84dvh)`), mantendo estados de expandir/recolher e rolagem disponível quando a tela for curta ou a fonte ampliada.
+- As etapas 2 e 3 não foram comprimidas; periodicidade, parcelas, datas, dias úteis, confirmação, e baixa mantêm o comportamento da 2.7.1.
+
+### Testes e integridade
+- Criado `tests/category-service-auto-regression.mjs`, verificando transição automática, categorias comuns, categoria repetida, receita, formulário desconectado, chip compacto e preservação dos campos.
+- Atualizado `tests/services-regression.mjs` para rejeitar o campo grande; atualizado mock de `tests/pf-entry-ui-regression.mjs` para refletir o estado do formulário.
+- Cinco testes de regressão isolados com dados fictícios passaram: seleção automática, três etapas e baixa, PF, catálogo de 26 serviços e Bottom Sheet. Testes Node integrais no GitHub Actions e PWA/Android reais ainda requerem evidências.
+- Pacote PWA e manifestos recebem `2.7.2` com cache e importações renovados.
+
 ## [2.7.1 — LANÇAMENTO EM TRÊS ETAPAS, BAIXA E PRÉVIA DE SERVIÇOS] — 2026-11-07
 
 **PUBLICAÇÃO CONFIRMADA:** PR [#89](https://github.com/gaveblue/gaveblue/pull/89) integrada à `main` (commit `191f44e2b4cfc00038391e2dcbfdc339bbf8e63b`), com GitHub Pages [42336177501](https://github.com/gaveblue/gaveblue/actions/runs/42336177501) concluído com **success** em 07/11/2026 03:56 UTC. Quatro regressões isoladas passaram com dados fictícios, incluindo validações de baixa atômica e de bloqueio para parcelas. Workflow financeiro [42336147557](https://github.com/gaveblue/gaveblue/actions/runs/42336147557) falhou antes de executar etapas (0 passos); validação manual no PWA Android ainda pendente. **A publicação não equivale à homologação integral.**

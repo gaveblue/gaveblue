@@ -85,7 +85,7 @@ const createSync=new Function('db','isServiceExpenseCategory','updateServicePick
 let resetCount=0;
 const sync=createSync(db,isServiceExpenseCategory,()=>{resetCount++});
 const area={hidden:true};
-const categoryForm={id:'title-form',elements:{type:{value:'expense'},categoryId:{value:'c1'},serviceId:{value:''}},
+const categoryForm={id:'title-form',dataset:{hasService:'false'},elements:{type:{value:'expense'},categoryId:{value:'c1'},serviceId:{value:''}},
  querySelector:selector=>selector==='.gb-service-area'?area:null};
 sync(categoryForm);assert.equal(area.hidden,false,'Service category reveals service choice');
 categoryForm.elements.categoryId.value='c3';categoryForm.elements.serviceId.value='streaming-netflix';

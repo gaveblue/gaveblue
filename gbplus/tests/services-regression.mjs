@@ -34,11 +34,13 @@ const serviceUI=load('service-ui',{
  SERVICE_BRAND_PATHS:logos,SERVICE_BRAND_COLORS:accents,esc
 },['servicePickerMarkup','serviceIconMarkup','serviceIdentityMarkup','serviceDisplayName']);
 const page=serviceUI.servicePickerMarkup();
-for(const word of ['name="serviceId"','name="serviceName"','Qual serviço?',
- 'aria-haspopup="dialog"','aria-controls="gb-picker-sheet"','data-action="title-service-toggle"']){
+for(const word of ['name="serviceId"','name="serviceName"','gb-service-field-compact',
+ 'gb-service-compact','aria-haspopup="dialog"','aria-controls="gb-picker-sheet"','data-action="title-service-toggle"']){
  assert(page.includes(word),'Missing '+word);
 }
 assert(!page.includes('gb-service-options'),'The 26 options now belong to the full-height sheet');
+assert(!page.includes('Qual serviço?'),'The large service-question field must be removed');
+assert(!page.includes('gb-service-heading'),'No large heading is displayed in the first step');
 assert(src('bottom-sheet').includes('SERVICE_CATALOG.filter'),'The full catalog must be in the sheet');
 const chosen=serviceUI.servicePickerMarkup({serviceId:'streaming-netflix'});
 assert(chosen.includes('value="streaming-netflix"'));

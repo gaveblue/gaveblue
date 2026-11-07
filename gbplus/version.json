@@ -1,21 +1,17 @@
 {
-  "version": "2.7.1",
+  "version": "2.7.2",
   "build": 1,
-  "published_at": "2026-11-07T03:56:30Z",
-  "title": "Novo lançamento em três etapas com baixa imediata e prévia de serviços",
+  "published_at": null,
+  "title": "Serviços abrem automaticamente na categoria e lançamento mais compacto",
   "notes": [
-    "O Novo lançamento passa a ter três etapas: 1 — Lançamento (Despesa/Receita, valor, categoria, serviço e descrição); 2 — Detalhes (periodicidade, parcelas, documento, observações e forma de movimentação); 3 — Confirmação (emissão, vencimento, dias úteis, prévia das parcelas e situação da baixa).",
-    "O atalho de compra em cartão de crédito foi transferido para a segunda etapa, aparecendo somente em despesas; a primeira etapa de receita e despesa não tem o bloco extra de crédito.",
-    "O usuário pode indicar Conta/Pix/dinheiro ou Cartão de débito nas movimentações de receita e despesa; cartão de débito utiliza uma conta financeira para a baixa, sem gerar fatura de crédito.",
-    "No lançamento de uma receita, o usuário pode associar opcionalmente um cartão como referência de reembolso. Esse vínculo é informativo e NÃO reduz limite nem fatura: o mecanismo de estornos em crédito ainda não foi implementado.",
-    "A categoria Serviços exibe uma prévia visual com três logos pequenos sobrepostos: Netflix, Spotify e iFood, tanto na lista de categorias quanto na categoria selecionada.",
-    "Emissão e vencimento estão apenas na terceira etapa, junto da prévia de vencimentos gerada a partir dessas datas.",
-    "Para títulos novos e únicos, a terceira etapa oferece Pendente (padrão) e Baixar agora, neste último caso exigindo uma conta ativa e data de baixa até hoje.",
-    "A criação do título e sua baixa imediata acontecem na mesma gravação do repositório, evitando criar um título pago sem registrar a movimentação; duplicações e falhas invalidam toda a operação.",
-    "Em parcelamentos e recorrências a baixa imediata fica indisponível para evitar liquidar várias parcelas de uma só vez; o usuário pode baixar os títulos individualmente depois.",
-    "Na edição de títulos antigos, a terceira etapa preserva datas e orienta a usar Detalhes do lançamento para qualquer baixa ou estorno, evitando duplicidade em pagamentos.",
-    "Não há alterações em tabelas Supabase nem migração de dados antigos. O vínculo cartão-conta para pagamento da fatura continua como já existente no cadastro de cartões.",
-    "A versão 2.7.1 foi integrada pela PR #89 (commit 191f44e2b4cfc00038391e2dcbfdc339bbf8e63b) e publicada no GitHub Pages #42336177501 com success em 07/11/2026 03:56 UTC."
+    "Na primeira etapa do Novo lançamento, a escolha explícita de uma categoria de despesa relacionada a Serviços, Assinaturas, Streaming ou Aplicativos abre automaticamente a listagem completa de serviços no Bottom Sheet.",
+    "A transição entre as duas listas acontece somente depois que o painel anterior é fechado, preservando foco, acessibilidade e todos os campos já digitados; cancelar a escolha mantém o formulário, sem salvar lançamentos.",
+    "O campo grande Qual serviço? foi eliminado; o serviço selecionado fica em um chip pequeno com seu logo e nome, que pode ser tocado para trocar a escolha.",
+    "Quando o aplicativo já define a descrição (Netflix, Spotify, iFood etc.), o campo de descrição redundante deixa de ocupar espaço no formulário, mas continua preservado e submetido ao motor financeiro.",
+    "Ao trocar para categoria sem serviços, a associação anterior é limpa e a descrição manual volta a ficar visível; uma receita não abre um catálogo de serviços de despesas.",
+    "A primeira etapa do formulário e o diálogo ficaram mais compactos e com espaçamentos menores em celular e desktop, buscando evitar rolagem na altura de tela comum sem remover a rolagem acessível em telas pequenas ou com texto ampliado.",
+    "O catálogo de 26 serviços, miniaturas sobrepostas na categoria Serviços, periodicidade, datas, faturas, saldos e regras de baixa da 2.7.1 permanecem inalterados.",
+    "Sem migração de banco, alteração de títulos existentes nem gravação financeira causada pela seleção de categoria ou aplicativo."
   ],
   "assets": [
     "./index.html",
@@ -179,28 +175,23 @@
   "highlights": [
     {
       "icon": "layers",
-      "title": "Lançamento em três etapas",
-      "description": "Valores e categoria primeiro; detalhes depois; datas e confirmação financeira ao final."
-    },
-    {
-      "icon": "check-circle-2",
-      "title": "Baixar agora ou deixar pendente",
-      "description": "Registre um lançamento único e sua baixa juntos, com conta e data verificadas."
+      "title": "Serviços abrem automaticamente",
+      "description": "Escolha Serviços na Categoria e veja os aplicativos imediatamente."
     },
     {
       "icon": "smartphone",
-      "title": "Serviços reconhecíveis",
-      "description": "Netflix, Spotify e iFood aparecem sobrepostos para identificar a categoria Serviços."
+      "title": "Campo de serviço compacto",
+      "description": "Após escolher o aplicativo, somente o logo e o nome ficam visíveis, em um seletor discreto."
     },
     {
-      "icon": "credit-card",
-      "title": "Cartão na etapa de detalhes",
-      "description": "Compra no crédito sem duplicar despesa e reembolso com vínculo informativo ao cartão."
+      "icon": "minimize-2",
+      "title": "Novo lançamento mais enxuto",
+      "description": "Primeira etapa reduzida para diminuir a necessidade de rolagem no celular."
     }
   ],
-  "release_status": "published_github_pages_ci_device_validation_pending",
+  "release_status": "candidate_2_7_2_pending_pages_deploy",
   "homologation": {
-    "status": "isolated_regressions_passed_pages_success_ci_runner_unavailable_pwa_pending",
-    "notes": "Quatro regressões isoladas com dados fictícios (três etapas, formulário PF, serviços, bottom sheet) passaram, assim como verificação estática de 17 requisitos do PWA e controles de baixa com conta única/parcelada/sem conta. GitHub Pages #42336177501: success. CI financeiro #42336147557: failure sem iniciar nenhuma etapa (0 steps). Não há teste real de baixa ou experiência no PWA Android; homologação integral pendente."
+    "status": "isolated_category_service_and_financial_tests_passed_ci_device_pending",
+    "notes": "Cinco regressões isoladas com dados fictícios passaram (categoria abre serviços automaticamente, três etapas e baixa, PF, 26 serviços e bottom sheet); inspeção real em navegador/Android PWA e CI financeiro completo continuam pendentes. Nenhuma movimentação financeira real executada."
   }
 }

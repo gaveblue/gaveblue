@@ -9,11 +9,11 @@ import {routes,dashboard,titlesView,partnersView,categoriesView,flowView,reports
 import {accountsCardsView} from './accounts-cards-view.js?v=20261106-2513';
 import {renderReactCharts,unmountReactCharts} from './gb-react-loader.js?v=20261105-45';
 import {mountNativeCharts} from './gb-charts-native.js?v=20261106-68';
-import {titleForm,partnerForm,accountForm,categoryForm,paymentForm,transferForm,titleDetail,customizeForm,accountDetail} from './forms.js?v=20261107-2710';
+import {titleForm,partnerForm,accountForm,categoryForm,paymentForm,transferForm,titleDetail,customizeForm,accountDetail} from './forms.js?v=20261107-2720';
 import {serviceById,serviceSearchKey,isServiceExpenseCategory} from './service-catalog.js?v=20261106-2630';
-import {serviceIconMarkup,serviceIdentityMarkup,serviceDisplayName} from './service-ui.js?v=20261107-2710';
-import {openGbPickerSheet,installGbPickerSheet,installEntryFormDrag} from './bottom-sheet.js?v=20261107-2710';
-import {toggleEntryMenu,chooseEntryOption,syncEntrySelect,closeEntryMenus} from './entry-select.js?v=20261107-2710';
+import {serviceIconMarkup,serviceIdentityMarkup,serviceDisplayName} from './service-ui.js?v=20261107-2720';
+import {openGbPickerSheet,installGbPickerSheet,installEntryFormDrag} from './bottom-sheet.js?v=20261107-2720';
+import {toggleEntryMenu,chooseEntryOption,syncEntrySelect,closeEntryMenus} from './entry-select.js?v=20261107-2720';
 import {installGbControls,enhanceGbControls} from './custom-controls.js?v=20261104-42';
 import {expectedDates,recurrenceAnchor} from './gb-calendar-rules.js?v=20261105-47';
 import {CATEGORY_ICON_OPTIONS,categoryIconFor,gbIcon} from './gb-icons.js?v=20261104-42';
@@ -71,7 +71,7 @@ function openModal(title,content){
  modal.classList.toggle('gb-entry-modal',isEntry);
  modal.classList.toggle('gb-bank-import-modal',content.includes('id="gb-import-workspace"'));
  if(isEntry)modal.dataset.gbSnap='partial';
- else delete modal.dataset.gbSnap;
+ else{delete modal.dataset.gbSnap;delete modal.dataset.gbEntryStep;}
  const grab=isEntry?'<button type="button" class="gb-entry-sheet-grab" data-entry-sheet-grab aria-label="Expandir formulário" aria-expanded="false"><span aria-hidden="true"></span></button>':'';
  document.querySelector('#modal-content').innerHTML=
   '<div class="modal-heading">'+grab+'<h2 id="modal-title">'+esc(title)+'</h2>'+
@@ -79,6 +79,7 @@ function openModal(title,content){
   '<div class="modal-body">'+content+'</div>';
  modal.setAttribute('aria-labelledby','modal-title');
  if(!modal.open)modal.showModal();
+ if(isEntry)modal.dataset.gbEntryStep=modal.querySelector('#title-form')?.dataset.step||'1';
  enhanceGbControls(modal);
  fitEntryAmount(modal.querySelector('#entry-amount'));
  if(isEntry){syncEntrySettlement(modal.querySelector('#title-form'));if(modal.querySelector('#title-form')?.dataset.step==='3')refreshEntrySchedule(modal.querySelector('#title-form'));}
@@ -316,7 +317,12 @@ function updateServicePicker(form,id){
    description.readOnly=false;
   }
  }
- if(toggle)toggle.textContent=id?'Alterar':'Selecionar';
+ if(toggle){
+  toggle.classList.toggle('is-chosen',Boolean(id));
+  toggle.classList.toggle('is-empty',!id);
+  toggle.setAttribute('aria-label',id?'Alterar serviço: '+label:'Escolher serviço ou aplicativo');
+ }
+ form.dataset.hasService=String(Boolean(id));
  const info=form.querySelector('.gb-service-help');
  if(info)info.textContent=service?.billingMode==='subscription'?
   'Assinatura? Se desejar, escolha Recorrente na etapa Detalhes. Nada será agendado automaticamente.':
@@ -334,6 +340,23 @@ function syncEntryServiceCategory(form){
  if(!area)return;
  area.hidden=!visible;
  if(!visible&&form.elements.serviceId?.value)updateServicePicker(form,'');
+ if(!visible)form.dataset.hasService='false';
+}
+function openEntryServiceSheet(form){
+ if(!form||form.id!=='title-form'||!form.isConnected||!modal.open)return false;
+ const area=form.querySelector('.gb-service-area');
+ if(!area||area.hidden||form.elements.type?.value!=='expense')return false;
+ const trigger=form.querySelector('[data-action="title-service-toggle"]');
+ if(trigger){
+  trigger.focus({preventScroll:true});
+  trigger.setAttribute('aria-expanded','true');
+ }
+ const shown=openGbPickerSheet({
+  kind:'service',selected:form.elements.serviceId?.value||'',
+  onPick:id=>{if(form.isConnected)updateServicePicker(form,id);}
+ });
+ if(!shown&&trigger)trigger.setAttribute('aria-expanded','false');
+ return shown;
 }
 function filterServicesInForm(form){
  if(!form||form.id!=='title-form')return;
@@ -426,6 +449,7 @@ function toggleEntryStep(form,step){
   if(current===2)validateEntryStepTwo(form);
  }
  form.dataset.step=String(step);
+ modal.dataset.gbEntryStep=String(step);
  for(let number=1;number<=3;number++){
   const stage=form.querySelector('#gb-entry-step-'+['','one','two','three'][number]);
   if(stage)stage.hidden=number!==step;
@@ -537,6 +561,10 @@ const actions={
       source.value=id;
       syncEntrySelect(source);
       source.dispatchEvent(new Event('change',{bubbles:true}));
+      // Only an explicit category selection opens the service panel.
+      // Editing an existing title or changing Despesa/Receita never does.
+      if(isServiceExpenseCategory(db.categories.find(c=>c.id===id))&&
+         form.elements.type?.value==='expense')openEntryServiceSheet(form);
      }
     });
     if(!shown){el.setAttribute('aria-expanded','false');toggleEntryMenu(el);}
@@ -560,16 +588,7 @@ const actions={
   },
   'title-next':el=>{const form=el.closest('#title-form');toggleEntryStep(form,Math.min(3,Number(form?.dataset.step||1)+1));},
   'title-back':el=>{const form=el.closest('#title-form');toggleEntryStep(form,Math.max(1,Number(form?.dataset.step||1)-1));},
-  'title-service-toggle':el=>{
-   const form=el.closest('#title-form');
-   if(!form)return;
-   el.setAttribute('aria-expanded','true');
-   const shown=openGbPickerSheet({
-    kind:'service',selected:form.elements.serviceId?.value||'',
-    onPick:id=>{if(form.isConnected)updateServicePicker(form,id);}
-   });
-   if(!shown)el.setAttribute('aria-expanded','false');
-  },
+  'title-service-toggle':el=>openEntryServiceSheet(el.closest('#title-form')),
   'title-service-pick':el=>updateServicePicker(el.closest('#title-form'),el.dataset.serviceId),
   'title-service-clear':el=>updateServicePicker(el.closest('#title-form'),''),
   'category-icon':el=>{

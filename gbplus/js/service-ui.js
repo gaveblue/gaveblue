@@ -45,21 +45,26 @@ export function serviceIdentityMarkup(id,name=''){
 }
 // Compact field inside Categoria. The full 26-service list is displayed only
 // in the separate draggable sheet, keeping FormData and custom names intact.
+// A selected service is displayed as one compact, tappable chip inside
+// Categoria. The full catalog opens automatically when Categoria=Serviços
+// is explicitly selected; the chip is a shortcut to change the choice.
 export function servicePickerMarkup(title=null){
  const id=String(title?.serviceId||'');
  const item=serviceById(id),custom=id==='custom';
- const display=item?.name||(custom?title?.serviceName||'Outro serviço':'Nenhum serviço selecionado');
- return '<section class="gb-service-field" aria-label="Escolher serviço ou aplicativo">'+
-  '<div class="gb-service-heading"><div><strong>Qual serviço?</strong>'+
-  '<p>Escolha um aplicativo ou assinatura desta categoria.</p></div></div>'+
+ const display=item?.name||(custom?(title?.serviceName||'Outro serviço'):'Selecionar aplicativo');
+ return '<section class="gb-service-field gb-service-field-compact" aria-label="Aplicativo selecionado">'+
   '<input type="hidden" name="serviceId" value="'+esc(item?.id||(custom?'custom':''))+'">'+
-  '<div class="gb-service-selected">'+
-   '<span class="gb-service-selected-content">'+(item?serviceIconMarkup(item):'<span class="gb-service-monogram" aria-hidden="true">+</span>')+
-    '<span class="gb-service-selected-name">'+esc(display)+'</span></span>'+
-   '<button type="button" class="button small" data-action="title-service-toggle" aria-haspopup="dialog" aria-controls="gb-picker-sheet" aria-expanded="false">'+
-    (id?'Alterar':'Selecionar')+'</button></div>'+
+  '<button type="button" class="gb-service-selected gb-service-compact'+(id?' is-chosen':' is-empty')+'"'+
+   ' data-action="title-service-toggle" aria-haspopup="dialog" aria-controls="gb-picker-sheet"'+
+   ' aria-expanded="false" aria-label="'+esc(id?'Alterar serviço: '+display:'Escolher serviço ou aplicativo')+'">'+
+   '<span class="gb-service-selected-content">'+(item?serviceIconMarkup(item):
+     '<span class="gb-service-monogram" aria-hidden="true">+</span>')+
+     '<span class="gb-service-selected-name">'+esc(display)+'</span></span>'+
+   '<span class="gb-service-compact-chevron" aria-hidden="true">⌄</span></button>'+
   '<label class="gb-service-custom" '+(custom?'':'hidden')+'><span>Nome do serviço personalizado</span>'+
-   '<input type="text" maxlength="120" name="serviceName" value="'+esc(custom?title?.serviceName||'':'')+'" placeholder="Ex.: Aplicativo local" '+(custom?'required':'')+'></label>'+
-  '<p class="gb-service-help" id="gb-service-naming-hint">O serviço define o nome do lançamento. Nenhuma assinatura ou baixa é criada automaticamente.</p>'+
+   '<input type="text" maxlength="120" name="serviceName" value="'+esc(custom?title?.serviceName||'':'')+
+   '" placeholder="Ex.: Aplicativo local" '+(custom?'required':'')+'></label>'+
+  '<p class="gb-service-help gb-visually-hidden" id="gb-service-naming-hint">'+
+   'O serviço selecionado define automaticamente o nome do lançamento.</p>'+
  '</section>';
 }
