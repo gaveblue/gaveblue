@@ -1016,11 +1016,16 @@ body.auth-locked .mobile-nav-fade{display:none!important}
 }
 
 
-/* GB+ 2.5.1 — Contas / Cartões: uma página e duas abas compactas.
-   Mantém os componentes, cores, saldos, botões e cartões atuais intactos. */
+/* GB+ 2.5.1 — layout único de Contas / Cartões.
+   A barra de alternância permanece visível durante a rolagem da tela.
+   Alterações apenas de layout; conteúdo financeiro original preservado. */
 .gb-accounts-cards-page{min-width:0}
+.gb-accounts-cards-page>.page-heading{margin-bottom:18px}
+.gb-finance-switcher{position:sticky;top:max(0px,env(safe-area-inset-top));z-index:4;
+ padding:8px 0 11px;margin:0 0 14px;background:var(--bg);
+ border-bottom:1px solid var(--border)}
 .gb-finance-tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;
- padding:5px;max-width:660px;width:100%;margin:16px 0 22px;
+ padding:5px;max-width:660px;width:100%;margin:0;
  background:var(--soft);border:1px solid var(--border);border-radius:999px}
 .gb-finance-tab{display:flex;align-items:center;justify-content:center;gap:9px;min-width:0;
  min-height:44px;padding:9px 15px;border:0;border-radius:999px;
@@ -1031,10 +1036,27 @@ body.auth-locked .mobile-nav-fade{display:none!important}
  box-shadow:0 1px 4px #0000000d;font-weight:690}
 .gb-finance-tab:not(.is-selected):hover{background:var(--hover);color:var(--ink)}
 .gb-finance-tab:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.gb-finance-actionbar{display:grid;grid-template-columns:minmax(0,1fr) auto;
+ gap:12px;align-items:center;min-width:0;margin-bottom:9px}
+.gb-finance-action-label{min-width:0}
+.gb-finance-action-label h2{font-size:16px;line-height:1.35}
+.gb-finance-action-label p{color:var(--muted);font-size:11px;line-height:1.5;margin-top:4px}
+.gb-finance-action-main{display:flex;align-items:center;justify-content:flex-end;min-width:0}
+.gb-finance-action-main .button{min-height:36px}
+.gb-finance-tools{display:flex;align-items:center;flex-wrap:wrap;gap:8px;
+ min-height:32px;margin-bottom:20px}
+.gb-finance-tools .button{font-size:10px}
 .gb-accounts-cards-page [role=tabpanel]{min-width:0}
 @media(max-width:760px){
- .gb-finance-tabs{max-width:none;margin:14px 0 20px;padding:4px}
- .gb-finance-tab{min-height:46px;font-size:13px;padding:9px 10px}
- .gb-accounts-cards-page .page-heading{margin-bottom:0}
+ .gb-accounts-cards-page>.page-heading{margin-bottom:12px}
+ .gb-finance-switcher{padding:6px 0 9px;margin-bottom:14px}
+ .gb-finance-tabs{max-width:none;padding:4px}
+ .gb-finance-tab{min-height:44px;font-size:13px;padding:9px 10px}
+ .gb-finance-actionbar{grid-template-columns:minmax(0,1fr) auto;gap:8px;margin-bottom:8px}
+ .gb-finance-action-label h2{font-size:15px}
+ .gb-finance-action-label p{font-size:10px}
+ .gb-finance-action-main .button{font-size:10px;padding:9px 11px;min-height:36px}
+ .gb-finance-tools{gap:7px;min-height:32px;margin-bottom:18px}
+ .gb-finance-tools .button{font-size:10px}
 }
 @media(prefers-reduced-motion:reduce){.gb-finance-tab{transition:none}}
