@@ -1,7 +1,7 @@
 import {money,dateLabel,pending,paid,today,within} from './domain.js?v=20261105-72';
 import {esc,icon,select,empty} from './ui.js?v=20261105-72';
 import {filteredTitles,periodBar} from './views.js?v=20261105-75';
-import {serviceIdentityMarkup} from './service-ui.js?v=20261106-2600';
+import {serviceIconMarkup,serviceDisplayName} from './service-ui.js?v=20261106-2620';
 
 const statusOptions=[
  ['all','Todos','layers'],['open','Pendentes','clock'],['settled','Pagos','check'],
@@ -20,14 +20,15 @@ function launchCard(db,t,isSelected){
  const partner=db.partners.find(p=>p.id===t.partnerId)?.name||'Sem parceiro';
  const category=db.categories.find(c=>c.id===t.categoryId)?.name||'Sem categoria';
  const subtitle=partner==='Sem parceiro'?category:partner;
+ const title=serviceDisplayName(t.serviceId,t.serviceName,t.description);
  return `<div class="gb-launch-swipe-shell" data-launch-id="${esc(t.id)}" data-intent="">
    <div class="gb-launch-underlay gb-launch-underlay-pay" aria-hidden="true">${icon('check')}<span>Baixar</span></div>
    <div class="gb-launch-underlay gb-launch-underlay-delete" aria-hidden="true">${icon('trash')}<span>Excluir</span></div>
    <article class="gb-launch-card ${income?'is-income':'is-expense'} ${isSelected?'is-selected':''}"
     role="button" tabindex="0" aria-pressed="${String(isSelected)}" data-action="select-launch" data-id="${esc(t.id)}"
-    aria-label="${esc(t.description)} · ${income?'receita':'despesa'} · ${money(t.amount)}. ${isSelected?'Selecionado':'Toque para selecionar'}">
-    <span class="gb-launch-card-icon ${income?'is-income':'is-expense'}">${icon(income?'up':'down')}</span>
-    <span class="gb-launch-card-title"><strong>${t.serviceId?serviceIdentityMarkup(t.serviceId,t.serviceName)+' ':''}${esc(t.description)}${t.count>1?` <small>${t.sequence}/${t.count}</small>`:''}</strong>
+    aria-label="${esc(title)} · ${income?'receita':'despesa'} · ${money(t.amount)}. ${isSelected?'Selecionado':'Toque para selecionar'}">
+    <span class="gb-launch-card-icon ${income?'is-income':'is-expense'} ${t.serviceId?'has-service':''}">${t.serviceId?serviceIconMarkup(t.serviceId):icon(income?'up':'down')}</span>
+    <span class="gb-launch-card-title"><strong>${esc(title)}${t.count>1?` <small>${t.sequence}/${t.count}</small>`:''}</strong>
       <span>${esc(subtitle)}</span>${subtitle!==category?`<small>${esc(category)}</small>`:''}</span>
     <span class="gb-launch-card-meta"><time datetime="${t.due}">${dateLabel(t.due)}</time>
       <span class="gb-launch-state ${statusStyle}">${esc(label)}</span>
