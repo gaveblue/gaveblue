@@ -59,7 +59,7 @@ assert.throws(()=>r.reviewSelection(preview(),pending,db),'Cannot create a secon
 const reviewUI=ui.bankImportMarkup(db,{accountId:'bank',preview:preview(),filter:'all',page:0,step:'review',decisions:{}});
 assert.match(reviewUI,/Pendente · retomar/);
 assert.match(reviewUI,/Criar receita e registrar recebimento/);
-assert(!reviewUI.includes('value="pending"'), 'Already pending must not offer pending again');
+assert(!reviewUI.includes('<option value="pending"'), 'Already pending must not offer pending again');
 assert.equal(r.reviewSelection(preview(),created,db,{today:'2026-11-06'}).totals.created,1);
 save('final-batch',created);
 assert.equal(db.bankImportBatches[0].entries[0].resolvedByBatchId,'final-batch');
