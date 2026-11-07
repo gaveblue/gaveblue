@@ -10,7 +10,7 @@ import {isServiceExpenseCategory} from './service-catalog.js?v=20261106-2630';
 const required='required maxlength="200"';
 export function titleForm(db,t,type='expense'){
  type=t?.type||type;
- const categoryOptions=db.categories.filter(c=>c.type===type).map(c=>[c.id,c.name,categoryIconFor(c)]);
+ const categoryOptions=db.categories.filter(c=>c.type===type).map(c=>[c.id,c.name,categoryIconFor(c),isServiceExpenseCategory(c)]);
  const selectedCategory=db.categories.find(c=>c.id===(t?.categoryId||categoryOptions[0]?.[0]));
  const showService=type==='expense'&&isServiceExpenseCategory(selectedCategory);
  const typeField='<div class="gb-entry-flow-switch" role="group" aria-label="Tipo de lançamento">'+
@@ -36,7 +36,7 @@ export function titleForm(db,t,type='expense'){
    '';
  const isSeries=!t||t.mode==='recurring';
  return `<form id="title-form" class="gb-entry-form gb-entry-wizard" data-id="${esc(t?.id||'')}" data-mode="${esc(t?.mode||'single')}" data-count="${Number(t?Math.max(1,t.count-t.sequence+1):1)}" data-step="1" data-entry-type="${esc(type)}">
-  <div class="gb-entry-progress" aria-label="Etapa 1 de 2"><span class="active">1 · Lançamento</span><span>2 · Detalhes</span></div>
+  <div class="gb-entry-progress" aria-label="Etapa 1 de 3"><span class="active">1 · Lançamento</span><span>2 · Detalhes</span><span>3 · Confirmação</span></div>
   <section id="gb-entry-step-one" class="gb-entry-stage" data-entry-stage="1" aria-label="Dados do lançamento">
    ${typeField}
    <div class="gb-entry-amount-hero">
@@ -53,31 +53,47 @@ export function titleForm(db,t,type='expense'){
     </div>
     <div class="full">${field('Descrição','description',t?.serviceId?serviceDisplayName(t.serviceId,t.serviceName,t.description):t?.description||'','text','required maxlength="300" placeholder="Ex.: Energia do escritório" '+(t?.serviceId&&showService?'readonly aria-describedby="gb-service-naming-hint"':''))}</div>
     ${partnerField}
-    ${field('Documento','document',t?.document||'','text','maxlength="100" placeholder="Nº do documento"')}
-    <div class="gb-entry-date">${field('Emissão','issue',t?.issue||today(),'date','required')}</div>
-    <div class="gb-entry-date">${field('Vencimento','due',t?.due||today(),'date','required')}</div>
+
    </div>
   </section>
   <section id="gb-entry-step-two" class="gb-entry-stage" data-entry-stage="2" aria-label="Periodicidade e observações" hidden>
    <div class="form-grid gb-entry-grid">
     <p class="full gb-entry-amount-recap">Valor informado: <strong>${money(t?.amount||0)}</strong></p>
     <div class="full">${periodicity}</div>
+    <div class="full">${field('Documento','document',t?.document||'','text','maxlength="100" placeholder="Nº do documento"')}</div>
+    <div class="full gb-entry-payment-channel">
+     <span class="gb-entry-label">Forma de movimentação</span>
+     <div class="gb-entry-channel-options" role="group" aria-label="Forma de movimentação">
+      <label><input type="radio" name="paymentMethod" value="account" ${t?.paymentMethod!=='debit'?'checked':''}> Conta / Pix / dinheiro</label>
+      <label><input type="radio" name="paymentMethod" value="debit" ${t?.paymentMethod==='debit'?'checked':''}> Cartão de débito</label>
+     </div>
+     <p class="gb-entry-channel-help">No débito, escolha a conta bancária utilizada na etapa final para registrar a baixa.</p>
+    </div>
     ${!t?'<div id="count-field" class="full" hidden>'+field('Parcelas / meses','count',2,'number','min="2" max="120" step="1"')+'</div>':''}
     ${extra?'<div class="full">'+extra+'</div>':''}
     ${textarea('Observações','notes',t?.notes)}
    </div>
+  </section>
+   ${!t&&Array.isArray(db.cards)&&db.cards.some(c=>c.active)?'<div class="gb-credit-entry-link" '+(type==='expense'?'':'hidden')+'><strong>Vai usar o cartão de crédito?</strong><p>Registre como compra no cartão para gerar a fatura sem duplicar a despesa.</p><button type="button" class="button" data-action="new-card-purchase">Lançar compra no cartão</button></div>':''}
+   ${!t?'<p class="gb-entry-refund-hint" '+(type==='income'?'':'hidden')+'>Receita por reembolso no cartão: a integração de estornos com limite e fatura ainda não está disponível. Registre apenas o recebimento financeiro real; não contabilize duas vezes.</p>':''}
+  </section>
+  <section id="gb-entry-step-three" class="gb-entry-stage" data-entry-stage="3" aria-label="Datas e baixa do lançamento" hidden>
+   <div class="form-grid gb-entry-grid">
+    <div class="gb-entry-date">${field('Emissão','issue',t?.issue||today(),'date','required')}</div>
+    <div class="gb-entry-date">${field('Vencimento','due',t?.due||today(),'date','required')}</div>
+   </div>
+   ${!t?'<fieldset class="gb-entry-settlement"><legend>Como ficará este lançamento?</legend><label class="gb-entry-settlement-option"><input type="radio" name="settlement" value="pending" checked><span><strong>Ficar pendente</strong><small>Registrar agora e baixar quando receber ou pagar.</small></span></label><label class="gb-entry-settlement-option"><input type="radio" name="settlement" value="paid"><span><strong>Baixar agora</strong><small>Registrar o pagamento ou recebimento junto do lançamento.</small></span></label><p class="gb-entry-settlement-series" hidden>Em parcelamentos e recorrências, cada parcela deve ser baixada individualmente após o lançamento.</p><div class="gb-entry-settlement-details" hidden><div class="gb-entry-settlement-accounts"><label class="field">Conta da baixa<select name="settleAccountId" data-gb-native="true"><option value="">Selecione uma conta</option>'+(db.accounts||[]).filter(a=>a.active).map(a=>'<option value="'+esc(a.id)+'">'+esc(a.name)+'</option>').join('')+'</select></label></div><div class="gb-entry-settlement-date">${field('Data da baixa','settleDate',today(),'date','max="'+today()+'"')}</div><p class="gb-entry-settlement-message">A baixa será registrada na conta selecionada. O saldo será atualizado apenas após a confirmação.</p></div></fieldset>':'<p class="gb-entry-edit-note">Para registrar ou estornar baixas de um lançamento existente, use a tela Detalhes do lançamento.</p>'}
    <section id="gb-entry-installments" class="gb-entry-installments" ${isSeries?'':'hidden'}>
     <label class="gb-entry-business-switch">
      <input type="checkbox" name="businessDays" value="true" ${t?.businessDays?'checked':''}>
      <span class="gb-entry-switch-track" aria-hidden="true"></span>
-     <span><strong>Considerar apenas dias úteis</strong><small>Adiantar não: sábados, domingos e feriados nacionais passam ao próximo dia útil.</small></span>
+     <span><strong>Considerar apenas dias úteis</strong><small>Sábados, domingos e feriados nacionais passam ao próximo dia útil.</small></span>
     </label>
     <div class="gb-entry-schedule-header"><strong>Prévia dos próximos vencimentos</strong><small id="gb-entry-schedule-count"></small></div>
     <div id="gb-entry-schedule" class="gb-entry-schedule" aria-live="polite"></div>
     <p class="gb-entry-schedule-note">Feriados estaduais e municipais não estão incluídos. Confira as datas antes de confirmar.</p>
    </section>
   </section>
-  ${!t&&Array.isArray(db.cards)&&db.cards.some(c=>c.active)?'<div class="gb-credit-entry-link"><strong>Vai pagar no cartão de crédito?</strong><p>Registre a compra no cartão para gerar a fatura automaticamente, sem duplicar a despesa.</p><button type="button" class="button" data-action="new-card-purchase">Lançar compra no cartão</button></div>':''}
   <input type="hidden" name="accountId" value="${esc(t?.accountId||'')}">
   <div class="form-error" role="alert"></div>
   <div class="gb-entry-wizard-footer" data-entry-footer="1">
