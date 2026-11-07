@@ -28,12 +28,12 @@ export function bankForm(bank){
   '</div><p class="form-hint">Instituições personalizadas recebem um símbolo com as iniciais. Não é necessário informar códigos bancários ou dados de acesso.</p>'+
   formFooter(bank?'Salvar instituição':'Cadastrar instituição')+'</form>';
 }
-export function cardsView(db){
+export function cardsView(db,{embedded=false}={}){
  const cards=creditCards(db),purchases=cardPurchases(db);
  const totalLimit=cards.filter(c=>c.active).reduce((s,c)=>s+c.limit,0);
  const used=cards.filter(c=>c.active).reduce((s,c)=>s+cardUsed(db,c.id),0);
- return heading('Cartões de crédito','Acompanhe limite, compras, parcelas e faturas no Contas a pagar.',
-  button(icon('plus')+'Novo cartão','new-card','primary'))+
+ return (embedded?'':heading('Cartões de crédito','Acompanhe limite, compras, parcelas e faturas no Contas a pagar.',
+  button(icon('plus')+'Novo cartão','new-card','primary')))+
  '<div class="gb-finance24-stats"><div><span>Limite total ativo</span><strong>'+money(totalLimit)+'</strong></div>'+
  '<div><span>Limite utilizado</span><strong>'+money(used)+'</strong></div><div><span>Disponível</span><strong>'+money(totalLimit-used)+'</strong></div></div>'+
  '<p class="gb-finance24-intro">Uma compra no cartão consome limite, mas não reduz o saldo da conta bancária. A fatura só reduz o saldo quando você registra a baixa do título.</p>'+
