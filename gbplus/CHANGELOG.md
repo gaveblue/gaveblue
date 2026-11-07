@@ -2,7 +2,7 @@
 
 ## [2.7.6 — LANÇAMENTOS, CARTÕES E ALERTAS DE ATRASO] — 2026-11-07
 
-**CANDIDATA A LIBERAÇÃO:** alterações propostas em uma branch separada. Não há homologação integral por teste em Android/PWA nem execução completa da suíte em Node.js. Uma integração/publicação eventual não substitui a homologação.
+**VERIFICAÇÃO PRÉ-PUBLICAÇÃO:** 25 de 25 arquivos de regressão existentes foram executados com seus códigos reais em JavaScript V8 e adaptações para leitura de arquivos, asserções e recursos Node; todos passaram. Cinco cenários financeiros extras de edição e redistribuição entre cartões também passaram. **Homologação integral ainda pendente:** não houve execução nativa da suíte em checkout Node.js, nem teste visual real do Android/PWA ou sessão Supabase autenticada. A publicação, quando realizada, não deve ser descrita como homologação integral.
 
 - **Etapa 1:** o campo Descrição deixa de ser obrigatório. Se ficar vazio, o nome da categoria será usado na identificação do lançamento; mantém os demais limites e validações. Digitação do valor sem contorno de caixa, com foco indicado por linha discreta.
 - **Etapa 2:** removida a pergunta Forma de movimentação (conta/debito). Periodicidade, documento e observações permanecem.
@@ -10,7 +10,7 @@
 - **Vencimentos:** prévia de parcelas fica escondida por padrão, acessível no botão Detalhar vencimentos, que abre uma folha nativa sem remontar o formulário. Ao escolher cartão, os vencimentos são calculados pelas regras do cartão.
 - **Lançamentos:** indicação vermelha Em atraso há X dias para títulos vencidos e ainda com saldo, utilizando dias de calendário.
 - **Cartão de crédito:** edição de compra a partir da tela de cartões e dos detalhes da fatura. Edição financeira recalcula as faturas em cópia isolada do banco e aplica apenas após passar nas validações de limite, datas e parcelas. Em faturas com pagamentos existentes, somente metadados podem ser editados até que a baixa seja estornada; não é possível alterar diretamente o total da fatura.
-- **Regressões verificadas em V8 isolado com dados fictícios:** `title-three-step-regression.mjs` (61 asserções), `card-purchase-edit-regression.mjs` (16), `entry-final-regression.mjs` (27). Testes ponta a ponta, simulador móvel e suíte Node completa ainda devem ser executados e documentados.
+- **Regressões:** 25/25 arquivos de testes executados em V8 adaptado com fontes da PR e resultados aprovados. Testes ponta a ponta em navegador/Android e suíte Node completa ainda requerem evidência.
 
 
 ## [2.7.5 — NAVEGAÇÃO FIXA NO RODAPÉ DO LANÇAMENTO] — 2026-11-07
