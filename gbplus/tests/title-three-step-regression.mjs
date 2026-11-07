@@ -54,7 +54,10 @@ assert(html.includes('value="paid"'));
 assert(html.includes('data-action="title-next"')&&html.includes('data-action="title-back"'));
 const income=form.titleForm(dummy,null,'income');
 assert(!income.split('id="gb-entry-step-one"')[1].split('id="gb-entry-step-two"')[0].includes('gb-credit-entry-link'),'Income first stage equal height');
-assert(income.includes('Receita por reembolso no cartão'));
+assert(income.includes('Cartão relacionado ao reembolso'));
+assert(income.includes('Vínculo apenas informativo'));
+assert(income.includes('name="relatedCardId"'));
+assert(src('app').includes('relatedCardId=v.type===\'income\''),'Card reference must be valid only for income');
 const edit=form.titleForm(dummy,{id:'old',type:'expense',description:'Netflix',categoryId:'service',amount:2990,
  issue:todayString,due:todayString,document:'',notes:'',partnerId:'',accountId:'',
  mode:'single',count:1,sequence:1,cancelled:false,serviceId:'streaming-netflix'});
