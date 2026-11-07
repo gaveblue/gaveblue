@@ -256,3 +256,11 @@
  .gb-entry-wizard .gb-entry-progress>span{font-size:9px}
  .gb-entry-current .gb-service-category-preview-item{width:20px;height:20px;min-width:20px}
 }
+
+/* Receipts can reference an existing credit card without posting a fake refund. */
+.gb-entry-refund-card{margin-top:16px;padding:13px 14px;border:1px solid var(--border);border-radius:13px;background:var(--soft);display:grid;gap:8px}
+.gb-entry-refund-card[hidden]{display:none!important}
+.gb-entry-refund-card>.field{display:grid;gap:7px;font-size:12px;font-weight:680;color:var(--ink)}
+.gb-entry-refund-card>.field select{width:100%;min-height:46px;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:var(--surface);color:var(--ink)}
+.gb-entry-refund-card>p{font-size:10px;line-height:1.6;color:var(--muted)}
+@media(max-width:760px){.gb-entry-refund-card>.field select{font-size:16px}}
