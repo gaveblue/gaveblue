@@ -4,7 +4,7 @@ Registro de mudanças do aplicativo localizado em `gbplus/`. Toda versão e toda
 
 ## [2.7.2 — SERVIÇOS AUTOMÁTICOS E LANÇAMENTO MAIS COMPACTO] — 2026-11-07
 
-**Status inicial: CANDIDATA À PUBLICAÇÃO.** Incremento visual 2.7.2, sem migração nem ações automáticas de pagamento.
+**PUBLICAÇÃO CONFIRMADA:** PR [#90](https://github.com/gaveblue/gaveblue/pull/90) integrada à `main` (commit `6bf9ecb9d733cd69b7185a80347cdd586e4848ed`). GitHub Pages [42337480435](https://github.com/gaveblue/gaveblue/actions/runs/42337480435) concluído com **success** em 07/11/2026 às 04:14 UTC. Cinco regressões isoladas com dados fictícios e 19 verificações estáticas passaram. O workflow financeiro [42337441986](https://github.com/gaveblue/gaveblue/actions/runs/42337441986) falhou antes de executar qualquer etapa (0 passos); a validação real no Android/PWA continua pendente. **Código publicado não equivale a homologação integral.**
 
 ### Categoria → serviço, sem etapa visual redundante
 - Selecionar explicitamente uma categoria de despesa de **Serviços, Assinaturas, Streaming ou Aplicativos** abre, em sequência, o **Bottom Sheet com os 26 serviços**. A pessoa não precisa tocar em um segundo campo “Qual serviço?”.
