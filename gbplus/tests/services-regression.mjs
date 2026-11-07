@@ -48,6 +48,8 @@ assert(other.includes('&lt;img'));
 assert(serviceUI.serviceIdentityMarkup('streaming-netflix').includes('<svg'));
 assert(serviceUI.serviceIconMarkup('streaming-netflix').includes('#E50914'));
 assert(serviceUI.serviceIconMarkup('music-spotify').includes('#1ED760'));
+assert(serviceUI.serviceIconMarkup('music-spotify').includes('--gb-service-fg:#151515'),'Spotify mark must contrast on its original green');
+assert(serviceUI.serviceIconMarkup('streaming-netflix').includes('--gb-service-fg:#ffffff'),'Netflix mark must contrast on red');
 assert.equal(serviceUI.serviceDisplayName('streaming-netflix','','outro'),'Netflix');
 assert.equal(serviceUI.serviceDisplayName('custom','Serviço local','outro'),'Serviço local');
 assert(serviceUI.serviceIdentityMarkup('delivery-plusdelivery').includes('PD'));
