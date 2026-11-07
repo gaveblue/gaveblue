@@ -12,6 +12,7 @@ const load=(name,deps,exports)=>Function(...Object.keys(deps),
  ';return {'+exports.join(',')+'};')(...Object.values(deps));
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
 const logos=load('service-brand-paths',{},['SERVICE_BRAND_PATHS']).SERVICE_BRAND_PATHS;
+const accents=load('service-brand-colors',{},['SERVICE_BRAND_COLORS']).SERVICE_BRAND_COLORS;
 const catalog=load('service-catalog',{},['SERVICE_CATALOG','SERVICE_GROUPS','serviceById','searchServices','serviceSearchKey']);
 assert.equal(catalog.SERVICE_CATALOG.length,26);
 assert.equal(new Set(catalog.SERVICE_CATALOG.map(s=>s.id)).size,26);
@@ -30,8 +31,8 @@ for(const [id,paths]of Object.entries(logos)){
 const serviceUI=load('service-ui',{
  SERVICE_CATALOG:catalog.SERVICE_CATALOG,SERVICE_GROUPS:catalog.SERVICE_GROUPS,
  serviceById:catalog.serviceById,serviceSearchKey:catalog.serviceSearchKey,
- SERVICE_BRAND_PATHS:logos,esc
-},['servicePickerMarkup','serviceIconMarkup','serviceIdentityMarkup']);
+ SERVICE_BRAND_PATHS:logos,SERVICE_BRAND_COLORS:accents,esc
+},['servicePickerMarkup','serviceIconMarkup','serviceIdentityMarkup','serviceDisplayName']);
 const page=serviceUI.servicePickerMarkup();
 for(const word of ['name="serviceId"','name="serviceName"','Netflix','HBO Max','iFood','Plus Delivery',
  'Outro serviço','id="gb-service-options" hidden','data-action="title-service-pick"'])assert(page.includes(word),'Missing '+word);
@@ -41,6 +42,10 @@ const other=serviceUI.servicePickerMarkup({serviceId:'custom',serviceName:'Local
 assert(!other.includes('<img onerror'));
 assert(other.includes('&lt;img'));
 assert(serviceUI.serviceIdentityMarkup('streaming-netflix').includes('<svg'));
+assert(serviceUI.serviceIconMarkup('streaming-netflix').includes('#E50914'));
+assert(serviceUI.serviceIconMarkup('music-spotify').includes('#1ED760'));
+assert.equal(serviceUI.serviceDisplayName('streaming-netflix','','outro'),'Netflix');
+assert.equal(serviceUI.serviceDisplayName('custom','Serviço local','outro'),'Serviço local');
 assert(serviceUI.serviceIdentityMarkup('delivery-plusdelivery').includes('PD'));
 let seq=0;
 const store=load('store',{
@@ -73,5 +78,7 @@ const app=src('app');
 assert(app.includes("serviceId,serviceName"),'Form save must include service metadata');
 assert(app.includes("serviceById(serviceId)"),'Unknown service IDs must be rejected');
 assert(app.includes('title-service-clear'),'User must be able to clear service');
-assert(app.includes("if(service&&!form.elements.description.value.trim())"),'Do not override existing descriptions');
+assert(app.includes('description.value=serviceDisplayName(hidden.value,name.value'), 'Selected service defines description');
+assert(app.includes('description.readOnly=true'),'PF service descriptions are read-only while selected');
+assert(app.includes('const description=serviceId?serviceDisplayName(serviceId,serviceName'), 'Saved title uses canonical service name');
 console.log('GB+ 2.6.0: 26 serviços, 13 ícones locais, validação, edição e segurança OK.');

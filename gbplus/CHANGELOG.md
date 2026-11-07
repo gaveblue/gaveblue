@@ -2,6 +2,29 @@
 
 Registro de mudanças do aplicativo localizado em `gbplus/`. Toda versão e toda compilação deve possuir uma entrada própria. **Uma alteração não deve ser considerada homologada apenas porque existe commit, teste escrito ou publicação.** A homologação exige evidências da execução e aprovação explícita.
 
+## [2.6.2 — NOVO LANÇAMENTO PF E SERVIÇOS COM CORES] — 2026-11-06
+
+**Status inicial: CANDIDATA A PUBLICAÇÃO.** Alteração visual solicitada expressamente no aplicativo, não em mockup; a publicação pela `main` depende de confirmação do deploy.
+
+### Interface do Novo lançamento
+- Novo seletor segmentado horizontal **Despesa | Receita** no topo. O controle mantém um `select` nativo oculto apenas como transportador de `FormData`, com seleção via botões acessíveis `aria-pressed`, e dispara o evento de `change` para atualizar categorias e serviços existentes.
+- Valor em reais **logo abaixo** do tipo, em destaque, na **primeira etapa**. Mantidos formatador de centavos, validação de valor positivo e regras de parcelas, vencimento, recorrência e dias úteis; etapa 2 agora organiza periodicidade, observações e revisão.
+- **Parceiro desabilitado para PF** com aviso de disponibilidade futura para PJ. O controle não aceita escolha, mas preserva o `partnerId` original durante a edição de títulos antigos para impedir perdas silenciosas.
+- Atalho de compra no cartão disponível somente para despesa e na primeira etapa.
+
+### Serviços e logotipos
+- O serviço selecionado determina o **nome canônico** do lançamento: Netflix gera título **Netflix**, mostrado com seu símbolo na lista e no detalhe, em vez de duplicar nome e identidade.
+- Enquanto serviço padrão ou personalizado estiver selecionado, a descrição é preenchida automaticamente e fica bloqueada para edição, para evitar divergência entre marca e lançamento. A opção "Outro serviço" permite digitar o nome, e desassociar o serviço libera a edição manual.
+- Os 13 símbolos SVG anteriormente incorporados recebem suas cores de referência; os outros serviços usam iniciais com acentos de cor conhecidos, sem fabricar logotipos oficiais. Plus Delivery permanece neutro sem fonte confirmada. As cores de alguns serviços sem vetor são aproximações visuais e não devem ser apresentadas como arquivos oficiais de marca.
+- Referência de metadados para as marcas vetoriais: `https://github.com/simple-icons/simple-icons/blob/develop/data/simple-icons.json`. O uso descritivo não representa parceria ou endosso.
+- Nenhum serviço cria cobrança, assinatura, baixa ou movimentação de saldo automaticamente.
+
+### Testes e segurança
+- Adicionado `tests/pf-entry-ui-regression.mjs`, atualizado `tests/services-regression.mjs` e ambos incluídos na pipeline.
+- Executados testes funcionais isolados com dados fictícios e verificações sintáticas de módulos; **GitHub Actions, Android/PWA e regressões integrais** ainda precisam de evidências.
+- Sem migração de banco, alteração da natureza dos títulos ou modificação de registros financeiros antigos.
+- Pacote PWA, stylesheet e identificador público atualizados para **2.6.2**, sem compilação exibida ao usuário.
+
 ## [2.6.1 — LIMPEZA FINANCEIRA E EXCLUSÃO AUTENTICADA] — 2026-11-06
 
 **PUBLICAÇÃO CONFIRMADA:** PR [#85](https://github.com/gaveblue/gaveblue/pull/85) integrada à `main` (commit `9a23aca2dae3ca275744d42b6ae6d5a7b664c880`). Implantação do GitHub Pages [42328190490](https://github.com/gaveblue/gaveblue/actions/runs/42328190490) concluída com `success` em **07/11/2026 02:15 UTC**. Edge Function `gbplus-delete-account` ativa no Supabase com JWT obrigatório. Teste isolado passou; workflow financeiro [42328163557](https://github.com/gaveblue/gaveblue/actions/runs/42328163557) falhou antes de iniciar as etapas (0 etapas). Ainda não há teste ponta a ponta de exclusão em conta descartável nem homologação PWA no celular. **Nenhum dado real foi apagado durante a implementação ou os testes.**

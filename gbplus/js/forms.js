@@ -5,15 +5,25 @@ import {entrySelect} from './entry-select.js?v=20261104-42';
 import {gbIcon,CATEGORY_ICON_OPTIONS,categoryIconFor} from './gb-icons.js?v=20261104-42';
 import {bankOptions,findBank,bankPicker} from './banks.js?v=20261105-87';
 import {dailyStatement} from './daily-statement.js?v=20261105-90';
-import {servicePickerMarkup,serviceIdentityMarkup} from './service-ui.js?v=20261106-2600';
+import {servicePickerMarkup,serviceIdentityMarkup,serviceDisplayName} from './service-ui.js?v=20261106-2620';
 const required='required maxlength="200"';
 export function titleForm(db,t,type='expense'){
  type=t?.type||type;
  const categoryOptions=db.categories.filter(c=>c.type===type).map(c=>[c.id,c.name,categoryIconFor(c)]);
- const partnerOptions=[['','Sem parceiro'],...db.partners.filter(p=>p.active||p.id===t?.partnerId).map(p=>[p.id,p.name])];
- const typeField=entrySelect('Tipo','type',[['expense','Despesa'],['income','Receita']],type,'entry-type',true);
+ const typeField='<div class="gb-entry-flow-switch" role="group" aria-label="Tipo de lançamento">'+
+  '<select id="entry-type" name="type" class="gb-entry-type-source" data-gb-native="true" aria-hidden="true" tabindex="-1">'+
+   '<option value="expense"'+(type==='expense'?' selected':'')+'>Despesa</option>'+
+   '<option value="income"'+(type==='income'?' selected':'')+'>Receita</option></select>'+
+  '<button type="button" data-action="entry-type-pick" data-value="expense" class="gb-entry-flow-option'+(type==='expense'?' is-active':'')+'" aria-pressed="'+(type==='expense')+'">'+
+   '<span class="gb-entry-flow-icon is-expense">'+icon('down')+'</span>Despesa</button>'+
+  '<button type="button" data-action="entry-type-pick" data-value="income" class="gb-entry-flow-option'+(type==='income'?' is-active':'')+'" aria-pressed="'+(type==='income')+'">'+
+   '<span class="gb-entry-flow-icon is-income">'+icon('up')+'</span>Receita</button></div>';
  const categoryField=entrySelect('Categoria','categoryId',categoryOptions,t?.categoryId,'entry-category',true);
- const partnerField=entrySelect('Parceiro','partnerId',partnerOptions,t?.partnerId,'entry-partner');
+ // PF does not expose partner editing. Preserve any pre-existing partner on edit
+ // so that older records remain intact until a dedicated PJ profile is shipped.
+ const partnerField='<div class="gb-entry-partner-disabled"><span class="gb-entry-label">Parceiro <small>Em breve para PJ</small></span>'+
+  '<div class="gb-entry-disabled-input" aria-disabled="true">'+icon('lock')+'<span>Desativado para PF</span></div>'+
+  '<input type="hidden" name="partnerId" value="'+esc(t?.partnerId||'')+'"></div>';
  const periodicity=t?
    entrySelect('Situação','cancelled',[['false','Ativo'],['true','Cancelado']],String(t.cancelled),'entry-cancelled'):
    entrySelect('Periodicidade','mode',[['single','Único'],['installment','Parcelado'],['recurring','Recorrente']],'single','entry-mode',true);
@@ -21,13 +31,20 @@ export function titleForm(db,t,type='expense'){
    entrySelect('Aplicar alterações','scope',[['one','Somente este lançamento'],['future','Este e os futuros da recorrência']],'one','entry-scope'):
    '';
  const isSeries=!t||t.mode==='recurring';
- return `<form id="title-form" class="gb-entry-form gb-entry-wizard" data-id="${esc(t?.id||'')}" data-mode="${esc(t?.mode||'single')}" data-count="${Number(t?Math.max(1,t.count-t.sequence+1):1)}" data-step="1">
-  <div class="gb-entry-progress" aria-label="Etapa 1 de 2"><span class="active">1 · Dados</span><span>2 · Valores</span></div>
+ return `<form id="title-form" class="gb-entry-form gb-entry-wizard" data-id="${esc(t?.id||'')}" data-mode="${esc(t?.mode||'single')}" data-count="${Number(t?Math.max(1,t.count-t.sequence+1):1)}" data-step="1" data-entry-type="${esc(type)}">
+  <div class="gb-entry-progress" aria-label="Etapa 1 de 2"><span class="active">1 · Lançamento</span><span>2 · Detalhes</span></div>
   <section id="gb-entry-step-one" class="gb-entry-stage" data-entry-stage="1" aria-label="Dados do lançamento">
+   ${typeField}
+   <div class="gb-entry-amount-hero">
+    <label for="entry-amount">Valor do lançamento</label>
+    <div class="gb-entry-amount-control"><span aria-hidden="true">R$</span>
+     <input id="entry-amount" name="amount" type="number" value="${t?t.amount/100:''}" data-mask="money" inputmode="numeric"
+      required min="0.01" max="10000000000" step="0.01" placeholder="0,00" aria-label="Valor do lançamento em reais">
+    </div>
+   </div>
    <div class="form-grid gb-entry-grid">
-    ${typeField}
-    ${categoryField}
-    <div class="full">${field('Descrição','description',t?.description||'','text','required maxlength="300" placeholder="Ex.: Energia do escritório"')}</div>
+    <div class="full">${categoryField}</div>
+    <div class="full">${field('Descrição','description',t?.serviceId?serviceDisplayName(t.serviceId,t.serviceName,t.description):t?.description||'','text','required maxlength="300" placeholder="Ex.: Energia do escritório" '+(t?.serviceId?'readonly aria-describedby="gb-service-naming-hint"':''))}</div>
     <div class="full gb-service-area" ${type==='expense'?'':'hidden'}>${servicePickerMarkup(t)}</div>
     ${partnerField}
     ${field('Documento','document',t?.document||'','text','maxlength="100" placeholder="Nº do documento"')}
@@ -35,9 +52,9 @@ export function titleForm(db,t,type='expense'){
     <div class="gb-entry-date">${field('Vencimento','due',t?.due||today(),'date','required')}</div>
    </div>
   </section>
-  <section id="gb-entry-step-two" class="gb-entry-stage" data-entry-stage="2" aria-label="Valores e periodicidade" hidden>
+  <section id="gb-entry-step-two" class="gb-entry-stage" data-entry-stage="2" aria-label="Periodicidade e observações" hidden>
    <div class="form-grid gb-entry-grid">
-    <div class="full">${field('Valor (R$)','amount',t?t.amount/100:'','number','required min="0.01" max="10000000000" step="0.01" placeholder="0,00"')}</div>
+    <p class="full gb-entry-amount-recap">Valor informado: <strong>${money(t?.amount||0)}</strong></p>
     <div class="full">${periodicity}</div>
     ${!t?'<div id="count-field" class="full" hidden>'+field('Parcelas / meses','count',2,'number','min="2" max="120" step="1"')+'</div>':''}
     ${extra?'<div class="full">'+extra+'</div>':''}
@@ -98,7 +115,7 @@ export function categoryForm(c){
 }
 export function paymentForm(db,t){const accounts=db.accounts.filter(a=>a.active);return accounts.length?`<div class="detail-summary"><span>${esc(t.description)}</span><strong>${money(pending(db,t))}</strong><small>Saldo pendente</small></div><form id="payment-form" data-id="${t.id}"><div class="form-grid">${field('Valor da baixa (R$)','amount',pending(db,t)/100,'number',`required min="0.01" max="${pending(db,t)/100}" step="0.01"`)}${field('Data do pagamento / recebimento','date',today(),'date',`required max="${today()}"`)}<div class="full">${select('Conta utilizada','accountId',accounts.map(a=>[a.id,a.name]),t.accountId,'required')}</div></div>${formFooter('Confirmar baixa')}</form>`:empty('Adicione uma conta primeiro','Uma baixa precisa de uma conta financeira para movimentar o saldo.','new-account','Cadastrar conta');}
 export function transferForm(db){const accounts=db.accounts.filter(a=>a.active).map(a=>[a.id,a.name]);return accounts.length>1?`<form id="transfer-form"><div class="form-grid">${select('Conta de origem','from',accounts,accounts[0][0],'required')}${select('Conta de destino','to',accounts,accounts[1][0],'required')}${field('Valor (R$)','amount','','number','required min="0.01" max="10000000000" step="0.01"')}${field('Data','date',today(),'date',`required max="${today()}"`)}</div><p class="form-hint">A transferência movimenta as duas contas sem gerar receita ou despesa.</p>${formFooter('Transferir')}</form>`:empty('São necessárias duas contas ativas','Cadastre as contas de origem e destino para transferir.','new-account','Cadastrar conta');}
-export function titleDetail(db,t){const invoicePurchases=t.cardInvoice?(db.cardPurchases||[]).filter(p=>p.invoiceId===t.id):[];return `<div class="detail-summary"><span>${esc(t.description)}${t.count>1?` · ${t.sequence}/${t.count}`:''}</span><strong>${money(t.amount)}</strong><small>${money(pending(db,t))} pendentes · Vencimento ${dateLabel(t.due)}</small></div><dl class="details"><dt>Parceiro</dt><dd>${esc(db.partners.find(p=>p.id===t.partnerId)?.name||'Sem parceiro')}</dd><dt>Categoria</dt><dd>${esc(db.categories.find(c=>c.id===t.categoryId)?.name)}</dd><dt>Serviço</dt><dd>${serviceIdentityMarkup(t.serviceId,t.serviceName)||'—'}</dd><dt>Documento</dt><dd>${esc(t.document||'—')}</dd><dt>Emissão</dt><dd>${dateLabel(t.issue)}</dd><dt>Observações</dt><dd>${esc(t.notes||'—')}</dd></dl>${t.cardInvoice?'<h3>Compras incluídas nesta fatura</h3>'+(invoicePurchases.length?'<div class="history-list">'+invoicePurchases.map(p=>'<div><span>'+esc(p.description)+'<small>'+dateLabel(p.date)+' · parcela '+p.sequence+'/'+p.count+'</small></span><b>'+money(p.amount)+'</b></div>').join('')+'</div>':'<p class="muted">Nenhuma compra vinculada.</p>'):''}<h3>Histórico de baixas</h3>${db.payments.some(p=>p.titleId===t.id)?`<div class="history-list">${db.payments.filter(p=>p.titleId===t.id).map(p=>`<div><span>${dateLabel(p.date)}<small>${esc(db.accounts.find(a=>a.id===p.accountId)?.name)}</small></span><b>${money(p.amount)}</b><button class="icon-button" data-action="undo-payment" data-id="${p.id}" aria-label="Estornar baixa de ${money(p.amount)}">${icon('trash')}</button></div>`).join('')}</div>`:'<p class="muted">Nenhuma baixa registrada.</p>'}<div class="form-footer">${t.cardInvoice?'':button(icon('trash'),'delete-title','danger',`data-id="${t.id}" aria-label="Excluir título"`)+button('Editar','edit-title','',`data-id="${t.id}"`)}${pending(db,t)>0?button('Registrar baixa','payment','primary',`data-id="${t.id}"`):''}</div>`;}
+export function titleDetail(db,t){const invoicePurchases=t.cardInvoice?(db.cardPurchases||[]).filter(p=>p.invoiceId===t.id):[];return `<div class="detail-summary"><span>${esc(serviceDisplayName(t.serviceId,t.serviceName,t.description))}${t.count>1?` · ${t.sequence}/${t.count}`:''}</span><strong>${money(t.amount)}</strong><small>${money(pending(db,t))} pendentes · Vencimento ${dateLabel(t.due)}</small></div><dl class="details"><dt>Parceiro</dt><dd>${esc(db.partners.find(p=>p.id===t.partnerId)?.name||'Sem parceiro')}</dd><dt>Categoria</dt><dd>${esc(db.categories.find(c=>c.id===t.categoryId)?.name)}</dd><dt>Serviço</dt><dd>${serviceIdentityMarkup(t.serviceId,t.serviceName)||'—'}</dd><dt>Documento</dt><dd>${esc(t.document||'—')}</dd><dt>Emissão</dt><dd>${dateLabel(t.issue)}</dd><dt>Observações</dt><dd>${esc(t.notes||'—')}</dd></dl>${t.cardInvoice?'<h3>Compras incluídas nesta fatura</h3>'+(invoicePurchases.length?'<div class="history-list">'+invoicePurchases.map(p=>'<div><span>'+esc(p.description)+'<small>'+dateLabel(p.date)+' · parcela '+p.sequence+'/'+p.count+'</small></span><b>'+money(p.amount)+'</b></div>').join('')+'</div>':'<p class="muted">Nenhuma compra vinculada.</p>'):''}<h3>Histórico de baixas</h3>${db.payments.some(p=>p.titleId===t.id)?`<div class="history-list">${db.payments.filter(p=>p.titleId===t.id).map(p=>`<div><span>${dateLabel(p.date)}<small>${esc(db.accounts.find(a=>a.id===p.accountId)?.name)}</small></span><b>${money(p.amount)}</b><button class="icon-button" data-action="undo-payment" data-id="${p.id}" aria-label="Estornar baixa de ${money(p.amount)}">${icon('trash')}</button></div>`).join('')}</div>`:'<p class="muted">Nenhuma baixa registrada.</p>'}<div class="form-footer">${t.cardInvoice?'':button(icon('trash'),'delete-title','danger',`data-id="${t.id}" aria-label="Excluir título"`)+button('Editar','edit-title','',`data-id="${t.id}"`)}${pending(db,t)>0?button('Registrar baixa','payment','primary',`data-id="${t.id}"`):''}</div>`;}
 export function customizeForm(db){return `<form id="customize-form"><p class="muted">Escolha o que importa para você em cada tela.</p><div class="customize-table"><div><b>Indicador</b><b>Desktop</b><b>Celular</b></div>${Object.entries(INDICATORS).map(([k,v])=>`<div><span>${v}</span>${['desktop','mobile'].map(d=>`<label><span class="sr-only">${v} ${d}</span><input type="checkbox" name="${d}:${k}" ${db.settings.panel[d][k]?'checked':''}></label>`).join('')}</div>`).join('')}</div>${button('Restaurar padrão','reset-panel','small','type="button"')}${formFooter('Salvar painel')}</form>`;}
 export function accountDetail(db,a){
  if(!a)return '<p class="muted">Conta não encontrada.</p>';

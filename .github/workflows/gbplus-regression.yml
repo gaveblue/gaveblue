@@ -41,6 +41,8 @@ jobs:
         run: node gbplus/tests/bank-import-readonly-release-regression.mjs
       - name: Comparação indicativa de saldos OFX/CSV
         run: node gbplus/tests/bank-import-balance-regression.mjs
+      - name: Formulário PF e serviços com logos (2.6.2)
+        run: node gbplus/tests/pf-entry-ui-regression.mjs
       - name: Redefinição financeira e exclusão de conta (2.6.1)
         run: node gbplus/tests/account-safety-regression.mjs
       - name: Catálogo de serviços e identificação opcional (2.6.0)

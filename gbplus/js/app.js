@@ -9,9 +9,9 @@ import {routes,dashboard,titlesView,partnersView,categoriesView,flowView,reports
 import {accountsCardsView} from './accounts-cards-view.js?v=20261106-2513';
 import {renderReactCharts,unmountReactCharts} from './gb-react-loader.js?v=20261105-45';
 import {mountNativeCharts} from './gb-charts-native.js?v=20261106-68';
-import {titleForm,partnerForm,accountForm,categoryForm,paymentForm,transferForm,titleDetail,customizeForm,accountDetail} from './forms.js?v=20261106-2600';
+import {titleForm,partnerForm,accountForm,categoryForm,paymentForm,transferForm,titleDetail,customizeForm,accountDetail} from './forms.js?v=20261106-2620';
 import {serviceById,serviceSearchKey} from './service-catalog.js?v=20261106-2600';
-import {serviceIconMarkup,serviceIdentityMarkup} from './service-ui.js?v=20261106-2600';
+import {serviceIconMarkup,serviceIdentityMarkup,serviceDisplayName} from './service-ui.js?v=20261106-2620';
 import {toggleEntryMenu,chooseEntryOption,syncEntrySelect,closeEntryMenus} from './entry-select.js?v=20261104-42';
 import {installGbControls,enhanceGbControls} from './custom-controls.js?v=20261104-42';
 import {expectedDates,recurrenceAnchor} from './gb-calendar-rules.js?v=20261105-47';
@@ -27,7 +27,7 @@ import {BANKS,bankCatalog,findBank,bankName,syncBankPicker,filterBankPicker,filt
 import {addCardPurchase,removeCardPurchase,ensureCardMayChange,creditCards,cardPurchases} from './credit-cards.js?v=20261105-72';
 import {cashForecast} from './forecast.js?v=20261105-72';
 import {banksView,bankForm,cardForm,cardPurchaseForm,forecastView,forecastSummary,forecastScenarioForm,forecastResult} from './finance-24-ui.js?v=20261106-2511';
-import {launchesView} from './launches-view.js?v=20261106-2600';
+import {launchesView} from './launches-view.js?v=20261106-2620';
 import {installLaunchGestures} from './launches-gestures.js?v=20261104-38';
 import {launchSelection,paymentSelection,paymentSummary,applyLaunchPayments,reversedSelection,applyLaunchReversals,deletionSelection,applyLaunchDeletions} from './launch-actions.js?v=20261105-72';
 let repository=null;let db;let busy=false;let pendingGeneration=null;let confirmAction=null;let pwaReady=false;
@@ -267,6 +267,9 @@ function updateServicePicker(form,id){
  if(id&&!service&&!custom)throw Error('Serviço não localizado.');
  const hidden=form.querySelector('[name="serviceId"]');
  const name=form.querySelector('[name="serviceName"]');
+ const description=form.elements.description;
+ const previousId=hidden.value;
+ const previousLabel=serviceDisplayName(previousId,name.value,'');
  const wrap=form.querySelector('.gb-service-custom');
  const current=form.querySelector('.gb-service-selected-content');
  const toggle=form.querySelector('[data-action="title-service-toggle"]');
@@ -277,7 +280,17 @@ function updateServicePicker(form,id){
  const label=service?.name||(custom?'Outro serviço':'Nenhum serviço escolhido');
  current.innerHTML=(service?serviceIconMarkup(service):'<span class="gb-service-monogram" aria-hidden="true">+</span>')+
   '<span class="gb-service-selected-name">'+esc(label)+'</span>';
- if(service&&!form.elements.description.value.trim())form.elements.description.value=service.name;
+ // For personal finance, the selected service is always the transaction name.
+ // This is a display/prefill rule only; it does not create a payment or subscription.
+ if(description){
+  if(service||custom){
+   description.value=serviceDisplayName(hidden.value,name.value,'');
+   description.readOnly=true;
+  }else{
+   if(previousId&&description.value===previousLabel)description.value='';
+   description.readOnly=false;
+  }
+ }
  toggle.textContent=id?'Alterar':'Escolher serviço';
  const info=form.querySelector('.gb-service-help');
  if(info)info.textContent=service?.billingMode==='subscription'?
@@ -304,6 +317,7 @@ function validateEntryStepOne(form){
  const categoryId=form.elements.categoryId?.value;
  if(!['income','expense'].includes(type)||!db.categories.some(c=>c.id===categoryId&&c.type===type))throw Error('Selecione o tipo e uma categoria válida.');
  if(!form.elements.description?.value.trim())throw Error('Informe a descrição do lançamento.');
+ if(cents(form.elements.amount?.value||'0')<1)throw Error('Informe um valor maior que R$ 0,00.');
  const serviceId=form.elements.serviceId?.value||'';
  const customName=form.elements.serviceName?.value.trim()||'';
  if(serviceId&&type!=='expense')throw Error('Serviços só podem ser associados a despesas.');
@@ -327,10 +341,14 @@ function toggleEntryStep(form,step){
   [...progress.children].forEach((item,i)=>item.classList.toggle('active',i===step-1));
  }
  const error=form.querySelector('.form-error');if(error)error.textContent='';
- if(forward)refreshEntrySchedule(form);
+ if(forward){
+  const recap=form.querySelector('.gb-entry-amount-recap strong');
+  if(recap)recap.textContent=money(cents(form.elements.amount.value));
+  refreshEntrySchedule(form);
+ }
  const scroll=modal.querySelector('.modal-body')||modal;
  scroll.scrollTo({top:0,behavior:'instant'});
- const focus=forward?form.elements.amount:form.elements.description;
+ const focus=forward?(form.querySelector('#gb-entry-step-two .gb-entry-trigger')||form.elements.notes):form.elements.amount;
  requestAnimationFrame(()=>focus?.focus({preventScroll:true}));
 }
 function refreshEntrySchedule(form){
@@ -407,6 +425,19 @@ const actions={
   'set-theme':el=>commit(d=>{d.settings.theme=el.dataset.value;},'Tema atualizado.'),
   'entry-toggle':el=>toggleEntryMenu(el),
   'entry-option':el=>chooseEntryOption(el),
+  'entry-type-pick':el=>{
+   const form=el.closest('#title-form'),select=form?.querySelector('#entry-type');
+   const type=el.dataset.value;
+   if(!select||!['expense','income'].includes(type))return;
+   select.value=type;
+   form.querySelectorAll('.gb-entry-flow-option').forEach(button=>{
+    const active=button.dataset.value===type;
+    button.classList.toggle('is-active',active);
+    button.setAttribute('aria-pressed',String(active));
+   });
+   form.dataset.entryType=type;
+   select.dispatchEvent(new Event('change',{bubbles:true}));
+  },
   'title-next':el=>toggleEntryStep(el.closest('#title-form'),2),
   'title-back':el=>toggleEntryStep(el.closest('#title-form'),1),
   'title-service-toggle':el=>{
@@ -979,7 +1010,8 @@ document.addEventListener('submit',async e=>{e.preventDefault();if(busy||!db)ret
    if(serviceId&&!serviceById(serviceId)&&serviceId!=='custom')throw Error('Serviço inválido.');
    const serviceName=serviceId==='custom'?String(v.serviceName||'').trim():'';
    if(serviceId==='custom'&&(!serviceName||serviceName.length>120))throw Error('Informe o nome do serviço.');
-   const input={type:v.type,description:v.description.trim(),categoryId:v.categoryId,partnerId:v.partnerId||'',
+   const description=serviceId?serviceDisplayName(serviceId,serviceName,''):v.description.trim();
+   const input={type:v.type,description,categoryId:v.categoryId,partnerId:v.partnerId||'',
     document:v.document.trim(),issue:v.issue,due:v.due,amount:cents(v.amount),
     accountId:v.accountId||'',notes:v.notes.trim(),serviceId,serviceName};
    if(id){
@@ -1088,7 +1120,7 @@ document.addEventListener('change',async e=>{if(!db)return;const el=e.target;try
   if(el.id==='report-partner'){state.reportPartner=el.value;render();}
   if(el.id==='backup-input'&&el.files[0]){const file=el.files[0];el.value='';if(file.size>15*1024*1024)throw Error('O backup deve ter no máximo 15 MB.');const restored=parseBackup(await file.text());confirm('Restaurar backup?',`Este arquivo contém ${restored.titles.length} títulos, ${restored.partners.length} parceiros e ${restored.accounts.length} contas. Os registros atuais serão substituídos. Exporte um backup antes de continuar, se necessário.`,()=>commit(d=>{Object.keys(d).forEach(k=>delete d[k]);Object.assign(d,restored);},'Backup restaurado com sucesso.'));}
 }catch(error){fail(error);}});
-document.addEventListener('input',e=>{if(['gb-reset-form','gb-delete-form'].includes(e.target.form?.id))syncAccountDangerConfirm(e.target.form,currentUser(),busy);if(e.target.id==='gb-service-search')filterServicesInForm(e.target.closest('#title-form'));if(e.target.form?.id==='title-form'&&['amount','count','due'].includes(e.target.name))refreshEntrySchedule(e.target.form);if(e.target.form?.id==='profile-form'){
+document.addEventListener('input',e=>{if(e.target.form?.id==='title-form'&&e.target.name==='serviceName'&&e.target.form.elements.serviceId?.value==='custom')e.target.form.elements.description.value=e.target.value.trim();if(['gb-reset-form','gb-delete-form'].includes(e.target.form?.id))syncAccountDangerConfirm(e.target.form,currentUser(),busy);if(e.target.id==='gb-service-search')filterServicesInForm(e.target.closest('#title-form'));if(e.target.form?.id==='title-form'&&['amount','count','due'].includes(e.target.name))refreshEntrySchedule(e.target.form);if(e.target.form?.id==='profile-form'){
  const field=e.target;
  if(field.name==='cpf'){
   const digits=field.value.replace(/\D/g,'').slice(0,11);
