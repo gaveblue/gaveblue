@@ -1,7 +1,7 @@
 {
   "version": "2.7.0",
   "build": 1,
-  "published_at": null,
+  "published_at": "2026-11-07T03:29:47Z",
   "title": "Nova experiência visual com painéis arrastáveis e ícones aprimorados",
   "notes": [
     "A versão 2.7.0 introduz um Bottom Sheet reutilizável, arrastável e pesquisável para categorias e serviços, com foco na experiência móvel e adaptação à tela de computador.",
@@ -14,7 +14,8 @@
     "Os ícones de serviços aumentam dentro do selo, com preenchimento baseado nas cores de referência das marcas e contraste de símbolo adaptado a fundos claros ou escuros.",
     "Os 26 serviços continuam opcionais; ao escolher Serviços ou categoria equivalente a identificação fica integrada à categoria, e a descrição usa o nome escolhido.",
     "Sem mudanças no motor financeiro, contas, títulos, saldos, segurança, migrações ou cobranças. Nenhum lançamento é gerado pela abertura de um painel.",
-    "Testes de regressão com dados fictícios cobrem categoria dinâmica, 26 serviços, navegação por busca, teclas, comportamento de arrastar e salvaguardas do formulário."
+    "Testes de regressão com dados fictícios cobrem categoria dinâmica, 26 serviços, navegação por busca, teclas, comportamento de arrastar e salvaguardas do formulário.",
+    "GB+ 2.7.0 integrada pela PR #88 (commit 31af5d5b), com GitHub Pages #42334207915 concluído com success em 07/11/2026 03:29 UTC."
   ],
   "assets": [
     "./index.html",
@@ -192,9 +193,9 @@
       "description": "Marcas de bancos e aplicativos maiores, legíveis e adaptadas ao modo escuro."
     }
   ],
-  "release_status": "candidate_2_7_0_pending_pages_deployment",
+  "release_status": "published_github_pages_ci_device_validation_pending",
   "homologation": {
-    "status": "isolated_sheet_service_and_pfu_tests_passed_complete_ci_device_pending",
-    "notes": "Testes isolados de interface, serviços e formulário com dados sintéticos passaram; a execução integral dos testes Node/GitHub Actions e inspeção visual manual de arraste no Android/PWA continuam pendentes de evidência. Nenhum dado de usuários foi alterado."
+    "status": "isolated_sheet_services_pfu_tests_passed_pages_success_ci_runner_unavailable_device_pending",
+    "notes": "Testes isolados bottom-sheet-regression.mjs, services-regression.mjs e pf-entry-ui-regression.mjs passaram com dados 100% fictícios. Auditoria estática de 19 condições do pacote passou. GitHub Pages #42334207915 resultou em success. Workflow financeiro #42334177960 falhou antes de executar qualquer etapa (0 passos), impedindo a homologação integral; gestos no Android/PWA real ainda aguardam conferência. Nenhuma conta ou dado financeiro foi modificado pela implementação."
   }
 }
