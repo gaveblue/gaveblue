@@ -6,7 +6,7 @@ import {uid,today,money,dateLabel,cents,addMonths,validDate,generateTitles,addPa
 import {KEY,INDICATORS,defaultPanel,parseBackup,backupText,MOBILE_SHORTCUTS,defaultMobileNav,effectiveMobileNav,validMobileNav,shouldOfferSetup} from './store.js?v=20261106-2505';
 import {esc,icon,button,field,select,formFooter,download,csv,titleTable} from './ui.js?v=20261105-72';
 import {routes,dashboard,titlesView,partnersView,categoriesView,flowView,reportsView,settingsView,notificationsView,filteredTitles,reportData} from './views.js?v=20261106-2511';
-import {accountsCardsView} from './accounts-cards-view.js?v=20261106-2511';
+import {accountsCardsView} from './accounts-cards-view.js?v=20261106-2513';
 import {renderReactCharts,unmountReactCharts} from './gb-react-loader.js?v=20261105-45';
 import {mountNativeCharts} from './gb-charts-native.js?v=20261106-68';
 import {titleForm,partnerForm,accountForm,categoryForm,paymentForm,transferForm,titleDetail,customizeForm,accountDetail} from './forms.js?v=20261106-2509';
