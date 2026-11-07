@@ -4,11 +4,11 @@
   "published_at": null,
   "title": "Navegação compacta e preferência de período",
   "notes": [
-    "Versão candidata: as ações Próximo, Voltar e Revisar/Salvar aparecem no cabeçalho do Novo lançamento, liberando o antigo espaço inferior; fechar continua disponível no X.",
+    "Atualização aprovada para publicação em 07/11/2026: as ações Próximo, Voltar e Revisar/Salvar aparecem no cabeçalho do Novo lançamento, liberando o antigo espaço inferior; fechar continua disponível no X.",
     "A primeira etapa do modal móvel abre um pouco acima, mantendo rolagem quando necessário para acessibilidade e telas menores.",
     "Este mês, Mês anterior, Este ano, Todo o período e datas personalizadas são lembrados por conta autenticada neste navegador, inclusive após reabrir o aplicativo.",
     "Datas relativas se atualizam com o calendário; datas personalizadas ficam fixas até o usuário trocar o filtro.",
-    "Nenhum título, saldo, parcela, cartão ou baixa foi alterado automaticamente. Pendente de homologação visual e financeira antes da publicação."
+    "Nenhum título, saldo, parcela, cartão ou baixa foi alterado automaticamente. Homologação integral não declarada: execução do CI financeiro e teste PWA Android ainda sem evidência."
   ],
   "assets": [
     "./index.html",
@@ -187,9 +187,9 @@
       "description": "Formulário móvel abre um pouco mais acima."
     }
   ],
-  "release_status": "candidate_not_published",
+  "release_status": "approved_for_release_deploy_pending",
   "homologation": {
-    "status": "pending_ci_and_android_pwa",
-    "notes": "Proposta de versão em branch; testes de regressão, conferência visual real e aprovação de publicação pendentes."
+    "status": "limited_static_checks_approved_publication_ci_runner_unavailable_device_pending",
+    "notes": "Aprovação expressa de publicação pelo responsável em 07/11/2026. Inspeção estática e testes isolados de persistência passaram; CI financeira não iniciou etapas e teste real do PWA Android não foi realizado. Publicação não implica homologação integral."
   }
 }
