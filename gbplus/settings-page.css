@@ -118,3 +118,28 @@ html[data-theme="dark"] .gb-cfg-search-trigger{background:#22232c}
  body.gb-settings-page .mobile-nav-fade{display:none!important}
  body.gb-settings-page .gb-ai-widget:not([open]){bottom:24px}
 }
+
+
+/* GB+ 2.6.1 — separate, explicit confirmations for reset and account deletion. */
+.gb-danger-form{display:grid;gap:14px;min-width:0}
+.gb-danger-intro,.gb-danger-preserved,.gb-danger-warning{font-size:12px;line-height:1.65;margin:0;color:var(--ink)}
+.gb-danger-preserved{background:var(--soft);padding:12px;border-radius:11px;border:1px solid var(--border)}
+.gb-danger-warning{color:var(--muted)}
+.gb-danger-counts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;padding:10px;border:1px solid var(--border);border-radius:12px;background:var(--soft)}
+.gb-danger-counts>span{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:7px 9px;background:var(--surface);border-radius:7px;font-size:10px;color:var(--muted)}
+.gb-danger-counts strong{font-size:12px;color:var(--ink);font-variant-numeric:tabular-nums}
+.gb-danger-phrase{display:grid;gap:8px;font-size:12px;line-height:1.5;color:var(--ink)}
+.gb-danger-phrase input{display:block;width:100%;min-height:46px;border:1px solid var(--border);border-radius:10px;padding:11px 12px;background:var(--surface);color:var(--ink);font-size:14px}
+.gb-danger-ack{display:flex;align-items:flex-start;gap:10px;padding:12px;border:1px solid var(--border);border-radius:11px;background:var(--soft);cursor:pointer}
+.gb-danger-ack input{width:18px;height:18px;margin:1px 0 0;flex:none;accent-color:var(--ink)}
+.gb-danger-ack span{font-size:11px;line-height:1.6;color:var(--ink)}
+.gb-danger-phrase input:focus-visible,.gb-danger-ack input:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.gb-danger-actions{display:flex;justify-content:flex-end;gap:9px;flex-wrap:wrap;padding-top:8px;border-top:1px solid var(--border)}
+.gb-danger-actions .button{min-height:43px;white-space:normal}
+.gb-danger-actions .button.danger{border:1px solid #b42318;background:#b42318;color:#fff}
+.gb-danger-actions .button.danger:disabled{opacity:.42;cursor:not-allowed}
+@media(max-width:760px){
+ .gb-danger-counts{grid-template-columns:minmax(0,1fr)}
+ .gb-danger-actions{display:grid;grid-template-columns:1fr;width:100%}
+ .gb-danger-actions .button{width:100%;min-height:45px}
+}
