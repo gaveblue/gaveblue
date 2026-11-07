@@ -9,10 +9,10 @@ import {routes,dashboard,titlesView,partnersView,categoriesView,flowView,reports
 import {accountsCardsView} from './accounts-cards-view.js?v=20261106-2513';
 import {renderReactCharts,unmountReactCharts} from './gb-react-loader.js?v=20261105-45';
 import {mountNativeCharts} from './gb-charts-native.js?v=20261106-68';
-import {titleForm,partnerForm,accountForm,categoryForm,paymentForm,transferForm,titleDetail,customizeForm,accountDetail} from './forms.js?v=20261107-2720';
+import {titleForm,partnerForm,accountForm,categoryForm,paymentForm,transferForm,titleDetail,customizeForm,accountDetail} from './forms.js?v=20261107-2760';
 import {serviceById,serviceSearchKey,isServiceExpenseCategory} from './service-catalog.js?v=20261106-2630';
 import {serviceIconMarkup,serviceIdentityMarkup,serviceDisplayName} from './service-ui.js?v=20261107-2720';
-import {openGbPickerSheet,installGbPickerSheet,installEntryFormDrag} from './bottom-sheet.js?v=20261107-2720';
+import {openGbPickerSheet,openGbScheduleSheet,installGbPickerSheet,installEntryFormDrag} from './bottom-sheet.js?v=20261107-2760';
 import {toggleEntryMenu,chooseEntryOption,syncEntrySelect,closeEntryMenus} from './entry-select.js?v=20261107-2720';
 import {installGbControls,enhanceGbControls} from './custom-controls.js?v=20261104-42';
 import {expectedDates,recurrenceAnchor} from './gb-calendar-rules.js?v=20261105-47';
@@ -25,10 +25,10 @@ import {canResetFinancialData,canDeleteAccount,clearFinancialDocument} from './a
 import {resetAccountModal,deleteAccountModal,syncAccountDangerConfirm} from './account-safety-ui.js?v=20261106-2610';
 import {firstSetupView,customMobileNavForm,shortcutsPreview,readMobileNav,firstStepsPanel} from './setup-ui.js?v=20261105-87';
 import {BANKS,bankCatalog,findBank,bankName,syncBankPicker,filterBankPicker,filterBankDirectory} from './banks.js?v=20261105-87';
-import {addCardPurchase,removeCardPurchase,ensureCardMayChange,creditCards,cardPurchases} from './credit-cards.js?v=20261105-72';
+import {addCardPurchase,updateCardPurchase,removeCardPurchase,ensureCardMayChange,creditCards,cardPurchases,cardCycle,shiftCardCycle,cardDue} from './credit-cards.js?v=20261107-2760';
 import {cashForecast} from './forecast.js?v=20261105-72';
-import {banksView,bankForm,cardForm,cardPurchaseForm,forecastView,forecastSummary,forecastScenarioForm,forecastResult} from './finance-24-ui.js?v=20261106-2511';
-import {launchesView} from './launches-view.js?v=20261106-2620';
+import {banksView,bankForm,cardForm,cardPurchaseForm,forecastView,forecastSummary,forecastScenarioForm,forecastResult} from './finance-24-ui.js?v=20261107-2760';
+import {launchesView} from './launches-view.js?v=20261107-2760';
 import {installLaunchGestures} from './launches-gestures.js?v=20261104-38';
 import {launchSelection,paymentSelection,paymentSummary,applyLaunchPayments,reversedSelection,applyLaunchReversals,deletionSelection,applyLaunchDeletions} from './launch-actions.js?v=20261105-72';
 import {readPeriodPreference,writePeriodPreference} from './period-preference.js?v=20261107-2730';
@@ -401,7 +401,7 @@ function validateEntryStepOne(form){
  const type=form.elements.type?.value;
  const categoryId=form.elements.categoryId?.value;
  if(!['income','expense'].includes(type)||!db.categories.some(c=>c.id===categoryId&&c.type===type))throw Error('Selecione o tipo e uma categoria válida.');
- if(!form.elements.description?.value.trim())throw Error('Informe a descrição do lançamento.');
+ // A descrição é opcional: a categoria é usada como identificação na gravação.
  if(cents(form.elements.amount?.value||'0')<1)throw Error('Informe um valor maior que R$ 0,00.');
  const serviceId=form.elements.serviceId?.value||'';
  const customName=form.elements.serviceName?.value.trim()||'';
@@ -432,39 +432,63 @@ function syncEntrySettlement(form){
  const mode=form.elements.mode?.value||'single';
  const isSeries=mode!=='single';
  const accounts=(db?.accounts||[]).filter(a=>a.active);
+ const cards=(db?.cards||[]).filter(c=>c.active);
  const paid=group.querySelector('input[value="paid"]');
+ const card=group.querySelector('input[value="card"]');
  const pending=group.querySelector('input[value="pending"]');
- if(paid){
-  paid.disabled=isSeries||accounts.length===0;
-  if(paid.disabled&&paid.checked&&pending)pending.checked=true;
+ if(paid)paid.disabled=isSeries||accounts.length===0;
+ if(card)card.disabled=form.elements.type?.value!=='expense'||mode==='recurring'||cards.length===0||
+  (mode==='installment'&&Number(form.elements.count?.value)>36);
+ if((paid?.disabled&&paid?.checked)||(card?.disabled&&card?.checked)){
+  if(pending)pending.checked=true;
  }
- const show=!!paid?.checked&&!paid.disabled;
+ const payNow=!!paid?.checked&&!paid.disabled;
+ const chargeCard=!!card?.checked&&!card.disabled;
  const details=group.querySelector('.gb-entry-settlement-details');
+ const cardDetails=group.querySelector('.gb-entry-settlement-card');
  const warn=group.querySelector('.gb-entry-settlement-series');
- if(details)details.hidden=!show;
+ if(details)details.hidden=!payNow;
+ if(cardDetails)cardDetails.hidden=!chargeCard;
  if(warn){
-  warn.hidden=!isSeries&&accounts.length>0;
+  warn.hidden=!(isSeries||accounts.length===0||cards.length===0);
   warn.textContent=isSeries?
-   'Parcelamentos e recorrências devem ser baixados por título, depois da criação.':
-   'Cadastre uma conta financeira ativa para habilitar a baixa imediata.';
+   'Para parcelas em conta, crie os títulos como pendentes e registre cada baixa depois. No cartão, até 36 parcelas entram nas faturas.':
+   accounts.length===0?'Cadastre uma conta para baixar agora; ainda é possível deixar pendente ou usar cartão.':
+   'Cadastre um cartão ativo para lançar compras na fatura.';
  }
  const account=form.elements.settleAccountId;
  const date=form.elements.settleDate;
- if(account)account.required=show;
- if(date)date.required=show;
+ const cardId=form.elements.settleCardId;
+ if(account)account.required=payNow;
+ if(date)date.required=payNow;
+ if(cardId)cardId.required=chargeCard;
+ const dueField=form.querySelector('.gb-entry-date-due');
+ if(dueField)dueField.hidden=chargeCard;
+ if(form.elements.due)form.elements.due.disabled=chargeCard;
+ const businessDays=form.querySelector('.gb-entry-business-switch');
+ if(businessDays)businessDays.hidden=chargeCard;
 }
 function validateEntryStepThree(form){
- if(!validDate(form.elements.issue?.value))throw Error('Informe uma data de emissão válida.');
- if(!validDate(form.elements.due?.value))throw Error('Informe uma data de vencimento válida.');
- if(form.dataset.id)return;
  const choice=form.elements.settlement?.value||'pending';
- if(!['pending','paid'].includes(choice))throw Error('Escolha como registrar o lançamento.');
+ if(!validDate(form.elements.issue?.value))throw Error('Informe uma data de emissão válida.');
+ if(choice!=='card'&&!validDate(form.elements.due?.value))throw Error('Informe uma data de vencimento válida.');
+ if(form.dataset.id)return;
+ if(!['pending','paid','card'].includes(choice))throw Error('Escolha como registrar o lançamento.');
  if(choice==='paid'){
   if(form.elements.mode?.value!=='single')throw Error('Baixa imediata disponível apenas para lançamento único.');
   if(!db.accounts.some(a=>a.id===form.elements.settleAccountId?.value&&a.active))
    throw Error('Selecione uma conta financeira ativa para a baixa.');
   if(!validDate(form.elements.settleDate?.value)||form.elements.settleDate.value>today())
    throw Error('A data da baixa deve ser válida e não pode ser futura.');
+ }
+ if(choice==='card'){
+  if(form.elements.type?.value!=='expense')throw Error('O cartão de crédito registra compras de despesas, não recebimentos.');
+  if(form.elements.mode?.value==='recurring')throw Error('Lançamento recorrente no cartão deve ser registrado mensalmente; escolha Único ou Parcelado.');
+  if(!db.cards?.some(c=>c.id===form.elements.settleCardId?.value&&c.active))
+   throw Error('Selecione um cartão de crédito ativo.');
+  if(form.elements.issue?.value>today())throw Error('A compra no cartão não pode ter data futura.');
+  if(form.elements.mode?.value==='installment'&&Number(form.elements.count?.value)>36)
+   throw Error('O cartão permite no máximo 36 parcelas.');
  }
 }
 function toggleEntryStep(form,step){
@@ -510,14 +534,22 @@ function refreshEntrySchedule(form){
  section.hidden=mode==='single'||(!!form.dataset.id&&form.elements.scope?.value!=='future');
  if(section.hidden)return;
  const target=form.querySelector('#gb-entry-schedule'),summary=form.querySelector('#gb-entry-schedule-count');
- const due=form.elements.due?.value;
+ const due=form.elements.settlement?.value==='card'?form.elements.issue?.value:form.elements.due?.value;
  const count=form.elements.count?Number(form.elements.count.value):(Number(form.dataset.count)||1);
- if(!validDate(due)){target.textContent='Defina um vencimento válido na terceira etapa.';return;}
+ if(!validDate(due)){target.textContent='Defina uma data válida na terceira etapa.';return;}
  if(!Number.isInteger(count)||count<1||count>120){target.textContent='Informe de 1 a 120 parcelas ou meses.';return;}
  try{
   const source=form.dataset.id?getTitle(form.dataset.id):null;
   const anchor=source?recurrenceAnchor(due,source):due;
-  const dates=expectedDates(anchor,mode,count,!!form.elements.businessDays?.checked,addMonths);
+  const cardChoice=form.elements.settlement?.value==='card';
+  const card=db.cards?.find(c=>c.id===form.elements.settleCardId?.value&&c.active);
+  const dates=cardChoice&&card?
+   Array.from({length:count},(_,i)=>{
+    const cycle=shiftCardCycle(cardCycle(form.elements.issue?.value,card.closingDay),i);
+    const dueOn=cardDue(cycle,card.closingDay,card.dueDay);
+    return {index:i+1,date:dueOn,nominal:dueOn,shifted:false};
+   }):
+   expectedDates(anchor,mode,count,!!form.elements.businessDays?.checked,addMonths);
   let amount=0;
   try{amount=cents(form.elements.amount?.value||'0,00');}catch{}
   summary.textContent=count+' vencimento'+(count!==1?'s':'');
@@ -548,7 +580,7 @@ const actions={
    const ids=launchSelectedIds();
    if(ids.length!==1)throw Error('A edição é individual. Selecione apenas um lançamento.');
    const target=getTitle(ids[0]);
-   if(target.cardInvoice)throw Error('Edite compras e parcelas pelo cartão. A fatura não pode ser alterada manualmente.');
+   if(target.cardInvoice){openModal('Compras da fatura',titleDetail(db,target));return;}
    openModal('Editar lançamento',titleForm(db,target));
   },
   'launch-pay':()=>startLaunchPayment(launchSelectedIds()),
@@ -612,6 +644,14 @@ const actions={
    form.dataset.entryType=type;
    select.dispatchEvent(new Event('change',{bubbles:true}));
   },
+  'title-schedule-detail':()=>{
+   const form=modal.querySelector('#title-form');
+   if(!form||form.dataset.step!=='3')return;
+   refreshEntrySchedule(form);
+   const rows=form.querySelector('#gb-entry-schedule');
+   const count=Number(form.elements.count?.value||form.dataset.count||1);
+   if(rows)openGbScheduleSheet(rows.innerHTML||'<p>Defina vencimentos válidos para continuar.</p>',count);
+  },
   'title-next':el=>{const form=el.closest('#title-form')||modal.querySelector('#title-form');toggleEntryStep(form,Math.min(3,Number(form?.dataset.step||1)+1));},
   'title-back':el=>{const form=el.closest('#title-form')||modal.querySelector('#title-form');toggleEntryStep(form,Math.max(1,Number(form?.dataset.step||1)-1));},
   'title-service-toggle':el=>openEntryServiceSheet(el.closest('#title-form')),
@@ -649,6 +689,11 @@ const actions={
    openModal('Editar cartão de crédito',cardForm(db,card));
   },
   'new-card-purchase':el=>openModal('Compra no cartão de crédito',cardPurchaseForm(db,el?.dataset?.id||'')),
+  'edit-card-purchase':el=>{
+   const purchase=cardPurchases(db).find(p=>p.id===el.dataset.id);
+   if(!purchase)throw Error('Compra não encontrada.');
+   openModal('Editar compra no cartão',cardPurchaseForm(db,purchase.cardId,purchase));
+  },
   'delete-card-purchase':el=>{
    const purchase=cardPurchases(db).find(x=>x.id===el.dataset.id);
    if(!purchase)throw Error('Compra não encontrada.');
@@ -662,7 +707,7 @@ const actions={
   'forecast-simulate':()=>openModal('Simular vencimento',forecastScenarioForm(db,forecastDays)),
   'edit-title':el=>{
    const title=getTitle(el.dataset.id);
-   if(title.cardInvoice)throw Error('Faturas são atualizadas pelas compras do cartão; não podem ser editadas como títulos comuns.');
+   if(title.cardInvoice){openModal('Compras da fatura',titleDetail(db,title));return;}
    openModal('Editar lançamento',titleForm(db,title));
   },
   'title-detail':el=>openModal('Detalhes do título',titleDetail(db,getTitle(el.dataset.id))),
@@ -943,7 +988,12 @@ const actions={
   'delete-account':el=>{const id=el.dataset.id;if((db.cards||[]).some(card=>card.payAccountId===id))throw Error('Esta conta é a conta de pagamento prevista de um cartão. Altere o cartão antes de excluí-la.');if(db.titles.some(t=>t.accountId===id)||db.payments.some(p=>p.accountId===id)||db.transfers.some(t=>t.from===id||t.to===id))throw Error('Esta conta tem vínculos. Marque-a como inativa para manter o histórico.');if((db.bankImportBatches||[]).some(b=>b.accountId===id))throw Error('Esta conta possui histórico de conciliações. Marque-a como inativa para preservá-lo.');confirm('Excluir conta?','A conta e seu saldo inicial serão removidos.',()=>commit(d=>{d.accounts=d.accounts.filter(a=>a.id!==id);},'Conta excluída.'));},
   'undo-payment':el=>{const id=el.dataset.id;confirm('Estornar baixa?','A baixa será removida, o valor voltará a ficar pendente e o saldo da conta será recalculado.',()=>commit(d=>{d.payments=d.payments.filter(p=>p.id!==id);},'Baixa estornada.'));},
   'undo-transfer':el=>{const id=el.dataset.id;confirm('Estornar transferência?','A movimentação será removida das duas contas.',()=>commit(d=>{d.transfers=d.transfers.filter(t=>t.id!==id);},'Transferência estornada.'));},
-  'save-generation':()=>{if(!pendingGeneration||busy)return;const generated=pendingGeneration;return commit(d=>{
+  'save-generation':()=>{
+   if(!pendingGeneration||busy)return;
+   const generated=pendingGeneration;
+   if(generated.cardPurchase)return commit(d=>addCardPurchase(d,generated.cardPurchase),
+    'Compra registrada no cartão. Faturas atualizadas, sem baixa bancária duplicada.');
+   return commit(d=>{
    if(generated.some(t=>d.titles.some(x=>!x.cancelled&&x.type===t.type&&x.description===t.description&&x.due===t.due&&x.amount===t.amount&&x.partnerId===t.partnerId)))
     throw Error('Já existe um título igual (descrição, parceiro, valor e vencimento). Revise para evitar duplicidade.');
    d.titles.push(...generated);
@@ -1189,14 +1239,14 @@ document.addEventListener('submit',async e=>{e.preventDefault();if(busy||!db)ret
    if(serviceId&&!serviceById(serviceId)&&serviceId!=='custom')throw Error('Serviço inválido.');
    const serviceName=serviceId==='custom'?String(v.serviceName||'').trim():'';
    if(serviceId==='custom'&&(!serviceName||serviceName.length>120))throw Error('Informe o nome do serviço.');
-   const description=serviceId?serviceDisplayName(serviceId,serviceName,''):v.description.trim();
+   const description=serviceId?serviceDisplayName(serviceId,serviceName,''):(v.description.trim()||db.categories.find(c=>c.id===v.categoryId)?.name||'Lançamento');
    const relatedCardId=v.type==='income'?String(v.relatedCardId||''):'';
    if(relatedCardId&&!(db.cards||[]).some(card=>card.id===relatedCardId))throw Error('Selecione um cartão válido para o reembolso.');
    const isPaid=!id&&v.settlement==='paid';
    const input={type:v.type,description,categoryId:v.categoryId,partnerId:v.partnerId||'',
     document:v.document.trim(),issue:v.issue,due:v.due,amount:cents(v.amount),
     accountId:isPaid?v.settleAccountId:(v.accountId||''),notes:v.notes.trim(),serviceId,serviceName,
-    paymentMethod:v.paymentMethod==='debit'?'debit':'account',relatedCardId};
+    paymentMethod:id?(getTitle(id).paymentMethod||'account'):'account',relatedCardId};
    if(id){
     const original=getTitle(id);
     const businessDays=original.mode!=='single'&&v.businessDays==='true';
@@ -1204,6 +1254,34 @@ document.addEventListener('submit',async e=>{e.preventDefault();if(busy||!db)ret
     return;
    }
    const businessDays=v.mode!=='single'&&v.businessDays==='true';
+   if(v.settlement==='card'){
+    // A credit-card purchase must only create card installments and invoices.
+    // Never create a second ordinary expense or a cash payment.
+    const installmentCount=v.mode==='installment'?Number(v.count):1;
+    const draft={cardId:v.settleCardId,date:v.issue,amount:input.amount,
+      description:input.description,categoryId:input.categoryId,partnerId:input.partnerId,count:installmentCount};
+    const clone=form.cloneNode(true);
+    const originalFields=[...form.querySelectorAll('input,select,textarea')];
+    const copiedFields=[...clone.querySelectorAll('input,select,textarea')];
+    originalFields.forEach((element,index)=>{
+     const dest=copiedFields[index];if(!dest)return;
+     if(element.tagName==='SELECT'){[...dest.options].forEach(o=>o.toggleAttribute('selected',o.value===element.value));}
+     else if(element.type==='checkbox'||element.type==='radio')dest.toggleAttribute('checked',element.checked);
+     else if(element.tagName==='TEXTAREA')dest.textContent=element.value;
+     else dest.setAttribute('value',element.value);
+    });
+    pendingGeneration={cardPurchase:draft,formHTML:clone.outerHTML};
+    const card=db.cards.find(c=>c.id===draft.cardId);
+    openModal('Revise a compra no cartão',
+     '<div class="preview-summary"><span>Compra no cartão · '+installmentCount+
+     (installmentCount===1?' parcela':' parcelas')+'</span><strong>'+money(input.amount)+
+     '</strong><p>'+esc(card?.name||'Cartão de crédito')+'</p></div>'+
+     '<p class="gb-entry-review-note">A compra será distribuída nas faturas do cartão. Não haverá baixa na conta agora e nenhuma despesa será duplicada.</p>'+
+     '<p>'+esc(input.description)+' · '+dateLabel(draft.date)+'</p>'+
+     '<div class="form-error" role="alert"></div><div class="form-footer">'+
+     button('Voltar','back-generation')+button('Confirmar compra','save-generation','primary')+'</div>');
+    return;
+   }
    const generated=generateTitles(input,v.mode,v.mode==='single'?1:Number(v.count),{businessDays});
    if(isPaid)generated.settlement={accountId:v.settleAccountId,date:v.settleDate};
    const clone=form.cloneNode(true);
@@ -1269,8 +1347,10 @@ document.addEventListener('submit',async e=>{e.preventDefault();if(busy||!db)ret
   else if(form.id==='card-purchase-form'){
    const amount=cents(v.amount),count=Number(v.count||1);
    if(!Number.isInteger(count)||count<1||count>36)throw Error('Informe de 1 a 36 parcelas.');
-   await commit(d=>addCardPurchase(d,{cardId:v.cardId,date:v.date,amount,description:v.description,categoryId:v.categoryId,partnerId:v.partnerId,count}),
-    'Compra registrada. As faturas correspondentes foram atualizadas.');
+   await commit(d=>id?
+    updateCardPurchase(d,id,{cardId:v.cardId,date:v.date,amount,description:v.description,categoryId:v.categoryId,partnerId:v.partnerId,count}):
+    addCardPurchase(d,{cardId:v.cardId,date:v.date,amount,description:v.description,categoryId:v.categoryId,partnerId:v.partnerId,count}),
+    id?'Compra atualizada. Faturas conferidas, sem duplicidade.':'Compra registrada. As faturas correspondentes foram atualizadas.');
   }
   else if(form.id==='forecast-scenario-form'){
    const title=db.titles.find(t=>t.id===v.titleId&&pending(db,t)>0);
@@ -1307,14 +1387,14 @@ document.addEventListener('change',async e=>{if(!db)return;const el=e.target;try
     syncEntrySelect(select);
    }
    syncEntryServiceCategory(el.form);
-   const credit=el.form?.querySelector('.gb-credit-entry-link');if(credit)credit.hidden=el.value!=='expense';
+   syncEntrySettlement(el.form);
    const refund=el.form?.querySelector('.gb-entry-refund-hint');if(refund)refund.hidden=el.value!=='income';
    const related=el.form?.querySelector('.gb-entry-refund-card');if(related)related.hidden=el.value!=='income';
   }
   if(el.id==='entry-category')syncEntryServiceCategory(el.form);
   if(el.id==='gb-service-group')filterServicesInForm(el.closest('#title-form'));
-  if(el.id==='entry-mode'){refreshEntrySchedule(el.form);syncEntrySettlement(el.form);}
-  if(el.form?.id==='title-form'&&el.name==='settlement')syncEntrySettlement(el.form);
+  if(el.id==='entry-mode'){syncEntrySettlement(el.form);refreshEntrySchedule(el.form);}
+  if(el.form?.id==='title-form'&&['settlement','settleCardId'].includes(el.name)){syncEntrySettlement(el.form);refreshEntrySchedule(el.form);}
   if(el.id==='period'){if(el.value==='custom'){openModal('Escolher período',`<form id="period-form"><div class="form-grid">${field('De','from',state.range.from||today(),'date','required')}${field('Até','to',state.range.to||today(),'date','required')}</div>${formFooter('Aplicar período')}</form>`);el.value=state.period;}else{state.period=el.value;state.range=rangeFor(el.value);savePeriodPreference();state.launchSelected=[];state.launchStatusOpen=false;render();}}
   if(el.dataset.filter){state[el.dataset.filter]=el.value;if(['partner','category'].includes(el.dataset.filter))state.moreFilters=true;state.launchSelected=[];render();}
   if(el.id==='report-type'){state.report=el.value;render();}

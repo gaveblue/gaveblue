@@ -99,6 +99,27 @@ export function openGbPickerSheet({kind,items=[],selected='',onPick}){
  root.querySelector('[data-sheet-grab]')?.focus({preventScroll:true});
  return true;
 }
+/** Read-only due-date detail sheet; the title form stays mounted underneath. */
+export function openGbScheduleSheet(rowsMarkup,count=0){
+ const root=picker();
+ if(!root||root.open)return false;
+ active={returnFocus:document.activeElement};
+ selectionAfterClose=null;drag=null;suppressGrabClick=false;
+ const total=Number.isInteger(count)&&count>0?count:0;
+ root.innerHTML='<div class="gb-sheet-body gb-sheet-schedule-body">'+
+  '<button type="button" class="gb-sheet-grab" data-sheet-grab aria-label="Expandir painel" aria-expanded="false"><span aria-hidden="true"></span></button>'+
+  '<div class="gb-sheet-header"><div><h2 id="gb-sheet-title">Vencimentos previstos</h2>'+
+   '<p>'+total+' parcela(s) ou vencimento(s) · conferência antes da gravação</p></div>'+
+   '<button type="button" class="gb-sheet-close" data-sheet-close aria-label="Fechar detalhes">'+icon('close')+'</button></div>'+
+  '<div class="gb-sheet-results gb-entry-sheet-schedule" tabindex="0">'+
+    rowsMarkup+
+   '<p class="gb-entry-schedule-note">Feriados estaduais e municipais não estão incluídos. Confira as datas antes de confirmar.</p>'+
+  '</div></div>';
+ snap(root,'partial');
+ root.showModal();
+ root.querySelector('[data-sheet-close]')?.focus({preventScroll:true});
+ return true;
+}
 export function filterGbPickerSheet(root,query){
  if(!root)return 0;
  const term=normalize(query);

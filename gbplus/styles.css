@@ -1060,3 +1060,14 @@ body.auth-locked .mobile-nav-fade{display:none!important}
  .gb-finance-tools .button{font-size:10px}
 }
 @media(prefers-reduced-motion:reduce){.gb-finance-tab{transition:none}}
+
+
+/* GB+ 2.7.6 — editing a card purchase must stay usable on narrow screens. */
+.gb-credit-purchase>.gb-credit-purchase-actions{
+ display:flex;align-items:center;flex-direction:row;gap:6px;flex:none;
+}
+.gb-credit-purchase-actions .button{font-size:11px;min-width:34px;min-height:34px}
+@media(max-width:400px){
+ .gb-credit-purchase{gap:6px;flex-wrap:wrap}
+ .gb-credit-purchase>.gb-credit-purchase-actions{margin-left:auto}
+}
