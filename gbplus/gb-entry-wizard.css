@@ -122,3 +122,53 @@
  .gb-service-option{min-height:42px}
  .gb-service-selected .button{padding:7px 9px;white-space:nowrap}
 }
+
+/* GB+ 2.6.2 — PF: transaction type and amount are the first choices. */
+.gb-entry-flow-switch{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:5px;background:var(--soft);border-radius:18px;margin:0 0 13px;min-height:66px}
+.gb-entry-flow-switch .gb-entry-type-source{display:none!important}
+.gb-entry-flow-option{border:1px solid transparent;border-radius:15px;background:transparent;color:var(--muted);display:inline-flex;align-items:center;justify-content:center;gap:10px;min-width:0;min-height:54px;padding:10px 14px;font-size:15px;font-weight:650;cursor:pointer}
+.gb-entry-flow-option.is-active{background:var(--surface);color:var(--ink);border-color:var(--border);box-shadow:0 1px 4px #0000000c}
+.gb-entry-flow-option:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.gb-entry-flow-icon{display:grid;place-items:center;flex:none;width:29px;height:29px;border-radius:10px;background:var(--surface);color:var(--muted)}
+.gb-entry-flow-icon .icon{width:19px;height:19px}
+.gb-entry-flow-icon.is-expense{color:#df3347;background:#fceef1}
+.gb-entry-flow-icon.is-income{color:#159b67;background:#eaf8f1}
+.gb-entry-amount-hero{display:grid;gap:3px;justify-items:center;padding:13px 6px 18px;margin:0 0 9px;border-bottom:1px solid var(--border)}
+.gb-entry-amount-hero>label{font-size:10px;letter-spacing:.03em;font-weight:650;color:var(--muted)}
+.gb-entry-amount-control{display:flex;justify-content:center;align-items:center;gap:8px;width:100%;max-width:420px;color:var(--ink)}
+.gb-entry-amount-control>span{font-size:clamp(24px,5vw,36px);font-weight:600;letter-spacing:-1px;white-space:nowrap}
+.gb-entry-amount-control input{display:block;border:0!important;background:transparent!important;box-shadow:none!important;outline-offset:1px;text-align:left;min-width:0;width:min(65%,280px);padding:0!important;line-height:1.2;font-size:clamp(29px,6vw,46px)!important;font-weight:650;color:var(--ink)!important;letter-spacing:-1.5px;font-variant-numeric:tabular-nums}
+.gb-entry-amount-control input:focus-visible{outline:2px solid var(--ink)!important;border-radius:7px}
+.gb-entry-amount-control input::placeholder{color:var(--muted);opacity:.65}
+.gb-entry-grid>.full:first-child{min-width:0}
+.gb-entry-grid .gb-entry-select[data-entry-name="categoryId"]{width:100%}
+.gb-entry-partner-disabled{display:grid;align-content:start;gap:8px;min-width:0}
+.gb-entry-partner-disabled>.gb-entry-label{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:3px}
+.gb-entry-partner-disabled>.gb-entry-label>small{font-size:9px;color:var(--muted);font-weight:500}
+.gb-entry-disabled-input{display:flex;align-items:center;gap:9px;min-height:49px;border:1px solid var(--border);background:var(--soft);border-radius:11px;padding:11px 13px;font-size:12px;color:var(--muted);opacity:.76;cursor:not-allowed;user-select:none}
+.gb-entry-disabled-input>.icon{width:18px;height:18px;flex:none}
+.gb-entry-amount-recap{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:12px;color:var(--muted);padding:13px 15px;border:1px solid var(--border);border-radius:12px;background:var(--soft)}
+.gb-entry-amount-recap strong{font-size:16px;color:var(--ink);font-variant-numeric:tabular-nums}
+.gb-entry-form input[name="description"][readonly]{background:var(--soft);color:var(--ink);cursor:default}
+.gb-entry-form input[name="description"][readonly]:focus-visible{outline-color:var(--ink)}
+/* Colored local icons and carefully themed monograms. No dynamic external image fetch. */
+.gb-service-branded{color:var(--gb-service-color)!important;background:color-mix(in srgb,var(--gb-service-color) 11%,var(--surface));border-color:color-mix(in srgb,var(--gb-service-color) 12%,var(--border))}
+.gb-service-logo-dark{color:#000!important;background:#fff!important;border-color:#dedee2!important}
+.gb-service-logo svg{fill:currentColor}
+.gb-launch-card-icon.has-service{padding:0;background:transparent;border:0;overflow:visible}
+.gb-launch-card-icon.has-service .gb-service-logo,.gb-launch-card-icon.has-service .gb-service-monogram{width:36px;height:36px;min-width:36px;border-radius:11px}
+.gb-launch-card-icon.has-service .gb-service-logo svg{width:22px;height:22px}
+@media(max-width:760px){
+ .gb-entry-flow-switch{min-height:59px;padding:4px;margin-bottom:10px}
+ .gb-entry-flow-option{min-height:51px;font-size:13px;padding:8px 7px;gap:6px}
+ .gb-entry-flow-icon{width:26px;height:26px;border-radius:8px}
+ .gb-entry-flow-icon .icon{width:17px;height:17px}
+ .gb-entry-amount-hero{padding:8px 4px 14px;margin-bottom:8px}
+ .gb-entry-amount-control input{font-size:clamp(29px,8vw,42px)!important}
+ .gb-entry-amount-control>span{font-size:clamp(24px,6vw,34px)}
+ .gb-entry-partner-disabled>.gb-entry-label>small{font-size:9px}
+}
+@media(max-width:365px){
+ .gb-entry-flow-option{font-size:12px;gap:4px}
+ .gb-entry-amount-control input{width:70%}
+}
