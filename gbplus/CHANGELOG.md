@@ -1,5 +1,15 @@
 # CHANGELOG — GB+ Gestão Financeira
 
+## [2.7.4 — SEGURANÇA ADMINISTRATIVA E HOMOLOGAÇÃO LOCAL] — 2026-11-07
+
+**LIBERAÇÃO AUTORIZADA PELO RESPONSÁVEL EM 07/11/2026; DEPLOY E HOMOLOGAÇÃO INTEGRAL AINDA DEVEM SER VERIFICADOS.** A API administrativa `gbplus-admin` foi reforçada no Supabase (Edge Function v2) com `verify_jwt=true` no gateway e autorização adicional por `auth.getUser()`. Esta versão registra a configuração em `supabase/config.toml` e mantém as demais funções intactas.
+
+**Processo sem GitHub Actions:** removido o workflow de regressões financeiras, sem alterar o mecanismo de publicação do GitHub Pages. Adicionado `gbplus/scripts/homologar-local.mjs` para executar arquivos `.mjs` em Node.js 22 e gerar relatório JSON, com orientações em `gbplus/HOMOLOGACAO-SEM-ACTIONS.md`.
+
+**Evidências disponíveis:** 22/22 arquivos de teste passaram em JavaScript V8 isolado com adaptadores de leitura/assertiva/codec e simulações de requisições. Corrigida uma asserção do teste de conciliação pendente que confundia a opção de ação em lote com a escolha por movimento, sem alterar a lógica financeira de produção.
+
+**Limitações:** não houve execução integral de `node gbplus/scripts/homologar-local.mjs` em checkout Node real, nem teste Android/PWA ou sessão administrativa real. A autorização para publicar não equivale à homologação integral. O status público só poderá ser declarado após confirmação objetiva do deploy GitHub Pages. Nenhum saldo, lançamento ou movimentação foi alterado por esta release.
+
 ## [2.7.3 — LANÇAMENTO COM AÇÕES NO TOPO E PERÍODO MEMORIZADO] — 2026-11-07
 
 **PUBLICAÇÃO CONFIRMADA:** PR [#91](https://github.com/gaveblue/gaveblue/pull/91) integrada à `main` por squash no commit `b24253d6d48f4056e2cd5b75faacbedd7cda58db`. GitHub Pages [#42339423278](https://github.com/gaveblue/gaveblue/actions/runs/42339423278) concluiu build e deploy com **success** em 07/11/2026 04:40 UTC. Verificações isoladas passaram, incluindo seis verificações funcionais do cabeçalho. O workflow financeiro #42339212876 falhou antes de executar qualquer etapa (0 passos). Inspeção real do PWA/Android continua pendente; publicação não equivale à homologação integral.
