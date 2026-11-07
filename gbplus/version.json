@@ -1,17 +1,16 @@
 {
   "version": "2.5.1",
-  "build": 1,
+  "build": 2,
   "published_at": null,
-  "title": "Contas e cartões — uma tela, duas abas",
+  "title": "Contas e Cartões unificados — regressões revisadas",
   "notes": [
-    "Unificamos as páginas de Contas bancárias e Cartões de crédito em uma única tela Contas e cartões, com duas abas compactas no topo.",
-    "Mantemos sem mudanças os saldos, logos dos bancos, conta, faturas, compras de cartão, limites, botões e formulários já existentes.",
-    "No topo da tela, o usuário alterna entre Contas e Cartões sem abrir outra área do sistema.",
-    "Links antigos #cards e atalhos móveis antigos continuam abrindo a aba Cartões dentro da página unificada.",
-    "A alternância é apenas visual e não altera contas, faturas, pagamentos, títulos nem limites.",
-    "O catálogo de 26 serviços para streaming, música, delivery e mobilidade foi preparado no planejamento da 2.5.1; ainda não é um seletor implantado e nenhum logo de serviços foi publicado.",
-    "A área de conciliação bancária da 2.5.0 build 9 permanece preservada, incluindo mapeamento manual de CSV.",
-    "O GitHub Actions de regressões e o teste ponta a ponta do PWA instalado continuam pendentes e são acompanhados em issues separadas."
+    "Contas e Cartões permanecem organizados em uma única tela com duas abas compactas, sem alterar os componentes preexistentes.",
+    "As antigas rotas e atalhos de Cartões continuam direcionando à aba Cartões na tela unificada.",
+    "Corrigido um teste herdado da 2.5.0 que comparava números fixos de versão, impedindo aprovação das regressões apesar do comportamento correto.",
+    "12/12 suítes regressivas passam em Node.js 22.16.0 sobre os arquivos implantados da 2.5.1 build 1 com o teste corrigido.",
+    "A mudança continua exclusivamente visual e de navegação; contas, saldos, faturas e limites não são modificados.",
+    "Catálogo de serviços da 2.5.1 segue preparado; logos oficiais e seletor dos serviços ainda não foram publicados.",
+    "Teste visual automatizado em Chromium travou neste ambiente e a execução CI GitHub Actions permanece bloqueada antes do runner."
   ],
   "assets": [
     "./index.html",
@@ -182,9 +181,9 @@
       "description": "A mudança é de organização e navegação; não altera saldos, limites nem faturas."
     }
   ],
-  "release_status": "development_accounts_cards_unified_homologation_pending",
+  "release_status": "development_accounts_cards_unified_qa_verified",
   "homologation": {
-    "status": "pendente",
-    "notes": "Build 1 de 2.5.1: testes de navegação, compatibilidade de links e regressões do núcleo financeiro antes de publicação. Login PWA integral e CI GitHub Actions ainda pendentes."
+    "status": "node_regressions_passed_browser_pwa_ci_pending",
+    "notes": "Build 2 corrige apenas a suite legada de metadata da 2.5.0. As 12 suítes regressivas foram aprovadas em Node 22 real, incluindo a nova navegação. Teste PWA Android/iPhone real e CI GitHub Actions ainda não concluídos."
   }
 }
