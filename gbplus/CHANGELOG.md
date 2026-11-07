@@ -1,5 +1,16 @@
 # CHANGELOG — GB+ Gestão Financeira
 
+## [2.7.5 — NAVEGAÇÃO FIXA NO RODAPÉ DO LANÇAMENTO] — 2026-11-07
+
+**ALTERAÇÃO DE INTERFACE:** os botões **Próximo**, **Voltar** e **Revisar/Salvar** voltam ao rodapé fixo do modal, fora da área rolável. O X continua no cabeçalho como única ação de fechar. A área central do formulário é rolável de forma independente nas três etapas; a altura compacta do painel móvel `min(575px,88dvh)` permanece inalterada.
+
+- `js/app.js`: em vez de transferir as ações para o cabeçalho, monta navegação em `.gb-entry-bottom-nav` após `.modal-body`. Os controles das etapas acompanham o estado do formulário e o botão externo de revisão/salvamento mantém `form="title-form"`.
+- `bottom-sheet.css`: rodapé com altura compacta e área de toque adequada; navegação visível inclusive com formulário extenso, sem alterar dados, rolagem da seção financeira ou processamento da baixa.
+- `index.html`, `sw.js` e `version.json`: identificação 2.7.5 build 1 e atualização de cache PWA para que a mudança seja carregada.
+- `tests/entry-footer-regression.mjs`: nova verificação dos três rodapés, vínculo do botão de salvar ao formulário, permanência do X e altura fixa. `tests/period-preference-regression.mjs` atualizada.
+- **Testes isolados em JavaScript com fontes reais (não equivalem a CI integral):** `entry-footer-regression.mjs`, `period-preference-regression.mjs`, `title-three-step-regression.mjs` e `category-service-auto-regression.mjs` passaram. Validação visual real Android/PWA e execução da suíte completa em Node.js permanecem pendentes. Publicação e homologação integral são status diferentes.
+
+
 ## [2.7.4 — SEGURANÇA ADMINISTRATIVA E HOMOLOGAÇÃO LOCAL] — 2026-11-07
 
 **LIBERAÇÃO AUTORIZADA PELO RESPONSÁVEL EM 07/11/2026; DEPLOY E HOMOLOGAÇÃO INTEGRAL AINDA DEVEM SER VERIFICADOS.** A API administrativa `gbplus-admin` foi reforçada no Supabase (Edge Function v2) com `verify_jwt=true` no gateway e autorização adicional por `auth.getUser()`. Esta versão registra a configuração em `supabase/config.toml` e mantém as demais funções intactas.
