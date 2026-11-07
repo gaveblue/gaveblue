@@ -20,3 +20,12 @@ Os pictogramas monocromáticos abaixo foram extraídos dos caminhos vetoriais di
 ## Requisitos do produto
 
 As 26 entradas originais permanecem no catálogo estável de IDs. A associação de serviço só é gravada após confirmação do lançamento e aceita remoção/edição. Valores e datas não são adivinhados, e serviços recorrentes são opcionais.
+
+## Atualização de cores na versão 2.6.2
+
+O módulo `js/service-brand-colors.js` adiciona tons de referência das marcas. A presença de cor **não deve ser interpretada como SVG oficial**: apenas as 13 marcas citadas acima têm símbolos vetoriais incorporados. Os outros serviços continuam com monogramas em iniciais; as cores são aproximações da identidade pública onde não há metadados do Simple Icons.
+
+Fonte de metadados da biblioteca consultada em 06/11/2026: https://github.com/simple-icons/simple-icons/blob/develop/data/simple-icons.json.
+
+Netflix usa vermelho `#E50914`; iFood usa `#EA1D2C`; Spotify usa `#1ED760`. Para marcas sem fonte confiável, como Plus Delivery, o fundo e o monograma permanecem neutros. Não é exibido qualquer sinal de parceria ou autorização das empresas.
+
