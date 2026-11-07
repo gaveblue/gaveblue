@@ -1,12 +1,14 @@
 # CHANGELOG — GB+ Gestão Financeira
 
-## [2.7.4 — SEGURANÇA ADMINISTRATIVA E HOMOLOGAÇÃO LOCAL] — 2026-11-07 (CANDIDATA)
+## [2.7.4 — SEGURANÇA ADMINISTRATIVA E HOMOLOGAÇÃO LOCAL] — 2026-11-07
 
-**NÃO HOMOLOGADA / NÃO PUBLICADA.** A API administrativa `gbplus-admin` já foi reforçada separadamente no Supabase (Edge Function v2) com `verify_jwt=true` no gateway e autorização adicional de usuário ao vivo por `auth.getUser()`, sem alterar o corpo da função. Esta PR registra a configuração em `supabase/config.toml` e inclui teste de regressão correspondente.
+**LIBERAÇÃO AUTORIZADA PELO RESPONSÁVEL EM 07/11/2026; DEPLOY E HOMOLOGAÇÃO INTEGRAL AINDA DEVEM SER VERIFICADOS.** A API administrativa `gbplus-admin` foi reforçada no Supabase (Edge Function v2) com `verify_jwt=true` no gateway e autorização adicional por `auth.getUser()`. Esta versão registra a configuração em `supabase/config.toml` e mantém as demais funções intactas.
 
-**Novo processo de homologação sem GitHub Actions:** o workflow de regressões financeiras do GB+ foi retirado desta proposta, sem modificar o mecanismo de publicação do GitHub Pages. Adicionado `gbplus/scripts/homologar-local.mjs` para executar todos os testes `.mjs` do projeto com Node.js 22, registrar aprovação/falha individual e gerar evidência JSON local (não publicada pelo Git). O procedimento está em `gbplus/HOMOLOGACAO-SEM-ACTIONS.md`.
+**Processo sem GitHub Actions:** removido o workflow de regressões financeiras, sem alterar o mecanismo de publicação do GitHub Pages. Adicionado `gbplus/scripts/homologar-local.mjs` para executar arquivos `.mjs` em Node.js 22 e gerar relatório JSON, com orientações em `gbplus/HOMOLOGACAO-SEM-ACTIONS.md`.
 
-**Evidências de execução isolada (07/11/2026):** os 22 arquivos de teste `.mjs` da PR foram executados com código-fonte real em um interpretador JavaScript V8 isolado, usando adaptadores para recursos Node (leitura de arquivos em memória, asserções, codecs e simulação de requisições). Após corrigir no teste de pendências bancárias uma asserção que confundia ações em lote com opções de uma linha, **22/22 verificações de arquivo passaram nesse ambiente adaptado**. Isto **não** é uma execução integral do comando `node gbplus/scripts/homologar-local.mjs` no repositório clonado, nem um teste ponta a ponta com Supabase ou navegador. Continuam pendentes: execução comprovada da suíte real, teste de login administrativo com sessão real, validação visual PWA/Android e aprovação explícita de homologação. Até lá, manter a versão 2.7.4 como candidata e a publicação principal em 2.7.3. Não confundir teste escrito com teste aprovado.
+**Evidências disponíveis:** 22/22 arquivos de teste passaram em JavaScript V8 isolado com adaptadores de leitura/assertiva/codec e simulações de requisições. Corrigida uma asserção do teste de conciliação pendente que confundia a opção de ação em lote com a escolha por movimento, sem alterar a lógica financeira de produção.
+
+**Limitações:** não houve execução integral de `node gbplus/scripts/homologar-local.mjs` em checkout Node real, nem teste Android/PWA ou sessão administrativa real. A autorização para publicar não equivale à homologação integral. O status público só poderá ser declarado após confirmação objetiva do deploy GitHub Pages. Nenhum saldo, lançamento ou movimentação foi alterado por esta release.
 
 ## [2.7.3 — LANÇAMENTO COM AÇÕES NO TOPO E PERÍODO MEMORIZADO] — 2026-11-07
 
