@@ -12,9 +12,16 @@ function selectedStatus(state){
  if(state.type==='expense'&&!state.status)return'expense';
  return state.status||'all';
 }
+/** Count calendar days, not hours, so timezone/clock changes cannot skew delays. */
+export function launchOverdueDays(due,reference=today()){
+ if(!/^\d{4}-\d{2}-\d{2}$/.test(due)||!/^\d{4}-\d{2}-\d{2}$/.test(reference))return 0;
+ const start=Date.parse(due+'T12:00:00Z'),end=Date.parse(reference+'T12:00:00Z');
+ return Number.isFinite(start)&&Number.isFinite(end)?Math.max(0,Math.round((end-start)/86400000)):0;
+}
 function launchCard(db,t,isSelected){
  const income=t.type==='income';
  const balance=pending(db,t);
+ const lateDays=!t.cancelled&&balance>0?launchOverdueDays(t.due):0;
  const label=t.cancelled?'Cancelado':balance===0?(income?'Recebido':'Pago'):paid(db,t.id)>0?'Parcial':t.due<today()?'Vencido':'Pendente';
  const statusStyle=t.cancelled?'cancelled':balance===0?'settled':t.due<today()?'late':'pending';
  const partner=db.partners.find(p=>p.id===t.partnerId)?.name||'Sem parceiro';
@@ -32,6 +39,7 @@ function launchCard(db,t,isSelected){
       <span>${esc(subtitle)}</span>${subtitle!==category?`<small>${esc(category)}</small>`:''}</span>
     <span class="gb-launch-card-meta"><time datetime="${t.due}">${dateLabel(t.due)}</time>
       <span class="gb-launch-state ${statusStyle}">${esc(label)}</span>
+      ${lateDays?'<span class="gb-launch-overdue">Em atraso há '+lateDays+' '+(lateDays===1?'dia':'dias')+'</span>':''}
       <strong>${money(t.amount)}</strong>${balance>0&&balance!==t.amount?`<small>${money(balance)} pendente</small>`:''}</span>
     <span class="gb-launch-selected-indicator" aria-hidden="true">${icon('check')}</span>
    </article></div>`;
