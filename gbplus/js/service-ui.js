@@ -21,6 +21,14 @@ export function serviceIconMarkup(service,size='small'){
  return '<span class="gb-service-monogram'+(hex?' gb-service-branded':'')+dark+'"'+style+' aria-hidden="true">'+
   esc(item.fallback||item.name.slice(0,2))+'</span>';
 }
+// Three overlapping, recognizable examples on the Serviços category.
+// Render only existing local symbols, no external logo requests.
+export function serviceCategoryPreviewMarkup(){
+ const ids=['streaming-netflix','music-spotify','delivery-ifood'];
+ return '<span class="gb-service-category-preview" aria-hidden="true">'+
+  ids.map(id=>'<span class="gb-service-category-preview-item">'+serviceIconMarkup(id)+'</span>').join('')+
+  '</span>';
+}
 export function serviceDisplayName(id,name='',fallback=''){
  const item=serviceById(id);
  if(item)return item.name;

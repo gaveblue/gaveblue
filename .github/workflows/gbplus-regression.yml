@@ -41,6 +41,8 @@ jobs:
         run: node gbplus/tests/bank-import-readonly-release-regression.mjs
       - name: Comparação indicativa de saldos OFX/CSV
         run: node gbplus/tests/bank-import-balance-regression.mjs
+      - name: Novo lançamento em 3 etapas e baixa atômica (2.7.1)
+        run: node gbplus/tests/title-three-step-regression.mjs
       - name: Bottom sheet arrastável e ícones (2.7.0)
         run: node gbplus/tests/bottom-sheet-regression.mjs
       - name: Formulário PF e serviços dentro da categoria (2.6.3)

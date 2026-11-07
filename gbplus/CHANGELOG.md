@@ -2,6 +2,30 @@
 
 Registro de mudanças do aplicativo localizado em `gbplus/`. Toda versão e toda compilação deve possuir uma entrada própria. **Uma alteração não deve ser considerada homologada apenas porque existe commit, teste escrito ou publicação.** A homologação exige evidências da execução e aprovação explícita.
 
+## [2.7.1 — LANÇAMENTO EM TRÊS ETAPAS, BAIXA E PRÉVIA DE SERVIÇOS] — 2026-11-07
+
+**Status inicial: CANDIDATA À PUBLICAÇÃO.** Atualização incremental na série 2.7.x, sem número de compilação visível. Somente publicar após conferir o deploy.
+
+### Formulário de lançamento
+- Primeira etapa **Lançamento** padronizada entre Despesa e Receita: seletor de tipo, valor centralizado, categoria (com serviço quando aplicável) e descrição. O cartão foi removido da primeira etapa.
+- Segunda etapa **Detalhes**: periodicidade, parcelas/meses, documento, observações e meio de movimentação (**Conta/Pix/dinheiro** ou **Cartão de débito**), disponível para despesas e receitas. A escolha de débito é metadado do título; a baixa movimenta a conta financeira, sem criar fatura de crédito.
+- O atalho de compra no **cartão de crédito** fica exclusivamente na segunda etapa, para despesas, e abre o fluxo de compra que gera faturas sem duplicidade.
+- Em **receitas**, há seleção opcional do cartão relacionado a um reembolso. Essa associação é **apenas informativa**: não abate limite/fatura. A operação real de estorno não está implantada e não deve ser apresentada como realizada.
+- Terceira etapa **Confirmação**: datas de emissão e vencimento, prévia de parcelas, opção de dias úteis e destino do lançamento.
+- Em novos lançamentos **únicos**, opção **Ficar pendente** (padrão) ou **Baixar agora**. Baixa imediata exige conta ativa, data válida não futura e faz a criação e o `addPayment` na **mesma gravação** via `commit`.
+- Parcelamentos e recorrências exigem baixa individual posterior; a baixa imediata é bloqueada para evitar quitação indevida de várias parcelas. Títulos antigos, quando editados, não ganham uma baixa adicional.
+- A revisão final informa se o título ficará pendente ou será liquidado, incluindo conta e data, antes da confirmação; nenhuma movimentação é executada ao navegar pelas etapas.
+
+### Categoria Serviços
+- Prévia de três miniaturas **Netflix, Spotify e iFood**, próximas e sobrepostas, incorporada à categoria de despesa Serviços no seletor e no Bottom Sheet. Usa os SVG/monogramas locais e as cores de marca já disponíveis.
+- Uma troca entre Receita e Despesa atualiza a prévia conforme o tipo da categoria.
+
+### Testes e compatibilidade
+- Novo `tests/title-three-step-regression.mjs` verifica a divisão das etapas, obrigatoriedade de conta/data na baixa, operação financeira de valor exato, preservação da entrada ao retornar e localização da prévia de serviços.
+- Permanecem os testes anteriores `pf-entry-ui-regression.mjs`, `services-regression.mjs` e `bottom-sheet-regression.mjs`.
+- Testes isolados com dados fictícios e análise estática realizados. **CI completo e PWA real permanecem pendentes de evidência.**
+- Sem mudança de schema no Supabase, sem transferência automática em cartões e sem migração de registros antigos.
+
 ## [2.7.0 — BOTTOM SHEETS ARRASTÁVEIS E IDENTIDADE VISUAL DOS ÍCONES] — 2026-11-07
 
 **PUBLICAÇÃO CONFIRMADA:** PR [#88](https://github.com/gaveblue/gaveblue/pull/88) integrada à `main` (commit `31af5d5b3321c4f7ce4576b3875728f5105951f5`). GitHub Pages [42334207915](https://github.com/gaveblue/gaveblue/actions/runs/42334207915) concluído com `success` em **07/11/2026 03:29 UTC**. Testes isolados do bottom sheet, serviços e formulário PF passaram, mas o workflow financeiro [42334177960](https://github.com/gaveblue/gaveblue/actions/runs/42334177960) falhou antes de executar etapas (0 passos). A validação real dos gestos em Android/PWA e a homologação integral continuam pendentes. **Versão 2.7.0 publicada não equivale a homologação completa.**

@@ -1,21 +1,20 @@
 {
-  "version": "2.7.0",
+  "version": "2.7.1",
   "build": 1,
-  "published_at": "2026-11-07T03:29:47Z",
-  "title": "Nova experiência visual com painéis arrastáveis e ícones aprimorados",
+  "published_at": null,
+  "title": "Novo lançamento em três etapas com baixa imediata e prévia de serviços",
   "notes": [
-    "A versão 2.7.0 introduz um Bottom Sheet reutilizável, arrastável e pesquisável para categorias e serviços, com foco na experiência móvel e adaptação à tela de computador.",
-    "A escolha de categoria apresenta todas as categorias reais da conta, com ícones, ordem alfabética e busca; nenhuma categoria artificial é inserida no banco.",
-    "A lista de serviços apresenta os 26 serviços cadastrados em cinco grupos, com busca, marcas, opção personalizada e opção Sem serviço.",
-    "Toque no puxador ou arraste para cima para expandir a seleção; arraste para baixo para recolher ou fechar, retornando ao formulário sem perder o valor, a descrição e as datas preenchidas.",
-    "O formulário Novo lançamento passa a ter puxador próprio no celular e três alturas para compactar, usar normalmente ou expandir, sem remover dados nem sair do fluxo.",
-    "As listas podem ser roladas independentemente do gesto de arrastar; seleção por toque, teclado, pesquisa e fechamento por Escape continuam disponíveis.",
-    "Os logotipos de bancos agora ocupam todo o espaço do selo com fundo claro consistente mesmo no modo escuro; se um arquivo estiver indisponível, continuam aparecendo as iniciais.",
-    "Os ícones de serviços aumentam dentro do selo, com preenchimento baseado nas cores de referência das marcas e contraste de símbolo adaptado a fundos claros ou escuros.",
-    "Os 26 serviços continuam opcionais; ao escolher Serviços ou categoria equivalente a identificação fica integrada à categoria, e a descrição usa o nome escolhido.",
-    "Sem mudanças no motor financeiro, contas, títulos, saldos, segurança, migrações ou cobranças. Nenhum lançamento é gerado pela abertura de um painel.",
-    "Testes de regressão com dados fictícios cobrem categoria dinâmica, 26 serviços, navegação por busca, teclas, comportamento de arrastar e salvaguardas do formulário.",
-    "GB+ 2.7.0 integrada pela PR #88 (commit 31af5d5b), com GitHub Pages #42334207915 concluído com success em 07/11/2026 03:29 UTC."
+    "O Novo lançamento passa a ter três etapas: 1 — Lançamento (Despesa/Receita, valor, categoria, serviço e descrição); 2 — Detalhes (periodicidade, parcelas, documento, observações e forma de movimentação); 3 — Confirmação (emissão, vencimento, dias úteis, prévia das parcelas e situação da baixa).",
+    "O atalho de compra em cartão de crédito foi transferido para a segunda etapa, aparecendo somente em despesas; a primeira etapa de receita e despesa não tem o bloco extra de crédito.",
+    "O usuário pode indicar Conta/Pix/dinheiro ou Cartão de débito nas movimentações de receita e despesa; cartão de débito utiliza uma conta financeira para a baixa, sem gerar fatura de crédito.",
+    "No lançamento de uma receita, o usuário pode associar opcionalmente um cartão como referência de reembolso. Esse vínculo é informativo e NÃO reduz limite nem fatura: o mecanismo de estornos em crédito ainda não foi implementado.",
+    "A categoria Serviços exibe uma prévia visual com três logos pequenos sobrepostos: Netflix, Spotify e iFood, tanto na lista de categorias quanto na categoria selecionada.",
+    "Emissão e vencimento estão apenas na terceira etapa, junto da prévia de vencimentos gerada a partir dessas datas.",
+    "Para títulos novos e únicos, a terceira etapa oferece Pendente (padrão) e Baixar agora, neste último caso exigindo uma conta ativa e data de baixa até hoje.",
+    "A criação do título e sua baixa imediata acontecem na mesma gravação do repositório, evitando criar um título pago sem registrar a movimentação; duplicações e falhas invalidam toda a operação.",
+    "Em parcelamentos e recorrências a baixa imediata fica indisponível para evitar liquidar várias parcelas de uma só vez; o usuário pode baixar os títulos individualmente depois.",
+    "Na edição de títulos antigos, a terceira etapa preserva datas e orienta a usar Detalhes do lançamento para qualquer baixa ou estorno, evitando duplicidade em pagamentos.",
+    "Não há alterações em tabelas Supabase nem migração de dados antigos. O vínculo cartão-conta para pagamento da fatura continua como já existente no cadastro de cartões."
   ],
   "assets": [
     "./index.html",
@@ -179,23 +178,28 @@
   "highlights": [
     {
       "icon": "layers",
-      "title": "Painéis arrastáveis",
-      "description": "Categorias e serviços com busca e lista completa em um painel que expande com o gesto."
+      "title": "Lançamento em três etapas",
+      "description": "Valores e categoria primeiro; detalhes depois; datas e confirmação financeira ao final."
+    },
+    {
+      "icon": "check-circle-2",
+      "title": "Baixar agora ou deixar pendente",
+      "description": "Registre um lançamento único e sua baixa juntos, com conta e data verificadas."
     },
     {
       "icon": "smartphone",
-      "title": "Novo lançamento mais flexível",
-      "description": "Expanda ou recolha o formulário no celular, sem perder o preenchimento."
+      "title": "Serviços reconhecíveis",
+      "description": "Netflix, Spotify e iFood aparecem sobrepostos para identificar a categoria Serviços."
     },
     {
-      "icon": "palette",
-      "title": "Ícones melhores nos dois temas",
-      "description": "Marcas de bancos e aplicativos maiores, legíveis e adaptadas ao modo escuro."
+      "icon": "credit-card",
+      "title": "Cartão na etapa de detalhes",
+      "description": "Compra no crédito sem duplicar despesa e reembolso com vínculo informativo ao cartão."
     }
   ],
-  "release_status": "published_github_pages_ci_device_validation_pending",
+  "release_status": "candidate_2_7_1_pending_deployment",
   "homologation": {
-    "status": "isolated_sheet_services_pfu_tests_passed_pages_success_ci_runner_unavailable_device_pending",
-    "notes": "Testes isolados bottom-sheet-regression.mjs, services-regression.mjs e pf-entry-ui-regression.mjs passaram com dados 100% fictícios. Auditoria estática de 19 condições do pacote passou. GitHub Pages #42334207915 resultou em success. Workflow financeiro #42334177960 falhou antes de executar qualquer etapa (0 passos), impedindo a homologação integral; gestos no Android/PWA real ainda aguardam conferência. Nenhuma conta ou dado financeiro foi modificado pela implementação."
+    "status": "isolated_three_step_financial_ui_tests_passed_ci_device_pending",
+    "notes": "Testes isolados com dados sintéticos: 3 etapas, pagamento atômico, bloqueio de baixa em séries, miniaturas e seletores. A execução integral de Node/CI GitHub Actions e validação no aparelho Android/PWA continuam pendentes; publicação não é homologação integral."
   }
 }

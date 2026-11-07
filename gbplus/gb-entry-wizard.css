@@ -204,3 +204,63 @@
  .gb-entry-wizard .gb-entry-amount-control input{max-width:min(69vw,17ch)}
  .gb-entry-category-block .gb-service-field{padding:10px}
 }
+
+/* GB+ 2.7.1 — three balanced stages and optional immediate settlement. */
+.gb-entry-wizard .gb-entry-progress{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+.gb-entry-wizard .gb-entry-progress>span{min-width:0;justify-content:center;text-align:center;padding:10px 7px;font-size:11px;line-height:1.35}
+.gb-entry-channel-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:8px}
+.gb-entry-channel-options label{display:flex;gap:9px;align-items:center;min-height:52px;padding:11px;border:1px solid var(--border);border-radius:12px;background:var(--surface);font-size:12px;line-height:1.45;cursor:pointer}
+.gb-entry-channel-options label:has(input:checked){background:var(--soft);border-color:var(--ink);font-weight:680}
+.gb-entry-channel-options input{flex:none;width:16px;height:16px;accent-color:var(--ink)}
+.gb-entry-channel-help{margin-top:8px;font-size:11px;color:var(--muted);line-height:1.5}
+.gb-entry-wizard #gb-entry-step-two .gb-credit-entry-link{margin:17px 0 0}
+.gb-entry-refund-hint,.gb-entry-edit-note{margin-top:15px;padding:12px 14px;border-radius:12px;background:var(--soft);border:1px solid var(--border);color:var(--muted);font-size:11px;line-height:1.6}
+.gb-entry-wizard #gb-entry-step-three .gb-entry-grid{margin-bottom:17px}
+.gb-entry-settlement{border:0;margin:0;padding:0;display:grid;gap:9px;min-width:0}
+.gb-entry-settlement legend{font-size:13px;font-weight:720;margin-bottom:10px;color:var(--ink)}
+.gb-entry-settlement-option{display:flex;align-items:center;gap:12px;border:1px solid var(--border);border-radius:13px;padding:13px 14px;min-height:64px;background:var(--surface);cursor:pointer}
+.gb-entry-settlement-option:has(input:checked){border-color:var(--ink);background:var(--soft)}
+.gb-entry-settlement-option:has(input:disabled){opacity:.45;cursor:not-allowed}
+.gb-entry-settlement-option input{width:18px;height:18px;flex:none;accent-color:var(--ink)}
+.gb-entry-settlement-option span{min-width:0;display:grid;gap:2px}
+.gb-entry-settlement-option strong{font-size:13px;font-weight:680;color:var(--ink)}
+.gb-entry-settlement-option small{font-size:11px;color:var(--muted);line-height:1.5}
+.gb-entry-settlement-series{padding:11px 12px;font-size:11px;line-height:1.5;color:var(--muted);background:var(--soft);border-radius:10px}
+.gb-entry-settlement-details{display:grid;gap:12px;padding:14px;border:1px solid var(--border);border-radius:13px;background:var(--soft)}
+.gb-entry-settlement-details[hidden],.gb-entry-settlement-series[hidden]{display:none!important}
+.gb-entry-settlement-details .field{display:grid;gap:7px;color:var(--ink);font-size:12px}
+.gb-entry-settlement-details .field select,.gb-entry-settlement-details .field input{width:100%;min-height:48px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--ink);font-size:14px}
+.gb-entry-settlement-message{font-size:10px;line-height:1.5;color:var(--muted)}
+/* Category service hint: close, visibly overlapping original-color app marks. */
+.gb-service-category-preview{display:inline-flex;align-items:center;flex:none;white-space:nowrap;padding-left:8px}
+.gb-service-category-preview-item{position:relative;display:inline-grid;place-items:center;width:25px;height:25px;min-width:25px;border:2px solid var(--surface);border-radius:9px;overflow:hidden;background:var(--surface)}
+.gb-service-category-preview-item:not(:first-child){margin-left:-9px}
+.gb-service-category-preview-item:nth-child(1){z-index:3}
+.gb-service-category-preview-item:nth-child(2){z-index:2}
+.gb-service-category-preview-item:nth-child(3){z-index:1}
+.gb-service-category-preview-item .gb-service-logo,.gb-service-category-preview-item .gb-service-monogram{width:100%!important;height:100%!important;min-width:0!important;border-radius:7px!important;box-shadow:none!important}
+.gb-service-category-preview-item .gb-service-logo svg{width:78%!important;height:78%!important}
+.gb-entry-current .gb-service-category-preview{margin-left:auto}
+.gb-entry-current .gb-service-category-preview-item{width:22px;height:22px;min-width:22px}
+.gb-entry-current .gb-service-category-preview-item:not(:first-child){margin-left:-8px}
+.gb-entry-wizard .gb-credit-entry-link[hidden],.gb-entry-wizard .gb-entry-refund-hint[hidden]{display:none!important}
+@media(max-width:760px){
+ .gb-entry-wizard .gb-entry-progress{gap:5px;margin-bottom:13px}
+ .gb-entry-wizard .gb-entry-progress>span{font-size:10px;padding:9px 4px;letter-spacing:-.2px}
+ .gb-entry-channel-options{gap:6px}
+ .gb-entry-channel-options label{font-size:11px;padding:9px;min-height:50px}
+ .gb-entry-settlement-option{padding:11px 12px}
+ .gb-entry-settlement-details .field select,.gb-entry-settlement-details .field input{font-size:16px}
+}
+@media(max-width:365px){
+ .gb-entry-wizard .gb-entry-progress>span{font-size:9px}
+ .gb-entry-current .gb-service-category-preview-item{width:20px;height:20px;min-width:20px}
+}
+
+/* Receipts can reference an existing credit card without posting a fake refund. */
+.gb-entry-refund-card{margin-top:16px;padding:13px 14px;border:1px solid var(--border);border-radius:13px;background:var(--soft);display:grid;gap:8px}
+.gb-entry-refund-card[hidden]{display:none!important}
+.gb-entry-refund-card>.field{display:grid;gap:7px;font-size:12px;font-weight:680;color:var(--ink)}
+.gb-entry-refund-card>.field select{width:100%;min-height:46px;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:var(--surface);color:var(--ink)}
+.gb-entry-refund-card>p{font-size:10px;line-height:1.6;color:var(--muted)}
+@media(max-width:760px){.gb-entry-refund-card>.field select{font-size:16px}}

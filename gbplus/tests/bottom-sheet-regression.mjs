@@ -32,6 +32,8 @@ const sheet=load('bottom-sheet',{
  SERVICE_CATALOG:catalog.SERVICE_CATALOG,
  SERVICE_GROUPS:catalog.SERVICE_GROUPS,
  serviceSearchKey:catalog.serviceSearchKey,
+ isServiceExpenseCategory:item=>item?.type==='expense'&&/serviç/i.test(item?.name||''),
+ serviceCategoryPreviewMarkup:()=>'<span class="gb-service-category-preview">Netflix Spotify iFood</span>',
  serviceIconMarkup:()=>'<span class="gb-service-logo">Marca</span>'
 },['openGbPickerSheet','filterGbPickerSheet','sheetGroupsCount','installGbPickerSheet','installEntryFormDrag']);
 assert.equal(catalog.SERVICE_CATALOG.length,26);
@@ -64,6 +66,7 @@ const categories=[{id:'agua',name:'Água',type:'expense'},
 assert(sheet.openGbPickerSheet({kind:'category',items:categories,selected:'servicos',onPick:value=>picked=value}));
 assert(fakeDialog.innerHTML.includes('data-sheet-choice="agua"'));
 assert(fakeDialog.innerHTML.includes('data-sheet-choice="servicos"'));
+assert(fakeDialog.innerHTML.includes('gb-service-category-preview'),'Service category must show overlapping service examples');
 assert(!fakeDialog.innerHTML.includes('<img src=x'),'Untrusted category names must be escaped');
 assert(fakeDialog.innerHTML.includes('&lt;img'));
 assert(fakeDialog.innerHTML.includes('aria-selected="true"'));
