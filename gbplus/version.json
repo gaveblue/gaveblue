@@ -1,7 +1,7 @@
 {
   "version": "2.6.2",
   "build": 1,
-  "published_at": null,
+  "published_at": "2026-11-07T02:53:01Z",
   "title": "Novo lançamento mais simples para PF e serviços com cores",
   "notes": [
     "Novo lançamento no GB+ Personal agora começa com seletor horizontal Despesa/Receita e campo de valor centralizado logo abaixo, inspirado na organização visual de referência.",
@@ -13,7 +13,8 @@
     "Logotipos vetoriais disponíveis (13) e identificações por iniciais dos demais serviços agora usam cores de referência de suas marcas quando conhecidas; não são criadas imagens falsas.",
     "Os lançamentos mostram o logo colorido ao lado do nome do serviço, evitando duplicação de Netflix Netflix.",
     "O atalho de compra no cartão é mostrado somente para despesas e na primeira etapa do lançamento; não altera o motor financeiro.",
-    "Sem alteração em schema, saldos, dados cadastrados ou regras de confirmação. Mudanças são de interface e identificação opcional."
+    "Sem alteração em schema, saldos, dados cadastrados ou regras de confirmação. Mudanças são de interface e identificação opcional.",
+    "A PR #86 foi integrada à main e o GitHub Pages #42331328476 foi publicado com conclusão success em 07/11/2026 às 02:53 UTC."
   ],
   "assets": [
     "./index.html",
@@ -189,9 +190,9 @@
       "description": "Netflix, Spotify e outros com nome automático e ícones nas cores das marcas."
     }
   ],
-  "release_status": "candidate_2_6_2_awaiting_deploy",
+  "release_status": "published_github_pages_ci_device_validation_pending",
   "homologation": {
-    "status": "isolated_pfu_and_service_tests_passed_ci_pwa_pending",
-    "notes": "Testes isolados pf-entry-ui-regression.mjs e services-regression.mjs passaram com dados sintéticos; teste integral Node/CI e validação no aparelho real aguardam execução. A versão não é publicada até verificar o GitHub Pages."
+    "status": "isolated_tests_passed_pages_success_ci_runner_unavailable_device_pending",
+    "notes": "Testes isolados pf-entry-ui-regression.mjs e services-regression.mjs passaram com dados fictícios; auditoria de 14 verificações do pacote passou. PR #86 integrada; GitHub Pages #42331328476 success. Workflow financeiro #42331303473 failure antes de iniciar qualquer etapa (0 passos); PWA no celular real ainda pendente. Nenhum dado financeiro foi alterado durante implementação."
   }
 }
