@@ -27,7 +27,7 @@ Registro de mudanças do aplicativo localizado em `gbplus/`. Toda versão e toda
 
 ## [2.5.0 · compilação 9 — MAPEAMENTO MANUAL DE CSV] — 2026-11-06
 
-**Situação:** preparação no ramo `feature/gbplus-250-b9-csv-mapeamento`, aguardando confirmação de implantação. Esta compilação **não altera** as regras de gravação, baixa, reversão ou isolamentos financeiros aprovadas na build 8.
+**Publicação confirmada:** PR [#79](https://github.com/gaveblue/gaveblue/pull/79) integrado e GitHub Pages [42314574315](https://github.com/gaveblue/gaveblue/actions/runs/42314574315) concluído com `success` em 06/11/2026 (commit `294f9266921ac6885373af699e4f195bb8a40832`). Esta compilação **não altera** as regras de gravação, baixa, reversão ou isolamento financeiro aprovadas na build 8.
 
 ### Entregas
 - Agora existe etapa de **mapeamento manual** quando o banco entrega arquivo CSV com cabeçalhos desconhecidos. O usuário associa as colunas de data, descrição, valor com sinal (e natureza) **ou** crédito/débito separados; campos opcionais: identificador e saldo.
@@ -40,7 +40,7 @@ Registro de mudanças do aplicativo localizado em `gbplus/`. Toda versão e toda
 
 ### Testes e limitações
 - Criada `tests/bank-import-mapping-regression.mjs` e adicionada ao workflow financeiro, cobrindo assinaturas de CSV, mapeamento duplicado, formato de valores, amostra maliciosa, sinais D/C, arquivo antigo e ausência de mutação financeira.
-- A nova suíte foi exercitada em JavaScript V8, com asserções aprovadas. **A execução Node integral e testes de navegador devem ser registrados separadamente**; nunca deduzir CI verde apenas da presença da suíte.
+- **11 de 11 suítes aprovadas em Node.js 22.16.0 real**, executadas sobre o pacote `github-pages` da build 9 efetivamente implantada, incluindo `bank-import-mapping-regression.mjs`; também passaram `node --check` para `js/app.js`, `js/bank-import-preview.js` e `js/bank-import-ui.js`. A interface PWA instalada em aparelho físico não foi homologada por esse teste.
 - GitHub Actions ainda falha antes da alocação do runner (issue #75). Isso não significa que o GitHub Pages falhou.
 - Não classificar toda a homologação de dispositivos/PWA como concluída antes de evidência.
 
