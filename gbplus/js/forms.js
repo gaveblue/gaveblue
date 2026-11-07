@@ -91,7 +91,7 @@ export function titleForm(db,t,type='expense'){
   <section id="gb-entry-step-three" class="gb-entry-stage" data-entry-stage="3" aria-label="Datas e baixa do lançamento" hidden>
    <div class="form-grid gb-entry-grid">
     <div class="gb-entry-date">${field('Emissão','issue',t?.issue||today(),'date','required')}</div>
-    <div class="gb-entry-date">${field('Vencimento','due',t?.due||today(),'date','required')}</div>
+    <div class="gb-entry-date gb-entry-date-due">${field('Vencimento','due',t?.due||today(),'date','required')}</div>
    </div>
    ${settlementHtml}
    <section id="gb-entry-installments" class="gb-entry-installments" ${isSeries?'':'hidden'}>
