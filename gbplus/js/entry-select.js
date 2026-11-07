@@ -1,5 +1,6 @@
 import {esc,icon} from './ui.js?v=20261104-42';
 import {gbIcon,gbOptionIcon} from './gb-icons.js?v=20261104-42';
+import {serviceCategoryPreviewMarkup} from './service-ui.js?v=20261107-2710';
 
 // A11y-friendly visual dropdown. An actual form select remains out of sight
 // only as the data carrier, so existing FormData and change handlers stay intact.
@@ -18,14 +19,14 @@ function menuOptionLabel(name,option){
 }
 export function entrySelect(label,name,options,value='',id='',required=false){
  const type=name==='type';
- const optionRows=options.map(([key,text,symbol])=>({value:String(key),text:String(text),icon:String(symbol||'')}));
+ const optionRows=options.map(([key,text,symbol,service])=>({value:String(key),text:String(text),icon:String(symbol||''),service:Boolean(service)}));
  const chosen=optionRows.find(o=>o.value===String(value??''))||optionRows[0];
  const selected=chosen?.value||'';
  const source='<select class="gb-entry-source" aria-hidden="true" tabindex="-1" name="'+esc(name)+'"'+(id?' id="'+esc(id)+'"':'')+'>'+
-  optionRows.map(o=>'<option value="'+esc(o.value)+'" data-icon="'+esc(o.icon)+'"'+(o.value===selected?' selected':'')+'>'+esc(o.text)+'</option>').join('')+'</select>';
+  optionRows.map(o=>'<option value="'+esc(o.value)+'" data-icon="'+esc(o.icon)+'" data-service-preview="'+o.service+'"'+(o.value===selected?' selected':'')+'>'+esc(o.text)+'</option>').join('')+'</select>';
  const renderValue=(o)=>type
   ? (o.value==='income'?'<span class="gb-entry-direction income">'+icon('up')+'</span>':'<span class="gb-entry-direction expense">'+icon('down')+'</span>')+'<span>'+esc(o.text)+'</span>'
-   :(name==='categoryId'?'<span class="gb-entry-chosen-icon">'+gbIcon(o.icon||gbOptionIcon(name,o.value,o.text))+'</span>':'')+'<span>'+esc(o?.text||'Selecione')+'</span>';
+   :(name==='categoryId'?'<span class="gb-entry-chosen-icon">'+gbIcon(o.icon||gbOptionIcon(name,o.value,o.text))+'</span>':'')+'<span>'+esc(o?.text||'Selecione')+'</span>'+(name==='categoryId'&&o.service?serviceCategoryPreviewMarkup():'');
  const optionsHtml=(name==='categoryId'?[]:optionRows).map(o=>'<button type="button" role="option" class="gb-entry-option'+(o.value===selected?' is-selected':'')+'" data-action="entry-option" data-value="'+esc(o.value)+'" aria-selected="'+(o.value===selected)+'">'+menuOptionLabel(name,o)+
   (o.value===selected?icon('check','gb-entry-option-check'):'')+'</button>').join('');
  return '<div class="gb-entry-select'+(type?' gb-entry-type':'')+'" data-entry-name="'+esc(name)+'">'+
@@ -41,7 +42,7 @@ export function syncEntrySelect(select){
  const chosen=select.selectedOptions[0];
  const options=[...select.options];
  const current=wrap.querySelector('.gb-entry-current');
- if(current)current.innerHTML=chosen?(isType?decoratedText(chosen,true):(entryName==='categoryId'?'<span class="gb-entry-chosen-icon">'+gbIcon(chosen.dataset.icon||gbOptionIcon(entryName,chosen.value,chosen.textContent))+'</span>':'')+'<span>'+esc(chosen.textContent||'Selecione')+'</span>'):'<span>Selecione</span>';
+ if(current)current.innerHTML=chosen?(isType?decoratedText(chosen,true):(entryName==='categoryId'?'<span class="gb-entry-chosen-icon">'+gbIcon(chosen.dataset.icon||gbOptionIcon(entryName,chosen.value,chosen.textContent))+'</span>':'')+'<span>'+esc(chosen.textContent||'Selecione')+'</span>'+(entryName==='categoryId'&&chosen.dataset.servicePreview==='true'?serviceCategoryPreviewMarkup():'')):'<span>Selecione</span>';
  const trigger=wrap.querySelector('.gb-entry-trigger');
  if(trigger)trigger.setAttribute('aria-label',(wrap.querySelector('.gb-entry-label')?.textContent||'Campo')+': '+(chosen?.textContent||'Selecione'));
  const optionsTarget=wrap.querySelector('.gb-entry-options');
