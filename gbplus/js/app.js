@@ -31,6 +31,7 @@ import {banksView,bankForm,cardForm,cardPurchaseForm,forecastView,forecastSummar
 import {launchesView} from './launches-view.js?v=20261106-2620';
 import {installLaunchGestures} from './launches-gestures.js?v=20261104-38';
 import {launchSelection,paymentSelection,paymentSummary,applyLaunchPayments,reversedSelection,applyLaunchReversals,deletionSelection,applyLaunchDeletions} from './launch-actions.js?v=20261105-72';
+import {readPeriodPreference,writePeriodPreference} from './period-preference.js?v=20261107-2730';
 let repository=null;let db;let busy=false;let pendingGeneration=null;let confirmAction=null;let pwaReady=false;
 let forecastDays=30;
 const isInstalledApp=isPwaInstalled;
@@ -77,12 +78,31 @@ function openModal(title,content){
   '<div class="modal-heading">'+grab+'<h2 id="modal-title">'+esc(title)+'</h2>'+
   '<button class="icon-button" data-action="close" aria-label="Fechar">'+icon('close')+'</button></div>'+
   '<div class="modal-body">'+content+'</div>';
+ if(isEntry)mountEntryHeaderActions();
  modal.setAttribute('aria-labelledby','modal-title');
  if(!modal.open)modal.showModal();
  if(isEntry)modal.dataset.gbEntryStep=modal.querySelector('#title-form')?.dataset.step||'1';
  enhanceGbControls(modal);
  fitEntryAmount(modal.querySelector('#entry-amount'));
  if(isEntry){syncEntrySettlement(modal.querySelector('#title-form'));if(modal.querySelector('#title-form')?.dataset.step==='3')refreshEntrySchedule(modal.querySelector('#title-form'));}
+}
+function mountEntryHeaderActions(){
+ const form=modal.querySelector('#title-form'),heading=modal.querySelector('.modal-heading');
+ if(!form||!heading)return;
+ const nav=document.createElement('nav');
+ nav.className='gb-entry-header-actions';
+ nav.setAttribute('aria-label','Etapas do lançamento');
+ for(const footer of form.querySelectorAll('[data-entry-footer]')){
+  footer.querySelector('[data-action="close"]')?.remove();
+  const back=footer.querySelector('[data-action="title-back"]');
+  if(back){back.textContent='‹';back.setAttribute('aria-label','Voltar à etapa anterior');back.title='Voltar';}
+  const next=footer.querySelector('[data-action="title-next"]');
+  if(next){next.textContent='Próximo';next.setAttribute('aria-label','Avançar para a próxima etapa');}
+  const submit=footer.querySelector('[type="submit"]');
+  if(submit){submit.setAttribute('form',form.id);submit.textContent=form.dataset.id?'Salvar':'Revisar';}
+  nav.appendChild(footer);
+ }
+ heading.querySelector('[data-action="close"]')?.before(nav);
 }
 function closeModal(){if(modal.open)modal.close();bankImportDraft=null;pendingGeneration=null;confirmAction=null;if(pwaReady)setTimeout(()=>maybeOfferPwaInstall(),1100);}
 function confirm(title,message,callback){confirmAction=callback;openModal(title,`<p class="confirm-message">${esc(message)}</p><div class="form-error" role="alert"></div><div class="form-footer">${button('Cancelar','close')}${button('Confirmar','confirm','primary')}</div>`);}
@@ -131,6 +151,12 @@ function renderMobileShortcut(key){
  return item||['titles','Lançamentos','transfer'];
 }
 function rangeFor(period){const now=today();const [y,m]=now.split('-').map(Number);const date=(y,m,d)=>`${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;if(period==='all')return {from:'',to:''};if(period==='year')return {from:`${y}-01-01`,to:`${y}-12-31`};const dt=new Date(y,m-1-(period==='last'?1:0),1);const yy=dt.getFullYear(),mm=dt.getMonth()+1;return {from:date(yy,mm,1),to:date(yy,mm,new Date(yy,mm,0).getDate())};}
+function savePeriodPreference(){
+ try{writePeriodPreference(localStorage,currentUser()?.id,{period:state.period,range:state.range});}catch{}
+}
+function loadPeriodPreference(){
+ try{return readPeriodPreference(localStorage,currentUser()?.id);}catch{return null;}
+}
 async function commit(mutator,message='Salvo com sucesso.'){if(!db)throw Error('Entre ou abra o modo local antes de continuar.');if(busy)throw Error('Aguarde a gravação atual.');busy=true;document.body.classList.add('saving');try{const draft=structuredClone(db);await mutator(draft);db=await repository.save(draft);state.launchSelected=[];closeModal();render();toast(message);}finally{busy=false;document.body.classList.remove('saving');}}
 function updateSystemAppearance(theme){
  const selected=theme==='dark'?'dark':'light',color=selected==='dark'?'#111214':'#f6f6f8';
@@ -453,7 +479,7 @@ function toggleEntryStep(form,step){
  for(let number=1;number<=3;number++){
   const stage=form.querySelector('#gb-entry-step-'+['','one','two','three'][number]);
   if(stage)stage.hidden=number!==step;
-  const footer=form.querySelector('[data-entry-footer="'+number+'"]');
+  const footer=modal.querySelector('[data-entry-footer="'+number+'"]');
   if(footer)footer.hidden=number!==step;
  }
  const progress=form.querySelector('.gb-entry-progress');
@@ -544,7 +570,7 @@ const actions={
    if(!wasOpen)document.getElementById('title-search')?.focus();
   },
   'toggle-title-filters':()=>{state.moreFilters=!state.moreFilters;state.launchSelected=[];render();},
-  'clear-title-filters':()=>{state.query='';state.status='';state.partner='';state.category='';state.type=state.route==='payable'?'expense':state.route==='receivable'?'income':'';state.period='all';state.range=rangeFor('all');state.moreFilters=false;state.launchSelected=[];state.launchStatusOpen=false;render();},
+  'clear-title-filters':()=>{state.query='';state.status='';state.partner='';state.category='';state.type=state.route==='payable'?'expense':state.route==='receivable'?'income':'';state.period='all';state.range=rangeFor('all');savePeriodPreference();state.moreFilters=false;state.launchSelected=[];state.launchStatusOpen=false;render();},
   'set-theme':el=>commit(d=>{d.settings.theme=el.dataset.value;},'Tema atualizado.'),
   'entry-toggle':el=>{
    const wrap=el.closest('.gb-entry-select'),form=el.closest('#title-form');
@@ -586,8 +612,8 @@ const actions={
    form.dataset.entryType=type;
    select.dispatchEvent(new Event('change',{bubbles:true}));
   },
-  'title-next':el=>{const form=el.closest('#title-form');toggleEntryStep(form,Math.min(3,Number(form?.dataset.step||1)+1));},
-  'title-back':el=>{const form=el.closest('#title-form');toggleEntryStep(form,Math.max(1,Number(form?.dataset.step||1)-1));},
+  'title-next':el=>{const form=el.closest('#title-form')||modal.querySelector('#title-form');toggleEntryStep(form,Math.min(3,Number(form?.dataset.step||1)+1));},
+  'title-back':el=>{const form=el.closest('#title-form')||modal.querySelector('#title-form');toggleEntryStep(form,Math.max(1,Number(form?.dataset.step||1)-1));},
   'title-service-toggle':el=>openEntryServiceSheet(el.closest('#title-form')),
   'title-service-pick':el=>updateServicePicker(el.closest('#title-form'),el.dataset.serviceId),
   'title-service-clear':el=>updateServicePicker(el.closest('#title-form'),''),
@@ -1266,7 +1292,7 @@ document.addEventListener('submit',async e=>{e.preventDefault();if(busy||!db)ret
   }
   else if(form.id==='transfer-form'){await commit(d=>transfer(d,{...v,amount:cents(v.amount)}),'Transferência registrada.');}
   else if(form.id==='customize-form'){await commit(d=>{for(const device of ['desktop','mobile'])for(const key of Object.keys(INDICATORS))d.settings.panel[device][key]=new FormData(form).has(`${device}:${key}`);},'Painel personalizado.');}
-  else if(form.id==='period-form'){if(v.from>v.to)throw Error('O início deve ser anterior ao fim do período.');state.period='custom';state.range={from:v.from,to:v.to};closeModal();render();}
+  else if(form.id==='period-form'){if(v.from>v.to)throw Error('O início deve ser anterior ao fim do período.');state.period='custom';state.range={from:v.from,to:v.to};savePeriodPreference();state.launchSelected=[];closeModal();render();}
 }catch(error){fail(error);}});
 function upsert(rows,row){const i=rows.findIndex(x=>x.id===row.id);if(i<0)rows.push(row);else rows[i]=row;}
 document.addEventListener('change',async e=>{if(!db)return;const el=e.target;try{
@@ -1289,7 +1315,7 @@ document.addEventListener('change',async e=>{if(!db)return;const el=e.target;try
   if(el.id==='gb-service-group')filterServicesInForm(el.closest('#title-form'));
   if(el.id==='entry-mode'){refreshEntrySchedule(el.form);syncEntrySettlement(el.form);}
   if(el.form?.id==='title-form'&&el.name==='settlement')syncEntrySettlement(el.form);
-  if(el.id==='period'){if(el.value==='custom'){openModal('Escolher período',`<form id="period-form"><div class="form-grid">${field('De','from',state.range.from||today(),'date','required')}${field('Até','to',state.range.to||today(),'date','required')}</div>${formFooter('Aplicar período')}</form>`);el.value=state.period;}else{state.period=el.value;state.range=rangeFor(el.value);state.launchSelected=[];state.launchStatusOpen=false;render();}}
+  if(el.id==='period'){if(el.value==='custom'){openModal('Escolher período',`<form id="period-form"><div class="form-grid">${field('De','from',state.range.from||today(),'date','required')}${field('Até','to',state.range.to||today(),'date','required')}</div>${formFooter('Aplicar período')}</form>`);el.value=state.period;}else{state.period=el.value;state.range=rangeFor(el.value);savePeriodPreference();state.launchSelected=[];state.launchStatusOpen=false;render();}}
   if(el.dataset.filter){state[el.dataset.filter]=el.value;if(['partner','category'].includes(el.dataset.filter))state.moreFilters=true;state.launchSelected=[];render();}
   if(el.id==='report-type'){state.report=el.value;render();}
   if(el.id==='report-partner'){state.reportPartner=el.value;render();}
@@ -1402,7 +1428,9 @@ async function init(){
   if(isRecovery()){showAuth('recovery');return;}
   repository=new SupabaseRepository(authClient(),user.id);
   db=await startupLimit(repository.read(),16000);
-  state.range=rangeFor('all');
+  const savedPeriod=loadPeriodPreference();
+  state.period=savedPeriod?.period||'all';
+  state.range=savedPeriod?.period==='custom'?savedPeriod.range:rangeFor(state.period);
   document.querySelector('#auth-gate').hidden=true;
   document.body.classList.remove('auth-locked');
   document.documentElement.removeAttribute('data-boot');
