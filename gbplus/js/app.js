@@ -657,6 +657,16 @@ const actions={
   install:()=>{if(isInstalledApp()){toast('GB+ já está instalado neste dispositivo.');return;}if(matchMedia('(max-width:760px) and (pointer:coarse)').matches){location.assign('./instalar.html');return;}showInstallHelp();},
 };
 document.addEventListener('click',async e=>{const el=e.target.closest('[data-action]');if(!el||!db)return;if(el.tagName==='BUTTON')e.preventDefault();try{await actions[el.dataset.action]?.(el);}catch(error){fail(error);}});
+// Keyboard access for the unified Contas/Cartões tabs, no changes to other screens.
+document.addEventListener('keydown',e=>{
+ const current=e.target?.closest?.('.gb-finance-tab');
+ if(!current||!['ArrowLeft','ArrowRight','Home','End'].includes(e.key))return;
+ e.preventDefault();
+ let next=e.key==='Home'?'accounts':e.key==='End'?'cards':
+  state.accountCardsTab==='accounts'?'cards':'accounts';
+ if(next!==state.accountCardsTab)actions['accounts-cards-tab']({dataset:{tab:next}});
+});
+
 document.addEventListener('click',e=>{if(!e.target.closest('.gb-entry-select'))closeEntryMenus();});
 // User-selected file bytes stay local and are discarded with the modal.
 document.addEventListener('change',async e=>{
