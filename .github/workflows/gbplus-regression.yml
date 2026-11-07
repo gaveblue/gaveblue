@@ -3,14 +3,21 @@ name: GB+ — regressões financeiras
 on:
   push:
     branches:
+      - main
       - 'feature/gbplus-250-build7-homologacao'
     paths:
       - 'gbplus/**'
       - '.github/workflows/gbplus-regression.yml'
+      - 'supabase/functions/gbplus-admin/**'
+      - 'supabase/config.toml'
   pull_request:
+    branches:
+      - main
     paths:
       - 'gbplus/**'
       - '.github/workflows/gbplus-regression.yml'
+      - 'supabase/functions/gbplus-admin/**'
+      - 'supabase/config.toml'
   workflow_dispatch:
 
 permissions:
@@ -18,8 +25,9 @@ permissions:
 
 jobs:
   financial-regressions:
-    runs-on: ubuntu-24.04
-    timeout-minutes: 5
+    # CI anterior falhou antes de qualquer etapa; testar fila alternativa de runner.
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -53,12 +61,16 @@ jobs:
         run: node gbplus/tests/pf-entry-ui-regression.mjs
       - name: Redefinição financeira e exclusão de conta (2.6.1)
         run: node gbplus/tests/account-safety-regression.mjs
+      - name: Autorização administrativa real e isolamento de privilégios
+        run: node --test gbplus/tests/admin-security.test.mjs
       - name: Catálogo de serviços e identificação opcional (2.6.0)
         run: node gbplus/tests/services-regression.mjs
       - name: Importação intuitiva e seleção múltipla (2.5.2)
         run: node gbplus/tests/bank-import-usability-regression.mjs
       - name: Conciliação e histórico
         run: node gbplus/tests/bank-reconciliation-regression.mjs
+      - name: Revisão de fluxo e apresentação financeira
+        run: node gbplus/tests/flow-visual-regression.mjs
       - name: Criação e reversão de lançamentos importados
         run: node gbplus/tests/bank-reconciliation-create-regression.mjs
       - name: Pendências retomáveis e reversão encadeada
