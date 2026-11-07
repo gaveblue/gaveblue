@@ -226,17 +226,41 @@ export function bankImportMarkup(db,draft){
    (draft.csvMapping?'<button type="button" class="gb-import-text-button" data-action="bank-import-map">Ajustar colunas</button>':'')+
    '<button type="button" class="gb-import-text-button" data-action="bank-import-reset">Trocar arquivo</button></div>'+
   (draft.accountHint?'<p class="gb-import-hint">Conta indicada pelo arquivo (oculta): '+esc(draft.accountHint)+'</p>':'')+
-  '<div class="gb-import-summary-grid" aria-label="Resumo do extrato">'+
-   summary('Créditos',money(preview.totals.credits),'income')+
-   summary('Débitos',money(preview.totals.debits),'expense')+
-   summary('Movimentos',String(preview.rows.length))+
-   summary('Possíveis vínculos',String(preview.totals.possibleMatches))+'</div>'+
+  '<section class="gb-import-overview" aria-label="Resumo fácil do extrato">'+
+   '<div class="gb-import-overview-heading"><h3>Resumo do extrato</h3><p>Estes valores vieram do banco. Nenhum movimento foi lançado ou baixado automaticamente.</p></div>'+
+   '<div class="gb-import-summary-grid" aria-label="Valores do extrato">'+
+    summary('Entradas no banco',money(preview.totals.credits),'income')+
+    summary('Saídas do banco',money(preview.totals.debits),'expense')+
+    summary('Movimentações',String(preview.rows.length))+
+    summary('Possíveis vínculos',String(preview.totals.possibleMatches))+
+   '</div>'+
+   '<p class="gb-import-overview-note">Uma saída do banco pode ser despesa, transferência ou fatura já paga. Confira antes de criar outro lançamento.</p></section>'+
   comparison+
-  '<div class="gb-import-step"><span class="gb-import-step-number">04</span><span>Revisar movimentações</span></div>'+
+  '<div class="gb-import-step"><span class="gb-import-step-number">04</span><span>Escolher as movimentações</span></div>'+
+  '<p class="gb-import-explainer">Filtre as entradas e saídas, marque só o que deseja tratar e escolha uma ação. Para vincular a uma baixa existente, use a decisão individual no movimento.</p>'+
+  '<details class="gb-import-help"><summary>Entenda as opções</summary><p><strong>Vincular:</strong> associa a uma baixa ou transferência já existente, sem reduzir saldo novamente. <strong>Criar despesa paga:</strong> cria o título e registra a baixa, alterando saldo apenas após sua confirmação. <strong>Manter para depois:</strong> guarda pendência. <strong>Ignorar:</strong> registra a decisão sem lançar despesa.</p></details>'+
   '<div class="gb-import-filters" role="group" aria-label="Filtrar movimentos importados">'+
    filters.map(([key,label,count])=>'<button type="button" data-action="bank-import-filter" data-value="'+key+
     '" aria-pressed="'+((draft.filter||'all')===key)+'" class="'+((draft.filter||'all')===key?'active':'')+'">'+label+' <span>'+count+'</span></button>').join('')+
   '</div>'+
+  (BANK_IMPORT_WRITES_ENABLED?
+   '<section class="gb-import-selection" aria-label="Selecionar movimentos para ação">'+
+    '<div class="gb-import-selection-heading"><strong>'+selectedCount+' marcado(s)</strong><span>'+rows.length+' movimento(s) neste filtro</span></div>'+
+    '<div class="gb-import-selection-buttons"><button type="button" class="button small" data-action="bank-import-select-visible" '+(selectable.length&&checked!==selectable.length?'':'disabled')+'>Selecionar esta página</button>'+
+    '<button type="button" class="button small" data-action="bank-import-clear-selection" '+(selectedCount?'':'disabled')+'>Limpar seleção</button></div>'+
+    (selectedCount?'<p class="gb-import-selection-total">Total das saídas marcadas: <strong>'+money(selectedTotal)+'</strong> · nenhum valor lançado ainda</p>':'')+
+    '<div class="gb-import-bulk-fields"><label class="gb-import-decision-label">Ação para os selecionados'+
+     '<select id="gb-import-bulk-action" class="gb-import-select" data-gb-native="true"><option value="">Escolher ação</option>'+
+      [['pending','Manter pendente'],['ignore','Ignorar movimentos'],['create','Preparar despesas pagas (com baixa)']].map(([key,label])=>
+       '<option value="'+key+'" '+(draft.bulkAction===key?'selected':'')+'>'+label+'</option>').join('')+
+     '</select></label>'+
+     (draft.bulkAction==='create'?'<label class="gb-import-decision-label">Categoria comum das despesas'+
+       '<select id="gb-import-bulk-category" class="gb-import-select" data-gb-native="true"><option value="">Escolher categoria</option>'+
+       (db.categories||[]).filter(c=>c.type==='expense').map(c=>
+        '<option value="'+esc(c.id)+'" '+(draft.bulkCategory===c.id?'selected':'')+'>'+esc(c.name)+'</option>').join('')+'</select></label>':'')+
+     '<button type="button" class="button" data-action="bank-import-apply-bulk" '+(selectedCount&&draft.bulkAction?'':'disabled')+'>Aplicar seleção</button></div>'+
+    '<p class="gb-import-selection-disclaimer">Estas ações só preparam a revisão. Para registrar baixas é necessária uma confirmação específica depois.</p>'+
+   '</section>':'')+
   '<div class="gb-import-records" aria-live="polite">'+(cards||'<div class="gb-import-no-items">Nenhum movimento neste filtro.</div>')+'</div>'+
   (rows.length>BANK_IMPORT_PAGE_SIZE?'<div class="gb-import-pager"><button type="button" data-action="bank-import-prev" '+(page===0?'disabled':'')+'>Anterior</button>'+
    '<span>Página '+(page+1)+' de '+Math.ceil(rows.length/BANK_IMPORT_PAGE_SIZE)+'</span>'+
