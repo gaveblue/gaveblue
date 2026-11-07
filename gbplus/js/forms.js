@@ -35,6 +35,20 @@ export function titleForm(db,t,type='expense'){
    entrySelect('Aplicar alterações','scope',[['one','Somente este lançamento'],['future','Este e os futuros da recorrência']],'one','entry-scope'):
    '';
  const isSeries=!t||t.mode==='recurring';
+ const activeAccounts=(db.accounts||[]).filter(a=>a.active);
+ const settlementHtml=!t?
+  '<fieldset class="gb-entry-settlement"><legend>Como ficará este lançamento?</legend>'+
+   '<label class="gb-entry-settlement-option"><input type="radio" name="settlement" value="pending" checked><span><strong>Ficar pendente</strong><small>Registrar agora e baixar quando pagar ou receber.</small></span></label>'+
+   '<label class="gb-entry-settlement-option"><input type="radio" name="settlement" value="paid"><span><strong>Baixar agora</strong><small>Registrar pagamento ou recebimento junto do lançamento.</small></span></label>'+
+   '<p class="gb-entry-settlement-series" hidden>Para parcelamentos e recorrências, faça a baixa de cada título individualmente.</p>'+
+   '<div class="gb-entry-settlement-details" hidden>'+
+    '<label class="field">Conta da baixa<select name="settleAccountId" data-gb-native="true"><option value="">Selecione uma conta</option>'+
+     activeAccounts.map(a=>'<option value="'+esc(a.id)+'">'+esc(a.name)+'</option>').join('')+'</select></label>'+
+    field('Data da baixa','settleDate',today(),'date','max="'+today()+'"')+
+    '<p class="gb-entry-settlement-message">A baixa será gravada junto com o título na conta escolhida, após a confirmação.</p>'+
+   '</div>'+
+  '</fieldset>':
+  '<p class="gb-entry-edit-note">Para registrar ou estornar baixas de um título existente, use Detalhes do lançamento.</p>';
  return `<form id="title-form" class="gb-entry-form gb-entry-wizard" data-id="${esc(t?.id||'')}" data-mode="${esc(t?.mode||'single')}" data-count="${Number(t?Math.max(1,t.count-t.sequence+1):1)}" data-step="1" data-entry-type="${esc(type)}">
   <div class="gb-entry-progress" aria-label="Etapa 1 de 3"><span class="active">1 · Lançamento</span><span>2 · Detalhes</span><span>3 · Confirmação</span></div>
   <section id="gb-entry-step-one" class="gb-entry-stage" data-entry-stage="1" aria-label="Dados do lançamento">
@@ -73,7 +87,6 @@ export function titleForm(db,t,type='expense'){
     ${extra?'<div class="full">'+extra+'</div>':''}
     ${textarea('Observações','notes',t?.notes)}
    </div>
-  </section>
    ${!t&&Array.isArray(db.cards)&&db.cards.some(c=>c.active)?'<div class="gb-credit-entry-link" '+(type==='expense'?'':'hidden')+'><strong>Vai usar o cartão de crédito?</strong><p>Registre como compra no cartão para gerar a fatura sem duplicar a despesa.</p><button type="button" class="button" data-action="new-card-purchase">Lançar compra no cartão</button></div>':''}
    ${!t?'<p class="gb-entry-refund-hint" '+(type==='income'?'':'hidden')+'>Receita por reembolso no cartão: a integração de estornos com limite e fatura ainda não está disponível. Registre apenas o recebimento financeiro real; não contabilize duas vezes.</p>':''}
   </section>
@@ -82,7 +95,7 @@ export function titleForm(db,t,type='expense'){
     <div class="gb-entry-date">${field('Emissão','issue',t?.issue||today(),'date','required')}</div>
     <div class="gb-entry-date">${field('Vencimento','due',t?.due||today(),'date','required')}</div>
    </div>
-   ${!t?'<fieldset class="gb-entry-settlement"><legend>Como ficará este lançamento?</legend><label class="gb-entry-settlement-option"><input type="radio" name="settlement" value="pending" checked><span><strong>Ficar pendente</strong><small>Registrar agora e baixar quando receber ou pagar.</small></span></label><label class="gb-entry-settlement-option"><input type="radio" name="settlement" value="paid"><span><strong>Baixar agora</strong><small>Registrar o pagamento ou recebimento junto do lançamento.</small></span></label><p class="gb-entry-settlement-series" hidden>Em parcelamentos e recorrências, cada parcela deve ser baixada individualmente após o lançamento.</p><div class="gb-entry-settlement-details" hidden><div class="gb-entry-settlement-accounts"><label class="field">Conta da baixa<select name="settleAccountId" data-gb-native="true"><option value="">Selecione uma conta</option>'+(db.accounts||[]).filter(a=>a.active).map(a=>'<option value="'+esc(a.id)+'">'+esc(a.name)+'</option>').join('')+'</select></label></div><div class="gb-entry-settlement-date">${field('Data da baixa','settleDate',today(),'date','max="'+today()+'"')}</div><p class="gb-entry-settlement-message">A baixa será registrada na conta selecionada. O saldo será atualizado apenas após a confirmação.</p></div></fieldset>':'<p class="gb-entry-edit-note">Para registrar ou estornar baixas de um lançamento existente, use a tela Detalhes do lançamento.</p>'}
+   ${settlementHtml}
    <section id="gb-entry-installments" class="gb-entry-installments" ${isSeries?'':'hidden'}>
     <label class="gb-entry-business-switch">
      <input type="checkbox" name="businessDays" value="true" ${t?.businessDays?'checked':''}>
@@ -101,6 +114,10 @@ export function titleForm(db,t,type='expense'){
    <button type="button" class="button primary" data-action="title-next">Próximo ${icon('arrow')}</button>
   </div>
   <div class="gb-entry-wizard-footer" data-entry-footer="2" hidden>
+   <button type="button" class="button" data-action="title-back">Voltar</button>
+   <button type="button" class="button primary" data-action="title-next">Próximo ${icon('arrow')}</button>
+  </div>
+  <div class="gb-entry-wizard-footer" data-entry-footer="3" hidden>
    <button type="button" class="button" data-action="title-back">Voltar</button>
    <button type="submit" class="button primary">${t?'Salvar alterações':'Revisar lançamento'} ${icon('arrow')}</button>
   </div>
