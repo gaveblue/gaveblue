@@ -2,6 +2,28 @@
 
 Registro de mudanças do aplicativo localizado em `gbplus/`. Toda versão e toda compilação deve possuir uma entrada própria. **Uma alteração não deve ser considerada homologada apenas porque existe commit, teste escrito ou publicação.** A homologação exige evidências da execução e aprovação explícita.
 
+## [2.6.0 — INTERFACE UNIFICADA, IMPORTAÇÃO INTUITIVA E CATÁLOGO DE SERVIÇOS] — 2026-11-06
+
+**Status inicial: CANDIDATA À PUBLICAÇÃO.** Publicação solicitada e autorizada pelo responsável do produto neste chat. Evidências de testes e resultado do GitHub Pages devem ser registrados posteriormente, sem confundir merge/deploy com homologação integral.
+
+### Entregas consolidadas
+- Unificação de **Contas e Cartões** com seletor sticky, cabeçalho padronizado, cadastro no mesmo local e ações contextuais, preservando os componentes financeiros originais (implementação iniciada na 2.5.1).
+- Importação OFX/CSV reformulada para fácil compreensão: resumo de entradas/saídas, texto preventivo sobre duplicidade, filtros e checkboxes para selecionar movimentações individuais ou a página atual.
+- Decisões em lote de **ignorar, manter pendente ou preparar despesa paga**. A última exige categoria e só é elegível para saída negativa, sem vínculo ou duplicidade; conciliar com baixa existente continua individual.
+- Cada decisão continua sendo revisada e confirmada. Criar título com baixa requer confirmação da conta e consentimento expresso do impacto no saldo. Seleção não grava nem baixa.
+- Catálogo de **26 serviços** em cinco grupos no **Novo lançamento**: streaming, música, delivery, mobilidade e serviços digitais. Busca textual, filtro por grupo e inclusão de **Outro serviço** com nome personalizado.
+- **13 pictogramas de marcas empacotados no aplicativo**, obtidos do acervo vetorial Simple Icons com procedência documentada em `SERVICE-ICON-SOURCES.md`; os 13 restantes apresentam iniciais neutras sem inventar logotipos. Uso visual não significa integração/parceria.
+- Ao escolher serviço, preencher a descrição **somente se ela estiver vazia**; não modificar valores, vencimentos, categorias, contas ou periodicidade. Assinaturas permanecem opcionais.
+- A identificação opcional `serviceId`/`serviceName` é persistida como atributo do título e mostrada em detalhes e na lista de lançamentos. Não há migração obrigatória ou novo esquema financeiro.
+- Novas regras de validação para serviço opcional nos backups e armazenamento online. `version.json`, cache PWA e referências de módulos atualizados para **2.6.0**.
+- Removida a exibição de numeração interna de compilações ao usuário no atualizador; a identificação pública segue somente `X.Y.Z`.
+
+### Verificações e ressalvas
+- Teste de serviço `tests/services-regression.mjs` e teste de interface de importação `tests/bank-import-usability-regression.mjs` adicionados à pipeline financeira.
+- Verificações isoladas com dados 100% fictícios indicam comportamento esperado e ausência de alterações financeiras antes de confirmação. A realização integral das regressões Node/GitHub Actions e homologação visual em PWA instalado **depende de execução documentada**.
+- A identidade de marca está sujeita às diretrizes de cada titular (Simple Icons não garante liberação de marcas).
+- A reformulação visual completa de **Novo lançamento** permanece em aberto até o envio da inspiração pelo responsável do produto; esta atualização integra serviços ao formulário atual sem inventar novo layout.
+
 ## [2.5.2 — IMPORTAÇÕES MAIS CLARAS E SELEÇÃO CONTROLADA] — 2026-11-06
 
 **Status: EM DESENVOLVIMENTO — SEM HOMOLOGAÇÃO OU PUBLICAÇÃO.** Branch `feature/gbplus-252-importacao-clara`. Esta atualização depende da integração/homologação anterior da 2.5.1; não foi incorporada à `main`.
