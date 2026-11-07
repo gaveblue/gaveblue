@@ -57,11 +57,11 @@ assert.match(app,/if\(!BANK_IMPORT_WRITES_ENABLED\)return;/,'Review handler must
 assert.match(app,/if\(!BANK_IMPORT_WRITES_ENABLED\)throw Error\('A conciliação com gravação/);
 assert.match(app,/if\(!BANK_IMPORT_WRITES_ENABLED\)throw Error\('A reversão por importação/);
 const html=read('index.html');
-assert.match(html,/name="gbplus-version" content="2.5.0"/);
-assert.match(html,/name="gbplus-build" content="9"/);
-assert.match(html,/app\.js\?v=20261106-2509/);
 const manifest=JSON.parse(read('version.json'));
-assert.equal(manifest.build,9);
-assert.equal(manifest.version,'2.5.0');
-assert.match(manifest.release_status,/reconciliation/);
-console.log('GB+ 2.5.0 build 6: preview enabled, all bank-import write actions locked.');
+const displayedVersion=html.match(/name="gbplus-version" content="([^"]+)"/)?.[1];
+const displayedBuild=html.match(/name="gbplus-build" content="([^"]+)"/)?.[1];
+assert.equal(displayedVersion,manifest.version,'HTML and manifest must agree on the release');
+assert.equal(Number(displayedBuild),manifest.build,'HTML and manifest must agree on build number');
+assert.match(html,/app\.js\?v=[0-9-]+/,'App script must be versioned for safe PWA upgrades');
+assert(manifest.assets.includes('./js/bank-import-ui.js'),'Bank-import UI must be in release asset list');
+console.log('GB+: bloqueio bancário em modo somente leitura e manifesto consistente OK.');
