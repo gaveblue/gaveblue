@@ -4,7 +4,7 @@ Registro de mudanças do aplicativo localizado em `gbplus/`. Toda versão e toda
 
 ## [2.7.1 — LANÇAMENTO EM TRÊS ETAPAS, BAIXA E PRÉVIA DE SERVIÇOS] — 2026-11-07
 
-**Status inicial: CANDIDATA À PUBLICAÇÃO.** Atualização incremental na série 2.7.x, sem número de compilação visível. Somente publicar após conferir o deploy.
+**PUBLICAÇÃO CONFIRMADA:** PR [#89](https://github.com/gaveblue/gaveblue/pull/89) integrada à `main` (commit `191f44e2b4cfc00038391e2dcbfdc339bbf8e63b`), com GitHub Pages [42336177501](https://github.com/gaveblue/gaveblue/actions/runs/42336177501) concluído com **success** em 07/11/2026 03:56 UTC. Quatro regressões isoladas passaram com dados fictícios, incluindo validações de baixa atômica e de bloqueio para parcelas. Workflow financeiro [42336147557](https://github.com/gaveblue/gaveblue/actions/runs/42336147557) falhou antes de executar etapas (0 passos); validação manual no PWA Android ainda pendente. **A publicação não equivale à homologação integral.**
 
 ### Formulário de lançamento
 - Primeira etapa **Lançamento** padronizada entre Despesa e Receita: seletor de tipo, valor centralizado, categoria (com serviço quando aplicável) e descrição. O cartão foi removido da primeira etapa.
