@@ -264,3 +264,49 @@
 .gb-entry-refund-card>.field select{width:100%;min-height:46px;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:var(--surface);color:var(--ink)}
 .gb-entry-refund-card>p{font-size:10px;line-height:1.6;color:var(--muted)}
 @media(max-width:760px){.gb-entry-refund-card>.field select{font-size:16px}}
+
+
+/* GB+ 2.7.6 — compact flow: amount without an outlined box on focus. */
+.gb-entry-wizard .gb-entry-amount-control input:focus,
+.gb-entry-wizard .gb-entry-amount-control input:focus-visible{
+ border:0!important;outline:0!important;box-shadow:none!important;
+ background:transparent!important;border-radius:0!important;
+}
+.gb-entry-wizard .gb-entry-amount-control:focus-within{
+ border-bottom:2px solid var(--ink);padding-bottom:2px;
+}
+.gb-entry-wizard .gb-entry-settlement-card{
+ display:grid;gap:12px;padding:13px;border:1px solid var(--border);
+ border-radius:13px;background:var(--soft);
+}
+.gb-entry-wizard .gb-entry-settlement-card[hidden],
+.gb-entry-wizard .gb-entry-business-switch[hidden],
+.gb-entry-wizard .gb-entry-date-due[hidden],
+.gb-entry-wizard #gb-entry-schedule[hidden]{display:none!important}
+.gb-entry-wizard .gb-entry-settlement-card .field{display:grid;gap:7px;font-size:12px}
+.gb-entry-wizard .gb-entry-settlement-card select{
+ width:100%;min-height:46px;padding:10px 12px;border:1px solid var(--border);
+ border-radius:10px;background:var(--surface);color:var(--ink);
+}
+.gb-entry-wizard .gb-entry-schedule-trigger{
+ width:100%;display:flex;align-items:center;justify-content:space-between;
+ gap:12px;padding:13px 14px;border:0;background:var(--surface);
+ color:var(--ink);font:inherit;text-align:left;cursor:pointer;
+}
+.gb-entry-wizard .gb-entry-schedule-trigger:focus-visible{
+ outline:2px solid var(--ink);outline-offset:-3px;border-radius:12px;
+}
+.gb-entry-wizard .gb-entry-schedule-trigger>span:first-child{
+ display:grid;gap:3px;font-size:12px;
+}
+.gb-entry-wizard .gb-entry-schedule-trigger strong{font-weight:720}
+.gb-entry-wizard .gb-entry-schedule-trigger small{font-size:10px;color:var(--muted)}
+.gb-entry-wizard .gb-entry-schedule-chevron{font-size:25px;color:var(--muted);line-height:1}
+.gb-sheet-schedule-body .gb-entry-schedule-row{padding:11px 0}
+.gb-sheet-schedule-body .gb-entry-schedule-note{margin:12px -4px 0;border-radius:10px}
+@media(max-width:760px){
+ .gb-entry-wizard .gb-entry-settlement-option{min-height:54px}
+ .gb-entry-wizard .gb-entry-settlement-option strong{font-size:12px}
+ .gb-entry-wizard .gb-entry-settlement-option small{font-size:10px}
+ .gb-entry-wizard .gb-entry-settlement-card select{font-size:16px}
+}
