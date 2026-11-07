@@ -683,6 +683,9 @@ const actions={
     });
     if(error||data?.deleted!==true)throw Error('Não foi possível confirmar a exclusão no servidor. Confira sua conexão e tente novamente ou contate o suporte.');
     // The server has deleted this user's Auth identity and cascaded their data.
+    // Remove per-user AI conversation history from this device as well.
+    try{localStorage.removeItem('gbplus-ai-chats-v1:'+user.id);}catch{}
+    try{localStorage.removeItem('gbplus-first-steps-dismissed:'+user.id);}catch{}
     try{await authClient().auth.signOut({scope:'local'});}catch{}
     try{sessionStorage.removeItem('gbplus-recovery');}catch{}
     location.replace('./?web=1');
