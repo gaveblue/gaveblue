@@ -1,14 +1,15 @@
 {
   "version": "2.7.3",
   "build": 1,
-  "published_at": null,
+  "published_at": "2026-11-07T04:40:39Z",
   "title": "Navegação compacta e preferência de período",
   "notes": [
-    "Atualização aprovada para publicação em 07/11/2026: as ações Próximo, Voltar e Revisar/Salvar aparecem no cabeçalho do Novo lançamento, liberando o antigo espaço inferior; fechar continua disponível no X.",
+    "Atualização publicada em 07/11/2026: as ações Próximo, Voltar e Revisar/Salvar aparecem no cabeçalho do Novo lançamento, liberando o antigo espaço inferior; fechar continua disponível no X.",
     "A primeira etapa do modal móvel abre um pouco acima, mantendo rolagem quando necessário para acessibilidade e telas menores.",
     "Este mês, Mês anterior, Este ano, Todo o período e datas personalizadas são lembrados por conta autenticada neste navegador, inclusive após reabrir o aplicativo.",
     "Datas relativas se atualizam com o calendário; datas personalizadas ficam fixas até o usuário trocar o filtro.",
-    "Nenhum título, saldo, parcela, cartão ou baixa foi alterado automaticamente. Homologação integral não declarada: execução do CI financeiro e teste PWA Android ainda sem evidência."
+    "Nenhum título, saldo, parcela, cartão ou baixa foi alterado automaticamente. Homologação integral não declarada: execução do CI financeiro e teste PWA Android ainda sem evidência.",
+    "GitHub Pages publicou a integração do PR #91 com sucesso no run #42339423278 (commit b24253d6d48f4056e2cd5b75faacbedd7cda58db; 07/11/2026 às 04:40 UTC)."
   ],
   "assets": [
     "./index.html",
@@ -187,9 +188,9 @@
       "description": "Formulário móvel abre um pouco mais acima."
     }
   ],
-  "release_status": "approved_for_release_deploy_pending",
+  "release_status": "published_github_pages_ci_device_validation_pending",
   "homologation": {
-    "status": "limited_static_checks_approved_publication_ci_runner_unavailable_device_pending",
-    "notes": "Aprovação expressa de publicação pelo responsável em 07/11/2026. Inspeção estática e testes isolados de persistência passaram; CI financeira não iniciou etapas e teste real do PWA Android não foi realizado. Publicação não implica homologação integral."
+    "status": "published_pages_success_manual_pwa_and_financial_runner_pending",
+    "notes": "GitHub Pages #42339423278: success após build, deploy e relatório de build. Teste funcional isolado do cabeçalho: 6 cenários aprovados; checagens estáticas de preferências e estrutura concluídas. GitHub Actions de regressão financeira #42339212876 falhou antes de executar etapas (0 passos); validação visual real no Android/PWA ainda sem evidências. Publicação não significa homologação integral."
   }
 }
