@@ -1,0 +1,133 @@
+/* GB+ 2.7.0 — draggable bottom sheets for form, categories and services.
+   Native <dialog> preserves focus management, ESC and the underlying FormData. */
+dialog#gb-picker-sheet{
+ position:fixed;inset:auto 0 0;width:min(570px,100vw);max-width:100vw;
+ height:min(67dvh,710px);max-height:calc(100dvh - 12px);min-height:280px;
+ margin:0 auto;padding:0;overflow:hidden;color:var(--ink);
+ border:1px solid var(--border);border-bottom:0;
+ border-radius:25px 25px 0 0;background:var(--surface);
+ box-shadow:0 -14px 60px #0003;transition:height .21s ease;
+}
+dialog#gb-picker-sheet:not([open]){display:none}
+dialog#gb-picker-sheet::backdrop{background:#0d0d1680;backdrop-filter:blur(2px)}
+dialog#gb-picker-sheet[data-snap="expanded"]{height:calc(100dvh - 10px - env(safe-area-inset-top))}
+.gb-sheet-body{display:flex;flex-direction:column;min-height:0;height:100%;overflow:hidden}
+.gb-sheet-grab{display:grid;place-items:center;flex:none;width:100%;height:31px;
+ background:transparent;border:0;padding:0;cursor:grab;touch-action:none}
+.gb-sheet-grab:active{cursor:grabbing}
+.gb-sheet-grab span{display:block;width:42px;height:5px;border-radius:99px;background:#c9cdd3}
+.gb-sheet-grab:focus-visible{outline:2px solid var(--ink);outline-offset:-5px;border-radius:12px}
+.gb-sheet-header{display:flex;align-items:center;justify-content:space-between;gap:12px;
+ flex:none;padding:7px 22px 16px}
+.gb-sheet-header h2{font-size:21px;font-weight:730;letter-spacing:-.65px}
+.gb-sheet-header p{font-size:11px;color:var(--muted);margin-top:3px}
+.gb-sheet-close{display:grid;place-items:center;flex:none;width:38px;height:38px;
+ padding:0;border:0;border-radius:50%;background:var(--soft);color:var(--muted)}
+.gb-sheet-close .icon{width:20px;height:20px}
+.gb-sheet-close:hover{color:var(--ink);background:var(--hover)}
+.gb-sheet-search{display:flex;gap:10px;align-items:center;flex:none;
+ min-height:47px;margin:0 22px 6px;padding:0 13px;
+ border:1px solid var(--border);border-radius:12px;background:var(--surface)}
+.gb-sheet-search .icon{width:20px;height:20px;color:var(--muted)}
+.gb-sheet-search input{width:100%;min-width:0;min-height:44px;border:0;outline:0;
+ box-shadow:none;background:transparent;color:var(--ink);font-size:15px}
+.gb-sheet-search input:focus-visible{outline:0}
+.gb-sheet-search:focus-within{border-color:var(--ink)}
+.gb-sheet-count{padding:2px 23px 7px;font-size:10px;color:var(--muted)}
+.gb-sheet-results{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;
+ padding:0 22px max(22px,env(safe-area-inset-bottom));overscroll-behavior:contain;
+ -webkit-overflow-scrolling:touch;touch-action:pan-y;scrollbar-width:thin}
+.gb-sheet-results:focus-visible{outline:2px solid var(--border);outline-offset:-2px}
+.gb-sheet-group{margin:3px 0 15px}
+.gb-sheet-group[hidden]{display:none!important}
+.gb-sheet-group h3{font-size:10px;font-weight:750;text-transform:uppercase;
+ letter-spacing:.09em;color:var(--muted);padding:8px 3px 7px}
+.gb-sheet-group-options{display:grid;gap:0}
+.gb-sheet-choice{display:flex;align-items:center;gap:13px;width:100%;min-height:62px;
+ padding:9px 5px;border:0;border-bottom:1px solid var(--border);border-radius:0;
+ text-align:left;background:transparent;color:var(--ink);font-size:14px;font-weight:530}
+.gb-sheet-choice:last-child{border-bottom:0}
+.gb-sheet-choice[hidden]{display:none!important}
+.gb-sheet-choice.is-selected{font-weight:710}
+.gb-sheet-choice:focus-visible{outline:2px solid var(--ink);outline-offset:-2px;border-radius:8px}
+.gb-sheet-choice:hover{background:var(--soft)}
+.gb-sheet-choice-label{min-width:0;flex:1;line-height:1.3;overflow-wrap:anywhere}
+.gb-sheet-choice-check{width:18px;height:18px;color:var(--ink);margin-left:auto;flex:none}
+.gb-sheet-choice .gb-service-logo,.gb-sheet-choice .gb-service-monogram,
+.gb-sheet-category-icon{display:grid;place-items:center;flex:none;
+ width:42px;height:42px;min-width:42px;border-radius:13px}
+.gb-sheet-category-icon{background:var(--soft);color:var(--ink)}
+.gb-sheet-category-icon .gb-symbol,.gb-sheet-category-icon .icon{width:24px;height:24px;stroke-width:1.85}
+.gb-sheet-category-icon.tone-lilac{background:#f0e2fc;color:#8139ac}
+.gb-sheet-category-icon.tone-blue{background:#e3edff;color:#316bc2}
+.gb-sheet-category-icon.tone-peach{background:#ffebe1;color:#b95928}
+.gb-sheet-category-icon.tone-mint{background:#dcf4eb;color:#248265}
+.gb-sheet-category-icon.tone-pink{background:#ffe2ec;color:#be3e72}
+.gb-sheet-category-icon.tone-amber{background:#fff1d0;color:#93671e}
+.gb-sheet-empty{font-size:13px;text-align:center;color:var(--muted);padding:20px}
+:root[data-theme=dark] .gb-sheet-grab span{background:#676a74}
+:root[data-theme=dark] .gb-sheet-category-icon.tone-lilac{background:#3f2b53;color:#d8a7f5}
+:root[data-theme=dark] .gb-sheet-category-icon.tone-blue{background:#233650;color:#9abff9}
+:root[data-theme=dark] .gb-sheet-category-icon.tone-peach{background:#4a3028;color:#f6b48b}
+:root[data-theme=dark] .gb-sheet-category-icon.tone-mint{background:#24453b;color:#8ddfbb}
+:root[data-theme=dark] .gb-sheet-category-icon.tone-pink{background:#4a2a38;color:#f9a7c5}
+:root[data-theme=dark] .gb-sheet-category-icon.tone-amber{background:#453c27;color:#f3d591}
+/* Brand marks fill their entire badge, with a contrasting symbol in both themes. */
+.gb-service-logo.gb-service-branded,.gb-service-monogram.gb-service-branded{
+ background:var(--gb-service-color,var(--soft))!important;
+ color:var(--gb-service-fg,#fff)!important;
+ border:1px solid transparent!important;overflow:hidden;
+}
+.gb-service-logo.gb-service-logo-dark,.gb-service-monogram.gb-service-logo-dark{
+ background:#111!important;color:#fff!important;border-color:#353535!important}
+.gb-service-logo svg{display:block;width:76%;height:76%;max-width:none;max-height:none;
+ fill:currentColor;flex:none}
+.gb-service-monogram{font-size:clamp(10px,1vw,12px);font-weight:760;letter-spacing:-.025em}
+.gb-sheet-choice .gb-service-logo svg{width:76%;height:76%}
+.gb-launch-card-icon.has-service .gb-service-logo svg{width:76%;height:76%}
+.gb-service-identity .gb-service-logo svg{width:76%;height:76%}
+/* Bank assets are full-bleed on a consistent light background. Their SVG
+   paths are not recolored or stretched, avoiding unreadable dark-mode marks. */
+.gb-bank-badge img{
+ inset:0!important;width:100%!important;height:100%!important;
+ padding:0!important;object-fit:contain!important;background:#fff!important;
+ border-radius:inherit;
+}
+.gb-bank-badge:has(>img){background:#fff!important}
+:root[data-theme=dark] .gb-bank-badge:has(>img){outline:1px solid #54555d}
+/* Mobile launch form itself is a resizable bottom sheet. */
+.gb-entry-sheet-grab{display:none}
+@media(max-width:760px){
+ dialog#gb-picker-sheet{width:100vw;max-width:100vw;height:66dvh;
+  border-left:0;border-right:0;border-radius:25px 25px 0 0}
+ dialog#gb-picker-sheet[data-snap="expanded"]{height:calc(100dvh - 8px - env(safe-area-inset-top))}
+ .gb-sheet-header{padding:5px 20px 14px}
+ .gb-sheet-header h2{font-size:20px}
+ .gb-sheet-results{padding-inline:18px}
+ .gb-sheet-search{margin-inline:18px}
+ #modal.gb-entry-modal{position:fixed;inset:auto 0 0 0!important;
+  margin:0;width:100vw!important;max-width:100vw!important;
+  height:77dvh;max-height:calc(100dvh - 8px - env(safe-area-inset-top))!important;
+  overflow:hidden!important;border-radius:25px 25px 0 0!important;
+  transition:height .21s ease}
+ #modal.gb-entry-modal[data-gb-snap="expanded"]{
+  height:calc(100dvh - 8px - env(safe-area-inset-top))}
+ #modal.gb-entry-modal[data-gb-snap="compact"]{height:44dvh}
+ #modal.gb-entry-modal #modal-content{display:flex;flex-direction:column;height:100%;min-height:0}
+ #modal.gb-entry-modal .modal-heading{position:relative;flex:none;padding-top:39px}
+ #modal.gb-entry-modal .modal-body{min-height:0;flex:1;overflow-y:auto;
+  overscroll-behavior:contain;padding-bottom:calc(20px + env(safe-area-inset-bottom))}
+ .gb-entry-sheet-grab{display:grid;place-items:center;position:absolute;top:0;left:0;
+  width:100%;height:30px;border:0;background:transparent;touch-action:none;cursor:grab}
+ .gb-entry-sheet-grab span{display:block;width:42px;height:5px;
+  border-radius:50px;background:#c9cdd3}
+ :root[data-theme=dark] .gb-entry-sheet-grab span{background:#676a74}
+ .gb-entry-sheet-grab:focus-visible{outline:2px solid var(--ink);outline-offset:-4px}
+}
+@media(max-width:400px){
+ .gb-sheet-choice{min-height:58px}
+ .gb-sheet-category-icon,.gb-sheet-choice .gb-service-logo,.gb-sheet-choice .gb-service-monogram{width:39px;height:39px;min-width:39px}
+}
+@media(prefers-reduced-motion:reduce){
+ dialog#gb-picker-sheet,#modal.gb-entry-modal{transition:none!important}
+}
