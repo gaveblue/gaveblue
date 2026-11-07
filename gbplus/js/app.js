@@ -1,6 +1,6 @@
 import {parseBankStatement,parseBankCsv,inspectBankCsv,proposeReconciliation,readBankFileText} from './bank-import-preview.js?v=20261106-2509';
-import {bankImportMarkup,bankImportHistoryMarkup,BANK_IMPORT_PAGE_SIZE,BANK_IMPORT_WRITES_ENABLED} from './bank-import-ui.js?v=20261106-2509';
-import {reviewSelection,applyReconciliationBatch,undoReconciliationBatch} from './bank-reconciliation.js?v=20261106-2505';
+import {bankImportMarkup,bankImportHistoryMarkup,bankImportFilteredRows,bankImportBulkDecisions,BANK_IMPORT_PAGE_SIZE,BANK_IMPORT_WRITES_ENABLED} from './bank-import-ui.js?v=20261106-2520';
+import {reviewSelection,applyReconciliationBatch,undoReconciliationBatch,reconciliationRecordKey,knownReconciliationKeys} from './bank-reconciliation.js?v=20261106-2505';
 import {filterFlowRows} from './gb-flow-filters.js?v=20261106-68';
 import {uid,today,money,dateLabel,cents,addMonths,validDate,generateTitles,addPayment,transfer,updateTitle,pending,flow,within} from './domain.js?v=20261105-72';
 import {KEY,INDICATORS,defaultPanel,parseBackup,backupText,MOBILE_SHORTCUTS,defaultMobileNav,effectiveMobileNav,validMobileNav,shouldOfferSetup} from './store.js?v=20261106-2505';
@@ -74,7 +74,7 @@ function redrawBankImport(){
 function openBankImport(accountId=''){
  const accounts=(db.accounts||[]).filter(a=>a.active!==false);
  const account=accounts.find(a=>a.id===accountId)||accounts[0];
- bankImportDraft={accountId:account?.id||'',parsed:null,preview:null,filename:'',accountHint:'',filter:'all',page:0,error:'',decisions:{},step:'review',review:null,confirmCreation:false,confirmAccount:false,csvSource:null,csvMapping:null};
+ bankImportDraft={accountId:account?.id||'',parsed:null,preview:null,filename:'',accountHint:'',filter:'all',page:0,error:'',decisions:{},selectedRows:[],bulkAction:'',bulkCategory:'',step:'review',review:null,confirmCreation:false,confirmAccount:false,csvSource:null,csvMapping:null};
  redrawBankImport();
 }
 // Guided onboarding is opt-in. No financial records are created before final confirmation.
@@ -421,13 +421,13 @@ const actions={
   'bank-import-open':el=>openBankImport(el.dataset.id||''),
   'bank-import-reset':()=>{
    if(!bankImportDraft)return;
-   Object.assign(bankImportDraft,{parsed:null,preview:null,filename:'',accountHint:'',filter:'all',page:0,error:'',decisions:{},step:'review',review:null,confirmCreation:false,confirmAccount:false,csvSource:null,csvMapping:null});
+   Object.assign(bankImportDraft,{parsed:null,preview:null,filename:'',accountHint:'',filter:'all',page:0,error:'',decisions:{},selectedRows:[],bulkAction:'',bulkCategory:'',step:'review',review:null,confirmCreation:false,confirmAccount:false,csvSource:null,csvMapping:null});
    redrawBankImport();
   },
 
   'bank-import-map':()=>{
    if(!bankImportDraft?.csvSource||!bankImportDraft.csvMapping)return;
-   Object.assign(bankImportDraft,{parsed:null,preview:null,step:'mapping',error:'',decisions:{},review:null,confirmCreation:false,confirmAccount:false});
+   Object.assign(bankImportDraft,{parsed:null,preview:null,step:'mapping',error:'',decisions:{},selectedRows:[],bulkAction:'',bulkCategory:'',review:null,confirmCreation:false,confirmAccount:false});
    redrawBankImport();
   },
   'bank-import-apply-map':()=>{
@@ -441,19 +441,17 @@ const actions={
     draft.parsed=parsed;
     draft.preview=proposeReconciliation(parsed,db,draft.accountId);
     draft.accountHint=parsed.accountHint||'';
-    Object.assign(draft,{error:'',filter:'all',page:0,decisions:{},review:null,confirmCreation:false,confirmAccount:false,step:'review'});
+    Object.assign(draft,{error:'',filter:'all',page:0,decisions:{},selectedRows:[],bulkAction:'',bulkCategory:'',review:null,confirmCreation:false,confirmAccount:false,step:'review'});
    }catch(error){draft.error=error?.message||'Confira o mapeamento do CSV.';}
    redrawBankImport();
   },
   'bank-import-filter':el=>{
-   if(!bankImportDraft?.preview||!['all','possible_match','ambiguous','not_found'].includes(el.dataset.value))return;
+   if(!bankImportDraft?.preview||!['all','expense','income','possible_match','ambiguous','not_found','decided'].includes(el.dataset.value))return;
    bankImportDraft.filter=el.dataset.value;bankImportDraft.page=0;redrawBankImport();
   },
   'bank-import-next':()=>{
    if(!bankImportDraft?.preview)return;
-   const count=bankImportDraft.filter==='all'?bankImportDraft.preview.rows.length:
-     bankImportDraft.preview.rows.filter(row=>bankImportDraft.filter==='ambiguous'
-       ?['ambiguous','possible_duplicate_in_file'].includes(row.status):row.status===bankImportDraft.filter).length;
+   const count=bankImportFilteredRows(bankImportDraft.preview,bankImportDraft.filter,bankImportDraft.decisions).length;
    bankImportDraft.page=Math.min(Math.max(0,Math.ceil(count/BANK_IMPORT_PAGE_SIZE)-1),bankImportDraft.page+1);
    redrawBankImport();
   },
@@ -678,7 +676,7 @@ document.addEventListener('change',async e=>{
   if(!(db.accounts||[]).some(a=>a.id===id&&a.active!==false))return;
   draft.accountId=id;
   if(draft.parsed)draft.preview=proposeReconciliation(draft.parsed,db,id);
-  draft.filter='all';draft.page=0;draft.decisions={};draft.review=null;draft.confirmCreation=false;draft.confirmAccount=false;draft.step=draft.csvMapping&&!draft.preview?'mapping':'review';redrawBankImport();return;
+  draft.filter='all';draft.page=0;draft.decisions={};draft.selectedRows=[];draft.bulkAction='';draft.bulkCategory='';draft.review=null;draft.confirmCreation=false;draft.confirmAccount=false;draft.step=draft.csvMapping&&!draft.preview?'mapping':'review';redrawBankImport();return;
  }
 
  if(el.matches?.('[data-bank-map-field]')){
@@ -739,7 +737,7 @@ document.addEventListener('change',async e=>{
    const parsed=parseBankStatement(contents,file.name);
    const preview=proposeReconciliation(parsed,db,draft.accountId);
    draft.parsed=parsed;draft.preview=preview;draft.accountHint=parsed.accountHint||'';
-   Object.assign(draft,{error:'',filter:'all',page:0,decisions:{},review:null,confirmCreation:false,confirmAccount:false,step:'review'});
+   Object.assign(draft,{error:'',filter:'all',page:0,decisions:{},selectedRows:[],bulkAction:'',bulkCategory:'',review:null,confirmCreation:false,confirmAccount:false,step:'review'});
   }catch(parseError){
    if(!mapping)throw parseError;
    Object.assign(draft,{parsed:null,preview:null,step:'mapping',error:'Colunas não reconhecidas automaticamente. Selecione as correspondências para conferir o arquivo.'});
