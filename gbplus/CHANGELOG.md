@@ -1,5 +1,18 @@
 # CHANGELOG — GB+ Gestão Financeira
 
+## [2.7.6 — LANÇAMENTOS, CARTÕES E ALERTAS DE ATRASO] — 2026-11-07
+
+**CANDIDATA A LIBERAÇÃO:** alterações propostas em uma branch separada. Não há homologação integral por teste em Android/PWA nem execução completa da suíte em Node.js. Uma integração/publicação eventual não substitui a homologação.
+
+- **Etapa 1:** o campo Descrição deixa de ser obrigatório. Se ficar vazio, o nome da categoria será usado na identificação do lançamento; mantém os demais limites e validações. Digitação do valor sem contorno de caixa, com foco indicado por linha discreta.
+- **Etapa 2:** removida a pergunta Forma de movimentação (conta/debito). Periodicidade, documento e observações permanecem.
+- **Etapa 3:** escolher Deixar pendente, Baixar em uma conta ou Lançar no cartão de crédito. A compra no cartão gera exclusivamente parcelas de fatura, sem título financeiro duplicado nem baixa de banco. Para evitar distorções, a baixa imediata em conta continua limitada aos lançamentos únicos; cartão permite despesas únicas e parceladas até 36 vezes, não receitas nem recorrências automáticas.
+- **Vencimentos:** prévia de parcelas fica escondida por padrão, acessível no botão Detalhar vencimentos, que abre uma folha nativa sem remontar o formulário. Ao escolher cartão, os vencimentos são calculados pelas regras do cartão.
+- **Lançamentos:** indicação vermelha Em atraso há X dias para títulos vencidos e ainda com saldo, utilizando dias de calendário.
+- **Cartão de crédito:** edição de compra a partir da tela de cartões e dos detalhes da fatura. Edição financeira recalcula as faturas em cópia isolada do banco e aplica apenas após passar nas validações de limite, datas e parcelas. Em faturas com pagamentos existentes, somente metadados podem ser editados até que a baixa seja estornada; não é possível alterar diretamente o total da fatura.
+- **Regressões verificadas em V8 isolado com dados fictícios:** `title-three-step-regression.mjs` (61 asserções), `card-purchase-edit-regression.mjs` (16), `entry-final-regression.mjs` (27). Testes ponta a ponta, simulador móvel e suíte Node completa ainda devem ser executados e documentados.
+
+
 ## [2.7.5 — NAVEGAÇÃO FIXA NO RODAPÉ DO LANÇAMENTO] — 2026-11-07
 
 **ALTERAÇÃO DE INTERFACE:** os botões **Próximo**, **Voltar** e **Revisar/Salvar** voltam ao rodapé fixo do modal, fora da área rolável. O X continua no cabeçalho como única ação de fechar. A área central do formulário é rolável de forma independente nas três etapas; a altura compacta do painel móvel `min(575px,88dvh)` permanece inalterada.
