@@ -178,6 +178,7 @@ export function settingsView(db,canInstall,online=false,user=null,installed=fals
  const records=cfgSection('DADOS E REGISTROS',
   cfgOption('Backup e restauração','Exportar ou restaurar seus dados','cloud','green','settings-backup')+
   cfgOption('Dados da conta','Registros, sincronização e armazenamento','database','blue','settings-data')+
+  cfgOption('Limpar todos os dados','Recomeçar o financeiro sem excluir seu login','trash','neutral','settings-reset')+
   cfgOption('Configuração inicial','Ajustes básicos e saldo inicial','gear','orange','restart-setup')+
   cfgOption('Bancos e instituições','Gerenciar logos e instituições personalizadas','wallet','blue','open-banks')+
   cfgOption('Cartões de crédito','Limites, faturas e compras parceladas','credit-card','purple','open-cards'));
@@ -193,7 +194,7 @@ export function settingsView(db,canInstall,online=false,user=null,installed=fals
   <div id="gb-cfg-search" class="gb-cfg-search" hidden><label for="settings-search-input" class="sr-only">Buscar configurações</label>${icon('search')}<input type="search" id="settings-search-input" placeholder="Pesquisar configurações" autocomplete="off" aria-label="Pesquisar configurações"></div>
   <a href="#profile" class="gb-cfg-profile"><span class="gb-cfg-profile-avatar">${icon('user')}</span><span class="gb-cfg-profile-label"><strong>${esc(name)}</strong><small>Gerenciar conta, dados e segurança</small></span><span class="gb-cfg-next">${icon('chevron')}</span></a>
   ${preferences}${records}${system}${support}
-  <button type="button" class="gb-cfg-delete gb-cfg-row" data-action="settings-delete" data-settings-keywords="excluir conta remover permanentemente dados"><span class="gb-cfg-row-icon">${icon('trash')}</span><span class="gb-cfg-row-label"><strong>Excluir conta</strong><small>Remover permanentemente sua conta e dados</small></span><span class="gb-cfg-next">${icon('chevron')}</span></button>
+  ${online?'<button type="button" class="gb-cfg-delete gb-cfg-row" data-action="settings-delete" data-settings-keywords="excluir conta remover permanentemente dados"><span class="gb-cfg-row-icon">'+icon('trash')+'</span><span class="gb-cfg-row-label"><strong>Excluir conta</strong><small>Excluir cadastro, login e dados permanentemente</small></span><span class="gb-cfg-next">'+icon('chevron')+'</span></button>':''}
   <p class="gb-cfg-empty" id="gb-cfg-no-results" hidden>Nenhuma configuração encontrada.</p>
   <input type="file" id="backup-input" accept=".json,application/json" hidden>
  </div>`;
