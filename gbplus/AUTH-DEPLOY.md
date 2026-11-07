@@ -81,9 +81,20 @@ após capturar uma mensagem apropriada para o usuário.
   não a leitura da mensagem nem a posição na caixa de entrada.
 - `emailReady` habilitado após a validação do envio SMTP.
 
-**Pendente:** validação completa de cadastro por e-mail e recuperação com definição de
-senha pelo usuário. O Google Cloud ainda está em Testing; a política de privacidade foi
-preparada, mas sua publicação e a conclusão do branding estão pendentes de confirmação.
+**Atualização de autenticação e marca (07/11/2026):** o usuário confirmou que a
+recuperação de senha funcionou. A política de privacidade foi aprovada e publicada em
+`https://gaveblue.com.br/gbplus/privacidade.html`. O Google Cloud está em produção,
+com o nome `GB+ Gestão Financeira` configurado.
+
+A verificação automática da marca apontou falta de comprovação da página inicial.
+A propriedade `https://gaveblue.com.br/gbplus/` foi então verificada com sucesso no
+Google Search Console, usando o arquivo HTML publicado somente nessa seção.
+O Google orienta aguardar 24 horas após verificar a propriedade antes de repetir a
+verificação de branding. O nome ainda não foi aprovado/publicado na tela de consentimento;
+até isso ocorrer, o domínio técnico do Supabase pode continuar aparecendo.
+
+**Pendente:** repetir a verificação da marca após a propagação e publicar o branding
+se aprovado. A validação completa de cadastro por e-mail continua pendente.
 
 Também permanecem pendentes os testes em celular/PWA instalado, a associação de login
 Google a uma conta preexistente com e-mail verificado e registros, e os demais cenários
