@@ -71,7 +71,7 @@ function openModal(title,content){
  modal.classList.toggle('gb-entry-modal',isEntry);
  modal.classList.toggle('gb-bank-import-modal',content.includes('id="gb-import-workspace"'));
  if(isEntry)modal.dataset.gbSnap='partial';
- else delete modal.dataset.gbSnap;
+ else{delete modal.dataset.gbSnap;delete modal.dataset.gbEntryStep;}
  const grab=isEntry?'<button type="button" class="gb-entry-sheet-grab" data-entry-sheet-grab aria-label="Expandir formulário" aria-expanded="false"><span aria-hidden="true"></span></button>':'';
  document.querySelector('#modal-content').innerHTML=
   '<div class="modal-heading">'+grab+'<h2 id="modal-title">'+esc(title)+'</h2>'+
@@ -79,6 +79,7 @@ function openModal(title,content){
   '<div class="modal-body">'+content+'</div>';
  modal.setAttribute('aria-labelledby','modal-title');
  if(!modal.open)modal.showModal();
+ if(isEntry)modal.dataset.gbEntryStep=modal.querySelector('#title-form')?.dataset.step||'1';
  enhanceGbControls(modal);
  fitEntryAmount(modal.querySelector('#entry-amount'));
  if(isEntry){syncEntrySettlement(modal.querySelector('#title-form'));if(modal.querySelector('#title-form')?.dataset.step==='3')refreshEntrySchedule(modal.querySelector('#title-form'));}
@@ -448,6 +449,7 @@ function toggleEntryStep(form,step){
   if(current===2)validateEntryStepTwo(form);
  }
  form.dataset.step=String(step);
+ modal.dataset.gbEntryStep=String(step);
  for(let number=1;number<=3;number++){
   const stage=form.querySelector('#gb-entry-step-'+['','one','two','three'][number]);
   if(stage)stage.hidden=number!==step;
