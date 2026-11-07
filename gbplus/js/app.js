@@ -104,6 +104,35 @@ function mountEntryBottomActions(){
   nav.appendChild(footer);
  }
 }
+/** Serialize the form together with its detached bottom navigation for review. */
+function serializeEntryFormForReview(form){
+ const clone=form.cloneNode(true);
+ const originals=[...form.querySelectorAll('input,select,textarea')];
+ const copies=[...clone.querySelectorAll('input,select,textarea')];
+ originals.forEach((field,index)=>{
+  const saved=copies[index];
+  if(!saved)return;
+  if(field.tagName==='SELECT'){
+   for(const option of saved.options)option.toggleAttribute('selected',option.value===field.value);
+  }else if(field.type==='checkbox'||field.type==='radio'){
+   saved.toggleAttribute('checked',field.checked);
+  }else if(field.tagName==='TEXTAREA'){
+   saved.textContent=field.value;
+  }else{
+   saved.setAttribute('value',field.value);
+  }
+ });
+ // All three footers live outside the form while the entry sheet is open.
+ // Restore them to the serialized copy, so the reviewer may go back to edit.
+ if(!clone.querySelectorAll('[data-entry-footer]').length){
+  const nav=modal.querySelector('.gb-entry-bottom-nav');
+  for(const footer of nav?.querySelectorAll('[data-entry-footer]')||[])
+   clone.appendChild(footer.cloneNode(true));
+ }
+ if(clone.querySelectorAll('[data-entry-footer]').length!==3)
+  throw Error('Não foi possível preparar a navegação da revisão. Reabra o lançamento.');
+ return clone.outerHTML;
+}
 function closeModal(){if(modal.open)modal.close();bankImportDraft=null;pendingGeneration=null;confirmAction=null;if(pwaReady)setTimeout(()=>maybeOfferPwaInstall(),1100);}
 function confirm(title,message,callback){confirmAction=callback;openModal(title,`<p class="confirm-message">${esc(message)}</p><div class="form-error" role="alert"></div><div class="form-footer">${button('Cancelar','close')}${button('Confirmar','confirm','primary')}</div>`);}
 // 2.5.0: preview only, never invokes commit(), Supabase or AI.
@@ -1075,7 +1104,14 @@ const actions={
     addPayment(d,{titleId:generated[0].id,accountId:generated.settlement.accountId,date:generated.settlement.date,amount:generated[0].amount});
    }
   },generated.settlement?'Lançamento criado e baixado. Saldo atualizado.':`${generated.length} título(s) criado(s) pendente(s).`);},
-  'back-generation':()=>{if(pendingGeneration?.formHTML){openModal('Novo lançamento',pendingGeneration.formHTML);pendingGeneration=null;}},
+  'back-generation':()=>{
+   if(!pendingGeneration?.formHTML)return;
+   openModal('Novo lançamento',pendingGeneration.formHTML);
+   const form=modal.querySelector('#title-form');
+   // Reactivate the matching footer and allow subsequent back/next navigation.
+   if(form)toggleEntryStep(form,Number(form.dataset.step)||3);
+   pendingGeneration=null;
+  },
   granularity:el=>{state.granularity=el.dataset.value;render();},
   'flow-chart-mode':el=>{const mode=el.dataset.mode;if(!['bars','lines','net'].includes(mode))return;state.flowChartMode=mode;render();},
   'flow-status':el=>{const next=el.dataset.value;if(!['all','paid','pending'].includes(next))return;state.flowStatus=next;render();},
@@ -1333,17 +1369,7 @@ document.addEventListener('submit',async e=>{e.preventDefault();if(busy||!db)ret
     const installmentCount=v.mode==='installment'?Number(v.count):1;
     const draft={cardId:v.settleCardId,date:v.issue,amount:input.amount,
       description:input.description,categoryId:input.categoryId,partnerId:input.partnerId,count:installmentCount};
-    const clone=form.cloneNode(true);
-    const originalFields=[...form.querySelectorAll('input,select,textarea')];
-    const copiedFields=[...clone.querySelectorAll('input,select,textarea')];
-    originalFields.forEach((element,index)=>{
-     const dest=copiedFields[index];if(!dest)return;
-     if(element.tagName==='SELECT'){[...dest.options].forEach(o=>o.toggleAttribute('selected',o.value===element.value));}
-     else if(element.type==='checkbox'||element.type==='radio')dest.toggleAttribute('checked',element.checked);
-     else if(element.tagName==='TEXTAREA')dest.textContent=element.value;
-     else dest.setAttribute('value',element.value);
-    });
-    pendingGeneration={cardPurchase:draft,formHTML:clone.outerHTML};
+    pendingGeneration={cardPurchase:draft,formHTML:serializeEntryFormForReview(form)};
     const card=db.cards.find(c=>c.id===draft.cardId);
     openModal('Revise a compra no cartão',
      '<div class="preview-summary"><span>Compra no cartão · '+installmentCount+
@@ -1357,16 +1383,7 @@ document.addEventListener('submit',async e=>{e.preventDefault();if(busy||!db)ret
    }
    const generated=generateTitles(input,v.mode,v.mode==='single'?1:Number(v.count),{businessDays});
    if(isPaid)generated.settlement={accountId:v.settleAccountId,date:v.settleDate};
-   const clone=form.cloneNode(true);
-   const originals=[...form.querySelectorAll('input,select,textarea')],destinations=[...clone.querySelectorAll('input,select,textarea')];
-   originals.forEach((el,i)=>{
-    const dest=destinations[i];if(!dest)return;
-    if(el.tagName==='SELECT'){[...dest.options].forEach(o=>o.toggleAttribute('selected',o.value===el.value));}
-    else if(el.type==='checkbox')dest.toggleAttribute('checked',el.checked);
-    else if(el.tagName==='TEXTAREA')dest.textContent=el.value;
-    else dest.setAttribute('value',el.value);
-   });
-   generated.formHTML=clone.outerHTML;
+   generated.formHTML=serializeEntryFormForReview(form);
    pendingGeneration=generated;
    const shifted=generated.filter(t=>t.shiftedToBusinessDay).length;
    const accountName=isPaid?db.accounts.find(a=>a.id===v.settleAccountId)?.name||'':'';
