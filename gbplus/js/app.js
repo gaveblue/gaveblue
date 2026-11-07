@@ -277,6 +277,10 @@ function updateServicePicker(form,id){
   '<span class="gb-service-selected-name">'+esc(label)+'</span>';
  if(service&&!form.elements.description.value.trim())form.elements.description.value=service.name;
  toggle.textContent=id?'Alterar':'Escolher serviço';
+ const info=form.querySelector('.gb-service-help');
+ if(info)info.textContent=service?.billingMode==='subscription'?
+  'Assinatura? Se desejar, escolha Recorrente na etapa Valores. Nada será agendado automaticamente.':
+  'A identificação não cria assinatura, cobrança, despesa ou baixa. Você decide os valores e vencimentos.';
  toggle.setAttribute('aria-expanded','false');options.hidden=true;
  if(custom)name.focus({preventScroll:true});
 }
