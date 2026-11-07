@@ -1,6 +1,6 @@
 # GB+ 2.5.0 — Projeto de importação e conciliação de extratos
 
-**Situação em 06/11/2026:** o núcleo OFX/CSV foi publicado na **compilação 8**, com conciliação assistida, criação mediante confirmação dupla, trilha de auditoria e reversão de lotes intactos. Testes Node reais e teste SQL transacional fictício foram aprovados; CI GitHub Actions e PWA autenticado real permanecem com ressalvas. **CSV manual não padronizado, XLSX, PDF e data-base histórica** não estão entregues: acompanhar [issue #78](https://github.com/gaveblue/gaveblue/issues/78). O restante deste arquivo preserva o escopo e histórico originalmente acordados.
+**Situação em 06/11/2026:** o núcleo OFX/CSV foi publicado na **compilação 8**, com conciliação assistida, criação mediante confirmação dupla, trilha de auditoria e reversão de lotes intactos. Testes Node reais e teste SQL transacional fictício foram aprovados; CI GitHub Actions e PWA autenticado real permanecem com ressalvas. **O mapeamento manual de CSV foi entregue na build 9**, com prévia, validação e confirmação financeira separada. **XLSX, PDF e data-base histórica** ainda não estão entregues: acompanhar [issue #78](https://github.com/gaveblue/gaveblue/issues/78). O restante deste arquivo preserva o escopo e histórico originalmente acordados.
 
 **Decisão proposta:** realizar a importação manual de extratos e planilhas na **2.5.0**. Reservar a **3.0.0** para a grande evolução da **IA do GB+**. A integração bancária automatizada via Open Finance é um projeto separado e não integra este escopo.
 
@@ -33,6 +33,12 @@ Restrições: somente movimentações não localizadas, sem duplicidade no arqui
 A reversão do lote pode excluir exclusivamente os títulos e as baixas **criados por ele**, se permanecerem intactos e não tiverem vínculos posteriores; o histórico continua auditável. Se o usuário editar algum lançamento após a criação, o sistema recusa a reversão automática para evitar perdas e requer revisão manual.
 
 **Estado:** código da compilação 3 implementado no PR #73; verificações lógicas simuladas concluídas, mas testes reais em PWA, arquivos de bancos e integração com armazenamento online continuam pendentes. **Não confundir implementação com homologação ou publicação**.
+
+## Complemento final de CSV — build 9
+
+O banco pode exportar CSV com nomes de colunas fora do padrão. O usuário agora pode mapear a coluna de data, histórico, valor único **ou** colunas separadas de crédito/débito, tipo, identificador e saldo. A prévia usa os dados mapeados e não cria lançamentos automaticamente. É possível corrigir o mapeamento antes da confirmação. **11/11 suítes Node reais aprovadas no artefato publicado.**
+
+Os formatos XLSX/PDF, campo de data-base do saldo inicial e homologação completa do PWA e GitHub Actions são acompanhados separadamente no backlog; não foram automaticamente considerados concluídos pela publicação.
 
 ## Objetivo
 
