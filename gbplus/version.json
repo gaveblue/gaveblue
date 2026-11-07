@@ -1,7 +1,7 @@
 {
   "version": "2.6.3",
   "build": 1,
-  "published_at": null,
+  "published_at": "2026-11-07T03:04:30Z",
   "title": "Valor centralizado e serviços integrados à categoria",
   "notes": [
     "O valor do Novo lançamento está centralizado como um conjunto R$ + valor com largura ajustada ao conteúdo, sem a linha divisória inferior.",
@@ -11,7 +11,8 @@
     "Prestação de serviços e outras categorias de receita não exibem o seletor, pois o catálogo se refere a despesas pessoais.",
     "Netflix, Spotify, iFood e os demais 26 serviços continuam com nome automático, marcas coloridas quando identificadas e regras financeiras originais.",
     "Nenhum título, conta, baixa ou login é alterado pela atualização de interface; não há novas migrações ou operações de banco.",
-    "Testes de regressão isolados verificam categorias de serviços, preservação do parceiro e alinhamento do valor."
+    "Testes de regressão isolados verificam categorias de serviços, preservação do parceiro e alinhamento do valor.",
+    "Versão 2.6.3 integrada pela PR #87 (commit 29cfae04); implantação GitHub Pages #42332219181 concluída com success em 07/11/2026 às 03:04 UTC."
   ],
   "assets": [
     "./index.html",
@@ -187,9 +188,9 @@
       "description": "Não aparece na interface pessoal, mas os dados antigos permanecem preservados."
     }
   ],
-  "release_status": "candidate_2_6_3_pending_pages",
+  "release_status": "published_github_pages_ci_device_validation_pending",
   "homologation": {
-    "status": "isolated_pfu_service_checks_passed_ci_device_pending",
-    "notes": "Testes isolados pf-entry-ui-regression.mjs e services-regression.mjs com dados fictícios passaram; CI financeiro completo e validação em dispositivo PWA real ainda pendentes. Nenhuma gravação financeira realizada nos testes."
+    "status": "isolated_tests_passed_pages_success_ci_runner_unavailable_pwa_pending",
+    "notes": "Testes pf-entry-ui-regression.mjs e services-regression.mjs passaram em avaliação isolada de JavaScript com dados fictícios; GitHub Pages #42332219181 publicou o código com sucesso. CI financeira #42332188995 falhou antes de executar qualquer etapa (0 passos), sem evidência de testes integrais. PWA instalado ainda não verificado em aparelho real."
   }
 }
