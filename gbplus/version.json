@@ -1,17 +1,15 @@
 {
   "version": "2.5.1",
-  "build": 2,
-  "published_at": "2026-11-07T00:20:18Z",
-  "title": "Contas e Cartões unificados — regressões revisadas",
+  "build": 3,
+  "published_at": null,
+  "title": "Seletor fixo e cabeçalho padronizado em Contas e Cartões",
   "notes": [
-    "Contas e Cartões permanecem organizados em uma única tela com duas abas compactas, sem alterar os componentes preexistentes.",
-    "As antigas rotas e atalhos de Cartões continuam direcionando à aba Cartões na tela unificada.",
-    "Corrigido um teste herdado da 2.5.0 que comparava números fixos de versão, impedindo aprovação das regressões apesar do comportamento correto.",
-    "12/12 suítes regressivas passam em Node.js 22.16.0 sobre os arquivos implantados da 2.5.1 build 1 com o teste corrigido.",
-    "A mudança continua exclusivamente visual e de navegação; contas, saldos, faturas e limites não são modificados.",
-    "Catálogo de serviços da 2.5.1 segue preparado; logos oficiais e seletor dos serviços ainda não foram publicados.",
-    "Teste visual automatizado em Chromium travou neste ambiente e a execução CI GitHub Actions permanece bloqueada antes do runner.",
-    "Build 2 publicada no GitHub Pages (run 42317536214), após PR #81. 12/12 testes Node passaram e o seletor Contas/Cartões preserva dados anteriores."
+    "Compilação candidata a homologação: o seletor Contas/Cartões permanece acessível durante a rolagem da tela.",
+    "Contas e Cartões têm título geral e posição idêntica para o botão principal de cadastro.",
+    "Na aba Contas permanecem Nova conta, Bancos e ícones e Transferir; na aba Cartões permanecem Novo cartão e o acesso a Nova compra.",
+    "Preservados os painéis financeiros originais, as rotas #accounts/#cards, o foco por teclado, os saldos e as regras de gravação.",
+    "Implementação isolada na branch de ajustes, sem publicação da build 3 na main.",
+    "Testes completos Node/CI, revisão visual em Android/iOS e homologação explícita pendentes."
   ],
   "assets": [
     "./index.html",
@@ -168,23 +166,23 @@
   "highlights": [
     {
       "icon": "wallet",
-      "title": "Contas e cartões juntos",
-      "description": "Uma única tela para saldos bancários, cartões de crédito, limites e faturas."
+      "title": "Contas e cartões no mesmo padrão",
+      "description": "Cabeçalho único e ações de cadastro no mesmo lugar nas duas abas."
     },
     {
       "icon": "credit-card",
-      "title": "Troca rápida por abas",
-      "description": "Alternância discreta entre Contas e Cartões, preservando todos os controles existentes."
+      "title": "Seletor fixo na rolagem",
+      "description": "Troque entre Contas e Cartões sem retornar ao começo da página."
     },
     {
       "icon": "shield",
-      "title": "Sem alteração financeira",
-      "description": "A mudança é de organização e navegação; não altera saldos, limites nem faturas."
+      "title": "Dados financeiros preservados",
+      "description": "Alterações restritas à interface; sem mudar contas, compras, saldos ou faturas."
     }
   ],
-  "release_status": "published_accounts_cards_unified_ci_pwa_pending",
+  "release_status": "candidate_pending_homologation_not_published",
   "homologation": {
-    "status": "node_regressions_passed_ci_pwa_pending",
-    "notes": "12 de 12 suítes aprovadas em Node 22.16.0 real com o código da 2.5.1 e teste de versão corrigido. GitHub Pages build2 42317536214 concluído com success. Captura Chromium travou; PWA instalado e runner de regressões GitHub Actions ainda sem homologação."
+    "status": "pending_node_ci_device_validation",
+    "notes": "Build 3 candidata: teste funcional isolado com registros fictícios em JavaScript e inspeção de arquivos. Ainda não há comprovação de execução completa das suítes Node, CI GitHub Actions ou homologação visual em aparelho real. Não publicar sem aprovação."
   }
 }
