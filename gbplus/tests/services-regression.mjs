@@ -19,7 +19,7 @@ assert.equal(Object.keys(catalog.SERVICE_GROUPS).length,5);
 assert.equal(Object.keys(logos).length,13);
 assert.equal(catalog.searchServices('netflix').length,1);
 assert.equal(catalog.searchServices('ifood').length,1);
-assert.equal(catalog.searchServices('delivery','delivery').length,0);
+assert.equal(catalog.searchServices('','delivery').length,5);
 assert(catalog.SERVICE_CATALOG.some(s=>s.name==='Plus Delivery'));
 assert(catalog.SERVICE_CATALOG.some(s=>s.name==='ChatGPT'));
 assert.equal(catalog.serviceSearchKey('Música + Vídeo'),'musicavideo');
