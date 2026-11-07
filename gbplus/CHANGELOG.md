@@ -2,6 +2,25 @@
 
 Registro de mudanças do aplicativo localizado em `gbplus/`. Toda versão e toda compilação deve possuir uma entrada própria. **Uma alteração não deve ser considerada homologada apenas porque existe commit, teste escrito ou publicação.** A homologação exige evidências da execução e aprovação explícita.
 
+## [2.6.1 — LIMPEZA FINANCEIRA E EXCLUSÃO AUTENTICADA] — 2026-11-06
+
+**Status inicial: publicação solicitada; homologação ponta a ponta pendente.** Nenhum dado real foi apagado durante a implementação ou os testes.
+
+### Duas operações distintas em Configurações
+- **Limpar todos os dados:** mostra os totais de lançamentos, baixas, contas, cartões, compras, transferências, parceiros, importações e instituições personalizadas. Exige marcar uma declaração e digitar **LIMPAR** para habilitar a confirmação; oferece exportação de backup. Recomeça o documento financeiro de forma atômica via repositório com controle de revisão. **Mantém Supabase Auth, e-mail e perfil pessoal**.
+- **Excluir conta:** substitui a mensagem antiga de "exclusão automática ainda não disponível" por uma interface de exclusão real. Exige e-mail completo, digitar **EXCLUIR** e marcar declaração irreversível. Somente após confirmação, chama a Edge Function `gbplus-delete-account`.
+- A Edge Function usa JWT obrigatório, valida o usuário via `auth.getUser(token)`, compara o e-mail informado ao e-mail de Auth e executa `auth.admin.deleteUser(user.id, false)` **exclusivamente para o usuário autenticado**. A chave administrativa fica apenas no servidor.
+- No projeto Supabase GB+, `gbplus_documents` e `gbplus_profiles` possuem FKs para `auth.users` com exclusão em cascata; o Storage estava vazio durante a auditoria. A exclusão do usuário retira os registros vinculados. Sessões já emitidas dependem da validade de JWT e de seu vencimento.
+- Após confirmação da exclusão, tenta encerrar a sessão local e remove histórico local de conversas do próprio usuário neste dispositivo. A exclusão não apaga backups exportados ou cópias isoladas de outros dispositivos.
+- Os dois fluxos são independentes. Abrir a tela ou marcar uma caixa **não executa nenhuma exclusão**. Ação financeira e exclusão de identidade são irreversíveis e exigem confirmação explícita.
+- Novos módulos `js/account-safety.js` e `js/account-safety-ui.js`, Edge Function `supabase/functions/gbplus-delete-account/index.ts` e testes `tests/account-safety-regression.mjs` registrados na regressão.
+- Política de privacidade e referências do PWA atualizadas para **2.6.1**.
+
+### Validação
+- Teste isolado de confirmações, limpeza sem gravar, renderização dos diálogos e proteção da função remota passou com dados fictícios.
+- Função remota implantada no Supabase e configurada com `verify_jwt=true`, mas **nenhuma exclusão real foi executada para testar**.
+- Teste ponta a ponta autenticado em conta de teste, instalação PWA no aparelho real e GitHub Actions ainda necessitam de evidência. Não considerar homologado sem teste real.
+
 ## [2.6.0 — INTERFACE UNIFICADA, IMPORTAÇÃO INTUITIVA E CATÁLOGO DE SERVIÇOS] — 2026-11-06
 
 **PUBLICAÇÃO CONFIRMADA:** PR [#84](https://github.com/gaveblue/gaveblue/pull/84) integrada à `main` (commit `d6ec0df762f54f0a1c87a0ad4beebcd8dad101b8`); deploy GitHub Pages [42324669146](https://github.com/gaveblue/gaveblue/actions/runs/42324669146) concluído com `success` em 07/11/2026 01:33 UTC. Três testes funcionais isolados com dados fictícios passaram. O workflow financeiro [42324622731](https://github.com/gaveblue/gaveblue/actions/runs/42324622731) falhou **antes de iniciar as etapas**, impedindo homologação CI (issue #75). A verificação em PWA Android/iOS real continua pendente; publicação não equivale à homologação integral.
