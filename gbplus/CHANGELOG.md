@@ -1,5 +1,14 @@
 # CHANGELOG — GB+ Gestão Financeira
 
+## [2.7.4 — SEGURANÇA ADMINISTRATIVA E REVISÃO DE CI] — 2026-11-07 (CANDIDATA)
+
+**NÃO HOMOLOGADA E NÃO LIBERADA.** A função `gbplus-admin` foi republicada em Supabase Edge Function v2 com o código anterior preservado e `verify_jwt=true` no gateway. Sua verificação adicional de usuário ao vivo por `auth.getUser()` e permissão por `app_metadata.gbplus_admin` foi mantida. O arquivo `supabase/config.toml` deve refletir esse estado para não reverter no próximo deploy.
+
+**Pendências de homologação:** o workflow financeiro da 2.7.3 e uma reexecução falharam antes de qualquer etapa. A proposta inclui runner alternativo, disparos de CI na `main`, testes automatizados administrativos e de fluxo; evidência de execução bem-sucedida da CI, teste real do login administrativo, PWA Android e aprovação explícita continuam obrigatórios. Publicação do GitHub Pages não equivale a homologação.
+
+**Senhas vazadas:** proteção nativa do Supabase Auth ainda desativada. O recurso depende do plano Pro ou superior e a organização está no Free; não houve autorização de cobrança, upgrade ou implementação substituta.
+
+
 ## [2.7.3 — LANÇAMENTO COM AÇÕES NO TOPO E PERÍODO MEMORIZADO] — 2026-11-07
 
 **PUBLICAÇÃO CONFIRMADA:** PR [#91](https://github.com/gaveblue/gaveblue/pull/91) integrada à `main` por squash no commit `b24253d6d48f4056e2cd5b75faacbedd7cda58db`. GitHub Pages [#42339423278](https://github.com/gaveblue/gaveblue/actions/runs/42339423278) concluiu build e deploy com **success** em 07/11/2026 04:40 UTC. Verificações isoladas passaram, incluindo seis verificações funcionais do cabeçalho. O workflow financeiro #42339212876 falhou antes de executar qualquer etapa (0 passos). Inspeção real do PWA/Android continua pendente; publicação não equivale à homologação integral.
