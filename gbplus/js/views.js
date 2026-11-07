@@ -171,6 +171,10 @@ function cfgSection(label,rows){
 export function settingsView(db,canInstall,online=false,user=null,installed=false){
  const appVersion=document.querySelector('meta[name="gbplus-version"]')?.content||'2.1.3';
  const name=String(user?.user_metadata?.gbplus_profile?.full_name||user?.user_metadata?.full_name||user?.user_metadata?.name||user?.email?.split('@')[0]||'Minha conta').trim();
+ // Visibility is restricted to the owner; the admin API independently validates
+ // the authenticated user's live app_metadata on every request.
+ const administration=online&&user?.id==='aa9701df-8e84-42cc-b2bd-4b644a983260'&&user?.app_metadata?.gbplus_admin===true
+  ?cfgSection('ADMINISTRAÇÃO',`<a href="./admin.html" class="gb-cfg-row" data-settings-keywords="painel administrativo usuários perfis gerenciar"><span class="gb-cfg-row-icon tone-purple">${icon('shield')}</span><span class="gb-cfg-row-label"><strong>Painel administrativo</strong><small>Gerenciar usuários e perfis do GB+</small></span><span class="gb-cfg-next">${icon('chevron')}</span></a>`):'';
  const preferences=cfgSection('PREFERÊNCIAS',
   cfgOption('Aparência','Tema, cores e layout','palette','purple','settings-appearance')+
   cfgOption('Personalizar painel','Escolha e organize os cards do início','grid','blue','customize')+
@@ -193,7 +197,7 @@ export function settingsView(db,canInstall,online=false,user=null,installed=fals
   <header class="gb-cfg-header"><a href="#dashboard" class="gb-cfg-back" aria-label="Voltar ao início">${icon('arrow')}</a><h1>Configurações</h1><button type="button" class="gb-cfg-search-trigger" data-action="settings-search" aria-label="Pesquisar nas configurações" aria-expanded="false" aria-controls="gb-cfg-search">${icon('search')}</button></header>
   <div id="gb-cfg-search" class="gb-cfg-search" hidden><label for="settings-search-input" class="sr-only">Buscar configurações</label>${icon('search')}<input type="search" id="settings-search-input" placeholder="Pesquisar configurações" autocomplete="off" aria-label="Pesquisar configurações"></div>
   <a href="#profile" class="gb-cfg-profile"><span class="gb-cfg-profile-avatar">${icon('user')}</span><span class="gb-cfg-profile-label"><strong>${esc(name)}</strong><small>Gerenciar conta, dados e segurança</small></span><span class="gb-cfg-next">${icon('chevron')}</span></a>
-  ${preferences}${records}${system}${support}
+  ${administration}${preferences}${records}${system}${support}
   ${online?'<button type="button" class="gb-cfg-delete gb-cfg-row" data-action="settings-delete" data-settings-keywords="excluir conta remover permanentemente dados"><span class="gb-cfg-row-icon">'+icon('trash')+'</span><span class="gb-cfg-row-label"><strong>Excluir conta</strong><small>Excluir cadastro, login e dados permanentemente</small></span><span class="gb-cfg-next">'+icon('chevron')+'</span></button>':''}
   <p class="gb-cfg-empty" id="gb-cfg-no-results" hidden>Nenhuma configuração encontrada.</p>
   <input type="file" id="backup-input" accept=".json,application/json" hidden>
