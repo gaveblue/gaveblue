@@ -1,15 +1,15 @@
 {
-  "version": "2.7.6",
+  "version": "2.7.7",
   "build": 1,
-  "published_at": "2026-11-07T20:53:22.020Z",
-  "title": "Lançamentos mais simples, atraso visível e edição de compras no cartão",
+  "published_at": "2026-11-07T21:59:52.530Z",
+  "title": "Seletores expansíveis, serviços em destaque e valor livre no lançamento",
   "notes": [
-    "A etapa final passou a oferecer Deixar pendente, Baixar em uma conta ou Lançar no cartão de crédito, com escolhas condicionadas ao tipo e à periodicidade.",
-    "A descrição do lançamento é opcional; quando vazia, a categoria identifica o título. A caixa de foco do valor foi substituída por um sublinhado discreto.",
-    "O detalhamento de parcelas fica oculto e abre em painel próprio. Compras parceladas no cartão mostram vencimentos calculados pelas regras de fechamento da fatura.",
-    "A tela Lançamentos informa em vermelho Em atraso há X dias para títulos vencidos e com saldo pendente.",
-    "Compras no cartão de crédito agora podem ser editadas; faturas são recalculadas sem duplicidade, e alterações financeiras em faturas já pagas continuam protegidas.",
-    "Regressões isoladas do fluxo, dos avisos e da edição de compras foram executadas com dados fictícios. Testes completos em Node.js e revisão visual no Android continuam pendentes."
+    "O valor do lançamento não mostra mais linha, borda ou caixa durante a digitação. A validação de valor inválido aparece somente quando necessária, como aviso temporário.",
+    "No seletor de categorias, Serviços aparece primeiro; categorias e serviços já abrem em um painel alto e podem ser recolhidos até meia tela arrastando para baixo.",
+    "Na terceira etapa, a escolha da conta e do cartão utiliza o mesmo painel alto. Exibe ícone da instituição, nome e saldo da conta ou limite disponível do cartão.",
+    "Os saldos e limites são os valores calculados pelas movimentações registradas no GB+, sem conexão automática com bancos, sem baixa adicional e sem alterar o cálculo financeiro.",
+    "As escolhas permanecem associadas aos campos de gravação, preservando pendente, baixa em conta e compra em cartão nas três etapas.",
+    "As 26 regressões .mjs passaram em JavaScript V8 isolado com adaptadores de Node. Testes visuais no Android/PWA e a execução integral nativa em Node.js ainda não foram comprovados."
   ],
   "assets": [
     "./index.html",
