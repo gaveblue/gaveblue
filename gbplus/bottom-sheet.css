@@ -220,34 +220,64 @@ dialog#gb-picker-sheet[data-snap="expanded"]{height:calc(100dvh - 10px - env(saf
 }
 
 
-/* GB+ 2.7.3 — ações de navegação no cabeçalho, sem rodapé ocupando rolagem. */
-#modal.gb-entry-modal .modal-heading{gap:7px}
-#modal.gb-entry-modal .modal-heading h2{min-width:0;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#modal.gb-entry-modal .gb-entry-header-actions{display:flex;align-items:center;flex:none}
-#modal.gb-entry-modal .gb-entry-header-actions .gb-entry-wizard-footer{
- display:flex;align-items:center;gap:6px;margin:0;padding:0;border:0;
+/* GB+ 2.7.5 — fixed bottom navigation, separate from scrollable form fields.
+   Keep the compact sheet dimensions introduced in 2.7.3. */
+#modal.gb-entry-modal{overflow:hidden!important;max-height:calc(100dvh - 20px)}
+#modal.gb-entry-modal #modal-content{
+ display:flex;flex-direction:column;min-height:0;max-height:calc(100dvh - 20px);
 }
-#modal.gb-entry-modal .gb-entry-header-actions .gb-entry-wizard-footer>.button{
- display:inline-flex;align-items:center;justify-content:center;gap:0;
- min-width:0;min-height:34px;height:34px;padding:6px 10px;
- border-radius:10px;font-size:12px;font-weight:680;white-space:nowrap;
+#modal.gb-entry-modal .modal-heading{flex:none;gap:7px}
+#modal.gb-entry-modal .modal-heading h2{
+ min-width:0;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
-#modal.gb-entry-modal .gb-entry-header-actions [data-action="title-back"]{
- width:34px;min-width:34px!important;padding:0!important;font-size:24px!important;line-height:1;
+#modal.gb-entry-modal .modal-body{
+ flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;
 }
-#modal.gb-entry-modal .gb-entry-header-actions .gb-entry-wizard-footer[hidden]{display:none!important}
+#modal.gb-entry-modal .gb-entry-bottom-nav{
+ display:block;flex:none;position:relative;z-index:2;
+ padding:11px 21px 13px;border-top:1px solid var(--border);
+ background:var(--surface);box-shadow:0 -5px 18px #0000000a;
+}
+#modal.gb-entry-modal .gb-entry-bottom-nav .gb-entry-wizard-footer{
+ display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);
+ gap:10px;margin:0;padding:0;border:0;
+}
+#modal.gb-entry-modal .gb-entry-bottom-nav .gb-entry-wizard-footer[hidden]{display:none!important}
+#modal.gb-entry-modal .gb-entry-bottom-nav [data-entry-footer="1"]{
+ grid-template-columns:1fr;
+}
+#modal.gb-entry-modal .gb-entry-bottom-nav [data-entry-footer="1"]>.button{
+ justify-self:end;width:min(100%,200px);
+}
+#modal.gb-entry-modal .gb-entry-bottom-nav .gb-entry-wizard-footer>.button{
+ display:flex;justify-content:center;align-items:center;gap:6px;
+ min-height:46px;border-radius:11px;padding:10px 12px;
+ font-size:13px;font-weight:720;white-space:nowrap;
+}
+#modal.gb-entry-modal .gb-entry-bottom-nav .gb-entry-wizard-footer>.button:focus-visible{
+ outline:2px solid var(--ink);outline-offset:2px;
+}
 @media(max-width:760px){
- #modal.gb-entry-modal[data-gb-snap="partial"][data-gb-entry-step="1"]{height:min(575px,88dvh)}
- #modal.gb-entry-modal .modal-heading{padding-right:13px;padding-left:17px}
- #modal.gb-entry-modal .modal-heading h2{font-size:16px;letter-spacing:-.4px}
- #modal.gb-entry-modal .gb-entry-header-actions .gb-entry-wizard-footer>.button{
-  min-height:32px;height:32px;font-size:11px;padding:5px 9px;
+ /* Same partial-sheet height as 2.7.3; only the buttons move. */
+ #modal.gb-entry-modal[data-gb-snap="partial"][data-gb-entry-step="1"]{
+  height:min(575px,88dvh);
  }
- #modal.gb-entry-modal .gb-entry-header-actions [data-action="title-back"]{
-  min-width:31px!important;width:31px;
+ #modal.gb-entry-modal #modal-content{max-height:none}
+ #modal.gb-entry-modal .modal-heading{padding-right:17px;padding-left:17px}
+ #modal.gb-entry-modal .modal-heading h2{font-size:19px}
+ #modal.gb-entry-modal .modal-body{
+  padding-bottom:12px;
+ }
+ #modal.gb-entry-modal .gb-entry-bottom-nav{
+  padding:9px 17px calc(11px + env(safe-area-inset-bottom));
+ }
+ #modal.gb-entry-modal .gb-entry-bottom-nav .gb-entry-wizard-footer>.button{
+  min-height:45px;font-size:12px;padding:9px 12px;
  }
 }
 @media(max-width:355px){
- #modal.gb-entry-modal .modal-heading h2{font-size:14px}
- #modal.gb-entry-modal .gb-entry-header-actions .gb-entry-wizard-footer>.button{padding-inline:7px}
+ #modal.gb-entry-modal .gb-entry-bottom-nav{padding-inline:12px}
+ #modal.gb-entry-modal .gb-entry-bottom-nav .gb-entry-wizard-footer>.button{
+  font-size:11px;padding-inline:8px;
+ }
 }
