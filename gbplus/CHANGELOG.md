@@ -2,6 +2,29 @@
 
 Registro de mudanças do aplicativo localizado em `gbplus/`. Toda versão e toda compilação deve possuir uma entrada própria. **Uma alteração não deve ser considerada homologada apenas porque existe commit, teste escrito ou publicação.** A homologação exige evidências da execução e aprovação explícita.
 
+## [2.5.1 · compilação 1 — CONTAS E CARTÕES EM UMA TELA] — 2026-11-06
+
+**Situação na preparação:** alteração em ramo `feature/gbplus-251-proximos-ajustes`, aguardando revisão, merge e implantação GitHub Pages. A publicação anterior é a 2.5.0, compilação 9.
+
+### Organização da interface
+- Unificadas as páginas de **Contas bancárias** e **Cartões de crédito** em uma entrada de navegação: **Contas e cartões** (`#accounts`), com seletor compacto **Contas | Cartões** no topo, inspirado somente na organização apresentada pelo usuário.
+- O visual preexistente das contas e cartões foi preservado: cartões de conta, saldos, instituições, limites, faturas, compras, transferências, histórico de conciliação, edição e botões mantêm a implementação anterior.
+- Na aba Contas permanecem os botões `Bancos e ícones`, `Transferir` e `Nova conta`. Na aba Cartões permanece `Novo cartão`, além de todos os controles próprios dos cartões de crédito.
+- A entrada antiga `#cards` continua aceita para quem tem link ou atalho antigo: abre a aba Cartões dentro da rota única sem apagar configurações pessoais. Os atalhos móveis salvos mantêm compatibilidade.
+- Mudança **exclusivamente de apresentação e navegação**; nenhum título, pagamento, saldo, limite, compra ou dado do usuário é modificado pela alternância.
+
+### Técnica e verificação
+- Criado `js/accounts-cards-view.js` e adicionado ao manifesto de assets; os componentes originais aceitam o modo de inserção na tela sem duplicar cabeçalhos.
+- CSS leve para seletor arredondado, foco via teclado, controle acessível (`role=tablist/tab/tabpanel`) e temas claro/escuro sem introduzir uma nova paleta.
+- `gbplus/tests/accounts-cards-unified-regression.mjs` verifica o seletor, compatibilidade dos links e ausência de mutação dos dados. Acrescentado à lista de regressões do repositório.
+- A estrutura e os conteúdos reais de Contas e Cartões foram executados com dados totalmente fictícios em Node.js 22.16.0 e as 11 suítes regressivas anteriores passaram; `node --check` aprovou os módulos de apresentação e o controlador.
+- **O Chromium do ambiente de teste travou ao gerar uma captura visual. Não registrar essa tentativa como homologação de layout no aparelho físico.** A comprovação do PWA completo em Android/iOS e o runner CI do GitHub Actions permanecem pendentes.
+
+### Próximas compilações da 2.5.1
+- O catálogo de **26 serviços** (streaming, música, delivery, mobilidade e serviços digitais) e o plano de logos estão preparatórios, **não disponíveis ainda no formulário**.
+- Logos oficiais somente depois de verificação de fonte/direito de uso. Não declarar Netflix, HBO Max, iFood, 99Food ou Plus Delivery como integrações do GB+.
+- Novos ajustes da 2.5.1 serão versionados e homologados individualmente.
+
 ## [2.5.0 · compilação 9 — MAPEAMENTO MANUAL DE CSV] — 2026-11-06
 
 **Publicação confirmada:** PR [#79](https://github.com/gaveblue/gaveblue/pull/79) integrado e GitHub Pages [42314574315](https://github.com/gaveblue/gaveblue/actions/runs/42314574315) concluído com `success` em 06/11/2026 (commit `294f9266921ac6885373af699e4f195bb8a40832`). Esta compilação **não altera** as regras de gravação, baixa, reversão ou isolamento financeiro aprovadas na build 8.

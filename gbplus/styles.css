@@ -1014,3 +1014,27 @@ body.auth-locked .mobile-nav-fade{display:none!important}
  .gb-balance-bank .gb-bank-badge{width:26px;height:26px;min-width:26px;min-height:26px;max-width:26px;max-height:26px}
  .gb-balance-bank>.gb-balance-bank-amount{font-size:12px}
 }
+
+
+/* GB+ 2.5.1 — Contas / Cartões: uma página e duas abas compactas.
+   Mantém os componentes, cores, saldos, botões e cartões atuais intactos. */
+.gb-accounts-cards-page{min-width:0}
+.gb-finance-tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;
+ padding:5px;max-width:660px;width:100%;margin:16px 0 22px;
+ background:var(--soft);border:1px solid var(--border);border-radius:999px}
+.gb-finance-tab{display:flex;align-items:center;justify-content:center;gap:9px;min-width:0;
+ min-height:44px;padding:9px 15px;border:0;border-radius:999px;
+ background:transparent;color:var(--muted);font:inherit;font-size:13px;font-weight:580;
+ cursor:pointer;transition:background .15s ease,color .15s ease,box-shadow .15s ease}
+.gb-finance-tab .icon{width:17px;height:17px;flex-shrink:0}
+.gb-finance-tab.is-selected{background:var(--surface);color:var(--ink);
+ box-shadow:0 1px 4px #0000000d;font-weight:690}
+.gb-finance-tab:not(.is-selected):hover{background:var(--hover);color:var(--ink)}
+.gb-finance-tab:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.gb-accounts-cards-page [role=tabpanel]{min-width:0}
+@media(max-width:760px){
+ .gb-finance-tabs{max-width:none;margin:14px 0 20px;padding:4px}
+ .gb-finance-tab{min-height:46px;font-size:13px;padding:9px 10px}
+ .gb-accounts-cards-page .page-heading{margin-bottom:0}
+}
+@media(prefers-reduced-motion:reduce){.gb-finance-tab{transition:none}}

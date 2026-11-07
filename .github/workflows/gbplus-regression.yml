@@ -29,6 +29,8 @@ jobs:
           node-version: '22'
       - name: Regressões anteriores
         run: node gbplus/tests/finance-regression.mjs
+      - name: Unificação de Contas e Cartões (2.5.1)
+        run: node gbplus/tests/accounts-cards-unified-regression.mjs
       - name: Leitura OFX e CSV
         run: node gbplus/tests/bank-import-preview-regression.mjs
       - name: Mapeamento manual de CSV não padronizado
