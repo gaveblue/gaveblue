@@ -4,7 +4,7 @@
 import {esc,icon} from './ui.js?v=20261105-72';
 import {gbIcon,categoryIconFor} from './gb-icons.js?v=20261104-42';
 import {SERVICE_CATALOG,SERVICE_GROUPS,serviceSearchKey,isServiceExpenseCategory} from './service-catalog.js?v=20261106-2630';
-import {serviceIconMarkup,serviceCategoryPreviewMarkup} from './service-ui.js?v=20261107-2710';
+import {serviceIconMarkup,serviceCategoryPreviewMarkup} from './service-ui.js?v=20261107-2720';
 
 const normalize=value=>String(value??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
 const picker=()=>document.querySelector('#gb-picker-sheet');
