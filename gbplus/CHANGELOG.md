@@ -2,6 +2,16 @@
 
 Registro de mudanças do aplicativo localizado em `gbplus/`. Toda versão e toda compilação deve possuir uma entrada própria. **Uma alteração não deve ser considerada homologada apenas porque existe commit, teste escrito ou publicação.** A homologação exige evidências da execução e aprovação explícita.
 
+## [2.5.1 · compilação 2 — AJUSTE DE REGRESSÃO E HOMOLOGAÇÃO] — 2026-11-06
+
+**Situação:** código em revisão, aguardando merge e deploy GitHub Pages. Nenhuma mudança adicional no layout de Contas/Cartões nem no mecanismo financeiro.
+
+- Corrigido `tests/bank-import-readonly-release-regression.mjs`: o teste antigo exigia a versão 2.5.0 build 9 de forma fixa, mesmo quando o aplicativo já estava em 2.5.1. A verificação agora compara `index.html` com `version.json`, preservando a garantia de que o importador não grava nada durante a simples prévia.
+- **12/12 suítes de regressão aprovadas em Node.js 22.16.0 real** sobre o pacote do GitHub Pages da 2.5.1 build 1 com o teste corrigido. O teste específico da tela unificada cobre aba ativa, conteúdo antigo, links `#cards`, teclado e ausência de alteração de dados.
+- Atualizados metadados de compilação e chave de cache PWA para 2.5.1 build 2.
+- **Limitações:** Chromium automatizado do ambiente travou na geração de captura; teste visual e login no PWA instalado em celular real ainda pendentes. Workflow financeiro GitHub Actions permanece impedido antes do runner, issue #75.
+- Os 26 serviços e logos de streaming/delivery seguem **planejados**, ainda não foram integrados ao formulário nesta compilação.
+
 ## [2.5.1 · compilação 1 — CONTAS E CARTÕES EM UMA TELA] — 2026-11-06
 
 **Situação na preparação:** alteração em ramo `feature/gbplus-251-proximos-ajustes`, aguardando revisão, merge e implantação GitHub Pages. A publicação anterior é a 2.5.0, compilação 9.
