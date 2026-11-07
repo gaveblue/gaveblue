@@ -60,6 +60,6 @@ export function servicePickerMarkup(title=null){
    '</div><p class="gb-service-empty" hidden>Nenhum serviço encontrado. Você pode usar "Outro serviço".</p>'+
    '<button type="button" class="gb-service-clear" data-action="title-service-clear">Não identificar serviço</button>'+
   '</div>'+
-  '<p class="gb-service-help">Selecionar um serviço não cria assinatura, cobrança, despesa ou baixa. Você decide os valores e vencimentos.</p>'+
+  '<p class="gb-service-help" id="gb-service-naming-hint">O serviço escolhido define o nome do lançamento. Nenhuma assinatura ou baixa é criada automaticamente.</p>'+
  '</section>';
 }
