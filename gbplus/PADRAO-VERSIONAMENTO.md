@@ -13,7 +13,7 @@ Aumentar X ou Y zera os componentes seguintes. A numeração não é uma medida 
 ## Transição sem apagar o histórico
 
 - A **2.5.1** já possui a compilação interna 2 publicada e a compilação interna 3 **candidata** no PR #82. **Não reescrever** esses registros históricos nem considerá-la publicada antes de homologação.
-- A **próxima entrega** de pequeno porte deve ser **2.5.2**, mesmo que tecnicamente sejam necessários múltiplos commits para prepará-la.
+- **Histórico de transição:** inicialmente se previu 2.5.2 como atualização incremental, mas o responsável consolidou o escopo e autorizou a **2.6.0** em 06/11/2026. A nova versão foi publicada no PR #84. As próximas versões devem respeitar X.Y.Z a partir deste marco.
 - O catálogo de 26 serviços planejado anteriormente será avaliado em conjunto com a nova experiência da tela "Novo lançamento" para a versão 2.5.2; nenhuma dessas funcionalidades está entregue enquanto faltar integração e homologação.
 - A **2.6.0** permanece reservada às melhorias de interface e organização já planejadas para uma atualização intermediária.
 - Identificadores técnicos de cache, commit e artefato podem continuar existindo internamente, quando necessários para distribuir o PWA com segurança, mas não são um segundo número de versão apresentado ao usuário.
