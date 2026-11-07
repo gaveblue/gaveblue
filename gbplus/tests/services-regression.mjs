@@ -64,7 +64,7 @@ t.serviceId='custom';t.serviceName='Lavanderia da cidade';
 assert.equal(store.validateDatabase(db),db,'Custom service must remain valid');
 t.serviceName='';
 assert.throws(()=>store.validateDatabase(db),/nome do serviço/);
-t.serviceId='streaming-netflix';t.serviceName='';t.type='income';
+t.serviceId='streaming-netflix';t.serviceName='';t.type='income';t.categoryId=db.categories.find(c=>c.type==='income').id;
 assert.throws(()=>store.validateDatabase(db),/serviço associado/);
 const formSource=src('forms');
 assert(formSource.includes('servicePickerMarkup(t)'), 'New and edit title must show picker');
