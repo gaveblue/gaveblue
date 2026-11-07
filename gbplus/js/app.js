@@ -1256,7 +1256,7 @@ document.addEventListener('change',async e=>{if(!db)return;const el=e.target;try
    const select=el.form?.querySelector('#entry-category');
    if(select){
     select.innerHTML=db.categories.filter(c=>c.type===el.value).map(c=>
-     `<option value="${esc(c.id)}" data-icon="${esc(categoryIconFor(c))}">${esc(c.name)}</option>`).join('');
+     `<option value="${esc(c.id)}" data-icon="${esc(categoryIconFor(c))}" data-service-preview="${isServiceExpenseCategory(c)}">${esc(c.name)}</option>`).join('');
     syncEntrySelect(select);
    }
    syncEntryServiceCategory(el.form);
