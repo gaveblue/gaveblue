@@ -1,15 +1,17 @@
 {
-  "version": "2.5.1",
-  "build": 3,
+  "version": "2.5.2",
+  "build": 1,
   "published_at": null,
-  "title": "Seletor fixo e cabeçalho padronizado em Contas e Cartões",
+  "title": "Importação bancária mais clara e seleção de movimentações",
   "notes": [
-    "Compilação candidata a homologação: o seletor Contas/Cartões permanece acessível durante a rolagem da tela.",
-    "Contas e Cartões têm título geral e posição idêntica para o botão principal de cadastro.",
-    "Na aba Contas permanecem Nova conta, Bancos e ícones e Transferir; na aba Cartões permanecem Novo cartão e o acesso a Nova compra.",
-    "Preservados os painéis financeiros originais, as rotas #accounts/#cards, o foco por teclado, os saldos e as regras de gravação.",
-    "Implementação isolada na branch de ajustes, sem publicação da build 3 na main.",
-    "Testes completos Node/CI, revisão visual em Android/iOS e homologação explícita pendentes."
+    "Resumo do extrato reorganizado com entradas, saídas, quantidade de movimentos e possíveis vínculos, explicando que os valores ainda não são lançamentos.",
+    "Filtros de todas, saídas, entradas, vínculos possíveis, itens para conferir, sem vínculo e decisões já preparadas.",
+    "Marcação individual ou seleção apenas dos movimentos da página atual, com contagem de itens e total informativo das saídas selecionadas.",
+    "Preparação de decisões em lote: manter pendente, ignorar ou criar despesas já pagas, exigindo categoria e restringindo esta última ação a saídas sem vínculo identificado.",
+    "Conciliação com baixa existente continua individual; revisão integral e confirmações explícitas permanecem obrigatórias antes de qualquer gravação.",
+    "Suporte responsivo; controle de seleção e alterações de interface não alteram saldos ou títulos por si só.",
+    "Atualizações futuras passam a usar versões X.Y.Z; compilações deixam de aparecer na interface do usuário.",
+    "Versão 2.5.2 ainda em desenvolvimento e não publicada. Ajustes de Novo lançamento e catálogo de serviços seguem aguardando a inspiração visual e integração."
   ],
   "assets": [
     "./index.html",
@@ -166,23 +168,23 @@
   "highlights": [
     {
       "icon": "wallet",
-      "title": "Contas e cartões no mesmo padrão",
-      "description": "Cabeçalho único e ações de cadastro no mesmo lugar nas duas abas."
+      "title": "Entenda seu extrato",
+      "description": "Entradas e saídas com explicações objetivas e filtros por tipo."
     },
     {
-      "icon": "credit-card",
-      "title": "Seletor fixo na rolagem",
-      "description": "Troque entre Contas e Cartões sem retornar ao começo da página."
+      "icon": "check",
+      "title": "Escolha cada movimento",
+      "description": "Selecione despesas específicas para preparar baixa, ignorar ou manter pendente."
     },
     {
       "icon": "shield",
-      "title": "Dados financeiros preservados",
-      "description": "Alterações restritas à interface; sem mudar contas, compras, saldos ou faturas."
+      "title": "Confirmação antes de baixar",
+      "description": "Nenhuma despesa afeta seu saldo sem revisão e autorização explícita."
     }
   ],
-  "release_status": "candidate_pending_homologation_not_published",
+  "release_status": "candidate_2_5_2_not_published",
   "homologation": {
-    "status": "pending_node_ci_device_validation",
-    "notes": "Build 3 candidata: teste funcional isolado com registros fictícios em JavaScript e inspeção de arquivos. Ainda não há comprovação de execução completa das suítes Node, CI GitHub Actions ou homologação visual em aparelho real. Não publicar sem aprovação."
+    "status": "pending_complete_node_ci_and_device_tests",
+    "notes": "Alterações da importação verificadas isoladamente em JavaScript com dados 100% fictícios. Regressão Node adicionada à pipeline, mas execução integral e homologação no Android/PWA pendentes; não publicar sem aprovação."
   }
 }
