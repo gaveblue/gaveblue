@@ -44,7 +44,9 @@ function optionMarkup(kind,item,index,selected){
   (isSelected?icon('check','gb-sheet-choice-check'):'')+'</button>';
 }
 function categorySections(categories,selected){
- const ordered=[...categories].sort((a,b)=>collator.compare(a.name,b.name));
+ // Surface Serviços first; selecting it still opens the service picker separately.
+ const ordered=[...categories].sort((a,b)=>
+  Number(isServiceExpenseCategory(b))-Number(isServiceExpenseCategory(a))||collator.compare(a.name,b.name));
  return [{title:'Categorias disponíveis',items:ordered.map((item,i)=>optionMarkup('category',item,i,selected))}];
 }
 function serviceSections(selected){
@@ -64,17 +66,39 @@ function serviceSections(selected){
  ]});
  return sections;
 }
+function financialSections(kind,items,selected){
+ const ordered=[...items].sort((a,b)=>collator.compare(a.name,b.name));
+ const options=ordered.map(item=>{
+  const id=String(item.id),name=String(item.name);
+  const chosen=id===selected;
+  // badgeMarkup is produced locally by the trusted bankBadge/icon renderer,
+  // never from user-provided HTML. Names, hints and searchable text are escaped.
+  const badge=String(item.badgeMarkup||'');
+  const detail=String(item.subtitle||'');
+  return '<button type="button" class="gb-sheet-choice gb-sheet-finance-choice'+(chosen?' is-selected':'')+
+   '" role="option" aria-selected="'+chosen+'" data-sheet-choice="'+esc(id)+'" data-sheet-search="'+
+   esc(normalize(name+' '+detail+' '+(item.search||'')))+'">'+
+   '<span class="gb-sheet-finance-badge" aria-hidden="true">'+badge+'</span>'+
+   '<span class="gb-sheet-finance-text"><strong>'+esc(name)+'</strong><small>'+esc(detail)+'</small></span>'+
+   (chosen?icon('check','gb-sheet-choice-check'):'')+'</button>';
+ });
+ return [{title:kind==='account'?'Contas disponíveis':'Cartões disponíveis',items:options}];
+}
 export function sheetGroupsCount(groups){
  return groups.reduce((count,group)=>count+group.items.length,0);
 }
 export function openGbPickerSheet({kind,items=[],selected='',onPick}){
  const root=picker();
- if(!root||!['category','service'].includes(kind)||typeof onPick!=='function')return false;
+ if(!root||!['category','service','account','card'].includes(kind)||typeof onPick!=='function')return false;
  // Never replace a live dialog: wait for its close event before opening another.
  if(root.open)return false;
- const sections=kind==='category'?categorySections(items,selected):serviceSections(selected);
- const title=kind==='category'?'Selecione a categoria':'Qual serviço?';
- const searchHint=kind==='category'?'Busque por uma categoria':'Busque por um serviço';
+ const sections=kind==='category'?categorySections(items,selected):
+  kind==='service'?serviceSections(selected):financialSections(kind,items,selected);
+ const titles={category:'Selecione a categoria',service:'Selecione o serviço',
+  account:'Selecione uma conta',card:'Selecione um cartão'};
+ const hints={category:'Busque por uma categoria',service:'Busque por um serviço',
+  account:'Busque por uma conta',card:'Busque por um cartão'};
+ const title=titles[kind],searchHint=hints[kind];
  const count=sheetGroupsCount(sections);
  const groups=sections.map((section,i)=>
   '<section class="gb-sheet-group" data-sheet-group="'+i+'"><h3>'+esc(section.title)+
@@ -94,9 +118,10 @@ export function openGbPickerSheet({kind,items=[],selected='',onPick}){
  active={onPick,returnFocus:document.activeElement};
  selectionAfterClose=null;
  drag=null;suppressGrabClick=false;
- snap(root,'partial');
+ // Open fully expanded: a downward drag collapses to half-height.
+ snap(root,'expanded');
  root.showModal();
- root.querySelector('[data-sheet-grab]')?.focus({preventScroll:true});
+ root.querySelector('[data-sheet-close]')?.focus({preventScroll:true});
  return true;
 }
 /** Read-only due-date detail sheet; the title form stays mounted underneath. */
