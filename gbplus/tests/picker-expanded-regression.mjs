@@ -16,7 +16,7 @@ const handle={attributes:{},setAttribute(k,v){this.attributes[k]=v},focus(){},se
 const closeButton={focus(){}};
 const root={
  open:false,dataset:{},listeners:{},innerHTML:'',
- querySelector(s){return s==='[data-sheet-grab]'?handle:s==='[data-sheet-close]'?closeButton:null},
+ querySelector(s){return ['[data-sheet-grab]','.gb-sheet-grab'].includes(s)?handle:s==='[data-sheet-close]'?closeButton:null},
  addEventListener(event,fn){this.listeners[event]=fn},
  showModal(){this.open=true},
  close(){this.open=false;this.listeners.close?.()}
