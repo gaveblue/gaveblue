@@ -1,17 +1,19 @@
 {
-  "version": "2.5.1",
-  "build": 2,
-  "published_at": "2026-11-07T00:20:18Z",
-  "title": "Contas e Cartões unificados — regressões revisadas",
+  "version": "2.6.0",
+  "build": 1,
+  "published_at": null,
+  "title": "Contas e cartões, extratos mais claros e serviços no lançamento",
   "notes": [
-    "Contas e Cartões permanecem organizados em uma única tela com duas abas compactas, sem alterar os componentes preexistentes.",
-    "As antigas rotas e atalhos de Cartões continuam direcionando à aba Cartões na tela unificada.",
-    "Corrigido um teste herdado da 2.5.0 que comparava números fixos de versão, impedindo aprovação das regressões apesar do comportamento correto.",
-    "12/12 suítes regressivas passam em Node.js 22.16.0 sobre os arquivos implantados da 2.5.1 build 1 com o teste corrigido.",
-    "A mudança continua exclusivamente visual e de navegação; contas, saldos, faturas e limites não são modificados.",
-    "Catálogo de serviços da 2.5.1 segue preparado; logos oficiais e seletor dos serviços ainda não foram publicados.",
-    "Teste visual automatizado em Chromium travou neste ambiente e a execução CI GitHub Actions permanece bloqueada antes do runner.",
-    "Build 2 publicada no GitHub Pages (run 42317536214), após PR #81. 12/12 testes Node passaram e o seletor Contas/Cartões preserva dados anteriores."
+    "Contas e Cartões agora compartilham uma tela, com alternância fixa durante a rolagem, cabeçalho uniforme e ações específicas em cada aba.",
+    "Importações OFX/CSV exibem resumo amigável, filtros de entradas e saídas e seleção de movimentos por página.",
+    "Decisões em lote permitem ignorar, manter pendente ou preparar despesa paga, com confirmação dupla antes de qualquer alteração financeira.",
+    "O formulário Novo lançamento oferece catálogo de 26 serviços de streaming, música, delivery, mobilidade e serviços digitais, inclusive Outro serviço.",
+    "13 marcas têm pictogramas locais de referência e 13 usam iniciais neutras; não há integração automática com plataformas nem parceria declarada.",
+    "A identificação de serviço é opcional, editável e preservada nos lançamentos, nos detalhes, no histórico e em backup.",
+    "Periodicidade e valor sempre dependem de escolha e confirmação do usuário. Selecionar serviço não cria título ou despesa automaticamente.",
+    "Convenção pública de versões X.Y.Z: não são exibidas compilações nas mensagens de atualização.",
+    "A remodelação completa do formulário Novo lançamento continua no planejamento para avaliação após o envio da inspiração visual.",
+    "Validação Node, GitHub Actions e conferência em aparelho real são registradas em separado das alterações do código."
   ],
   "assets": [
     "./index.html",
@@ -163,28 +165,35 @@
     "./js/bank-import-ui.js",
     "./js/bank-reconciliation.js",
     "./js/accounts-cards-view.js",
-    "./js/service-catalog.js"
+    "./js/service-catalog.js",
+    "./js/service-brand-paths.js",
+    "./js/service-ui.js"
   ],
   "highlights": [
     {
-      "icon": "wallet",
-      "title": "Contas e cartões juntos",
-      "description": "Uma única tela para saldos bancários, cartões de crédito, limites e faturas."
+      "icon": "credit-card",
+      "title": "Contas e cartões em harmonia",
+      "description": "Troque entre as duas abas sem perder a navegação e com ações organizadas."
     },
     {
-      "icon": "credit-card",
-      "title": "Troca rápida por abas",
-      "description": "Alternância discreta entre Contas e Cartões, preservando todos os controles existentes."
+      "icon": "wallet",
+      "title": "Importação mais simples",
+      "description": "Filtre movimentações, selecione despesas e confira tudo antes da baixa."
+    },
+    {
+      "icon": "sparkles",
+      "title": "26 serviços identificáveis",
+      "description": "Netflix, iFood, Spotify e outros em um catálogo opcional no lançamento."
     },
     {
       "icon": "shield",
-      "title": "Sem alteração financeira",
-      "description": "A mudança é de organização e navegação; não altera saldos, limites nem faturas."
+      "title": "Seu saldo sob controle",
+      "description": "Nenhuma ação de serviço ou seleção bancária grava dinheiro sem autorização."
     }
   ],
-  "release_status": "published_accounts_cards_unified_ci_pwa_pending",
+  "release_status": "candidate_2_6_0_pending_publication",
   "homologation": {
-    "status": "node_regressions_passed_ci_pwa_pending",
-    "notes": "12 de 12 suítes aprovadas em Node 22.16.0 real com o código da 2.5.1 e teste de versão corrigido. GitHub Pages build2 42317536214 concluído com success. Captura Chromium travou; PWA instalado e runner de regressões GitHub Actions ainda sem homologação."
+    "status": "isolated_service_and_import_checks_passed_full_ci_device_pending",
+    "notes": "Testes de conteúdo e verificações isoladas com dados sintéticos realizados, sem impacto financeiro. A execução completa do pipeline Node/CI e a validação visual do PWA continuam pendentes até evidência. Publicação autorizada pelo responsável do produto."
   }
 }

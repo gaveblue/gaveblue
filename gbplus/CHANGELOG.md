@@ -2,6 +2,68 @@
 
 Registro de mudanças do aplicativo localizado em `gbplus/`. Toda versão e toda compilação deve possuir uma entrada própria. **Uma alteração não deve ser considerada homologada apenas porque existe commit, teste escrito ou publicação.** A homologação exige evidências da execução e aprovação explícita.
 
+## [2.6.0 — INTERFACE UNIFICADA, IMPORTAÇÃO INTUITIVA E CATÁLOGO DE SERVIÇOS] — 2026-11-06
+
+**Status inicial: CANDIDATA À PUBLICAÇÃO.** Publicação solicitada e autorizada pelo responsável do produto neste chat. Evidências de testes e resultado do GitHub Pages devem ser registrados posteriormente, sem confundir merge/deploy com homologação integral.
+
+### Entregas consolidadas
+- Unificação de **Contas e Cartões** com seletor sticky, cabeçalho padronizado, cadastro no mesmo local e ações contextuais, preservando os componentes financeiros originais (implementação iniciada na 2.5.1).
+- Importação OFX/CSV reformulada para fácil compreensão: resumo de entradas/saídas, texto preventivo sobre duplicidade, filtros e checkboxes para selecionar movimentações individuais ou a página atual.
+- Decisões em lote de **ignorar, manter pendente ou preparar despesa paga**. A última exige categoria e só é elegível para saída negativa, sem vínculo ou duplicidade; conciliar com baixa existente continua individual.
+- Cada decisão continua sendo revisada e confirmada. Criar título com baixa requer confirmação da conta e consentimento expresso do impacto no saldo. Seleção não grava nem baixa.
+- Catálogo de **26 serviços** em cinco grupos no **Novo lançamento**: streaming, música, delivery, mobilidade e serviços digitais. Busca textual, filtro por grupo e inclusão de **Outro serviço** com nome personalizado.
+- **13 pictogramas de marcas empacotados no aplicativo**, obtidos do acervo vetorial Simple Icons com procedência documentada em `SERVICE-ICON-SOURCES.md`; os 13 restantes apresentam iniciais neutras sem inventar logotipos. Uso visual não significa integração/parceria.
+- Ao escolher serviço, preencher a descrição **somente se ela estiver vazia**; não modificar valores, vencimentos, categorias, contas ou periodicidade. Assinaturas permanecem opcionais.
+- A identificação opcional `serviceId`/`serviceName` é persistida como atributo do título e mostrada em detalhes e na lista de lançamentos. Não há migração obrigatória ou novo esquema financeiro.
+- Novas regras de validação para serviço opcional nos backups e armazenamento online. `version.json`, cache PWA e referências de módulos atualizados para **2.6.0**.
+- Removida a exibição de numeração interna de compilações ao usuário no atualizador; a identificação pública segue somente `X.Y.Z`.
+
+### Verificações e ressalvas
+- Teste de serviço `tests/services-regression.mjs` e teste de interface de importação `tests/bank-import-usability-regression.mjs` adicionados à pipeline financeira.
+- Verificações isoladas com dados 100% fictícios indicam comportamento esperado e ausência de alterações financeiras antes de confirmação. A realização integral das regressões Node/GitHub Actions e homologação visual em PWA instalado **depende de execução documentada**.
+- A identidade de marca está sujeita às diretrizes de cada titular (Simple Icons não garante liberação de marcas).
+- A reformulação visual completa de **Novo lançamento** permanece em aberto até o envio da inspiração pelo responsável do produto; esta atualização integra serviços ao formulário atual sem inventar novo layout.
+
+## [2.5.2 — IMPORTAÇÕES MAIS CLARAS E SELEÇÃO CONTROLADA] — 2026-11-06
+
+**Status: EM DESENVOLVIMENTO — SEM HOMOLOGAÇÃO OU PUBLICAÇÃO.** Branch `feature/gbplus-252-importacao-clara`. Esta atualização depende da integração/homologação anterior da 2.5.1; não foi incorporada à `main`.
+
+### Objetivo: compreensão no primeiro uso
+- Resumo do extrato com rótulos claros de **Entradas no banco**, **Saídas do banco**, quantidade de movimentos e possíveis vínculos. Texto explícito evita confundir dados do banco com receitas/despesas já registradas.
+- Filtros por **Todos, Saídas, Entradas, Possíveis vínculos, Conferir, Sem vínculo e Com decisão**. Paginação permanece para não sobrecarregar dispositivos com milhares de movimentos.
+- Lista de movimentos com seleção por checkbox e **Selecionar esta página**, com desmarcação disponível; seleções não são o mesmo que decisões e não alteram saldos.
+- Ações coletivas apenas preparatórias: **Manter pendente**, **Ignorar** e **Preparar despesas pagas (com baixa)**. A última exige categoria de despesas e só aceita movimentos negativos que estejam sem vínculo; entradas, duplicidades e movimentos com correspondência não podem passar por baixa coletiva.
+- Manter **Vincular à baixa existente** como decisão individual, prevenindo associação incorreta de muitas movimentações a um mesmo pagamento.
+- Ajuda discreta explica cada ação e quando ela pode modificar o saldo; revisão final passa a listar todas as decisões do lote (até o limite de 200), não somente as 50 primeiras.
+
+### Salvaguardas
+- Apenas a decisão **Criar despesa e registrar baixa**, validada no `reviewSelection`, pode gerar título e pagamento. A aplicação em lote é **somente memória**, sem `commit()`, gravação de saldo ou envio do arquivo bancário a terceiros.
+- Continuam exigidas duas confirmações distintas: conta bancária correta e, para criação de título/baixa, consentimento explícito sobre impacto financeiro.
+- Persistem limites e barreiras do núcleo 2.5.0: até 50 novos títulos por lote, 200 decisões por lote, rejeição de movimento futuro, duplicado, incompatível ou semelhante a título existente.
+- Sem alteração no backend, esquema de dados, liquidação de faturas ou regras de conciliação.
+- `tests/bank-import-usability-regression.mjs` acrescentado à pipeline de regressões, cobrindo filtros, seleção, erros e confirmação; testes completos e interface real ainda **não executados/homologados** nesta rodada.
+- Metadados e cache de teste versionados como **2.5.2**; o identificador interno `build` continua para compatibilidade técnica, mas deixou de ser exibido ao usuário no atualizador.
+
+### Pendente antes da liberação
+- Validar teste Node e regressões financeiras, CI quando runner disponível (issue #75), UI em Android/PWA e desktop, acessibilidade e o vínculo correto com o plano de serviços/Novo lançamento.
+- Pedir a aprovação explícita do responsável pelo produto antes da implantação.
+
+## [2.5.1 · compilação 3 — CABEÇALHO PADRONIZADO E SELETOR FIXO] — 2026-11-06
+
+**Status: CANDIDATA, SEM PUBLICAÇÃO E SEM HOMOLOGAÇÃO FINAL.** Implementação isolada em `feature/gbplus-251-ajustes-seguintes`. Não alterar a `main` nem considerar a compilação 3 liberada até obter evidências e aprovação explícita.
+
+### Ajustes de usabilidade
+- Contas e Cartões passam a usar o mesmo título de página **Contas e cartões**, a mesma hierarquia de cabeçalho, o mesmo alinhamento para botão principal de cadastro e a mesma área para ações secundárias.
+- O seletor compacto **Contas | Cartões** fica **sticky** no alto da área visível ao rolar a página, incluindo layouts móveis com suporte a *safe area*; mantém navegação por teclado e atributos de acessibilidade.
+- **Contas:** `Nova conta`, `Bancos e ícones`, `Transferir`; **Cartões:** `Novo cartão`, `Nova compra`. Cada ação mantém o formulário original, sem repetir ações que não se aplicam à aba.
+- Permanecem intocados o cálculo de saldos, a conta bancária, as transações, limites, faturas, compras, importação bancária, cadastros e regras de segurança/isolamento.
+- Atualizados os identificadores de assets/cache e o manifesto da compilação candidata, sem publicação em produção.
+- Acrescentadas verificações ao teste `tests/accounts-cards-unified-regression.mjs` para estrutura uniforme, ações contextuais e CSS sticky.
+
+### Validação pendente
+- Verificação funcional isolada com dados fictícios em JavaScript apontou cabeçalhos e ações esperados; **não equivale à execução completa de Node 22 ou à homologação do PWA**.
+- Executar regressões Node, revisar comportamento do seletor em rolagem e modal nos navegadores móveis, executar CI quando o runner estiver disponível (issue #75), registrar resultados e obter aprovação explícita antes da liberação.
+
 ## [2.5.1 · compilação 2 — AJUSTE DE REGRESSÃO E HOMOLOGAÇÃO] — 2026-11-06
 
 **Publicação confirmada:** PR [#81](https://github.com/gaveblue/gaveblue/pull/81) integrado e deploy GitHub Pages [42317536214](https://github.com/gaveblue/gaveblue/actions/runs/42317536214) concluído com sucesso (commit `f52f43b47746138a5cfd63480bf3d7fadbf7c70b`). Nenhuma mudança adicional no layout de Contas/Cartões nem no mecanismo financeiro.

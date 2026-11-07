@@ -14,10 +14,49 @@ const statusInfo={
 };
 const summary=(label,value,modifier='')=>'<div class="gb-import-summary '+modifier+'"><span>'+label+'</span><strong>'+value+'</strong></div>';
 const fmtCents=amount=>(amount>0?'+ ':'− ')+money(Math.abs(amount));
-const filtered=(preview,filter)=>filter==='all'?preview.rows:
- preview.rows.filter(row=>filter==='ambiguous'
-  ?row.status==='ambiguous'||row.status==='possible_duplicate_in_file'
-  :row.status===filter);
+/** Filtered views are read-only; they never save payments. */
+export function bankImportFilteredRows(preview,filter='all',decisions={}){
+ return (preview?.rows||[]).filter(row=>{
+  if(filter==='all')return true;
+  if(filter==='expense')return row.record.amount<0;
+  if(filter==='income')return row.record.amount>0;
+  if(filter==='decided')return ['link','ignore','pending','create'].includes(decisions?.[row.index]?.action);
+  if(filter==='ambiguous')return ['ambiguous','possible_duplicate_in_file'].includes(row.status);
+  return row.status===filter;
+ });
+}
+/** Prepare decisions only for explicitly selected indices. Never commits financial data. */
+export function bankImportBulkDecisions(preview,selection,action,categoryId,db,accountId,decisions={},currentDate='9999-12-31'){
+ if(!preview||!Array.isArray(preview.rows)||preview.accountId!==accountId)throw Error('Confira a conta bancária antes de aplicar as decisões.');
+ const ids=[...new Set((Array.isArray(selection)?selection:[]).map(Number))];
+ if(!ids.length)throw Error('Selecione ao menos um movimento do extrato.');
+ if(ids.length>200)throw Error('Selecione no máximo 200 movimentos por vez.');
+ if(!['ignore','pending','create'].includes(action))throw Error('Escolha uma ação para os movimentos selecionados.');
+ if(action==='create'){
+  if(ids.length>50)throw Error('É possível preparar no máximo 50 despesas pagas por lote.');
+  if(!db.categories?.some(c=>c.id===categoryId&&c.type==='expense'))throw Error('Escolha uma categoria de despesas válida.');
+ }
+ const saved=knownReconciliationKeys(db,accountId);
+ const alreadyPending=pendingReconciliationKeys(db,accountId);
+ const next={...decisions};
+ for(const index of ids){
+  const row=preview.rows[index];
+  if(!Number.isSafeInteger(index)||index<0||!row||row.index!==index)throw Error('Seleção de movimento inválida.');
+  const key=reconciliationRecordKey(row.record);
+  if(saved.has(key))throw Error('Um movimento selecionado já está registrado. Desmarque-o.');
+  if(row.status==='possible_duplicate_in_file')throw Error('Há movimento repetido no arquivo: confira individualmente.');
+  if(action==='pending'&&alreadyPending.has(key))throw Error('Um movimento já está pendente. Desmarque-o ou tome outra decisão.');
+  if(action==='create'){
+   if(row.record.amount>=0||row.status!=='not_found')throw Error('Prepare baixas apenas para saídas não localizadas e sem vínculo.');
+   if(row.record.date>currentDate)throw Error('Movimentos futuros não podem receber baixa.');
+  }
+  next[index]=action==='create'?
+   {action:'create',target:'',categoryId,description:row.record.description.slice(0,300)}:
+   {action,target:''};
+ }
+ return next;
+}
+
 const choiceCount=draft=>Object.values(draft?.decisions||{}).filter(d=>['link','ignore','pending','create'].includes(d?.action)).length;
 const choiceValue=(choice,key)=>choice?.[key]??'';
 export function bankImportMarkup(db,draft){
@@ -77,7 +116,7 @@ export function bankImportMarkup(db,draft){
    '<div class="gb-import-privacy">'+icon('shield')+
     '<p>O arquivo permanece no dispositivo. Nenhum lançamento, baixa ou saldo será alterado pela leitura.</p></div></div>';
  }
- const preview=draft.preview,rows=filtered(preview,draft.filter||'all');
+ const preview=draft.preview,rows=bankImportFilteredRows(preview,draft.filter||'all',draft.decisions);
  const reported=preview.bankBalance;
  const comparison=reported?(()=>{
   const internal=accountBalance(db,preview.accountId,reported.date);
@@ -96,7 +135,7 @@ export function bankImportMarkup(db,draft){
  if(BANK_IMPORT_WRITES_ENABLED&&draft.step==='confirm'&&plan){
   return head+
    '<div class="gb-import-step"><span class="gb-import-step-number">02</span><span>Confirmar decisões</span></div>'+
-   '<div class="gb-import-review-heading"><h3>Revisão final</h3><p>Você selecionou '+plan.entries.length+' movimento(s). Confira antes de salvar os vínculos e decisões.</p></div>'+
+   '<div class="gb-import-review-heading"><h3>Revisão final</h3><p>Revise cada decisão antes de confirmar. Somente lançamentos novos marcados para criação e baixa poderão alterar o saldo.</p></div>'+
    '<div class="gb-import-summary-grid">'+
     summary('Conciliar',String(plan.totals.linked))+
     summary('Ignorar',String(plan.totals.ignored))+
@@ -105,12 +144,12 @@ export function bankImportMarkup(db,draft){
     summary('Entradas a registrar',money(plan.totals.amountCreatedIn||0),'income')+
     summary('Saídas a registrar',money(plan.totals.amountCreatedOut||0),'expense')+
     summary('Alteração de saldo',money((plan.totals.amountCreatedIn||0)-(plan.totals.amountCreatedOut||0)))+'</div>'+
-   '<div class="gb-import-confirm-rows">'+plan.entries.slice(0,50).map(row=>
+   '<div class="gb-import-confirm-rows">'+plan.entries.map(row=>
      '<div class="gb-import-confirm-row"><span>'+dateLabel(row.date)+' · '+esc(row.description)+
      '</span><b>'+fmtCents(row.amount)+'</b><small>'+({'link':'Conciliar','ignore':'Ignorar','pending':'Manter pendente','create':'Criar '+(row.amount>0?'receita recebida':'despesa paga')}[row.action])+
      (row.action==='create'?' · '+esc(db.categories.find(c=>c.id===row.categoryId)?.name||'Categoria não localizada'):'')+'</small></div>'
     ).join('')+
-    (plan.entries.length>50?'<p class="gb-import-hint">Mostrando 50 dos '+plan.entries.length+' movimentos selecionados.</p>':'')+
+
    '</div>'+
    '<div class="gb-import-privacy">'+icon('shield')+'<p>As conciliações usam vínculos existentes. Os movimentos escolhidos como <strong>Criar lançamento</strong> gerarão um título e uma baixa na conta, alterando o saldo. O arquivo original não será armazenado.</p></div>'+
    (plan.totals.created?'<p class="gb-import-finance-warning">Antes de confirmar: verifique se essas movimentações já fazem parte do saldo inicial informado. Transferências entre suas próprias contas não devem ser classificadas como receitas ou despesas.</p><label class="gb-import-explicit-confirm"><input type="checkbox" id="gb-import-create-confirm" '+(draft.confirmCreation?'checked':'')+'><span>Confirmo a criação de '+plan.totals.created+' lançamento(s) já baixado(s), com efeito no saldo bancário do GB+.</span></label>':'')+
@@ -120,8 +159,18 @@ export function bankImportMarkup(db,draft){
  }
  const page=Math.min(Math.max(Number(draft.page)||0,0),Math.max(0,Math.ceil(rows.length/BANK_IMPORT_PAGE_SIZE)-1));
  const visible=rows.slice(page*BANK_IMPORT_PAGE_SIZE,(page+1)*BANK_IMPORT_PAGE_SIZE);
- const filters=[['all','Todos',preview.rows.length],['possible_match','Prováveis',preview.totals.possibleMatches],
-  ['ambiguous','Revisar',preview.totals.ambiguous],['not_found','Não localizados',preview.totals.unmatched]];
+ const counts={expense:preview.rows.filter(r=>r.record.amount<0).length,
+  income:preview.rows.filter(r=>r.record.amount>0).length,decided:choiceCount(draft)};
+ const filters=[['all','Todos',preview.rows.length],['expense','Saídas',counts.expense],
+  ['income','Entradas',counts.income],['possible_match','Possíveis vínculos',preview.totals.possibleMatches],
+  ['ambiguous','Conferir',preview.totals.ambiguous],['not_found','Sem vínculo',preview.totals.unmatched],
+  ['decided','Com decisão',counts.decided]];
+ const selected=new Set(Array.isArray(draft.selectedRows)?draft.selectedRows:[]);
+ const selectable=visible.filter(row=>!saved.has(reconciliationRecordKey(row.record))&&row.status!=='possible_duplicate_in_file');
+ const checked=selectable.filter(row=>selected.has(row.index)).length;
+ const selectedCount=selected.size;
+ const selectedTotal=preview.rows.filter(row=>selected.has(row.index)&&row.record.amount<0)
+  .reduce((sum,row)=>sum+Math.abs(row.record.amount),0);
  const cards=visible.map(item=>{
   const record=item.record,info=statusInfo[item.status]||['Revisar','unmatched'];
   const decision=draft.decisions?.[item.index]||{action:'skip',target:''};
@@ -132,7 +181,9 @@ export function bankImportMarkup(db,draft){
    esc(candidate.description|| (candidate.type==='transfer'?'Transferência':'Baixa'))+
    ' · '+dateLabel(candidate.date)+' · '+fmtCents(candidate.amount)+
    (item.candidates.length>1?' · '+item.candidates.length+' candidatos':'')+'</div>':'';
-  const actionOptions=[['skip','Sem decisão'],['link','Conciliar com registro'],['create','Criar lançamento baixado'],['ignore','Ignorar'],['pending','Manter pendente']]
+  const actionOptions=[['skip','Sem decisão'],['link','Vincular à baixa existente'],
+    ['create',record.amount<0?'Criar despesa e registrar baixa':'Criar receita e registrar recebimento'],
+    ['ignore','Ignorar'],['pending','Manter para depois']]
     .filter(([action])=>action==='link'?item.candidates.length>0&&item.status!=='possible_duplicate_in_file':
      action==='create'?item.status==='not_found':action!=='pending'||!wasPending)
     .map(([key,label])=>'<option value="'+key+'" '+(decision.action===key?'selected':'')+'>'+label+'</option>').join('');
@@ -151,8 +202,13 @@ export function bankImportMarkup(db,draft){
     '<label class="gb-import-decision-label">Descrição do lançamento<input type="text" maxlength="300" class="gb-import-create-description" data-bank-create-description="'+item.index+'" value="'+esc(decision.description??record.description.slice(0,300))+'" aria-label="Descrição do lançamento '+(item.index+1)+'" required></label>'+
     '<p class="gb-import-hint">Será registrado como '+(record.amount>0?'receita recebida':'despesa paga')+' na data do extrato, com baixa na conta selecionada.</p>'+
    '</div>':'';
-  return '<article class="gb-import-row"><div class="gb-import-row-head">'+
-   '<time datetime="'+record.date+'">'+dateLabel(record.date)+'</time>'+
+  const selectableRow=!already&&item.status!=='possible_duplicate_in_file';
+  const toggle=BANK_IMPORT_WRITES_ENABLED?'<label class="gb-import-row-select">'+
+   '<input type="checkbox" data-bank-select-index="'+item.index+'" '+(selected.has(item.index)?'checked ':'')+
+   (selectableRow?'':'disabled ')+'aria-label="Selecionar movimento '+(item.index+1)+': '+esc(record.description.slice(0,70))+'">'+
+   '<span>Selecionar</span></label>':'';
+  return '<article class="gb-import-row'+(selected.has(item.index)?' is-selected':'')+'"><div class="gb-import-row-head">'+
+   toggle+'<time datetime="'+record.date+'">'+dateLabel(record.date)+'</time>'+
    '<span class="gb-import-flag gb-import-'+(already?'match':wasPending?'ambiguous':info[1])+'">'+(already?'Já registrado':wasPending?'Pendente · retomar':info[0])+'</span></div>'+
    '<div class="gb-import-row-body"><strong>'+esc(record.description)+'</strong>'+
    '<b class="'+(record.amount>0?'gb-import-positive':'gb-import-negative')+'">'+fmtCents(record.amount)+'</b></div>'+
@@ -170,17 +226,41 @@ export function bankImportMarkup(db,draft){
    (draft.csvMapping?'<button type="button" class="gb-import-text-button" data-action="bank-import-map">Ajustar colunas</button>':'')+
    '<button type="button" class="gb-import-text-button" data-action="bank-import-reset">Trocar arquivo</button></div>'+
   (draft.accountHint?'<p class="gb-import-hint">Conta indicada pelo arquivo (oculta): '+esc(draft.accountHint)+'</p>':'')+
-  '<div class="gb-import-summary-grid" aria-label="Resumo do extrato">'+
-   summary('Créditos',money(preview.totals.credits),'income')+
-   summary('Débitos',money(preview.totals.debits),'expense')+
-   summary('Movimentos',String(preview.rows.length))+
-   summary('Possíveis vínculos',String(preview.totals.possibleMatches))+'</div>'+
+  '<section class="gb-import-overview" aria-label="Resumo fácil do extrato">'+
+   '<div class="gb-import-overview-heading"><h3>Resumo do extrato</h3><p>Estes valores vieram do banco. Nenhum movimento foi lançado ou baixado automaticamente.</p></div>'+
+   '<div class="gb-import-summary-grid" aria-label="Valores do extrato">'+
+    summary('Entradas no banco',money(preview.totals.credits),'income')+
+    summary('Saídas do banco',money(preview.totals.debits),'expense')+
+    summary('Movimentações',String(preview.rows.length))+
+    summary('Possíveis vínculos',String(preview.totals.possibleMatches))+
+   '</div>'+
+   '<p class="gb-import-overview-note">Uma saída do banco pode ser despesa, transferência ou fatura já paga. Confira antes de criar outro lançamento.</p></section>'+
   comparison+
-  '<div class="gb-import-step"><span class="gb-import-step-number">04</span><span>Revisar movimentações</span></div>'+
+  '<div class="gb-import-step"><span class="gb-import-step-number">04</span><span>Escolher as movimentações</span></div>'+
+  '<p class="gb-import-explainer">Filtre as entradas e saídas, marque só o que deseja tratar e escolha uma ação. Para vincular a uma baixa existente, use a decisão individual no movimento.</p>'+
+  '<details class="gb-import-help"><summary>Entenda as opções</summary><p><strong>Vincular:</strong> associa a uma baixa ou transferência já existente, sem reduzir saldo novamente. <strong>Criar despesa paga:</strong> cria o título e registra a baixa, alterando saldo apenas após sua confirmação. <strong>Manter para depois:</strong> guarda pendência. <strong>Ignorar:</strong> registra a decisão sem lançar despesa.</p></details>'+
   '<div class="gb-import-filters" role="group" aria-label="Filtrar movimentos importados">'+
    filters.map(([key,label,count])=>'<button type="button" data-action="bank-import-filter" data-value="'+key+
     '" aria-pressed="'+((draft.filter||'all')===key)+'" class="'+((draft.filter||'all')===key?'active':'')+'">'+label+' <span>'+count+'</span></button>').join('')+
   '</div>'+
+  (BANK_IMPORT_WRITES_ENABLED?
+   '<section class="gb-import-selection" aria-label="Selecionar movimentos para ação">'+
+    '<div class="gb-import-selection-heading"><strong>'+selectedCount+' marcado(s)</strong><span>'+rows.length+' movimento(s) neste filtro</span></div>'+
+    '<div class="gb-import-selection-buttons"><button type="button" class="button small" data-action="bank-import-select-visible" '+(selectable.length&&checked!==selectable.length?'':'disabled')+'>Selecionar esta página</button>'+
+    '<button type="button" class="button small" data-action="bank-import-clear-selection" '+(selectedCount?'':'disabled')+'>Limpar seleção</button></div>'+
+    (selectedCount?'<p class="gb-import-selection-total">Total das saídas marcadas: <strong>'+money(selectedTotal)+'</strong> · nenhum valor lançado ainda</p>':'')+
+    '<div class="gb-import-bulk-fields"><label class="gb-import-decision-label">Ação para os selecionados'+
+     '<select id="gb-import-bulk-action" class="gb-import-select" data-gb-native="true"><option value="">Escolher ação</option>'+
+      [['pending','Manter pendente'],['ignore','Ignorar movimentos'],['create','Preparar despesas pagas (com baixa)']].map(([key,label])=>
+       '<option value="'+key+'" '+(draft.bulkAction===key?'selected':'')+'>'+label+'</option>').join('')+
+     '</select></label>'+
+     (draft.bulkAction==='create'?'<label class="gb-import-decision-label">Categoria comum das despesas'+
+       '<select id="gb-import-bulk-category" class="gb-import-select" data-gb-native="true"><option value="">Escolher categoria</option>'+
+       (db.categories||[]).filter(c=>c.type==='expense').map(c=>
+        '<option value="'+esc(c.id)+'" '+(draft.bulkCategory===c.id?'selected':'')+'>'+esc(c.name)+'</option>').join('')+'</select></label>':'')+
+     '<button type="button" class="button" data-action="bank-import-apply-bulk" '+(selectedCount&&draft.bulkAction?'':'disabled')+'>Aplicar seleção</button></div>'+
+    '<p class="gb-import-selection-disclaimer">Estas ações só preparam a revisão. Para registrar baixas é necessária uma confirmação específica depois.</p>'+
+   '</section>':'')+
   '<div class="gb-import-records" aria-live="polite">'+(cards||'<div class="gb-import-no-items">Nenhum movimento neste filtro.</div>')+'</div>'+
   (rows.length>BANK_IMPORT_PAGE_SIZE?'<div class="gb-import-pager"><button type="button" data-action="bank-import-prev" '+(page===0?'disabled':'')+'>Anterior</button>'+
    '<span>Página '+(page+1)+' de '+Math.ceil(rows.length/BANK_IMPORT_PAGE_SIZE)+'</span>'+

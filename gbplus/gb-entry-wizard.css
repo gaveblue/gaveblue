@@ -90,3 +90,35 @@
 #transfer-form input[name="amount"],#account-form input[name="initial"]{
  font-variant-numeric:tabular-nums;letter-spacing:.1px
 }
+
+
+/* GB+ 2.6.0 — compact optional service catalog in the existing two-step form. */
+.gb-service-field{display:grid;gap:10px;min-width:0;padding:14px;border:1px solid var(--border);border-radius:14px;background:var(--soft)}
+.gb-service-heading strong{font-size:12px;font-weight:700}
+.gb-service-heading p,.gb-service-help{font-size:10px;color:var(--muted);line-height:1.6;margin-top:3px}
+.gb-service-selected{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:8px 10px}
+.gb-service-selected-content{display:flex;align-items:center;gap:9px;min-width:0;font-size:12px;font-weight:600}
+.gb-service-selected-name{min-width:0;overflow-wrap:anywhere}
+.gb-service-logo,.gb-service-monogram{display:inline-grid;place-items:center;width:29px;height:29px;min-width:29px;border-radius:9px;background:var(--surface);border:1px solid var(--border);color:var(--ink)}
+.gb-service-logo svg{width:17px;height:17px;display:block}
+.gb-service-monogram{font-size:10px;font-weight:750;letter-spacing:-.3px;background:var(--soft)}
+.gb-service-picker{display:grid;gap:10px;padding-top:8px;border-top:1px solid var(--border)}
+.gb-service-search-label,.gb-service-group-label,.gb-service-custom{display:grid;gap:6px;font-size:11px;font-weight:600}
+.gb-service-search-label input,.gb-service-group-label select,.gb-service-custom input{width:100%;min-height:40px;padding:9px 11px;border-radius:9px;border:1px solid var(--border);background:var(--surface);color:var(--ink);font:inherit;font-size:12px}
+.gb-service-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;max-height:225px;overflow-y:auto;overscroll-behavior:contain}
+.gb-service-option{display:flex;align-items:center;gap:9px;text-align:left;padding:7px 9px;border:1px solid var(--border);border-radius:9px;background:var(--surface);font-size:11px;min-width:0}
+.gb-service-option:hover,.gb-service-option:focus-visible{border-color:var(--ink)}
+.gb-service-option .gb-service-logo,.gb-service-option .gb-service-monogram{width:28px;height:28px;min-width:28px}
+.gb-service-option span:last-child{min-width:0;overflow-wrap:anywhere}
+.gb-service-empty{font-size:11px;color:var(--muted)}
+.gb-service-clear{justify-self:start;min-height:35px;padding:8px 4px;border:0;background:transparent;text-decoration:underline;font-size:11px;color:var(--ink)}
+.gb-service-identity{display:inline-flex;align-items:center;gap:5px;vertical-align:middle;max-width:100%;font-size:11px}
+.gb-service-identity .gb-service-logo,.gb-service-identity .gb-service-monogram{width:23px;height:23px;min-width:23px;border-radius:7px}
+.gb-service-identity .gb-service-logo svg{width:14px;height:14px}
+.gb-launch-card-title .gb-service-identity>span:last-child{font-size:10px;color:var(--muted)}
+@media(max-width:760px){
+ .gb-service-field{padding:11px}
+ .gb-service-options{grid-template-columns:minmax(0,1fr);max-height:210px}
+ .gb-service-option{min-height:42px}
+ .gb-service-selected .button{padding:7px 9px;white-space:nowrap}
+}

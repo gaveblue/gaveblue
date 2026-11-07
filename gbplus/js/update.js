@@ -142,7 +142,7 @@
   manifest=info;downloadReady=false;
   const isMajor=Number(info.version.split('.')[0])>Number(installed.split('.')[0]);
   show(isMajor?'Uma nova geração do GB+':'Novidades chegando ao GB+',
-   'Versão '+installed+(info.version===installed?' · compilação '+installedBuild:'')+'  →  '+info.version+(info.version===installed?' · compilação '+info.build:''),
+   'Versão '+installed+'  →  '+info.version,
    isMajor?'Uma atualização importante está pronta. Veja as novidades e decida quando instalar.':'Confira o que melhorou no aplicativo. Seus dados financeiros serão preservados.');
   notes(info);
   els.primary.hidden=false;els.primary.dataset.next='download';
@@ -184,9 +184,9 @@
  function publicationPending(source,hosted=null){
   if(active)return;
   manifest=null;downloadReady=false;
-  const hostedLabel=hosted?hosted.version+' · compilação '+hosted.build:'não confirmada';
+  const hostedLabel=hosted?hosted.version:'não confirmada';
   show('Atualização aguardando publicação',
-   'GitHub '+source.version+' · compilação '+source.build+' · site '+hostedLabel,
+   'GitHub '+source.version+' · site '+hostedLabel,
    'A nova versão já consta no repositório, mas o site ainda não a está entregando. Por segurança, o GB+ não vai instalar arquivos incompletos ou mostrar “Tudo atualizado”.');
   notes(['Sua conta, seus lançamentos e seus saldos não serão alterados.','É possível tentar renovar somente os arquivos antigos do aplicativo.']);
   put(els.later,'Fechar');put(els.primary,'Recuperar atualização');

@@ -1,15 +1,17 @@
 import {parseBankStatement,parseBankCsv,inspectBankCsv,proposeReconciliation,readBankFileText} from './bank-import-preview.js?v=20261106-2509';
-import {bankImportMarkup,bankImportHistoryMarkup,BANK_IMPORT_PAGE_SIZE,BANK_IMPORT_WRITES_ENABLED} from './bank-import-ui.js?v=20261106-2509';
-import {reviewSelection,applyReconciliationBatch,undoReconciliationBatch} from './bank-reconciliation.js?v=20261106-2505';
+import {bankImportMarkup,bankImportHistoryMarkup,bankImportFilteredRows,bankImportBulkDecisions,BANK_IMPORT_PAGE_SIZE,BANK_IMPORT_WRITES_ENABLED} from './bank-import-ui.js?v=20261106-2600';
+import {reviewSelection,applyReconciliationBatch,undoReconciliationBatch,reconciliationRecordKey,knownReconciliationKeys} from './bank-reconciliation.js?v=20261106-2505';
 import {filterFlowRows} from './gb-flow-filters.js?v=20261106-68';
 import {uid,today,money,dateLabel,cents,addMonths,validDate,generateTitles,addPayment,transfer,updateTitle,pending,flow,within} from './domain.js?v=20261105-72';
-import {KEY,INDICATORS,defaultPanel,parseBackup,backupText,MOBILE_SHORTCUTS,defaultMobileNav,effectiveMobileNav,validMobileNav,shouldOfferSetup} from './store.js?v=20261106-2505';
+import {KEY,INDICATORS,defaultPanel,parseBackup,backupText,MOBILE_SHORTCUTS,defaultMobileNav,effectiveMobileNav,validMobileNav,shouldOfferSetup} from './store.js?v=20261106-2600';
 import {esc,icon,button,field,select,formFooter,download,csv,titleTable} from './ui.js?v=20261105-72';
 import {routes,dashboard,titlesView,partnersView,categoriesView,flowView,reportsView,settingsView,notificationsView,filteredTitles,reportData} from './views.js?v=20261106-2511';
-import {accountsCardsView} from './accounts-cards-view.js?v=20261106-2511';
+import {accountsCardsView} from './accounts-cards-view.js?v=20261106-2513';
 import {renderReactCharts,unmountReactCharts} from './gb-react-loader.js?v=20261105-45';
 import {mountNativeCharts} from './gb-charts-native.js?v=20261106-68';
-import {titleForm,partnerForm,accountForm,categoryForm,paymentForm,transferForm,titleDetail,customizeForm,accountDetail} from './forms.js?v=20261106-2509';
+import {titleForm,partnerForm,accountForm,categoryForm,paymentForm,transferForm,titleDetail,customizeForm,accountDetail} from './forms.js?v=20261106-2600';
+import {serviceById,serviceSearchKey} from './service-catalog.js?v=20261106-2600';
+import {serviceIconMarkup,serviceIdentityMarkup} from './service-ui.js?v=20261106-2600';
 import {toggleEntryMenu,chooseEntryOption,syncEntrySelect,closeEntryMenus} from './entry-select.js?v=20261104-42';
 import {installGbControls,enhanceGbControls} from './custom-controls.js?v=20261104-42';
 import {expectedDates,recurrenceAnchor} from './gb-calendar-rules.js?v=20261105-47';
@@ -23,7 +25,7 @@ import {BANKS,bankCatalog,findBank,bankName,syncBankPicker,filterBankPicker,filt
 import {addCardPurchase,removeCardPurchase,ensureCardMayChange,creditCards,cardPurchases} from './credit-cards.js?v=20261105-72';
 import {cashForecast} from './forecast.js?v=20261105-72';
 import {banksView,bankForm,cardForm,cardPurchaseForm,forecastView,forecastSummary,forecastScenarioForm,forecastResult} from './finance-24-ui.js?v=20261106-2511';
-import {launchesView} from './launches-view.js?v=20261105-75';
+import {launchesView} from './launches-view.js?v=20261106-2600';
 import {installLaunchGestures} from './launches-gestures.js?v=20261104-38';
 import {launchSelection,paymentSelection,paymentSummary,applyLaunchPayments,reversedSelection,applyLaunchReversals,deletionSelection,applyLaunchDeletions} from './launch-actions.js?v=20261105-72';
 let repository=null;let db;let busy=false;let pendingGeneration=null;let confirmAction=null;let pwaReady=false;
@@ -74,7 +76,7 @@ function redrawBankImport(){
 function openBankImport(accountId=''){
  const accounts=(db.accounts||[]).filter(a=>a.active!==false);
  const account=accounts.find(a=>a.id===accountId)||accounts[0];
- bankImportDraft={accountId:account?.id||'',parsed:null,preview:null,filename:'',accountHint:'',filter:'all',page:0,error:'',decisions:{},step:'review',review:null,confirmCreation:false,confirmAccount:false,csvSource:null,csvMapping:null};
+ bankImportDraft={accountId:account?.id||'',parsed:null,preview:null,filename:'',accountHint:'',filter:'all',page:0,error:'',decisions:{},selectedRows:[],bulkAction:'',bulkCategory:'',step:'review',review:null,confirmCreation:false,confirmAccount:false,csvSource:null,csvMapping:null};
  redrawBankImport();
 }
 // Guided onboarding is opt-in. No financial records are created before final confirmation.
@@ -257,11 +259,54 @@ function requestLaunchDeletion(ids){
   ()=>commit(d=>applyLaunchDeletions(d,ids),selected.length+' lançamento(s) excluído(s).'));
 }
 
+function updateServicePicker(form,id){
+ if(!form||form.id!=='title-form')return;
+ const service=serviceById(id),custom=id==='custom';
+ if(id&&!service&&!custom)throw Error('Serviço não localizado.');
+ const hidden=form.querySelector('[name="serviceId"]');
+ const name=form.querySelector('[name="serviceName"]');
+ const wrap=form.querySelector('.gb-service-custom');
+ const current=form.querySelector('.gb-service-selected-content');
+ const toggle=form.querySelector('[data-action="title-service-toggle"]');
+ const options=form.querySelector('#gb-service-options');
+ hidden.value=service?.id||(custom?'custom':'');
+ if(!custom)name.value='';
+ wrap.hidden=!custom;name.required=custom;
+ const label=service?.name||(custom?'Outro serviço':'Nenhum serviço escolhido');
+ current.innerHTML=(service?serviceIconMarkup(service):'<span class="gb-service-monogram" aria-hidden="true">+</span>')+
+  '<span class="gb-service-selected-name">'+esc(label)+'</span>';
+ if(service&&!form.elements.description.value.trim())form.elements.description.value=service.name;
+ toggle.textContent=id?'Alterar':'Escolher serviço';
+ const info=form.querySelector('.gb-service-help');
+ if(info)info.textContent=service?.billingMode==='subscription'?
+  'Assinatura? Se desejar, escolha Recorrente na etapa Valores. Nada será agendado automaticamente.':
+  'A identificação não cria assinatura, cobrança, despesa ou baixa. Você decide os valores e vencimentos.';
+ toggle.setAttribute('aria-expanded','false');options.hidden=true;
+ if(custom)name.focus({preventScroll:true});
+}
+function filterServicesInForm(form){
+ if(!form||form.id!=='title-form')return;
+ const search=serviceSearchKey(form.querySelector('#gb-service-search')?.value||'');
+ const group=form.querySelector('#gb-service-group')?.value||'all';
+ let found=0;
+ form.querySelectorAll('.gb-service-option').forEach(option=>{
+  const matchText=!search||option.dataset.serviceSearch?.includes(search);
+  const matchGroup=group==='all'||option.dataset.serviceGroup===group||option.dataset.serviceGroup==='custom';
+  option.hidden=!(matchText&&matchGroup);if(!option.hidden)found++;
+ });
+ const noResult=form.querySelector('.gb-service-empty');
+ if(noResult)noResult.hidden=found>0;
+}
 function validateEntryStepOne(form){
  const type=form.elements.type?.value;
  const categoryId=form.elements.categoryId?.value;
  if(!['income','expense'].includes(type)||!db.categories.some(c=>c.id===categoryId&&c.type===type))throw Error('Selecione o tipo e uma categoria válida.');
  if(!form.elements.description?.value.trim())throw Error('Informe a descrição do lançamento.');
+ const serviceId=form.elements.serviceId?.value||'';
+ const customName=form.elements.serviceName?.value.trim()||'';
+ if(serviceId&&type!=='expense')throw Error('Serviços só podem ser associados a despesas.');
+ if(serviceId&&!serviceById(serviceId)&&serviceId!=='custom')throw Error('Escolha um serviço válido.');
+ if(serviceId==='custom'&&(!customName||customName.length>120))throw Error('Informe o nome do serviço personalizado (até 120 caracteres).');
  if(!validDate(form.elements.issue?.value))throw Error('Informe uma data de emissão válida.');
  if(!validDate(form.elements.due?.value))throw Error('Informe uma data de vencimento válida.');
 }
@@ -362,6 +407,14 @@ const actions={
   'entry-option':el=>chooseEntryOption(el),
   'title-next':el=>toggleEntryStep(el.closest('#title-form'),2),
   'title-back':el=>toggleEntryStep(el.closest('#title-form'),1),
+  'title-service-toggle':el=>{
+   const form=el.closest('#title-form'),picker=form?.querySelector('#gb-service-options');
+   if(!picker)return;
+   picker.hidden=!picker.hidden;el.setAttribute('aria-expanded',String(!picker.hidden));
+   if(!picker.hidden)form.querySelector('#gb-service-search')?.focus({preventScroll:true});
+  },
+  'title-service-pick':el=>updateServicePicker(el.closest('#title-form'),el.dataset.serviceId),
+  'title-service-clear':el=>updateServicePicker(el.closest('#title-form'),''),
   'category-icon':el=>{
    const form=el.closest('#category-form'),value=el.dataset.icon;
    if(!form||!CATEGORY_ICON_OPTIONS.some(([key])=>key===value))return;
@@ -421,13 +474,13 @@ const actions={
   'bank-import-open':el=>openBankImport(el.dataset.id||''),
   'bank-import-reset':()=>{
    if(!bankImportDraft)return;
-   Object.assign(bankImportDraft,{parsed:null,preview:null,filename:'',accountHint:'',filter:'all',page:0,error:'',decisions:{},step:'review',review:null,confirmCreation:false,confirmAccount:false,csvSource:null,csvMapping:null});
+   Object.assign(bankImportDraft,{parsed:null,preview:null,filename:'',accountHint:'',filter:'all',page:0,error:'',decisions:{},selectedRows:[],bulkAction:'',bulkCategory:'',step:'review',review:null,confirmCreation:false,confirmAccount:false,csvSource:null,csvMapping:null});
    redrawBankImport();
   },
 
   'bank-import-map':()=>{
    if(!bankImportDraft?.csvSource||!bankImportDraft.csvMapping)return;
-   Object.assign(bankImportDraft,{parsed:null,preview:null,step:'mapping',error:'',decisions:{},review:null,confirmCreation:false,confirmAccount:false});
+   Object.assign(bankImportDraft,{parsed:null,preview:null,step:'mapping',error:'',decisions:{},selectedRows:[],bulkAction:'',bulkCategory:'',review:null,confirmCreation:false,confirmAccount:false});
    redrawBankImport();
   },
   'bank-import-apply-map':()=>{
@@ -441,19 +494,43 @@ const actions={
     draft.parsed=parsed;
     draft.preview=proposeReconciliation(parsed,db,draft.accountId);
     draft.accountHint=parsed.accountHint||'';
-    Object.assign(draft,{error:'',filter:'all',page:0,decisions:{},review:null,confirmCreation:false,confirmAccount:false,step:'review'});
+    Object.assign(draft,{error:'',filter:'all',page:0,decisions:{},selectedRows:[],bulkAction:'',bulkCategory:'',review:null,confirmCreation:false,confirmAccount:false,step:'review'});
    }catch(error){draft.error=error?.message||'Confira o mapeamento do CSV.';}
    redrawBankImport();
   },
+  'bank-import-select-visible':()=>{
+   const d=bankImportDraft;if(!d?.preview||d.step!=='review')return;
+   const rows=bankImportFilteredRows(d.preview,d.filter,d.decisions);
+   const page=Math.min(Math.max(0,Number(d.page)||0),Math.max(0,Math.ceil(rows.length/BANK_IMPORT_PAGE_SIZE)-1));
+   const saved=knownReconciliationKeys(db,d.accountId);
+   const slice=rows.slice(page*BANK_IMPORT_PAGE_SIZE,(page+1)*BANK_IMPORT_PAGE_SIZE);
+   const eligible=slice.filter(row=>row.status!=='possible_duplicate_in_file'&&!saved.has(reconciliationRecordKey(row.record)));
+   const selected=new Set(d.selectedRows||[]);
+   eligible.forEach(row=>selected.add(row.index));
+   d.selectedRows=[...selected].sort((a,b)=>a-b);d.error='';redrawBankImport();
+  },
+  'bank-import-clear-selection':()=>{
+   if(!bankImportDraft?.preview)return;
+   bankImportDraft.selectedRows=[];bankImportDraft.bulkAction='';bankImportDraft.bulkCategory='';
+   bankImportDraft.error='';redrawBankImport();
+  },
+  'bank-import-apply-bulk':()=>{
+   const d=bankImportDraft;if(!d?.preview||d.step!=='review')return;
+   try{
+    const next=bankImportBulkDecisions(d.preview,d.selectedRows,d.bulkAction,d.bulkCategory,db,
+     d.accountId,d.decisions,today());
+    d.decisions=next;d.selectedRows=[];d.bulkAction='';d.bulkCategory='';
+    d.review=null;d.confirmCreation=false;d.confirmAccount=false;d.error='';
+   }catch(error){d.error=error.message||'Confira os movimentos selecionados.';}
+   redrawBankImport();
+  },
   'bank-import-filter':el=>{
-   if(!bankImportDraft?.preview||!['all','possible_match','ambiguous','not_found'].includes(el.dataset.value))return;
+   if(!bankImportDraft?.preview||!['all','expense','income','possible_match','ambiguous','not_found','decided'].includes(el.dataset.value))return;
    bankImportDraft.filter=el.dataset.value;bankImportDraft.page=0;redrawBankImport();
   },
   'bank-import-next':()=>{
    if(!bankImportDraft?.preview)return;
-   const count=bankImportDraft.filter==='all'?bankImportDraft.preview.rows.length:
-     bankImportDraft.preview.rows.filter(row=>bankImportDraft.filter==='ambiguous'
-       ?['ambiguous','possible_duplicate_in_file'].includes(row.status):row.status===bankImportDraft.filter).length;
+   const count=bankImportFilteredRows(bankImportDraft.preview,bankImportDraft.filter,bankImportDraft.decisions).length;
    bankImportDraft.page=Math.min(Math.max(0,Math.ceil(count/BANK_IMPORT_PAGE_SIZE)-1),bankImportDraft.page+1);
    redrawBankImport();
   },
@@ -673,12 +750,29 @@ document.addEventListener('change',async e=>{
  const el=e.target;
  if(!bankImportDraft||!modal.open||!el?.closest?.('#modal'))return;
  const draft=bankImportDraft;
+ if(el.matches?.('[data-bank-select-index]')){
+  if(!draft.preview||draft.step!=='review')return;
+  const index=Number(el.dataset.bankSelectIndex),row=draft.preview.rows[index];
+  if(!Number.isSafeInteger(index)||!row||row.index!==index||row.status==='possible_duplicate_in_file')return;
+  if(knownReconciliationKeys(db,draft.accountId).has(reconciliationRecordKey(row.record)))return;
+  const selected=new Set(draft.selectedRows||[]);
+  if(el.checked)selected.add(index);else selected.delete(index);
+  draft.selectedRows=[...selected].sort((a,b)=>a-b);draft.error='';redrawBankImport();return;
+ }
+ if(el.id==='gb-import-bulk-action'){
+  if(!draft.preview||draft.step!=='review'||!['','pending','ignore','create'].includes(el.value))return;
+  draft.bulkAction=el.value;draft.bulkCategory='';draft.error='';redrawBankImport();return;
+ }
+ if(el.id==='gb-import-bulk-category'){
+  if(!draft.preview||draft.step!=='review')return;
+  draft.bulkCategory=el.value;draft.error='';return;
+ }
  if(el.id==='gb-import-account'){
   const id=el.value;
   if(!(db.accounts||[]).some(a=>a.id===id&&a.active!==false))return;
   draft.accountId=id;
   if(draft.parsed)draft.preview=proposeReconciliation(draft.parsed,db,id);
-  draft.filter='all';draft.page=0;draft.decisions={};draft.review=null;draft.confirmCreation=false;draft.confirmAccount=false;draft.step=draft.csvMapping&&!draft.preview?'mapping':'review';redrawBankImport();return;
+  draft.filter='all';draft.page=0;draft.decisions={};draft.selectedRows=[];draft.bulkAction='';draft.bulkCategory='';draft.review=null;draft.confirmCreation=false;draft.confirmAccount=false;draft.step=draft.csvMapping&&!draft.preview?'mapping':'review';redrawBankImport();return;
  }
 
  if(el.matches?.('[data-bank-map-field]')){
@@ -698,6 +792,7 @@ document.addEventListener('change',async e=>{
   if(!Number.isInteger(index)||!draft.preview.rows[index])return;
   if(el.value==='skip')delete draft.decisions[index];
   else if(['link','ignore','pending','create'].includes(el.value))draft.decisions[index]={action:el.value,target:'',...(el.value==='create'?{categoryId:'',description:draft.preview.rows[index].record.description.slice(0,300)}:{})};
+  draft.selectedRows=(draft.selectedRows||[]).filter(i=>i!==index);
   draft.review=null;draft.confirmCreation=false;draft.error='';redrawBankImport();return;
  }
  if(el.matches?.('[data-bank-create-category]')){
@@ -739,7 +834,7 @@ document.addEventListener('change',async e=>{
    const parsed=parseBankStatement(contents,file.name);
    const preview=proposeReconciliation(parsed,db,draft.accountId);
    draft.parsed=parsed;draft.preview=preview;draft.accountHint=parsed.accountHint||'';
-   Object.assign(draft,{error:'',filter:'all',page:0,decisions:{},review:null,confirmCreation:false,confirmAccount:false,step:'review'});
+   Object.assign(draft,{error:'',filter:'all',page:0,decisions:{},selectedRows:[],bulkAction:'',bulkCategory:'',review:null,confirmCreation:false,confirmAccount:false,step:'review'});
   }catch(parseError){
    if(!mapping)throw parseError;
    Object.assign(draft,{parsed:null,preview:null,step:'mapping',error:'Colunas não reconhecidas automaticamente. Selecione as correspondências para conferir o arquivo.'});
@@ -847,9 +942,13 @@ document.addEventListener('submit',async e=>{e.preventDefault();if(busy||!db)ret
   if(form.id==='title-form'){
    if(form.dataset.step!=='2')throw Error('Conclua as duas etapas do lançamento.');
    validateEntryStepOne(form);
+   const serviceId=v.type==='expense'?String(v.serviceId||''):'';
+   if(serviceId&&!serviceById(serviceId)&&serviceId!=='custom')throw Error('Serviço inválido.');
+   const serviceName=serviceId==='custom'?String(v.serviceName||'').trim():'';
+   if(serviceId==='custom'&&(!serviceName||serviceName.length>120))throw Error('Informe o nome do serviço.');
    const input={type:v.type,description:v.description.trim(),categoryId:v.categoryId,partnerId:v.partnerId||'',
     document:v.document.trim(),issue:v.issue,due:v.due,amount:cents(v.amount),
-    accountId:v.accountId||'',notes:v.notes.trim()};
+    accountId:v.accountId||'',notes:v.notes.trim(),serviceId,serviceName};
    if(id){
     const original=getTitle(id);
     const businessDays=original.mode!=='single'&&v.businessDays==='true';
@@ -947,7 +1046,8 @@ document.addEventListener('change',async e=>{if(!db)return;const el=e.target;try
   if(el.form?.id==='profile-form')syncProfileSaveState(el.form);
   if(el.form?.id==='title-form'&&['mode','scope','count','due','businessDays'].includes(el.name))refreshEntrySchedule(el.form);
   if(el.name?.startsWith('slot')&&el.form?.id==='mobile-nav-form')updateMobileNavPreview(el.form);
-  if(el.id==='entry-type'){const select=document.querySelector('#entry-category');if(select){select.innerHTML=db.categories.filter(c=>c.type===el.value).map(c=>`<option value="${esc(c.id)}" data-icon="${esc(categoryIconFor(c))}">${esc(c.name)}</option>`).join('');syncEntrySelect(select);}}
+  if(el.id==='entry-type'){const select=document.querySelector('#entry-category');if(select){select.innerHTML=db.categories.filter(c=>c.type===el.value).map(c=>`<option value="${esc(c.id)}" data-icon="${esc(categoryIconFor(c))}">${esc(c.name)}</option>`).join('');syncEntrySelect(select);}const area=el.form?.querySelector('.gb-service-area');if(area){area.hidden=el.value!=='expense';if(el.value!=='expense')updateServicePicker(el.form,'');}}
+  if(el.id==='gb-service-group')filterServicesInForm(el.closest('#title-form'));
   if(el.id==='entry-mode'){refreshEntrySchedule(el.form);}
   if(el.id==='period'){if(el.value==='custom'){openModal('Escolher período',`<form id="period-form"><div class="form-grid">${field('De','from',state.range.from||today(),'date','required')}${field('Até','to',state.range.to||today(),'date','required')}</div>${formFooter('Aplicar período')}</form>`);el.value=state.period;}else{state.period=el.value;state.range=rangeFor(el.value);state.launchSelected=[];state.launchStatusOpen=false;render();}}
   if(el.dataset.filter){state[el.dataset.filter]=el.value;if(['partner','category'].includes(el.dataset.filter))state.moreFilters=true;state.launchSelected=[];render();}
@@ -955,7 +1055,7 @@ document.addEventListener('change',async e=>{if(!db)return;const el=e.target;try
   if(el.id==='report-partner'){state.reportPartner=el.value;render();}
   if(el.id==='backup-input'&&el.files[0]){const file=el.files[0];el.value='';if(file.size>15*1024*1024)throw Error('O backup deve ter no máximo 15 MB.');const restored=parseBackup(await file.text());confirm('Restaurar backup?',`Este arquivo contém ${restored.titles.length} títulos, ${restored.partners.length} parceiros e ${restored.accounts.length} contas. Os registros atuais serão substituídos. Exporte um backup antes de continuar, se necessário.`,()=>commit(d=>{Object.keys(d).forEach(k=>delete d[k]);Object.assign(d,restored);},'Backup restaurado com sucesso.'));}
 }catch(error){fail(error);}});
-document.addEventListener('input',e=>{if(e.target.form?.id==='title-form'&&['amount','count','due'].includes(e.target.name))refreshEntrySchedule(e.target.form);if(e.target.form?.id==='profile-form'){
+document.addEventListener('input',e=>{if(e.target.id==='gb-service-search')filterServicesInForm(e.target.closest('#title-form'));if(e.target.form?.id==='title-form'&&['amount','count','due'].includes(e.target.name))refreshEntrySchedule(e.target.form);if(e.target.form?.id==='profile-form'){
  const field=e.target;
  if(field.name==='cpf'){
   const digits=field.value.replace(/\D/g,'').slice(0,11);

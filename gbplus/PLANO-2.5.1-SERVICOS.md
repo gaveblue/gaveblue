@@ -1,5 +1,7 @@
 # GB+ 2.5.1 — Serviços com identificação visual e catálogo de aplicativos
 
+> **Atualização de planejamento — 06/11/2026:** pelo novo padrão de versionamento (`PADRAO-VERSIONAMENTO.md`), a entrega do catálogo de serviços, seus logos autorizados e integração ao fluxo de "Novo lançamento" passam a ser planejados para a **versão 2.5.2**. O documento abaixo preserva o planejamento histórico da 2.5.1; serviços ainda **não estão disponíveis no aplicativo**. O redesenho do formulário dependerá da referência visual enviada pelo responsável do produto.
+
 **Situação:** plano aprovado para desenvolvimento na 2.5.1, **ainda não publicado como funcionalidade**. Conservar a 2.5.0 exclusivamente para encerrar o núcleo de importação/conciliação OFX/CSV e o mapeamento manual de CSV da build 9.
 
 ## Objetivo
