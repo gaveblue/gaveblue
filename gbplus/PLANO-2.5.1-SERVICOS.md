@@ -57,8 +57,8 @@ Os serviços são exemplos para seleção, não assinaturas ativadas. O usuário
 
 ## Fases
 
-- **2.5.1 build 1:** catálogo técnico e seletor compacto no formulário, com iniciais como fallback.
-- **2.5.1 build 2:** logos oficiais verificados, detalhes visuais e aprimoramentos de busca.
-- **2.5.1 build 3 (se necessário):** revisão de assinaturas/recorrências e testes de acessibilidade/relatórios.
+- **2.5.1 build 1:** unificar Contas e Cartões em uma tela com abas (entrega atual); catálogo técnico preparado sem interface pública de serviços.
+- **2.5.1 build 2 e seguintes:** integrar seletor compacto de serviços ao lançamento, com iniciais como fallback; adicionar logos oficiais verificados após autorização.
+- **Compilações seguintes:** revisão de assinaturas/recorrências, relatórios e demais ajustes solicitados, com homologação de cada entrega.
 
 As fases são marcos técnicos, não uma promessa de que tudo está publicado. **A 2.6.0 fica reservada para a expansão de orientação financeira contextual e organização de orçamento**, sem deixar esse catálogo competir com o escopo principal da 2.6.
