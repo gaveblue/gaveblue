@@ -1,7 +1,8 @@
 /**
  * GB+ 2.5.1 — catálogo inicial de serviços.
  * Dados de identificação apenas: não autenticam nem consultam plataformas externas.
- * Logos ainda dependem de revisão de fonte/licença. Não exibir caminhos inexistentes.
+ * 13 marcas têm vetores locais provenientes do Simple Icons; os demais usam iniciais neutras.
+ * A biblioteca não confere direito de marca, parceria ou integração.
  */
 const definitions=[
  ['streaming-netflix','Netflix','streaming','subscription','NF'],
