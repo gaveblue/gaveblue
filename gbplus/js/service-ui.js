@@ -2,15 +2,27 @@
 // The picker does not submit, subscribe, pay or reconcile anything.
 import {SERVICE_CATALOG,SERVICE_GROUPS,serviceById,serviceSearchKey} from './service-catalog.js?v=20261106-2600';
 import {SERVICE_BRAND_PATHS} from './service-brand-paths.js?v=20261106-2600';
+import {SERVICE_BRAND_COLORS} from './service-brand-colors.js?v=20261106-2620';
 import {esc} from './ui.js?v=20261105-72';
 
+// Only known fixed palette values are interpolated; no user provided CSS.
 export function serviceIconMarkup(service,size='small'){
  const item=typeof service==='string'?serviceById(service):service;
  if(!item)return '<span class="gb-service-monogram" aria-hidden="true">+</span>';
+ const hex=SERVICE_BRAND_COLORS[item.id]||'';
+ const style=/^[A-F0-9]{6}$/.test(hex)?' style="--gb-service-color:#'+hex+'"':'';
+ const dark=hex==='000000'?' gb-service-logo-dark':'';
  const path=SERVICE_BRAND_PATHS[item.id];
- if(path?.length)return '<span class="gb-service-logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor" focusable="false">'+
+ if(path?.length)return '<span class="gb-service-logo gb-service-branded'+dark+'"'+style+' aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor" focusable="false">'+
   path.map(d=>'<path d="'+d+'"/>').join('')+'</svg></span>';
- return '<span class="gb-service-monogram" aria-hidden="true">'+esc(item.fallback||item.name.slice(0,2))+'</span>';
+ return '<span class="gb-service-monogram'+(hex?' gb-service-branded':'')+dark+'"'+style+' aria-hidden="true">'+
+  esc(item.fallback||item.name.slice(0,2))+'</span>';
+}
+export function serviceDisplayName(id,name='',fallback=''){
+ const item=serviceById(id);
+ if(item)return item.name;
+ if(id==='custom')return String(name||fallback||'Outro serviço');
+ return String(fallback||'');
 }
 export function serviceIdentityMarkup(id,name=''){
  if(!id)return '';
@@ -26,7 +38,7 @@ export function servicePickerMarkup(title=null){
  const display=item?.name||(custom?title?.serviceName||'Outro serviço':'Nenhum serviço escolhido');
  return '<section class="gb-service-field" aria-label="Identificação opcional do serviço">'+
   '<div class="gb-service-heading"><div><strong>Serviço ou aplicativo</strong>'+
-  '<p>Opcional · identifique assinaturas, delivery e outros gastos.</p></div></div>'+
+  '<p>Opcional · o serviço escolhido define o nome do lançamento.</p></div></div>'+
   '<input type="hidden" name="serviceId" value="'+esc(item?.id||(custom?'custom':''))+'">'+
   '<div class="gb-service-selected">'+
    '<span class="gb-service-selected-content">'+(item?serviceIconMarkup(item):'<span class="gb-service-monogram" aria-hidden="true">+</span>')+
