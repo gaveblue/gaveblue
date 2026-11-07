@@ -4,7 +4,7 @@ Registro de mudanças do aplicativo localizado em `gbplus/`. Toda versão e toda
 
 ## [2.5.1 · compilação 2 — AJUSTE DE REGRESSÃO E HOMOLOGAÇÃO] — 2026-11-06
 
-**Situação:** código em revisão, aguardando merge e deploy GitHub Pages. Nenhuma mudança adicional no layout de Contas/Cartões nem no mecanismo financeiro.
+**Publicação confirmada:** PR [#81](https://github.com/gaveblue/gaveblue/pull/81) integrado e deploy GitHub Pages [42317536214](https://github.com/gaveblue/gaveblue/actions/runs/42317536214) concluído com sucesso (commit `f52f43b47746138a5cfd63480bf3d7fadbf7c70b`). Nenhuma mudança adicional no layout de Contas/Cartões nem no mecanismo financeiro.
 
 - Corrigido `tests/bank-import-readonly-release-regression.mjs`: o teste antigo exigia a versão 2.5.0 build 9 de forma fixa, mesmo quando o aplicativo já estava em 2.5.1. A verificação agora compara `index.html` com `version.json`, preservando a garantia de que o importador não grava nada durante a simples prévia.
 - **12/12 suítes de regressão aprovadas em Node.js 22.16.0 real** sobre o pacote do GitHub Pages da 2.5.1 build 1 com o teste corrigido. O teste específico da tela unificada cobre aba ativa, conteúdo antigo, links `#cards`, teclado e ausência de alteração de dados.
@@ -14,7 +14,7 @@ Registro de mudanças do aplicativo localizado em `gbplus/`. Toda versão e toda
 
 ## [2.5.1 · compilação 1 — CONTAS E CARTÕES EM UMA TELA] — 2026-11-06
 
-**Situação na preparação:** alteração em ramo `feature/gbplus-251-proximos-ajustes`, aguardando revisão, merge e implantação GitHub Pages. A publicação anterior é a 2.5.0, compilação 9.
+**Publicação confirmada:** PR [#80](https://github.com/gaveblue/gaveblue/pull/80) integrado à `main` e implantação do GitHub Pages [42317173087](https://github.com/gaveblue/gaveblue/actions/runs/42317173087) concluída com sucesso. A compilação 2 preservou integralmente essa interface e corrigiu somente o teste legado de versionamento.
 
 ### Organização da interface
 - Unificadas as páginas de **Contas bancárias** e **Cartões de crédito** em uma entrada de navegação: **Contas e cartões** (`#accounts`), com seletor compacto **Contas | Cartões** no topo, inspirado somente na organização apresentada pelo usuário.
