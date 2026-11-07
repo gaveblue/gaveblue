@@ -41,7 +41,7 @@ function makeMock(isEdit=false){
   querySelector(selector){
    const key=selector==='[type="submit"]'?'submit':
     (selector.match(/data-action="([^"]+)"/)||[])[1];
-   return buttons[key]||null;
+   return Object.values(buttons).find(item=>item.action===key)||null;
   }
  }));
  const nav={children:[],appendChild(item){this.children.push(item);}};
