@@ -5,7 +5,7 @@ import {entrySelect} from './entry-select.js?v=20261107-2710';
 import {gbIcon,CATEGORY_ICON_OPTIONS,categoryIconFor} from './gb-icons.js?v=20261104-42';
 import {bankOptions,findBank,bankPicker} from './banks.js?v=20261105-87';
 import {dailyStatement} from './daily-statement.js?v=20261105-90';
-import {servicePickerMarkup,serviceIdentityMarkup,serviceDisplayName} from './service-ui.js?v=20261107-2710';
+import {servicePickerMarkup,serviceIdentityMarkup,serviceDisplayName} from './service-ui.js?v=20261107-2720';
 import {isServiceExpenseCategory} from './service-catalog.js?v=20261106-2630';
 const required='required maxlength="200"';
 export function titleForm(db,t,type='expense'){
@@ -49,7 +49,7 @@ export function titleForm(db,t,type='expense'){
    '</div>'+
   '</fieldset>':
   '<p class="gb-entry-edit-note">Para registrar ou estornar baixas de um título existente, use Detalhes do lançamento.</p>';
- return `<form id="title-form" class="gb-entry-form gb-entry-wizard" data-id="${esc(t?.id||'')}" data-mode="${esc(t?.mode||'single')}" data-count="${Number(t?Math.max(1,t.count-t.sequence+1):1)}" data-step="1" data-entry-type="${esc(type)}">
+ return `<form id="title-form" class="gb-entry-form gb-entry-wizard" data-id="${esc(t?.id||'')}" data-mode="${esc(t?.mode||'single')}" data-count="${Number(t?Math.max(1,t.count-t.sequence+1):1)}" data-step="1" data-entry-type="${esc(type)}" data-has-service="${Boolean(t?.serviceId&&showService)}">
   <div class="gb-entry-progress" aria-label="Etapa 1 de 3"><span class="active">1 · Lançamento</span><span>2 · Detalhes</span><span>3 · Confirmação</span></div>
   <section id="gb-entry-step-one" class="gb-entry-stage" data-entry-stage="1" aria-label="Dados do lançamento">
    ${typeField}
@@ -65,7 +65,7 @@ export function titleForm(db,t,type='expense'){
      ${categoryField}
      <div class="gb-service-area" ${showService?'':'hidden'}>${servicePickerMarkup(t)}</div>
     </div>
-    <div class="full">${field('Descrição','description',t?.serviceId?serviceDisplayName(t.serviceId,t.serviceName,t.description):t?.description||'','text','required maxlength="300" placeholder="Ex.: Energia do escritório" '+(t?.serviceId&&showService?'readonly aria-describedby="gb-service-naming-hint"':''))}</div>
+    <div class="full gb-entry-description-field">${field('Descrição','description',t?.serviceId?serviceDisplayName(t.serviceId,t.serviceName,t.description):t?.description||'','text','required maxlength="300" placeholder="Ex.: Energia do escritório" '+(t?.serviceId&&showService?'readonly aria-describedby="gb-service-naming-hint"':''))}</div>
     ${partnerField}
 
    </div>
