@@ -88,6 +88,54 @@ export function removeCardPurchase(db,id){
  db.titles=db.titles.filter(t=>!t.cardInvoice||t.amount>0);
  return group.length;
 }
+/**
+ * Edits a credit purchase without duplicating card invoices or bank transactions.
+ * A single purchase row represents one installment; changing it changes the whole group.
+ * Draft calculations are committed only after all constraints succeed.
+ */
+export function updateCardPurchase(db,id,input){
+ const purchase=cardPurchases(db).find(p=>p.id===id);
+ if(!purchase)throw Error('Compra no cartão não encontrada.');
+ const group=purchase.groupId?cardPurchases(db).filter(p=>p.groupId===purchase.groupId):[purchase];
+ const ordered=[...group].sort((a,b)=>a.sequence-b.sequence);
+ const total=ordered.reduce((sum,row)=>sum+row.amount,0);
+ const amount=input.amount,count=Number(input.count||1);
+ const cardId=String(input.cardId||'');
+ const date=String(input.date||'');
+ const description=String(input.description||'').trim();
+ const categoryId=String(input.categoryId||'');
+ const partnerId=String(input.partnerId||'');
+ if(!Number.isSafeInteger(amount)||amount<=0||amount>1e12||!Number.isInteger(count)||count<1||count>36||count>amount)
+  throw Error('Informe valor e parcelas válidos (até 36 parcelas).');
+ if(!validDate(date)||date>today())throw Error('Informe uma data real da compra, até hoje.');
+ if(!description||description.length>300)throw Error('Informe uma descrição válida para a compra.');
+ if(!db.categories.some(c=>c.id===categoryId&&c.type==='expense'))
+  throw Error('Selecione uma categoria de despesa válida.');
+ const changedFinancial=cardId!==purchase.cardId||date!==purchase.date||amount!==total||count!==ordered.length;
+ const paidInvoice=ordered.some(row=>(db.payments||[]).some(payment=>payment.titleId===row.invoiceId));
+ if(paidInvoice&&changedFinancial)
+  throw Error('Esta compra possui fatura paga. Estorne a baixa antes de alterar cartão, data, valor ou parcelas.');
+ if(!changedFinancial){
+  // Description/category/partner are not part of invoice accounting.
+  for(const row of ordered)Object.assign(row,{description,categoryId,partnerId});
+  return ordered;
+ }
+ // Rebuild on a detached copy. Failed limit/validation never touches live records.
+ const draft=structuredClone(db);
+ removeCardPurchase(draft,id);
+ const created=addCardPurchase(draft,{cardId,date,amount,count,description,categoryId,partnerId});
+ // Keep stable installment ids when the number of installments remains unchanged.
+ if(created.length===ordered.length){
+  for(let i=0;i<created.length;i++)created[i].id=ordered[i].id;
+  if(ordered.length>1){
+   for(const row of created)row.groupId=purchase.groupId;
+  }
+ }
+ db.titles=draft.titles;
+ db.cardPurchases=draft.cardPurchases;
+ db.categories=draft.categories;
+ return created;
+}
 export function ensureCardMayChange(db,id,next){
  const old=creditCards(db).find(c=>c.id===id);
  if(!old)return;
