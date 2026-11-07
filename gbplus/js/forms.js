@@ -36,16 +36,23 @@ export function titleForm(db,t,type='expense'){
    '';
  const isSeries=!t||t.mode==='recurring';
  const activeAccounts=(db.accounts||[]).filter(a=>a.active);
+ const activeCards=(db.cards||[]).filter(c=>c.active);
  const settlementHtml=!t?
-  '<fieldset class="gb-entry-settlement"><legend>Como ficará este lançamento?</legend>'+
-   '<label class="gb-entry-settlement-option"><input type="radio" name="settlement" value="pending" checked><span><strong>Ficar pendente</strong><small>Registrar agora e baixar quando pagar ou receber.</small></span></label>'+
-   '<label class="gb-entry-settlement-option"><input type="radio" name="settlement" value="paid"><span><strong>Baixar agora</strong><small>Registrar pagamento ou recebimento junto do lançamento.</small></span></label>'+
-   '<p class="gb-entry-settlement-series" hidden>Para parcelamentos e recorrências, faça a baixa de cada título individualmente.</p>'+
+  '<fieldset class="gb-entry-settlement"><legend>Como deseja registrar?</legend>'+
+   '<label class="gb-entry-settlement-option"><input type="radio" name="settlement" value="pending" checked><span><strong>Deixar pendente</strong><small>Registrar sem baixar agora.</small></span></label>'+
+   '<label class="gb-entry-settlement-option"><input type="radio" name="settlement" value="paid"><span><strong>Baixar em uma conta</strong><small>Registrar pagamento ou recebimento na conta escolhida.</small></span></label>'+
+   '<label class="gb-entry-settlement-option gb-entry-card-option"><input type="radio" name="settlement" value="card"><span><strong>Lançar no cartão de crédito</strong><small>A compra entra na fatura, sem baixar a conta agora.</small></span></label>'+
+   '<p class="gb-entry-settlement-series" hidden>Parcelas e recorrências bancárias ficam pendentes; compras no cartão geram faturas próprias.</p>'+
    '<div class="gb-entry-settlement-details" hidden>'+
     '<label class="field">Conta da baixa<select name="settleAccountId" data-gb-native="true"><option value="">Selecione uma conta</option>'+
      activeAccounts.map(a=>'<option value="'+esc(a.id)+'">'+esc(a.name)+'</option>').join('')+'</select></label>'+
     field('Data da baixa','settleDate',today(),'date','max="'+today()+'"')+
-    '<p class="gb-entry-settlement-message">A baixa será gravada junto com o título na conta escolhida, após a confirmação.</p>'+
+    '<p class="gb-entry-settlement-message">A baixa será gravada junto do título, após confirmar.</p>'+
+   '</div>'+
+   '<div class="gb-entry-settlement-card" hidden>'+
+    '<label class="field">Cartão de crédito<select name="settleCardId" data-gb-native="true"><option value="">Selecione um cartão</option>'+
+     activeCards.map(c=>'<option value="'+esc(c.id)+'">'+esc(c.name)+'</option>').join('')+'</select></label>'+
+    '<p class="gb-entry-settlement-message">Compra única ou até 36 parcelas. Vencimentos serão calculados pelas regras de fechamento e vencimento do cartão; o saldo da conta só muda ao pagar a fatura.</p>'+
    '</div>'+
   '</fieldset>':
   '<p class="gb-entry-edit-note">Para registrar ou estornar baixas de um título existente, use Detalhes do lançamento.</p>';
@@ -65,7 +72,7 @@ export function titleForm(db,t,type='expense'){
      ${categoryField}
      <div class="gb-service-area" ${showService?'':'hidden'}>${servicePickerMarkup(t)}</div>
     </div>
-    <div class="full gb-entry-description-field">${field('Descrição','description',t?.serviceId?serviceDisplayName(t.serviceId,t.serviceName,t.description):t?.description||'','text','required maxlength="300" placeholder="Ex.: Energia do escritório" '+(t?.serviceId&&showService?'readonly aria-describedby="gb-service-naming-hint"':''))}</div>
+    <div class="full gb-entry-description-field">${field('Descrição','description',t?.serviceId?serviceDisplayName(t.serviceId,t.serviceName,t.description):t?.description||'','text','maxlength="300" placeholder="Ex.: Energia do escritório" '+(t?.serviceId&&showService?'readonly aria-describedby="gb-service-naming-hint"':''))}</div>
     ${partnerField}
 
    </div>
@@ -75,19 +82,10 @@ export function titleForm(db,t,type='expense'){
     <p class="full gb-entry-amount-recap">Valor informado: <strong>${money(t?.amount||0)}</strong></p>
     <div class="full">${periodicity}</div>
     <div class="full">${field('Documento','document',t?.document||'','text','maxlength="100" placeholder="Nº do documento"')}</div>
-    <div class="full gb-entry-payment-channel">
-     <span class="gb-entry-label">Forma de movimentação</span>
-     <div class="gb-entry-channel-options" role="group" aria-label="Forma de movimentação">
-      <label><input type="radio" name="paymentMethod" value="account" ${t?.paymentMethod!=='debit'?'checked':''}> Conta / Pix / dinheiro</label>
-      <label><input type="radio" name="paymentMethod" value="debit" ${t?.paymentMethod==='debit'?'checked':''}> Cartão de débito</label>
-     </div>
-     <p class="gb-entry-channel-help">No débito, escolha a conta bancária utilizada na etapa final para registrar a baixa.</p>
-    </div>
     ${!t?'<div id="count-field" class="full" hidden>'+field('Parcelas / meses','count',2,'number','min="2" max="120" step="1"')+'</div>':''}
     ${extra?'<div class="full">'+extra+'</div>':''}
     ${textarea('Observações','notes',t?.notes)}
    </div>
-   ${!t&&Array.isArray(db.cards)&&db.cards.some(c=>c.active)?'<div class="gb-credit-entry-link" '+(type==='expense'?'':'hidden')+'><strong>Vai usar o cartão de crédito?</strong><p>Registre como compra no cartão para gerar a fatura sem duplicar a despesa.</p><button type="button" class="button" data-action="new-card-purchase">Lançar compra no cartão</button></div>':''}
    ${(db.cards||[]).length?'<div class="gb-entry-refund-card" '+(type==='income'?'':'hidden')+'>'+select('Cartão relacionado ao reembolso (opcional)','relatedCardId',[['','Não vincular'],...(db.cards||[]).map(c=>[c.id,c.name])],t?.relatedCardId||'')+'<p>Vínculo apenas informativo: não reduz automaticamente a fatura nem aumenta o limite. Só registre baixa bancária quando o valor realmente entrar na conta.</p></div>':''}
   </section>
   <section id="gb-entry-step-three" class="gb-entry-stage" data-entry-stage="3" aria-label="Datas e baixa do lançamento" hidden>
@@ -102,9 +100,10 @@ export function titleForm(db,t,type='expense'){
      <span class="gb-entry-switch-track" aria-hidden="true"></span>
      <span><strong>Considerar apenas dias úteis</strong><small>Sábados, domingos e feriados nacionais passam ao próximo dia útil.</small></span>
     </label>
-    <div class="gb-entry-schedule-header"><strong>Prévia dos próximos vencimentos</strong><small id="gb-entry-schedule-count"></small></div>
-    <div id="gb-entry-schedule" class="gb-entry-schedule" aria-live="polite"></div>
-    <p class="gb-entry-schedule-note">Feriados estaduais e municipais não estão incluídos. Confira as datas antes de confirmar.</p>
+    <button type="button" class="gb-entry-schedule-trigger" data-action="title-schedule-detail" aria-label="Detalhar vencimentos das parcelas">
+     <span><strong>Detalhar vencimentos</strong><small id="gb-entry-schedule-count"></small></span><span class="gb-entry-schedule-chevron" aria-hidden="true">›</span>
+    </button>
+    <div id="gb-entry-schedule" class="gb-entry-schedule" hidden aria-live="polite"></div>
    </section>
   </section>
   <input type="hidden" name="accountId" value="${esc(t?.accountId||'')}">
