@@ -10,6 +10,7 @@ const normalize=value=>String(value??'').normalize('NFD').replace(/[\u0300-\u036
 const picker=()=>document.querySelector('#gb-picker-sheet');
 const collator=new Intl.Collator('pt-BR',{sensitivity:'base'});
 let active=null;
+let selectionAfterClose=null;
 let drag=null;
 let suppressGrabClick=false;
 
@@ -69,7 +70,8 @@ export function sheetGroupsCount(groups){
 export function openGbPickerSheet({kind,items=[],selected='',onPick}){
  const root=picker();
  if(!root||!['category','service'].includes(kind)||typeof onPick!=='function')return false;
- if(root.open)closePicker();
+ // Never replace a live dialog: wait for its close event before opening another.
+ if(root.open)return false;
  const sections=kind==='category'?categorySections(items,selected):serviceSections(selected);
  const title=kind==='category'?'Selecione a categoria':'Qual serviço?';
  const searchHint=kind==='category'?'Busque por uma categoria':'Busque por um serviço';
@@ -90,6 +92,7 @@ export function openGbPickerSheet({kind,items=[],selected='',onPick}){
   '<div class="gb-sheet-results" tabindex="0">'+groups+
   '<p class="gb-sheet-empty" hidden>Nenhum resultado encontrado.</p></div></div>';
  active={onPick,returnFocus:document.activeElement};
+ selectionAfterClose=null;
  drag=null;suppressGrabClick=false;
  snap(root,'partial');
  root.showModal();
@@ -126,8 +129,8 @@ export function installGbPickerSheet(){
   if(option){
    const value=option.dataset.sheetChoice;
    const callback=active?.onPick;
+   if(callback)selectionAfterClose={callback,value};
    closePicker();
-   if(callback)callback(value);
    return;
   }
   if(event.target.closest('[data-sheet-grab]')){
@@ -153,11 +156,15 @@ export function installGbPickerSheet(){
  root.addEventListener('cancel',event=>{event.preventDefault();closePicker();});
  root.addEventListener('close',()=>{
   const focus=active?.returnFocus;
-  active=null;drag=null;
+  const selection=selectionAfterClose;
+  active=null;selectionAfterClose=null;drag=null;
   if(focus?.isConnected){
    focus.setAttribute?.('aria-expanded','false');
    focus.focus({preventScroll:true});
   }
+  // Native dialog is fully closed before category selection can open
+  // the service picker. Prevents double dialogs and stale focus.
+  if(selection)selection.callback(selection.value);
  });
  root.addEventListener('pointerdown',event=>{
   const handle=event.target.closest('[data-sheet-grab]');
