@@ -60,6 +60,7 @@
   <link rel="stylesheet" href="./gb-entry-wizard.css?v=20261106-2630">
   <link rel="stylesheet" href="./custom-controls.css?v=20261104-41">
   <link rel="stylesheet" href="./overlays.css?v=20261104-40">
+  <link rel="stylesheet" href="./bottom-sheet.css?v=20261107-2700">
 <style>
 .gb-ai-widget{position:fixed;right:18px;bottom:40px;z-index:9999;font-family:system-ui,sans-serif}
 .gb-ai-widget>summary{list-style:none;cursor:pointer;display:grid;place-items:center;width:52px;height:52px;border-radius:50%;background:#181818;color:white;box-shadow:0 0 0 3px #ffffffbb,0 0 19px #a98fff88,0 8px 24px #0003;font-size:27px;font-weight:500;transition:transform .2s,box-shadow .2s;animation:gb-ai-glow 3s ease-in-out infinite}
@@ -91,7 +92,7 @@ body.auth-locked .gb-ai-widget{display:none}
   <details class="gb-ai-widget"><summary aria-label="Abrir ou fechar assistente financeiro">✦</summary><iframe title="Assistente financeiro GB+ AI" src="./ai-lab/?v=20261105-ai82" loading="lazy"></iframe></details>
   <div class="mobile-nav-fade" aria-hidden="true"></div>
   <nav class="mobile-nav" id="mobile-navigation" aria-label="Navegação móvel"></nav>
-  <dialog id="modal"><div id="modal-content"></div></dialog><div id="toast" role="status" aria-live="polite"></div>
+  <dialog id="modal"><div id="modal-content"></div></dialog><dialog id="gb-picker-sheet" class="gb-picker-dialog" aria-labelledby="gb-sheet-title"></dialog><div id="toast" role="status" aria-live="polite"></div>
   <noscript>Ative o JavaScript para usar o GB+. Os dados são armazenados neste navegador.</noscript>
   <script>
   // Only display guidance when bootstrap truly did not progress; never reload automatically.
