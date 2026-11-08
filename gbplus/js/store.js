@@ -1,7 +1,7 @@
 import {uid,validDate,paid,today} from './domain.js?v=20261105-72';
 import {CATEGORY_ICON_OPTIONS} from './gb-icons.js?v=20261108-2821';
 import {BANKS} from './banks.js?v=20261105-87';
-import {CATEGORY_SUGGESTIONS} from './category-library.js?v=20261108-2821';
+import {CATEGORY_SUGGESTIONS} from './category-library.js?v=20261108-2862';
 import {DEFAULT_NOTIFICATION_PREFS,validNotificationPrefs} from './notification-rules.js?v=20261108-2821';
 export const KEY='gb-plus:data:v1';
 export const INDICATORS={balance:'Saldo disponível',receivable:'A receber',payable:'A pagar',provisions:'Provisões líquidas',received:'Receitas recebidas',spent:'Despesas pagas',result:'Resultado financeiro',overdue:'Títulos vencidos',chart:'Fluxo de caixa',upcoming:'Próximos vencimentos'};
