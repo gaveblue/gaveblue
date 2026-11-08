@@ -29,3 +29,16 @@ Fonte de metadados da biblioteca consultada em 06/11/2026: https://github.com/si
 
 Netflix usa vermelho `#E50914`; iFood usa `#EA1D2C`; Spotify usa `#1ED760`. Para marcas sem fonte confiável, como Plus Delivery, o fundo e o monograma permanecem neutros. Não é exibido qualquer sinal de parceria ou autorização das empresas.
 
+
+
+## Ampliação proposta — 2.8.6 (revisão de 08/11/2026)
+
+O catálogo passou de **26 para 49 opções** na branch de desenvolvimento da versão 2.8.6. São **39 serviços com SVG local** (13 símbolos Simple Icons mantidos e 26 mapeamentos adicionais de **Font Awesome Free Brands 6.7.2**). Entre os mapeamentos adicionais, três melhoram opções que antes usavam apenas iniciais: YouTube Premium, Google One e Microsoft 365. Esses três representam o símbolo da marca principal, sem afirmar que seja o ícone específico do plano/produto.
+
+- Fonte da ampliação: Font Awesome Free Brands 6.7.2, pacote `@fortawesome/free-brands-svg-icons`, https://fontawesome.com/license/free. O conjunto de ícones de marca requer atribuição **CC BY 4.0** (código sob MIT conforme componente), mantida neste documento. Créditos: **Font Awesome (Fonticons, Inc.)**; https://fontawesome.com/ e https://creativecommons.org/licenses/by/4.0/. SVGs compilados como caminhos locais no arquivo `js/service-extra-brand-paths.js`.
+- Os identificadores originais Simple Icons continuam sujeitos ao aviso de marcas e às diretrizes individuais. Nem CC0 nem CC BY 4.0 autorizam criar afiliação, endosso ou usar marcas em material promocional sem verificar as regras de cada titular.
+- **Sem símbolo específico incorporado (10):** Disney+, Prime Video, Globoplay, 99Food, Plus Delivery, Rappi, 99, inDrive, Canva, ChatGPT. Mantêm-se as iniciais, sem assets externos de procedência incerta. Não são relatados como ícones quebrados: são placeholders intencionais.
+- Nunca baixar logos automaticamente de links arbitrários de usuários: qualquer novo SVG recebido precisa passar por validação de procedência, licença, tamanho, ausência de scripts e ausência de referências externas. PNG/WebP também podem ser usados após revisão, preservando aspecto e sem expor dados dos usuários.
+- Não alterar o catálogo de serviços existentes nem suas IDs em atualizações futuras; isso preserva títulos antigos. A seleção continua opcional e não cria lançamentos.
+
+**Status:** a 2.8.6 é candidata, sem publicação ou homologação declarada neste registro. A 2.8.5 existente não é alterada diretamente pela branch.
