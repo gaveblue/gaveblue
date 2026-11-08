@@ -140,7 +140,26 @@ html.gb-theme-compact .toggle:focus-visible{outline:2px solid #7199ef;outline-of
 html.gb-theme-compact .orbit-diffuse{filter:blur(4px)}
 html.gb-theme-compact .orbit-soft{filter:blur(2px)}
 html.gb-theme-compact .orbit-primary{filter:drop-shadow(0 0 2px var(--orbit-color,#91abff))}
-html.gb-theme-compact .pixel-symbol{filter:none}
+/* Keep day/night glyphs readable even on mobile WebViews that cannot paint
+   the particle canvas. The full laboratory version keeps its morphing canvas. */
+html.gb-theme-compact .pixel-symbol{display:none!important}
+.gb-compact-theme-glyph{display:none}
+html.gb-theme-compact .gb-compact-theme-glyph{
+  display:block;position:absolute;z-index:7;left:50%;top:50%;
+  width:51%;height:51%;overflow:visible;transform:translate(-50%,-50%);
+  pointer-events:none;image-rendering:pixelated
+}
+html.gb-theme-compact .gb-compact-night-glyph{
+  color:#e8efff;opacity:var(--night);
+  filter:drop-shadow(0 1px 1px rgba(0,0,0,.34))
+}
+html.gb-theme-compact .gb-compact-day-glyph{
+  color:#37363d;opacity:var(--day);
+  filter:drop-shadow(0 1px 0 rgba(255,255,255,.55))
+}
+html.gb-theme-compact .knob{
+  --orbit-color:color-mix(in srgb,#ffb843 calc(var(--day) * 100%),#809eff)
+}
 
 </style>
 </head>
@@ -180,6 +199,17 @@ html.gb-theme-compact .pixel-symbol{filter:none}
               <path class="orbit-core" d="M 9 186 L 9 195 C 9 233 28 259 78 259 L 190 259 C 240 259 259 233 259 195 L 259 74 C 259 36 240 9 189 9 L 79 9 C 28 9 9 36 9 74 L 9 84" />
             </svg>
             <canvas class="pixel-symbol" id="pixel-symbol" aria-hidden="true"></canvas>
+            <!-- Pixel-art symbols rendered in SVG for the 59px mobile control.
+                 Full-size prototype retains the original morphing canvas. -->
+            <svg class="gb-compact-theme-glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <g class="gb-compact-night-glyph" fill="currentColor">
+                <path d="M13 3h-4v2H7v2H5v3H4v5h1v2h2v2h3v2h7v-2h-5v-2h-2v-3H8v-4h2V8h2V6h1V3z"/>
+                <path d="M18 5h2v2h-2zM17 11h2v2h-2zM20 14h1v2h-1z"/>
+              </g>
+              <g class="gb-compact-day-glyph" fill="currentColor">
+                <path d="M10 9h4v6h-4zM11 3h2v4h-2zM11 17h2v4h-2zM3 11h5v2H3zM16 11h5v2h-5zM5 5h2v2H5zM17 5h2v2h-2zM5 17h2v2H5zM17 17h2v2h-2z"/>
+              </g>
+            </svg>
             <div class="lens-specular"></div>
           </div>
         </div>
@@ -224,7 +254,13 @@ html.gb-theme-compact .pixel-symbol{filter:none}
   let lastState = false;
   // The U-shaped strip fits the bottom in night mode and the top in day mode.
   // Its midpoint travels via the RIGHT edge; drag position directly scrubs it.
-  const orbitLength = orbitGuide?.getTotalLength() || 870;
+  // SVG path geometry may be unavailable briefly in a PWA/WebView iframe.
+  // Never let that prevent the moon/sun or spring animation from rendering.
+  let orbitLength=870;
+  try {
+    const measured=orbitGuide?.getTotalLength?.();
+    if(Number.isFinite(measured)&&measured>0)orbitLength=measured;
+  } catch {} 
   const orbitStrip = Math.min(orbitLength * .44, 398);
   const orbitTravel = orbitLength - orbitStrip;
   for (const path of orbitPaths) path.style.strokeDasharray = `${orbitStrip} ${orbitLength + 10}`;
@@ -238,12 +274,19 @@ html.gb-theme-compact .pixel-symbol{filter:none}
     const to = p < .5 ? [242,248,255] : [255,184,67];
     const mix = smooth(p < .5 ? p * 2 : (p - .5) * 2);
     const color = `rgb(${Math.round(lerp(from[0],to[0],mix))},${Math.round(lerp(from[1],to[1],mix))},${Math.round(lerp(from[2],to[2],mix))})`;
-    const point = orbitGuide.getPointAtLength(offset + orbitStrip * .5);
     const knob = document.getElementById('knob');
+    if(!knob)return;
     knob.style.setProperty('--orbit-color',color);
-    knob.style.setProperty('--orbit-x',`${(point.x/268*100).toFixed(2)}%`);
-    knob.style.setProperty('--orbit-y',`${(point.y/268*100).toFixed(2)}%`);
     knob.style.setProperty('--orbit-offset',String(-offset));
+    try {
+      const point=orbitGuide?.getPointAtLength?.(offset + orbitStrip * .5);
+      if(point&&Number.isFinite(point.x)&&Number.isFinite(point.y)){
+        knob.style.setProperty('--orbit-x',`${(point.x/268*100).toFixed(2)}%`);
+        knob.style.setProperty('--orbit-y',`${(point.y/268*100).toFixed(2)}%`);
+      }
+    } catch {
+      // Preserve the computed gold/blue orbit even if path geometry fails.
+    }
   }
 
 
