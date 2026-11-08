@@ -92,7 +92,7 @@ export function registerCardInvoiceBalance(db,input){
  const card=creditCards(db).find(c=>c.id===input.cardId&&c.active);
  if(!card)throw Error('Selecione um cartão de crédito ativo.');
  const cycle=String(input.cycle||'');
- if(!/^\\d{4}-(0[1-9]|1[0-2])$/.test(cycle)||cycle>cardCycle(today(),card.closingDay))
+ if(!/^\d{4}-(0[1-9]|1[0-2])$/.test(cycle)||cycle>cardCycle(today(),card.closingDay))
   throw Error('Informe uma competência atual ou anterior para a fatura.');
  const closeDate=cycle+'-'+String(card.closingDay).padStart(2,'0');
  const date=closeDate<=today()?closeDate:today();
