@@ -10,7 +10,7 @@ const finance=read('js/finance-24-ui.js'),accounts=read('js/accounts-cards-view.
 let passed=0;
 const test=(condition,label)=>{assert.ok(condition,label);passed++;};
 test(page.includes('id="connection" class="connection" hidden'),'Status online não deve ocupar o cabeçalho');
-test(page.includes('id="gb-top-theme-frame"'),'Seletor Liquid Glass compacto deve substituir o ícone anterior');
+test(page.includes('id="gb-theme-toggle"')&&page.includes('data-action="top-theme"'),'Alternador sol/lua deve estar no cabeçalho');
 test(accounts.includes("finance-24-ui.js?v=20261108-2811"),'A tela Contas/Cartões deve carregar a nova versão do código de faturas');
 test(app.includes("accounts-cards-view.js?v=20261108-2811"),'A importação da tela Contas/Cartões deve ter cache invalidado');
 test(page.includes('./more-page.css?v=20261108-2811'),'A página Mais precisa carregar seu estilo');
