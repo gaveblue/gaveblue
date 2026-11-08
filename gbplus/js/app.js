@@ -63,12 +63,15 @@ const modal=document.querySelector('#modal');
     root.classList.remove('gb-theme-preview');
     root.style.removeProperty('--gb-theme-day-share');
     root.style.removeProperty('--gb-theme-day-progress');
+    root.style.removeProperty('--gb-theme-text-day-share');
   }
   function scrubLiquidTheme(progress){
     if(!Number.isFinite(progress)||progress<0||progress>1)return;
     const root=document.documentElement;
     root.style.setProperty('--gb-theme-day-share',(progress*100).toFixed(2)+'%');
     root.style.setProperty('--gb-theme-day-progress',progress.toFixed(4));
+    // Prevent grey-on-grey text at 50%; backgrounds still interpolate linearly.
+    root.style.setProperty('--gb-theme-text-day-share',progress>=.5?'100%':'0%');
     root.classList.add('gb-theme-preview');
     clearTimeout(gbLiquidPreviewTimeout);
     // Safety fallback if the iframe reloads or closes mid-gesture.
