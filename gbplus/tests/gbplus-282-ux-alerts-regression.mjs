@@ -45,8 +45,8 @@ ok(!notifications.validNotificationPrefs({enabled:true,daysBefore:100,expenses:t
 const app=read('js/app.js'),page=read('index.html'),css=read('next-282.css'),views=read('js/views.js'),toggle=read('lab/liquid-theme-toggle.html'),more=read('js/more-view.js');
 ok(css.includes('.gb-balance-accounts::-webkit-scrollbar{display:none')&&css.includes('overflow-x:auto!important'),'Esconder barra mantendo rolagem horizontal');
 ok(page.includes('id="gb-theme-toggle"')&&!page.includes('class="avatar"'),'Alternador sol/lua no topo e Minha Conta continua em Mais');
-ok(toggle.includes('compact')&&toggle.includes('canSendTheme=true'),'Efeito compacto conserva interação sem evento inicial');
-ok(app.includes('frame.contentWindow!==event.source')&&app.includes('event.origin!==location.origin'),'Origem/janela conferidas no tema');
+ok(!page.includes('gb-top-theme-frame')&&page.includes('gb-theme-toggle-sun')&&page.includes('gb-theme-toggle-moon'),'Controle simples de sol e lua substitui iframe descontinuado');
+ok(!app.includes('liquid-theme-progress')&&app.includes("'top-theme':()=>commit"),'Sem mensagens de iframe; a troca de tema usa persistência existente');
 ok(more.includes('href="#profile"')&&more.includes('Minha Conta')&&more.includes('Carteira'),'Minha Conta em Mais e Carteira');
 ok(views.includes("['due-overview','Painel de vencimentos']"),'Relatório antigo preservado');
 ok(views.includes("button(icon('settings')+' Configurar avisos'"),'Notificações configuráveis na tela');
