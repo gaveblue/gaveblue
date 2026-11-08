@@ -736,6 +736,16 @@ body.auth-locked .mobile-nav-fade{display:none!important}
 .gb-credit-card-meta span{border:1px solid var(--border);border-radius:8px;padding:5px 8px}
 .gb-credit-card-meta b{color:var(--ink)}
 .gb-credit-card-buttons{display:flex;gap:8px;margin:15px 0 18px}
+/* GB+ 2.8.0: monthly card statements, with clear action to settle the linked payable. */
+.gb-credit-card-buttons{flex-wrap:wrap}
+.gb-invoice-next{margin:12px 0 0;color:var(--muted);font-size:11px;line-height:1.5}
+.gb-invoice-next strong{color:var(--ink);font-weight:600}
+.gb-invoice-total{font-size:11px;letter-spacing:normal;color:var(--muted);font-weight:500;margin-left:6px}
+.gb-credit-invoice-row{display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border)}
+.gb-credit-invoice-row .gb-credit-invoice{flex:1;min-width:0;border-bottom:0}
+.gb-credit-invoice-row>.button{white-space:nowrap;flex-shrink:0}
+@media(max-width:420px){.gb-credit-invoice-row{gap:5px}.gb-credit-invoice-row .button{padding-inline:10px}.gb-invoice-total{display:block;margin-left:0}}
+
 .gb-credit-card h3{font-size:12px;letter-spacing:.04em;margin:18px 0 8px}
 .gb-credit-invoice,.gb-credit-purchase{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 4px;border:0;border-bottom:1px solid var(--border);background:transparent;width:100%;text-align:left;color:var(--ink)}
 .gb-credit-invoice span,.gb-credit-purchase>div{display:flex;flex-direction:column;gap:3px;min-width:0}
