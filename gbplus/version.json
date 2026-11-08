@@ -1,15 +1,18 @@
 {
-  "version": "2.8.1",
+  "version": "2.8.2",
   "build": 1,
-  "published_at": "2026-11-08T17:59:34.000Z",
-  "title": "Correções de cartões e navegação Liquid Glass",
+  "published_at": "2026-11-08T20:05:35.017Z",
+  "title": "Carteira, categorias ampliadas, Liquid Glass e avisos",
   "notes": [
-    "Corrigido o erro de função na lista de faturas dos cartões quando existem lançamentos; Pagar aparece para faturas pendentes e desaparece após quitação.",
-    "Atualizadas as referências dos módulos de cartões para que a tela Contas e Cartões carregue a correção sem utilizar o componente antigo em cache.",
-    "Removido do topo o texto Conta online para priorizar o botão existente de alternar o tema, preservando autenticação e sincronização.",
-    "A seção Mais agora abre uma página completa com 16 destinos em quatro grupos, em vez de um pop-up.",
-    "O indicador Liquid Glass é posicionado e dimensionado de acordo com a aba realmente ativa, mantendo ícones e rótulos centralizados.",
-    "Liberação autorizada em 08/11/2026 com 20 verificações direcionadas e 22 verificações Liquid Glass aprovadas no V8; homologação integral Node, Android/PWA e Supabase autenticado permanece pendente."
+    "Barra de rolagem visual dos bancos oculta, mantendo o gesto horizontal.",
+    "Atalho Cartões renomeado para Carteira sem alterar as faturas.",
+    "Pacote de 50 categorias adicionais para contas novas e importação opcional nas existentes.",
+    "Biblioteca de 55 ícones com pesquisa no cadastro de categorias.",
+    "Seletor Liquid Glass compacto com arrasto no cabeçalho e Minha Conta na tela Mais.",
+    "Nova tela de notificações internas para contas a pagar e receber, com prazos e preferências ajustáveis.",
+    "Painel analítico de vencimentos disponível em Relatórios.",
+    "Liberação web autorizada para empacotamento Android sem GitHub Actions. Ainda não gera APK e não lê notificações bancárias.",
+    "Homologação parcial: testes isolados aprovados, pendentes Android/PWA instalado, Supabase autenticado e distribuição do pacote."
   ],
   "assets": [
     "./index.html",
@@ -173,28 +176,36 @@
     "./liquid-glass.css",
     "./lab/liquid-theme-toggle.html",
     "./js/more-view.js",
-    "./more-page.css"
+    "./more-page.css",
+    "./next-282.css",
+    "./js/category-library.js",
+    "./js/notification-rules.js"
   ],
   "highlights": [
     {
-      "icon": "card",
-      "title": "Faturas corrigidas",
-      "description": "A lista de cartões e os botões de pagamento voltaram a funcionar."
+      "icon": "wallet",
+      "title": "Carteira",
+      "description": "O acesso aos cartões agora se chama Carteira."
     },
     {
-      "icon": "menu",
-      "title": "Mais em tela cheia",
-      "description": "Todas as funcionalidades em grupos, com navegação mais simples."
+      "icon": "category",
+      "title": "Categorias e ícones",
+      "description": "50 sugestões extras e 55 ícones para escolher."
+    },
+    {
+      "icon": "bell",
+      "title": "Avisos de vencimento",
+      "description": "Defina quando receber lembretes dentro do GB+."
     },
     {
       "icon": "sparkles",
-      "title": "Liquid Glass alinhado",
-      "description": "Botões centralizados e acesso ao tema com mais espaço."
+      "title": "Tema Liquid Glass",
+      "description": "Seletor compacto com arrasto no topo do aplicativo."
     }
   ],
-  "release_status": "authorized_release_2_8_1_partial_validation",
+  "release_status": "authorized_release_2_8_2_web_packaging_android_pending",
   "homologation": {
-    "status": "release_authorized_partial_testing_full_homologation_pending",
-    "notes": "Usuário autorizou concluir a 2.8.1 em 08/11/2026. 20 verificações da regressão direcionada, 22 de Liquid Glass, 4 rotas e teste dinâmico de fatura pendente/quitada: passaram em V8 isolado. Pendentes teste de aplicativo real Android/PWA, suíte Node integral, persistência Supabase e confirmação do deploy. Não marcar como homologação integral."
+    "status": "partial_testing_authorized_web_release_full_android_supabase_pending",
+    "notes": "Publicação web autorizada em 08/11/2026 para empacotamento. Testes direcionados 2.8.2 (131 asserções) e regressões anteriores aprovados em V8 isolado. Não houve homologação Android/PWA real, Supabase autenticado ou geração de APK. GitHub Actions indisponível; não confundir publicação web com homologação integral."
   }
 }

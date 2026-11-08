@@ -1,6 +1,8 @@
 import {uid,validDate,paid,today} from './domain.js?v=20261105-72';
-import {CATEGORY_ICON_OPTIONS} from './gb-icons.js?v=20261104-42';
+import {CATEGORY_ICON_OPTIONS} from './gb-icons.js?v=20261108-2821';
 import {BANKS} from './banks.js?v=20261105-87';
+import {CATEGORY_SUGGESTIONS} from './category-library.js?v=20261108-2821';
+import {DEFAULT_NOTIFICATION_PREFS,validNotificationPrefs} from './notification-rules.js?v=20261108-2821';
 export const KEY='gb-plus:data:v1';
 export const INDICATORS={balance:'Saldo disponível',receivable:'A receber',payable:'A pagar',provisions:'Provisões líquidas',received:'Receitas recebidas',spent:'Despesas pagas',result:'Resultado financeiro',overdue:'Títulos vencidos',chart:'Fluxo de caixa',upcoming:'Próximos vencimentos'};
 export const defaultPanel=()=>({desktop:Object.fromEntries(Object.keys(INDICATORS).map(k=>[k,true])),mobile:Object.fromEntries(Object.keys(INDICATORS).map(k=>[k,true]))});
@@ -9,7 +11,7 @@ export const MOBILE_SHORTCUTS=[
  ['titles','Lançamentos','transfer'],['payable','A pagar','down'],['receivable','A receber','up'],
  ['provisions','Provisões','layers'],['flow','Fluxo de caixa','chart'],
  ['partners','Parceiros','people'],['accounts','Contas','wallet'],
- ['cards','Cartões','credit-card'],['forecast','Previsão','chart'],['banks','Bancos','building-2'],
+ ['cards','Carteira','wallet'],['forecast','Previsão','chart'],['banks','Bancos','building-2'],
  ['categories','Categorias','category'],['reports','Relatórios','chart'],
  ['notifications','Notificações','bell'],['settings','Configurações','settings'],
  ['profile','Meu perfil','user'],['menu','Mais','more']
@@ -23,7 +25,7 @@ export function shouldOfferSetup(db){
  // Backward-compatible: do not trigger first-run wizard on existing edited finances.
  return db?.revision===0&&['accounts','titles','payments','transfers','partners'].every(k=>Array.isArray(db[k])&&!db[k].length);
 }
-export function emptyDatabase(){return {schemaVersion:1,revision:0,titles:[],payments:[],partners:[],accounts:[],transfers:[],categories:[...['Água','Energia elétrica','Internet','Aluguel','Salários','Impostos','Combustíveis','Manutenção','Fretes','Serviços','Compras','Outras despesas'].map(name=>({id:uid(),name,type:'expense'})),...['Vendas','Prestação de serviços','Recebimento de clientes','Reembolsos','Outras receitas'].map(name=>({id:uid(),name,type:'income'}))],settings:{theme:'light',panel:defaultPanel(),mobileNav:defaultMobileNav(),setupCompleted:false}};}
+export function emptyDatabase(){return {schemaVersion:1,revision:0,titles:[],payments:[],partners:[],accounts:[],transfers:[],categories:[...['Água','Energia elétrica','Internet','Aluguel','Salários','Impostos','Combustíveis','Manutenção','Fretes','Serviços','Compras','Outras despesas'].map(name=>({id:uid(),name,type:'expense'})),...['Vendas','Prestação de serviços','Recebimento de clientes','Reembolsos','Outras receitas'].map(name=>({id:uid(),name,type:'income'})),...CATEGORY_SUGGESTIONS.map(([name,type,icon])=>({id:uid(),name,type,icon}))],settings:{theme:'light',panel:defaultPanel(),mobileNav:defaultMobileNav(),setupCompleted:false,notifications:{...DEFAULT_NOTIFICATION_PREFS}}};}
 const assert=(ok,message)=>{if(!ok)throw Error(`Backup inválido: ${message}`);};
 const str=(s,max=2000)=>typeof s==='string'&&s.length<=max;
 const amount=n=>Number.isSafeInteger(n)&&Math.abs(n)<=1e12;
@@ -193,6 +195,7 @@ export function validateDatabase(db){
   // Optional on older backups: unchanged data can be loaded without migration.
   if(db.settings.mobileNav!==undefined)assert(validMobileNav(db.settings.mobileNav),'atalhos da barra inferior.');
   if(db.settings.setupCompleted!==undefined)assert(typeof db.settings.setupCompleted==='boolean','configuração inicial.');
+  if(db.settings.notifications!==undefined)assert(validNotificationPrefs(db.settings.notifications),'preferências dos avisos.');
   validateCreditData(db);
   validateReconciliationHistory(db);
   assert(Number.isSafeInteger(db.revision)&&db.revision>=0,'revisão.');return db;

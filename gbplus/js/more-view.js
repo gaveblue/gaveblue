@@ -8,7 +8,7 @@ const groups=[
     ['payable','Contas a pagar','down','Despesas e vencimentos'],
     ['receivable','Contas a receber','up','Receitas e recebimentos'],
     ['accounts','Contas e cartões','wallet','Saldos e contas bancárias'],
-    ['cards','Cartões de crédito','credit-card','Faturas, limites e compras']
+    ['cards','Carteira','wallet','Cartões, faturas e limites']
   ]},
   {label:'PLANEJAMENTO E RELATÓRIOS',entries:[
     ['provisions','Provisões','layers','Entradas e saídas previstas'],
@@ -23,7 +23,6 @@ const groups=[
   ]},
   {label:'CONTA E APLICATIVO',entries:[
     ['notifications','Notificações','bell','Avisos e vencimentos'],
-    ['profile','Minha conta','user','Dados pessoais e acesso'],
     ['settings','Configurações','settings','Tema, atalhos, ajuda e atualizações']
   ]}
 ];
@@ -34,7 +33,8 @@ const link=(route,label,glyph,description)=>
   '<span class="gb-more-row-chevron" aria-hidden="true">'+icon('chevron')+'</span></a>';
 export function moreView(online=false){
   return '<div class="gb-more-page">'+
-    '<header class="gb-more-heading"><span class="gb-more-eyebrow">SEU FINANCEIRO</span><h1>Mais</h1><p>Todas as funcionalidades do GB+, em um só lugar.</p></header>'+
+    '<header class="gb-more-heading"><span class="gb-more-eyebrow">SEU FINANCEIRO</span><h1>Mais</h1><p>Todas as funcionalidades do GB+, em um só lugar.</p></header>'+ 
+    '<a href="#profile" class="gb-more-profile"><span class="gb-more-profile-symbol">'+icon('user')+'</span><span><strong>Minha Conta</strong><small>Perfil, dados pessoais e segurança</small></span>'+icon('chevron')+'</a>'+
     groups.map(group=>'<section class="gb-more-section" aria-label="'+esc(group.label)+'">'+
       '<h2>'+esc(group.label)+'</h2><div class="gb-more-list">'+group.entries.map(entry=>link(...entry)).join('')+'</div></section>').join('')+
     '<p class="gb-more-connection" role="status">'+(online?'Conta online · dados vinculados ao seu acesso.':'Dados locais neste navegador.')+'</p>'+

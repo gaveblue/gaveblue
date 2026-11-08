@@ -1,5 +1,20 @@
 # CHANGELOG — GB+ Gestão Financeira
 
+## [2.8.2 — CARTEIRA, CATEGORIAS, LIQUID GLASS E AVISOS (LIBERAÇÃO WEB AUTORIZADA; HOMOLOGAÇÃO PARCIAL)] — 2026-11-08
+
+**Liberação web 2.8.2 build 1 autorizada expressamente em 08/11/2026 para empacotamento Android.** GitHub Actions indisponível para APK. Homologação integral continua pendente.
+
+- **Saldo e bancos:** oculta apenas a barra visual de rolagem horizontal dos bancos no card de saldo, mantendo gesto de deslizar e acessibilidade.
+- **Carteira:** rótulo do atalho móvel antes chamado "Cartões" agora é **Carteira**, sem mudar a rota interna, as faturas ou as contas relacionadas. Página Mais também reflete o nome.
+- **Categorias ampliadas:** 50 sugestões adicionais para contas novas; contas existentes recebem botão opcional para incorporar categorias não cadastradas, sem sobrescrever categorias próprias, valores ou lançamentos. Biblioteca de ícones expandida de 21 para 55 opções reais, com busca.
+- **Cabeçalho Liquid Glass:** seletor aprovado em tamanho compacto no topo, com vidro, lua/sol pixelados e luz orbital azul/dourada preservados; estado salvo pelo fluxo de preferência existente, com origem e janela do iframe validadas. O seletor grande deixa de aparecer em Configurações; permanece escolha acessível e simples de tema.
+- **Minha Conta:** acesso deslocado para um cartão de perfil na página **Mais** e removida a criação dinâmica de botão no topo.
+- **Nova tela de notificações:** avisos **dentro do aplicativo** para atrasados, vencimentos do dia e futuros, considerando pagamentos parciais, quitações, cancelamentos, despesas e receitas. Preferências: ativar, antecedência de 0 a 30 dias, receber/pagar e mostrar atrasados. **Não inclui push com app fechado nem requer permissões do dispositivo.**
+- **Relatórios:** nova opção "Painel de vencimentos" reutiliza informações da visão analítica anterior, sem perder dados.
+- **Persistência:** usa o documento de configurações existente; parâmetro opcional de avisos mantém compatibilidade com backups e usuários anteriores. Sem migração SQL.
+- **Teste:** módulos e cenários de categorias, ícones, notificações, tema, rotas e cache foram verificados em execução isolada; suíte `gbplus/tests/gbplus-282-regression.mjs` adicionada. **Ainda precisa da execução nativa completa, do teste integrado Android/PWA e da homologação em ambiente autenticado de teste.**
+- **Status:** liberação web autorizada com testes parciais documentados. Requer confirmação da propagação do site e validação separada do APK; não inclui leitura de notificações bancárias.
+
 ## [2.8.1 — CORREÇÃO DE CARTÕES E NAVEGAÇÃO (LIBERAÇÃO AUTORIZADA; HOMOLOGAÇÃO PARCIAL)] — 2026-11-08
 
 **Liberação autorizada expressamente em 08/11/2026.** Preparada a versão 2.8.1 build 1 para publicação; a homologação técnica completa ainda não foi comprovada.
