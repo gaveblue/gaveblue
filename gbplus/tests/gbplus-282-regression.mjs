@@ -52,7 +52,7 @@ check(styles.includes('.gb-balance-accounts::-webkit-scrollbar')&&styles.include
 check(app.includes("next==='more'")&&app.includes("calculateDueAlerts(db,today())"),'Rotas e alertas devem estar ligados ao aplicativo.');
 check(app.includes('gb-category-icon-search')&&app.includes('notification-preferences-form'),'Busca de ícones e formulário de avisos devem funcionar.');
 check(views.includes("due-overview")&&views.includes("export function notificationsView(db)"),'Relatório de vencimentos e notificações devem coexistir.');
-check(index.includes('app.js?v=20261108-2821')&&index.includes('next-282.css?v=20261108-2821'),'Imports versionados para contornar cache antigo.');
+check(index.includes('app.js?v=20261108-2831')&&index.includes('next-282.css?v=20261108-2831'),'Imports versionados para contornar cache antigo.');
 const toggle=read('lab/liquid-theme-toggle.html');
 check(toggle.includes('gb-theme-compact')&&toggle.includes('setOrbit(p)')&&toggle.includes('postMessage'),'Efeito orbital deve continuar na versão compacta.');
 for(const [,script] of toggle.matchAll(/<script>([\s\S]*?)<\/script>/g))Function(script);
