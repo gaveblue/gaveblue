@@ -5,7 +5,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#10121a" />
   <title>GB+ | Glass Light Toggle — Protótipo</title>
-  <script>if(new URLSearchParams(location.search).get('compact')==='1')document.documentElement.classList.add('gb-theme-compact');</script>
+  <script>
+  // Set the compact iframe's initial palette before CSS paints. A dark canvas
+  // underneath a light glass track caused the visible black outer capsule.
+  (() => {
+    const options = new URLSearchParams(location.search);
+    if (options.get('compact') !== '1') return;
+    const isLight = options.get('theme') === 'light';
+    const root = document.documentElement;
+    root.classList.add('gb-theme-compact');
+    root.dataset.gbCompactTheme = isLight ? 'light' : 'dark';
+    root.style.colorScheme = isLight ? 'light' : 'dark';
+    root.style.setProperty('--progress', isLight ? '1' : '0');
+    root.style.setProperty('--day', isLight ? '1' : '0');
+    root.style.setProperty('--night', isLight ? '0' : '1');
+  })();
+</script>
   <style>
 :root {
   color-scheme: dark;
@@ -87,13 +102,40 @@ body.gb-theme-embed .toggle-stage{width:min(360px,100%)}
 body.gb-theme-embed .footnote{margin-top:24px;font-size:11px}
 @media(max-width:600px){body.gb-theme-embed .showcase{padding:32px 13px 23px}body.gb-theme-embed .footnote{margin-top:22px}}
 
-/* GB+ 2.8.2 — o mesmo toggle aprovado, compacto para o cabeçalho. */
-html.gb-theme-compact,html.gb-theme-compact body{height:100%;min-height:0;overflow:hidden;background:transparent!important}
+/* GB+ 2.8.3 — refinement of the approved header toggle, not a new control.
+   An iframe whose document advertises color-scheme:dark may draw a black
+   canvas around the white track even with CSS background:transparent.
+   Match the canvas to the REAL current theme before the first paint. */
+html.gb-theme-compact,html.gb-theme-compact body{
+  height:100%;min-height:0;overflow:hidden;background:transparent!important
+}
+html.gb-theme-compact[data-gb-compact-theme="light"]{color-scheme:light!important}
+html.gb-theme-compact[data-gb-compact-theme="dark"]{color-scheme:dark!important}
 html.gb-theme-compact .scene,html.gb-theme-compact .intro,html.gb-theme-compact .topbar,html.gb-theme-compact footer,html.gb-theme-compact .footnote{display:none!important}
 html.gb-theme-compact .page{min-height:0;height:100%;width:100%;display:flex;align-items:center;justify-content:center}
 html.gb-theme-compact .showcase{padding:0!important;margin:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;min-height:0}
-html.gb-theme-compact .toggle-stage{width:calc(100% - 14px);max-width:112px;flex:0 0 auto}
-html.gb-theme-compact .stage-halo{inset:-20% -10%;filter:blur(6px)}
+html.gb-theme-compact .toggle-stage{width:calc(100% - 8px);max-width:106px;flex:0 0 auto}
+html.gb-theme-compact .stage-halo{inset:-13% -6%;filter:blur(4px)}
+html.gb-theme-compact .stage-halo-day{opacity:calc(var(--day) * .48)}
+html.gb-theme-compact .toggle{box-shadow:0 3px 13px rgba(65,72,85,calc(var(--day) * .065))}
+html.gb-theme-compact .track-day{
+  background:linear-gradient(145deg,rgba(255,255,255,.98),rgba(239,241,245,.92));
+  border:1px solid rgba(205,210,219,.58);
+  box-shadow:inset 0 2px 5px rgba(138,148,168,.085),
+    inset 0 0 0 1px rgba(255,255,255,.88),
+    0 2px 9px rgba(78,91,113,.075)
+}
+html.gb-theme-compact .lens-day{
+  background:radial-gradient(ellipse 65% 46% at 73% 5%,rgba(255,219,158,.44),transparent 94%),
+    linear-gradient(160deg,rgba(255,255,255,.99),rgba(246,246,249,.94) 72%,rgba(231,232,237,.94));
+  border:1px solid rgba(255,255,255,.98);
+  box-shadow:inset 0 2px 5px rgba(255,255,255,.99),
+    inset 0 -2px 4px rgba(132,142,156,.10),
+    0 3px 9px rgba(69,75,87,.13),
+    0 0 0 1px rgba(190,197,208,.18)
+}
+html.gb-theme-compact .ambient-diffusion{opacity:calc(var(--night) * .48)}
+html.gb-theme-compact .orbit-bloom{opacity:calc(.14 + var(--night) * .15);filter:blur(12px)}
 html.gb-theme-compact .toggle:focus-visible{outline:2px solid #7199ef;outline-offset:2px}
 html.gb-theme-compact .orbit-diffuse{filter:blur(4px)}
 html.gb-theme-compact .orbit-soft{filter:blur(2px)}
@@ -310,6 +352,11 @@ html.gb-theme-compact .pixel-symbol{filter:none}
     css.setProperty('--progress',p.toFixed(5));
     css.setProperty('--day',smooth(p).toFixed(5));
     css.setProperty('--night',(1-smooth(p)).toFixed(5));
+    if (compact) {
+      const appearance = p >= .5 ? 'light' : 'dark';
+      css.dataset.gbCompactTheme = appearance;
+      css.style.colorScheme = appearance;
+    }
     resizeCanvas();
     setOrbit(p);
     drawPixels(p);
