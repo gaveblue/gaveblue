@@ -28,7 +28,7 @@ import {firstSetupView,customMobileNavForm,shortcutsPreview,readMobileNav,firstS
 import {BANKS,bankCatalog,findBank,bankForAccount,bankBadge,bankName,syncBankPicker,filterBankPicker,filterBankDirectory} from './banks.js?v=20261105-87';
 import {addCardPurchase,registerCardInvoiceBalance,updateCardPurchase,removeCardPurchase,ensureCardMayChange,creditCards,cardPurchases,cardAvailable,cardCycle,shiftCardCycle,cardDue} from './credit-cards.js?v=20261107-2800';
 import {cashForecast} from './forecast.js?v=20261105-72';
-import {missingCategorySuggestions,appendCategorySuggestions} from './category-library.js?v=20261108-2821';
+import {missingCategorySuggestions,appendCategorySuggestions,isSelectableExpenseCategory,isPrimaryServiceCategory} from './category-library.js?v=20261108-2862';
 import {calculateDueAlerts,notificationPrefs,validNotificationPrefs,NOTIFICATION_DAYS} from './notification-rules.js?v=20261108-2821';
 import {banksView,bankForm,cardForm,cardPurchaseForm,cardInvoiceBalanceForm,forecastView,forecastSummary,forecastScenarioForm,forecastResult} from './finance-24-ui.js?v=20261108-2811';
 import {launchesView} from './launches-view.js?v=20261108-2861';
@@ -743,7 +743,7 @@ const actions={
     el.setAttribute('aria-expanded','true');
     const shown=openGbPickerSheet({
      kind:'category',
-     items:db.categories.filter(c=>c.type===form.elements.type?.value),
+     items:db.categories.filter(c=>c.type===form.elements.type?.value&&isSelectableExpenseCategory(c,source?.value||'')),
      selected:source?.value||'',
      onPick:id=>{
       if(!form.isConnected||!source||![...source.options].some(o=>o.value===id))return;
@@ -1571,8 +1571,8 @@ document.addEventListener('change',async e=>{if(!db)return;const el=e.target;try
   if(el.id==='entry-type'){
    const select=el.form?.querySelector('#entry-category');
    if(select){
-    select.innerHTML=db.categories.filter(c=>c.type===el.value).map(c=>
-     `<option value="${esc(c.id)}" data-icon="${esc(categoryIconFor(c))}" data-service-preview="${isServiceExpenseCategory(c)}">${esc(c.name)}</option>`).join('');
+    select.innerHTML=db.categories.filter(c=>c.type===el.value&&isSelectableExpenseCategory(c,select.value)).map(c=>
+     `<option value="${esc(c.id)}" data-icon="${esc(categoryIconFor(c))}" data-service-preview="${isPrimaryServiceCategory(c)}">${esc(c.name)}</option>`).join('');
     syncEntrySelect(select);
    }
    syncEntryServiceCategory(el.form);
