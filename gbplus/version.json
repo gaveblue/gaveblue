@@ -1,9 +1,10 @@
 {
   "version": "2.8.6",
-  "build": 2861,
+  "build": 2862,
   "published_at": null,
   "title": "Biblioteca de aplicativos e logotipos ampliada",
   "notes": [
+    "Seleção de categorias simplificada: Aplicativos de transporte, Assinaturas digitais e Streaming ficam dentro de Serviços; os registros antigos conservam suas categorias originais sem migração.",
     "Catálogo opcional ampliado de 26 para 49 serviços, preservando os IDs anteriores, nomes personalizados e lançamentos existentes.",
     "39 marcas com símbolos vetoriais locais: 13 anteriores e 26 novos ou atualizados; 10 serviços sem arte confirmada continuam com iniciais seguras.",
     "Novos grupos para redes sociais, jogos, compras e pagamentos; ícones locais funcionam sem buscar imagens em serviços externos.",
@@ -197,6 +198,6 @@
   "release_status": "candidate_not_published",
   "homologation": {
     "status": "pending_new_changes",
-    "notes": "2.8.6 em branch de revisão. Código de marca e testes dirigidos em preparação; faltam aceitação em PWA Android e aprovação específica desta versão. A 2.8.5 publicada permanece inalterada."
+    "notes": "Branch/PR de revisão da versão 2.8.6. Alterações visuais em categorias e biblioteca de ícones exigem QA real em Android/PWA e homologação específica. A versão pública 2.8.5 permanece intacta."
   }
 }
