@@ -6,7 +6,7 @@ import {uid,today,money,dateLabel,cents,addMonths,validDate,generateTitles,addPa
 import {KEY,INDICATORS,defaultPanel,parseBackup,backupText,MOBILE_SHORTCUTS,defaultMobileNav,effectiveMobileNav,validMobileNav,shouldOfferSetup} from './store.js?v=20261108-2861';
 import {esc,icon,button,field,select,formFooter,download,csv,titleTable} from './ui.js?v=20261105-72';
 import {routes,dashboard,titlesView,partnersView,categoriesView,flowView,reportsView,settingsView,notificationsView,filteredTitles,reportData} from './views.js?v=20261108-2862';
-import {moreView} from './more-view.js?v=20261108-2811';
+import {moreView} from './more-view.js?v=20261108-2863';
 import {accountsCardsView} from './accounts-cards-view.js?v=20261108-2811';
 import {renderReactCharts,unmountReactCharts} from './gb-react-loader.js?v=20261105-45';
 import {mountNativeCharts} from './gb-charts-native.js?v=20261106-68';
@@ -237,18 +237,18 @@ gbMobileNav.innerHTML=(()=>{
  const custom=effectiveMobileNav(db.settings);
  const slots=[['dashboard','Início','home'],renderMobileShortcut(custom[0]),['new','Novo','plus'],renderMobileShortcut(custom[1]),renderMobileShortcut(custom[2])];
   // Mais é uma página navegável; Início e Novo permanecem fixos.
-  const isActive=key=>key==='menu'?state.route==='more':
+  const isActive=key=>key==='menu'||key==='settings'?state.route==='more':
     key==='accounts'||key==='cards'?state.route==='accounts'&&state.accountCardsTab===key:
     state.route===key;
   const activeIndex=slots.findIndex(([key])=>isActive(key));
   gbMobileNav.style.setProperty('--gb-liquid-visible',activeIndex<0?'0':'1');
   return slots.map(([key,label,ico])=>{
     if(key==='new')return '<button type="button" data-action="new-title" class="mobile-new" aria-label="Novo">'+icon(ico)+'<span>Novo</span></button>';
-    const actual=key==='menu'?'more':key;
+    const actual=key==='menu'||key==='settings'?'more':key;
     const active=isActive(key);
     return '<a href="#'+actual+'" class="'+(active?'active':'')+'" '+(active?'aria-current="page"':'')+'>'+icon(ico)+'<span>'+esc(label)+'</span></a>';
   }).join('');
-})();requestAnimationFrame(alignLiquidNavIndicator);const views={dashboard:()=>dashboard(db,state,!!currentUser(),currentUser()),more:()=>moreView(!!currentUser()),titles:()=>launchesView(db,state),payable:()=>titlesView(db,state),receivable:()=>titlesView(db,state),partners:()=>partnersView(db,state),accounts:()=>accountsCardsView(db,state.accountCardsTab),categories:()=>categoriesView(db),flow:()=>flowView(db,state),provisions:()=>flowView(db,state),reports:()=>reportsView(db,state),settings:()=>settingsView(db,!isInstalledApp(),!!currentUser(),currentUser(),isInstalledApp()),notifications:()=>notificationsView(db),banks:()=>banksView(db),cards:()=>accountsCardsView(db,'cards'),forecast:()=>forecastView(db,forecastDays),profile:()=>profileView(currentUser(),profileCpfStatus.userId===currentUser()?.id?profileCpfStatus:{ready:false,cpf:'',error:''})};document.body.classList.toggle('gb-settings-page',state.route==='settings');unmountReactCharts();document.querySelector('#main').innerHTML=(views[state.route]||views.dashboard)();if(state.route==='dashboard'){
+})();requestAnimationFrame(alignLiquidNavIndicator);const views={dashboard:()=>dashboard(db,state,!!currentUser(),currentUser()),more:()=>moreView(!!currentUser(),db,currentUser(),isInstalledApp()),titles:()=>launchesView(db,state),payable:()=>titlesView(db,state),receivable:()=>titlesView(db,state),partners:()=>partnersView(db,state),accounts:()=>accountsCardsView(db,state.accountCardsTab),categories:()=>categoriesView(db),flow:()=>flowView(db,state),provisions:()=>flowView(db,state),reports:()=>reportsView(db,state),settings:()=>settingsView(db,!isInstalledApp(),!!currentUser(),currentUser(),isInstalledApp()),notifications:()=>notificationsView(db),banks:()=>banksView(db),cards:()=>accountsCardsView(db,'cards'),forecast:()=>forecastView(db,forecastDays),profile:()=>profileView(currentUser(),profileCpfStatus.userId===currentUser()?.id?profileCpfStatus:{ready:false,cpf:'',error:''})};document.body.classList.toggle('gb-settings-page',state.route==='settings');unmountReactCharts();document.querySelector('#main').innerHTML=(views[state.route]||views.dashboard)();if(state.route==='dashboard'){
  const flowSection=document.querySelector('#main .dashboard-middle');
  if(flowSection)flowSection.insertAdjacentHTML('beforebegin',forecastSummary(db));
 }
@@ -339,7 +339,7 @@ function initializeProfileDirtyState(){
  syncProfileSaveState(form);
 }
 function applyPanel(){const device=matchMedia('(max-width: 760px)').matches?'mobile':'desktop';document.querySelectorAll('[data-indicator]').forEach(el=>{el.hidden=!db.settings.panel[device][el.dataset.indicator];});document.querySelectorAll('.dashboard-middle,.results-grid,.stats-grid').forEach(el=>el.hidden=![...el.children].some(x=>!x.hidden));}
-function route(){if(!db)return;const requested=location.hash.slice(1);const next=requested==='cards'?'accounts':requested;if(requested==='cards'){state.accountCardsTab='cards';history.replaceState(null,'','#accounts');}if(next==='main'&&document.querySelector('#main').childElementCount)return;const previous=state.route;state.route=next==='profile'||next==='more'||routes.some(r=>r[0]===next)?next:'dashboard';if(previous!==state.route){state.launchSelected=[];state.launchStatusOpen=false;}state.type=state.route==='payable'?'expense':state.route==='receivable'?'income':'';closeModal();render();window.scrollTo(0,0);}
+function route(){if(!db)return;const requested=location.hash.slice(1);const next=requested==='cards'?'accounts':requested==='settings'?'more':requested;if(requested==='cards'){state.accountCardsTab='cards';history.replaceState(null,'','#accounts');}if(requested==='settings')history.replaceState(null,'','#more');if(next==='main'&&document.querySelector('#main').childElementCount)return;const previous=state.route;state.route=next==='profile'||next==='more'||routes.some(r=>r[0]===next)?next:'dashboard';if(previous!==state.route){state.launchSelected=[];state.launchStatusOpen=false;}state.type=state.route==='payable'?'expense':state.route==='receivable'?'income':'';closeModal();render();window.scrollTo(0,0);}
 function formValues(form){return Object.fromEntries(new FormData(form));}
 function getTitle(id){const t=db.titles.find(t=>t.id===id);if(!t)throw Error('Título não encontrado.');return t;}
 function fail(error){
