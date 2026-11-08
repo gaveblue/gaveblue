@@ -44,8 +44,8 @@ check('A luz orbital aprovada continua',toggle.includes('setOrbit(p)')&&toggle.i
 check('A mola e o arrasto continuam',toggle.includes('const stiffness = 205')&&toggle.includes("toggle.addEventListener('pointerdown'"));
 check('Acessibilidade do teclado preservada',toggle.includes("e.key === 'ArrowLeft'")&&toggle.includes("e.key === 'Enter'"));
 check('A origem das mensagens de tema é validada',app.includes('event.origin!==location.origin')&&app.includes('frame.contentWindow!==event.source'));
-check('O iframe é versionado para não receber CSS antigo',page.includes('v=20261108-2831&amp;theme=light')&&app.includes('v=20261108-2831&theme='));
-check('Estilo novo é importado com cache atualizado',page.includes('next-282.css?v=20261108-2831')&&page.includes('app.js?v=20261108-2831'));
+check('O iframe é versionado para não receber CSS antigo',page.includes('v=20261108-2832&amp;theme=light')&&app.includes('v=20261108-2832&theme='));
+check('Estilo novo é importado com cache atualizado',page.includes('next-282.css?v=20261108-2832')&&page.includes('app.js?v=20261108-2832'));
 check('Espaço do cabeçalho continua discreto',style.includes('height:59px')&&style.includes('max-width:106px')===false);
 check('Não altera a página Mais nem as faturas',app.includes('more:()=>moreView')&&app.includes('accountsCardsView'));
 console.log('GB+ 2.8.3 Liquid Glass: '+tests.length+' verificações aprovadas em fonte. Teste visual em Android ainda pendente.');
