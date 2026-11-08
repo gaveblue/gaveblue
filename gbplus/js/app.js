@@ -49,6 +49,17 @@ let bankImportDraft=null; // Memory-only preview; released on modal close.
 
 const state={route:'dashboard',accountCardsTab:'accounts',period:'all',range:{},query:'',status:'',type:'',partner:'',category:'',partnerQuery:'',granularity:'month',flowChartMode:'bars',flowStatus:'all',report:'payable',reportPartner:'',moreFilters:false,launchSelected:[],launchStatusOpen:false,launchSearchOpen:false};
 const modal=document.querySelector('#modal');
+  // A integração escuta só a janela ativa do seletor, na mesma origem.
+  window.addEventListener('message',event=>{
+    if(event.origin!==location.origin||event.data?.type!=='gbplus:liquid-theme')return;
+    const frame=document.querySelector('#gb-liquid-theme-frame');
+    if(!frame||!modal.open||frame.contentWindow!==event.source||!db||busy)return;
+    const theme=event.data.theme;
+    if(theme!=='light'&&theme!=='dark')return;
+    if(db.settings.theme===theme)return;
+    void commit(d=>{d.settings.theme=theme;},'Tema atualizado.').catch(error=>toast(error?.message||'Não foi possível salvar o tema.'));
+  });
+
 installGbPickerSheet();
 installEntryFormDrag(modal);
 // Desktop-only sidebar preference; changing it never touches the finance database.
@@ -195,9 +206,18 @@ function updateSystemAppearance(theme){
  document.querySelector('meta[name="theme-color"]')?.setAttribute('content',color);
  try{localStorage.setItem('gbplus-appearance-v1',selected);}catch{}
 }
-function render(){if(!db)return;updateSystemAppearance(db.settings.theme);document.querySelector('#navigation').innerHTML=routes.map(([key,label,ico])=>`<a href="#${key}" class="nav-item ${state.route===key?'active':''}" ${state.route===key?'aria-current="page"':''}>${icon(ico)}<span>${label}</span></a>`).join('');document.querySelector('#breadcrumb').textContent=state.route==='profile'?'Minha conta':routes.find(r=>r[0]===state.route)?.[1]||'Visão geral';document.querySelector('.theme-button').innerHTML=`${icon(db.settings.theme==='light'?'moon':'sun')}<span>Modo ${db.settings.theme==='light'?'escuro':'claro'}</span><span class="theme-switch"></span>`;document.querySelector('[data-action="search"]').innerHTML=icon('search');const notificationBell=document.querySelector('[data-action="notifications"]');const dueNotifications=db.titles.filter(t=>!t.cancelled&&pending(db,t)>0&&t.due<=today()).length;notificationBell.innerHTML=icon('bell')+(dueNotifications?'<span class="notification-dot" aria-hidden="true"></span>':'');notificationBell.setAttribute('aria-label','Notificações'+(dueNotifications?' · '+dueNotifications+' títulos vencidos ou vencendo hoje':''));const topTheme=document.querySelector('[data-action="top-theme"]');if(topTheme){const dark=db.settings.theme==='dark';topTheme.innerHTML=icon(dark?'sun':'moon');topTheme.setAttribute('aria-label',dark?'Ativar modo claro':'Ativar modo escuro');topTheme.title=dark?'Ativar modo claro':'Ativar modo escuro';topTheme.setAttribute('aria-pressed',String(dark));}document.querySelector('#mobile-navigation').innerHTML=(()=>{
+function render(){if(!db)return;updateSystemAppearance(db.settings.theme);document.querySelector('#navigation').innerHTML=routes.map(([key,label,ico])=>`<a href="#${key}" class="nav-item ${state.route===key?'active':''}" ${state.route===key?'aria-current="page"':''}>${icon(ico)}<span>${label}</span></a>`).join('');document.querySelector('#breadcrumb').textContent=state.route==='profile'?'Minha conta':routes.find(r=>r[0]===state.route)?.[1]||'Visão geral';document.querySelector('.theme-button').innerHTML=`${icon(db.settings.theme==='light'?'moon':'sun')}<span>Modo ${db.settings.theme==='light'?'escuro':'claro'}</span><span class="theme-switch"></span>`;document.querySelector('[data-action="search"]').innerHTML=icon('search');const notificationBell=document.querySelector('[data-action="notifications"]');const dueNotifications=db.titles.filter(t=>!t.cancelled&&pending(db,t)>0&&t.due<=today()).length;notificationBell.innerHTML=icon('bell')+(dueNotifications?'<span class="notification-dot" aria-hidden="true"></span>':'');notificationBell.setAttribute('aria-label','Notificações'+(dueNotifications?' · '+dueNotifications+' títulos vencidos ou vencendo hoje':''));const topTheme=document.querySelector('[data-action="top-theme"]');if(topTheme){const dark=db.settings.theme==='dark';topTheme.innerHTML=icon(dark?'sun':'moon');topTheme.setAttribute('aria-label',dark?'Ativar modo claro':'Ativar modo escuro');topTheme.title=dark?'Ativar modo claro':'Ativar modo escuro';topTheme.setAttribute('aria-pressed',String(dark));}const gbMobileNav=document.querySelector('#mobile-navigation');
+gbMobileNav.classList.add('gb-liquid-nav');
+gbMobileNav.innerHTML=(()=>{
  const custom=effectiveMobileNav(db.settings);
  const slots=[['dashboard','Início','home'],renderMobileShortcut(custom[0]),['new','Novo','plus'],renderMobileShortcut(custom[1]),renderMobileShortcut(custom[2])];
+  // A lente acompanha o atalho real ativo; as preferências do usuário não mudam.
+  const activeIndex=slots.findIndex(([key])=>key==='accounts'||key==='cards'
+    ?state.route==='accounts'&&state.accountCardsTab===key
+    :state.route===key);
+  gbMobileNav.style.setProperty('--gb-liquid-index',String(Math.max(0,activeIndex)));
+  gbMobileNav.style.setProperty('--gb-liquid-visible',activeIndex<0?'0':'1');
+
  return slots.map(([key,label,ico])=>key==='new'||key==='menu'?`<button type="button" data-action="${key==='new'?'new-title':'mobile-menu'}" class="${key==='new'?'mobile-new':''}" aria-label="${label}">${icon(ico)}<span>${label}</span></button>`:`<a href="#${key}" class="${(key==='accounts'||key==='cards'?state.route==='accounts'&&state.accountCardsTab===key:state.route===key)?'active':''}" ${(key==='accounts'||key==='cards'?state.route==='accounts'&&state.accountCardsTab===key:state.route===key)?'aria-current="page"':''}>${icon(ico)}<span>${label}</span></a>`).join('');
 })();const views={dashboard:()=>dashboard(db,state,!!currentUser(),currentUser()),titles:()=>launchesView(db,state),payable:()=>titlesView(db,state),receivable:()=>titlesView(db,state),partners:()=>partnersView(db,state),accounts:()=>accountsCardsView(db,state.accountCardsTab),categories:()=>categoriesView(db),flow:()=>flowView(db,state),provisions:()=>flowView(db,state),reports:()=>reportsView(db,state),settings:()=>settingsView(db,!isInstalledApp(),!!currentUser(),currentUser(),isInstalledApp()),notifications:()=>notificationsView(db),banks:()=>banksView(db),cards:()=>accountsCardsView(db,'cards'),forecast:()=>forecastView(db,forecastDays),profile:()=>profileView(currentUser(),profileCpfStatus.userId===currentUser()?.id?profileCpfStatus:{ready:false,cpf:'',error:''})};document.body.classList.toggle('gb-settings-page',state.route==='settings');unmountReactCharts();document.querySelector('#main').innerHTML=(views[state.route]||views.dashboard)();if(state.route==='dashboard'){
  const flowSection=document.querySelector('#main .dashboard-middle');
@@ -937,11 +957,10 @@ const actions={
     if(opening)input.focus();else{input.value='';filterSettings('');}
   },
   'settings-appearance':()=>openModal('Aparência',
-    '<p class="muted">Escolha como deseja visualizar seu financeiro. A preferência é aplicada ao GB+ inteiro.</p>'+
-    '<div class="segmented" style="margin-top:18px">'+
-    ['light','dark'].map(t=>button(icon(t==='light'?'sun':'moon')+(t==='light'?'Modo claro':'Modo escuro'),'set-theme',db.settings.theme===t?'primary':'','data-value="'+t+'"')).join('')+
-    '</div>'),
-  'settings-backup':()=>openModal('Backup e restauração',
+    '<p class="muted">Arraste o vidro para escolher o tema. A preferência será aplicada em todo o GB+.</p>'+
+    '<iframe id="gb-liquid-theme-frame" class="gb-liquid-theme-frame" title="Alternar tema claro ou escuro com seletor Liquid Glass" src="./lab/liquid-theme-toggle.html?embed=1&amp;theme='+encodeURIComponent(db.settings.theme==='dark'?'dark':'light')+'" loading="eager"></iframe>'+
+    '<p class="gb-liquid-theme-help">Toque, arraste ou use as setas do teclado. A configuração fica salva em suas preferências.</p>'),
+    'settings-backup':()=>openModal('Backup e restauração',
     '<p class="muted">Exporte uma cópia dos seus registros financeiros. A restauração substitui os registros atuais e exige confirmação antes de salvar.</p>'+
     '<div class="button-stack" style="margin-top:20px">'+
     button(icon('download')+' Exportar backup JSON','backup','primary')+
