@@ -75,7 +75,8 @@ assert(serviceUI.serviceIdentityMarkup('delivery-plusdelivery').includes('PD'));
 let seq=0;
 const store=load('store',{
  uid:()=> 'id'+(++seq), validDate:d=>/^\d{4}-\d\d-\d\d$/.test(d),
- paid:()=>0,today:()=> '2026-11-06',CATEGORY_ICON_OPTIONS:[],BANKS:[]
+ paid:()=>0,today:()=> '2026-11-06',CATEGORY_ICON_OPTIONS:[],BANKS:[],
+ CATEGORY_SUGGESTIONS:[],DEFAULT_NOTIFICATION_PREFS:{},validNotificationPrefs:()=>true
 },['emptyDatabase','validateDatabase']);
 const db=store.emptyDatabase();
 const initial=JSON.stringify(db);
@@ -90,6 +91,14 @@ assert.equal(store.validateDatabase(db),db);
 assert.equal(store.validateDatabase(JSON.parse(JSON.stringify(db))).titles[0].serviceId,'streaming-netflix');
 const saved=JSON.parse(JSON.stringify(db));
 assert.equal(saved.titles[0].serviceId,'streaming-netflix','Backup must preserve service ID');
+for(const newId of ['social-whatsapp','games-steam','shopping-amazon']){
+ t.serviceId=newId;
+ assert.equal(store.validateDatabase(db),db,'New category service must persist: '+newId);
+ assert.equal(JSON.parse(JSON.stringify(db)).titles[0].serviceId,newId,'Backup must preserve '+newId);
+}
+t.serviceId='unknown-app';
+assert.throws(()=>store.validateDatabase(db),/identificador do serviço/,'Unknown prefix must be rejected');
+t.serviceId='streaming-netflix';
 t.serviceId='custom';t.serviceName='Lavanderia da cidade';
 assert.equal(store.validateDatabase(db),db,'Custom service must remain valid');
 t.serviceName='';
