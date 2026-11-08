@@ -6,8 +6,7 @@ export const CATEGORY_SUGGESTIONS = Object.freeze([
   ['Consultas médicas','expense','stethoscope'],['Plano de saúde','expense','shield-check'],
   ['Seguro de veículos','expense','shield-check'],['IPVA e licenciamento','expense','car'],
   ['Pedágios','expense','route'],['Estacionamento','expense','circle-parking'],
-  ['Transporte público','expense','bus'],['Aplicativos de transporte','expense','car'],
-  ['Assinaturas digitais','expense','monitor-play'],['Streaming','expense','tv'],
+  ['Transporte público','expense','bus'],
   ['Mensalidade escolar','expense','book-open'],['Cursos e capacitações','expense','graduation-cap'],
   ['Academia','expense','dumbbell'],['Lazer e entretenimento','expense','gamepad-2'],
   ['Viagens','expense','plane'],['Hospedagem','expense','bed-double'],
@@ -27,6 +26,16 @@ export const CATEGORY_SUGGESTIONS = Object.freeze([
   ['Doações recebidas','income','gift'],['Receita de assinaturas','income','monitor-play']
 ]);
 const normalized = name => String(name||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().toLocaleLowerCase('pt-BR').replace(/\s+/g,' ');
+// The three formerly suggested categories now live inside the Serviços app picker.
+// Existing IDs are kept for historical titles, card purchases and imports.
+const LEGACY_SERVICE_NAMES=new Set(['aplicativos de transporte','assinaturas digitais','streaming']);
+export const isLegacyServiceCategory=category=>Boolean(category?.type==='expense'&&
+ LEGACY_SERVICE_NAMES.has(normalized(category.name)));
+export const isPrimaryServiceCategory=category=>Boolean(category?.type==='expense'&&
+ normalized(category.name)==='servicos');
+// A title already using a legacy ID can still be edited without changing its category.
+export const isSelectableExpenseCategory=(category,currentId='')=>
+ !isLegacyServiceCategory(category)||category.id===currentId;
 export function missingCategorySuggestions(categories=[]){
   const existing=new Set(categories.map(c=>c.type+'|'+normalized(c.name)));
   return CATEGORY_SUGGESTIONS.filter(([name,type])=>!existing.has(type+'|'+normalized(name)));
