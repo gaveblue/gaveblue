@@ -241,7 +241,7 @@ if(topGlass){
   const currentTheme=db.settings.theme==='dark'?'dark':'light';
   if(topGlass.dataset.theme!==currentTheme){
     topGlass.dataset.theme=currentTheme;
-    topGlass.src='./lab/liquid-theme-toggle.html?embed=1&compact=1&theme='+encodeURIComponent(currentTheme);
+    topGlass.src='./lab/liquid-theme-toggle.html?embed=1&compact=1&v=20261108-2831&theme='+encodeURIComponent(currentTheme);
   }
 }
 const gbMobileNav=document.querySelector('#mobile-navigation');
