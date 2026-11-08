@@ -2,11 +2,12 @@ import {today,money,dateLabel,pending,paid,accountBalance} from './domain.js?v=2
 import {esc,field,select,textarea,formFooter,button,icon,titleTable,empty} from './ui.js?v=20261105-72';
 import {INDICATORS} from './store.js?v=20261105-78';
 import {entrySelect} from './entry-select.js?v=20261107-2720';
-import {gbIcon,CATEGORY_ICON_OPTIONS,categoryIconFor} from './gb-icons.js?v=20261104-42';
+import {gbIcon,CATEGORY_ICON_OPTIONS,categoryIconFor} from './gb-icons.js?v=20261108-2821';
 import {bankOptions,findBank,bankPicker} from './banks.js?v=20261105-87';
 import {dailyStatement} from './daily-statement.js?v=20261105-90';
 import {servicePickerMarkup,serviceIdentityMarkup,serviceDisplayName} from './service-ui.js?v=20261107-2720';
 import {isServiceExpenseCategory} from './service-catalog.js?v=20261106-2630';
+import {missingCategorySuggestions} from './category-library.js?v=20261108-2821';
 const required='required maxlength="200"';
 export function titleForm(db,t,type='expense'){
  type=t?.type||type;
@@ -22,6 +23,7 @@ export function titleForm(db,t,type='expense'){
    '<span class="gb-entry-flow-icon is-expense">'+icon('down')+'</span>Despesa</button>'+
   '<button type="button" data-action="entry-type-pick" data-value="income" class="gb-entry-flow-option'+(type==='income'?' is-active':'')+'" aria-pressed="'+(type==='income')+'">'+
    '<span class="gb-entry-flow-icon is-income">'+icon('up')+'</span>Receita</button></div>';
+ const missingCategories=missingCategorySuggestions(db.categories);
  const categoryField=entrySelect('Categoria','categoryId',categoryOptions,t?.categoryId,'entry-category',true);
  // PF does not expose partner editing. Preserve any pre-existing partner on edit
  // so that older records remain intact until a dedicated PJ profile is shipped.
@@ -79,6 +81,7 @@ export function titleForm(db,t,type='expense'){
    <div class="form-grid gb-entry-grid">
     <div class="full gb-entry-category-block">
      ${categoryField}
+     ${!t&&missingCategories.length?`<button type="button" class="gb-category-expand-btn" data-action="add-suggested-categories">Adicionar ${missingCategories.length} categorias sugeridas</button>`:''}
      <div class="gb-service-area" ${showService?'':'hidden'}>${servicePickerMarkup(t)}</div>
     </div>
     <div class="full gb-entry-description-field">${field('Descrição','description',t?.serviceId?serviceDisplayName(t.serviceId,t.serviceName,t.description):t?.description||'','text','maxlength="300" placeholder="Ex.: Energia do escritório" '+(t?.serviceId&&showService?'readonly aria-describedby="gb-service-naming-hint"':''))}</div>
@@ -154,6 +157,7 @@ export function categoryForm(c){
   ${select('Tipo','type',[['expense','Despesa'],['income','Receita']],c?.type||'expense')}
   <fieldset class="full gb-category-icon-picker"><legend>Ícone da categoria</legend>
    <input type="hidden" name="icon" value="${esc(current)}">
+   <label class="gb-category-icon-filter-label" for="gb-category-icon-search">Buscar ícone</label><input id="gb-category-icon-search" class="gb-category-icon-filter" type="search" autocomplete="off" placeholder="Buscar entre ${CATEGORY_ICON_OPTIONS.length} ícones" aria-label="Filtrar ícones">
    <div class="gb-category-icon-grid">${palette}</div>
    <small>O ícone aparece nos menus e junto à categoria selecionada.</small>
   </fieldset>
