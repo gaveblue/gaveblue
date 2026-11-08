@@ -8,11 +8,14 @@
 .gb-category-icon-filter{display:block;width:100%;min-height:41px;border-radius:11px;background:var(--surface);border:1px solid var(--border);color:var(--ink);padding:10px 12px;font:inherit;font-size:12px;margin-bottom:12px}
 .gb-category-icon-grid{max-height:300px;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;grid-template-columns:repeat(5,minmax(0,1fr))}
 .gb-category-icon-choice[hidden]{display:none!important}
-.gb-top-theme-frame{display:block;width:clamp(99px,27vw,122px);height:65px;min-width:99px;flex:0 0 auto;border:0;background:transparent;overflow:hidden;border-radius:26px}
+/* 2.8.3: glass control should look as light as the surrounding header. */
+.gb-top-theme-frame{display:block;width:clamp(96px,26vw,118px);height:59px;min-width:96px;flex:0 0 auto;border:0;background:transparent;overflow:hidden;border-radius:24px}
+html[data-theme="light"] .gb-top-theme-frame{color-scheme:light}
+html[data-theme="dark"] .gb-top-theme-frame{color-scheme:dark}
 .top-actions .avatar,.top-actions .account-button{display:none!important}
 @media(max-width:760px){
  .top-actions{gap:7px}
- .top-actions .gb-top-theme-frame{width:clamp(96px,26vw,116px);height:63px}
+ .top-actions .gb-top-theme-frame{width:clamp(96px,26vw,114px);height:59px}
  .topbar{min-height:76px}
 }
 .gb-alerts-intro{display:flex;align-items:center;gap:12px;border:1px solid var(--border);background:var(--surface);border-radius:17px;padding:18px;margin:12px 0 14px}
