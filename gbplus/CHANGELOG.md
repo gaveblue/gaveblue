@@ -1,15 +1,15 @@
 # CHANGELOG — GB+ Gestão Financeira
 
 
-## [2.8.0 — FATURAS INTEGRADAS (CANDIDATA; NÃO HOMOLOGADA/NÃO PUBLICADA)] — 2026-11-07
+## [2.8.0 — FATURAS + LIQUID GLASS (LIBERAÇÃO AUTORIZADA; HOMOLOGAÇÃO PARCIAL)] — 2026-11-08
 
-### Interfaces aprovadas — implementação iniciada em 08/11/2026
+### Interfaces aprovadas — incluídas na 2.8.0 em 08/11/2026
 - **Navegação Liquid Glass:** lente translúcida segue o atalho ativo, preservando cinco atalhos, personalização e botão Novo. Modos claro/escuro, foco e preferência por movimento reduzido respeitados; barra oculta em Configurações como antes.
 - **Seletor de tema Liquid Glass:** protótipo v2 aprovado integrado ao modal Configurações → Aparência; lua/sol pixelados e luz orbital azul embaixo → direita → dourado em cima. Tema gravado pelo fluxo financeiro atual, com evento limitado à mesma origem e janela, conclusão da animação antes da gravação e limpeza do iframe/timer ao fechar.
 - **Estado:** funcionalidade candidata em desenvolvimento, aprovação visual obtida; **não homologada/não publicada**. Nenhum dado de produção foi migrado ou alterado.
 
 
-**Em desenvolvimento na branch `feature/gbplus-280-faturas`.** Nenhuma liberação nem homologação integral é declarada. A versão pública permanece em 2.7.8 até nova autorização de liberação.
+**Liberação autorizada expressamente pelo responsável em 08/11/2026.** Homologação técnica integral não foi concluída: testes funcionais isolados e estáticos passaram, mas a execução da suíte Node foi bloqueada no GitHub Actions antes de começar; faltam Android/PWA integrado e Supabase com conta de testes. Publicação não deve ser confundida com homologação.
 
 - **Faturas de cartões:** cada cartão passa a exibir o próximo fechamento, vencimento previsto, total em aberto, faturas existentes, situação de pagamento e um botão **Pagar**, conectado ao formulário de baixa já usado pelo Contas a pagar.
 - **Lançar saldo de fatura externa:** novo formulário para registrar o valor consolidado de uma competência que ainda não possui compras no GB+. Gera um único título `cardInvoice` com vencimento e conta pagadora conforme o cartão; não desconta o saldo bancário até a baixa.
