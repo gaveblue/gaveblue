@@ -1,7 +1,7 @@
 // GB+ 2.5.1 — A single, consistent header for accounts and cards.
 // Presentation and navigation only. Financial data and forms stay untouched.
 import {heading,accountsView} from './views.js?v=20261106-2511';
-import {cardsView} from './finance-24-ui.js?v=20261106-2511';
+import {cardsView} from './finance-24-ui.js?v=20261108-2811';
 import {button,icon} from './ui.js?v=20261105-72';
 
 export function accountsCardsView(db,selected='accounts'){
