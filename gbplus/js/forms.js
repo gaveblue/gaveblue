@@ -1,12 +1,12 @@
 import {today,money,dateLabel,pending,paid,accountBalance} from './domain.js?v=20261105-72';
 import {esc,field,select,textarea,formFooter,button,icon,titleTable,empty} from './ui.js?v=20261105-72';
 import {INDICATORS} from './store.js?v=20261105-78';
-import {entrySelect} from './entry-select.js?v=20261107-2720';
+import {entrySelect} from './entry-select.js?v=20261108-2861';
 import {gbIcon,CATEGORY_ICON_OPTIONS,categoryIconFor} from './gb-icons.js?v=20261108-2821';
 import {bankOptions,findBank,bankPicker} from './banks.js?v=20261105-87';
 import {dailyStatement} from './daily-statement.js?v=20261105-90';
-import {servicePickerMarkup,serviceIdentityMarkup,serviceDisplayName} from './service-ui.js?v=20261107-2720';
-import {isServiceExpenseCategory} from './service-catalog.js?v=20261106-2630';
+import {servicePickerMarkup,serviceIdentityMarkup,serviceDisplayName} from './service-ui.js?v=20261108-2861';
+import {isServiceExpenseCategory} from './service-catalog.js?v=20261108-2861';
 import {missingCategorySuggestions} from './category-library.js?v=20261108-2821';
 const required='required maxlength="200"';
 export function titleForm(db,t,type='expense'){
