@@ -42,3 +42,21 @@ O catálogo passou de **26 para 49 opções** na branch de desenvolvimento da ve
 - Não alterar o catálogo de serviços existentes nem suas IDs em atualizações futuras; isso preserva títulos antigos. A seleção continua opcional e não cria lançamentos.
 
 **Status:** a 2.8.6 é candidata, sem publicação ou homologação declarada neste registro. A 2.8.5 existente não é alterada diretamente pela branch.
+
+## Implementação do catálogo 2.8.6 após links oficiais fornecidos (08/11/2026)
+
+**Obtido e salvo localmente (1):**
+- `digital-chatgpt` → `assets/service-icons/chatgpt.svg`: vetor do emblema ChatGPT extraído de `edent/SuperTinyIcons/images/svg/chatgpt.svg`, https://github.com/edent/SuperTinyIcons . Repositório licenciado sob MIT, © Terence Eden; manter aviso de licença. A marca e o desenho são da OpenAI, cujas restrições individuais continuam válidas. Conferido contra a página oficial de referência https://help.openai.com/pt-br/articles/7905742-what-does-the-official-chatgpt-ios-app-icon-look-like . Fonte vetorial **terceirizada**, não o ZIP oficial de logos da OpenAI. O vetor original conserva desenho, proporção e as cores preto/branco.
+
+**Links oficiais confirmados como fontes, mas sem asset local incorporado (9):**
+- Disney+: https://press.disneyplus.com/about/logos
+- Prime Video: https://assets.aboutamazon.com/26/c7/11fb9c044d14870a3154c90d9bf5/prime-video-landscape-logo-blue-rgb.png — arquivo horizontal, exigiria validação de variante quadrada ou ajuste em contain sem corte
+- Globoplay: https://play.google.com/store/apps/details?id=com.globo.globotv — ícone de loja, download binário não validado
+- 99Food: https://restaurantes.99app.com/repositorio/ — botão redireciona a material de terceiros/Drive, download não obtido
+- Plus Delivery: https://arquivos.plusdelivery.com.br/ — marca exige cuidados de fundo/proporção; imagem em domínio oficial sem transferência concluída
+- Rappi: https://play.google.com/store/apps/details?id=com.grability.rappi — imagem da loja, download binário não validado
+- 99: https://99app.com/newsroom/brand-99.zip — ZIP não extraído
+- inDrive: https://indrive.com/files/inDrive_Logo.zip — ZIP não extraído
+- Canva: https://www.canva.dev/assets/connect/Canva-logos.zip — ZIP não extraído
+
+**Controle de qualidade:** manter monogramas até que um arquivo SVG/PNG/WebP seja de fato incorporado ao repositório e testado, sem buscar imagens externas na execução. Validar não conter SVG ativo (scripts, links externos ou eventos), verificar termos de marca e preferir símbolo quadrado sem distorcer. O catálogo de IDs e valores financeiros não muda por falta desses arquivos.
