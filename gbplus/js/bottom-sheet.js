@@ -4,6 +4,7 @@
 import {esc,icon} from './ui.js?v=20261105-72';
 import {gbIcon,categoryIconFor} from './gb-icons.js?v=20261104-42';
 import {SERVICE_CATALOG,SERVICE_GROUPS,serviceSearchKey,isServiceExpenseCategory} from './service-catalog.js?v=20261108-2861';
+import {isPrimaryServiceCategory,isSelectableExpenseCategory} from './category-library.js?v=20261108-2862';
 import {serviceIconMarkup,serviceCategoryPreviewMarkup} from './service-ui.js?v=20261108-2861';
 
 const normalize=value=>String(value??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
@@ -40,13 +41,15 @@ function optionMarkup(kind,item,index,selected){
   '" role="option" aria-selected="'+isSelected+'" data-sheet-choice="'+esc(id)+'" data-sheet-search="'+
   esc(normalize(name+' '+group))+'">'+badge(kind,item,index)+
   '<span class="gb-sheet-choice-label">'+esc(name)+'</span>'+
-  (kind==='category'&&isServiceExpenseCategory(item)?serviceCategoryPreviewMarkup():'')+
+  (kind==='category'&&isPrimaryServiceCategory(item)?serviceCategoryPreviewMarkup():'')+
   (isSelected?icon('check','gb-sheet-choice-check'):'')+'</button>';
 }
 function categorySections(categories,selected){
- // Surface Serviços first; selecting it still opens the service picker separately.
- const ordered=[...categories].sort((a,b)=>
-  Number(isServiceExpenseCategory(b))-Number(isServiceExpenseCategory(a))||collator.compare(a.name,b.name));
+ // One visible entry point for services. Legacy choices stay editable only
+ // when already selected on an older title (their UUIDs are never removed).
+ const ordered=categories.filter(c=>isSelectableExpenseCategory(c,selected))
+  .sort((a,b)=>Number(isPrimaryServiceCategory(b))-Number(isPrimaryServiceCategory(a))||
+   collator.compare(a.name,b.name));
  return [{title:'Categorias disponíveis',items:ordered.map((item,i)=>optionMarkup('category',item,i,selected))}];
 }
 function serviceSections(selected){
