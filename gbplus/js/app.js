@@ -215,7 +215,7 @@ gbMobileNav.innerHTML=(()=>{
   const activeIndex=slots.findIndex(([key])=>key==='accounts'||key==='cards'
     ?state.route==='accounts'&&state.accountCardsTab===key
     :state.route===key);
-  gbMobileNav.style.setProperty('--gb-liquid-index',String(Math.max(0,activeIndex)));
+  gbMobileNav.style.setProperty('--gb-liquid-offset',String(Math.max(0,activeIndex)*100)+'%');
   gbMobileNav.style.setProperty('--gb-liquid-visible',activeIndex<0?'0':'1');
 
  return slots.map(([key,label,ico])=>key==='new'||key==='menu'?`<button type="button" data-action="${key==='new'?'new-title':'mobile-menu'}" class="${key==='new'?'mobile-new':''}" aria-label="${label}">${icon(ico)}<span>${label}</span></button>`:`<a href="#${key}" class="${(key==='accounts'||key==='cards'?state.route==='accounts'&&state.accountCardsTab===key:state.route===key)?'active':''}" ${(key==='accounts'||key==='cards'?state.route==='accounts'&&state.accountCardsTab===key:state.route===key)?'aria-current="page"':''}>${icon(ico)}<span>${label}</span></a>`).join('');
