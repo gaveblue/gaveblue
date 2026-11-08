@@ -1,7 +1,7 @@
 # GB+ 2.8.0 — Faturas de cartões e integração financeira
 
-**Status: candidata em desenvolvimento. NÃO HOMOLOGADA. NÃO PUBLICADA.**
-Base: v2.7.8 build 1. A versão pública e os dados de usuários não foram alterados por esta branch.
+**Status: liberação expressamente autorizada em 08/11/2026 com homologação parcial; testes nativos completos, Android/PWA e Supabase permanecem pendentes.**
+Base: v2.7.8 build 1. O merge/deploy será registrado separadamente; a versão não exige migração SQL.
 
 ## Escopo
 
