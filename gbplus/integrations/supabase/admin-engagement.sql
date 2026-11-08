@@ -73,7 +73,7 @@ begin
 end $$;
 
 create or replace function public.gbplus_admin_usage(p_users uuid[]) returns jsonb
-language sql stable security invoker set search_path = '' as $$
+language sql stable security definer set search_path = '' as $$
  select coalesce(jsonb_agg(jsonb_build_object(
  'user_id',u.id,'tracked_since',a.started_at,'last_seen_at',a.last_seen_at,
  'online',coalesce(a.last_seen_at > now()-interval '75 seconds',false),'active_seconds',a.active_seconds,
@@ -84,7 +84,7 @@ language sql stable security invoker set search_path = '' as $$
  'titles',case when jsonb_typeof(d.data->'titles')='array' then jsonb_array_length(d.data->'titles') else 0 end,
  'partners',case when jsonb_typeof(d.data->'partners')='array' then jsonb_array_length(d.data->'partners') else 0 end
  )), '[]'::jsonb)
- from auth.users u left join public.gbplus_activity a on a.user_id=u.id
+ from unnest(p_users) as u(id) left join public.gbplus_activity a on a.user_id=u.id
  left join public.gbplus_email_preferences p on p.user_id=u.id
  left join public.gbplus_documents d on d.user_id=u.id
  where u.id=any(p_users) and cardinality(p_users)<=50;
