@@ -1,15 +1,15 @@
 {
   "version": "2.8.6",
-  "build": 2862,
+  "build": 2864,
   "published_at": null,
-  "title": "Biblioteca de aplicativos e logotipos ampliada",
+  "title": "Mais e Configurações integrados; biblioteca de marcas em revisão",
   "notes": [
-    "Seleção de categorias simplificada: Aplicativos de transporte, Assinaturas digitais e Streaming ficam dentro de Serviços; os registros antigos conservam suas categorias originais sem migração.",
-    "Catálogo opcional ampliado de 26 para 49 serviços, preservando os IDs anteriores, nomes personalizados e lançamentos existentes.",
-    "39 marcas com símbolos vetoriais locais: 13 anteriores e 26 novos ou atualizados; 10 serviços sem arte confirmada continuam com iniciais seguras.",
-    "Novos grupos para redes sociais, jogos, compras e pagamentos; ícones locais funcionam sem buscar imagens em serviços externos.",
-    "SVGs públicos provenientes de Simple Icons e Font Awesome Free Brands; fontes e atribuições documentadas no repositório.",
-    "Candidata para revisão: mudanças restritas ao catálogo, símbolos, cache e testes; nenhuma movimentação ou alteração financeira automática."
+    "A tela Mais incorpora preferências, backup, dados e segurança, atualizações e suporte em grupos expansíveis, mantendo Minha Conta sem duplicação.",
+    "Rotas antigas #settings redirecionam para #more; controles de excluir conta e restaurar dados permanecem com confirmações existentes.",
+    "ChatGPT utiliza arquivo SVG local de símbolo vetorial público verificado, com fallback de letras caso a imagem falhe.",
+    "Aguardam arquivo utilizável e verificação de licença: Disney+, Prime Video, Globoplay, 99Food, Plus Delivery, Rappi, 99, inDrive e Canva.",
+    "Catálogo de 49 serviços e categoria Serviços única para novos lançamentos. Categorias legadas ficam preservadas em históricos.",
+    "Versão candidata apenas; testes integrados e homologação visual em Android/PWA ainda necessários."
   ],
   "assets": [
     "./index.html",
@@ -176,28 +176,29 @@
     "./more-page.css",
     "./next-282.css",
     "./js/category-library.js",
-    "./js/notification-rules.js"
+    "./js/notification-rules.js",
+    "./assets/service-icons/chatgpt.svg"
   ],
   "highlights": [
     {
       "icon": "grid",
-      "title": "49 aplicativos",
-      "description": "Mais opções em streaming, música, serviços digitais, redes sociais, jogos e compras."
+      "title": "Mais com Configurações",
+      "description": "Acesso direto a preferências, dados e segurança, sistema e suporte na mesma tela."
     },
     {
-      "icon": "image",
-      "title": "39 ícones locais",
-      "description": "Símbolos vetoriais incorporados e identificadores neutros onde faltam arquivos confiáveis."
+      "icon": "file",
+      "title": "ChatGPT com SVG local",
+      "description": "Marca vetorial com tratamento seguro de falha; demais ícones oficiais aguardam arquivos."
     },
     {
-      "icon": "shield",
-      "title": "Preserva seus dados",
-      "description": "Nenhuma modificação automática em lançamentos, cartões, faturas ou saldos."
+      "icon": "check",
+      "title": "Categorias organizadas",
+      "description": "Streaming e assinaturas agrupados em Serviços, preservando o histórico."
     }
   ],
   "release_status": "candidate_not_published",
   "homologation": {
-    "status": "pending_new_changes",
-    "notes": "Branch/PR de revisão da versão 2.8.6. Alterações visuais em categorias e biblioteca de ícones exigem QA real em Android/PWA e homologação específica. A versão pública 2.8.5 permanece intacta."
+    "status": "pending_full_qa_and_visual_review",
+    "notes": "PR de rascunho; nenhuma homologação ou liberação da 2.8.6. Testes isolados de código não substituem teste visual Android/PWA nem teste em Supabase autenticado. Manter 2.8.5 pública."
   }
 }
