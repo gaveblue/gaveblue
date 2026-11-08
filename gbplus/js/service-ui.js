@@ -1,7 +1,8 @@
 // GB+ 2.6.0 — optional service identities for expense titles.
 // The picker does not submit, subscribe, pay or reconcile anything.
-import {serviceById} from './service-catalog.js?v=20261107-2700';
+import {serviceById} from './service-catalog.js?v=20261108-2861';
 import {SERVICE_BRAND_PATHS} from './service-brand-paths.js?v=20261106-2600';
+import {SERVICE_EXTRA_BRAND_PATHS} from './service-extra-brand-paths.js?v=20261108-2861';
 import {SERVICE_BRAND_COLORS} from './service-brand-colors.js?v=20261106-2620';
 import {esc} from './ui.js?v=20261105-72';
 
@@ -16,8 +17,14 @@ export function serviceIconMarkup(service,size='small'){
  const style=valid?' style="--gb-service-color:#'+hex+';--gb-service-fg:'+(bright?'#151515':'#ffffff')+'"':'';
  const dark=hex==='000000'?' gb-service-logo-dark':'';
  const path=SERVICE_BRAND_PATHS[item.id];
- if(path?.length)return '<span class="gb-service-logo gb-service-branded'+dark+'"'+style+' aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor" focusable="false">'+
-  path.map(d=>'<path d="'+d+'"/>').join('')+'</svg></span>';
+ const extra=SERVICE_EXTRA_BRAND_PATHS[item.id];
+ if(path?.length||extra?.length===3){
+  // Both sources are vetted, locally bundled SVG-only data (no remote fetch).
+  const viewBox=extra?'0 0 '+extra[0]+' '+extra[1]:'0 0 24 24';
+  const vectors=extra?[extra[2]]:path;
+  return '<span class="gb-service-logo gb-service-branded'+dark+'"'+style+' aria-hidden="true"><svg viewBox="'+viewBox+'" fill="currentColor" focusable="false">'+
+   vectors.map(d=>'<path d="'+d+'"/>').join('')+'</svg></span>';
+ }
  return '<span class="gb-service-monogram'+(hex?' gb-service-branded':'')+dark+'"'+style+' aria-hidden="true">'+
   esc(item.fallback||item.name.slice(0,2))+'</span>';
 }
@@ -43,7 +50,7 @@ export function serviceIdentityMarkup(id,name=''){
  return '<span class="gb-service-identity">'+serviceIconMarkup(item)+
   '<span>'+esc(title)+'</span></span>';
 }
-// Compact field inside Categoria. The full 26-service list is displayed only
+// Compact field inside Categoria. The full service list is displayed only
 // in the separate draggable sheet, keeping FormData and custom names intact.
 // A selected service is displayed as one compact, tappable chip inside
 // Categoria. The full catalog opens automatically when Categoria=Serviços
