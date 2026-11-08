@@ -1,5 +1,17 @@
 # CHANGELOG — GB+ Gestão Financeira
 
+## [2.8.1 — CORREÇÃO DE CARTÕES E NAVEGAÇÃO (CANDIDATA, NÃO PUBLICADA)] — 2026-11-08
+
+**Branch:** `fix/gbplus-281-cards-more-liquid`. Partiu da 2.8.0 build 1; a versão pública não é alterada antes da homologação e autorização de liberação.
+
+- **Correção de erro nos cartões:** restabelecida a concatenação do HTML das faturas. Antes, a ausência de `+` causava `TypeError: "string" is not a function` quando existia fatura. Garantida a atualização das importações e do cache em `accounts-cards-view.js` e `app.js`.
+- **Barra superior:** texto "Conta online" removido visualmente do cabeçalho para liberar espaço e dar prioridade ao botão de alternar tema; sincronização e indicador de estado nas outras áreas preservados.
+- **Mais como página:** a ação antes aberta em pop-up agora é a rota `#more`, com 16 destinos por grupos, histórico de navegação e item ativo na barra.
+- **Liquid Glass centralizado:** posição e largura do foco animado medidas a partir do atalho real, inclusive cartões e atalhos personalizáveis; ícones/rótulos centralizados.
+- **Testes parciais:** teste de renderização real de fatura pendente e quitada, 18 cenários da interface (mais duas conferências do cache), 22 verificações do toggle e sintaxe JS aprovados no V8 isolado. A suíte integral Node/Android/PWA e o teste autenticado Supabase ainda precisam de comprovação.
+- **Homologação:** ainda pendente; não publicar esta alteração nem anunciá-la como liberada até aceite e evidências suficientes.
+
+
 
 ## [2.8.0 — FATURAS + LIQUID GLASS (LIBERAÇÃO AUTORIZADA; HOMOLOGAÇÃO PARCIAL)] — 2026-11-08
 
