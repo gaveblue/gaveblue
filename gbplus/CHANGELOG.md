@@ -1,6 +1,6 @@
 # CHANGELOG — GB+ Gestão Financeira
 
-## [2.8.4 — SÍMBOLOS DO LIQUID GLASS NO ANDROID (CANDIDATA; NÃO PUBLICADA)] — 2026-11-08
+## [2.8.4 — SÍMBOLOS DO LIQUID GLASS NO ANDROID (LIBERAÇÃO WEB PARA TESTE; HOMOLOGAÇÃO PENDENTE)] — 2026-11-08
 
 **Origem:** capturas reais do PWA Android 2.8.3 mostraram o seletor sem sol/lua em ambos os temas e luz azul persistindo no modo claro. As capturas mostram telas distintas (Início e Fluxo de caixa); **não comprovam**, por si só, que a mudança do tema causou troca de página.
 
@@ -9,7 +9,7 @@
 - **Mantido:** arrasto progressivo claro/escuro, mola, gradação de cores da interface, checagem de origem, salvamento apenas após o fim do gesto, navegação e dados financeiros.
 - **Cache:** query do iframe e do módulo principal atualizada para `20261108-2841`; nenhuma alteração ou migração de dados.
 - **Testes:** 24 verificações de símbolos, geometria e tema aprovadas em V8; miniatura visual isolada em Chromium exibiu corretamente os ícones nas duas cores. Teste integrado em PWA Android real ainda pendente.
-- **Status:** candidata em branch separada `fix/gbplus-284-glass-icons-fallback`, **não publicada**. A versão pública permanece 2.8.3 até autorização após revisão.
+- **Status:** publicação web da **2.8.4 build 1** autorizada em 08/11/2026 pelo responsável para realizar a homologação no próprio PWA instalado. O código e os testes isolados foram verificados; aceitação visual no Android/PWA e validação integrada continuam pendentes. Não usar GitHub Actions para compilar APK.
 
 ## [2.8.3 — LIQUID GLASS CLARO E TRANSIÇÃO SUAVE (LIBERAÇÃO WEB AUTORIZADA; HOMOLOGAÇÃO PARCIAL)] — 2026-11-08
 
