@@ -64,7 +64,7 @@ html[data-theme="dark"] .gb-top-theme-frame{color-scheme:dark}
    Only active while dragging/springing. Percentage values originate from the
    compact theme iframe; the persisted theme remains untouched until release.
    color-mix is supported by current Chromium / Android WebView browsers. */
-html.gb-theme-preview{
+:root[data-theme].gb-theme-preview{
   --bg:color-mix(in srgb,#f6f6f8 var(--gb-theme-day-share,100%),#111214);
   --surface:color-mix(in srgb,#ffffff var(--gb-theme-day-share,100%),#1b1c1f);
   --soft:color-mix(in srgb,#f7f7f9 var(--gb-theme-day-share,100%),#222327);
