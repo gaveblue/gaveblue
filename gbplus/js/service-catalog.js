@@ -1,7 +1,7 @@
 /**
  * GB+ 2.5.1 — catálogo inicial de serviços.
  * Dados de identificação apenas: não autenticam nem consultam plataformas externas.
- * 13 marcas têm vetores locais provenientes do Simple Icons; os demais usam iniciais neutras.
+ * Marcas com símbolo público verificado usam SVG local; as demais usam iniciais neutras.
  * A biblioteca não confere direito de marca, parceria ou integração.
  */
 const definitions=[
@@ -30,11 +30,35 @@ const definitions=[
  ['digital-icloud','iCloud+','digital','subscription','iC'],
  ['digital-microsoft365','Microsoft 365','digital','subscription','M3'],
  ['digital-canva','Canva','digital','subscription','CV'],
- ['digital-chatgpt','ChatGPT','digital','subscription','CG']
+ ['digital-chatgpt','ChatGPT','digital','subscription','CG'],
+ ['streaming-youtube','YouTube','streaming','subscription','YT'],
+ ['streaming-twitch','Twitch','streaming','subscription','TW'],
+ ['music-soundcloud','SoundCloud','music','subscription','SC'],
+ ['music-bandcamp','Bandcamp','music','on_demand','BC'],
+ ['digital-googledrive','Google Drive','digital','subscription','GD'],
+ ['digital-dropbox','Dropbox','digital','subscription','DB'],
+ ['digital-slack','Slack','digital','subscription','SL'],
+ ['digital-trello','Trello','digital','subscription','TR'],
+ ['digital-figma','Figma','digital','subscription','FG'],
+ ['digital-github','GitHub','digital','subscription','GH'],
+ ['digital-discord','Discord','digital','subscription','DI'],
+ ['digital-patreon','Patreon','digital','subscription','PT'],
+ ['social-instagram','Instagram','social','on_demand','IG'],
+ ['social-tiktok','TikTok','social','on_demand','TK'],
+ ['social-whatsapp','WhatsApp','social','on_demand','WA'],
+ ['social-telegram','Telegram','social','subscription','TG'],
+ ['social-facebook','Facebook','social','on_demand','FB'],
+ ['social-x','X','social','subscription','X'],
+ ['games-steam','Steam','games','on_demand','ST'],
+ ['games-playstation','PlayStation','games','subscription','PS'],
+ ['games-xbox','Xbox','games','subscription','XB'],
+ ['shopping-amazon','Amazon','shopping','on_demand','AM'],
+ ['shopping-paypal','PayPal','shopping','on_demand','PP']
 ];
 export const SERVICE_GROUPS=Object.freeze({
  streaming:'Streaming e vídeo',music:'Música e conteúdo',delivery:'Delivery',
- mobility:'Mobilidade',digital:'Serviços digitais'
+ mobility:'Mobilidade',digital:'Serviços digitais',
+ social:'Redes sociais e comunicação',games:'Games e entretenimento',shopping:'Compras e pagamentos'
 });
 export const SERVICE_CATALOG=Object.freeze(definitions.map(([id,name,group,billingMode,fallback])=>
  Object.freeze({id,name,group,billingMode,fallback,logoPath:null,logoVerified:false})
