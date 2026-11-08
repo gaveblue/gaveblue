@@ -11,6 +11,7 @@ const forms=source('forms'), css=readFileSync(resolve(here,'../bottom-sheet.css'
 const load=(name,deps,keys)=>Function(...Object.keys(deps),source(name)
  .replace(/^import[^\n]*\n/gm,'').replace(/^export /gm,'')+';return {'+keys.join(',')+'};')(...Object.values(deps));
 const {isServiceExpenseCategory}=load('service-catalog',{},['isServiceExpenseCategory']);
+const {isSelectableExpenseCategory}=load('category-library',{},['isSelectableExpenseCategory']);
 const db={categories:[
  {id:'water',name:'Água',type:'expense'},
  {id:'service',name:'Serviços',type:'expense'},
@@ -45,9 +46,9 @@ const openEntryServiceSheet=Function('modal','openGbPickerSheet','updateServiceP
 const action=app.match(/  'entry-toggle':el=>\{([\s\S]*?)\n  \},\n  'entry-option':/);
 assert(action,'Category entry-toggle action missing');
 const entryToggle=Function('db','closeEntryMenus','openGbPickerSheet','syncEntrySelect',
- 'Event','isServiceExpenseCategory','openEntryServiceSheet','toggleEntryMenu',
+ 'Event','isServiceExpenseCategory','isSelectableExpenseCategory','openEntryServiceSheet','toggleEntryMenu',
  'return function(el){'+action[1]+'\n}')(db,()=>{},sheetOpen,()=>{calls.sync++},
- class Event{constructor(type){this.type=type}},isServiceExpenseCategory,
+ class Event{constructor(type){this.type=type}},isServiceExpenseCategory,isSelectableExpenseCategory,
  openEntryServiceSheet,()=>{throw Error('Unexpected fallback')});
 const button={closest:selector=>selector==='.gb-entry-select'?{dataset:{entryName:'categoryId'}}:
  selector==='#title-form'?form:null,setAttribute(){}};
@@ -96,7 +97,7 @@ assert(sheet.includes('selectionAfterClose')&&sheet.includes('if(selection)selec
  'The next modal should open only after the previous native dialog closes');
 const selected=load('service-ui',{
  serviceById:id=>id==='streaming-netflix'?{id,name:'Netflix'}:null,
- SERVICE_BRAND_PATHS:{},SERVICE_BRAND_COLORS:{},
+ SERVICE_BRAND_PATHS:{},SERVICE_EXTRA_BRAND_PATHS:{},SERVICE_BRAND_COLORS:{},
  esc:s=>String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;')
 },['servicePickerMarkup']);
 const html=selected.servicePickerMarkup({serviceId:'streaming-netflix'});
