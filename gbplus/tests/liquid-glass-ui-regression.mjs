@@ -26,6 +26,8 @@ assert.match(css,/html\[data-theme=dark\]/,'Tema escuro deve ter tratamento pró
 assert.match(app,/gb-liquid-theme-frame/,'Configurações → Aparência devem mostrar o seletor aprovado');
 assert.match(app,/event\.origin!==location\.origin/,'Mensagem deve conferir a origem');
 assert.match(app,/frame\.contentWindow!==event\.source/,'Mensagem deve conferir a janela do iframe');
+assert.match(app,/modal\.addEventListener\('close'/,'Fechar o modal deve desmontar a animação');
+assert.match(app,/clearTimeout\(gbLiquidThemeTimer\)/,'Trocas repetidas devem cancelar a pendência anterior');
 assert.match(app,/if\(theme!=='light'&&theme!=='dark'\)return/,'Valores inválidos devem ser rejeitados');
 assert.match(toggle,/gbplus:theme-change/,'O toggle deve emitir evento de tema');
 assert.match(toggle,/window\.parent\.postMessage/,'O toggle deve comunicar o tema ao aplicativo');
@@ -33,4 +35,4 @@ assert.match(toggle,/setOrbit\(p\)/,'A faixa orbital aprovada deve continuar ati
 assert.match(toggle,/reflectState\(initialLight\)/,'O seletor deve iniciar no tema já salvo');
 assert.match(changelog,/Interfaces aprovadas — implementação iniciada em 08\/11\/2026/,'Atualização precisa ser documentada');
 assert.match(page,/gbplus-version" content="2\.7\.8"/,'A candidata não pode anunciar liberação sem homologação');
-console.log('Liquid Glass 2.8.0: integração estática verificada (20 asserções).');
+console.log('Liquid Glass 2.8.0: integração estática verificada (22 asserções).');
