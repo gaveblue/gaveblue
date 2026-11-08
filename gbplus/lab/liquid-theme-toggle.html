@@ -375,6 +375,7 @@ html.gb-theme-compact .pixel-symbol{filter:none}
   window.addEventListener('resize',resizeCanvas,{passive:true});
   resizeCanvas();
   // Sincroniza o estado inicial com o tema do GB+ sem gravar no banco.
+  let canSendTheme=false;
   const embedded = new URLSearchParams(location.search).get('embed') === '1' || compact;
   if(compact){document.documentElement.classList.add('gb-theme-compact');document.body.classList.add('gb-theme-compact');window.addEventListener('resize',scheduleRender);}
   const initialLight = new URLSearchParams(location.search).get('theme') === 'light';
@@ -382,6 +383,7 @@ html.gb-theme-compact .pixel-symbol{filter:none}
     document.documentElement.classList.add('gb-theme-embed');
     document.body.classList.add('gb-theme-embed');
     toggle.addEventListener('gbplus:theme-change', (event) => {
+      if(!canSendTheme)return; // A sincronização inicial jamais deve sobrescrever o tema salvo.
       if (window.parent !== window && ['light','dark'].includes(event.detail?.theme)) {
         window.parent.postMessage({type:'gbplus:liquid-theme', theme:event.detail.theme}, location.origin);
       }
@@ -390,6 +392,7 @@ html.gb-theme-compact .pixel-symbol{filter:none}
   progress = target = initialLight ? 1 : 0;
   lastState = initialLight;
   reflectState(initialLight);
+  canSendTheme=true;
 
   scheduleRender();
 })();
