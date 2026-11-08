@@ -16,6 +16,8 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.TextView;
+import android.widget.Button;
+import android.widget.LinearLayout;
 
 /**
  * GB+ Android beta: a locked-down WebView over the existing HTTPS app.
@@ -30,7 +32,9 @@ public final class MainActivity extends Activity {
 
     private boolean isInternal(Uri uri) {
         if (uri == null) return false;
-        if (!"https".equalsIgnoreCase(uri.getScheme())) return false;
+        if (!uri.isHierarchical() || !"https".equalsIgnoreCase(uri.getScheme())) return false;
+        if (uri.getUserInfo() != null) return false; // Avoid userinfo confusion.
+        if (uri.getPort() != -1 && uri.getPort() != 443) return false;
         final String host = uri.getHost();
         if (!"gaveblue.com.br".equalsIgnoreCase(host)) return false;
         final String path = uri.getPath();
@@ -48,14 +52,29 @@ public final class MainActivity extends Activity {
         }
     }
 
-    private void showConnectionError() {
+    // Full-screen offline/certificate warning with safe retry. Never bypass TLS.
+    private void showConnectionError(String message) {
+        if (isFinishing() || isDestroyed()) return;
+        LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(38, 85, 38, 36);
+        layout.setBackgroundColor(Color.rgb(17, 18, 20));
+
         TextView error = new TextView(this);
-        error.setBackgroundColor(Color.rgb(17, 18, 20));
         error.setTextColor(Color.WHITE);
         error.setTextSize(15f);
-        error.setPadding(44, 90, 44, 44);
-        error.setText("Não foi possível abrir o GB+ com segurança. Verifique sua conexão e tente novamente.\n\nO aplicativo não ignorou erros de certificado.");
-        setContentView(error);
+        error.setText(message);
+        layout.addView(error);
+
+        Button retry = new Button(this);
+        retry.setText("Tentar novamente");
+        retry.setOnClickListener(view -> {
+            if (webView == null) return;
+            setContentView(webView);
+            webView.loadUrl(APP_URL);
+        });
+        layout.addView(retry);
+        setContentView(layout);
     }
 
     @Override
@@ -92,11 +111,11 @@ public final class MainActivity extends Activity {
             @Override
             public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
                 handler.cancel();
-                showConnectionError();
+                showConnectionError("Conexão bloqueada por erro de segurança no certificado. O GB+ não ignora erros HTTPS.");
             }
             @Override
             public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
-                if (request.isForMainFrame()) showConnectionError();
+                if (request.isForMainFrame()) showConnectionError("Não foi possível acessar o GB+. Verifique a internet e toque em Tentar novamente.");
             }
         });
         webView.setWebChromeClient(new WebChromeClient() {
