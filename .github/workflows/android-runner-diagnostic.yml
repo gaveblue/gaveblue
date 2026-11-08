@@ -1,0 +1,19 @@
+name: GB+ Android - diagnostico do runner
+on:
+  push:
+    branches:
+      - experiment/gbplus-android-beta-apk
+    paths:
+      - '.github/workflows/android-runner-diagnostic.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verificar-runner:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Verificar se o GitHub disponibiliza um runner
+        run: |
+          echo 'Iniciou etapa no runner do GitHub'
+          uname -a
