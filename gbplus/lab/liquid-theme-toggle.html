@@ -217,6 +217,9 @@ html.gb-theme-compact .pixel-symbol{filter:none}
   const css = document.documentElement.style;
   const lowMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   let progress = 0, target = 0, velocity = 0, dragging = false;
+  // Scrub the parent dashboard through the full 0..1 lightness range, but
+  // never save account preferences while the user's finger is moving.
+  let userInteracting=false, lastSentPreview=NaN;
   let pressX = 0, hasMoved = false, lastFrame = performance.now();
   let lastState = false;
   // The U-shaped strip fits the bottom in night mode and the top in day mode.
@@ -327,6 +330,23 @@ html.gb-theme-compact .pixel-symbol{filter:none}
     ctx.restore();
   }
 
+  function sendThemeScrub(p, settled) {
+    if (!compact || !userInteracting || !canSendTheme || window.parent===window) return;
+    if (!settled && Number.isFinite(lastSentPreview) && Math.abs(p-lastSentPreview) < .004) return;
+    lastSentPreview=p;
+    window.parent.postMessage({
+      type:'gbplus:liquid-theme-progress',
+      progress:Number(p.toFixed(4)),
+      phase:dragging?'drag':'settle'
+    }, location.origin);
+    if (settled) {
+      window.parent.postMessage({
+        type:'gbplus:liquid-theme-settled',
+        theme:target>=.5?'light':'dark'
+      }, location.origin);
+      userInteracting=false;
+    }
+  }
   let renderPending=false;
   function scheduleRender(){if(renderPending)return;renderPending=true;window.requestAnimationFrame(render);}
   function render(now) {
@@ -360,6 +380,10 @@ html.gb-theme-compact .pixel-symbol{filter:none}
     resizeCanvas();
     setOrbit(p);
     drawPixels(p);
+    if (compact && userInteracting) {
+      const settled=!dragging && Math.abs(target-progress)<.00025 && Math.abs(velocity)<.004;
+      sendThemeScrub(p,settled);
+    }
     if(!compact||dragging||Math.abs(target-progress)>.00025||Math.abs(velocity)>.004) scheduleRender();
   }
 
@@ -373,6 +397,7 @@ html.gb-theme-compact .pixel-symbol{filter:none}
     }));
   }
   function setTheme(isDay) {
+    userInteracting=true;
     target = isDay ? 1 : 0;
     if (lastState !== isDay) reflectState(isDay);
     scheduleRender();
@@ -388,6 +413,7 @@ html.gb-theme-compact .pixel-symbol{filter:none}
     if (e.button !== undefined && e.button !== 0) return;
     toggle.setPointerCapture(e.pointerId);
     dragging = true;
+    userInteracting=true;
     hasMoved = false;
     pressX = e.clientX;
     velocity = 0;
