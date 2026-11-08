@@ -1647,8 +1647,6 @@ function updateConnection(){
   const online=!!currentUser();
   document.querySelector('#connection').textContent=online?(navigator.onLine?'Conta online':'Sem conexão · gravação indisponível'):(navigator.onLine?'Dados neste navegador':'Sem conexão · modo local');
   document.querySelector('.local-mark').innerHTML='<span class="status-dot"></span> '+(online?'Conta online<small>Dados privados do seu login.</small>':'Armazenamento local<small>Seus dados, neste navegador.</small>');
-  const access=document.querySelector('#account-access');
-  if(access){access.innerHTML=icon('user');access.setAttribute('aria-label',online?'Minha conta':'Entrar na minha conta');access.title=online?'Minha conta — '+currentUser().email:'Entrar na minha conta';}
 }
 async function refreshOnline(manual=false){
   if(!currentUser()||!db||busy||!navigator.onLine||document.hidden||document.body.classList.contains('auth-locked'))return;
@@ -1699,10 +1697,7 @@ function startupRecovery(message){
 }
 async function init(){
  try{
-  const avatar=document.querySelector('.avatar');
-  if(avatar)avatar.outerHTML='<button type="button" class="icon-button account-button" id="account-access" aria-label="Minha conta" title="Minha conta">'+icon('user')+'</button>';
-  const account=document.querySelector('#account-access');
-  if(account)account.onclick=()=>{if(currentUser()&&db){location.hash='profile';}else showAuth();};
+  // Minha Conta é acessada pela página Mais; o cabeçalho fica livre para o Liquid Glass.
   const main=document.querySelector('#main');
   if(main&&!document.querySelector('#sync-alert'))main.insertAdjacentHTML('beforebegin','<div id="sync-alert" class="auth-notice sync-alert" role="alert" hidden>A gravação online precisa ser conferida. Feche o formulário, atualize os dados e refaça a alteração. <button class="button small" data-auth-action="refresh">Atualizar dados online</button></div>');
   const loginReturnMessage=consumeAuthReturnMessage();
