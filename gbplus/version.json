@@ -1,18 +1,15 @@
 {
-  "version": "2.8.2",
+  "version": "2.8.3",
   "build": 1,
-  "published_at": "2026-11-08T20:05:35.017Z",
-  "title": "Carteira, categorias ampliadas, Liquid Glass e avisos",
+  "published_at": "2026-11-08T21:02:09.461Z",
+  "title": "Liquid Glass claro e transição suave entre temas",
   "notes": [
-    "Barra de rolagem visual dos bancos oculta, mantendo o gesto horizontal.",
-    "Atalho Cartões renomeado para Carteira sem alterar as faturas.",
-    "Pacote de 50 categorias adicionais para contas novas e importação opcional nas existentes.",
-    "Biblioteca de 55 ícones com pesquisa no cadastro de categorias.",
-    "Seletor Liquid Glass compacto com arrasto no cabeçalho e Minha Conta na tela Mais.",
-    "Nova tela de notificações internas para contas a pagar e receber, com prazos e preferências ajustáveis.",
-    "Painel analítico de vencimentos disponível em Relatórios.",
-    "Liberação web autorizada para empacotamento Android sem GitHub Actions. Ainda não gera APK e não lê notificações bancárias.",
-    "Homologação parcial: testes isolados aprovados, pendentes Android/PWA instalado, Supabase autenticado e distribuição do pacote."
+    "Corrigida a moldura preta do seletor Liquid Glass no modo claro: vidro branco translúcido, bordas sutis e brilho dourado discreto.",
+    "O botão compacto acompanha o dedo com transição progressiva do claro para o escuro e vice-versa, incluindo fundo, cartões e barra de navegação.",
+    "O efeito orbital azul/dourado, a resposta por mola e os atalhos de teclado foram preservados.",
+    "Textos mantêm contraste durante a mistura de cores e o tema só é salvo quando a escolha é concluída após soltar.",
+    "O novo arrasto cancela confirmação anterior ainda pendente e mensagens do iframe passam por checagem de origem e de valor.",
+    "Liberação web expressamente autorizada em 08/11/2026, com 246 verificações direcionadas aprovadas em V8/Chromium isolados. Homologação completa em PWA Android e Supabase autenticado permanece pendente."
   ],
   "assets": [
     "./index.html",
@@ -183,29 +180,24 @@
   ],
   "highlights": [
     {
-      "icon": "wallet",
-      "title": "Carteira",
-      "description": "O acesso aos cartões agora se chama Carteira."
-    },
-    {
-      "icon": "category",
-      "title": "Categorias e ícones",
-      "description": "50 sugestões extras e 55 ícones para escolher."
-    },
-    {
-      "icon": "bell",
-      "title": "Avisos de vencimento",
-      "description": "Defina quando receber lembretes dentro do GB+."
-    },
-    {
       "icon": "sparkles",
-      "title": "Tema Liquid Glass",
-      "description": "Seletor compacto com arrasto no topo do aplicativo."
+      "title": "Liquid Glass mais elegante",
+      "description": "Trilho translúcido no modo claro, sem a moldura preta."
+    },
+    {
+      "icon": "sun",
+      "title": "Transição gradual",
+      "description": "Arraste para clarear ou escurecer a tela em tempo real."
+    },
+    {
+      "icon": "shield-check",
+      "title": "Tema com confirmação segura",
+      "description": "A preferência é gravada somente quando a escolha termina."
     }
   ],
-  "release_status": "authorized_release_2_8_2_web_packaging_android_pending",
+  "release_status": "authorized_web_release_2_8_3_partial_homologation",
   "homologation": {
-    "status": "partial_testing_authorized_web_release_full_android_supabase_pending",
-    "notes": "Publicação web autorizada em 08/11/2026 para empacotamento. Testes direcionados 2.8.2 (131 asserções) e regressões anteriores aprovados em V8 isolado. Não houve homologação Android/PWA real, Supabase autenticado ou geração de APK. GitHub Actions indisponível; não confundir publicação web com homologação integral."
+    "status": "web_release_authorized_directed_tests_passed_full_android_supabase_pending",
+    "notes": "Responsável autorizou publicação da 2.8.3 em 08/11/2026. Testes direcionados 27 progressão/segurança, 19 vidro claro, 23 Liquid Glass anterior, 131 da 2.8.2, 26 interface/avisos e 20 cartões/navegação aprovados em V8 isolado, mais inspeção de cores intermediárias no Chromium. Não atesta teste real de PWA Android, sessão Supabase ou completa homologação; publicar site sem gerar APK ou compilar via GitHub Actions."
   }
 }
