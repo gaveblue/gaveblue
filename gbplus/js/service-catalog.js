@@ -60,8 +60,10 @@ export const SERVICE_GROUPS=Object.freeze({
  mobility:'Mobilidade',digital:'Serviços digitais',
  social:'Redes sociais e comunicação',games:'Games e entretenimento',shopping:'Compras e pagamentos'
 });
+// Assets are audited, relative and committed to this repository; no CDN calls.
+const LOCAL_SERVICE_LOGOS=Object.freeze({'digital-chatgpt':'./assets/service-icons/chatgpt.svg'});
 export const SERVICE_CATALOG=Object.freeze(definitions.map(([id,name,group,billingMode,fallback])=>
- Object.freeze({id,name,group,billingMode,fallback,logoPath:null,logoVerified:false})
+ Object.freeze({id,name,group,billingMode,fallback,logoPath:LOCAL_SERVICE_LOGOS[id]||null,logoVerified:Boolean(LOCAL_SERVICE_LOGOS[id])})
 ));
 export const serviceSearchKey=s=>String(s??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');
 export const serviceById=id=>SERVICE_CATALOG.find(s=>s.id===id)||null;
