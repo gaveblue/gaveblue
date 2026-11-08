@@ -182,7 +182,7 @@ function cfgOption(title,description,ico,color,action,badge=''){
 function cfgSection(label,rows){
  return `<section class="gb-cfg-group" aria-label="${esc(label)}"><h2>${esc(label)}</h2><div class="gb-cfg-list">${rows}</div></section>`;
 }
-export function settingsView(db,canInstall,online=false,user=null,installed=false){
+export function settingsView(db,canInstall,online=false,user=null,installed=false,embedded=false){
  const appVersion=document.querySelector('meta[name="gbplus-version"]')?.content||'2.1.3';
  const name=String(user?.user_metadata?.gbplus_profile?.full_name||user?.user_metadata?.full_name||user?.user_metadata?.name||user?.email?.split('@')[0]||'Minha conta').trim();
  // Visibility is restricted to the owner; the admin API independently validates
@@ -208,11 +208,9 @@ export function settingsView(db,canInstall,online=false,user=null,installed=fals
   cfgOption('Convidar um amigo','Compartilhe o GB+ com seus amigos','share','green','invite-friend')+
   cfgOption('Ajuda e suporte','Dúvidas, tutoriais e contato','help','blue','settings-help')+
   cfgOption('Sobre o GB+','Versão, novidades e licenças','info','neutral','settings-about'));
- return `<div class="gb-settings-layout">
-  <header class="gb-cfg-header"><a href="#dashboard" class="gb-cfg-back" aria-label="Voltar ao início">${icon('arrow')}</a><h1>Configurações</h1><button type="button" class="gb-cfg-search-trigger" data-action="settings-search" aria-label="Pesquisar nas configurações" aria-expanded="false" aria-controls="gb-cfg-search">${icon('search')}</button></header>
+ return `<div class="gb-settings-layout${embedded?' gb-more-settings':''}">\n  ${embedded?'':`  <header class="gb-cfg-header"><a href="#dashboard" class="gb-cfg-back" aria-label="Voltar ao início">${icon('arrow')}</a><h1>Configurações</h1><button type="button" class="gb-cfg-search-trigger" data-action="settings-search" aria-label="Pesquisar nas configurações" aria-expanded="false" aria-controls="gb-cfg-search">${icon('search')}</button></header>
   <div id="gb-cfg-search" class="gb-cfg-search" hidden><label for="settings-search-input" class="sr-only">Buscar configurações</label>${icon('search')}<input type="search" id="settings-search-input" placeholder="Pesquisar configurações" autocomplete="off" aria-label="Pesquisar configurações"></div>
-  <a href="#profile" class="gb-cfg-profile"><span class="gb-cfg-profile-avatar">${icon('user')}</span><span class="gb-cfg-profile-label"><strong>${esc(name)}</strong><small>Gerenciar conta, dados e segurança</small></span><span class="gb-cfg-next">${icon('chevron')}</span></a>
-  ${administration}${preferences}${records}${system}${support}
+  <a href="#profile" class="gb-cfg-profile"><span class="gb-cfg-profile-avatar">${icon('user')}</span><span class="gb-cfg-profile-label"><strong>${esc(name)}</strong><small>Gerenciar conta, dados e segurança</small></span><span class="gb-cfg-next">${icon('chevron')}</span></a>`}\n  ${administration}${preferences}${records}${system}${support}
   ${online?'<button type="button" class="gb-cfg-delete gb-cfg-row" data-action="settings-delete" data-settings-keywords="excluir conta remover permanentemente dados"><span class="gb-cfg-row-icon">'+icon('trash')+'</span><span class="gb-cfg-row-label"><strong>Excluir conta</strong><small>Excluir cadastro, login e dados permanentemente</small></span><span class="gb-cfg-next">'+icon('chevron')+'</span></button>':''}
   <p class="gb-cfg-empty" id="gb-cfg-no-results" hidden>Nenhuma configuração encontrada.</p>
   <input type="file" id="backup-input" accept=".json,application/json" hidden>
