@@ -68,9 +68,10 @@ html.gb-theme-preview{
   --bg:color-mix(in srgb,#f6f6f8 var(--gb-theme-day-share,100%),#111214);
   --surface:color-mix(in srgb,#ffffff var(--gb-theme-day-share,100%),#1b1c1f);
   --soft:color-mix(in srgb,#f7f7f9 var(--gb-theme-day-share,100%),#222327);
-  --ink:color-mix(in srgb,#19191c var(--gb-theme-day-share,100%),#f2f2f4);
-  --muted:color-mix(in srgb,#818187 var(--gb-theme-day-share,100%),#a0a0a9);
-  --subtle:color-mix(in srgb,#b7b7bf var(--gb-theme-day-share,100%),#6d6d77);
+  /* Readable text switches contrast near halfway; backgrounds keep scrubbing smoothly. */
+  --ink:color-mix(in srgb,#19191c var(--gb-theme-text-day-share,100%),#f2f2f4);
+  --muted:color-mix(in srgb,#4a4a52 var(--gb-theme-text-day-share,100%),#f0f0f3);
+  --subtle:color-mix(in srgb,#666670 var(--gb-theme-text-day-share,100%),#dedee6);
   --border:color-mix(in srgb,#eaeaec var(--gb-theme-day-share,100%),#303136);
   --hover:color-mix(in srgb,#efeff2 var(--gb-theme-day-share,100%),#303136);
   --inverse:color-mix(in srgb,#ffffff var(--gb-theme-day-share,100%),#171719);
