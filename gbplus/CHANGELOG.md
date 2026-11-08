@@ -1,5 +1,18 @@
 # CHANGELOG — GB+ Gestão Financeira
 
+## [2.8.5 — BOTÃO DE TEMA SIMPLES, SOL E LUA (LIBERAÇÃO WEB PARA TESTE; HOMOLOGAÇÃO PARCIAL)] — 2026-11-08
+
+**Motivo:** o usuário rejeitou a aparência e o funcionamento do seletor Liquid Glass que continuava visualmente inadequado no PWA Android. Solicitou retirar completamente o controle e substituí-lo por uma flag normal, com sol/lua simples de biblioteca. A versão foi preparada para ser publicada e testada no celular.
+
+- **Cabeçalho:** excluído o iframe `gb-top-theme-frame` e substituído por um interruptor pequeno e discreto `gb-theme-toggle` com dois ícones da biblioteca Lucide-style já incorporada ao projeto. Sem fundo preto no modo claro.
+- **Interação:** clique/toque para alternar entre temas. Sem arrasto, partículas, mola, barra orbital, comunicação de mensagens entre janelas ou pré-visualização de cores em tempo real.
+- **Persistência:** reutiliza `top-theme` e `commit` já existentes; mantém a preferência salva, sem tocar em lançamentos. O estado visual e os rótulos acessíveis acompanham o tema escolhido.
+- **Acessibilidade:** papel de interruptor, `aria-checked`, rótulo contextual, foco visível, suporte a teclado e respeito a movimento reduzido.
+- **Configurações:** texto de Aparência atualizado para refletir o interruptor simples e as opções explícitas de modo claro/escuro; a área Minha Conta continua na página Mais.
+- **Limpeza:** removidos código e CSS de animações do seletor no aplicativo. O laboratório experimental pode permanecer no histórico do Git, mas não é mais carregado no PWA e saiu da lista de assets da versão.
+- **Testes:** regressão `gbplus-285-simple-theme-regression.mjs` cobre botões, símbolos, acessibilidade, persistência e remoção do iframe. Regressões de categorias, avisos, cartões e navegação executadas. Testes dos seletores 2.8.3/2.8.4 que já não existem foram retirados da suíte ativa (originais permanecem no histórico Git).
+- **Status:** publicação web autorizada como versão 2.8.5 build 1 para permitir testes no Android. Ainda pendente validação visual no PWA instalado e testes integrados em conta Supabase de demonstração. Nenhum APK.
+
 ## [2.8.4 — SÍMBOLOS DO LIQUID GLASS NO ANDROID (LIBERAÇÃO WEB PARA TESTE; HOMOLOGAÇÃO PENDENTE)] — 2026-11-08
 
 **Origem:** capturas reais do PWA Android 2.8.3 mostraram o seletor sem sol/lua em ambos os temas e luz azul persistindo no modo claro. As capturas mostram telas distintas (Início e Fluxo de caixa); **não comprovam**, por si só, que a mudança do tema causou troca de página.
