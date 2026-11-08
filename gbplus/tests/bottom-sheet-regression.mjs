@@ -36,15 +36,15 @@ const sheet=load('bottom-sheet',{
  serviceCategoryPreviewMarkup:()=>'<span class="gb-service-category-preview">Netflix Spotify iFood</span>',
  serviceIconMarkup:()=>'<span class="gb-service-logo">Marca</span>'
 },['openGbPickerSheet','filterGbPickerSheet','sheetGroupsCount','installGbPickerSheet','installEntryFormDrag']);
-assert.equal(catalog.SERVICE_CATALOG.length,26);
-assert.equal(Object.keys(catalog.SERVICE_GROUPS).length,5);
+assert.equal(catalog.SERVICE_CATALOG.length,49);
+assert.equal(Object.keys(catalog.SERVICE_GROUPS).length,8);
 assert.equal(sheet.sheetGroupsCount([{items:[1,2]},{items:[3]}]),3);
 sheet.installGbPickerSheet();
 assert.equal(fakeDialog.dataset.gbReady,'true');
 let picked;
 assert(sheet.openGbPickerSheet({kind:'service',selected:'streaming-netflix',onPick:value=>picked=value}));
 assert(fakeDialog.open);
-assert.equal((fakeDialog.innerHTML.match(/data-sheet-choice="(?:streaming|music|delivery|mobility|digital)-/g)||[]).length,26);
+assert.equal((fakeDialog.innerHTML.match(/data-sheet-choice="(?:streaming|music|delivery|mobility|digital)-/g)||[]).length,49);
 for(const service of ['Netflix','HBO Max','Spotify','iFood','Plus Delivery','ChatGPT']){
  assert(fakeDialog.innerHTML.includes(service),'Missing service '+service);
 }
@@ -122,4 +122,4 @@ assert(app.includes("source.dispatchEvent(new Event('change',{bubbles:true}))"),
  'Choosing category must retain original category/form event rules');
 const html=readFileSync(resolve(root,'../index.html'),'utf8');
 assert(html.includes('id="gb-picker-sheet"')&&html.includes('bottom-sheet.css'));
-console.log('GB+ 2.7.0: 26 serviços, categorias, busca, gesto, foco, proteção do formulário e ícones OK.');
+console.log('GB+ 2.8.6 candidata: 49 serviços, categorias, busca, gesto, foco e preservação do formulário.');
