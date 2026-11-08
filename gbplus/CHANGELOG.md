@@ -1,5 +1,18 @@
 # CHANGELOG — GB+ Gestão Financeira
 
+
+## [2.8.0 — FATURAS INTEGRADAS (CANDIDATA; NÃO HOMOLOGADA/NÃO PUBLICADA)] — 2026-11-07
+
+**Em desenvolvimento na branch `feature/gbplus-280-faturas`.** Nenhuma liberação nem homologação integral é declarada. A versão pública permanece em 2.7.8 até nova autorização de liberação.
+
+- **Faturas de cartões:** cada cartão passa a exibir o próximo fechamento, vencimento previsto, total em aberto, faturas existentes, situação de pagamento e um botão **Pagar**, conectado ao formulário de baixa já usado pelo Contas a pagar.
+- **Lançar saldo de fatura externa:** novo formulário para registrar o valor consolidado de uma competência que ainda não possui compras no GB+. Gera um único título `cardInvoice` com vencimento e conta pagadora conforme o cartão; não desconta o saldo bancário até a baixa.
+- **Proteção contra duplicidade:** uma competência não aceita simultaneamente saldo importado e compras individuais. Edição de valor de fatura consolidada mantém a origem e não multiplica títulos; faturas com baixas existentes exigem estorno antes de mudar valores ou excluir.
+- **Categorias:** preservada a lista alta com Serviços priorizado e abertura automática já implementada em 2.7.7; o nome de categoria reservado `Fatura de cartão` deixa de aparecer entre as despesas avulsas no formulário geral, evitando registro acidental de uma segunda despesa. Categorias das compras permanecem independentes da obrigação de pagamento da fatura.
+- **Validação técnica preliminar:** testes de cenários com as funções financeiras reais em V8 (criação, vencimento, duplicidade, edição, baixa parcial e valor de limite), além de validação real de `store.validateDatabase` para documento com fatura importada e baixa parcial. Não equivalem à execução integral nativa da suíte Node.
+- **Pendente para homologar:** executar `node gbplus/scripts/homologar-local.mjs`, comprovar telas e navegação no Android/PWA e conferir gravação online em usuário de testes. O `version.json` permanece em 2.7.8 até a aprovação, para não declarar publicação antecipada. Ver `PLANO-2.8.0-FATURAS.md`.
+
+
 ## [2.7.8 — CORREÇÃO DE RODAPÉ APÓS VOLTAR DA REVISÃO] — 2026-11-07
 
 **Hotfix de navegação:** após avançar pela terceira etapa para a prévia final, o botão Voltar restaurava apenas o `<form>`, mas os três conjuntos de botões Próximo/Voltar/Revisar haviam sido movidos para fora dele, para o rodapé fixo. Assim, a cópia destinada à volta não incluía a navegação e ela desaparecia.
