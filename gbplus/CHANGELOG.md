@@ -1,5 +1,16 @@
 # CHANGELOG — GB+ Gestão Financeira
 
+## [2.8.6 — AMPLIAÇÃO DA BIBLIOTECA DE APLICATIVOS E ÍCONES (CANDIDATA; NÃO PUBLICADA)] — 2026-11-08
+
+**Solicitação:** ampliar o catálogo de aplicativos usados para identificar despesas e substituir identificações genéricas por símbolos públicos confiáveis onde possível. O responsável informou que a versão 2.8.5 estava homologada; isso não constitui homologação antecipada das alterações 2.8.6.
+
+- **Catálogo:** 26 → **49 serviços**, com IDs antigos preservados e novos grupos Redes sociais e comunicação, Games e entretenimento e Compras e pagamentos. Disponibilizados YouTube, Twitch, SoundCloud, Bandcamp, Google Drive, Dropbox, Slack, Trello, Figma, GitHub, Discord, Patreon, Instagram, TikTok, WhatsApp, Telegram, Facebook, X, Steam, PlayStation, Xbox, Amazon e PayPal.
+- **Logotipos:** 13 símbolos Simple Icons existentes permanecem locais; incorporados 26 mapeamentos Font Awesome Free Brands (23 novos e YouTube Premium, Google One, Microsoft 365), totalizando **39 serviços com vetor local**. As 10 marcas sem arquivo fiel confirmado usam monogramas legíveis, sem tentativa de fabricar uma marca.
+- **Privacidade e offline:** somente SVG paths incorporados aos módulos, sem novas consultas de imagem/CDN no aplicativo. Dimensões originais preservadas via viewBox. Fontes e licenças em `SERVICE-ICON-SOURCES.md`.
+- **Compatibilidade:** seletor expansível, pesquisa, personalização, nomes de serviço, receitas, saldos, cartões, faturas e dados existentes não alterados. Sem cobranças ou novos lançamentos automáticos.
+- **Cache:** módulos dependentes, identificador da página e shell PWA preparados para a candidata. `version.json` indica expressamente `candidate_not_published` e não inventa data de publicação.
+- **Testes:** regressões de catálogo e seletor atualizadas para 49 serviços, integridade de IDs, ícones locais e fallbacks. Verificações de integração Android/PWA, Supabase e aceite visual ainda necessários para homologar e publicar. Não atribuir status “homologado” sem evidência da 2.8.6.
+
 ## [2.8.5 — BOTÃO DE TEMA SIMPLES, SOL E LUA (LIBERAÇÃO WEB PARA TESTE; HOMOLOGAÇÃO PARCIAL)] — 2026-11-08
 
 **Motivo:** o usuário rejeitou a aparência e o funcionamento do seletor Liquid Glass que continuava visualmente inadequado no PWA Android. Solicitou retirar completamente o controle e substituí-lo por uma flag normal, com sol/lua simples de biblioteca. A versão foi preparada para ser publicada e testada no celular.
