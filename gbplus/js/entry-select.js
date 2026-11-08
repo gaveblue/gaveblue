@@ -1,6 +1,6 @@
 import {esc,icon} from './ui.js?v=20261104-42';
 import {gbIcon,gbOptionIcon} from './gb-icons.js?v=20261104-42';
-import {serviceCategoryPreviewMarkup} from './service-ui.js?v=20261108-2861';
+import {serviceCategoryPreviewMarkup} from './service-ui.js?v=20261108-2864';
 
 // A11y-friendly visual dropdown. An actual form select remains out of sight
 // only as the data carrier, so existing FormData and change handlers stay intact.
