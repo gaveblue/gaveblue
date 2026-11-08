@@ -1,0 +1,48 @@
+/* GB+ 2.8.2 — ajustes visuais isolados; não mexe em regras financeiras. */
+/* O usuário continua rolando os bancos horizontalmente; só o trilho desaparece. */
+.gb-balance-accounts{scrollbar-width:none!important;-ms-overflow-style:none;overflow-x:auto!important}
+.gb-balance-accounts::-webkit-scrollbar{display:none!important;width:0!important;height:0!important}
+.gb-category-expand-btn{align-self:flex-start;border:0;background:transparent;color:var(--ink);font-size:11px;font-weight:650;padding:7px 0;cursor:pointer}
+.gb-category-expand-btn:hover{text-decoration:underline}
+.gb-category-icon-filter-label{display:block;font-size:11px;color:var(--muted);margin:9px 0 6px}
+.gb-category-icon-filter{display:block;width:100%;min-height:41px;border-radius:11px;background:var(--surface);border:1px solid var(--border);color:var(--ink);padding:10px 12px;font:inherit;font-size:12px;margin-bottom:12px}
+.gb-category-icon-grid{max-height:300px;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;grid-template-columns:repeat(5,minmax(0,1fr))}
+.gb-category-icon-choice[hidden]{display:none!important}
+.gb-top-theme-frame{display:block;width:clamp(99px,27vw,122px);height:65px;min-width:99px;flex:0 0 auto;border:0;background:transparent;overflow:hidden;border-radius:26px}
+.top-actions .avatar,.top-actions .account-button{display:none!important}
+@media(max-width:760px){
+ .top-actions{gap:7px}
+ .top-actions .gb-top-theme-frame{width:clamp(96px,26vw,116px);height:63px}
+ .topbar{min-height:76px}
+}
+.gb-alerts-intro{display:flex;align-items:center;gap:12px;border:1px solid var(--border);background:var(--surface);border-radius:17px;padding:18px;margin:12px 0 14px}
+.gb-alerts-intro>span{width:39px;height:39px;border-radius:13px;display:grid;place-items:center;background:color-mix(in srgb,#8aa8fa 13%,var(--surface));color:#5b83e0;flex:none}
+.gb-alerts-intro .icon{width:20px;height:20px}
+.gb-alerts-intro>div{display:flex;flex-direction:column;gap:5px;min-width:0}
+.gb-alerts-intro strong{font-size:14px}
+.gb-alerts-intro small{font-size:11px;color:var(--muted);line-height:1.5}
+.gb-alerts-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-bottom:23px}
+.gb-alerts-stats span{padding:13px 5px;border:1px solid var(--border);border-radius:13px;text-align:center;font-size:11px;color:var(--muted);background:var(--surface)}
+.gb-alerts-group{margin:20px 0}
+.gb-alerts-group h2{font-size:12px;display:flex;align-items:center;gap:9px;color:var(--ink);margin:0 3px 11px}
+.gb-alerts-group h2 .icon{width:18px;height:18px;color:var(--muted)}
+.gb-alerts-group h2 small{margin-left:auto;font-size:12px;color:var(--muted)}
+.gb-alerts-list{overflow:hidden;border:1px solid var(--border);border-radius:17px;background:var(--surface)}
+.gb-alert-row{display:flex;align-items:center;gap:12px;padding:15px;border:0;background:none;text-align:left;width:100%;color:var(--ink);min-height:72px}
+.gb-alert-row+.gb-alert-row{border-top:1px solid var(--border)}
+.gb-alert-row:hover,.gb-alert-row:focus-visible{background:var(--hover)}
+.gb-alert-row:focus-visible{outline:2px solid #8ea9ef;outline-offset:-2px}
+.gb-alert-row-icon{flex:0 0 33px;width:33px;height:33px;border-radius:11px;display:grid;place-items:center;background:var(--soft)}
+.gb-alert-row-icon .icon{width:17px;height:17px}
+.gb-alert-row-content{display:flex;flex-direction:column;min-width:0;gap:5px;flex:1}
+.gb-alert-row-content strong{font-size:12px;overflow-wrap:anywhere}
+.gb-alert-row-content small{font-size:10px;color:var(--muted);line-height:1.4}
+.gb-alert-row-value{white-space:nowrap;font-size:12px;font-weight:700}
+.gb-alerts-empty,.gb-alerts-disabled{font-size:12px;line-height:1.65;color:var(--muted);padding:19px;border:1px solid var(--border);border-radius:16px;background:var(--surface)}
+.gb-alerts-disclaimer{font-size:11px;line-height:1.6;color:var(--muted);margin:22px 4px 30px}
+.gb-notification-config .gb-notification-toggle{display:flex;align-items:center;gap:11px;padding:12px 0;border-bottom:1px solid var(--border);font-size:13px}
+.gb-notification-config .gb-notification-toggle input{accent-color:var(--ink);width:18px;height:18px;flex:none}
+.gb-notification-config label.gb-notification-select{display:block;color:var(--muted);font-size:12px;margin-top:16px}
+.gb-notification-config select{display:block;width:100%;border:1px solid var(--border);border-radius:11px;padding:11px;background:var(--surface);color:var(--ink);margin-top:7px}
+.gb-notification-config .form-hint{line-height:1.6;margin:18px 0}
+@media(max-width:420px){.gb-alert-row-value{font-size:11px}.gb-alert-row{padding:12px;gap:8px}.gb-category-icon-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
