@@ -33,6 +33,6 @@ assert.match(toggle,/gbplus:theme-change/,'O toggle deve emitir evento de tema')
 assert.match(toggle,/window\.parent\.postMessage/,'O toggle deve comunicar o tema ao aplicativo');
 assert.match(toggle,/setOrbit\(p\)/,'A faixa orbital aprovada deve continuar ativa');
 assert.match(toggle,/reflectState\(initialLight\)/,'O seletor deve iniciar no tema já salvo');
-assert.match(changelog,/Interfaces aprovadas — implementação iniciada em 08\/11\/2026/,'Atualização precisa ser documentada');
-assert.match(page,/gbplus-version" content="2\.7\.8"/,'A candidata não pode anunciar liberação sem homologação');
+assert.match(changelog,/Interfaces aprovadas — incluídas na 2\.8\.0 em 08\/11\/2026/,'Atualização precisa ser documentada');
+assert.match(page,/gbplus-version" content="2\.8\.0"/,'A versão autorizada precisa anunciar 2.8.0');
 console.log('Liquid Glass 2.8.0: integração estática verificada (22 asserções).');
