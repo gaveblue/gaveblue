@@ -52,22 +52,78 @@ let bankImportDraft=null; // Memory-only preview; released on modal close.
 
 const state={route:'dashboard',accountCardsTab:'accounts',period:'all',range:{},query:'',status:'',type:'',partner:'',category:'',partnerQuery:'',granularity:'month',flowChartMode:'bars',flowStatus:'all',report:'payable',reportPartner:'',moreFilters:false,launchSelected:[],launchStatusOpen:false,launchSearchOpen:false};
 const modal=document.querySelector('#modal');
-  // O seletor aprovado fica no cabeçalho. Somente esse iframe pode trocar o tema.
-  let gbLiquidThemeTimer=null;
+  // Somente o seletor Liquid Glass do cabeçalho pode pré-visualizar e salvar.
+  // O progresso altera APENAS CSS: nenhuma escrita financeira ou de preferência
+  // acontece durante o arrasto. O tema persistente é salvo após a soltura.
+  let gbLiquidThemeTimer=null,gbLiquidPreviewTimeout=null;
+  function clearLiquidThemePreview(){
+    clearTimeout(gbLiquidPreviewTimeout);
+    gbLiquidPreviewTimeout=null;
+    const root=document.documentElement;
+    root.classList.remove('gb-theme-preview');
+    root.style.removeProperty('--gb-theme-day-share');
+    root.style.removeProperty('--gb-theme-day-progress');
+    root.style.removeProperty('--gb-theme-text-day-share');
+  }
+  function scrubLiquidTheme(progress){
+    if(!Number.isFinite(progress)||progress<0||progress>1)return;
+    const root=document.documentElement;
+    root.style.setProperty('--gb-theme-day-share',(progress*100).toFixed(2)+'%');
+    root.style.setProperty('--gb-theme-day-progress',progress.toFixed(4));
+    // Prevent grey-on-grey text at 50%; backgrounds still interpolate linearly.
+    root.style.setProperty('--gb-theme-text-day-share',progress>=.5?'100%':'0%');
+    root.classList.add('gb-theme-preview');
+    clearTimeout(gbLiquidPreviewTimeout);
+    // Safety fallback if the iframe reloads or closes mid-gesture.
+    gbLiquidPreviewTimeout=setTimeout(clearLiquidThemePreview,6000);
+  }
   window.addEventListener('message',event=>{
-    if(event.origin!==location.origin||event.data?.type!=='gbplus:liquid-theme')return;
+    if(event.origin!==location.origin)return;
     const frame=document.querySelector('#gb-top-theme-frame');
-    if(!frame||frame.contentWindow!==event.source||!db||busy)return;
-    const theme=event.data.theme;
+    if(!frame||frame.contentWindow!==event.source||!db)return;
+    const data=event.data;
+    if(data?.type==='gbplus:liquid-theme-progress'){
+      if(!Number.isFinite(data.progress)||data.progress<0||data.progress>1)return;
+      // A new drag cancels an older uncommitted selection.
+      if(data.phase==='drag'&&gbLiquidThemeTimer!==null){
+        clearTimeout(gbLiquidThemeTimer);
+        gbLiquidThemeTimer=null;
+      }
+      scrubLiquidTheme(data.progress);
+      return;
+    }
+    if(data?.type==='gbplus:liquid-theme-settled'){
+      if(data.theme!=='light'&&data.theme!=='dark')return;
+      if(gbLiquidThemeTimer===null && !busy && db.settings.theme===data.theme)
+        clearLiquidThemePreview();
+      return;
+    }
+    if(data?.type!=='gbplus:liquid-theme'||busy)return;
+    const theme=data.theme;
     if(theme!=='light'&&theme!=='dark')return;
     clearTimeout(gbLiquidThemeTimer);
     gbLiquidThemeTimer=null;
-    if(db.settings.theme===theme)return;
+    if(db.settings.theme===theme)return; // settled event removes preview
     const wait=window.matchMedia('(prefers-reduced-motion: reduce)').matches?0:620;
-    gbLiquidThemeTimer=setTimeout(()=>{
+    gbLiquidThemeTimer=setTimeout(async()=>{
       gbLiquidThemeTimer=null;
-      if(!frame.isConnected||document.querySelector('#gb-top-theme-frame')!==frame)return;
-      void commit(d=>{d.settings.theme=theme;},'Tema atualizado.').catch(error=>toast(error?.message||'Não foi possível salvar o tema.'));
+      if(!frame.isConnected||document.querySelector('#gb-top-theme-frame')!==frame){
+        clearLiquidThemePreview();
+        return;
+      }
+      if(db.settings.theme===theme){clearLiquidThemePreview();return;}
+      const previousTheme=db.settings.theme;
+      // Prevent render() from reloading the iframe that is still springing.
+      frame.dataset.theme=theme;
+      try{
+        await commit(d=>{d.settings.theme=theme;},'Tema atualizado.');
+      }catch(error){
+        frame.dataset.theme=previousTheme;
+        frame.src='./lab/liquid-theme-toggle.html?embed=1&compact=1&v=20261108-2832&theme='+encodeURIComponent(previousTheme);
+        toast(error?.message||'Não foi possível salvar o tema.');
+      }finally{
+        clearLiquidThemePreview();
+      }
     },wait);
   });
 
@@ -241,7 +297,7 @@ if(topGlass){
   const currentTheme=db.settings.theme==='dark'?'dark':'light';
   if(topGlass.dataset.theme!==currentTheme){
     topGlass.dataset.theme=currentTheme;
-    topGlass.src='./lab/liquid-theme-toggle.html?embed=1&compact=1&theme='+encodeURIComponent(currentTheme);
+    topGlass.src='./lab/liquid-theme-toggle.html?embed=1&compact=1&v=20261108-2832&theme='+encodeURIComponent(currentTheme);
   }
 }
 const gbMobileNav=document.querySelector('#mobile-navigation');

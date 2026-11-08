@@ -8,11 +8,14 @@
 .gb-category-icon-filter{display:block;width:100%;min-height:41px;border-radius:11px;background:var(--surface);border:1px solid var(--border);color:var(--ink);padding:10px 12px;font:inherit;font-size:12px;margin-bottom:12px}
 .gb-category-icon-grid{max-height:300px;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;grid-template-columns:repeat(5,minmax(0,1fr))}
 .gb-category-icon-choice[hidden]{display:none!important}
-.gb-top-theme-frame{display:block;width:clamp(99px,27vw,122px);height:65px;min-width:99px;flex:0 0 auto;border:0;background:transparent;overflow:hidden;border-radius:26px}
+/* 2.8.3: glass control should look as light as the surrounding header. */
+.gb-top-theme-frame{display:block;width:clamp(96px,26vw,118px);height:59px;min-width:96px;flex:0 0 auto;border:0;background:transparent;overflow:hidden;border-radius:24px}
+html[data-theme="light"] .gb-top-theme-frame{color-scheme:light}
+html[data-theme="dark"] .gb-top-theme-frame{color-scheme:dark}
 .top-actions .avatar,.top-actions .account-button{display:none!important}
 @media(max-width:760px){
  .top-actions{gap:7px}
- .top-actions .gb-top-theme-frame{width:clamp(96px,26vw,116px);height:63px}
+ .top-actions .gb-top-theme-frame{width:clamp(96px,26vw,114px);height:59px}
  .topbar{min-height:76px}
 }
 .gb-alerts-intro{display:flex;align-items:center;gap:12px;border:1px solid var(--border);background:var(--surface);border-radius:17px;padding:18px;margin:12px 0 14px}
@@ -56,3 +59,40 @@
 .gb-more-profile-symbol .icon{width:24px;height:24px}
 .gb-more-profile:hover,.gb-more-profile:focus-visible{background:var(--hover)}
 .gb-more-profile:focus-visible{outline:2px solid #8b9fed;outline-offset:2px}
+
+/* GB+ 2.8.3 · Live Liquid Glass drag scrub.
+   Only active while dragging/springing. Percentage values originate from the
+   compact theme iframe; the persisted theme remains untouched until release.
+   color-mix is supported by current Chromium / Android WebView browsers. */
+:root[data-theme].gb-theme-preview{
+  --bg:color-mix(in srgb,#f6f6f8 var(--gb-theme-day-share,100%),#111214);
+  --surface:color-mix(in srgb,#ffffff var(--gb-theme-day-share,100%),#1b1c1f);
+  --soft:color-mix(in srgb,#f7f7f9 var(--gb-theme-day-share,100%),#222327);
+  /* Readable text switches contrast near halfway; backgrounds keep scrubbing smoothly. */
+  --ink:color-mix(in srgb,#19191c var(--gb-theme-text-day-share,100%),#f2f2f4);
+  --muted:color-mix(in srgb,#4a4a52 var(--gb-theme-text-day-share,100%),#f0f0f3);
+  --subtle:color-mix(in srgb,#666670 var(--gb-theme-text-day-share,100%),#dedee6);
+  --border:color-mix(in srgb,#eaeaec var(--gb-theme-day-share,100%),#303136);
+  --hover:color-mix(in srgb,#efeff2 var(--gb-theme-day-share,100%),#303136);
+  --inverse:color-mix(in srgb,#ffffff var(--gb-theme-day-share,100%),#171719);
+  --glass:color-mix(in srgb,#ffffffc9 var(--gb-theme-day-share,100%),#1b1c1fce);
+  --shadow:0 3px 8px rgb(21 21 32 / calc(var(--gb-theme-day-progress,1) * .025));
+  color:var(--ink);
+  background-color:var(--bg)!important;
+}
+html.gb-theme-preview body{background-color:var(--bg)!important;color:var(--ink)}
+@media(max-width:760px){
+  html.gb-theme-preview body::after{background-color:var(--bg)!important}
+  html.gb-theme-preview body:not(.auth-locked) .mobile-nav.gb-liquid-nav{
+    background:linear-gradient(138deg,
+      color-mix(in srgb,rgba(255,255,255,.88) var(--gb-theme-day-share,100%),rgba(59,65,82,.8)),
+      color-mix(in srgb,rgba(244,247,254,.66) var(--gb-theme-day-share,100%),rgba(26,30,41,.78)));
+    border-color:color-mix(in srgb,rgba(255,255,255,.91) var(--gb-theme-day-share,100%),rgba(223,233,255,.24));
+  }
+  html.gb-theme-preview body:not(.auth-locked) .mobile-nav.gb-liquid-nav::before{
+    background:linear-gradient(142deg,
+      color-mix(in srgb,rgba(255,255,255,.92) var(--gb-theme-day-share,100%),rgba(143,161,209,.33)),
+      color-mix(in srgb,rgba(193,208,241,.4) var(--gb-theme-day-share,100%),rgba(64,76,105,.49)));
+  }
+  html.gb-theme-preview .mobile-nav.gb-liquid-nav>a.active{color:var(--ink)}
+}

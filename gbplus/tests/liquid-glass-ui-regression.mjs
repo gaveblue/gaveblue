@@ -14,7 +14,7 @@ const page=read('index.html');
 const changelog=read('CHANGELOG.md');
 
 assert.match(page,/\.\/liquid-glass\.css\?v=20261108-2811/,'A folha Liquid Glass precisa estar carregada');
-assert.match(page,/js\/app\.js\?v=20261108-2821/,'O app precisa usar cache da candidata');
+assert.match(page,/js\/app\.js\?v=20261108-2832/,'O app precisa usar cache da candidata');
 assert.match(app,/const slots=\[\['dashboard','Início','home'\],renderMobileShortcut\(custom\[0\]\),\['new','Novo','plus'\],renderMobileShortcut\(custom\[1\]\),renderMobileShortcut\(custom\[2\]\)\]/,'Atalhos fixos/personalizáveis devem permanecer');
 assert.match(app,/gbMobileNav\.classList\.add\('gb-liquid-nav'\)/,'A navegação precisa ativar a lente');
 assert.match(app,/nav\.style\.setProperty\('--gb-liquid-left'/,'A lente precisa acompanhar a aba real');
@@ -35,5 +35,5 @@ assert.match(toggle,/setOrbit\(p\)/,'A faixa orbital aprovada deve continuar ati
 assert.match(toggle,/reflectState\(initialLight\)/,'O seletor deve iniciar no tema já salvo');
 assert.match(toggle,/canSendTheme=true/,'A inicialização não deve enviar comando de tema ao aplicativo');
 assert.match(changelog,/Interfaces aprovadas — incluídas na 2\.8\.0 em 08\/11\/2026/,'Atualização precisa ser documentada');
-assert.match(page,/gbplus-version" content="2\.8\.2"/,'A versão autorizada precisa anunciar 2.8.2');
+assert.match(page,/gbplus-version" content="2\.8\.3"/,'A versão autorizada precisa anunciar 2.8.3');
 console.log('Liquid Glass 2.8.2: regressão de 23 asserções após alinhamento dos ícones.');
