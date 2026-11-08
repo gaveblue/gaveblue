@@ -3,7 +3,7 @@ import {bankImportMarkup,bankImportHistoryMarkup,bankImportFilteredRows,bankImpo
 import {reviewSelection,applyReconciliationBatch,undoReconciliationBatch,reconciliationRecordKey,knownReconciliationKeys} from './bank-reconciliation.js?v=20261106-2505';
 import {filterFlowRows} from './gb-flow-filters.js?v=20261106-68';
 import {uid,today,money,dateLabel,cents,addMonths,validDate,generateTitles,addPayment,transfer,updateTitle,pending,accountBalance,flow,within} from './domain.js?v=20261105-72';
-import {KEY,INDICATORS,defaultPanel,parseBackup,backupText,MOBILE_SHORTCUTS,defaultMobileNav,effectiveMobileNav,validMobileNav,shouldOfferSetup} from './store.js?v=20261108-2821';
+import {KEY,INDICATORS,defaultPanel,parseBackup,backupText,MOBILE_SHORTCUTS,defaultMobileNav,effectiveMobileNav,validMobileNav,shouldOfferSetup} from './store.js?v=20261108-2861';
 import {esc,icon,button,field,select,formFooter,download,csv,titleTable} from './ui.js?v=20261105-72';
 import {routes,dashboard,titlesView,partnersView,categoriesView,flowView,reportsView,settingsView,notificationsView,filteredTitles,reportData} from './views.js?v=20261108-2851';
 import {moreView} from './more-view.js?v=20261108-2811';
