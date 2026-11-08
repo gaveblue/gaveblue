@@ -179,6 +179,7 @@ export function settingsView(db,canInstall,online=false,user=null,installed=fals
  const administration=online&&user?.id==='aa9701df-8e84-42cc-b2bd-4b644a983260'&&user?.app_metadata?.gbplus_admin===true
   ?cfgSection('ADMINISTRAÇÃO',`<a href="./admin.html" class="gb-cfg-row" data-settings-keywords="painel administrativo usuários perfis gerenciar"><span class="gb-cfg-row-icon tone-purple">${icon('shield')}</span><span class="gb-cfg-row-label"><strong>Painel administrativo</strong><small>Gerenciar usuários e perfis do GB+</small></span><span class="gb-cfg-next">${icon('chevron')}</span></a>`):'';
  const preferences=cfgSection('PREFERÊNCIAS',
+  `<a href="./email-preferencias.html" class="gb-cfg-row" data-settings-keywords="e-mail marketing consentimento privacidade"><span class="gb-cfg-row-icon tone-blue">${icon('bell')}</span><span class="gb-cfg-row-label"><strong>Preferências de e-mail</strong><small>Escolha se deseja receber novidades e ofertas</small></span><span class="gb-cfg-next">${icon('chevron')}</span></a>`+
   cfgOption('Aparência','Escolha entre modo claro e escuro','palette','purple','settings-appearance')+
   cfgOption('Avisos de vencimento','Escolha prazos e tipos de lembretes','bell','orange','notification-preferences')+
   cfgOption('Personalizar painel','Escolha e organize os cards do início','grid','blue','customize')+

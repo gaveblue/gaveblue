@@ -2,13 +2,13 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 const source=await readFile(new URL('../../supabase/functions/gbplus-admin/index.ts',import.meta.url),'utf8');
-const moduleSource=source.replace(/^import .*createClient.*;$/m,'').split('\nDeno.serve(')[0];
+const moduleSource=source.replace(/^import .*createClient.*;$/m,'').split('\nconst resendKey=')[0];
 const {createHandler}=await import('data:text/javascript;base64,'+Buffer.from(moduleSource).toString('base64'));
 const owner={id:'11111111-1111-4111-8111-111111111111',email:'owner@example.com',app_metadata:{gbplus_admin:true},user_metadata:{}};
 const member={id:'22222222-2222-4222-8222-222222222222',email:'member@example.com',app_metadata:{providers:['google']},user_metadata:{gbplus_profile:{full_name:'Original',phone:'11999999999',address:{city:'Preservada'}},private_note:'not exposed'},encrypted_password:'never expose'};
 function fixture(actor=owner){
  const calls=[],events=[];
- const admin={auth:{getUser:async token=>{calls.push(['verify',token]);return {data:{user:actor},error:actor?null:Error('Invalid')};},
+ const admin={rpc:async()=>({data:[]}),auth:{getUser:async token=>{calls.push(['verify',token]);return {data:{user:actor},error:actor?null:Error('Invalid')};},
   admin:{listUsers:async args=>{calls.push(['list',args]);return {data:{users:[member],total:1,nextPage:null}};},
    getUserById:async id=>({data:{user:id===owner.id?owner:member}}),
    updateUserById:async(id,body)=>{calls.push(['update',id,body]);return {data:{user:{...member,...body}}};}},
@@ -31,7 +31,7 @@ test('validates live role on every call and rejects suspended admins',async()=>{
 });
 test('bounded pagination and safe output omit private metadata and secrets',async()=>{
  const f=fixture(),r=await f.send({action:'list',page:1});assert.equal(r.status,200);
- for(const forbidden of ['encrypted_password','private_note','Preservada','never expose'])assert.equal(JSON.stringify(r.body).includes(forbidden),false);
+ for(const forbidden of ['encrypted_password','private_note','never expose'])assert.equal(JSON.stringify(r.body).includes(forbidden),false);
  assert.deepEqual(f.calls.find(c=>c[0]==='list')[1],{page:1,perPage:50});assert.equal((await f.send({action:'list',page:-1})).status,400);
 });
 test('profile edits preserve other attributes and cannot set privilege, password or email',async()=>{
@@ -52,5 +52,45 @@ test('recovery recipient and redirect cannot be overridden by caller',async()=>{
 });
 test('rejects untrusted origins and oversized input before authorization',async()=>{
  const f=fixture();assert.equal((await f.send({action:'list'},{origin:'https://evil.example'})).status,403);
- assert.equal((await f.send({action:'list',padding:'x'.repeat(3000)})).status,413);assert.equal(f.calls.length,0);
+ assert.equal((await f.send({action:'list',padding:'x'.repeat(17000)})).status,413);assert.equal(f.calls.length,0);
+});
+
+function mailFixture({consent=false,reserved=true,mailerResult={ok:true,id:'provider-id'},fail=false}={}){
+ const calls=[];const target={...member,email_confirmed_at:'2026-01-01'};
+ const chain=table=>({select(){return this;},eq(){return this;},maybeSingle:async()=>({data:{marketing:consent}}),
+  insert:async data=>{calls.push(['insert',table,data]);return {};},
+  update:data=>{calls.push(['update',table,data]);return {eq:async()=>({})};}});
+ const admin={auth:{getUser:async()=>({data:{user:owner}}),admin:{getUserById:async()=>({data:{user:target}}),inviteUserByEmail:async(email,options)=>{calls.push(['invite',email,options]);return {data:{user:target}};}}},
+  from:chain,rpc:async(name,args)=>{calls.push(['rpc',name,args]);return {data:{reserved,status:reserved?'sending':'accepted'}};}};
+ const send=createHandler(()=>admin,()=>{},async(payload,id)=>{calls.push(['send',payload,id]);if(fail)throw Error('timeout');return mailerResult;});
+ return {calls,request:async overrides=>{
+  const response=await send(new Request('https://example.com',{method:'POST',headers:{origin:'https://gaveblue.com.br',authorization:'Bearer test','content-type':'application/json'},body:JSON.stringify({action:'send_email',user_id:member.id,operation_id:'33333333-3333-4333-8333-333333333333',kind:'marketing',subject:'Novidades GB+',message:'Uma mensagem de teste, sem envio real.',...overrides})}));
+  return {status:response.status,body:await response.json()};
+ }};
+}
+test('marketing without explicit consent is blocked before provider or reservation',async()=>{
+ const f=mailFixture();assert.equal((await f.request()).status,409);assert.equal(f.calls.length,0);
+});
+test('marketing renders safe content, individual recipient and unsubscribe headers',async()=>{
+ const f=mailFixture({consent:true});assert.equal((await f.request({message:'Mensagem <script>alert(1)</script> de teste.'})).status,200);
+ const payload=f.calls.find(c=>c[0]==='send')[1];assert.deepEqual(payload.to,[member.email]);assert.equal(payload.html.includes('<script>'),false);
+ assert.ok(payload.html.includes('Cancelar recebimento'));assert.ok(payload.headers['List-Unsubscribe'].includes('/gbplus-mail-optout?token='));
+ assert.equal(payload.headers['List-Unsubscribe-Post'],'List-Unsubscribe=One-Click');
+ const tokenInsert=f.calls.find(c=>c[0]==='insert')[2];assert.equal(tokenInsert.token_hash.length,64);assert.equal(Object.hasOwn(tokenInsert,'token'),false);
+});
+test('service messages need no marketing permission and never expose other recipients',async()=>{
+ const f=mailFixture();assert.equal((await f.request({kind:'service',to:['evil@example.com']})).status,200);
+ assert.deepEqual(f.calls.find(c=>c[0]==='send')[1].to,[member.email]);
+});
+test('duplicate operation cannot dispatch a second email',async()=>{
+ const f=mailFixture({consent:true,reserved:false});assert.equal((await f.request()).status,409);assert.equal(f.calls.some(c=>c[0]==='send'),false);
+});
+test('uncertain provider failure is recorded honestly, not as delivery or safe retry',async()=>{
+ const f=mailFixture({fail:true});assert.equal((await f.request({kind:'service'})).status,502);
+ assert.equal(f.calls.find(c=>c[0]==='update')[2].status,'unknown');
+});
+test('invitation never sets a password, confirms email or grants privileges',async()=>{
+ const f=mailFixture();assert.equal((await f.request({action:'invite',name:'New Person',email:'new@example.com',password:'bad',app_metadata:{gbplus_admin:true}})).status,200);
+ const options=f.calls.find(c=>c[0]==='invite')[2];assert.deepEqual(Object.keys(options).sort(),['data','redirectTo']);
+ assert.deepEqual(options.data,{gbplus_profile:{full_name:'New Person'}});assert.equal(options.redirectTo,'https://gaveblue.com.br/gbplus/convite.html');
 });

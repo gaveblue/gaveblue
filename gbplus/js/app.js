@@ -5,7 +5,7 @@ import {filterFlowRows} from './gb-flow-filters.js?v=20261106-68';
 import {uid,today,money,dateLabel,cents,addMonths,validDate,generateTitles,addPayment,transfer,updateTitle,pending,accountBalance,flow,within} from './domain.js?v=20261105-72';
 import {KEY,INDICATORS,defaultPanel,parseBackup,backupText,MOBILE_SHORTCUTS,defaultMobileNav,effectiveMobileNav,validMobileNav,shouldOfferSetup} from './store.js?v=20261108-2821';
 import {esc,icon,button,field,select,formFooter,download,csv,titleTable} from './ui.js?v=20261105-72';
-import {routes,dashboard,titlesView,partnersView,categoriesView,flowView,reportsView,settingsView,notificationsView,filteredTitles,reportData} from './views.js?v=20261108-2851';
+import {routes,dashboard,titlesView,partnersView,categoriesView,flowView,reportsView,settingsView,notificationsView,filteredTitles,reportData} from './views.js?v=20261108-2851-admin2';
 import {moreView} from './more-view.js?v=20261108-2811';
 import {accountsCardsView} from './accounts-cards-view.js?v=20261108-2811';
 import {renderReactCharts,unmountReactCharts} from './gb-react-loader.js?v=20261105-45';
@@ -1698,6 +1698,7 @@ async function init(){
   document.querySelector('#auth-gate').hidden=true;
   document.body.classList.remove('auth-locked');
   document.documentElement.removeAttribute('data-boot');
+  import('./activity.js?v=20261107-admin2').then(({startActivity})=>startActivity(authClient(),currentUser)).catch(()=>{});
   route();window.dispatchEvent(new Event('gbplus-ai-ready'));
   if(shouldOfferSetup(db))startSetupWizard();
   pwaReady=true;

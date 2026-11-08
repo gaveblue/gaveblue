@@ -5,6 +5,10 @@ verify_jwt = true
 [functions.gbplus-admin]
 verify_jwt = true
 
+# Public unsubscribe endpoint: validates a random single-purpose token.
+[functions.gbplus-mail-optout]
+verify_jwt = false
+
 [functions.platform-admin]
 verify_jwt = false
 
