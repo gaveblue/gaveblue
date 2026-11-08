@@ -15,7 +15,7 @@ body:not(.auth-locked) .mobile-nav.gb-liquid-nav::before{
   border:1px solid rgba(255,255,255,.96);
   box-shadow:0 4px 14px rgba(37,55,96,.17),inset 0 1px 0 rgba(255,255,255,.95),inset 0 -2px 8px rgba(139,163,222,.12);
   -webkit-backdrop-filter:blur(9px) saturate(170%);backdrop-filter:blur(9px) saturate(170%);
-  transform:translate3d(calc(var(--gb-liquid-index,0) * 100%),0,0);
+  transform:translate3d(var(--gb-liquid-offset,0%),0,0);
   transition:transform 540ms cubic-bezier(.2,1.23,.3,1),opacity 200ms ease;
 }
 body:not(.auth-locked) .mobile-nav.gb-liquid-nav::after{
