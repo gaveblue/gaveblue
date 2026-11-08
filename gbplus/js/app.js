@@ -795,12 +795,14 @@ const actions={
   'edit-card-purchase':el=>{
    const purchase=cardPurchases(db).find(p=>p.id===el.dataset.id);
    if(!purchase)throw Error('Compra não encontrada.');
-   openModal('Editar compra no cartão',cardPurchaseForm(db,purchase.cardId,purchase));
+   openModal(purchase.source==='invoice-balance'?'Editar saldo da fatura':'Editar compra no cartão',cardPurchaseForm(db,purchase.cardId,purchase));
   },
   'delete-card-purchase':el=>{
    const purchase=cardPurchases(db).find(x=>x.id===el.dataset.id);
    if(!purchase)throw Error('Compra não encontrada.');
-   confirm('Excluir compra do cartão?','A compra de '+money(purchase.amount)+' será removida da fatura correspondente. Se for parcelada, todas as parcelas serão removidas. Não é possível excluir compras de faturas que já tiveram pagamento.',()=>commit(d=>removeCardPurchase(d,purchase.id),'Compra removida e faturas atualizadas.'));
+   confirm(purchase.source==='invoice-balance'?'Excluir saldo da fatura?':'Excluir compra do cartão?',
+    (purchase.source==='invoice-balance'?'O saldo consolidado de '+money(purchase.amount)+' e sua fatura serão removidos.':'A compra de '+money(purchase.amount)+' será removida da fatura correspondente. Se for parcelada, todas as parcelas serão removidas.')+' Não é possível excluir lançamentos de faturas que já tiveram pagamento.',
+    ()=>commit(d=>removeCardPurchase(d,purchase.id),'Compra removida e faturas atualizadas.'));
   },
   'forecast-period':el=>{
    const days=Number(el.dataset.value);
