@@ -39,7 +39,7 @@ export function cardsView(db,{embedded=false}={}){
  '<p class="gb-finance24-intro">Uma compra no cartão consome limite, mas não reduz o saldo da conta bancária. A fatura só reduz o saldo quando você registra a baixa do título.</p>'+
  (cards.length?'<div class="gb-credit-grid">'+cards.map(card=>{
   const bank=findBank(db,card.bankId),used=cardUsed(db,card.id),available=cardAvailable(db,card);
-  const related=purchases.filter(p=>p.cardId===card.id),invoices=db.titles.filter(t=>t.cardInvoice&&t.cardId===card.id)
+  const related=purchases.filter(p=>p.cardId===card.id&&p.source!=='invoice-balance'),invoices=db.titles.filter(t=>t.cardInvoice&&t.cardId===card.id)
    .sort((a,b)=>(pending(db,b)>0)-(pending(db,a)>0)||a.due.localeCompare(b.due));
   const upcomingCycle=cardCycle(today(),card.closingDay);
   const upcomingClose=upcomingCycle+'-'+String(card.closingDay).padStart(2,'0');
@@ -104,6 +104,20 @@ export function cardPurchaseForm(db,cardId='',purchase=null){
  const total=group.reduce((sum,p)=>sum+p.amount,0);
  const locked=group.some(p=>db.payments?.some(row=>row.titleId===p.invoiceId));
  const imported=purchase?.source==='invoice-balance';
+ if(imported){
+  const card=active.find(c=>c.id===purchase.cardId);
+  return '<form id="card-purchase-form" data-id="'+esc(purchase.id)+'">'+
+   '<input type="hidden" name="cardId" value="'+esc(purchase.cardId)+'">'+
+   '<input type="hidden" name="date" value="'+esc(purchase.date)+'">'+
+   '<input type="hidden" name="categoryId" value="'+esc(purchase.categoryId)+'">'+
+   '<input type="hidden" name="partnerId" value="">'+
+   '<input type="hidden" name="count" value="1">'+
+   '<div class="form-grid"><p class="full"><strong>'+esc(card?.name||'Cartão')+'</strong> · Competência '+esc(card?.closingDay?cardCycle(purchase.date,card.closingDay):'—')+'</p>'+
+    '<div class="full">'+field('Identificação da fatura','description',purchase.description,'text','required maxlength="300"')+'</div>'+
+    '<div class="full">'+field('Valor consolidado da fatura (R$)','amount',total/100,'number','required min="0.01" max="10000000000" step="0.01"')+'</div></div>'+
+   '<p class="form-hint">'+(locked?'Esta fatura já possui pagamento. Estorne todas as baixas antes de alterar o valor.':'O valor informado representa toda a fatura: não lance compras individuais nesta mesma competência.')+'</p>'+
+   formFooter('Salvar saldo da fatura')+'</form>';
+ }
  return '<form id="card-purchase-form" data-id="'+esc(purchase?.id||'')+'"><div class="form-grid">'+
   '<div class="full">'+select('Cartão utilizado','cardId',active.map(c=>[c.id,c.name+(c.active?'':' (inativo)')]),selected,'required')+'</div>'+
   '<div class="full">'+field(imported?'Descrição do saldo da fatura':'Descrição da despesa','description',purchase?.description||'','text','required maxlength="300" placeholder="Ex.: Compra no supermercado"')+'</div>'+
