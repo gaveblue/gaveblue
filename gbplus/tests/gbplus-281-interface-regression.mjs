@@ -13,19 +13,19 @@ test(page.includes('id="connection" class="connection" hidden'),'Status online n
 test(page.includes('id="gb-theme-toggle"')&&page.includes('data-action="top-theme"'),'Alternador sol/lua deve estar no cabeçalho');
 test(accounts.includes("finance-24-ui.js?v=20261108-2811"),'A tela Contas/Cartões deve carregar a nova versão do código de faturas');
 test(app.includes("accounts-cards-view.js?v=20261108-2811"),'A importação da tela Contas/Cartões deve ter cache invalidado');
-test(page.includes('./more-page.css?v=20261108-2811'),'A página Mais precisa carregar seu estilo');
+test(page.includes('./more-page.css?v=20261108-2863'),'A página Mais precisa carregar seu estilo');
 test(navStyle.includes('.top-actions .connection{display:none!important}'),'Conexão deve ficar oculta mesmo sob CSS anterior');
 test(navStyle.includes('left:var(--gb-liquid-left,6px)'),'A lente deve usar a posição real da aba');
 test(app.includes("next==='more'"),'Rota Mais deve ser reconhecida pelo roteador');
 test(app.includes("more:()=>moreView"),'A rota Mais deve renderizar um painel real');
-test(app.includes("key==='menu'?'more':key"),'Mais precisa ser link de página, não popup');
+test(app.includes("key==='menu'||key==='settings'?'more':key"),'Mais precisa ser link de página, não popup');
 test(!app.includes("'mobile-menu':()=>openModal('Seu financeiro'"),'Popup antigo não pode continuar em uso');
 
 const body=moreCode.replace(/^import[^\n]*\n/gm,'').replace(/^export /gm,'');
-const moreView=Function('esc','icon',body+';return moreView;')(s=>String(s),s=>'<i>'+s+'</i>');
-const moreHtml=moreView(true);
-test(moreHtml.includes('href="#cards"')&&moreHtml.includes('href="#settings"'),'Todas as principais funcionalidades devem estar listadas');
-test((moreHtml.match(/class="gb-more-row"/g)||[]).length===15&&moreHtml.includes('class="gb-more-profile"'),'Mais deve listar 15 destinos e Minha Conta destacada');
+const moreView=Function('esc','icon','settingsView',body+';return moreView;')(s=>String(s),s=>'<i>'+s+'</i>',()=>'<div class="gb-more-settings">Preferências e dados</div>');
+const moreHtml=moreView(true,{});
+test(moreHtml.includes('href="#cards"')&&!moreHtml.includes('href="#settings"')&&moreHtml.includes('gb-more-settings'),'Todas as principais funcionalidades devem estar listadas');
+test((moreHtml.match(/class="gb-more-row"/g)||[]).length===14&&moreHtml.includes('class="gb-more-profile"'),'Mais deve listar 14 destinos e Minha Conta destacada');
 test(moreStyle.includes('max-width:770px')&&moreStyle.includes('gb-more-list'),'A página Mais deve ter lista responsiva');
 
 const start=app.indexOf('function alignLiquidNavIndicator(){');
