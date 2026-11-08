@@ -250,7 +250,16 @@ gbMobileNav.innerHTML=(()=>{
     const active=isActive(key);
     return '<a href="#'+actual+'" class="'+(active?'active':'')+'" '+(active?'aria-current="page"':'')+'>'+icon(ico)+'<span>'+esc(label)+'</span></a>';
   }).join('');
-})();requestAnimationFrame(alignLiquidNavIndicator);const views={dashboard:()=>dashboard(db,state,!!currentUser(),currentUser()),more:()=>moreView(!!currentUser(),db,currentUser(),isInstalledApp()),titles:()=>launchesView(db,state),payable:()=>titlesView(db,state),receivable:()=>titlesView(db,state),partners:()=>partnersView(db,state),accounts:()=>accountsCardsView(db,state.accountCardsTab),categories:()=>categoriesView(db),flow:()=>flowView(db,state),provisions:()=>flowView(db,state),reports:()=>reportsView(db,state),settings:()=>settingsView(db,!isInstalledApp(),!!currentUser(),currentUser(),isInstalledApp()),notifications:()=>notificationsView(db),banks:()=>banksView(db),cards:()=>accountsCardsView(db,'cards'),forecast:()=>forecastView(db,forecastDays),profile:()=>profileView(currentUser(),profileCpfStatus.userId===currentUser()?.id?profileCpfStatus:{ready:false,cpf:'',error:''})};document.body.classList.toggle('gb-settings-page',state.route==='settings');unmountReactCharts();document.querySelector('#main').innerHTML=(views[state.route]||views.dashboard)();if(state.route==='dashboard'){
+})();requestAnimationFrame(alignLiquidNavIndicator);const views={dashboard:()=>dashboard(db,state,!!currentUser(),currentUser()),more:()=>moreView(!!currentUser(),db,currentUser(),isInstalledApp()),titles:()=>launchesView(db,state),payable:()=>titlesView(db,state),receivable:()=>titlesView(db,state),partners:()=>partnersView(db,state),accounts:()=>accountsCardsView(db,state.accountCardsTab),categories:()=>categoriesView(db),flow:()=>flowView(db,state),provisions:()=>flowView(db,state),reports:()=>reportsView(db,state),settings:()=>settingsView(db,!isInstalledApp(),!!currentUser(),currentUser(),isInstalledApp()),notifications:()=>notificationsView(db),banks:()=>banksView(db),cards:()=>accountsCardsView(db,'cards'),forecast:()=>forecastView(db,forecastDays),profile:()=>profileView(currentUser(),profileCpfStatus.userId===currentUser()?.id?profileCpfStatus:{ready:false,cpf:'',error:''})};document.body.classList.toggle('gb-settings-page',state.route==='settings');
+const expandedMoreSections=state.route==='more'&&document.querySelector('#main .gb-more-integrated')
+ ? [...document.querySelectorAll('#main .gb-more-cfg-group')].filter(node=>node.open).map(node=>node.getAttribute('aria-label')) : null;
+unmountReactCharts();document.querySelector('#main').innerHTML=(views[state.route]||views.dashboard)();
+if(expandedMoreSections!==null){
+ document.querySelectorAll('#main .gb-more-cfg-group').forEach(node=>{
+  node.open=expandedMoreSections.includes(node.getAttribute('aria-label'));
+ });
+}
+if(state.route==='dashboard'){
  const flowSection=document.querySelector('#main .dashboard-middle');
  if(flowSection)flowSection.insertAdjacentHTML('beforebegin',forecastSummary(db));
 }
