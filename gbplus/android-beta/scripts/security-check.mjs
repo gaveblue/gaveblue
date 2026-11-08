@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// GB+ Android Beta: automated source-level safety gates. This is NOT an APK build.
+// GB+ Android Beta: automated source-level safety gates. This is NOT an APK build, and does not require GitHub Actions.
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {dirname, resolve} from 'node:path';
@@ -11,7 +11,8 @@ const manifest=read('app/src/main/AndroidManifest.xml');
 const activity=read('app/src/main/java/br/com/gaveblue/gbplus/beta/MainActivity.java');
 const config=read('app/build.gradle');
 const settings=read('settings.gradle');
-const workflow=read('../../.github/workflows/android-beta-apk.yml');
+const linuxBuild=read('scripts/build-release-local.sh');
+const windowsBuild=read('scripts/build-release-local.ps1');
 let passed=0;
 function check(condition, description){assert.ok(condition,description);passed++;}
 const requested=[...manifest.matchAll(/<uses-permission\s+android:name="([^"]+)"/g)].map(m=>m[1]);
@@ -40,8 +41,9 @@ check(activity.includes('setAcceptThirdPartyCookies(webView, false)'),'Third-par
 check(activity.includes('retry.setOnClickListener')&&activity.includes('webView.loadUrl(APP_URL)'),'Retry uses fixed HTTPS URL');
 check(config.includes('debuggable false')&&config.includes('minSdk 26')&&config.includes('targetSdk 35'),'Release hardened and SDK targets explicit');
 check(settings.includes('google()')&&settings.includes('mavenCentral()'),'Only defined standard dependency repositories');
-check(workflow.includes('apksigner" verify')&&workflow.includes('sha256sum'),'Signed APK and SHA-256 checked by CI');
-check(workflow.includes('actions/upload-artifact@v4'),'Artifacts are retained for review');
+check(linuxBuild.includes('verify --verbose')&&linuxBuild.includes('sha256sum'),'Linux must verify signature and SHA-256');
+check(windowsBuild.includes('verify --verbose')&&windowsBuild.includes('Get-FileHash'),'Windows must verify signature and SHA-256');
 check(!activity.includes('http://')&&!activity.includes('setAllowUniversalAccessFromFileURLs(true)'),'No unsafe fallback to insecure loads');
+check(!linuxBuild.includes('github.com/actions')&&!windowsBuild.includes('github.com/actions'),'No GitHub Actions dependency');
 
 console.log('GB+ Android Beta: '+passed+' verificações estáticas aprovadas. APK e dispositivo ainda precisam de testes reais.');
