@@ -11,8 +11,8 @@ import {accountsCardsView} from './accounts-cards-view.js?v=20261108-2811';
 import {renderReactCharts,unmountReactCharts} from './gb-react-loader.js?v=20261105-45';
 import {mountNativeCharts} from './gb-charts-native.js?v=20261106-68';
 import {titleForm,partnerForm,accountForm,categoryForm,paymentForm,transferForm,titleDetail,customizeForm,accountDetail} from './forms.js?v=20261108-2862';
-import {serviceById,serviceSearchKey,isServiceExpenseCategory} from './service-catalog.js?v=20261108-2861';
-import {serviceIconMarkup,serviceIdentityMarkup,serviceDisplayName} from './service-ui.js?v=20261108-2861';
+import {serviceById,serviceSearchKey,isServiceExpenseCategory} from './service-catalog.js?v=20261108-2864';
+import {serviceIconMarkup,serviceIdentityMarkup,serviceDisplayName,installServiceIconRecovery} from './service-ui.js?v=20261108-2864';
 import {openGbPickerSheet,openGbScheduleSheet,installGbPickerSheet,installEntryFormDrag} from './bottom-sheet.js?v=20261108-2862';
 import {toggleEntryMenu,chooseEntryOption,syncEntrySelect,closeEntryMenus} from './entry-select.js?v=20261108-2861';
 import {installGbControls,enhanceGbControls} from './custom-controls.js?v=20261104-42';
@@ -50,6 +50,8 @@ function firstStepsDismissed(){
 let profileCpfStatus={userId:null,cpf:'',ready:false,loading:false,error:''};
 let bankImportDraft=null; // Memory-only preview; released on modal close.
 
+// Install once; offline image failures degrade to the existing neutral monogram.
+installServiceIconRecovery(document);
 const state={route:'dashboard',accountCardsTab:'accounts',period:'all',range:{},query:'',status:'',type:'',partner:'',category:'',partnerQuery:'',granularity:'month',flowChartMode:'bars',flowStatus:'all',report:'payable',reportPartner:'',moreFilters:false,launchSelected:[],launchStatusOpen:false,launchSearchOpen:false};
 const modal=document.querySelector('#modal');
 // O controle de tema do cabeçalho é um botão normal. A ação "top-theme"
