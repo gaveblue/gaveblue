@@ -1,6 +1,8 @@
 # CHANGELOG — GB+ Gestão Financeira
 
-## [2.8.3 — LIQUID GLASS CLARO NO CABEÇALHO (CANDIDATA; NÃO PUBLICADA)] — 2026-11-08
+## [2.8.3 — LIQUID GLASS CLARO E TRANSIÇÃO SUAVE (LIBERAÇÃO WEB AUTORIZADA; HOMOLOGAÇÃO PARCIAL)] — 2026-11-08
+
+**Autorização:** publicação imediata da versão web 2.8.3 solicitada pelo responsável após aprovação da correção visual e da transição. Não usar GitHub Actions para compilar APK.
 
 **Origem:** aprovação visual pelo responsável de um seletor claro/escuro menor, com cápsula branca translúcida, borda cinza sutil e iluminação dourada discreta no modo claro, sem moldura preta. Alteração preparada na branch `fix/gbplus-283-light-glass-header`.
 
@@ -11,7 +13,7 @@
 - **Preservado:** tecla/arrasto do seletor, trajetória orbital com luz azul no modo escuro e dourada no modo claro, sincronização com o tema salvo, notificações, dados financeiros e layout das demais telas.
 - **Cabeçalho:** componente discretamente menor (59px de altura) e cache invalidado nos arquivos CSS/JS e no próprio iframe (`20261108-2832`).
 - **Evidências:** comparação visual headless no Chromium reproduziu o defeito e a eliminação da moldura preta em modo claro. Regressões locais aprovadas: 131 verificações 2.8.2, 26 avisos/interface, 20 cartões/navegação, 23 Liquid Glass anterior e 19 específicas do vidro claro e 27 novas verificações do arrasto progressivo (tema claro/escuro, origem, persistência e cancelamento). Validação adicional de cores intermediárias no Chromium headless.
-- **Status:** candidata aguardando homologação/publicação; sem alterações na versão pública 2.8.2. Falta verificação final no PWA/Android real com os dois temas.
+- **Status:** publicação web 2.8.3 build 1 expressamente autorizada em 08/11/2026. Testes direcionados aprovados; homologação integral Android/PWA e Supabase autenticado ainda pendente. A publicação não inclui APK nem leitura de notificações bancárias.
 
 ## [2.8.2 — CARTEIRA, CATEGORIAS, LIQUID GLASS E AVISOS (LIBERAÇÃO WEB AUTORIZADA; HOMOLOGAÇÃO PARCIAL)] — 2026-11-08
 
