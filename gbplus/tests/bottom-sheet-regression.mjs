@@ -80,6 +80,11 @@ assert(fakeDialog.innerHTML.includes('gb-service-category-preview'),'Service cat
 assert(!fakeDialog.innerHTML.includes('<img src=x'),'Untrusted category names must be escaped');
 assert(fakeDialog.innerHTML.includes('&lt;img'));
 assert(fakeDialog.innerHTML.includes('aria-selected="true"'));
+fakeDialog.close();
+assert(sheet.openGbPickerSheet({kind:'category',items:categories,selected:'legacy-streaming',onPick:value=>picked=value}));
+assert(fakeDialog.innerHTML.includes('data-sheet-choice="legacy-streaming"'),'Existing historical category must be editable');
+assert(!fakeDialog.innerHTML.includes('data-sheet-choice="legacy-assinatura"'),'Only the active legacy category may appear');
+assert(!fakeDialog.innerHTML.includes('data-sheet-choice="legacy-transporte"'),'Other legacy categories remain hidden');
 const listItems=[
  {dataset:{sheetSearch:'agua'},hidden:false},
  {dataset:{sheetSearch:'servicos'},hidden:false},
