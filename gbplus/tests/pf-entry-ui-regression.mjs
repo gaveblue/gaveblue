@@ -27,6 +27,7 @@ const titleUI=load('forms',{
  serviceDisplayName:(id,name,fallback)=>id==='streaming-netflix'?'Netflix':id==='custom'?name:fallback,
  textarea:(label,name,value)=>'<label>'+label+'<textarea name="'+name+'">'+esc(value||'')+'</textarea></label>',
  categoryIconFor:()=> 'calendar',isServiceExpenseCategory,isSelectableExpenseCategory,isPrimaryServiceCategory,
+ missingCategorySuggestions:()=>[],
 },['titleForm']);
 const db={
  categories:[{id:'c1',name:'Serviços',type:'expense'},{id:'c3',name:'Água',type:'expense'},{id:'c2',name:'Vendas',type:'income'}],
