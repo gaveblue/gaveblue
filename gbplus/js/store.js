@@ -184,7 +184,7 @@ export function validateDatabase(db){
    const serviceId=title.serviceId??'',serviceName=title.serviceName??'';
    assert(str(serviceId,100)&&str(serviceName,120),'identificação do serviço.');
    assert(!serviceId||title.type==='expense','serviço associado apenas a despesa.');
-   assert(!serviceId||serviceId==='custom'||/^(streaming|music|delivery|mobility|digital)-[a-z0-9-]+$/.test(serviceId),'identificador do serviço.');
+   assert(!serviceId||serviceId==='custom'||/^(streaming|music|delivery|mobility|digital|social|games|shopping)-[a-z0-9-]+$/.test(serviceId),'identificador do serviço.');
    assert(serviceId!=='custom'||serviceName.trim().length>0,'nome do serviço personalizado.');
    assert(serviceId==='custom'||serviceName==='','nome de serviço não personalizado.');
   }
