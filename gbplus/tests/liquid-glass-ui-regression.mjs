@@ -14,7 +14,7 @@ const page=read('index.html');
 const changelog=read('CHANGELOG.md');
 
 assert.match(page,/\.\/liquid-glass\.css\?v=20261108-2811/,'A folha Liquid Glass precisa estar carregada');
-assert.match(page,/js\/app\.js\?v=20261108-2821/,'O app precisa usar cache da candidata');
+assert.match(page,/js\/app\.js\?v=20261108-2831/,'O app precisa usar cache da candidata');
 assert.match(app,/const slots=\[\['dashboard','Início','home'\],renderMobileShortcut\(custom\[0\]\),\['new','Novo','plus'\],renderMobileShortcut\(custom\[1\]\),renderMobileShortcut\(custom\[2\]\)\]/,'Atalhos fixos/personalizáveis devem permanecer');
 assert.match(app,/gbMobileNav\.classList\.add\('gb-liquid-nav'\)/,'A navegação precisa ativar a lente');
 assert.match(app,/nav\.style\.setProperty\('--gb-liquid-left'/,'A lente precisa acompanhar a aba real');
