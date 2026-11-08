@@ -6,7 +6,7 @@
 ### Interfaces aprovadas — incluídas na 2.8.0 em 08/11/2026
 - **Navegação Liquid Glass:** lente translúcida segue o atalho ativo, preservando cinco atalhos, personalização e botão Novo. Modos claro/escuro, foco e preferência por movimento reduzido respeitados; barra oculta em Configurações como antes.
 - **Seletor de tema Liquid Glass:** protótipo v2 aprovado integrado ao modal Configurações → Aparência; lua/sol pixelados e luz orbital azul embaixo → direita → dourado em cima. Tema gravado pelo fluxo financeiro atual, com evento limitado à mesma origem e janela, conclusão da animação antes da gravação e limpeza do iframe/timer ao fechar.
-- **Estado:** funcionalidade candidata em desenvolvimento, aprovação visual obtida; **não homologada/não publicada**. Nenhum dado de produção foi migrado ou alterado.
+- **Estado:** interfaces aprovadas e incluídas na versão autorizada; homologação técnica integral **pendente**. Nenhuma migração SQL ou modificação manual em dados financeiros reais foi realizada.
 
 
 **Liberação autorizada expressamente pelo responsável em 08/11/2026.** Homologação técnica integral não foi concluída: testes funcionais isolados e estáticos passaram, mas a execução da suíte Node foi bloqueada no GitHub Actions antes de começar; faltam Android/PWA integrado e Supabase com conta de testes. Publicação não deve ser confundida com homologação.
@@ -16,7 +16,7 @@
 - **Proteção contra duplicidade:** uma competência não aceita simultaneamente saldo importado e compras individuais. Edição de valor de fatura consolidada mantém a origem e não multiplica títulos; faturas com baixas existentes exigem estorno antes de mudar valores ou excluir.
 - **Categorias:** preservada a lista alta com Serviços priorizado e abertura automática já implementada em 2.7.7; o nome de categoria reservado `Fatura de cartão` deixa de aparecer entre as despesas avulsas no formulário geral, evitando registro acidental de uma segunda despesa. Categorias das compras permanecem independentes da obrigação de pagamento da fatura.
 - **Validação técnica preliminar:** testes de cenários com as funções financeiras reais em V8 (criação, vencimento, duplicidade, edição, baixa parcial e valor de limite), além de validação real de `store.validateDatabase` para documento com fatura importada e baixa parcial. Não equivalem à execução integral nativa da suíte Node.
-- **Pendente para homologar:** executar `node gbplus/scripts/homologar-local.mjs`, comprovar telas e navegação no Android/PWA e conferir gravação online em usuário de testes. O `version.json` permanece em 2.7.8 até a aprovação, para não declarar publicação antecipada. Ver `PLANO-2.8.0-FATURAS.md`.
+- **Pendente para homologar:** executar `node gbplus/scripts/homologar-local.mjs`, comprovar telas e navegação no Android/PWA e conferir gravação online em usuário de testes. O `version.json` foi preparado para 2.8.0 build 1 por autorização explícita; o lançamento ocorre com homologação parcial documentada. Ver `PLANO-2.8.0-FATURAS.md`.
 
 
 ## [2.7.8 — CORREÇÃO DE RODAPÉ APÓS VOLTAR DA REVISÃO] — 2026-11-07
