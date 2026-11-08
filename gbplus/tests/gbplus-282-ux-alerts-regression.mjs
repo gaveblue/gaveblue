@@ -44,7 +44,7 @@ ok(!notifications.validNotificationPrefs({enabled:true,daysBefore:100,expenses:t
 
 const app=read('js/app.js'),page=read('index.html'),css=read('next-282.css'),views=read('js/views.js'),toggle=read('lab/liquid-theme-toggle.html'),more=read('js/more-view.js');
 ok(css.includes('.gb-balance-accounts::-webkit-scrollbar{display:none')&&css.includes('overflow-x:auto!important'),'Esconder barra mantendo rolagem horizontal');
-ok(page.includes('id="gb-top-theme-frame"')&&!page.includes('class="avatar"'),'Liquid Glass no cabeçalho substitui Minha Conta');
+ok(page.includes('id="gb-theme-toggle"')&&!page.includes('class="avatar"'),'Alternador sol/lua no topo e Minha Conta continua em Mais');
 ok(toggle.includes('compact')&&toggle.includes('canSendTheme=true'),'Efeito compacto conserva interação sem evento inicial');
 ok(app.includes('frame.contentWindow!==event.source')&&app.includes('event.origin!==location.origin'),'Origem/janela conferidas no tema');
 ok(more.includes('href="#profile"')&&more.includes('Minha Conta')&&more.includes('Carteira'),'Minha Conta em Mais e Carteira');
@@ -52,8 +52,8 @@ ok(views.includes("['due-overview','Painel de vencimentos']"),'Relatório antigo
 ok(views.includes("button(icon('settings')+' Configurar avisos'"),'Notificações configuráveis na tela');
 ok(app.includes("form.id==='notification-preferences-form'"),'Salvar preferências por formulário');
 ok(app.includes("form.id==='category-form'"),'Cadastro de categoria preservado');
-ok(!page.includes('data-action="top-theme"'),'Não manter botão antigo ao lado do controle novo');
-ok(page.includes('next-282.css?v=20261108-2832'),'Folha de estilos nova registrada');
+ok(page.includes('data-action="top-theme"')&&!page.includes('gb-top-theme-frame'),'Botão de tema normal substitui completamente o iframe');
+ok(page.includes('next-282.css?v=20261108-2851'),'Folha de estilos nova registrada');
 
 const viewSource=views.slice(views.indexOf('export function notificationsView(db){'),views.indexOf('export function partnersView(db',views.indexOf('export function notificationsView(db){'))).replace(/^export /,'');
 const notificationView=Function('heading','button','icon','esc','money','dateLabel','calculateDueAlerts','notificationPrefs','today',
