@@ -356,3 +356,9 @@
 @media(max-width:760px){
  .gb-entry-wizard .gb-entry-finance-trigger{min-height:61px}
 }
+
+/* Local brand asset with safe fallback, preserving full icon colours on both themes. */
+.gb-service-logo.gb-service-asset{position:relative;overflow:hidden;background:#fff!important;border-color:#dedee2!important;color:#171717!important}
+.gb-service-asset-fallback{display:grid;place-items:center;position:absolute;inset:0;font-size:10px;font-weight:750;line-height:1}
+.gb-service-asset-image{position:absolute;inset:0;display:block;width:100%!important;height:100%!important;object-fit:contain;background:#fff}
+.gb-service-asset-image[hidden]{display:none!important}
