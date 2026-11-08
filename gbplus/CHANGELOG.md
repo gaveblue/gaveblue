@@ -1,8 +1,8 @@
 # CHANGELOG — GB+ Gestão Financeira
 
-## [2.8.2 — CARTEIRA, CATEGORIAS, LIQUID GLASS E AVISOS (CANDIDATA; NÃO PUBLICADA)] — 2026-11-08
+## [2.8.2 — CARTEIRA, CATEGORIAS, LIQUID GLASS E AVISOS (LIBERAÇÃO WEB AUTORIZADA; HOMOLOGAÇÃO PARCIAL)] — 2026-11-08
 
-**Branch:** `feature/gbplus-282-ui-categories-alerts`. Base 2.8.1; nenhuma alteração enviada ao público.
+**Liberação web 2.8.2 build 1 autorizada expressamente em 08/11/2026 para empacotamento Android.** GitHub Actions indisponível para APK. Homologação integral continua pendente.
 
 - **Saldo e bancos:** oculta apenas a barra visual de rolagem horizontal dos bancos no card de saldo, mantendo gesto de deslizar e acessibilidade.
 - **Carteira:** rótulo do atalho móvel antes chamado "Cartões" agora é **Carteira**, sem mudar a rota interna, as faturas ou as contas relacionadas. Página Mais também reflete o nome.
@@ -13,7 +13,7 @@
 - **Relatórios:** nova opção "Painel de vencimentos" reutiliza informações da visão analítica anterior, sem perder dados.
 - **Persistência:** usa o documento de configurações existente; parâmetro opcional de avisos mantém compatibilidade com backups e usuários anteriores. Sem migração SQL.
 - **Teste:** módulos e cenários de categorias, ícones, notificações, tema, rotas e cache foram verificados em execução isolada; suíte `gbplus/tests/gbplus-282-regression.mjs` adicionada. **Ainda precisa da execução nativa completa, do teste integrado Android/PWA e da homologação em ambiente autenticado de teste.**
-- **Status:** sem merge, sem publicação; preparar revisão e homologação antes de liberação.
+- **Status:** liberação web autorizada com testes parciais documentados. Requer confirmação da propagação do site e validação separada do APK; não inclui leitura de notificações bancárias.
 
 ## [2.8.1 — CORREÇÃO DE CARTÕES E NAVEGAÇÃO (LIBERAÇÃO AUTORIZADA; HOMOLOGAÇÃO PARCIAL)] — 2026-11-08
 
