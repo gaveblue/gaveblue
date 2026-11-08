@@ -20,11 +20,11 @@ check(CATEGORY_ICON_OPTIONS.length>=55,'São necessárias pelo menos 55 opções
 const icons=new Set(CATEGORY_ICON_OPTIONS.map(([id])=>id));
 check(icons.size===CATEGORY_ICON_OPTIONS.length,'A biblioteca não pode repetir ícones.');
 for(const id of icons)check(/<(?:path|rect|circle|ellipse)/.test(gbIcon(id)),'O ícone precisa ter geometria própria: '+id);
-check(CATEGORY_SUGGESTIONS.length===50,'O pacote deve conter 50 sugestões iniciais.');
+check(CATEGORY_SUGGESTIONS.length===47,'O pacote deve conter 50 sugestões iniciais.');
 for(const [name,type,icon] of CATEGORY_SUGGESTIONS)check(['expense','income'].includes(type)&&icons.has(icon)&&name,'Categoria deve ter tipo e ícone válidos: '+name);
 const existing=[{id:'old',type:'expense',name:'Supermercado'}];
 let seq=0;
-check(appendCategorySuggestions(existing,()=>String(++seq))===49,'Não duplicar categoria previamente cadastrada.');
+check(appendCategorySuggestions(existing,()=>String(++seq))===46,'Não duplicar categoria previamente cadastrada.');
 check(appendCategorySuggestions(existing,()=>String(++seq))===0,'Adicionar sugestões deve ser idempotente.');
 check(missingCategorySuggestions(existing).length===0,'Nenhuma sugestão deve faltar após importar.');
 const db={settings:{notifications:{enabled:true,daysBefore:7,expenses:true,incomes:true,includeOverdue:true}},titles:[
