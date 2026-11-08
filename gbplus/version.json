@@ -1,14 +1,15 @@
 {
-  "version": "2.8.4",
+  "version": "2.8.5",
   "build": 1,
-  "published_at": "2026-11-08T21:28:33.876Z",
-  "title": "Liquid Glass: sol e lua visíveis no Android",
+  "published_at": "2026-11-08T21:46:55.998Z",
+  "title": "Botão de tema simples com sol e lua",
   "notes": [
-    "Corrigida a ausência dos símbolos de sol e lua dentro do seletor Liquid Glass no PWA Android, com ícones pixelados de contraste adequado.",
-    "Faixa luminosa resiliente quando o Android não suporta temporariamente as funções geométricas do SVG, preservando azul no escuro e dourado no claro.",
-    "Preservadas a transição suave entre temas, a mola do botão, a navegação e as informações financeiras.",
-    "Liberação web autorizada para que a homologação visual seja feita no próprio PWA Android instalado. Não equivale à homologação final.",
-    "Verificações direcionadas da correção e regressões de interface aprovadas em V8 isolado; teste integrado Android e Supabase autenticado ainda pendente. Nenhum APK foi gerado."
+    "O antigo seletor Liquid Glass do cabeçalho foi removido a pedido do responsável, incluindo molduras, arrasto, iluminação orbital e iframe.",
+    "Novo interruptor pequeno e discreto com ícones normais de sol e lua da biblioteca local Lucide-style; em modo claro mantém tons claros e no escuro usa cores suaves.",
+    "Toque para alternar imediatamente entre modo claro e escuro, mantendo a preferência sincronizada pelo mecanismo existente de gravação do GB+.",
+    "Acessibilidade: rótulo dinâmico, função de interruptor, navegação por teclado, indicador de foco e respeito a movimento reduzido.",
+    "Sem alterações de valores financeiros, contas, cartões, faturas, lançamentos ou navegação inferior.",
+    "Liberação web solicitada para teste no PWA instalado. Testes direcionados aprovados; confirmação visual no Android e homologação Supabase autenticada ainda pendentes."
   ],
   "assets": [
     "./index.html",
@@ -170,7 +171,6 @@
     "./bottom-sheet.css",
     "./js/period-preference.js",
     "./liquid-glass.css",
-    "./lab/liquid-theme-toggle.html",
     "./js/more-view.js",
     "./more-page.css",
     "./next-282.css",
@@ -180,23 +180,23 @@
   "highlights": [
     {
       "icon": "sun",
-      "title": "Sol e lua visíveis",
-      "description": "Símbolos de tema mais nítidos no seletor Liquid Glass."
+      "title": "Modo claro e escuro sem complicação",
+      "description": "Interruptor simples com sol e lua no topo."
     },
     {
-      "icon": "sparkles",
-      "title": "Iluminação corrigida",
-      "description": "Dourado no modo claro e azul no escuro."
+      "icon": "moon",
+      "title": "Sem moldura preta nem efeitos",
+      "description": "Removidos o vidro animado e a luz orbital do botão de tema."
     },
     {
-      "icon": "mouse-pointer",
-      "title": "Arrasto preservado",
-      "description": "A tela continua mudando gradualmente entre temas."
+      "icon": "check-circle",
+      "title": "Preferência preservada",
+      "description": "A troca de tema continua salva no GB+."
     }
   ],
-  "release_status": "public_web_release_2_8_4_approved_for_device_validation",
+  "release_status": "web_release_2_8_5_simple_theme_for_android_testing",
   "homologation": {
-    "status": "released_for_device_testing_not_fully_homologated",
-    "notes": "Usuário esclareceu que só consegue testar no PWA Android após publicar e solicitou publicar diretamente. Verificações estáticas (24 da 2.8.4, 27 do arrasto, 19 vidro claro e 23 Liquid Glass anterior, além de regressões das versões 2.8.2/2.8.1) aprovadas. Testes reais Android/PWA e Supabase autenticado pendentes após a publicação. Não usar GitHub Actions para compilar APK. Publicação web via Pages é distinta da compilação de aplicativos."
+    "status": "web_release_authorized_for_device_testing_full_validation_pending",
+    "notes": "Em 08/11/2026 o responsável rejeitou o seletor Liquid Glass e pediu desfazer a experiência e publicar uma flag normal. Implementado botão simples com ícones locais e ação de tema persistida via commit. Testes dirigidos (32 da flag, 131 de categorias, 26 de alertas, 20 de cartões e navegação) aprovados em V8 isolado; validação visual integrada em Android/PWA e Supabase autenticado pendentes. GitHub Actions não utilizado para compilar APK."
   }
 }
