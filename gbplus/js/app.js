@@ -25,9 +25,9 @@ import {canResetFinancialData,canDeleteAccount,clearFinancialDocument} from './a
 import {resetAccountModal,deleteAccountModal,syncAccountDangerConfirm} from './account-safety-ui.js?v=20261106-2610';
 import {firstSetupView,customMobileNavForm,shortcutsPreview,readMobileNav,firstStepsPanel} from './setup-ui.js?v=20261105-87';
 import {BANKS,bankCatalog,findBank,bankForAccount,bankBadge,bankName,syncBankPicker,filterBankPicker,filterBankDirectory} from './banks.js?v=20261105-87';
-import {addCardPurchase,updateCardPurchase,removeCardPurchase,ensureCardMayChange,creditCards,cardPurchases,cardAvailable,cardCycle,shiftCardCycle,cardDue} from './credit-cards.js?v=20261107-2760';
+import {addCardPurchase,registerCardInvoiceBalance,updateCardPurchase,removeCardPurchase,ensureCardMayChange,creditCards,cardPurchases,cardAvailable,cardCycle,shiftCardCycle,cardDue} from './credit-cards.js?v=20261107-2800';
 import {cashForecast} from './forecast.js?v=20261105-72';
-import {banksView,bankForm,cardForm,cardPurchaseForm,forecastView,forecastSummary,forecastScenarioForm,forecastResult} from './finance-24-ui.js?v=20261107-2760';
+import {banksView,bankForm,cardForm,cardPurchaseForm,cardInvoiceBalanceForm,forecastView,forecastSummary,forecastScenarioForm,forecastResult} from './finance-24-ui.js?v=20261107-2800';
 import {launchesView} from './launches-view.js?v=20261107-2760';
 import {installLaunchGestures} from './launches-gestures.js?v=20261104-38';
 import {launchSelection,paymentSelection,paymentSummary,applyLaunchPayments,reversedSelection,applyLaunchReversals,deletionSelection,applyLaunchDeletions} from './launch-actions.js?v=20261105-72';
@@ -791,6 +791,7 @@ const actions={
    openModal('Editar cartão de crédito',cardForm(db,card));
   },
   'new-card-purchase':el=>openModal('Compra no cartão de crédito',cardPurchaseForm(db,el?.dataset?.id||'')),
+  'new-card-invoice':el=>openModal('Informar fatura do cartão',cardInvoiceBalanceForm(db,el?.dataset?.id||'')),
   'edit-card-purchase':el=>{
    const purchase=cardPurchases(db).find(p=>p.id===el.dataset.id);
    if(!purchase)throw Error('Compra não encontrada.');
@@ -1441,6 +1442,10 @@ document.addEventListener('submit',async e=>{e.preventDefault();if(busy||!db)ret
     updateCardPurchase(d,id,{cardId:v.cardId,date:v.date,amount,description:v.description,categoryId:v.categoryId,partnerId:v.partnerId,count}):
     addCardPurchase(d,{cardId:v.cardId,date:v.date,amount,description:v.description,categoryId:v.categoryId,partnerId:v.partnerId,count}),
     id?'Compra atualizada. Faturas conferidas, sem duplicidade.':'Compra registrada. As faturas correspondentes foram atualizadas.');
+  }
+  else if(form.id==='card-invoice-balance-form'){
+   await commit(d=>registerCardInvoiceBalance(d,{cardId:v.cardId,cycle:v.cycle,amount:cents(v.amount),description:v.description}),
+    'Fatura registrada em Contas a pagar. O saldo da conta muda somente após o pagamento.');
   }
   else if(form.id==='forecast-scenario-form'){
    const title=db.titles.find(t=>t.id===v.titleId&&pending(db,t)>0);
