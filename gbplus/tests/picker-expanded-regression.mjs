@@ -28,12 +28,14 @@ const document={
 const serviceCatalog=[{id:'streaming-netflix',name:'Netflix',group:'streaming'}];
 const lib=Function('document','esc','icon','gbIcon','categoryIconFor','SERVICE_CATALOG',
  'SERVICE_GROUPS','serviceSearchKey','isServiceExpenseCategory',
+ 'isPrimaryServiceCategory','isSelectableExpenseCategory',
  'serviceIconMarkup','serviceCategoryPreviewMarkup','setTimeout',
  source.replace(/^import[^\n]*\n/gm,'').replace(/^export /gm,'')+
  ';return {openGbPickerSheet,installGbPickerSheet};')(
  document,esc,(name)=>'<svg data-icon="'+esc(name)+'"></svg>',()=>'<svg></svg>',
  ()=> 'drop',serviceCatalog,{streaming:'Streaming'},x=>x,
  category=>String(category?.name||'').toLowerCase().includes('servi'),
+ cat=>cat?.name==='Serviços',()=>true,
  ()=>'<span>Logo</span>',()=>'<span>Serviços</span>',()=>{});
 const reset=()=>{
  if(root.open)root.close();
@@ -42,8 +44,8 @@ const reset=()=>{
 lib.installGbPickerSheet();
 reset();
 assert(lib.openGbPickerSheet({kind:'category',items:[
- {id:'agua',name:'Água'},{id:'aluguel',name:'Aluguel'},
- {id:'service',name:'Serviços'}],selected:'agua',onPick:()=>{}}));
+ {id:'agua',name:'Água',type:'expense'},{id:'aluguel',name:'Aluguel',type:'expense'},
+ {id:'service',name:'Serviços',type:'expense'}],selected:'agua',onPick:()=>{}}));
 assert.equal(root.dataset.snap,'expanded','Category should open fully expanded');
 assert.equal(handle.attributes['aria-expanded'],'true');
 assert(root.innerHTML.indexOf('data-sheet-choice="service"')<
