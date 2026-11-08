@@ -53,7 +53,7 @@ ok(views.includes("button(icon('settings')+' Configurar avisos'"),'Notificaçõe
 ok(app.includes("form.id==='notification-preferences-form'"),'Salvar preferências por formulário');
 ok(app.includes("form.id==='category-form'"),'Cadastro de categoria preservado');
 ok(!page.includes('data-action="top-theme"'),'Não manter botão antigo ao lado do controle novo');
-ok(page.includes('next-282.css?v=20261108-2821'),'Folha de estilos nova registrada');
+ok(page.includes('next-282.css?v=20261108-2831'),'Folha de estilos nova registrada');
 
 const viewSource=views.slice(views.indexOf('export function notificationsView(db){'),views.indexOf('export function partnersView(db',views.indexOf('export function notificationsView(db){'))).replace(/^export /,'');
 const notificationView=Function('heading','button','icon','esc','money','dateLabel','calculateDueAlerts','notificationPrefs','today',
