@@ -1,15 +1,14 @@
 {
-  "version": "2.8.3",
+  "version": "2.8.4",
   "build": 1,
-  "published_at": "2026-11-08T21:02:09.461Z",
-  "title": "Liquid Glass claro e transição suave entre temas",
+  "published_at": "2026-11-08T21:28:33.876Z",
+  "title": "Liquid Glass: sol e lua visíveis no Android",
   "notes": [
-    "Corrigida a moldura preta do seletor Liquid Glass no modo claro: vidro branco translúcido, bordas sutis e brilho dourado discreto.",
-    "O botão compacto acompanha o dedo com transição progressiva do claro para o escuro e vice-versa, incluindo fundo, cartões e barra de navegação.",
-    "O efeito orbital azul/dourado, a resposta por mola e os atalhos de teclado foram preservados.",
-    "Textos mantêm contraste durante a mistura de cores e o tema só é salvo quando a escolha é concluída após soltar.",
-    "O novo arrasto cancela confirmação anterior ainda pendente e mensagens do iframe passam por checagem de origem e de valor.",
-    "Liberação web expressamente autorizada em 08/11/2026, com 246 verificações direcionadas aprovadas em V8/Chromium isolados. Homologação completa em PWA Android e Supabase autenticado permanece pendente."
+    "Corrigida a ausência dos símbolos de sol e lua dentro do seletor Liquid Glass no PWA Android, com ícones pixelados de contraste adequado.",
+    "Faixa luminosa resiliente quando o Android não suporta temporariamente as funções geométricas do SVG, preservando azul no escuro e dourado no claro.",
+    "Preservadas a transição suave entre temas, a mola do botão, a navegação e as informações financeiras.",
+    "Liberação web autorizada para que a homologação visual seja feita no próprio PWA Android instalado. Não equivale à homologação final.",
+    "Verificações direcionadas da correção e regressões de interface aprovadas em V8 isolado; teste integrado Android e Supabase autenticado ainda pendente. Nenhum APK foi gerado."
   ],
   "assets": [
     "./index.html",
@@ -180,24 +179,24 @@
   ],
   "highlights": [
     {
-      "icon": "sparkles",
-      "title": "Liquid Glass mais elegante",
-      "description": "Trilho translúcido no modo claro, sem a moldura preta."
-    },
-    {
       "icon": "sun",
-      "title": "Transição gradual",
-      "description": "Arraste para clarear ou escurecer a tela em tempo real."
+      "title": "Sol e lua visíveis",
+      "description": "Símbolos de tema mais nítidos no seletor Liquid Glass."
     },
     {
-      "icon": "shield-check",
-      "title": "Tema com confirmação segura",
-      "description": "A preferência é gravada somente quando a escolha termina."
+      "icon": "sparkles",
+      "title": "Iluminação corrigida",
+      "description": "Dourado no modo claro e azul no escuro."
+    },
+    {
+      "icon": "mouse-pointer",
+      "title": "Arrasto preservado",
+      "description": "A tela continua mudando gradualmente entre temas."
     }
   ],
-  "release_status": "authorized_web_release_2_8_3_partial_homologation",
+  "release_status": "public_web_release_2_8_4_approved_for_device_validation",
   "homologation": {
-    "status": "web_release_authorized_directed_tests_passed_full_android_supabase_pending",
-    "notes": "Responsável autorizou publicação da 2.8.3 em 08/11/2026. Testes direcionados 27 progressão/segurança, 19 vidro claro, 23 Liquid Glass anterior, 131 da 2.8.2, 26 interface/avisos e 20 cartões/navegação aprovados em V8 isolado, mais inspeção de cores intermediárias no Chromium. Não atesta teste real de PWA Android, sessão Supabase ou completa homologação; publicar site sem gerar APK ou compilar via GitHub Actions."
+    "status": "released_for_device_testing_not_fully_homologated",
+    "notes": "Usuário esclareceu que só consegue testar no PWA Android após publicar e solicitou publicar diretamente. Verificações estáticas (24 da 2.8.4, 27 do arrasto, 19 vidro claro e 23 Liquid Glass anterior, além de regressões das versões 2.8.2/2.8.1) aprovadas. Testes reais Android/PWA e Supabase autenticado pendentes após a publicação. Não usar GitHub Actions para compilar APK. Publicação web via Pages é distinta da compilação de aplicativos."
   }
 }

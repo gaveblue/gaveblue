@@ -1,5 +1,16 @@
 # CHANGELOG — GB+ Gestão Financeira
 
+## [2.8.4 — SÍMBOLOS DO LIQUID GLASS NO ANDROID (LIBERAÇÃO WEB PARA TESTE; HOMOLOGAÇÃO PENDENTE)] — 2026-11-08
+
+**Origem:** capturas reais do PWA Android 2.8.3 mostraram o seletor sem sol/lua em ambos os temas e luz azul persistindo no modo claro. As capturas mostram telas distintas (Início e Fluxo de caixa); **não comprovam**, por si só, que a mudança do tema causou troca de página.
+
+- **Símbolos visíveis:** o controle compacto passa a usar pequenos ícones pixelados em SVG para o sol e a lua, com contraste alto em cada tema e opacidade proporcional ao arrasto. O laboratório/protótipo maior mantém o canvas de partículas e sua transformação original.
+- **Faixa luminosa:** inicialização segura do comprimento da trajetória SVG e tratamento de falhas de `getPointAtLength()`/`getTotalLength()` em WebViews, preservando a cor dourada no modo claro e azul no modo escuro mesmo quando APIs geométricas não estão disponíveis.
+- **Mantido:** arrasto progressivo claro/escuro, mola, gradação de cores da interface, checagem de origem, salvamento apenas após o fim do gesto, navegação e dados financeiros.
+- **Cache:** query do iframe e do módulo principal atualizada para `20261108-2841`; nenhuma alteração ou migração de dados.
+- **Testes:** 24 verificações de símbolos, geometria e tema aprovadas em V8; miniatura visual isolada em Chromium exibiu corretamente os ícones nas duas cores. Teste integrado em PWA Android real ainda pendente.
+- **Status:** publicação web da **2.8.4 build 1** autorizada em 08/11/2026 pelo responsável para realizar a homologação no próprio PWA instalado. O código e os testes isolados foram verificados; aceitação visual no Android/PWA e validação integrada continuam pendentes. Não usar GitHub Actions para compilar APK.
+
 ## [2.8.3 — LIQUID GLASS CLARO E TRANSIÇÃO SUAVE (LIBERAÇÃO WEB AUTORIZADA; HOMOLOGAÇÃO PARCIAL)] — 2026-11-08
 
 **Autorização:** publicação imediata da versão web 2.8.3 solicitada pelo responsável após aprovação da correção visual e da transição. Não usar GitHub Actions para compilar APK.

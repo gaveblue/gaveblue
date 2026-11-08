@@ -88,5 +88,5 @@ check(toggle.includes("setOrbit(p)")&&toggle.includes('const stiffness = 205'),'
 check(style.includes(':root[data-theme].gb-theme-preview')&&style.includes('color-mix(in srgb'),'Mistura de cores tem precedência mesmo sobre o tema escuro salvo.');
 check(style.includes('--bg:color-mix')&&style.includes('--ink:color-mix')&&style.includes('--surface:color-mix'),'Fundo, texto e cartões acompanham o arrasto.');
 check(style.includes('html.gb-theme-preview body::after'),'Área inferior acompanha o tema no celular.');
-check(html.includes('v=20261108-2832')&&app.includes('v=20261108-2832'),'Cache novo do seletor e do aplicativo.');
+check(html.includes('v=20261108-2841')&&app.includes('v=20261108-2841'),'Cache novo do seletor e do aplicativo.');
 console.log('GB+ 2.8.3: '+passed+' verificações de transição progressiva e segurança aprovadas.');
