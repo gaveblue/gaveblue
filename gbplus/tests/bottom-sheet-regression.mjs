@@ -12,6 +12,7 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({
  '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
 })[c]);
 const catalog=load('service-catalog',{},['SERVICE_CATALOG','SERVICE_GROUPS','serviceSearchKey']);
+const categoriesLib=load('category-library',{},['isSelectableExpenseCategory','isPrimaryServiceCategory']);
 const calls={};
 const handle={attributes:{},focus(){},setAttribute(k,v){this.attributes[k]=v;},setPointerCapture(){}};
 const focus={isConnected:true,attributes:{},setAttribute(k,v){this.attributes[k]=v;},focus(){calls.focus=(calls.focus||0)+1;}};
@@ -29,6 +30,8 @@ const document={querySelector:selector=>selector==='#gb-picker-sheet'?fakeDialog
 const sheet=load('bottom-sheet',{
  document,esc,icon:()=>'<svg></svg>',gbIcon:()=>'<svg class="gb-symbol"></svg>',
  categoryIconFor:()=> 'tag',
+ isSelectableExpenseCategory:categoriesLib.isSelectableExpenseCategory,
+ isPrimaryServiceCategory:categoriesLib.isPrimaryServiceCategory,
  SERVICE_CATALOG:catalog.SERVICE_CATALOG,
  SERVICE_GROUPS:catalog.SERVICE_GROUPS,
  serviceSearchKey:catalog.serviceSearchKey,
@@ -62,10 +65,17 @@ assert(calls.focus>=1);
 
 const categories=[{id:'agua',name:'Água',type:'expense'},
  {id:'servicos',name:'Serviços',type:'expense'},
+ {id:'legacy-streaming',name:'Streaming',type:'expense'},
+ {id:'legacy-assinatura',name:'Assinaturas digitais',type:'expense'},
+ {id:'legacy-transporte',name:'Aplicativos de transporte',type:'expense'},
  {id:'injection',name:'<img src=x onerror=alert(1)>',type:'expense'}];
 assert(sheet.openGbPickerSheet({kind:'category',items:categories,selected:'servicos',onPick:value=>picked=value}));
 assert(fakeDialog.innerHTML.includes('data-sheet-choice="agua"'));
 assert(fakeDialog.innerHTML.includes('data-sheet-choice="servicos"'));
+for(const legacy of ['legacy-streaming','legacy-assinatura','legacy-transporte']){
+ assert(!fakeDialog.innerHTML.includes('data-sheet-choice="'+legacy+'"'),legacy+' should only remain in existing titles');
+}
+assert.equal((fakeDialog.innerHTML.match(/gb-service-category-preview/g)||[]).length,1,'Single preview on Serviços');
 assert(fakeDialog.innerHTML.includes('gb-service-category-preview'),'Service category must show overlapping service examples');
 assert(!fakeDialog.innerHTML.includes('<img src=x'),'Untrusted category names must be escaped');
 assert(fakeDialog.innerHTML.includes('&lt;img'));
