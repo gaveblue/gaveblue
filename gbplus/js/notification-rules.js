@@ -26,10 +26,15 @@ export function calculateDueAlerts(db,asOf){
  const prefs=notificationPrefs(db?.settings);
  const now=utcDay(asOf),messages=[],summary={overdue:0,today:0,upcoming:0};
  if(!prefs.enabled||!Number.isFinite(now))return {prefs,items:messages,summary,total:0};
+ // Uma passagem linear pelos pagamentos: não percorrer todo o financeiro para cada título.
+ const paidByTitle=new Map();
+ for(const payment of db?.payments||[]){
+  paidByTitle.set(payment.titleId,(paidByTitle.get(payment.titleId)||0)+payment.amount);
+ }
  for(const title of db?.titles||[]){
   if(title.cancelled||!((title.type==='expense'&&prefs.expenses)||(title.type==='income'&&prefs.incomes)))continue;
   // A aplicação tem baixas reais; apenas saldo pendente merece lembrete.
-  const paidAmount=(db.payments||[]).filter(row=>row.titleId===title.id).reduce((sum,row)=>sum+row.amount,0);
+  const paidAmount=paidByTitle.get(title.id)||0;
   const outstanding=Math.max(0,title.amount-paidAmount);
   if(outstanding===0)continue;
   const difference=utcDay(title.due)-now;
