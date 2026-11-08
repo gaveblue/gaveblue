@@ -13,14 +13,14 @@ const toggle=read('lab/liquid-theme-toggle.html');
 const page=read('index.html');
 const changelog=read('CHANGELOG.md');
 
-assert.match(page,/\.\/liquid-glass\.css\?v=20261108-2801/,'A folha Liquid Glass precisa estar carregada');
-assert.match(page,/js\/app\.js\?v=20261108-2801/,'O app precisa usar cache da candidata');
+assert.match(page,/\.\/liquid-glass\.css\?v=20261108-2811/,'A folha Liquid Glass precisa estar carregada');
+assert.match(page,/js\/app\.js\?v=20261108-2811/,'O app precisa usar cache da candidata');
 assert.match(app,/const slots=\[\['dashboard','Início','home'\],renderMobileShortcut\(custom\[0\]\),\['new','Novo','plus'\],renderMobileShortcut\(custom\[1\]\),renderMobileShortcut\(custom\[2\]\)\]/,'Atalhos fixos/personalizáveis devem permanecer');
 assert.match(app,/gbMobileNav\.classList\.add\('gb-liquid-nav'\)/,'A navegação precisa ativar a lente');
-assert.match(app,/gbMobileNav\.style\.setProperty\('--gb-liquid-offset'/,'A lente precisa acompanhar a aba real');
+assert.match(app,/nav\.style\.setProperty\('--gb-liquid-left'/,'A lente precisa acompanhar a aba real');
 assert.match(app,/state\.accountCardsTab===key/,'Contas e cartões compartilham a rota');
 assert.match(app,/gbMobileNav\.style\.setProperty\('--gb-liquid-visible'/,'A lente não deve selecionar aba inexistente');
-assert.match(css,/transform:translate3d\(var\(--gb-liquid-offset,0%\),0,0\)/,'Deslocamento deve ser compatível com Android');
+assert.match(css,/left:var\(--gb-liquid-left,6px\)/,'Deslocamento deve usar a posição medida do botão');
 assert.match(css,/prefers-reduced-motion:reduce/,'Deve respeitar movimento reduzido');
 assert.match(css,/html\[data-theme=dark\]/,'Tema escuro deve ter tratamento próprio');
 assert.match(app,/gb-liquid-theme-frame/,'Configurações → Aparência devem mostrar o seletor aprovado');
@@ -35,4 +35,4 @@ assert.match(toggle,/setOrbit\(p\)/,'A faixa orbital aprovada deve continuar ati
 assert.match(toggle,/reflectState\(initialLight\)/,'O seletor deve iniciar no tema já salvo');
 assert.match(changelog,/Interfaces aprovadas — incluídas na 2\.8\.0 em 08\/11\/2026/,'Atualização precisa ser documentada');
 assert.match(page,/gbplus-version" content="2\.8\.0"/,'A versão autorizada precisa anunciar 2.8.0');
-console.log('Liquid Glass 2.8.0: integração estática verificada (22 asserções).');
+console.log('Liquid Glass 2.8.1: regressão de 22 asserções após alinhamento dos ícones.');
