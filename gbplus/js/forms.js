@@ -7,12 +7,12 @@ import {bankOptions,findBank,bankPicker} from './banks.js?v=20261105-87';
 import {dailyStatement} from './daily-statement.js?v=20261105-90';
 import {servicePickerMarkup,serviceIdentityMarkup,serviceDisplayName} from './service-ui.js?v=20261108-2861';
 import {isServiceExpenseCategory} from './service-catalog.js?v=20261108-2861';
-import {missingCategorySuggestions} from './category-library.js?v=20261108-2821';
+import {missingCategorySuggestions,isSelectableExpenseCategory,isPrimaryServiceCategory} from './category-library.js?v=20261108-2862';
 const required='required maxlength="200"';
 export function titleForm(db,t,type='expense'){
  type=t?.type||type;
  // Faturas são geradas pelo próprio módulo de cartões, nunca pelo lançamento avulso.
- const categoryOptions=db.categories.filter(c=>c.type===type&&(c.name!=='Fatura de cartão'||c.id===t?.categoryId)).map(c=>[c.id,c.name,categoryIconFor(c),isServiceExpenseCategory(c)]);
+ const categoryOptions=db.categories.filter(c=>c.type===type&&isSelectableExpenseCategory(c,t?.categoryId||'')&&(c.name!=='Fatura de cartão'||c.id===t?.categoryId)).map(c=>[c.id,c.name,categoryIconFor(c),isPrimaryServiceCategory(c)]);
  const selectedCategory=db.categories.find(c=>c.id===(t?.categoryId||categoryOptions[0]?.[0]));
  const showService=type==='expense'&&isServiceExpenseCategory(selectedCategory);
  const typeField='<div class="gb-entry-flow-switch" role="group" aria-label="Tipo de lançamento">'+
