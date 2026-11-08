@@ -3,21 +3,21 @@ import {bankImportMarkup,bankImportHistoryMarkup,bankImportFilteredRows,bankImpo
 import {reviewSelection,applyReconciliationBatch,undoReconciliationBatch,reconciliationRecordKey,knownReconciliationKeys} from './bank-reconciliation.js?v=20261106-2505';
 import {filterFlowRows} from './gb-flow-filters.js?v=20261106-68';
 import {uid,today,money,dateLabel,cents,addMonths,validDate,generateTitles,addPayment,transfer,updateTitle,pending,accountBalance,flow,within} from './domain.js?v=20261105-72';
-import {KEY,INDICATORS,defaultPanel,parseBackup,backupText,MOBILE_SHORTCUTS,defaultMobileNav,effectiveMobileNav,validMobileNav,shouldOfferSetup} from './store.js?v=20261106-2600';
+import {KEY,INDICATORS,defaultPanel,parseBackup,backupText,MOBILE_SHORTCUTS,defaultMobileNav,effectiveMobileNav,validMobileNav,shouldOfferSetup} from './store.js?v=20261108-2821';
 import {esc,icon,button,field,select,formFooter,download,csv,titleTable} from './ui.js?v=20261105-72';
-import {routes,dashboard,titlesView,partnersView,categoriesView,flowView,reportsView,settingsView,notificationsView,filteredTitles,reportData} from './views.js?v=20261107-admin1';
+import {routes,dashboard,titlesView,partnersView,categoriesView,flowView,reportsView,settingsView,notificationsView,filteredTitles,reportData} from './views.js?v=20261108-2821';
 import {moreView} from './more-view.js?v=20261108-2811';
 import {accountsCardsView} from './accounts-cards-view.js?v=20261108-2811';
 import {renderReactCharts,unmountReactCharts} from './gb-react-loader.js?v=20261105-45';
 import {mountNativeCharts} from './gb-charts-native.js?v=20261106-68';
-import {titleForm,partnerForm,accountForm,categoryForm,paymentForm,transferForm,titleDetail,customizeForm,accountDetail} from './forms.js?v=20261107-2800';
+import {titleForm,partnerForm,accountForm,categoryForm,paymentForm,transferForm,titleDetail,customizeForm,accountDetail} from './forms.js?v=20261108-2821';
 import {serviceById,serviceSearchKey,isServiceExpenseCategory} from './service-catalog.js?v=20261106-2630';
 import {serviceIconMarkup,serviceIdentityMarkup,serviceDisplayName} from './service-ui.js?v=20261107-2720';
 import {openGbPickerSheet,openGbScheduleSheet,installGbPickerSheet,installEntryFormDrag} from './bottom-sheet.js?v=20261107-2770';
 import {toggleEntryMenu,chooseEntryOption,syncEntrySelect,closeEntryMenus} from './entry-select.js?v=20261107-2720';
 import {installGbControls,enhanceGbControls} from './custom-controls.js?v=20261104-42';
 import {expectedDates,recurrenceAnchor} from './gb-calendar-rules.js?v=20261105-47';
-import {CATEGORY_ICON_OPTIONS,categoryIconFor,gbIcon} from './gb-icons.js?v=20261104-42';
+import {CATEGORY_ICON_OPTIONS,categoryIconFor,gbIcon} from './gb-icons.js?v=20261108-2821';
 import {setupPwaInstallation,maybeOfferPwaInstall,showInstallHelp,isPwaInstalled} from './pwa-install.js?v=20261104-40';
 import {SupabaseRepository} from '../integrations/supabase/repository.js?v=20261106-2505';
 import {initializeAuth,authClient,currentUser,showAuth,isRecovery,updatePersonalProfile,consumeAuthReturnMessage,consumeSessionNotice,signOutAccount,authError,emailCooldownSeconds,markAuthEmailSent} from './auth.js?v=20261105-69';
@@ -28,6 +28,8 @@ import {firstSetupView,customMobileNavForm,shortcutsPreview,readMobileNav,firstS
 import {BANKS,bankCatalog,findBank,bankForAccount,bankBadge,bankName,syncBankPicker,filterBankPicker,filterBankDirectory} from './banks.js?v=20261105-87';
 import {addCardPurchase,registerCardInvoiceBalance,updateCardPurchase,removeCardPurchase,ensureCardMayChange,creditCards,cardPurchases,cardAvailable,cardCycle,shiftCardCycle,cardDue} from './credit-cards.js?v=20261107-2800';
 import {cashForecast} from './forecast.js?v=20261105-72';
+import {missingCategorySuggestions,appendCategorySuggestions} from './category-library.js?v=20261108-2821';
+import {calculateDueAlerts,notificationPrefs,validNotificationPrefs,NOTIFICATION_DAYS} from './notification-rules.js?v=20261108-2821';
 import {banksView,bankForm,cardForm,cardPurchaseForm,cardInvoiceBalanceForm,forecastView,forecastSummary,forecastScenarioForm,forecastResult} from './finance-24-ui.js?v=20261108-2811';
 import {launchesView} from './launches-view.js?v=20261107-2760';
 import {installLaunchGestures} from './launches-gestures.js?v=20261104-38';
@@ -50,28 +52,21 @@ let bankImportDraft=null; // Memory-only preview; released on modal close.
 
 const state={route:'dashboard',accountCardsTab:'accounts',period:'all',range:{},query:'',status:'',type:'',partner:'',category:'',partnerQuery:'',granularity:'month',flowChartMode:'bars',flowStatus:'all',report:'payable',reportPartner:'',moreFilters:false,launchSelected:[],launchStatusOpen:false,launchSearchOpen:false};
 const modal=document.querySelector('#modal');
-  // A integração escuta só a janela ativa do seletor, na mesma origem.
+  // O seletor aprovado fica no cabeçalho. Somente esse iframe pode trocar o tema.
   let gbLiquidThemeTimer=null;
-  // Fechar a janela interrompe a renderização contínua do canvas no iframe.
-  modal.addEventListener('close',()=>{
-    clearTimeout(gbLiquidThemeTimer);
-    gbLiquidThemeTimer=null;
-    modal.querySelector('#gb-liquid-theme-frame')?.remove();
-  });
   window.addEventListener('message',event=>{
     if(event.origin!==location.origin||event.data?.type!=='gbplus:liquid-theme')return;
-    const frame=document.querySelector('#gb-liquid-theme-frame');
-    if(!frame||!modal.open||frame.contentWindow!==event.source||!db||busy)return;
+    const frame=document.querySelector('#gb-top-theme-frame');
+    if(!frame||frame.contentWindow!==event.source||!db||busy)return;
     const theme=event.data.theme;
     if(theme!=='light'&&theme!=='dark')return;
     clearTimeout(gbLiquidThemeTimer);
     gbLiquidThemeTimer=null;
     if(db.settings.theme===theme)return;
-    // Aguarda a luz completar seu movimento, mas não grava se o painel fechar.
     const wait=window.matchMedia('(prefers-reduced-motion: reduce)').matches?0:620;
     gbLiquidThemeTimer=setTimeout(()=>{
       gbLiquidThemeTimer=null;
-      if(!modal.open||!frame.isConnected||document.querySelector('#gb-liquid-theme-frame')!==frame)return;
+      if(!frame.isConnected||document.querySelector('#gb-top-theme-frame')!==frame)return;
       void commit(d=>{d.settings.theme=theme;},'Tema atualizado.').catch(error=>toast(error?.message||'Não foi possível salvar o tema.'));
     },wait);
   });
@@ -237,7 +232,19 @@ function updateSystemAppearance(theme){
  document.querySelector('meta[name="theme-color"]')?.setAttribute('content',color);
  try{localStorage.setItem('gbplus-appearance-v1',selected);}catch{}
 }
-function render(){if(!db)return;updateSystemAppearance(db.settings.theme);document.querySelector('#navigation').innerHTML=routes.map(([key,label,ico])=>`<a href="#${key}" class="nav-item ${state.route===key?'active':''}" ${state.route===key?'aria-current="page"':''}>${icon(ico)}<span>${label}</span></a>`).join('');document.querySelector('#breadcrumb').textContent=state.route==='profile'?'Minha conta':routes.find(r=>r[0]===state.route)?.[1]||'Visão geral';document.querySelector('.theme-button').innerHTML=`${icon(db.settings.theme==='light'?'moon':'sun')}<span>Modo ${db.settings.theme==='light'?'escuro':'claro'}</span><span class="theme-switch"></span>`;document.querySelector('[data-action="search"]').innerHTML=icon('search');const notificationBell=document.querySelector('[data-action="notifications"]');const dueNotifications=db.titles.filter(t=>!t.cancelled&&pending(db,t)>0&&t.due<=today()).length;notificationBell.innerHTML=icon('bell')+(dueNotifications?'<span class="notification-dot" aria-hidden="true"></span>':'');notificationBell.setAttribute('aria-label','Notificações'+(dueNotifications?' · '+dueNotifications+' títulos vencidos ou vencendo hoje':''));const topTheme=document.querySelector('[data-action="top-theme"]');if(topTheme){const dark=db.settings.theme==='dark';topTheme.innerHTML=icon(dark?'sun':'moon');topTheme.setAttribute('aria-label',dark?'Ativar modo claro':'Ativar modo escuro');topTheme.title=dark?'Ativar modo claro':'Ativar modo escuro';topTheme.setAttribute('aria-pressed',String(dark));}const gbMobileNav=document.querySelector('#mobile-navigation');
+function render(){if(!db)return;updateSystemAppearance(db.settings.theme);document.querySelector('#navigation').innerHTML=routes.map(([key,label,ico])=>`<a href="#${key}" class="nav-item ${state.route===key?'active':''}" ${state.route===key?'aria-current="page"':''}>${icon(ico)}<span>${label}</span></a>`).join('');document.querySelector('#breadcrumb').textContent=state.route==='profile'?'Minha conta':routes.find(r=>r[0]===state.route)?.[1]||'Visão geral';document.querySelector('.theme-button').innerHTML=`${icon(db.settings.theme==='light'?'moon':'sun')}<span>Modo ${db.settings.theme==='light'?'escuro':'claro'}</span><span class="theme-switch"></span>`;document.querySelector('[data-action="search"]').innerHTML=icon('search');const notificationBell=document.querySelector('[data-action="notifications"]');
+const dueAlerts=calculateDueAlerts(db,today());
+notificationBell.innerHTML=icon('bell')+(dueAlerts.total?'<span class="notification-dot" aria-hidden="true"></span>':'');
+notificationBell.setAttribute('aria-label','Notificações'+(dueAlerts.total?' · '+dueAlerts.total+' lembrete(s) de vencimento':''));
+const topGlass=document.querySelector('#gb-top-theme-frame');
+if(topGlass){
+  const currentTheme=db.settings.theme==='dark'?'dark':'light';
+  if(topGlass.dataset.theme!==currentTheme){
+    topGlass.dataset.theme=currentTheme;
+    topGlass.src='./lab/liquid-theme-toggle.html?embed=1&compact=1&theme='+encodeURIComponent(currentTheme);
+  }
+}
+const gbMobileNav=document.querySelector('#mobile-navigation');
 gbMobileNav.classList.add('gb-liquid-nav');
 gbMobileNav.innerHTML=(()=>{
  const custom=effectiveMobileNav(db.settings);
@@ -824,7 +831,23 @@ const actions={
     button.setAttribute('aria-pressed',String(selected));
    });
   },
-  'new-title':()=>openModal('Novo lançamento',titleForm(db,null,state.type||'expense')),
+  'new-title':async()=>{
+    const type=state.type||'expense';
+    const needed=missingCategorySuggestions(db.categories).length;
+    if(needed){
+      try{await commit(d=>appendCategorySuggestions(d.categories,uid),needed+' categorias adicionadas à seleção.');}
+      catch(error){toast('Não foi possível ampliar as categorias agora. Você ainda pode lançar com as existentes.');}
+    }
+    openModal('Novo lançamento',titleForm(db,null,type));
+  },
+  'add-suggested-categories':async()=>{
+    const fromEntry=!!modal.querySelector('#title-form');
+    const type=modal.querySelector('#title-form')?.elements?.type?.value||state.type||'expense';
+    const needed=missingCategorySuggestions(db.categories).length;
+    if(!needed){toast('Sua lista de categorias já está completa.');return;}
+    await commit(d=>appendCategorySuggestions(d.categories,uid),needed+' novas categorias disponíveis.');
+    if(fromEntry)openModal('Novo lançamento',titleForm(db,null,type));
+  },
   'open-banks':()=>{location.hash='banks';if(state.route==='banks')render();},
   'accounts-cards-tab':el=>{
    const tab=el.dataset.tab;
@@ -992,10 +1015,23 @@ const actions={
     if(opening)input.focus();else{input.value='';filterSettings('');}
   },
   'settings-appearance':()=>openModal('Aparência',
-    '<p class="muted">Arraste o vidro para escolher o tema. A preferência será aplicada em todo o GB+.</p>'+
-    '<iframe id="gb-liquid-theme-frame" class="gb-liquid-theme-frame" title="Alternar tema claro ou escuro com seletor Liquid Glass" src="./lab/liquid-theme-toggle.html?embed=1&amp;theme='+encodeURIComponent(db.settings.theme==='dark'?'dark':'light')+'" loading="eager"></iframe>'+
-    '<p class="gb-liquid-theme-help">Toque, arraste ou use as setas do teclado. A configuração fica salva em suas preferências.</p>'),
-    'settings-backup':()=>openModal('Backup e restauração',
+    '<p class="muted">O controle Liquid Glass agora fica no canto superior da tela. Arraste-o para alternar entre claro e escuro.</p>'+
+    '<p class="form-hint" style="margin-top:12px">Como alternativa, você também pode escolher um modo abaixo.</p>'+
+    '<div class="button-stack" style="margin-top:16px">'+
+    button(icon('sun')+' Modo claro','set-theme',db.settings.theme==='light'?'primary':'','data-value="light"')+
+    button(icon('moon')+' Modo escuro','set-theme',db.settings.theme==='dark'?'primary':'','data-value="dark"')+'</div>'),
+  'notification-preferences':()=>{const p=notificationPrefs(db.settings);
+    const check=(key,label)=>'<label class="gb-notification-toggle"><input type="checkbox" name="'+key+'" '+(p[key]?'checked':'')+'>'+label+'</label>';
+    openModal('Configurar avisos de vencimento',
+      '<form id="notification-preferences-form" class="gb-notification-config">'+
+      check('enabled','Ativar avisos de vencimento')+
+      '<label class="gb-notification-select">Avisar com antecedência<select name="daysBefore" aria-label="Dias de antecedência">'+NOTIFICATION_DAYS.map(n=>'<option value="'+n+'" '+(p.daysBefore===n?'selected':'')+'>'+ (n===0?'Somente no dia':n+' dia(s) antes')+'</option>').join('')+'</select></label>'+
+      check('expenses','Avisar sobre contas a pagar')+
+      check('incomes','Avisar sobre contas a receber')+
+      check('includeOverdue','Mostrar vencimentos atrasados')+
+      '<p class="form-hint">O GB+ mostra esses lembretes dentro do aplicativo a partir dos vencimentos cadastrados. Não envia push com o aplicativo fechado.</p>'+formFooter('Salvar avisos')+'</form>');
+  },
+      'settings-backup':()=>openModal('Backup e restauração',
     '<p class="muted">Exporte uma cópia dos seus registros financeiros. A restauração substitui os registros atuais e exige confirmação antes de salvar.</p>'+
     '<div class="button-stack" style="margin-top:20px">'+
     button(icon('download')+' Exportar backup JSON','backup','primary')+
@@ -1306,6 +1342,15 @@ document.addEventListener('change',e=>{
  if(e.target?.matches?.('select[name="bankId"]')&&db)syncBankPicker(e.target.closest('.gb-bank-picker'),db);
 });
 document.addEventListener('input',e=>{
+ if(e.target?.id==='gb-category-icon-search'){
+  const term=String(e.target.value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+  const form=e.target.closest('#category-form');
+  form?.querySelectorAll('.gb-category-icon-choice').forEach(choice=>{
+    const title=String(choice.title||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+    choice.hidden=!!term&&!title.includes(term);
+  });
+  return;
+ }
  if(bankImportDraft?.step==='review'&&e.target?.matches?.('[data-bank-create-description]')){
   const index=Number(e.target.dataset.bankCreateDescription),choice=bankImportDraft.decisions[index];
   if(choice?.action==='create'){
@@ -1509,6 +1554,13 @@ document.addEventListener('submit',async e=>{e.preventDefault();if(busy||!db)ret
    const result=forecastResult(db,forecastDays,title.id,v.due);
    openModal('Resultado da simulação',result+'<div class="form-footer">'+button('Voltar à previsão','close','primary')+'</div>');
   }
+  else if(form.id==='notification-preferences-form'){
+    const value={enabled:v.enabled==='on',daysBefore:Number(v.daysBefore),
+      expenses:v.expenses==='on',incomes:v.incomes==='on',includeOverdue:v.includeOverdue==='on'};
+    if(!validNotificationPrefs(value))throw Error('Confira as preferências de avisos.');
+    if(value.enabled&&!value.expenses&&!value.incomes)throw Error('Escolha contas a pagar ou a receber para avisar.');
+    await commit(d=>{d.settings.notifications=value;},'Preferências de avisos atualizadas.');
+  }
   else if(form.id==='category-form'){if(!CATEGORY_ICON_OPTIONS.some(([key])=>key===v.icon))throw Error('Escolha um ícone válido para a categoria.');await commit(d=>{const row={...v,id:id||uid(),name:v.name.trim()};if(d.categories.some(c=>c.id!==row.id&&c.type===row.type&&c.name.toLowerCase()===row.name.toLowerCase()))throw Error('Já existe uma categoria com este nome e tipo.');if(id&&d.titles.some(t=>t.categoryId===id&&t.type!==v.type))throw Error('Não é possível alterar o tipo de uma categoria em uso.');upsert(d.categories,row);});}
   else if(form.id==='payment-form'){await commit(d=>addPayment(d,{titleId:id,accountId:v.accountId,date:v.date,amount:cents(v.amount)}),'Baixa registrada. Saldo atualizado.');}
   else if(form.id==='launch-bulk-pay-form'){
@@ -1596,7 +1648,7 @@ function updateConnection(){
   document.querySelector('#connection').textContent=online?(navigator.onLine?'Conta online':'Sem conexão · gravação indisponível'):(navigator.onLine?'Dados neste navegador':'Sem conexão · modo local');
   document.querySelector('.local-mark').innerHTML='<span class="status-dot"></span> '+(online?'Conta online<small>Dados privados do seu login.</small>':'Armazenamento local<small>Seus dados, neste navegador.</small>');
   const access=document.querySelector('#account-access');
-  access.innerHTML=icon('user');access.setAttribute('aria-label',online?'Minha conta':'Entrar na minha conta');access.title=online?'Minha conta — '+currentUser().email:'Entrar na minha conta';
+  if(access){access.innerHTML=icon('user');access.setAttribute('aria-label',online?'Minha conta':'Entrar na minha conta');access.title=online?'Minha conta — '+currentUser().email:'Entrar na minha conta';}
 }
 async function refreshOnline(manual=false){
   if(!currentUser()||!db||busy||!navigator.onLine||document.hidden||document.body.classList.contains('auth-locked'))return;
