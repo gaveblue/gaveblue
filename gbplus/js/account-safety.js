@@ -1,7 +1,7 @@
 // GB+ 2.6.1 — destructive actions never run from page rendering.
 // Reset clears ONLY the financial document, not Supabase Auth identity/profile.
 // Actual persistence always goes through the revision-checked repository.save().
-import {emptyDatabase} from './store.js?v=20261106-2610';
+import {emptyDatabase} from './store.js?v=20261108-2861';
 
 export const RESET_CONFIRMATION='LIMPAR';
 export const DELETE_CONFIRMATION='EXCLUIR';
