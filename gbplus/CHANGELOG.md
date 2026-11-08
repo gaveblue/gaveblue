@@ -3,6 +3,12 @@
 
 ## [2.8.0 — FATURAS INTEGRADAS (CANDIDATA; NÃO HOMOLOGADA/NÃO PUBLICADA)] — 2026-11-07
 
+### Interfaces aprovadas — implementação iniciada em 08/11/2026
+- **Navegação Liquid Glass:** lente translúcida segue o atalho ativo, preservando cinco atalhos, personalização e botão Novo. Modos claro/escuro, foco e preferência por movimento reduzido respeitados; barra oculta em Configurações como antes.
+- **Seletor de tema Liquid Glass:** protótipo v2 aprovado integrado ao modal Configurações → Aparência; lua/sol pixelados e luz orbital azul embaixo → direita → dourado em cima. Tema gravado pelo fluxo financeiro atual, com evento limitado à mesma origem e janela.
+- **Estado:** funcionalidade candidata em desenvolvimento, aprovação visual obtida; **não homologada/não publicada**. Nenhum dado de produção foi migrado ou alterado.
+
+
 **Em desenvolvimento na branch `feature/gbplus-280-faturas`.** Nenhuma liberação nem homologação integral é declarada. A versão pública permanece em 2.7.8 até nova autorização de liberação.
 
 - **Faturas de cartões:** cada cartão passa a exibir o próximo fechamento, vencimento previsto, total em aberto, faturas existentes, situação de pagamento e um botão **Pagar**, conectado ao formulário de baixa já usado pelo Contas a pagar.
