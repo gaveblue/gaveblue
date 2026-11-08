@@ -1,6 +1,6 @@
 // GB+ 2.6.0 — optional service identities for expense titles.
 // The picker does not submit, subscribe, pay or reconcile anything.
-import {serviceById} from './service-catalog.js?v=20261108-2861';
+import {serviceById} from './service-catalog.js?v=20261108-2864';
 import {SERVICE_BRAND_PATHS} from './service-brand-paths.js?v=20261106-2600';
 import {SERVICE_EXTRA_BRAND_PATHS} from './service-extra-brand-paths.js?v=20261108-2861';
 import {SERVICE_BRAND_COLORS} from './service-brand-colors.js?v=20261106-2620';
