@@ -1,15 +1,15 @@
 {
-  "version": "2.8.0",
+  "version": "2.8.1",
   "build": 1,
-  "published_at": "2026-11-08T17:27:50.000Z",
-  "title": "Faturas de cartão integradas e interfaces Liquid Glass",
+  "published_at": "2026-11-08T17:59:34.000Z",
+  "title": "Correções de cartões e navegação Liquid Glass",
   "notes": [
-    "Faturas dos cartões com fechamento, vencimento, total pendente e ação Pagar vinculada ao fluxo atual de baixa.",
-    "Cadastro de saldo consolidado de fatura externa, criando um único título a pagar e impedindo duplicidade por cartão/competência.",
-    "Baixa parcial permite acompanhar valor devido e limite sem contabilizar a compra como saída bancária antecipada.",
-    "Barra inferior Liquid Glass aprovada, com lente animada na aba selecionada e preservação de atalhos personalizados.",
-    "Seletor Liquid Glass em Configurações → Aparência, incluindo brilho orbital azul/dourado, lua/sol pixelados e persistência da preferência.",
-    "Liberação autorizada expressamente em 08/11/2026, com homologação parcial: regressões de faturas, navegação e seletor em ambiente isolado passaram; testes nativos completos, Android/PWA integrado e Supabase autenticado continuam pendentes."
+    "Corrigido o erro de função na lista de faturas dos cartões quando existem lançamentos; Pagar aparece para faturas pendentes e desaparece após quitação.",
+    "Atualizadas as referências dos módulos de cartões para que a tela Contas e Cartões carregue a correção sem utilizar o componente antigo em cache.",
+    "Removido do topo o texto Conta online para priorizar o botão existente de alternar o tema, preservando autenticação e sincronização.",
+    "A seção Mais agora abre uma página completa com 16 destinos em quatro grupos, em vez de um pop-up.",
+    "O indicador Liquid Glass é posicionado e dimensionado de acordo com a aba realmente ativa, mantendo ícones e rótulos centralizados.",
+    "Liberação autorizada em 08/11/2026 com 20 verificações direcionadas e 22 verificações Liquid Glass aprovadas no V8; homologação integral Node, Android/PWA e Supabase autenticado permanece pendente."
   ],
   "assets": [
     "./index.html",
@@ -171,28 +171,30 @@
     "./bottom-sheet.css",
     "./js/period-preference.js",
     "./liquid-glass.css",
-    "./lab/liquid-theme-toggle.html"
+    "./lab/liquid-theme-toggle.html",
+    "./js/more-view.js",
+    "./more-page.css"
   ],
   "highlights": [
     {
       "icon": "card",
-      "title": "Faturas no fluxo financeiro",
-      "description": "Acompanhe vencimentos, registre saldo consolidado e pague suas faturas."
+      "title": "Faturas corrigidas",
+      "description": "A lista de cartões e os botões de pagamento voltaram a funcionar."
+    },
+    {
+      "icon": "menu",
+      "title": "Mais em tela cheia",
+      "description": "Todas as funcionalidades em grupos, com navegação mais simples."
     },
     {
       "icon": "sparkles",
-      "title": "Navegação Liquid Glass",
-      "description": "Barra inferior mais fluida, mantendo seus atalhos e a ação Novo."
-    },
-    {
-      "icon": "sparkles",
-      "title": "Seletor de tema Liquid Glass",
-      "description": "Arraste o vidro entre o modo claro e o escuro com iluminação orbital."
+      "title": "Liquid Glass alinhado",
+      "description": "Botões centralizados e acesso ao tema com mais espaço."
     }
   ],
-  "release_status": "authorized_release_ci_node_android_pwa_supabase_validation_pending",
+  "release_status": "authorized_release_2_8_1_partial_validation",
   "homologation": {
-    "status": "partial_testing_release_authorized_full_homologation_pending",
-    "notes": "Autorização expressa do usuário em 08/11/2026. Antes de publicar: 25 verificações de faturas +14 de edição de cartão (V8 isolado), 4 cenários de navegação, 6 de tema, 22 verificações estáticas Liquid Glass; protótipos no Chromium. GitHub Actions run #42504209375 falhou antes de iniciar etapas (runner_id=0). Pendentes: suíte Node completa, Android/PWA real no aplicativo, Supabase autenticado e confirmação do deploy. Não declarar homologação integral."
+    "status": "release_authorized_partial_testing_full_homologation_pending",
+    "notes": "Usuário autorizou concluir a 2.8.1 em 08/11/2026. 20 verificações da regressão direcionada, 22 de Liquid Glass, 4 rotas e teste dinâmico de fatura pendente/quitada: passaram em V8 isolado. Pendentes teste de aplicativo real Android/PWA, suíte Node integral, persistência Supabase e confirmação do deploy. Não marcar como homologação integral."
   }
 }

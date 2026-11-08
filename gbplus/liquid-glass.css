@@ -9,14 +9,14 @@ body:not(.auth-locked) .mobile-nav.gb-liquid-nav{
 }
 body:not(.auth-locked) .mobile-nav.gb-liquid-nav::before{
   content:"";pointer-events:none;position:absolute;z-index:0;
-  left:6px;top:6px;bottom:6px;width:calc((100% - 12px)/5);
+  left:var(--gb-liquid-left,6px);top:6px;bottom:6px;width:var(--gb-liquid-width,calc((100% - 12px)/5));
   border-radius:20px;opacity:var(--gb-liquid-visible,0);
   background:linear-gradient(142deg,rgba(255,255,255,.92),rgba(240,245,255,.75) 58%,rgba(193,208,241,.4));
   border:1px solid rgba(255,255,255,.96);
   box-shadow:0 4px 14px rgba(37,55,96,.17),inset 0 1px 0 rgba(255,255,255,.95),inset 0 -2px 8px rgba(139,163,222,.12);
   -webkit-backdrop-filter:blur(9px) saturate(170%);backdrop-filter:blur(9px) saturate(170%);
-  transform:translate3d(var(--gb-liquid-offset,0%),0,0);
-  transition:transform 540ms cubic-bezier(.2,1.23,.3,1),opacity 200ms ease;
+  transform:none;
+  transition:left 540ms cubic-bezier(.2,1.23,.3,1),width 250ms ease,opacity 200ms ease;
 }
 body:not(.auth-locked) .mobile-nav.gb-liquid-nav::after{
   content:"";position:absolute;inset:1px;pointer-events:none;z-index:0;border-radius:inherit;
@@ -49,3 +49,13 @@ html[data-theme=dark] .mobile-nav.gb-liquid-nav>a.active{color:#f6f7fb}
 .gb-liquid-theme-help{font-size:11px;line-height:1.55;color:var(--muted);text-align:center;margin:12px 0 2px}
 @media(max-width:760px){.gb-liquid-theme-frame{height:290px;border-radius:18px}}
 @media(prefers-reduced-motion:reduce){.mobile-nav.gb-liquid-nav::before,.mobile-nav.gb-liquid-nav>a,.mobile-nav.gb-liquid-nav>button{transition:none!important}}
+/* 2.8.1: espaço limpo no cabeçalho e indicador centrado no alvo real. */
+.top-actions .connection{display:none!important}
+@media(max-width:760px){
+  .top-actions{gap:9px;justify-content:flex-end;flex-shrink:0}
+  .top-actions .top-theme-button{display:inline-flex!important;align-items:center;justify-content:center;min-width:42px;min-height:42px;flex:0 0 42px;border-radius:50%;color:var(--ink)}
+  .top-actions .top-theme-button .icon{width:21px;height:21px}
+  .top-actions .top-theme-button:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+  .mobile-nav.gb-liquid-nav>a,.mobile-nav.gb-liquid-nav>button{flex:1 1 0;text-align:center;padding-inline:2px;min-width:0}
+  .mobile-nav.gb-liquid-nav>a span,.mobile-nav.gb-liquid-nav>button span{text-align:center;max-width:100%}
+}

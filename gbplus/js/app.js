@@ -6,7 +6,8 @@ import {uid,today,money,dateLabel,cents,addMonths,validDate,generateTitles,addPa
 import {KEY,INDICATORS,defaultPanel,parseBackup,backupText,MOBILE_SHORTCUTS,defaultMobileNav,effectiveMobileNav,validMobileNav,shouldOfferSetup} from './store.js?v=20261106-2600';
 import {esc,icon,button,field,select,formFooter,download,csv,titleTable} from './ui.js?v=20261105-72';
 import {routes,dashboard,titlesView,partnersView,categoriesView,flowView,reportsView,settingsView,notificationsView,filteredTitles,reportData} from './views.js?v=20261107-admin1';
-import {accountsCardsView} from './accounts-cards-view.js?v=20261106-2513';
+import {moreView} from './more-view.js?v=20261108-2811';
+import {accountsCardsView} from './accounts-cards-view.js?v=20261108-2811';
 import {renderReactCharts,unmountReactCharts} from './gb-react-loader.js?v=20261105-45';
 import {mountNativeCharts} from './gb-charts-native.js?v=20261106-68';
 import {titleForm,partnerForm,accountForm,categoryForm,paymentForm,transferForm,titleDetail,customizeForm,accountDetail} from './forms.js?v=20261107-2800';
@@ -27,7 +28,7 @@ import {firstSetupView,customMobileNavForm,shortcutsPreview,readMobileNav,firstS
 import {BANKS,bankCatalog,findBank,bankForAccount,bankBadge,bankName,syncBankPicker,filterBankPicker,filterBankDirectory} from './banks.js?v=20261105-87';
 import {addCardPurchase,registerCardInvoiceBalance,updateCardPurchase,removeCardPurchase,ensureCardMayChange,creditCards,cardPurchases,cardAvailable,cardCycle,shiftCardCycle,cardDue} from './credit-cards.js?v=20261107-2800';
 import {cashForecast} from './forecast.js?v=20261105-72';
-import {banksView,bankForm,cardForm,cardPurchaseForm,cardInvoiceBalanceForm,forecastView,forecastSummary,forecastScenarioForm,forecastResult} from './finance-24-ui.js?v=20261107-2800';
+import {banksView,bankForm,cardForm,cardPurchaseForm,cardInvoiceBalanceForm,forecastView,forecastSummary,forecastScenarioForm,forecastResult} from './finance-24-ui.js?v=20261108-2811';
 import {launchesView} from './launches-view.js?v=20261107-2760';
 import {installLaunchGestures} from './launches-gestures.js?v=20261104-38';
 import {launchSelection,paymentSelection,paymentSummary,applyLaunchPayments,reversedSelection,applyLaunchReversals,deletionSelection,applyLaunchDeletions} from './launch-actions.js?v=20261105-72';
@@ -200,6 +201,21 @@ function updateMobileNavPreview(form){
  const message=form.querySelector('.form-error');
  if(message)message.textContent=validMobileNav(current)?'':'Selecione três atalhos diferentes, sem repetições.';
 }
+
+function alignLiquidNavIndicator(){
+  const nav=document.querySelector('#mobile-navigation');
+  if(!nav?.classList.contains('gb-liquid-nav'))return;
+  const active=nav.querySelector('[aria-current="page"]');
+  if(!active || nav.getBoundingClientRect().width===0){
+    nav.style.setProperty('--gb-liquid-visible','0');
+    return;
+  }
+  const bar=nav.getBoundingClientRect(),tab=active.getBoundingClientRect();
+  nav.style.setProperty('--gb-liquid-left',Math.max(0,tab.left-bar.left).toFixed(1)+'px');
+  nav.style.setProperty('--gb-liquid-width',tab.width.toFixed(1)+'px');
+  nav.style.setProperty('--gb-liquid-visible','1');
+}
+window.addEventListener('resize',()=>requestAnimationFrame(alignLiquidNavIndicator));
 function renderMobileShortcut(key){
  if(key==='menu')return ['menu','Mais','more'];
  const item=MOBILE_SHORTCUTS.find(([id])=>id===key);
@@ -226,15 +242,19 @@ gbMobileNav.classList.add('gb-liquid-nav');
 gbMobileNav.innerHTML=(()=>{
  const custom=effectiveMobileNav(db.settings);
  const slots=[['dashboard','Início','home'],renderMobileShortcut(custom[0]),['new','Novo','plus'],renderMobileShortcut(custom[1]),renderMobileShortcut(custom[2])];
-  // A lente acompanha o atalho real ativo; as preferências do usuário não mudam.
-  const activeIndex=slots.findIndex(([key])=>key==='accounts'||key==='cards'
-    ?state.route==='accounts'&&state.accountCardsTab===key
-    :state.route===key);
-  gbMobileNav.style.setProperty('--gb-liquid-offset',String(Math.max(0,activeIndex)*100)+'%');
+  // Mais é uma página navegável; Início e Novo permanecem fixos.
+  const isActive=key=>key==='menu'?state.route==='more':
+    key==='accounts'||key==='cards'?state.route==='accounts'&&state.accountCardsTab===key:
+    state.route===key;
+  const activeIndex=slots.findIndex(([key])=>isActive(key));
   gbMobileNav.style.setProperty('--gb-liquid-visible',activeIndex<0?'0':'1');
-
- return slots.map(([key,label,ico])=>key==='new'||key==='menu'?`<button type="button" data-action="${key==='new'?'new-title':'mobile-menu'}" class="${key==='new'?'mobile-new':''}" aria-label="${label}">${icon(ico)}<span>${label}</span></button>`:`<a href="#${key}" class="${(key==='accounts'||key==='cards'?state.route==='accounts'&&state.accountCardsTab===key:state.route===key)?'active':''}" ${(key==='accounts'||key==='cards'?state.route==='accounts'&&state.accountCardsTab===key:state.route===key)?'aria-current="page"':''}>${icon(ico)}<span>${label}</span></a>`).join('');
-})();const views={dashboard:()=>dashboard(db,state,!!currentUser(),currentUser()),titles:()=>launchesView(db,state),payable:()=>titlesView(db,state),receivable:()=>titlesView(db,state),partners:()=>partnersView(db,state),accounts:()=>accountsCardsView(db,state.accountCardsTab),categories:()=>categoriesView(db),flow:()=>flowView(db,state),provisions:()=>flowView(db,state),reports:()=>reportsView(db,state),settings:()=>settingsView(db,!isInstalledApp(),!!currentUser(),currentUser(),isInstalledApp()),notifications:()=>notificationsView(db),banks:()=>banksView(db),cards:()=>accountsCardsView(db,'cards'),forecast:()=>forecastView(db,forecastDays),profile:()=>profileView(currentUser(),profileCpfStatus.userId===currentUser()?.id?profileCpfStatus:{ready:false,cpf:'',error:''})};document.body.classList.toggle('gb-settings-page',state.route==='settings');unmountReactCharts();document.querySelector('#main').innerHTML=(views[state.route]||views.dashboard)();if(state.route==='dashboard'){
+  return slots.map(([key,label,ico])=>{
+    if(key==='new')return '<button type="button" data-action="new-title" class="mobile-new" aria-label="Novo">'+icon(ico)+'<span>Novo</span></button>';
+    const actual=key==='menu'?'more':key;
+    const active=isActive(key);
+    return '<a href="#'+actual+'" class="'+(active?'active':'')+'" '+(active?'aria-current="page"':'')+'>'+icon(ico)+'<span>'+esc(label)+'</span></a>';
+  }).join('');
+})();requestAnimationFrame(alignLiquidNavIndicator);const views={dashboard:()=>dashboard(db,state,!!currentUser(),currentUser()),more:()=>moreView(!!currentUser()),titles:()=>launchesView(db,state),payable:()=>titlesView(db,state),receivable:()=>titlesView(db,state),partners:()=>partnersView(db,state),accounts:()=>accountsCardsView(db,state.accountCardsTab),categories:()=>categoriesView(db),flow:()=>flowView(db,state),provisions:()=>flowView(db,state),reports:()=>reportsView(db,state),settings:()=>settingsView(db,!isInstalledApp(),!!currentUser(),currentUser(),isInstalledApp()),notifications:()=>notificationsView(db),banks:()=>banksView(db),cards:()=>accountsCardsView(db,'cards'),forecast:()=>forecastView(db,forecastDays),profile:()=>profileView(currentUser(),profileCpfStatus.userId===currentUser()?.id?profileCpfStatus:{ready:false,cpf:'',error:''})};document.body.classList.toggle('gb-settings-page',state.route==='settings');unmountReactCharts();document.querySelector('#main').innerHTML=(views[state.route]||views.dashboard)();if(state.route==='dashboard'){
  const flowSection=document.querySelector('#main .dashboard-middle');
  if(flowSection)flowSection.insertAdjacentHTML('beforebegin',forecastSummary(db));
 }
@@ -325,7 +345,7 @@ function initializeProfileDirtyState(){
  syncProfileSaveState(form);
 }
 function applyPanel(){const device=matchMedia('(max-width: 760px)').matches?'mobile':'desktop';document.querySelectorAll('[data-indicator]').forEach(el=>{el.hidden=!db.settings.panel[device][el.dataset.indicator];});document.querySelectorAll('.dashboard-middle,.results-grid,.stats-grid').forEach(el=>el.hidden=![...el.children].some(x=>!x.hidden));}
-function route(){if(!db)return;const requested=location.hash.slice(1);const next=requested==='cards'?'accounts':requested;if(requested==='cards'){state.accountCardsTab='cards';history.replaceState(null,'','#accounts');}if(next==='main'&&document.querySelector('#main').childElementCount)return;const previous=state.route;state.route=next==='profile'||routes.some(r=>r[0]===next)?next:'dashboard';if(previous!==state.route){state.launchSelected=[];state.launchStatusOpen=false;}state.type=state.route==='payable'?'expense':state.route==='receivable'?'income':'';closeModal();render();window.scrollTo(0,0);}
+function route(){if(!db)return;const requested=location.hash.slice(1);const next=requested==='cards'?'accounts':requested;if(requested==='cards'){state.accountCardsTab='cards';history.replaceState(null,'','#accounts');}if(next==='main'&&document.querySelector('#main').childElementCount)return;const previous=state.route;state.route=next==='profile'||next==='more'||routes.some(r=>r[0]===next)?next:'dashboard';if(previous!==state.route){state.launchSelected=[];state.launchStatusOpen=false;}state.type=state.route==='payable'?'expense':state.route==='receivable'?'income':'';closeModal();render();window.scrollTo(0,0);}
 function formValues(form){return Object.fromEntries(new FormData(form));}
 function getTitle(id){const t=db.titles.find(t=>t.id===id);if(!t)throw Error('Título não encontrado.');return t;}
 function fail(error){
@@ -1160,7 +1180,7 @@ const actions={
   },
   search:()=>{state.query='';location.hash='titles';if(state.route==='titles')render();requestAnimationFrame(()=>document.querySelector('#title-search')?.focus());},
   notifications:()=>{location.hash='notifications';if(state.route==='notifications')render();},
-  'mobile-menu':()=>openModal('Seu financeiro',`<nav class="menu-grid">${routes.map(([key,label,ico])=>`<a href="#${key}" data-action="close">${icon(ico)}${label}</a>`).join('')}</nav><div class="local-note">${icon('info')} ${currentUser()?'Conta online · use o mesmo login em seus dispositivos.':'Dados locais, sem sincronização entre dispositivos.'}</div>`),
+  'mobile-menu':()=>{location.hash='more';if(state.route==='more')render();},
   'legacy-backup':()=>{if(!currentUser())return;const raw=localStorage.getItem(KEY);if(!raw){toast('Não há registros locais antigos neste navegador.');return;}download('gb-plus-local-original.json',raw,'application/json');toast('Cópia local exportada. Seus dados online não foram alterados.');},
   backup:()=>{download(`gb-plus-backup-${today()}.json`,backupText(db),'application/json');toast('Backup exportado. Guarde-o em um local seguro.');},
   restore:()=>document.querySelector('#backup-input').click(),
