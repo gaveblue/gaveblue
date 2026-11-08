@@ -119,7 +119,7 @@ const modal=document.querySelector('#modal');
         await commit(d=>{d.settings.theme=theme;},'Tema atualizado.');
       }catch(error){
         frame.dataset.theme=previousTheme;
-        frame.src='./lab/liquid-theme-toggle.html?embed=1&compact=1&v=20261108-2832&theme='+encodeURIComponent(previousTheme);
+        frame.src='./lab/liquid-theme-toggle.html?embed=1&compact=1&v=20261108-2841&theme='+encodeURIComponent(previousTheme);
         toast(error?.message||'Não foi possível salvar o tema.');
       }finally{
         clearLiquidThemePreview();
@@ -297,7 +297,7 @@ if(topGlass){
   const currentTheme=db.settings.theme==='dark'?'dark':'light';
   if(topGlass.dataset.theme!==currentTheme){
     topGlass.dataset.theme=currentTheme;
-    topGlass.src='./lab/liquid-theme-toggle.html?embed=1&compact=1&v=20261108-2832&theme='+encodeURIComponent(currentTheme);
+    topGlass.src='./lab/liquid-theme-toggle.html?embed=1&compact=1&v=20261108-2841&theme='+encodeURIComponent(currentTheme);
   }
 }
 const gbMobileNav=document.querySelector('#mobile-navigation');
