@@ -35,5 +35,5 @@ assert.match(toggle,/setOrbit\(p\)/,'A faixa orbital aprovada deve continuar ati
 assert.match(toggle,/reflectState\(initialLight\)/,'O seletor deve iniciar no tema já salvo');
 assert.match(toggle,/canSendTheme=true/,'A inicialização não deve enviar comando de tema ao aplicativo');
 assert.match(changelog,/Interfaces aprovadas — incluídas na 2\.8\.0 em 08\/11\/2026/,'Atualização precisa ser documentada');
-assert.match(page,/gbplus-version" content="2\.8\.1"/,'A versão autorizada precisa anunciar 2.8.1');
-console.log('Liquid Glass 2.8.1: regressão de 23 asserções após alinhamento dos ícones.');
+assert.match(page,/gbplus-version" content="2\.8\.2"/,'A versão autorizada precisa anunciar 2.8.2');
+console.log('Liquid Glass 2.8.2: regressão de 23 asserções após alinhamento dos ícones.');
