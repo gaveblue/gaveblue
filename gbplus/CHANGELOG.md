@@ -6,9 +6,11 @@
 
 - **Causa da moldura preta:** no iframe compacto, o documento mantinha `color-scheme: dark` independentemente do tema. O fundo transparente do iframe era desenhado sobre uma tela escura ao redor do trilho claro; reproduzido em navegador Chromium.
 - **Correção:** o tema inicial é definido antes do primeiro desenho (modo claro ou escuro, com variáveis CSS correspondentes), e a indicação `color-scheme` acompanha o arrasto. O iframe segue transparente; o trilho claro e a lente receberam gradiente branco/cinza suave, bordas delicadas e sombras de baixa intensidade.
+- **Transição progressiva (novo pedido):** o botão agora envia a posição fracionária de 0 a 1 para o aplicativo enquanto o usuário arrasta. O fundo, os cartões, os elementos de vidro e a barra inferior interpolam as cores com `color-mix()`, acompanhando a mola após soltar; textos trocam o contraste no ponto médio para permanecerem legíveis.
+- **Segurança e persistência:** mensagens aceitas apenas do iframe de origem verificada; progresso inválido é ignorado. A prévia é apenas CSS e **não grava dados**. O tema é salvo uma única vez depois que o usuário solta; novo arrasto cancela uma gravação pendente, e a visualização volta ao tema salvo em caso de falha.
 - **Preservado:** tecla/arrasto do seletor, trajetória orbital com luz azul no modo escuro e dourada no modo claro, sincronização com o tema salvo, notificações, dados financeiros e layout das demais telas.
-- **Cabeçalho:** componente discretamente menor (59px de altura) e cache invalidado nos arquivos CSS/JS e no próprio iframe (`20261108-2831`).
-- **Evidências:** comparação visual headless no Chromium reproduziu o defeito e a eliminação da moldura preta em modo claro. Regressões locais aprovadas: 131 verificações 2.8.2, 26 avisos/interface, 20 cartões/navegação, 23 Liquid Glass anterior e 19 específicas deste ajuste.
+- **Cabeçalho:** componente discretamente menor (59px de altura) e cache invalidado nos arquivos CSS/JS e no próprio iframe (`20261108-2832`).
+- **Evidências:** comparação visual headless no Chromium reproduziu o defeito e a eliminação da moldura preta em modo claro. Regressões locais aprovadas: 131 verificações 2.8.2, 26 avisos/interface, 20 cartões/navegação, 23 Liquid Glass anterior e 19 específicas do vidro claro e 27 novas verificações do arrasto progressivo (tema claro/escuro, origem, persistência e cancelamento). Validação adicional de cores intermediárias no Chromium headless.
 - **Status:** candidata aguardando homologação/publicação; sem alterações na versão pública 2.8.2. Falta verificação final no PWA/Android real com os dois temas.
 
 ## [2.8.2 — CARTEIRA, CATEGORIAS, LIQUID GLASS E AVISOS (LIBERAÇÃO WEB AUTORIZADA; HOMOLOGAÇÃO PARCIAL)] — 2026-11-08
