@@ -11,6 +11,7 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({
  '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
 })[c]);
 const {isServiceExpenseCategory}=load('service-catalog',{},['isServiceExpenseCategory']);
+const {isSelectableExpenseCategory,isPrimaryServiceCategory}=load('category-library',{},['isSelectableExpenseCategory','isPrimaryServiceCategory']);
 assert(isServiceExpenseCategory({type:'expense',name:'Serviços'}));
 assert(isServiceExpenseCategory({type:'expense',name:'Assinaturas digitais'}));
 assert(isServiceExpenseCategory({type:'expense',name:'Streaming'}));
@@ -25,7 +26,7 @@ const titleUI=load('forms',{
  icon:()=>'<svg aria-hidden="true"></svg>',servicePickerMarkup:()=>'<section class="gb-service-field">Serviço ou aplicativo</section>',
  serviceDisplayName:(id,name,fallback)=>id==='streaming-netflix'?'Netflix':id==='custom'?name:fallback,
  textarea:(label,name,value)=>'<label>'+label+'<textarea name="'+name+'">'+esc(value||'')+'</textarea></label>',
- categoryIconFor:()=> 'calendar',isServiceExpenseCategory,
+ categoryIconFor:()=> 'calendar',isServiceExpenseCategory,isSelectableExpenseCategory,isPrimaryServiceCategory,
 },['titleForm']);
 const db={
  categories:[{id:'c1',name:'Serviços',type:'expense'},{id:'c3',name:'Água',type:'expense'},{id:'c2',name:'Vendas',type:'income'}],
