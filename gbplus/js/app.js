@@ -50,14 +50,29 @@ let bankImportDraft=null; // Memory-only preview; released on modal close.
 const state={route:'dashboard',accountCardsTab:'accounts',period:'all',range:{},query:'',status:'',type:'',partner:'',category:'',partnerQuery:'',granularity:'month',flowChartMode:'bars',flowStatus:'all',report:'payable',reportPartner:'',moreFilters:false,launchSelected:[],launchStatusOpen:false,launchSearchOpen:false};
 const modal=document.querySelector('#modal');
   // A integração escuta só a janela ativa do seletor, na mesma origem.
+  let gbLiquidThemeTimer=null;
+  // Fechar a janela interrompe a renderização contínua do canvas no iframe.
+  modal.addEventListener('close',()=>{
+    clearTimeout(gbLiquidThemeTimer);
+    gbLiquidThemeTimer=null;
+    modal.querySelector('#gb-liquid-theme-frame')?.remove();
+  });
   window.addEventListener('message',event=>{
     if(event.origin!==location.origin||event.data?.type!=='gbplus:liquid-theme')return;
     const frame=document.querySelector('#gb-liquid-theme-frame');
     if(!frame||!modal.open||frame.contentWindow!==event.source||!db||busy)return;
     const theme=event.data.theme;
     if(theme!=='light'&&theme!=='dark')return;
+    clearTimeout(gbLiquidThemeTimer);
+    gbLiquidThemeTimer=null;
     if(db.settings.theme===theme)return;
-    void commit(d=>{d.settings.theme=theme;},'Tema atualizado.').catch(error=>toast(error?.message||'Não foi possível salvar o tema.'));
+    // Aguarda a luz completar seu movimento, mas não grava se o painel fechar.
+    const wait=window.matchMedia('(prefers-reduced-motion: reduce)').matches?0:620;
+    gbLiquidThemeTimer=setTimeout(()=>{
+      gbLiquidThemeTimer=null;
+      if(!modal.open||!frame.isConnected||document.querySelector('#gb-liquid-theme-frame')!==frame)return;
+      void commit(d=>{d.settings.theme=theme;},'Tema atualizado.').catch(error=>toast(error?.message||'Não foi possível salvar o tema.'));
+    },wait);
   });
 
 installGbPickerSheet();
