@@ -179,32 +179,34 @@ export function reportsView(db,state){const data=reportData(db,state);return `${
 function cfgOption(title,description,ico,color,action,badge=''){
  return `<button type="button" class="gb-cfg-row" data-action="${action}" data-settings-keywords="${esc(title+' '+description)}"><span class="gb-cfg-row-icon tone-${color}">${icon(ico)}</span><span class="gb-cfg-row-label"><strong>${esc(title)}</strong><small>${esc(description)}</small></span>${badge?`<span class="gb-cfg-version">${esc(badge)}</span>`:''}<span class="gb-cfg-next">${icon('chevron')}</span></button>`;
 }
-function cfgSection(label,rows){
+function cfgSection(label,rows,embedded=false){
+ if(embedded)return `<details class="gb-cfg-group gb-more-cfg-group" aria-label="${esc(label)}" ${label==='PREFERÊNCIAS'?'open':''}><summary class="gb-more-cfg-summary"><span>${esc(label)}</span>${icon('chevron')}</summary><div class="gb-cfg-list">${rows}</div></details>`;
  return `<section class="gb-cfg-group" aria-label="${esc(label)}"><h2>${esc(label)}</h2><div class="gb-cfg-list">${rows}</div></section>`;
 }
 export function settingsView(db,canInstall,online=false,user=null,installed=false,embedded=false){
+ const section=(label,rows)=>cfgSection(label,rows,embedded);
  const appVersion=document.querySelector('meta[name="gbplus-version"]')?.content||'2.1.3';
  const name=String(user?.user_metadata?.gbplus_profile?.full_name||user?.user_metadata?.full_name||user?.user_metadata?.name||user?.email?.split('@')[0]||'Minha conta').trim();
  // Visibility is restricted to the owner; the admin API independently validates
  // the authenticated user's live app_metadata on every request.
  const administration=online&&user?.id==='aa9701df-8e84-42cc-b2bd-4b644a983260'&&user?.app_metadata?.gbplus_admin===true
-  ?cfgSection('ADMINISTRAÇÃO',`<a href="./admin.html" class="gb-cfg-row" data-settings-keywords="painel administrativo usuários perfis gerenciar"><span class="gb-cfg-row-icon tone-purple">${icon('shield')}</span><span class="gb-cfg-row-label"><strong>Painel administrativo</strong><small>Gerenciar usuários e perfis do GB+</small></span><span class="gb-cfg-next">${icon('chevron')}</span></a>`):'';
- const preferences=cfgSection('PREFERÊNCIAS',
+  ?section('ADMINISTRAÇÃO',`<a href="./admin.html" class="gb-cfg-row" data-settings-keywords="painel administrativo usuários perfis gerenciar"><span class="gb-cfg-row-icon tone-purple">${icon('shield')}</span><span class="gb-cfg-row-label"><strong>Painel administrativo</strong><small>Gerenciar usuários e perfis do GB+</small></span><span class="gb-cfg-next">${icon('chevron')}</span></a>`):'';
+ const preferences=section('PREFERÊNCIAS',
   cfgOption('Aparência','Escolha entre modo claro e escuro','palette','purple','settings-appearance')+
   cfgOption('Avisos de vencimento','Escolha prazos e tipos de lembretes','bell','orange','notification-preferences')+
   cfgOption('Personalizar painel','Escolha e organize os cards do início','grid','blue','customize')+
   cfgOption('Barra de ações','Defina os atalhos exibidos na navegação','phone','cyan','customize-mobile-nav'));
- const records=cfgSection('DADOS E REGISTROS',
+ const records=section('DADOS E REGISTROS',
   cfgOption('Backup e restauração','Exportar ou restaurar seus dados','cloud','green','settings-backup')+
   cfgOption('Dados da conta','Registros, sincronização e armazenamento','database','blue','settings-data')+
   cfgOption('Limpar todos os dados','Recomeçar o financeiro sem excluir seu login','trash','neutral','settings-reset')+
   cfgOption('Configuração inicial','Ajustes básicos e saldo inicial','gear','orange','restart-setup')+
   cfgOption('Bancos e instituições','Gerenciar logos e instituições personalizadas','wallet','blue','open-banks')+
   cfgOption('Cartões de crédito','Limites, faturas e compras parceladas','credit-card','purple','open-cards'));
- const system=cfgSection('SISTEMA',
+ const system=section('SISTEMA',
   cfgOption('Atualizações do GB+','Verificar nova versão e instalar','refresh','blue','settings-updates','v'+appVersion)+
   (installed?'':cfgOption('Instalar aplicativo','Adicionar o GB+ à tela inicial','download','purple','install')));
- const support=cfgSection('SUPORTE E SOBRE',
+ const support=section('SUPORTE E SOBRE',
   cfgOption('Convidar um amigo','Compartilhe o GB+ com seus amigos','share','green','invite-friend')+
   cfgOption('Ajuda e suporte','Dúvidas, tutoriais e contato','help','blue','settings-help')+
   cfgOption('Sobre o GB+','Versão, novidades e licenças','info','neutral','settings-about'));
