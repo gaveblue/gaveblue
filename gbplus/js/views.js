@@ -179,7 +179,7 @@ export function settingsView(db,canInstall,online=false,user=null,installed=fals
  const administration=online&&user?.id==='aa9701df-8e84-42cc-b2bd-4b644a983260'&&user?.app_metadata?.gbplus_admin===true
   ?cfgSection('ADMINISTRAÇÃO',`<a href="./admin.html" class="gb-cfg-row" data-settings-keywords="painel administrativo usuários perfis gerenciar"><span class="gb-cfg-row-icon tone-purple">${icon('shield')}</span><span class="gb-cfg-row-label"><strong>Painel administrativo</strong><small>Gerenciar usuários e perfis do GB+</small></span><span class="gb-cfg-next">${icon('chevron')}</span></a>`):'';
  const preferences=cfgSection('PREFERÊNCIAS',
-  cfgOption('Aparência','Tema pelo seletor superior e layout','palette','purple','settings-appearance')+
+  cfgOption('Aparência','Escolha entre modo claro e escuro','palette','purple','settings-appearance')+
   cfgOption('Avisos de vencimento','Escolha prazos e tipos de lembretes','bell','orange','notification-preferences')+
   cfgOption('Personalizar painel','Escolha e organize os cards do início','grid','blue','customize')+
   cfgOption('Barra de ações','Defina os atalhos exibidos na navegação','phone','cyan','customize-mobile-nav'));
