@@ -20,6 +20,12 @@ jobs:
     steps:
       - name: Checkout do código
         uses: actions/checkout@v4
+      - name: Instalar Node 22 para verificações estáticas
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verificar política de segurança antes de compilar
+        run: node gbplus/android-beta/scripts/security-check.mjs
       - name: Instalar Java 17
         uses: actions/setup-java@v4
         with:
