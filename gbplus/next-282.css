@@ -46,3 +46,13 @@
 .gb-notification-config select{display:block;width:100%;border:1px solid var(--border);border-radius:11px;padding:11px;background:var(--surface);color:var(--ink);margin-top:7px}
 .gb-notification-config .form-hint{line-height:1.6;margin:18px 0}
 @media(max-width:420px){.gb-alert-row-value{font-size:11px}.gb-alert-row{padding:12px;gap:8px}.gb-category-icon-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+
+/* Destaque de Minha Conta na página Mais, mantendo o acesso pelo menu. */
+.gb-more-profile{display:flex;align-items:center;gap:15px;border:1px solid var(--border);background:var(--surface);color:var(--ink);padding:16px;border-radius:20px;text-decoration:none;box-shadow:0 5px 22px #1111190c;min-height:82px}
+.gb-more-profile>span:nth-child(2){flex:1;display:flex;flex-direction:column;gap:5px;min-width:0}
+.gb-more-profile strong{font-size:14px;font-weight:750}
+.gb-more-profile small{font-size:11px;color:var(--muted)}
+.gb-more-profile-symbol{width:43px;height:43px;border-radius:50%;background:var(--soft);display:grid;place-items:center}
+.gb-more-profile-symbol .icon{width:24px;height:24px}
+.gb-more-profile:hover,.gb-more-profile:focus-visible{background:var(--hover)}
+.gb-more-profile:focus-visible{outline:2px solid #8b9fed;outline-offset:2px}
