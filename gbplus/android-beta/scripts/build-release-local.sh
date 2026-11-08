@@ -1,17 +1,22 @@
 #!/usr/bin/env bash
 # GB+ Android beta: signed APK local build WITHOUT GitHub Actions.
 # Requires locally installed Android SDK 36, Java 17+, Gradle 8.13 and keytool.
-set -euo pipefail
+set -eo pipefail
 SELF="$(cd "$(dirname "$0")" && pwd)"
 PROJECT="$(cd "$SELF/.." && pwd)"
 if ! command -v gradle >/dev/null 2>&1; then
   echo "ERRO: Gradle 8.13 não encontrado. Instale Gradle ou use Android Studio/PWABuilder." >&2
   exit 2
 fi
+if ! command -v node >/dev/null 2>&1; then
+  echo 'ERRO: Node.js não encontrado para verificações de segurança.' >&2
+  exit 2
+fi
 if ! command -v keytool >/dev/null 2>&1; then
   echo "ERRO: keytool não disponível. Instale o JDK." >&2
   exit 2
 fi
+if [[ -z "$ANDROID_HOME" && -n "$ANDROID_SDK_ROOT" ]]; then ANDROID_HOME="$ANDROID_SDK_ROOT"; fi
 if [[ -z "$ANDROID_HOME" || ! -d "$ANDROID_HOME/platforms/android-36" ]]; then
   echo "ERRO: Android SDK 36 não encontrado. Instale pelo Android Studio." >&2
   exit 2
