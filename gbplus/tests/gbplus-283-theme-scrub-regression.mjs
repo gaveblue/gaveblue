@@ -55,8 +55,10 @@ send({type:'gbplus:liquid-theme-progress',progress:1.4,phase:'drag'});
 check(!classes.has('gb-theme-preview'),'Progresso fora do intervalo rejeitado.');
 send({type:'gbplus:liquid-theme-progress',progress:.25,phase:'drag'});
 check(classes.has('gb-theme-preview')&&props.get('--gb-theme-day-share')==='25.00%','25% de claridade ao arrastar.');
+check(props.get('--gb-theme-text-day-share')==='0%','Textos claros permanecem legíveis na metade escura.');
 send({type:'gbplus:liquid-theme-progress',progress:.67,phase:'drag'});
 check(props.get('--gb-theme-day-share')==='67.00%','Progresso é contínuo, não só 0/1.');
+check(props.get('--gb-theme-text-day-share')==='100%','Textos escuros aparecem com contraste na metade clara.');
 check(db.settings.theme==='light'&&writeCount===0,'Sem gravação ou inversão do tema durante arrasto.');
 send({type:'gbplus:liquid-theme',theme:'dark'});
 check(writeCount===0&&timersByDelay(620).length===1,'Persistência é agendada somente depois de soltar.');
@@ -65,7 +67,7 @@ check(timersByDelay(620).length===0,'Novo arrasto cancela uma escolha anterior p
 send({type:'gbplus:liquid-theme',theme:'dark'});
 await runDelay(620);
 check(writeCount===1&&db.settings.theme==='dark','Soltar e concluir grava o modo escuro uma única vez.');
-check(!classes.has('gb-theme-preview'),'Após salvar o preview é limpo.');
+check(!classes.has('gb-theme-preview')&&!props.has('--gb-theme-text-day-share'),'Após salvar, preview e ajuste de contraste são limpos.');
 check(frame.dataset.theme==='dark'&&frame.src==='initial','O iframe não é recarregado durante a mola.');
 send({type:'gbplus:liquid-theme-progress',progress:.72,phase:'drag'});
 send({type:'gbplus:liquid-theme',theme:'dark'});
@@ -83,7 +85,7 @@ check(toggle.includes("type:'gbplus:liquid-theme-progress'")&&toggle.includes('p
 check(toggle.includes("type:'gbplus:liquid-theme-settled'")&&toggle.includes('userInteracting=false'),'O iframe sinaliza fim da mola.');
 check(toggle.includes("Math.abs(p-lastSentPreview) < .004"),'Mensagens redundantes são limitadas.');
 check(toggle.includes("setOrbit(p)")&&toggle.includes('const stiffness = 205'),'Orbital e mola originais permanecem.');
-check(style.includes('html.gb-theme-preview')&&style.includes('color-mix(in srgb'),'Cores misturadas em tempo real por CSS.');
+check(style.includes(':root[data-theme].gb-theme-preview')&&style.includes('color-mix(in srgb'),'Mistura de cores tem precedência mesmo sobre o tema escuro salvo.');
 check(style.includes('--bg:color-mix')&&style.includes('--ink:color-mix')&&style.includes('--surface:color-mix'),'Fundo, texto e cartões acompanham o arrasto.');
 check(style.includes('html.gb-theme-preview body::after'),'Área inferior acompanha o tema no celular.');
 check(html.includes('v=20261108-2832')&&app.includes('v=20261108-2832'),'Cache novo do seletor e do aplicativo.');
