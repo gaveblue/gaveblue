@@ -10,7 +10,7 @@ const finance=read('js/finance-24-ui.js'),accounts=read('js/accounts-cards-view.
 let passed=0;
 const test=(condition,label)=>{assert.ok(condition,label);passed++;};
 test(page.includes('id="connection" class="connection" hidden'),'Status online não deve ocupar o cabeçalho');
-test(page.includes('data-action="top-theme"'),'Atalho de alternância de tema precisa continuar no topo');
+test(page.includes('id="gb-top-theme-frame"'),'Seletor Liquid Glass compacto deve substituir o ícone anterior');
 test(accounts.includes("finance-24-ui.js?v=20261108-2811"),'A tela Contas/Cartões deve carregar a nova versão do código de faturas');
 test(app.includes("accounts-cards-view.js?v=20261108-2811"),'A importação da tela Contas/Cartões deve ter cache invalidado');
 test(page.includes('./more-page.css?v=20261108-2811'),'A página Mais precisa carregar seu estilo');
@@ -25,7 +25,7 @@ const body=moreCode.replace(/^import[^\n]*\n/gm,'').replace(/^export /gm,'');
 const moreView=Function('esc','icon',body+';return moreView;')(s=>String(s),s=>'<i>'+s+'</i>');
 const moreHtml=moreView(true);
 test(moreHtml.includes('href="#cards"')&&moreHtml.includes('href="#settings"'),'Todas as principais funcionalidades devem estar listadas');
-test((moreHtml.match(/class="gb-more-row"/g)||[]).length===16,'Mais deve exibir 16 destinos');
+test((moreHtml.match(/class="gb-more-row"/g)||[]).length===15&&moreHtml.includes('class="gb-more-profile"'),'Mais deve listar 15 destinos e Minha Conta destacada');
 test(moreStyle.includes('max-width:770px')&&moreStyle.includes('gb-more-list'),'A página Mais deve ter lista responsiva');
 
 const start=app.indexOf('function alignLiquidNavIndicator(){');
@@ -68,4 +68,4 @@ test(open.includes('data-action="payment"'),'Fatura pendente precisa oferecer Pa
 db.payments.push({id:'pagamento',titleId:'fatura',amount:12000});
 const settled=cardsView(db,{embedded:true});
 test(!settled.includes('data-action="payment"'),'Fatura quitada não pode oferecer Pagar');
-console.log('GB+ 2.8.1: '+passed+' verificações aprovadas — cartões, Mais, cabeçalho e lente centralizada.');
+console.log('GB+ 2.8.2: '+passed+' verificações aprovadas — cartões, Mais, cabeçalho e lente centralizada.');
