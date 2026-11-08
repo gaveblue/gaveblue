@@ -59,3 +59,39 @@ html[data-theme="dark"] .gb-top-theme-frame{color-scheme:dark}
 .gb-more-profile-symbol .icon{width:24px;height:24px}
 .gb-more-profile:hover,.gb-more-profile:focus-visible{background:var(--hover)}
 .gb-more-profile:focus-visible{outline:2px solid #8b9fed;outline-offset:2px}
+
+/* GB+ 2.8.3 · Live Liquid Glass drag scrub.
+   Only active while dragging/springing. Percentage values originate from the
+   compact theme iframe; the persisted theme remains untouched until release.
+   color-mix is supported by current Chromium / Android WebView browsers. */
+html.gb-theme-preview{
+  --bg:color-mix(in srgb,#f6f6f8 var(--gb-theme-day-share,100%),#111214);
+  --surface:color-mix(in srgb,#ffffff var(--gb-theme-day-share,100%),#1b1c1f);
+  --soft:color-mix(in srgb,#f7f7f9 var(--gb-theme-day-share,100%),#222327);
+  --ink:color-mix(in srgb,#19191c var(--gb-theme-day-share,100%),#f2f2f4);
+  --muted:color-mix(in srgb,#818187 var(--gb-theme-day-share,100%),#a0a0a9);
+  --subtle:color-mix(in srgb,#b7b7bf var(--gb-theme-day-share,100%),#6d6d77);
+  --border:color-mix(in srgb,#eaeaec var(--gb-theme-day-share,100%),#303136);
+  --hover:color-mix(in srgb,#efeff2 var(--gb-theme-day-share,100%),#303136);
+  --inverse:color-mix(in srgb,#ffffff var(--gb-theme-day-share,100%),#171719);
+  --glass:color-mix(in srgb,#ffffffc9 var(--gb-theme-day-share,100%),#1b1c1fce);
+  --shadow:0 3px 8px rgb(21 21 32 / calc(var(--gb-theme-day-progress,1) * .025));
+  color:var(--ink);
+  background-color:var(--bg)!important;
+}
+html.gb-theme-preview body{background-color:var(--bg)!important;color:var(--ink)}
+@media(max-width:760px){
+  html.gb-theme-preview body::after{background-color:var(--bg)!important}
+  html.gb-theme-preview body:not(.auth-locked) .mobile-nav.gb-liquid-nav{
+    background:linear-gradient(138deg,
+      color-mix(in srgb,rgba(255,255,255,.88) var(--gb-theme-day-share,100%),rgba(59,65,82,.8)),
+      color-mix(in srgb,rgba(244,247,254,.66) var(--gb-theme-day-share,100%),rgba(26,30,41,.78)));
+    border-color:color-mix(in srgb,rgba(255,255,255,.91) var(--gb-theme-day-share,100%),rgba(223,233,255,.24));
+  }
+  html.gb-theme-preview body:not(.auth-locked) .mobile-nav.gb-liquid-nav::before{
+    background:linear-gradient(142deg,
+      color-mix(in srgb,rgba(255,255,255,.92) var(--gb-theme-day-share,100%),rgba(143,161,209,.33)),
+      color-mix(in srgb,rgba(193,208,241,.4) var(--gb-theme-day-share,100%),rgba(64,76,105,.49)));
+  }
+  html.gb-theme-preview .mobile-nav.gb-liquid-nav>a.active{color:var(--ink)}
+}
