@@ -1,15 +1,15 @@
 {
-  "version": "2.7.8",
+  "version": "2.8.0",
   "build": 1,
-  "published_at": "2026-11-07T22:53:55.573Z",
-  "title": "Correção da navegação ao voltar da prévia de lançamentos",
+  "published_at": "2026-11-08T17:27:50.000Z",
+  "title": "Faturas de cartão integradas e interfaces Liquid Glass",
   "notes": [
-    "Corrigido o desaparecimento dos botões Próximo, Voltar e Revisar ao retornar da prévia final para editar um lançamento.",
-    "A prévia guarda agora as três barras de botões que ficam fixas fora da área rolável, recriando-as corretamente ao voltar para a terceira etapa.",
-    "A alteração também preserva valores, campos selecionados, conta, cartão, opção de baixa e estados de caixas/radios entre prévia e edição.",
-    "Não houve alteração em saldos, faturas, lançamentos, regras de parcelamento ou aparência da navegação inferior.",
-    "Teste específico reproduziu retorno da prévia e navegação 3→2→1→2→3 (72 asserções), com regressões complementares aprovadas em JS V8 isolado.",
-    "A publicação não substitui o teste visual real Android/PWA nem a execução nativa integral em Node.js."
+    "Faturas dos cartões com fechamento, vencimento, total pendente e ação Pagar vinculada ao fluxo atual de baixa.",
+    "Cadastro de saldo consolidado de fatura externa, criando um único título a pagar e impedindo duplicidade por cartão/competência.",
+    "Baixa parcial permite acompanhar valor devido e limite sem contabilizar a compra como saída bancária antecipada.",
+    "Barra inferior Liquid Glass aprovada, com lente animada na aba selecionada e preservação de atalhos personalizados.",
+    "Seletor Liquid Glass em Configurações → Aparência, incluindo brilho orbital azul/dourado, lua/sol pixelados e persistência da preferência.",
+    "Liberação autorizada expressamente em 08/11/2026, com homologação parcial: regressões de faturas, navegação e seletor em ambiente isolado passaram; testes nativos completos, Android/PWA integrado e Supabase autenticado continuam pendentes."
   ],
   "assets": [
     "./index.html",
@@ -169,28 +169,30 @@
     "./js/service-brand-colors.js",
     "./js/bottom-sheet.js",
     "./bottom-sheet.css",
-    "./js/period-preference.js"
+    "./js/period-preference.js",
+    "./liquid-glass.css",
+    "./lab/liquid-theme-toggle.html"
   ],
   "highlights": [
     {
-      "icon": "minimize-2",
-      "title": "Formulário mais curto",
-      "description": "Botões compactos no cabeçalho liberam espaço no lançamento."
+      "icon": "card",
+      "title": "Faturas no fluxo financeiro",
+      "description": "Acompanhe vencimentos, registre saldo consolidado e pague suas faturas."
     },
     {
-      "icon": "calendar",
-      "title": "Período lembrado",
-      "description": "A escolha de período fica salva para cada usuário neste navegador."
+      "icon": "sparkles",
+      "title": "Navegação Liquid Glass",
+      "description": "Barra inferior mais fluida, mantendo seus atalhos e a ação Novo."
     },
     {
-      "icon": "smartphone",
-      "title": "Abertura mais alta",
-      "description": "Formulário móvel abre um pouco mais acima."
+      "icon": "sparkles",
+      "title": "Seletor de tema Liquid Glass",
+      "description": "Arraste o vidro entre o modo claro e o escuro com iluminação orbital."
     }
   ],
-  "release_status": "published_github_pages_ci_device_validation_pending",
+  "release_status": "authorized_release_ci_node_android_pwa_supabase_validation_pending",
   "homologation": {
-    "status": "published_pages_success_manual_pwa_and_financial_runner_pending",
-    "notes": "GitHub Pages #42339423278: success após build, deploy e relatório de build. Teste funcional isolado do cabeçalho: 6 cenários aprovados; checagens estáticas de preferências e estrutura concluídas. GitHub Actions de regressão financeira #42339212876 falhou antes de executar etapas (0 passos); validação visual real no Android/PWA ainda sem evidências. Publicação não significa homologação integral."
+    "status": "partial_testing_release_authorized_full_homologation_pending",
+    "notes": "Autorização expressa do usuário em 08/11/2026. Antes de publicar: 25 verificações de faturas +14 de edição de cartão (V8 isolado), 4 cenários de navegação, 6 de tema, 22 verificações estáticas Liquid Glass; protótipos no Chromium. GitHub Actions run #42504209375 falhou antes de iniciar etapas (runner_id=0). Pendentes: suíte Node completa, Android/PWA real no aplicativo, Supabase autenticado e confirmação do deploy. Não declarar homologação integral."
   }
 }

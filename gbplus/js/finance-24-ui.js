@@ -1,7 +1,7 @@
 import {esc,icon,button,field,select,formFooter,empty} from './ui.js?v=20261105-72';
-import {today,money,dateLabel,pending,accountBalance} from './domain.js?v=20261105-72';
+import {today,money,dateLabel,pending,paid,status,accountBalance} from './domain.js?v=20261105-72';
 import {BANKS,bankCatalog,bankOptions,findBank,bankBadge,bankPicker} from './banks.js?v=20261105-87';
-import {creditCards,cardPurchases,cardUsed,cardAvailable} from './credit-cards.js?v=20261107-2760';
+import {creditCards,cardPurchases,cardUsed,cardAvailable,cardCycle,cardDue} from './credit-cards.js?v=20261107-2800';
 import {cashForecast} from './forecast.js?v=20261105-72';
 
 const heading=(title,subtitle,buttons='')=>'<div class="page-heading"><div><h1>'+title+'</h1><p>'+subtitle+'</p></div><div class="heading-actions">'+buttons+'</div></div>';
@@ -39,8 +39,12 @@ export function cardsView(db,{embedded=false}={}){
  '<p class="gb-finance24-intro">Uma compra no cartão consome limite, mas não reduz o saldo da conta bancária. A fatura só reduz o saldo quando você registra a baixa do título.</p>'+
  (cards.length?'<div class="gb-credit-grid">'+cards.map(card=>{
   const bank=findBank(db,card.bankId),used=cardUsed(db,card.id),available=cardAvailable(db,card);
-  const related=purchases.filter(p=>p.cardId===card.id),invoices=db.titles.filter(t=>t.cardInvoice&&t.cardId===card.id)
-   .sort((a,b)=>a.due.localeCompare(b.due));
+  const related=purchases.filter(p=>p.cardId===card.id&&p.source!=='invoice-balance'),invoices=db.titles.filter(t=>t.cardInvoice&&t.cardId===card.id)
+   .sort((a,b)=>(pending(db,b)>0)-(pending(db,a)>0)||a.due.localeCompare(b.due));
+  const upcomingCycle=cardCycle(today(),card.closingDay);
+  const upcomingClose=upcomingCycle+'-'+String(card.closingDay).padStart(2,'0');
+  const upcomingDue=cardDue(upcomingCycle,card.closingDay,card.dueDay);
+  const totalPending=invoices.reduce((sum,invoice)=>sum+pending(db,invoice),0);
   return '<section class="gb-credit-card"><div class="gb-credit-card-top">'+bankBadge(bank)+
    '<div><h2>'+esc(card.name)+'</h2><small>'+esc(bank?.name||'Instituição não informada')+
    (card.last4?' · final '+esc(card.last4):'')+'</small></div>'+
@@ -49,11 +53,14 @@ export function cardsView(db,{embedded=false}={}){
    '<span>Utilizado '+money(used)+' de '+money(card.limit)+'</span><div class="gb-credit-meter"><i style="width:'+Math.max(0,Math.min(100,used/card.limit*100)).toFixed(2)+'%"></i></div></div>'+
    '<div class="gb-credit-card-meta"><span>Fecha dia <b>'+card.closingDay+'</b></span><span>Vence dia <b>'+card.dueDay+'</b></span>'+
    '<span>'+esc(card.active?'Ativo':'Inativo')+'</span></div>'+
-   '<div class="gb-credit-card-buttons">'+button(icon('plus')+'Compra no cartão','new-card-purchase','primary small','data-id="'+esc(card.id)+'"')+'</div>'+
-   '<h3>Faturas</h3>'+(invoices.length?invoices.slice(0,9).map(t=>
-    '<button type="button" class="gb-credit-invoice" data-action="title-detail" data-id="'+esc(t.id)+'"><span>'+dateLabel(t.due)+
-    '<small>'+esc(t.description)+'</small></span><strong>'+money(pending(db,t))+'</strong></button>').join(''):
-    '<p class="muted">Nenhuma fatura registrada.</p>')+
+   '<p class="gb-invoice-next">Próximo fechamento: <strong>'+dateLabel(upcomingClose)+'</strong> · Vencimento previsto: <strong>'+dateLabel(upcomingDue)+'</strong></p>'+ 
+   '<div class="gb-credit-card-buttons">'+button(icon('plus')+'Compra no cartão','new-card-purchase','primary small','data-id="'+esc(card.id)+'"')+
+    button('Informar saldo de fatura','new-card-invoice','small','data-id="'+esc(card.id)+'"')+'</div>'+
+   '<h3>Faturas <small class="gb-invoice-total">'+money(totalPending)+' a pagar</small></h3>'+(invoices.length?invoices.slice(0,12).map(t=>
+    '<div class="gb-credit-invoice-row"><button type="button" class="gb-credit-invoice" data-action="title-detail" data-id="'+esc(t.id)+'"><span>'+dateLabel(t.due)+
+    '<small>'+esc(t.description)+' · '+(cardPurchases(db).some(p=>p.invoiceId===t.id&&p.source==='invoice-balance')?'Saldo informado · ':'')+status(db,t)+(paid(db,t.id)>0&&pending(db,t)>0?' · '+money(paid(db,t.id))+' pagos':'')+'</small></span><strong>'+money(pending(db,t))+'</strong></button>' 
+    (pending(db,t)>0?button('Pagar','payment','small','data-id="'+esc(t.id)+'" aria-label="Pagar '+esc(t.description)+'"'):'')+'</div>').join(''):
+    '<p class="muted">Ainda não há faturas com valores lançados. Os próximos vencimentos são apenas previsões de calendário.</p>')+
    '<h3>Compras recentes</h3>'+(related.length?related.slice().sort((a,b)=>b.date.localeCompare(a.date)).slice(0,10).map(p=>
     '<div class="gb-credit-purchase"><div><strong>'+esc(p.description)+'</strong><small>'+dateLabel(p.date)+
     ' · parcela '+p.sequence+'/'+p.count+'</small></div><span>'+money(p.amount)+'</span>'+
@@ -61,6 +68,19 @@ export function cardsView(db,{embedded=false}={}){
     button(icon('trash'),'delete-card-purchase','small','data-id="'+esc(p.id)+'" aria-label="Excluir compra"')+'</div></div>').join(''):
     '<p class="muted">Nenhuma compra cadastrada neste cartão.</p>')+'</section>';
  }).join('')+'</div>':empty('Cadastre seu primeiro cartão','Informe limite e dias de fechamento e vencimento para gerar suas faturas.','new-card','Cadastrar cartão'));
+}
+export function cardInvoiceBalanceForm(db,cardId=''){
+ const card=creditCards(db).find(c=>c.id===cardId&&c.active);
+ if(!card)return empty('Cadastre um cartão ativo','Para informar uma fatura, escolha um cartão ativo.','new-card','Cadastrar cartão');
+ const cycle=cardCycle(today(),card.closingDay);
+ return '<form id="card-invoice-balance-form">'+
+  '<input type="hidden" name="cardId" value="'+esc(card.id)+'">'+
+  '<div class="form-grid"><p class="full"><strong>'+esc(card.name)+'</strong> · Fecha dia '+card.closingDay+' · Vence dia '+card.dueDay+'</p>'+
+   '<div class="full">'+field('Competência da fatura (mês/ano)','cycle',cycle,'month','required max="'+esc(cycle)+'"')+'</div>'+
+   '<div class="full">'+field('Valor consolidado da fatura (R$)','amount','','number','required min="0.01" max="10000000000" step="0.01"')+'</div>'+
+   '<div class="full">'+field('Identificação','description','Saldo informado da fatura','text','required maxlength="300"')+'</div></div>'+
+  '<p class="form-hint">Use apenas para uma fatura informada pelo banco que ainda não possui compras registradas no GB+ nesta competência. Não registre compras dessa mesma fatura novamente: isso duplicaria o valor. O lançamento será criado em Contas a pagar, com vencimento conforme o cartão; a conta bancária só será debitada quando a baixa for confirmada.</p>'+
+  formFooter('Gerar fatura a pagar')+'</form>';
 }
 export function cardForm(db,card){
  const options=bankOptions(db);
@@ -83,15 +103,30 @@ export function cardPurchaseForm(db,cardId='',purchase=null){
  const group=purchase?(purchase.groupId?cardPurchases(db).filter(p=>p.groupId===purchase.groupId):[purchase]):[];
  const total=group.reduce((sum,p)=>sum+p.amount,0);
  const locked=group.some(p=>db.payments?.some(row=>row.titleId===p.invoiceId));
+ const imported=purchase?.source==='invoice-balance';
+ if(imported){
+  const card=active.find(c=>c.id===purchase.cardId);
+  return '<form id="card-purchase-form" data-id="'+esc(purchase.id)+'">'+
+   '<input type="hidden" name="cardId" value="'+esc(purchase.cardId)+'">'+
+   '<input type="hidden" name="date" value="'+esc(purchase.date)+'">'+
+   '<input type="hidden" name="categoryId" value="'+esc(purchase.categoryId)+'">'+
+   '<input type="hidden" name="partnerId" value="">'+
+   '<input type="hidden" name="count" value="1">'+
+   '<div class="form-grid"><p class="full"><strong>'+esc(card?.name||'Cartão')+'</strong> · Competência '+esc(card?.closingDay?cardCycle(purchase.date,card.closingDay):'—')+'</p>'+
+    '<div class="full">'+field('Identificação da fatura','description',purchase.description,'text','required maxlength="300"')+'</div>'+
+    '<div class="full">'+field('Valor consolidado da fatura (R$)','amount',total/100,'number','required min="0.01" max="10000000000" step="0.01"')+'</div></div>'+
+   '<p class="form-hint">'+(locked?'Esta fatura já possui pagamento. Estorne todas as baixas antes de alterar o valor.':'O valor informado representa toda a fatura: não lance compras individuais nesta mesma competência.')+'</p>'+
+   formFooter('Salvar saldo da fatura')+'</form>';
+ }
  return '<form id="card-purchase-form" data-id="'+esc(purchase?.id||'')+'"><div class="form-grid">'+
   '<div class="full">'+select('Cartão utilizado','cardId',active.map(c=>[c.id,c.name+(c.active?'':' (inativo)')]),selected,'required')+'</div>'+
-  '<div class="full">'+field('Descrição da despesa','description',purchase?.description||'','text','required maxlength="300" placeholder="Ex.: Compra no supermercado"')+'</div>'+
+  '<div class="full">'+field(imported?'Descrição do saldo da fatura':'Descrição da despesa','description',purchase?.description||'','text','required maxlength="300" placeholder="Ex.: Compra no supermercado"')+'</div>'+
   '<div class="full">'+select('Categoria da despesa','categoryId',db.categories.filter(c=>c.type==='expense').map(c=>[c.id,c.name]),purchase?.categoryId||'','required')+'</div>'+
   '<div class="full">'+select('Parceiro (opcional)','partnerId',[['','Sem parceiro'],...db.partners.filter(p=>p.active||p.id===purchase?.partnerId).map(p=>[p.id,p.name])],purchase?.partnerId||'')+'</div>'+
   field('Data da compra','date',purchase?.date||today(),'date','required max="'+today()+'"')+
   field('Valor total (R$)','amount',purchase?total/100:'','number','required min="0.01" step="0.01" max="10000000000"')+
   field('Número de parcelas','count',group.length||1,'number','required min="1" max="36" step="1"')+
-  '</div><p class="form-hint">'+(locked?
+  '</div><p class="form-hint">'+(imported?'Saldo consolidado lançado manualmente. Não cadastre compras individuais para esta competência sem antes remover o saldo informado. ': '')+(locked?
    'Esta compra possui fatura paga. Você pode ajustar descrição, categoria e parceiro; para mudar valores ou parcelas, estorne a baixa da fatura primeiro.':
    'Alterações de cartão, data, valor ou parcelas recalculam as faturas correspondentes sem duplicar despesas ou afetar o caixa antes da baixa.')+
   '</p>'+formFooter(purchase?'Salvar alterações':'Registrar compra')+'</form>';

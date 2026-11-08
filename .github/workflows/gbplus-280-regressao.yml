@@ -1,0 +1,31 @@
+name: GB+ 2.8.0 - regressao da candidata
+on:
+  push:
+    branches:
+      - feature/gbplus-280-faturas
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  regressao:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout somente-leitura
+        uses: actions/checkout@v4
+      - name: Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Executar suite de homologacao local sem publicar
+        run: node gbplus/scripts/homologar-local.mjs
+      - name: Preservar relatorio da suite
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gbplus-280-relatorio-testes
+          path: gbplus/homologacao-local/relatorios/*.json
+          if-no-files-found: warn
+          retention-days: 14

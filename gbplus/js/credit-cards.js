@@ -41,9 +41,20 @@ export function addCardPurchase(db,input){
  const description=String(input.description||'').trim();
  if(!description||description.length>300)throw Error('Informe uma descrição válida para a compra.');
  if(!db.categories.some(c=>c.id===input.categoryId&&c.type==='expense'))throw Error('Selecione uma categoria de despesa.');
+ const source=input.source||'purchase';
+ if(!['purchase','invoice-balance'].includes(source)||source==='invoice-balance'&&count!==1)
+  throw Error('Tipo de lançamento de cartão inválido.');
+ const baseCycle=cardCycle(input.date,card.closingDay);
+ // A statement balance replaces itemized purchases for this cycle; never sum both.
+ for(let index=0;index<count;index++){
+  const cycle=shiftCardCycle(baseCycle,index);
+  const invoice=db.titles.find(t=>t.cardInvoice===true&&t.cardId===card.id&&t.cardCycle===cycle&&!t.cancelled);
+  if(invoice&&(source==='invoice-balance'||cardPurchases(db).some(p=>p.invoiceId===invoice.id&&p.source==='invoice-balance')))
+   throw Error('Esta competência já tem fatura ou saldo informado. Exclua o saldo manual antes de lançar compras individuais para evitar duplicidade.');
+ }
  if(cardAvailable(db,card)<value)throw Error('Esta compra ultrapassa o limite disponível do cartão. Confira o limite e as faturas.');
  if(!Array.isArray(db.cardPurchases))db.cardPurchases=[];
- const categoryId=invoiceCategory(db),groupId=count>1?uid():null,baseCycle=cardCycle(input.date,card.closingDay);
+ const categoryId=invoiceCategory(db),groupId=count>1?uid():null;
  const generated=[];
  for(let index=0;index<count;index++){
   const cycle=shiftCardCycle(baseCycle,index);
@@ -65,11 +76,37 @@ export function addCardPurchase(db,input){
   const row={
    id:uid(),cardId:card.id,invoiceId:invoice.id,date:input.date,amount:part,description,
    categoryId:input.categoryId,partnerId:input.partnerId||'',groupId,
-   sequence:index+1,count
+   source,sequence:index+1,count
   };
   db.cardPurchases.push(row);generated.push(row);
  }
  return generated;
+}
+/**
+ * Record a consolidated balance from an external statement, without creating
+ * an additional expense title for an already itemized GB+ invoice.
+ * It occupies exactly one card cycle. The financial title remains the same
+ * cardInvoice title used by the ordinary payment and forecast flows.
+ */
+export function registerCardInvoiceBalance(db,input){
+ const card=creditCards(db).find(c=>c.id===input.cardId&&c.active);
+ if(!card)throw Error('Selecione um cartão de crédito ativo.');
+ const cycle=String(input.cycle||'');
+ if(!/^\d{4}-(0[1-9]|1[0-2])$/.test(cycle)||cycle>cardCycle(today(),card.closingDay))
+  throw Error('Informe uma competência atual ou anterior para a fatura.');
+ const closeDate=cycle+'-'+String(card.closingDay).padStart(2,'0');
+ const date=closeDate<=today()?closeDate:today();
+ if(cardCycle(date,card.closingDay)!==cycle)
+  throw Error('A competência informada não corresponde ao ciclo do cartão.');
+ const description=String(input.description||'Saldo informado da fatura').trim();
+ if(!description||description.length>300)throw Error('Informe uma identificação válida para a fatura.');
+ // Existing purchases/invoices, including a prior manually entered balance,
+ // must be reconciled by the user rather than summed a second time.
+ if(db.titles.some(t=>t.cardInvoice===true&&t.cardId===card.id&&t.cardCycle===cycle&&!t.cancelled))
+  throw Error('Já existe uma fatura para esta competência. Abra-a para pagar ou editar as compras.');
+ const categoryId=invoiceCategory(db);
+ return addCardPurchase(db,{cardId:card.id,date,amount:input.amount,count:1,
+  description,categoryId,partnerId:'',source:'invoice-balance'});
 }
 export function removeCardPurchase(db,id){
  const purchase=cardPurchases(db).find(p=>p.id===id);
@@ -123,7 +160,7 @@ export function updateCardPurchase(db,id,input){
  // Rebuild on a detached copy. Failed limit/validation never touches live records.
  const draft=structuredClone(db);
  removeCardPurchase(draft,id);
- const created=addCardPurchase(draft,{cardId,date,amount,count,description,categoryId,partnerId});
+ const created=addCardPurchase(draft,{cardId,date,amount,count,description,categoryId,partnerId,source:purchase.source||'purchase'});
  // Keep stable installment ids when the number of installments remains unchanged.
  if(created.length===ordered.length){
   for(let i=0;i<created.length;i++)created[i].id=ordered[i].id;

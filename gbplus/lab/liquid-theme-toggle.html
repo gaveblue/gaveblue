@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#10121a" />
+  <title>GB+ | Glass Light Toggle — Protótipo</title>
+  <style>
+:root {
+  color-scheme: dark;
+  --progress: 0;
+  --day: 0;
+  --night: 1;
+  font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+* { box-sizing: border-box; }
+html, body { margin:0; min-height:100%; }
+html { overflow-x:clip; }
+body { min-height: 100svh; overflow-x: hidden; position:relative; background: #0a0d16; color:#e8e9ee; }
+.scene { position:fixed; inset:0; z-index:0; pointer-events:none; }
+.scene-night { background:radial-gradient(ellipse 58% 48% at 48% 56%, rgba(49,60,104,.30) 0%, rgba(12,15,25,.2) 64%, transparent 100%), linear-gradient(165deg,#080a10 0%,#151827 65%, #0c0e16 100%); }
+.scene-day { opacity:var(--day); background:radial-gradient(ellipse 70% 65% at 45% 57%, #fffefa 0%,#f7f6f0 55%,#e8e7e1 100%); }
+.page { position:relative; z-index:1; min-height:100svh; display:flex; flex-direction:column; }
+.topbar { width: min(1140px, calc(100% - 48px)); margin:0 auto; padding-top:36px; display:flex; align-items:center; justify-content:space-between; }
+.brand { display:flex;align-items:center;gap:14px; font-weight:700; letter-spacing:-.8px; font-size:19px; color:color-mix(in srgb, #fff calc(var(--night) * 100%), #222 calc(var(--day) * 100%)); }
+.brand-mark span { color:#80a9ff; }
+.brand-separator { width:1px;height:17px;background:#818ba3;opacity:.45; }
+.brand-suffix { font:500 11px/1 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:2px;opacity:.65; }
+.proto-label { font:500 10px/1.1 ui-monospace,SFMono-Regular,Consolas,monospace; color: #999dac;letter-spacing:1.65px; }
+.showcase { width:100%; flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:56px 16px 70px; }
+.intro { text-align:center; margin-bottom:64px; }
+.eyebrow { font:600 11px/1 ui-monospace,monospace; letter-spacing:2.4px; color:#8c9fe0; margin:0 0 21px; }
+h1 { margin:0; font-size:clamp(30px,4.5vw,48px);font-weight:550; letter-spacing:-2px; color:color-mix(in srgb,#f3f4f7 calc(var(--night) * 100%),#26252c calc(var(--day) * 100%)); }
+.lead { margin:14px 0 0; color:color-mix(in srgb,#a2a6b7 calc(var(--night) * 100%),#727176 calc(var(--day) * 100%)); font-size:14px; letter-spacing:.1px; }
+.toggle-stage { width:min(650px, 100%); position:relative; }
+.stage-halo { position:absolute;z-index:-1;pointer-events:none;top:-36%;bottom:-48%;left:-30%;right:-30%; }
+.stage-halo-night { opacity:var(--night); background:radial-gradient(ellipse 38% 36% at 31% 56%, rgba(61,92,220,.17),transparent 80%);filter:blur(25px); }
+.stage-halo-day { opacity:var(--day); background:radial-gradient(ellipse 36% 41% at 69% 48%,rgba(243,181,65,.22),transparent 80%);filter:blur(30px); }
+.toggle { width:100%; aspect-ratio:2.18 / 1; border-radius:999px; position:relative; overflow:visible; cursor:grab; touch-action:none; isolation:isolate; outline:none; -webkit-tap-highlight-color:transparent; user-select:none; }
+.toggle.dragging { cursor:grabbing; }
+.toggle:focus-visible { outline:3px solid #789fff; outline-offset:13px; }
+.track { position:absolute; inset:0; border-radius:inherit; pointer-events:none; }
+.track-night { opacity:var(--night); background: radial-gradient(ellipse 60% 82% at 28% 90%, #121726 0%, #08090d 70%, #050607 100%); box-shadow:inset 0 4px 18px rgba(0,0,0,.95),inset 0 -3px 9px rgba(53,53,74,.35),0 -5px 20px rgba(0,0,0,.5), 0 15px 38px rgba(0,0,0,.14); }
+.track-day { opacity:var(--day); background:linear-gradient(145deg,#f9f9f7 12%,#e7e7e2 100%); box-shadow:inset 0 6px 16px rgba(99,95,84,.20),inset 0 0 0 2px rgba(255,255,255,.92), 0 18px 45px rgba(115,108,91,.14), 0 2px 7px rgba(114,113,101,.18); }
+.ambient-diffusion { position:absolute;inset:-12px; border-radius:inherit;z-index:-1; pointer-events:none; background:radial-gradient(ellipse 36% 48% at calc(26% + var(--progress) * 48%) 70%, rgba(73,111,255,.18),transparent 100%);filter:blur(19px);opacity:var(--night); }
+.knob { position:absolute; z-index:1; top:3%; left:1.6%; width:46.4%; height:94%; border-radius:25%; overflow:visible; transform:translate3d(calc(var(--progress) * 109.1%),0,0); will-change:transform; }
+.lens { position:absolute; inset:0; border-radius:inherit;overflow:hidden; }
+.lens-night { opacity:var(--night); background:radial-gradient(ellipse 62% 42% at 50% 95%,rgba(129,150,252,.65) 0%, rgba(83,98,157,.4) 49%,rgba(39,42,66,.15) 100%),radial-gradient(ellipse 85% 69% at 35% 12%,rgba(205,207,227,.21) 0%,rgba(110,118,151,.14) 45%,rgba(65,70,100,.25) 90%),linear-gradient(160deg,rgba(186,192,215,.18),rgba(38,42,65,.62));box-shadow:inset 0 3px 4px rgba(253,253,255,.18),inset 3px 0 5px rgba(180,191,240,.19),inset -4px -5px 8px rgba(165,181,246,.25), 0 15px 30px rgba(0,0,0,.35),0 0 23px rgba(67,87,192,.32);border:1px solid rgba(196,196,236,.25);backdrop-filter: blur(9px) saturate(130%); }
+.lens-day { opacity:var(--day); background:radial-gradient(ellipse 66% 46% at 69% 9%,rgba(253,207,131,.69),transparent 92%),radial-gradient(ellipse 76% 76% at 25% 80%,rgba(255,255,255,.9),rgba(245,242,239,.86)),linear-gradient(150deg,rgba(255,255,255,.96),rgba(232,230,225,.86));box-shadow:inset 0 2px 6px rgba(255,255,255,.95),inset -3px -3px 8px rgba(153,148,138,.25), 0 12px 27px rgba(104,96,77,.22), 0 1px 4px rgba(105,100,91,.12);border:1px solid rgba(255,255,255,.8);backdrop-filter: blur(11px) saturate(110%); }
+.lens-inner { position:absolute;inset:2.2%;border-radius:24%; pointer-events:none;box-shadow:inset 0 1px 3px rgba(255,255,255,.09),inset 0 -4px 9px rgba(128,149,255,.13); }
+.lens-specular { z-index:6;position:absolute;inset:2px;border-radius:25%; pointer-events:none; background:linear-gradient(155deg,rgba(255,255,255,.13) 0%, transparent 30%,transparent 77%,rgba(255,255,255,.13) 100%); opacity:.7; mix-blend-mode:screen; }
+/* A genuine travelling illuminated strip rather than two fixed neon outlines. */
+.orbit-outline { position:absolute;inset:0;z-index:4;width:100%;height:100%;overflow:visible;pointer-events:none;fill:none;stroke-linecap:round;stroke-linejoin:round; }
+.orbit-outline path { stroke-dasharray:var(--orbit-dash,390) 2000;stroke-dashoffset:var(--orbit-offset,0);stroke:var(--orbit-color,#91abff); }
+.orbit-diffuse { stroke-width:18;opacity:.53;filter:blur(13px); }
+.orbit-soft { stroke-width:10;opacity:.75;filter:blur(5px); }
+.orbit-primary { stroke-width:4.8;opacity:.94;filter:drop-shadow(0 0 5px var(--orbit-color,#91abff)); }
+.orbit-core { stroke:#fffdf7!important;stroke-width:1.65;opacity:.86;filter:drop-shadow(0 0 3px white); }
+.orbit-bloom {position:absolute;z-index:3;pointer-events:none;width:66%;height:66%;left:var(--orbit-x,50%);top:var(--orbit-y,97%);transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(ellipse at 50% 50%,var(--orbit-color,#91abff) 0%,transparent 68%);filter:blur(22px);opacity:.29;mix-blend-mode:screen;}
+.pixel-symbol {z-index:5;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:74%;height:74%;pointer-events:none;filter:drop-shadow(0 0 5px rgba(251,239,223,calc(var(--night) * .24)));}
+.footnote {display:flex; flex-wrap:wrap; justify-content:center;align-items:center;gap:9px; text-align:center;margin-top:65px; color:color-mix(in srgb,#858b9d calc(var(--night) * 100%),#87827b calc(var(--day) * 100%)); font-size:12px; letter-spacing:.1px; }
+.state-dot {height:7px;width:7px;border-radius:50%;background:color-mix(in srgb,#789eff calc(var(--night) * 100%),#ffbc61 calc(var(--day) * 100%)); box-shadow:0 0 11px currentColor; }
+.foot-separator {opacity:.5;}
+footer {text-align:center; font:500 10px/1.2 ui-monospace,monospace;letter-spacing:1.6px; color:color-mix(in srgb,#696f82 calc(var(--night) * 100%),#aba59b calc(var(--day) * 100%));padding:0 20px 30px;}
+footer span {padding:0 5px;}
+@media(max-width:600px){
+ .topbar{padding-top:25px;width:calc(100% - 40px)}
+ .proto-label{font-size:8px;letter-spacing:1px}
+ .showcase{padding:45px 18px 65px}
+ .intro{margin-bottom:67px}
+ .toggle-stage{width:min(100%,560px)}
+ .footnote{margin-top:63px;max-width:300px;font-size:11px;line-height:1.6}
+ h1{letter-spacing:-1.2px}
+ .lead{max-width:260px;line-height:1.5;margin-inline:auto}
+ footer{font-size:8px;letter-spacing:.85px}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{transition-duration:0s!important;animation-duration:0s!important;}}
+
+  
+/* GB+ 2.8.0: integração em painel de Aparência. Preserva integralmente o toggle aprovado. */
+body.gb-theme-embed,html.gb-theme-embed{min-height:0;height:100%;overflow:hidden}
+body.gb-theme-embed .topbar,body.gb-theme-embed .intro,body.gb-theme-embed footer{display:none!important}
+body.gb-theme-embed .page{min-height:100%;height:100%;justify-content:center}
+body.gb-theme-embed .showcase{padding:35px 15px 30px;justify-content:center}
+body.gb-theme-embed .toggle-stage{width:min(360px,100%)}
+body.gb-theme-embed .footnote{margin-top:24px;font-size:11px}
+@media(max-width:600px){body.gb-theme-embed .showcase{padding:32px 13px 23px}body.gb-theme-embed .footnote{margin-top:22px}}
+</style>
+</head>
+<body>
+  <div class="scene scene-night" aria-hidden="true"></div>
+  <div class="scene scene-day" aria-hidden="true"></div>
+  <main class="page">
+    <header class="topbar">
+      <div class="brand"><span class="brand-mark">GB<span>+</span></span><span class="brand-separator"></span><span class="brand-suffix">LAB</span></div>
+      <span class="proto-label">PROTÓTIPO INTERATIVO</span>
+    </header>
+    <section class="showcase" aria-labelledby="screen-title">
+      <div class="intro">
+        <p class="eyebrow">APARÊNCIA</p>
+        <h1 id="screen-title">Um toque de luz.</h1>
+        <p class="lead">Arraste o vidro para alternar entre os temas.</p>
+      </div>
+
+      <div class="toggle-stage">
+        <div class="stage-halo stage-halo-night" aria-hidden="true"></div>
+        <div class="stage-halo stage-halo-day" aria-hidden="true"></div>
+        <div id="toggle" class="toggle" role="switch" tabindex="0" aria-label="Alternar tema claro ou escuro" aria-checked="false">
+          <div class="track track-night" aria-hidden="true"></div>
+          <div class="track track-day" aria-hidden="true"></div>
+          <div class="ambient-diffusion" aria-hidden="true"></div>
+          <div class="knob" id="knob" aria-hidden="true">
+            <div class="lens lens-night"></div>
+            <div class="lens lens-day"></div>
+            <div class="lens-inner"></div>
+            <!-- A single continuous perimeter path: bottom → right edge → top.
+                 The same strip travels along the path with the drag progress. -->
+            <div class="orbit-bloom" aria-hidden="true"></div>
+            <svg class="orbit-outline" viewBox="0 0 268 268" preserveAspectRatio="none" aria-hidden="true">
+              <path id="orbit-guide" class="orbit-diffuse" d="M 9 186 L 9 195 C 9 233 28 259 78 259 L 190 259 C 240 259 259 233 259 195 L 259 74 C 259 36 240 9 189 9 L 79 9 C 28 9 9 36 9 74 L 9 84" />
+              <path class="orbit-soft" d="M 9 186 L 9 195 C 9 233 28 259 78 259 L 190 259 C 240 259 259 233 259 195 L 259 74 C 259 36 240 9 189 9 L 79 9 C 28 9 9 36 9 74 L 9 84" />
+              <path class="orbit-primary" d="M 9 186 L 9 195 C 9 233 28 259 78 259 L 190 259 C 240 259 259 233 259 195 L 259 74 C 259 36 240 9 189 9 L 79 9 C 28 9 9 36 9 74 L 9 84" />
+              <path class="orbit-core" d="M 9 186 L 9 195 C 9 233 28 259 78 259 L 190 259 C 240 259 259 233 259 195 L 259 74 C 259 36 240 9 189 9 L 79 9 C 28 9 9 36 9 74 L 9 84" />
+            </svg>
+            <canvas class="pixel-symbol" id="pixel-symbol" aria-hidden="true"></canvas>
+            <div class="lens-specular"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="footnote">
+        <span class="state-dot" aria-hidden="true"></span>
+        <span id="state-label" aria-live="polite">Modo escuro</span>
+        <span class="foot-separator">·</span>
+        <span>Toque, arraste ou use as setas do teclado</span>
+      </div>
+    </section>
+    <footer>GB+ EXPERIENCE LAB <span>•</span> CONCEITO VISUAL PARA HOMOLOGAÇÃO</footer>
+  </main>
+  <script>
+/**
+ * GB+ glass toggle prototype — plain JS, no build step, no external packages.
+ * Drag = scrub animation. Release = spring to nearest state.
+ * Keep this isolated until the GB+ version is approved and homologated.
+ */
+(() => {
+  'use strict';
+  const toggle = document.getElementById('toggle');
+  const label = document.getElementById('state-label');
+  const canvas = document.getElementById('pixel-symbol');
+  const orbitGuide = document.getElementById('orbit-guide');
+  const orbitPaths = [...document.querySelectorAll('.orbit-outline path')];
+  const ctx = canvas.getContext('2d');
+  if (!toggle || !canvas || !ctx) return;
+
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const clamp = (n, a = 0, b = 1) => Math.min(b, Math.max(a, n));
+  const smooth = (t) => t * t * (3 - 2 * t);
+  const css = document.documentElement.style;
+  const lowMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  let progress = 0, target = 0, velocity = 0, dragging = false;
+  let pressX = 0, hasMoved = false, lastFrame = performance.now();
+  let lastState = false;
+  // The U-shaped strip fits the bottom in night mode and the top in day mode.
+  // Its midpoint travels via the RIGHT edge; drag position directly scrubs it.
+  const orbitLength = orbitGuide?.getTotalLength() || 870;
+  const orbitStrip = Math.min(orbitLength * .44, 398);
+  const orbitTravel = orbitLength - orbitStrip;
+  for (const path of orbitPaths) path.style.strokeDasharray = `${orbitStrip} ${orbitLength + 10}`;
+  const orbitPaint = {p:NaN};
+  function setOrbit(p) {
+    if (Math.abs(p-orbitPaint.p) < .0002) return;
+    orbitPaint.p = p;
+    const offset = p * orbitTravel;
+    // Blue → silver/white over the right side → amber on top.
+    const from = p < .5 ? [112,159,255] : [242,248,255];
+    const to = p < .5 ? [242,248,255] : [255,184,67];
+    const mix = smooth(p < .5 ? p * 2 : (p - .5) * 2);
+    const color = `rgb(${Math.round(lerp(from[0],to[0],mix))},${Math.round(lerp(from[1],to[1],mix))},${Math.round(lerp(from[2],to[2],mix))})`;
+    const point = orbitGuide.getPointAtLength(offset + orbitStrip * .5);
+    const knob = document.getElementById('knob');
+    knob.style.setProperty('--orbit-color',color);
+    knob.style.setProperty('--orbit-x',`${(point.x/268*100).toFixed(2)}%`);
+    knob.style.setProperty('--orbit-y',`${(point.y/268*100).toFixed(2)}%`);
+    knob.style.setProperty('--orbit-offset',String(-offset));
+  }
+
+
+  // Paired, deterministic pixel matrices so the moon and the sun actually morph
+  // as the thumb is dragged, instead of merely swapping SVGs.
+  const moon = [], sun = [];
+  for (let y = -11; y <= 11; y++) {
+    for (let x = -11; x <= 11; x++) {
+      const rMoon = Math.hypot(x + 1.4, y - 0.3);
+      const cutout = Math.hypot(x - 2.8, y + 3.7);
+      const moonBody = rMoon < 7.55 && cutout > 6.7;
+      const star1 = (x === 7 && Math.abs(y + 8) <= 1) || (y === -8 && Math.abs(x - 7) <= 1);
+      const star2 = (x === 10 && Math.abs(y + 4) <= 1) || (y === -4 && Math.abs(x - 10) <= 1);
+      const star3 = (x === 7 && y === -2) || (x === 8 && y === 2);
+      if (moonBody || star1 || star2 || star3) moon.push({ x, y, weight: moonBody ? 1 : .70 });
+      const rr = Math.hypot(x, y);
+      const core = rr < 3.65;
+      const orthRay = (Math.abs(x) <= .55 && Math.abs(y) >= 5 && Math.abs(y) <= 9) ||
+        (Math.abs(y) <= .55 && Math.abs(x) >= 5 && Math.abs(x) <= 9);
+      const diagonalRay = (Math.abs(Math.abs(x) - Math.abs(y)) <= .48 && rr >= 5.9 && rr <= 9.5);
+      const accent = ((x === -8 && y === 3) || (x === 8 && y === -3));
+      if (core || orthRay || diagonalRay || accent) sun.push({x,y,weight:core ? 1 : .86});
+    }
+  }
+  // Matching both matrices by angle produces a coherent swirl.
+  const angleSort = (a, b) => Math.atan2(a.y,a.x) - Math.atan2(b.y,b.x) ||
+      Math.hypot(a.x,a.y) - Math.hypot(b.x,b.y);
+  moon.sort(angleSort); sun.sort(angleSort);
+  const maxPoints = Math.max(moon.length, sun.length);
+  const particles = Array.from({length:maxPoints}, (_,i) => ({
+    from: moon[i % moon.length],
+    to: sun[i % sun.length],
+    existsNight: i < moon.length,
+    existsDay: i < sun.length,
+    delay: ((i * 29) % 23) / 22 * .17,
+    swirl: 1 + ((i * 17) % 9) / 10,
+  }));
+
+  function resizeCanvas() {
+    const bounds = canvas.getBoundingClientRect();
+    const dpr = Math.min(3, window.devicePixelRatio || 1);
+    const w = Math.max(1, Math.round(bounds.width * dpr));
+    const h = Math.max(1, Math.round(bounds.height * dpr));
+    if (canvas.width !== w || canvas.height !== h) {
+      canvas.width = w;
+      canvas.height = h;
+    }
+  }
+
+  function drawPixels(p) {
+    if (!canvas.width) return;
+    const w = canvas.width, h = canvas.height;
+    ctx.clearRect(0, 0, w, h);
+    const scale = Math.min(w,h) / 230;
+    ctx.save();
+    ctx.translate(w/2,h/2);
+    ctx.scale(scale,scale);
+    const cs = smooth(p);
+    const px = 8.7;
+    for (let i=0; i<particles.length; i++) {
+      const part = particles[i];
+      const st = smooth(clamp((p - part.delay) / (1 - part.delay * 1.8)));
+      const a = part.from, b = part.to;
+      const phase = Math.PI * st;
+      // Swirling detour: pixels orbit briefly as the glass slides.
+      const baseX = lerp(a.x,b.x,st), baseY = lerp(a.y,b.y,st);
+      const turn = Math.sin(phase) * 3.6 * part.swirl;
+      const x = baseX * Math.cos(turn*.14) - baseY * Math.sin(turn*.14) +
+                Math.cos(i * 2.3999632) * Math.sin(phase) * 3.5;
+      const y = baseX * Math.sin(turn*.14) + baseY * Math.cos(turn*.14) +
+                Math.sin(i * 2.3999632) * Math.sin(phase) * 3.5;
+      const visibility = lerp(part.existsNight ? part.from.weight : 0,
+                              part.existsDay ? part.to.weight : 0, st);
+      if (visibility <= .02) continue;
+      const r = Math.round(lerp(255,45,cs));
+      const g = Math.round(lerp(247,44,cs));
+      const bl = Math.round(lerp(232,48,cs));
+      const pixelSize = px * (.84 + Math.sin(phase)*.10);
+      ctx.fillStyle = `rgba(${r},${g},${bl},${visibility})`;
+      ctx.shadowColor = `rgba(${255-Math.round(cs*120)},${228-Math.round(cs*90)},${210-Math.round(cs*100)},${(1-cs)*.48})`;
+      ctx.shadowBlur = (1 - cs)*3.6;
+      ctx.fillRect(x*px-pixelSize/2, y*px-pixelSize/2, pixelSize*.81, pixelSize*.81);
+    }
+    ctx.restore();
+  }
+
+  function render(now) {
+    const dt = Math.min(.045,Math.max(0, (now - lastFrame) / 1000));
+    lastFrame = now;
+    if (!dragging) {
+      if (lowMotion.matches) {
+        progress = target;
+        velocity = 0;
+      } else {
+        // Damped physical spring. Safe across variable frame rates.
+        const stiffness = 205, damping = 23;
+        velocity += ((target - progress) * stiffness - velocity * damping) * dt;
+        progress += velocity * dt;
+        if (Math.abs(target - progress) < .00015 && Math.abs(velocity) < .004) {
+          progress = target;
+          velocity = 0;
+        }
+      }
+    }
+    const p = clamp(progress);
+    css.setProperty('--progress',p.toFixed(5));
+    css.setProperty('--day',smooth(p).toFixed(5));
+    css.setProperty('--night',(1-smooth(p)).toFixed(5));
+    resizeCanvas();
+    setOrbit(p);
+    drawPixels(p);
+    window.requestAnimationFrame(render);
+  }
+
+  function reflectState(isDay) {
+    toggle.setAttribute('aria-checked',String(isDay));
+    label.textContent = isDay ? 'Modo claro' : 'Modo escuro';
+    lastState = isDay;
+    // Integration hook — GB+ should subscribe to this only after approval.
+    toggle.dispatchEvent(new CustomEvent('gbplus:theme-change', {
+      bubbles:true, detail:{theme:isDay ? 'light' : 'dark'}
+    }));
+  }
+  function setTheme(isDay) {
+    target = isDay ? 1 : 0;
+    if (lastState !== isDay) reflectState(isDay);
+  }
+  function pointerToProgress(e) {
+    const r = toggle.getBoundingClientRect();
+    const knobWidth = r.width * .464;
+    const padding = r.width*.016;
+    const maxX = r.width - knobWidth - padding*2;
+    return clamp((e.clientX - r.left - padding - knobWidth/2) / maxX);
+  }
+  toggle.addEventListener('pointerdown',e => {
+    if (e.button !== undefined && e.button !== 0) return;
+    toggle.setPointerCapture(e.pointerId);
+    dragging = true;
+    hasMoved = false;
+    pressX = e.clientX;
+    velocity = 0;
+    toggle.classList.add('dragging');
+  });
+  toggle.addEventListener('pointermove',e => {
+    if (!dragging) return;
+    if (Math.abs(e.clientX-pressX) > 4) hasMoved = true;
+    if (hasMoved) progress = pointerToProgress(e);
+  });
+  function endDrag(e) {
+    if (!dragging) return;
+    dragging = false;
+    toggle.classList.remove('dragging');
+    if (hasMoved) setTheme(progress >= .5);
+    else setTheme(!lastState);
+    if (toggle.hasPointerCapture(e.pointerId)) toggle.releasePointerCapture(e.pointerId);
+  }
+  toggle.addEventListener('pointerup',endDrag);
+  toggle.addEventListener('pointercancel',e => {
+    if (!dragging) return;
+    dragging=false;
+    toggle.classList.remove('dragging');
+    setTheme(progress >= .5);
+  });
+  toggle.addEventListener('keydown',e => {
+    if (e.key === 'ArrowRight' || e.key === 'End') {e.preventDefault(); setTheme(true);}
+    else if (e.key === 'ArrowLeft' || e.key === 'Home') {e.preventDefault();setTheme(false);}
+    else if (e.key === ' ' || e.key === 'Enter') {e.preventDefault();setTheme(!lastState);}
+  });
+  window.addEventListener('resize',resizeCanvas,{passive:true});
+  resizeCanvas();
+  // Sincroniza o estado inicial com o tema do GB+ sem gravar no banco.
+  const embedded = new URLSearchParams(location.search).get('embed') === '1';
+  const initialLight = new URLSearchParams(location.search).get('theme') === 'light';
+  if (embedded) {
+    document.documentElement.classList.add('gb-theme-embed');
+    document.body.classList.add('gb-theme-embed');
+    toggle.addEventListener('gbplus:theme-change', (event) => {
+      if (window.parent !== window && ['light','dark'].includes(event.detail?.theme)) {
+        window.parent.postMessage({type:'gbplus:liquid-theme', theme:event.detail.theme}, location.origin);
+      }
+    });
+  }
+  progress = target = initialLight ? 1 : 0;
+  lastState = initialLight;
+  reflectState(initialLight);
+
+  requestAnimationFrame(render);
+})();
+
+  </script>
+</body>
+</html>
