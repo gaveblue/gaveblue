@@ -44,7 +44,7 @@ assert.equal(fakeDialog.dataset.gbReady,'true');
 let picked;
 assert(sheet.openGbPickerSheet({kind:'service',selected:'streaming-netflix',onPick:value=>picked=value}));
 assert(fakeDialog.open);
-assert.equal((fakeDialog.innerHTML.match(/data-sheet-choice="(?:streaming|music|delivery|mobility|digital)-/g)||[]).length,49);
+assert.equal((fakeDialog.innerHTML.match(/data-sheet-choice="(?:streaming|music|delivery|mobility|digital|social|games|shopping)-/g)||[]).length,49);
 for(const service of ['Netflix','HBO Max','Spotify','iFood','Plus Delivery','ChatGPT']){
  assert(fakeDialog.innerHTML.includes(service),'Missing service '+service);
 }
