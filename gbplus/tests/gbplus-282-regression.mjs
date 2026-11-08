@@ -52,7 +52,7 @@ check(styles.includes('.gb-balance-accounts::-webkit-scrollbar')&&styles.include
 check(app.includes("next==='more'")&&app.includes("calculateDueAlerts(db,today())"),'Rotas e alertas devem estar ligados ao aplicativo.');
 check(app.includes('gb-category-icon-search')&&app.includes('notification-preferences-form'),'Busca de ícones e formulário de avisos devem funcionar.');
 check(views.includes("due-overview")&&views.includes("export function notificationsView(db)"),'Relatório de vencimentos e notificações devem coexistir.');
-check(index.includes('app.js?v=20261108-2861')&&index.includes('next-282.css?v=20261108-2851'),'Imports versionados para contornar cache antigo.');
+check(index.includes('app.js?v=20261108-2862')&&index.includes('next-282.css?v=20261108-2851'),'Imports versionados para contornar cache antigo.');
 const toggle=read('lab/liquid-theme-toggle.html');
 check(index.includes('gb-theme-toggle-sun')&&index.includes('gb-theme-toggle-moon')&&!app.includes('liquid-theme-progress'),'Sol e lua da flag substituem o controle orbital antigo.');
 for(const [,script] of toggle.matchAll(/<script>([\s\S]*?)<\/script>/g))Function(script);
