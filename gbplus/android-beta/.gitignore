@@ -1,0 +1,15 @@
+# GB+ Android beta: no private signing keys, generated artifacts or local SDK paths.
+.gradle/
+**/build/
+local.properties
+*.jks
+*.keystore
+*.p12
+*.pfx
+*.pem
+*.key
+*.apk
+*.aab
+dist/
+.idea/
+*.iml
