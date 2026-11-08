@@ -52,80 +52,9 @@ let bankImportDraft=null; // Memory-only preview; released on modal close.
 
 const state={route:'dashboard',accountCardsTab:'accounts',period:'all',range:{},query:'',status:'',type:'',partner:'',category:'',partnerQuery:'',granularity:'month',flowChartMode:'bars',flowStatus:'all',report:'payable',reportPartner:'',moreFilters:false,launchSelected:[],launchStatusOpen:false,launchSearchOpen:false};
 const modal=document.querySelector('#modal');
-  // Somente o seletor Liquid Glass do cabeçalho pode pré-visualizar e salvar.
-  // O progresso altera APENAS CSS: nenhuma escrita financeira ou de preferência
-  // acontece durante o arrasto. O tema persistente é salvo após a soltura.
-  let gbLiquidThemeTimer=null,gbLiquidPreviewTimeout=null;
-  function clearLiquidThemePreview(){
-    clearTimeout(gbLiquidPreviewTimeout);
-    gbLiquidPreviewTimeout=null;
-    const root=document.documentElement;
-    root.classList.remove('gb-theme-preview');
-    root.style.removeProperty('--gb-theme-day-share');
-    root.style.removeProperty('--gb-theme-day-progress');
-    root.style.removeProperty('--gb-theme-text-day-share');
-  }
-  function scrubLiquidTheme(progress){
-    if(!Number.isFinite(progress)||progress<0||progress>1)return;
-    const root=document.documentElement;
-    root.style.setProperty('--gb-theme-day-share',(progress*100).toFixed(2)+'%');
-    root.style.setProperty('--gb-theme-day-progress',progress.toFixed(4));
-    // Prevent grey-on-grey text at 50%; backgrounds still interpolate linearly.
-    root.style.setProperty('--gb-theme-text-day-share',progress>=.5?'100%':'0%');
-    root.classList.add('gb-theme-preview');
-    clearTimeout(gbLiquidPreviewTimeout);
-    // Safety fallback if the iframe reloads or closes mid-gesture.
-    gbLiquidPreviewTimeout=setTimeout(clearLiquidThemePreview,6000);
-  }
-  window.addEventListener('message',event=>{
-    if(event.origin!==location.origin)return;
-    const frame=document.querySelector('#gb-top-theme-frame');
-    if(!frame||frame.contentWindow!==event.source||!db)return;
-    const data=event.data;
-    if(data?.type==='gbplus:liquid-theme-progress'){
-      if(!Number.isFinite(data.progress)||data.progress<0||data.progress>1)return;
-      // A new drag cancels an older uncommitted selection.
-      if(data.phase==='drag'&&gbLiquidThemeTimer!==null){
-        clearTimeout(gbLiquidThemeTimer);
-        gbLiquidThemeTimer=null;
-      }
-      scrubLiquidTheme(data.progress);
-      return;
-    }
-    if(data?.type==='gbplus:liquid-theme-settled'){
-      if(data.theme!=='light'&&data.theme!=='dark')return;
-      if(gbLiquidThemeTimer===null && !busy && db.settings.theme===data.theme)
-        clearLiquidThemePreview();
-      return;
-    }
-    if(data?.type!=='gbplus:liquid-theme'||busy)return;
-    const theme=data.theme;
-    if(theme!=='light'&&theme!=='dark')return;
-    clearTimeout(gbLiquidThemeTimer);
-    gbLiquidThemeTimer=null;
-    if(db.settings.theme===theme)return; // settled event removes preview
-    const wait=window.matchMedia('(prefers-reduced-motion: reduce)').matches?0:620;
-    gbLiquidThemeTimer=setTimeout(async()=>{
-      gbLiquidThemeTimer=null;
-      if(!frame.isConnected||document.querySelector('#gb-top-theme-frame')!==frame){
-        clearLiquidThemePreview();
-        return;
-      }
-      if(db.settings.theme===theme){clearLiquidThemePreview();return;}
-      const previousTheme=db.settings.theme;
-      // Prevent render() from reloading the iframe that is still springing.
-      frame.dataset.theme=theme;
-      try{
-        await commit(d=>{d.settings.theme=theme;},'Tema atualizado.');
-      }catch(error){
-        frame.dataset.theme=previousTheme;
-        frame.src='./lab/liquid-theme-toggle.html?embed=1&compact=1&v=20261108-2841&theme='+encodeURIComponent(previousTheme);
-        toast(error?.message||'Não foi possível salvar o tema.');
-      }finally{
-        clearLiquidThemePreview();
-      }
-    },wait);
-  });
+// O controle de tema do cabeçalho é um botão normal. A ação "top-theme"
+ // usa o mesmo commit autenticado das preferências; não há iframe, arrasto,
+ // escuta de mensagens externas nem pré-visualização CSS.
 
 installGbPickerSheet();
 installEntryFormDrag(modal);
@@ -292,13 +221,15 @@ function render(){if(!db)return;updateSystemAppearance(db.settings.theme);docume
 const dueAlerts=calculateDueAlerts(db,today());
 notificationBell.innerHTML=icon('bell')+(dueAlerts.total?'<span class="notification-dot" aria-hidden="true"></span>':'');
 notificationBell.setAttribute('aria-label','Notificações'+(dueAlerts.total?' · '+dueAlerts.total+' lembrete(s) de vencimento':''));
-const topGlass=document.querySelector('#gb-top-theme-frame');
-if(topGlass){
+const topThemeToggle=document.querySelector('#gb-theme-toggle');
+if(topThemeToggle){
   const currentTheme=db.settings.theme==='dark'?'dark':'light';
-  if(topGlass.dataset.theme!==currentTheme){
-    topGlass.dataset.theme=currentTheme;
-    topGlass.src='./lab/liquid-theme-toggle.html?embed=1&compact=1&v=20261108-2841&theme='+encodeURIComponent(currentTheme);
-  }
+  topThemeToggle.dataset.theme=currentTheme;
+  topThemeToggle.setAttribute('aria-checked',String(currentTheme==='dark'));
+  topThemeToggle.setAttribute('aria-label',currentTheme==='dark'?'Ativar modo claro':'Ativar modo escuro');
+  topThemeToggle.title=currentTheme==='dark'?'Ativar modo claro':'Ativar modo escuro';
+  topThemeToggle.querySelector('.gb-theme-toggle-sun').innerHTML=icon('sun');
+  topThemeToggle.querySelector('.gb-theme-toggle-moon').innerHTML=icon('moon');
 }
 const gbMobileNav=document.querySelector('#mobile-navigation');
 gbMobileNav.classList.add('gb-liquid-nav');
@@ -1071,8 +1002,7 @@ const actions={
     if(opening)input.focus();else{input.value='';filterSettings('');}
   },
   'settings-appearance':()=>openModal('Aparência',
-    '<p class="muted">O controle Liquid Glass agora fica no canto superior da tela. Arraste-o para alternar entre claro e escuro.</p>'+
-    '<p class="form-hint" style="margin-top:12px">Como alternativa, você também pode escolher um modo abaixo.</p>'+
+    '<p class="muted">Escolha o modo claro ou escuro. Você também pode alternar pelo botão de sol e lua no topo da tela.</p>'+
     '<div class="button-stack" style="margin-top:16px">'+
     button(icon('sun')+' Modo claro','set-theme',db.settings.theme==='light'?'primary':'','data-value="light"')+
     button(icon('moon')+' Modo escuro','set-theme',db.settings.theme==='dark'?'primary':'','data-value="dark"')+'</div>'),
