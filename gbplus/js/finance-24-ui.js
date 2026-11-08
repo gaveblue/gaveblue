@@ -58,7 +58,7 @@ export function cardsView(db,{embedded=false}={}){
     button('Informar saldo de fatura','new-card-invoice','small','data-id="'+esc(card.id)+'"')+'</div>'+
    '<h3>Faturas <small class="gb-invoice-total">'+money(totalPending)+' a pagar</small></h3>'+(invoices.length?invoices.slice(0,12).map(t=>
     '<div class="gb-credit-invoice-row"><button type="button" class="gb-credit-invoice" data-action="title-detail" data-id="'+esc(t.id)+'"><span>'+dateLabel(t.due)+
-    '<small>'+esc(t.description)+' · '+status(db,t)+(paid(db,t.id)>0&&pending(db,t)>0?' · '+money(paid(db,t.id))+' pagos':'')+'</small></span><strong>'+money(pending(db,t))+'</strong></button>'+ 
+    '<small>'+esc(t.description)+' · '+(cardPurchases(db).some(p=>p.invoiceId===t.id&&p.source==='invoice-balance')?'Saldo informado · ':'')+status(db,t)+(paid(db,t.id)>0&&pending(db,t)>0?' · '+money(paid(db,t.id))+' pagos':'')+'</small></span><strong>'+money(pending(db,t))+'</strong></button>' 
     (pending(db,t)>0?button('Pagar','payment','small','data-id="'+esc(t.id)+'" aria-label="Pagar '+esc(t.description)+'"'):'')+'</div>').join(''):
     '<p class="muted">Ainda não há faturas com valores lançados. Os próximos vencimentos são apenas previsões de calendário.</p>')+
    '<h3>Compras recentes</h3>'+(related.length?related.slice().sort((a,b)=>b.date.localeCompare(a.date)).slice(0,10).map(p=>
