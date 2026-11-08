@@ -5,7 +5,7 @@
 
 ### Interfaces aprovadas — implementação iniciada em 08/11/2026
 - **Navegação Liquid Glass:** lente translúcida segue o atalho ativo, preservando cinco atalhos, personalização e botão Novo. Modos claro/escuro, foco e preferência por movimento reduzido respeitados; barra oculta em Configurações como antes.
-- **Seletor de tema Liquid Glass:** protótipo v2 aprovado integrado ao modal Configurações → Aparência; lua/sol pixelados e luz orbital azul embaixo → direita → dourado em cima. Tema gravado pelo fluxo financeiro atual, com evento limitado à mesma origem e janela.
+- **Seletor de tema Liquid Glass:** protótipo v2 aprovado integrado ao modal Configurações → Aparência; lua/sol pixelados e luz orbital azul embaixo → direita → dourado em cima. Tema gravado pelo fluxo financeiro atual, com evento limitado à mesma origem e janela, conclusão da animação antes da gravação e limpeza do iframe/timer ao fechar.
 - **Estado:** funcionalidade candidata em desenvolvimento, aprovação visual obtida; **não homologada/não publicada**. Nenhum dado de produção foi migrado ou alterado.
 
 
