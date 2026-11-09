@@ -1,14 +1,15 @@
 {
-  "version": "2.8.8",
-  "build": 2880,
+  "version": "2.8.9",
+  "build": 2890,
   "published_at": null,
-  "title": "Ícones de aplicativos com alta nitidez",
+  "title": "Contas financeiras — formulário simplificado",
   "notes": [
-    "Correção de qualidade visual: substituição do atlas WebP 256×256 com 13 células de 64×64 por 13 arquivos individuais WebP de 320×320, produzidos a partir das imagens fornecidas pelo responsável.",
-    "Redimensionamento sem corte, sem forçar escala de 400%, sem filtro de desfoque e com object-fit:contain para preservar logos, fundos e proporções.",
-    "IDs e grupos dos 56 aplicativos preservados, inclusive as sete lojas adicionadas na 2.8.7; nenhum lançamento, conta, cartão, fatura ou consentimento foi alterado.",
-    "Imagens ficam no próprio repositório, não são buscadas em websites de terceiros e têm fallback textual em caso de erro.",
-    "PR #108 integrado à main: versão 2.8.8 build 2880. Atualização efetiva no PWA depende de deploy/caches; ainda sem confirmação do domínio."
+    "Formulário de contas redesenhado: nome, seletor de banco em bottom sheet arrastável e saldo inicial opcional em estilo de valor, preservando situação nas edições.",
+    "Selecionar banco abre o mesmo painel usado em categorias e serviços: abre expandido e pode ser arrastado para meia tela, com busca, logo e opções priorizadas.",
+    "Opção Dinheiro em caixa (sem banco) fica em destaque no topo do painel, útil para dinheiro físico e caixa transitório, usando o ícone de carteira.",
+    "Removidos somente do editor de contas: faixa horizontal de bancos, busca duplicada, Outra instituição, agência e número da conta. Dados preexistentes de agência e conta são preservados ao salvar.",
+    "Saldo inicial deixa de ser obrigatório na criação; se vazio, inicia em R$ 0,00. Na edição, o saldo continua sendo a base de cálculo existente.",
+    "Sem mudanças em lançamentos, importações, cartões, faturas, termos ou marketing. Corrigido cache dos módulos e CSS no PWA."
   ],
   "assets": [
     "./index.html",
@@ -205,24 +206,24 @@
   ],
   "highlights": [
     {
-      "icon": "image",
-      "title": "13 logotipos mais nítidos",
-      "description": "Arquivos individuais de 320 × 320, sem ampliação artificial do atlas."
+      "icon": "wallet",
+      "title": "Contas mais simples",
+      "description": "Somente nome, instituição ou caixa e saldo inicial."
     },
     {
-      "icon": "grid",
-      "title": "56 aplicativos mantidos",
-      "description": "Categorias e vínculos de lançamentos preservados."
+      "icon": "list",
+      "title": "Bancos em bottom sheet",
+      "description": "Pesquisa com logo; painel expandido ou meia tela."
     },
     {
-      "icon": "smartphone",
-      "title": "Visual adaptado",
-      "description": "Renderização proporcional em temas claro e escuro."
+      "icon": "shield",
+      "title": "Histórico preservado",
+      "description": "Agência, número da conta e lançamentos antigos não são apagados."
     }
   ],
-  "release_status": "merged_to_main_pending_live_verification",
+  "release_status": "candidate_qa_pending",
   "homologation": {
-    "status": "code_regressions_passed_visual_qa_pending",
-    "notes": "PR #108 mesclado à main em 08/11/2026. Treze arquivos WebP individuais de 320×320 verificados no GitHub; testes de catálogo de 56 serviços, seleção, fallbacks e persistência sem alterações financeiras passaram. A homologação visual Android/PWA e a entrega da versão atualizada no domínio ainda não foram verificadas. Nenhuma migração de dados."
+    "status": "pending_tests_and_visual_review",
+    "notes": "2.8.9 em branch. Executar testes de cadastro/edição, opção caixa, banco, dados legados e PWA. QA visual Android ainda pendente."
   }
 }
