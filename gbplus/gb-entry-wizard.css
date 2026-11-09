@@ -363,7 +363,7 @@
 .gb-service-asset-image{position:absolute;inset:0;display:block;width:100%!important;height:100%!important;object-fit:contain;background:#fff}
 .gb-service-asset-image[hidden]{display:none!important}
 
-/* GB+ 2.8.7 — atlas de logos recebidos (4×4), sem downloads externos. */
-.gb-service-logo.gb-service-sprite{position:relative;display:inline-block;overflow:hidden;background:#fff!important;color:#171717!important;border-color:#dedee2!important}
-.gb-service-logo.gb-service-sprite .gb-service-sprite-image{position:absolute!important;display:block;width:400%!important;height:400%!important;max-width:none!important;max-height:none!important;object-fit:fill!important;background:none!important;inset:auto!important}
-.gb-service-logo.gb-service-sprite .gb-service-sprite-image[hidden]{display:none!important}
+/* GB+ 2.8.8 — ícones independentes 320×320. Sem escala artificial do atlas. */
+.gb-service-logo.gb-service-asset{display:inline-flex;align-items:center;justify-content:center;isolation:isolate;overflow:hidden}
+.gb-service-logo .gb-service-asset-image.gb-service-image-hq{position:absolute;inset:0;display:block;width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;object-fit:contain!important;object-position:center center!important;image-rendering:auto;transform:none!important;filter:none!important;border-radius:inherit}
+.gb-service-logo .gb-service-asset-image.gb-service-image-hq[hidden]{display:none!important}
