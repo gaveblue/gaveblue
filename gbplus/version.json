@@ -1,7 +1,7 @@
 {
   "version": "2.9.0",
   "build": 2900,
-  "published_at": null,
+  "published_at": "2026-11-09T04:18:26Z",
   "title": "Cofrinhos de metas e contas personalizadas",
   "notes": [
     "Conta personalizada substitui a opção Dinheiro em caixa e permite escolher um ícone local para representar dinheiro físico, carteira ou caixa transitório.",
@@ -223,9 +223,9 @@
       "description": "Transferências internas preservam o saldo geral."
     }
   ],
-  "release_status": "user_authorized_release_qa_incomplete",
+  "release_status": "deployed_github_pages_qa_incomplete",
   "homologation": {
     "status": "specific_regressions_passed_ci_and_visual_pending",
-    "notes": "Liberação solicitada expressamente pelo responsável em 09/11/2026. Dois testes específicos do editor de contas e metas executados em ambiente JS isolado passaram; o workflow GitHub Actions falhou antes de registrar execução de steps, logo a suíte integral e o QA visual Android/PWA ainda não foram comprovados. Não classificar como homologada."
+    "notes": "Liberação solicitada expressamente pelo responsável em 09/11/2026. Dois testes específicos do editor de contas e metas executados em ambiente JS isolado passaram; o workflow GitHub Actions falhou antes de registrar execução de steps, logo a suíte integral e o QA visual Android/PWA ainda não foram comprovados. Não classificar como homologada. Deploy GitHub Pages concluído com sucesso no run 42561013587 para merge 0e3963b4c28d072bae3e92dc225125dc047df605. Site em Android/PWA real ainda não inspecionado."
   }
 }
