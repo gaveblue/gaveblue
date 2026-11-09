@@ -67,41 +67,33 @@ export const SERVICE_GROUPS=Object.freeze({
  mobility:'Mobilidade',digital:'Serviços digitais',
  social:'Redes sociais e comunicação',games:'Games e entretenimento',shopping:'Compras e pagamentos'
 });
-// Assets are audited, relative and committed to this repository; no CDN calls.
+// Imagens individuais locais: 320×320 para os 13 ícones revisados, nunca atlas 64px.
+// Os IDs financeiros anteriores permanecem intactos.
 const LOCAL_SERVICE_LOGOS=Object.freeze({
  'digital-chatgpt':'./assets/service-icons/chatgpt.svg',
  'delivery-plusdelivery':'./assets/service-icons/plus-delivery.webp',
- 'delivery-99food':'./assets/service-icons/99food.png',
- 'streaming-primevideo':'./assets/service-icons/prime-video.webp',
  'streaming-disney':'./assets/service-icons/disney-plus.webp',
  'streaming-globoplay':'./assets/service-icons/globoplay.webp',
  'delivery-rappi':'./assets/service-icons/rappi.webp',
  'mobility-99':'./assets/service-icons/99.webp',
  'mobility-indrive':'./assets/service-icons/indrive.webp',
- 'digital-canva':'./assets/service-icons/canva.webp'
-});
-// Grade 4×4 de imagens originais enviadas pelo usuário (2026-11-08).
-// O atlas preserva a arte de cada marca; não existe CDN nem redesenho fictício.
-// Células: [coluna, linha], índices 0..3. O logo substitui um ícone anterior,
-// mas não altera o ID de nenhum lançamento existente.
-export const SERVICE_SPRITE_URL='./assets/service-icons/service-brands-287.webp';
-const LOCAL_SERVICE_SPRITES=Object.freeze({
- 'streaming-hbomax':[0,0],
- 'delivery-99food':[1,0],
- 'streaming-primevideo':[2,0],
- 'shopping-tiktokshop':[3,0],
- 'social-whatsapp':[0,1],
- 'shopping-shopee':[1,1],
- 'shopping-mercadolivre':[2,1],
- 'social-telegram':[3,1],
- 'music-spotify':[0,2],
- 'shopping-magalu':[1,2],
- 'shopping-casasbahia':[2,2],
- 'shopping-temu':[3,2],
- 'shopping-shein':[0,3]
+ 'digital-canva':'./assets/service-icons/canva.webp',
+ 'streaming-hbomax':'./assets/service-icons/hbo-max.webp',
+ 'delivery-99food':'./assets/service-icons/99food.webp',
+ 'streaming-primevideo':'./assets/service-icons/prime-video.webp',
+ 'shopping-tiktokshop':'./assets/service-icons/tiktok-shop.webp',
+ 'social-whatsapp':'./assets/service-icons/whatsapp.webp',
+ 'shopping-shopee':'./assets/service-icons/shopee.webp',
+ 'shopping-mercadolivre':'./assets/service-icons/mercado-livre.webp',
+ 'social-telegram':'./assets/service-icons/telegram.webp',
+ 'music-spotify':'./assets/service-icons/spotify.webp',
+ 'shopping-magalu':'./assets/service-icons/magalu.webp',
+ 'shopping-casasbahia':'./assets/service-icons/casas-bahia.webp',
+ 'shopping-temu':'./assets/service-icons/temu.webp',
+ 'shopping-shein':'./assets/service-icons/shein.webp'
 });
 export const SERVICE_CATALOG=Object.freeze(definitions.map(([id,name,group,billingMode,fallback])=>
- Object.freeze({id,name,group,billingMode,fallback,logoPath:LOCAL_SERVICE_LOGOS[id]||null,sprite:LOCAL_SERVICE_SPRITES[id]||null,logoVerified:Boolean(LOCAL_SERVICE_LOGOS[id]||LOCAL_SERVICE_SPRITES[id])})
+ Object.freeze({id,name,group,billingMode,fallback,logoPath:LOCAL_SERVICE_LOGOS[id]||null,logoVerified:Boolean(LOCAL_SERVICE_LOGOS[id])})
 ));
 export const serviceSearchKey=s=>String(s??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');
 export const serviceById=id=>SERVICE_CATALOG.find(s=>s.id===id)||null;
