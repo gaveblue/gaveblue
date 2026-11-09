@@ -1,4 +1,4 @@
-// GB+ 2.8.9 — regressão de Nova/Editar conta e seletor de instituição.
+// GB+ 2.9.0 — regressão de Nova/Editar conta e seletor de instituição.
 // Execute: node gbplus/tests/gbplus-289-account-sheet-regression.mjs
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
@@ -79,7 +79,7 @@ const shown=picker.openGbPickerSheet({
 });
 assert(shown&&sheetRoot.open&&sheetRoot.dataset.snap==='expanded');
 assert(sheetRoot.innerHTML.indexOf('Conta personalizada')<sheetRoot.innerHTML.indexOf('Bancos disponíveis'));
-assert(sheetRoot.innerHTML.includes('aria-selected="true" data-sheet-choice="__cash__"'));
+assert(sheetRoot.innerHTML.includes('aria-selected="true" data-sheet-choice="__custom__"'));
 assert(sheetRoot.innerHTML.includes('data-sheet-search-input')&&sheetRoot.innerHTML.includes('Arraste a barra'));
 const app=read('js/app.js');
 assert(app.includes("'account-bank-picker':el=>")&&app.includes("bankPickerCatalog(db)"));
@@ -94,6 +94,6 @@ assert(css.includes('#account-form .gb-account-opening-control'));
 const version=JSON.parse(read('version.json'));
 assert.equal(version.version,'2.9.0');assert.equal(version.build,2900);
 assert(read('sw.js').includes('gb-plus-shell-v2900'));
-assert(read('index.html').includes('gbplus-version" content="2.8.9"'));
+assert(read('index.html').includes('gbplus-version" content="2.9.0"'));
 assert(read('index.html').includes('app.js?v=20261109-2900'));
 console.log('GB+ 2.9.0: regressão do editor de contas e bottom sheet atualizada.');
