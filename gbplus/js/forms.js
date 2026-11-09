@@ -2,9 +2,10 @@ import {today,money,dateLabel,pending,paid,accountBalance} from './domain.js?v=2
 import {esc,field,select,textarea,formFooter,button,icon,titleTable,empty} from './ui.js?v=20261105-72';
 import {INDICATORS} from './store.js?v=20261105-78';
 import {entrySelect} from './entry-select.js?v=20261108-2861';
-import {gbIcon,CATEGORY_ICON_OPTIONS,categoryIconFor} from './gb-icons.js?v=20261108-2821';
+import {gbIcon,CATEGORY_ICON_OPTIONS,categoryIconFor} from './gb-icons.js?v=20261109-2900';
 import {bankOptions,findBank,bankPicker,bankBadge} from './banks.js?v=20261105-87';
 import {dailyStatement} from './daily-statement.js?v=20261105-90';
+import {ACCOUNT_ICON_OPTIONS,GOAL_PRESETS,accountKind,accountIcon,goalPreset} from './account-goals.js?v=20261109-2900';
 import {servicePickerMarkup,serviceIdentityMarkup,serviceDisplayName} from './service-ui.js?v=20261108-2880';
 import {isServiceExpenseCategory} from './service-catalog.js?v=20261108-2880';
 import {missingCategorySuggestions,isSelectableExpenseCategory,isPrimaryServiceCategory} from './category-library.js?v=20261108-2862';
@@ -134,34 +135,66 @@ export function titleForm(db,t,type='expense'){
  </form>`;
 }
 export function partnerForm(p){return `<form id="partner-form" data-id="${p?.id||''}"><div class="form-grid">${field('Nome ou razão social','name',p?.name||'','text',required)}${field('Nome fantasia','tradeName',p?.tradeName||'','text','maxlength="200"')}${field('CPF ou CNPJ','document',p?.document||'','text','maxlength="18"')}${field('Telefone','phone',p?.phone||'','tel','maxlength="30"')}${field('E-mail','email',p?.email||'','email','maxlength="200"')}${select('Situação','active',[['true','Ativo'],['false','Inativo']],String(p?.active??true))}<fieldset class="full roles"><legend>Classificações · escolha uma ou mais</legend>${['Cliente','Fornecedor','Transportadora','Funcionário','Outros'].map(r=>`<label><input type="checkbox" name="roles" value="${r}" ${p?.roles.includes(r)?'checked':''}>${r}</label>`).join('')}</fieldset><div class="full">${field('Endereço','address',p?.address||'','text','maxlength="500"')}</div>${textarea('Observações','notes',p?.notes)}</div>${p?button(icon('trash')+'Excluir parceiro','delete-partner','danger small',`data-id="${p.id}" type="button"`):''}${formFooter()}</form>`;}
-/** Compact, shared account-bank preview. No persisted "cash" bank ID is needed. */
-export function accountBankPreview(db,bankId='',manualBank=''){
+/** The selector is shared by banks, custom cash accounts and goal cofrinhos. */
+export function accountBankPreview(db,bankId='',manualBank='',kind='bank',ico=''){
  const bank=findBank(db,bankId);
  const legacy=!bank?String(manualBank||'').trim():'';
- const label=bank?.name||legacy||'Dinheiro em caixa';
- const sub=bank?'Banco ou instituição':legacy?'Instituição já cadastrada':'Sem banco · caixa transitório';
- const mark=bank?bankBadge(bank):
-  '<span class="gb-account-cash-mark" aria-hidden="true">'+icon('wallet')+'</span>';
+ const type=kind==='goal'?'goal':kind==='custom'||(!bank&&!legacy)?'custom':'bank';
+ const label=type==='goal'?'Cofrinho':type==='custom'?'Conta personalizada':bank?.name||legacy;
+ const sub=type==='goal'?'Guarde dinheiro para um objetivo':type==='custom'?'Sem banco · personalize como quiser':
+  bank?'Banco ou instituição':'Instituição já cadastrada';
+ const mark=type==='bank'&&bank?bankBadge(bank):
+  '<span class="gb-account-cash-mark" aria-hidden="true">'+gbIcon(accountIcon({kind:type,icon:ico}))+'</span>';
  return '<span class="gb-account-bank-preview">'+mark+
   '<span class="gb-account-bank-copy"><strong>'+esc(label)+'</strong><small>'+esc(sub)+'</small></span></span>';
 }
-export function accountForm(db,a){
+export function accountForm(db,a,options={}){
  const matched=findBank(db,a?.bankId)||findBank(db,a?.bank);
  const id=matched?.id||'';
  const legacy=a?.bank&&!matched?String(a.bank):'';
+ const kind=a?accountKind(a):options.kind==='goal'?'goal':'custom';
+ const currentIcon=accountIcon({kind,icon:a?.icon});
  const initial=a?String((a.initial||0)/100):'';
+ const template=goalPreset(a?.goalCategory||'custom');
+ const palette=ACCOUNT_ICON_OPTIONS.map(([key,label])=>
+  '<button type="button" class="gb-account-icon-choice'+(currentIcon===key?' is-selected':'')+
+   '" data-action="account-icon" data-icon="'+esc(key)+'" aria-pressed="'+(currentIcon===key)+
+   '" aria-label="Ícone: '+esc(label)+'" title="'+esc(label)+'">'+gbIcon(key)+
+   '<small>'+esc(label)+'</small></button>').join('');
  return '<form id="account-form" class="gb-account-edit-form" data-id="'+esc(a?.id||'')+'">'+
   '<div class="form-grid gb-account-edit-grid">'+
-   '<div class="full">'+field('Nome da conta','name',a?.name||'','text','required maxlength="120" placeholder="Ex.: Conta principal, Caixa da empresa"')+'</div>'+
+   '<div class="full">'+field('Nome da conta','name',a?.name||'','text','required maxlength="120" placeholder="Ex.: Reserva de emergência, Carteira, Conta principal"')+'</div>'+
    '<div class="full gb-account-bank-field"><span class="gb-account-bank-label" id="account-bank-label">Onde fica o dinheiro?</span>'+
+    '<input type="hidden" name="kind" value="'+esc(kind)+'">'+
     '<input type="hidden" name="bankId" value="'+esc(id)+'">'+
     '<input type="hidden" name="bank" value="'+esc(legacy)+'">'+
     '<button type="button" class="gb-account-bank-trigger" data-action="account-bank-picker" aria-labelledby="account-bank-label" aria-haspopup="dialog" aria-controls="gb-picker-sheet" aria-expanded="false">'+
-     '<span data-account-bank-preview>'+accountBankPreview(db,id,legacy)+'</span>'+
+     '<span data-account-bank-preview>'+accountBankPreview(db,id,legacy,kind,currentIcon)+'</span>'+
      icon('chevron')+'</button></div>'+
+   '<div class="full gb-account-type-fields" data-account-type-fields '+(kind==='bank'?'hidden':'')+'>'+
+    '<fieldset class="gb-account-icon-picker"><legend>Escolha um ícone</legend>'+
+     '<input type="hidden" name="icon" value="'+esc(currentIcon)+'">'+
+     '<div class="gb-account-icon-grid" role="group" aria-label="Ícones da conta">'+palette+'</div></fieldset>'+
+    '<p class="gb-account-kind-hint">Seu ícone aparece nos saldos e nos cartões de contas.</p>'+
+   '</div>'+
+   '<div class="full gb-account-goal-fields" data-account-goal-fields '+(kind==='goal'?'':'hidden')+'>'+
+    '<label class="field">Qual é seu objetivo? <select name="goalCategory">'+
+     GOAL_PRESETS.map(([value,label])=>'<option value="'+esc(value)+'" '+(template[0]===value?'selected':'')+'>'+esc(label)+'</option>').join('')+
+    '</select></label>'+
+    '<div class="gb-account-goal-grid">'+
+     field('Valor da meta (R$)','goalTarget',a?.goalTarget?String(a.goalTarget/100):'','number','min="0.01" max="10000000000" step="0.01" inputmode="decimal" placeholder="Ex.: 10000,00"')+
+     field('Quando quer alcançar?','goalDue',a?.goalDue||'','date','')+
+    '</div>'+
+    '<div class="gb-goal-duration" role="group" aria-label="Escolher prazo da meta">'+
+     '<span>Prazo rápido</span>'+[3,6,12,24].map(m=>
+      '<button type="button" class="button small" data-action="goal-duration" data-months="'+m+'">'+
+       (m===12?'1 ano':m===24?'2 anos':m+' meses')+'</button>').join('')+'</div>'+ 
+    '<p class="gb-account-kind-hint">Acompanhe quanto falta e a sugestão mensal para chegar à meta.</p>'+
+   '</div>'+
    '<div class="full gb-account-opening"><label for="account-initial">Saldo inicial <small>(opcional)</small></label>'+
     '<div class="gb-account-opening-control"><span aria-hidden="true">R$</span>'+
      '<input id="account-initial" name="initial" type="number" value="'+esc(initial)+'" placeholder="0,00" min="-10000000000" max="10000000000" step="0.01" inputmode="decimal" aria-label="Saldo inicial em reais, opcional"></div>'+
+    '<p class="gb-account-opening-hint">Se o dinheiro já está em outra conta do GB+, deixe zero e use Transferir para não contar duas vezes.</p>'+
    '</div>'+
    (a?select('Situação','active',[['true','Ativa'],['false','Inativa']],String(a.active??true)):'<input type="hidden" name="active" value="true">')+
   '</div>'+
@@ -184,7 +217,19 @@ export function categoryForm(c){
   </div>${c?button(icon('trash')+'Excluir categoria','delete-category','danger small',`data-id="${c.id}" type="button"`):''}${formFooter()}</form>`;
 }
 export function paymentForm(db,t){const accounts=db.accounts.filter(a=>a.active);return accounts.length?`<div class="detail-summary"><span>${esc(t.description)}</span><strong>${money(pending(db,t))}</strong><small>Saldo pendente</small></div><form id="payment-form" data-id="${t.id}"><div class="form-grid">${field('Valor da baixa (R$)','amount',pending(db,t)/100,'number',`required min="0.01" max="${pending(db,t)/100}" step="0.01"`)}${field('Data do pagamento / recebimento','date',today(),'date',`required max="${today()}"`)}<div class="full">${select('Conta utilizada','accountId',accounts.map(a=>[a.id,a.name]),t.accountId,'required')}</div></div>${formFooter('Confirmar baixa')}</form>`:empty('Adicione uma conta primeiro','Uma baixa precisa de uma conta financeira para movimentar o saldo.','new-account','Cadastrar conta');}
-export function transferForm(db){const accounts=db.accounts.filter(a=>a.active).map(a=>[a.id,a.name]);return accounts.length>1?`<form id="transfer-form"><div class="form-grid">${select('Conta de origem','from',accounts,accounts[0][0],'required')}${select('Conta de destino','to',accounts,accounts[1][0],'required')}${field('Valor (R$)','amount','','number','required min="0.01" max="10000000000" step="0.01"')}${field('Data','date',today(),'date',`required max="${today()}"`)}</div><p class="form-hint">A transferência movimenta as duas contas sem gerar receita ou despesa.</p>${formFooter('Transferir')}</form>`:empty('São necessárias duas contas ativas','Cadastre as contas de origem e destino para transferir.','new-account','Cadastrar conta');}
+export function transferForm(db,{from='',to=''}={}){
+ const active=db.accounts.filter(a=>a.active),options=active.map(a=>[a.id,a.name]);
+ if(active.length<2)return empty('São necessárias duas contas ativas','Cadastre as contas de origem e destino para transferir.','new-account','Cadastrar conta');
+ const source=options.some(([id])=>id===from)?from:options.find(([id])=>id!==to)?.[0]||options[0][0];
+ const target=options.some(([id])=>id===to&&id!==source)?to:options.find(([id])=>id!==source)?.[0]||options[1][0];
+ return '<form id="transfer-form"><div class="form-grid">'+
+  select('Conta de origem','from',options,source,'required')+
+  select('Conta de destino','to',options,target,'required')+
+  field('Valor (R$)','amount','','number','required min="0.01" max="10000000000" step="0.01"')+
+  field('Data','date',today(),'date','required max="'+today()+'"')+
+  '</div><p class="form-hint">A transferência movimenta as duas contas sem gerar receita ou despesa. Para guardar dinheiro no cofrinho, transfira de uma conta existente.</p>'+
+  formFooter('Transferir')+'</form>';
+}
 export function titleDetail(db,t){const invoicePurchases=t.cardInvoice?(db.cardPurchases||[]).filter(p=>p.invoiceId===t.id):[];return `<div class="detail-summary"><span>${esc(serviceDisplayName(t.serviceId,t.serviceName,t.description))}${t.count>1?` · ${t.sequence}/${t.count}`:''}</span><strong>${money(t.amount)}</strong><small>${money(pending(db,t))} pendentes · Vencimento ${dateLabel(t.due)}</small></div><dl class="details"><dt>Parceiro</dt><dd>${esc(db.partners.find(p=>p.id===t.partnerId)?.name||'Sem parceiro')}</dd><dt>Categoria</dt><dd>${esc(db.categories.find(c=>c.id===t.categoryId)?.name)}</dd><dt>Serviço</dt><dd>${serviceIdentityMarkup(t.serviceId,t.serviceName)||'—'}</dd><dt>Documento</dt><dd>${esc(t.document||'—')}</dd><dt>Meio previsto</dt><dd>${t.paymentMethod==='debit'?'Cartão de débito':t.paymentMethod==='account'?'Conta / Pix / dinheiro':'—'}</dd><dt>Cartão relacionado</dt><dd>${esc(db.cards?.find(c=>c.id===t.relatedCardId)?.name||'—')}${t.relatedCardId?' · vínculo informativo, sem ajuste na fatura':''}</dd>${t.cardInvoice?`<dt>Cartão</dt><dd>${esc(db.cards?.find(c=>c.id===t.cardId)?.name||'Cartão não encontrado')}</dd><dt>Competência</dt><dd>${esc(t.cardCycle||'—')}</dd><dt>Tipo de fatura</dt><dd>${invoicePurchases.some(p=>p.source==='invoice-balance')?'Saldo consolidado informado':'Compras registradas no GB+'}</dd>`:''}<dt>Emissão</dt><dd>${dateLabel(t.issue)}</dd><dt>Observações</dt><dd>${esc(t.notes||'—')}</dd></dl>${t.cardInvoice?'<h3>Composição da fatura</h3>'+(invoicePurchases.length?'<div class="history-list">'+invoicePurchases.map(p=>'<div><span>'+esc(p.description)+'<small>'+(p.source==='invoice-balance'?'Saldo consolidado informado · sem itens individuais':dateLabel(p.date)+' · parcela '+p.sequence+'/'+p.count)+'</small></span><b>'+money(p.amount)+'</b>'+button(p.source==='invoice-balance'?'Editar saldo':'Editar compra','edit-card-purchase','small',`data-id="${p.id}"`)+(p.source==='invoice-balance'?button('Excluir saldo','delete-card-purchase','small',`data-id="${p.id}"`):'')+'</div>').join('')+'</div>':'<p class="muted">Nenhuma compra vinculada.</p>'):''}<h3>Histórico de baixas</h3>${db.payments.some(p=>p.titleId===t.id)?`<div class="history-list">${db.payments.filter(p=>p.titleId===t.id).map(p=>`<div><span>${dateLabel(p.date)}<small>${esc(db.accounts.find(a=>a.id===p.accountId)?.name)}</small></span><b>${money(p.amount)}</b><button class="icon-button" data-action="undo-payment" data-id="${p.id}" aria-label="Estornar baixa de ${money(p.amount)}">${icon('trash')}</button></div>`).join('')}</div>`:'<p class="muted">Nenhuma baixa registrada.</p>'}<div class="form-footer">${t.cardInvoice?'':button(icon('trash'),'delete-title','danger',`data-id="${t.id}" aria-label="Excluir título"`)+button('Editar','edit-title','',`data-id="${t.id}"`)}${pending(db,t)>0?button('Registrar baixa','payment','primary',`data-id="${t.id}"`):''}</div>`;}
 export function customizeForm(db){return `<form id="customize-form"><p class="muted">Escolha o que importa para você em cada tela.</p><div class="customize-table"><div><b>Indicador</b><b>Desktop</b><b>Celular</b></div>${Object.entries(INDICATORS).map(([k,v])=>`<div><span>${v}</span>${['desktop','mobile'].map(d=>`<label><span class="sr-only">${v} ${d}</span><input type="checkbox" name="${d}:${k}" ${db.settings.panel[d][k]?'checked':''}></label>`).join('')}</div>`).join('')}</div>${button('Restaurar padrão','reset-panel','small','type="button"')}${formFooter('Salvar painel')}</form>`;}
 export function accountDetail(db,a){
@@ -193,10 +238,10 @@ export function accountDetail(db,a){
  const groups=ledger.days;
  return '<div class="gb-statement" aria-label="Extrato da conta">'+
   '<div class="gb-statement-account"><span>'+esc(a.name)+'</span><strong>'+money(ledger.closing)+'</strong><small>Saldo atual · Saldo inicial cadastrado: '+money(a.initial)+'</small></div>'+
-  (a.active!==false?'<div class="gb-statement-import"><button class="button" data-action="bank-import-open" data-id="'+esc(a.id)+'">'+icon('upload')+' Importar extrato OFX/CSV</button><small>Arquivo local · só grava após confirmar</small></div>':'')+ 
+  (a.active!==false&&accountKind(a)!=='goal'?'<div class="gb-statement-import"><button class="button" data-action="bank-import-open" data-id="'+esc(a.id)+'">'+icon('upload')+' Importar extrato OFX/CSV</button><small>Arquivo local · só grava após confirmar</small></div>':'')+ 
    '<div class="gb-statement-totals"><div><small>Créditos acumulados</small><strong class="gb-statement-credit">+ '+money(ledger.credits)+'</strong></div>'+
   '<div><small>Débitos acumulados</small><strong class="gb-statement-debit">− '+money(ledger.debits)+'</strong></div></div>'+
-  '<div class="gb-statement-links"><button type="button" class="button" data-action="bank-import-history" data-id="'+esc(a.id)+'">Histórico de conciliações</button></div>'+ 
+  (accountKind(a)==='goal'?'<div class="gb-goal-actions">'+button('Guardar','goal-deposit','small','data-id="'+esc(a.id)+'"')+button('Retirar','goal-withdraw','small','data-id="'+esc(a.id)+'"')+'</div>':'<div class="gb-statement-links"><button type="button" class="button" data-action="bank-import-history" data-id="'+esc(a.id)+'">Histórico de conciliações</button></div>')+ 
    '<p class="gb-statement-note">Movimentações registradas no GB+. O saldo inicial cadastrado é a base dos cálculos. Os vínculos de conciliação não alteram estes valores.</p>'+
   '<div class="gb-statement-days">'+groups.map(day=>
    '<section class="gb-statement-day" aria-label="Movimentações de '+dateLabel(day.date)+'">'+

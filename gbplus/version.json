@@ -1,16 +1,15 @@
 {
-  "version": "2.8.9",
-  "build": 2890,
+  "version": "2.9.0",
+  "build": 2900,
   "published_at": null,
-  "title": "Contas financeiras — formulário simplificado",
+  "title": "Cofrinhos de metas e contas personalizadas",
   "notes": [
-    "Formulário de contas redesenhado: nome, seletor de banco em bottom sheet arrastável e saldo inicial opcional em estilo de valor, preservando situação nas edições.",
-    "Selecionar banco abre o mesmo painel usado em categorias e serviços: abre expandido e pode ser arrastado para meia tela, com busca, logo e opções priorizadas.",
-    "Opção Dinheiro em caixa (sem banco) fica em destaque no topo do painel, útil para dinheiro físico e caixa transitório, usando o ícone de carteira.",
-    "Removidos somente do editor de contas: faixa horizontal de bancos, busca duplicada, Outra instituição, agência e número da conta. Dados preexistentes de agência e conta são preservados ao salvar.",
-    "Saldo inicial deixa de ser obrigatório na criação; se vazio, inicia em R$ 0,00. Na edição, o saldo continua sendo a base de cálculo existente.",
-    "Sem mudanças em lançamentos, importações, cartões, faturas, termos ou marketing. Corrigido cache dos módulos e CSS no PWA.",
-    "PR #110 mesclado na main; atualização efetiva do PWA em gaveblue.com.br/gbplus/ ainda não confirmada."
+    "Conta personalizada substitui a opção Dinheiro em caixa e permite escolher um ícone local para representar dinheiro físico, carteira ou caixa transitório.",
+    "Cofrinhos são contas internas com ícones personalizáveis, objetivos predefinidos (emergência, casamento, educação, viagem, casa ou outro), valor-alvo e data prevista.",
+    "Cartões de metas exibem saldo, porcentagem alcançada, valor que falta, prazo e sugestão aproximada de aporte mensal.",
+    "Depósitos e retiradas em cofrinhos usam transferências entre contas existentes; não contam como receita/despesa nem duplicam saldo total.",
+    "Dados anteriores e vínculos financeiros existentes são preservados. Metadados opcionais no JSON de contas, sem nova tabela ou migração SQL.",
+    "Liberação autorizada pelo proprietário; testes integrais no CI e validação visual Android/PWA ainda sem evidências."
   ],
   "assets": [
     "./index.html",
@@ -203,28 +202,30 @@
     "./assets/service-icons/hq-shopee.webp",
     "./assets/service-icons/hq-telegram.webp",
     "./assets/service-icons/hq-spotify.webp",
-    "./assets/service-icons/hq-tiktok-shop.webp"
+    "./assets/service-icons/hq-tiktok-shop.webp",
+    "./account-goals.css",
+    "./js/account-goals.js"
   ],
   "highlights": [
     {
+      "icon": "piggy-bank",
+      "title": "Meus cofrinhos",
+      "description": "Metas personalizadas e progresso visível."
+    },
+    {
       "icon": "wallet",
-      "title": "Contas mais simples",
-      "description": "Somente nome, instituição ou caixa e saldo inicial."
+      "title": "Conta personalizada",
+      "description": "Sem banco e com ícone à sua escolha."
     },
     {
-      "icon": "list",
-      "title": "Bancos em bottom sheet",
-      "description": "Pesquisa com logo; painel expandido ou meia tela."
-    },
-    {
-      "icon": "shield",
-      "title": "Histórico preservado",
-      "description": "Agência, número da conta e lançamentos antigos não são apagados."
+      "icon": "transfer",
+      "title": "Aportes sem duplicar",
+      "description": "Transferências internas preservam o saldo geral."
     }
   ],
-  "release_status": "merged_to_main_pending_live_verification",
+  "release_status": "user_authorized_release_qa_incomplete",
   "homologation": {
-    "status": "isolated_regressions_passed_visual_qa_pending",
-    "notes": "PR #110 mesclado em main em 08/11/2026. Testes isolados: regressão 2.8.9, 12 casos de busca de bancos, ação banco/caixa, persistência sem perda de agência/número, 128 verificações da 2.8.2, 32 da 2.8.5, regressão de bottom sheet. Não foi possível acessar o domínio público nem homologar a tela visualmente em Android/PWA real; não declarar QA visual completo."
+    "status": "specific_regressions_passed_ci_and_visual_pending",
+    "notes": "Liberação solicitada expressamente pelo responsável em 09/11/2026. Dois testes específicos do editor de contas e metas executados em ambiente JS isolado passaram; o workflow GitHub Actions falhou antes de registrar execução de steps, logo a suíte integral e o QA visual Android/PWA ainda não foram comprovados. Não classificar como homologada."
   }
 }

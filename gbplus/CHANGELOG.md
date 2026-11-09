@@ -1,5 +1,15 @@
 # CHANGELOG — GB+ Gestão Financeira
 
+## [2.9.0 — COFRINHOS E CONTAS PERSONALIZADAS (LIBERAÇÃO AUTORIZADA; QA VISUAL PENDENTE)] — 2026-11-09
+
+- **Conta personalizada:** substitui “Dinheiro em caixa” na seleção de tipos; nome livre e ícone escolhido de uma paleta de pictogramas locais. Sem vínculo com instituição bancária.
+- **Cofrinho:** cadastra uma meta com tipo (reserva de emergência, casamento, educação, viagem, casa ou outro objetivo), nome editável, ícone, valor-alvo em centavos e data final.
+- **Painel de metas:** cofrinhos destacados na tela Contas e cartões, mostrando saldo, objetivo, porcentagem, prazo, falta para alcançar e estimativa de aporte por mês.
+- **Aportes e resgates:** botões Guardar e Retirar abrem transferência interna, sem lançamento artificial de receita ou despesa; saídas de cofrinho não podem exceder seu saldo.
+- **Compatibilidade:** arquivos de contas anteriores mantidos; novos campos opcionais em cada conta no documento JSON existente; não há nova tabela, mudança de RLS ou migração SQL.
+- **Escopo:** telas de contas e cartões, visualização de saldos, registro de contas e transferências, validação e cache PWA. Cartões, faturas, lançamentos antigos, onboarding e LGPD mantidos.
+- **Liberação autorizada pelo responsável em 09/11/2026:** dois testes específicos executados em ambiente JS isolado passaram; a suíte integral no GitHub Actions falhou antes do início dos steps, sem evidência de execução. QA visual Android/PWA e validação online seguem pendentes. Não declarar homologado antes dessas evidências.
+
 ## [2.8.9 — CADASTRO DE CONTAS MAIS LIMPO (MERGE NA MAIN; SITE A CONFERIR)] — 2026-11-08
 
 - **Escopo exclusivo:** tela Nova conta / Editar conta. Nenhum outro formulário sofreu redesign.

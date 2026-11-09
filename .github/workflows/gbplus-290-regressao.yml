@@ -1,0 +1,35 @@
+name: GB+ 2.9.0 - regressao de cofrinhos
+on:
+  push:
+    branches:
+      - feat/gbplus-290-goal-vaults
+  pull_request:
+    paths:
+      - 'gbplus/**'
+      - '.github/workflows/gbplus-290-regressao.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  regressao:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout em modo leitura
+        uses: actions/checkout@v4
+      - name: Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Executar regressões isoladas sem publicar
+        run: node gbplus/scripts/homologar-local.mjs
+      - name: Preservar relatório dos testes
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gbplus-290-evidencias
+          path: gbplus/homologacao-local/relatorios/*.json
+          if-no-files-found: warn
+          retention-days: 14

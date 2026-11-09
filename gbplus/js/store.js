@@ -1,5 +1,6 @@
 import {uid,validDate,paid,today} from './domain.js?v=20261105-72';
-import {CATEGORY_ICON_OPTIONS} from './gb-icons.js?v=20261108-2821';
+import {CATEGORY_ICON_OPTIONS} from './gb-icons.js?v=20261109-2900';
+import {ACCOUNT_ICON_OPTIONS,GOAL_PRESETS,accountKind} from './account-goals.js?v=20261109-2900';
 import {BANKS} from './banks.js?v=20261105-87';
 import {CATEGORY_SUGGESTIONS} from './category-library.js?v=20261108-2862';
 import {DEFAULT_NOTIFICATION_PREFS,validNotificationPrefs} from './notification-rules.js?v=20261108-2821';
@@ -181,6 +182,18 @@ export function validateDatabase(db){
   const has=(key,id)=>db[key].some(x=>x.id===id);
   for(const c of db.categories)assert(str(c.name,100)&&c.name.trim()&&['income','expense'].includes(c.type)&&(c.icon===undefined||CATEGORY_ICON_OPTIONS.some(([key])=>key===c.icon)),'categoria.');
   for(const a of db.accounts)assert(str(a.name,120)&&a.name.trim()&&str(a.bank,120)&&str(a.branch,80)&&str(a.number,80)&&amount(a.initial)&&typeof a.active==='boolean','conta.');
+  // Legacy accounts without kind/icon/goal metadata remain valid.
+  for(const a of db.accounts){
+   if(a.kind!==undefined)assert(['bank','custom','goal'].includes(a.kind),'tipo da conta.');
+   if(a.icon!==undefined)assert(str(a.icon,60)&&(!a.icon||ACCOUNT_ICON_OPTIONS.some(([key])=>key===a.icon)),'ícone da conta.');
+   if(a.goalCategory!==undefined)assert(str(a.goalCategory,40)&&(!a.goalCategory||GOAL_PRESETS.some(([key])=>key===a.goalCategory)),'categoria da meta.');
+   if(a.goalTarget!==undefined)assert(amount(a.goalTarget)&&a.goalTarget>=0,'valor da meta.');
+   if(a.goalDue!==undefined)assert(str(a.goalDue,10)&&(!a.goalDue||validDate(a.goalDue)),'data da meta.');
+   if(accountKind(a)==='goal'){
+    assert(a.goalTarget>0&&validDate(a.goalDue)&&a.initial>=0&&!a.bankId&&!a.bank,'configuração do cofrinho.');
+   }
+   if(['custom','goal'].includes(a.kind))assert(!a.bankId&&!a.bank,'conta não bancária.');
+  }
   for(const p of db.partners)assert(str(p.name,200)&&p.name.trim()&&['tradeName','document','phone','email','address','notes'].every(k=>str(p[k]))&&typeof p.active==='boolean'&&Array.isArray(p.roles)&&p.roles.length>0&&p.roles.every(r=>['Cliente','Fornecedor','Transportadora','Funcionário','Outros'].includes(r)),'parceiro.');
   for(const t of db.titles){assert(str(t.description,300)&&t.description.trim()&&str(t.document,100)&&str(t.notes)&&['income','expense'].includes(t.type)&&amount(t.amount)&&t.amount>0&&validDate(t.issue)&&validDate(t.due)&&typeof t.cancelled==='boolean','título.');assert((!t.partnerId||has('partners',t.partnerId))&&(!t.accountId||has('accounts',t.accountId))&&db.categories.some(c=>c.id===t.categoryId&&c.type===t.type),'referência do título.');assert(['single','installment','recurring'].includes(t.mode)&&Number.isInteger(t.sequence)&&Number.isInteger(t.count)&&t.sequence>=1&&t.sequence<=t.count&&t.count<=120&&(t.groupId===null||str(t.groupId,100)),'série do título.');}
   // Optional service identity: preserved by local backups and Supabase JSON payloads.
