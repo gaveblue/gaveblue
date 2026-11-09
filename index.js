@@ -27,57 +27,122 @@ const pages = {
               <span class="text-sm text-slate-300 font-medium">4.99/5</span>
             </div>
           </div>
-          <!-- Vitrine de lançamento GB+; sem alterações no aplicativo financeiro -->
+          <!-- Vitrine GB+: demonstrações locais, sem movimentação financeira real -->
           <div id="gbplus-campaign" class="gbc" aria-labelledby="gbc-title">
             <div class="gbc-intro">
               <div>
-                <span class="gbc-kicker">Um produto GaveBlue</span>
-                <h2 class="gbc-title" id="gbc-title">Conheça o GB+: suas finanças no seu ritmo.</h2>
+                <span class="gbc-kicker"><span class="gbc-pulse-dot" aria-hidden="true"></span> CONHEÇA O ECOSSISTEMA</span>
+                <h2 id="gbc-title" class="gbc-title">Uma nova forma de cuidar das suas finanças.</h2>
+                <p>Explore como o GB+ reúne saldos, contas e lançamentos em uma experiência simples.</p>
               </div>
-              <a href="/gbplus/apresentacao.html">Explorar o GB+ <span aria-hidden="true">↗</span></a>
+              <a class="gbc-outline-link" href="/gbplus/apresentacao.html">Conhecer o GB+ <span aria-hidden="true">↗</span></a>
             </div>
-            <div class="gbc-grid">
-              <article class="gbc-card gbc-card--brand">
-                <span class="gbc-overline">GaveBlue apresenta</span>
-                <h3>GB+</h3>
-                <p class="gbc-brand-desc">Seu dinheiro, mais simples. Saldos e previsões organizados numa só experiência.</p>
-                <div class="gbc-phone">
-                  <img src="/gbplus/assets/gbplus-dashboard-real.svg" alt="Tela real do painel do GB+, com saldo, contas a receber e a pagar." width="220" height="476" loading="lazy" decoding="async">
-                </div>
-                <a class="gbc-cta" href="/gbplus/apresentacao.html">Conheça o aplicativo <span aria-hidden="true">↗</span></a>
-              </article>
-              <article class="gbc-card gbc-card--cards">
-                <span class="gbc-overline">Controle em um só lugar</span>
-                <h3>Contas e cartões, juntos.</h3>
-                <p>Visualize limites, gerencie seus cartões e acompanhe suas faturas.</p>
-                <div class="gbc-mock-cards" aria-hidden="true">
-                  <div class="gbc-mock-switch"><span>Contas</span><span>Cartões</span></div>
-                  <div class="gbc-mock-label"><span>Meus cartões</span><em>+ Novo cartão</em></div>
-                  <div class="gbc-mock-stats">
-                    <span>Limite total<strong>R$ 0,00</strong></span>
-                    <span>Utilizado<strong>R$ 0,00</strong></span>
-                    <span>Disponível<strong>R$ 0,00</strong></span>
+            <div class="gbc-layout">
+              <div class="gbc-hero">
+                <div class="gbc-hero-copy">
+                  <span class="gbc-eyebrow">GAVEBLUE APRESENTA</span>
+                  <h3>GB<span>+</span></h3>
+                  <strong class="gbc-hero-headline">Sua vida financeira,<br>do seu jeito.</strong>
+                  <p>Mais clareza para acompanhar suas contas e planejar os próximos passos.</p>
+                  <div class="gbc-demo-switch gbc-hero-switch" aria-label="Prévia do painel">
+                    <button type="button" class="is-active" data-gbc-group="hero" data-gbc-value="resumo" aria-pressed="true">Visão geral</button>
+                    <button type="button" data-gbc-group="hero" data-gbc-value="previsoes" aria-pressed="false">Previsões</button>
                   </div>
-                  <div class="gbc-mock-footer"></div>
+                  <div class="gbc-hero-caption" aria-live="polite">
+                    <div data-gbc-panel-group="hero" data-gbc-panel-value="resumo">Visualize seu saldo e os valores a receber e a pagar.</div>
+                    <div data-gbc-panel-group="hero" data-gbc-panel-value="previsoes" hidden>Antecipe compromissos e tenha uma visão do seu futuro financeiro.</div>
+                  </div>
+                  <div class="gbc-hero-actions">
+                    <a href="/gbplus/?web=1" class="gbc-primary-link">Abrir GB+ <span aria-hidden="true">↗</span></a>
+                    <a href="/gbplus/apresentacao.html" class="gbc-quiet-link">Ver detalhes</a>
+                  </div>
                 </div>
-                <a class="gbc-cta" href="/gbplus/apresentacao.html">Saiba mais <span aria-hidden="true">↗</span></a>
-                <small class="gbc-note">Prévia ilustrativa da interface de cartões.</small>
-              </article>
-              <article class="gbc-card gbc-card--entries">
-                <span class="gbc-overline">Mais praticidade</span>
-                <h3>Lançamentos sem complicação.</h3>
-                <p>Registre receitas e despesas em um fluxo claro, dividido em etapas.</p>
-                <div class="gbc-mock-entry" aria-hidden="true">
-                  <div class="gbc-mock-step"><span>1 · Lançamento</span><span>2 · Detalhes</span><span>3 · Confirmar</span></div>
-                  <div class="gbc-mock-type"><span>↓ Despesa</span><span>↑ Receita</span></div>
-                  <div class="gbc-mock-value">R$ 0,00</div>
-                  <div class="gbc-mock-field">Categoria · Serviços</div>
-                  <div class="gbc-mock-field">Descrição do lançamento</div>
+                <div class="gbc-hero-device">
+                  <div class="gbc-device-shell" aria-label="Prévia do aplicativo GB+">
+                    <div class="gbc-device-notch" aria-hidden="true"></div>
+                    <img data-gbc-panel-group="hero" data-gbc-panel-value="resumo" src="/gbplus/assets/gbplus-dashboard-real.svg" alt="Painel do GB+ com visão dos saldos e contas." width="220" height="476" loading="lazy" decoding="async">
+                    <div class="gbc-forecast" data-gbc-panel-group="hero" data-gbc-panel-value="previsoes" hidden>
+                      <span class="gbc-forecast-logo">GB+</span>
+                      <span class="gbc-forecast-heading">Seu futuro financeiro</span>
+                      <strong>Próximos 30 dias</strong>
+                      <div><span>Entradas previstas</span><b>R$ 0,00</b></div>
+                      <div><span>Saídas previstas</span><b>R$ 0,00</b></div>
+                      <div class="gbc-forecast-result"><span>Resultado previsto</span><b>R$ 0,00</b></div>
+                      <small>Valores ilustrativos</small>
+                    </div>
+                  </div>
+                  <span class="gbc-device-halo" aria-hidden="true"></span>
                 </div>
-                <a class="gbc-cta" href="/gbplus/apresentacao.html">Descubra o GB+ <span aria-hidden="true">↗</span></a>
-                <span class="gbc-dots" aria-hidden="true">···</span>
-              </article>
+                <span class="gbc-hero-footnote">Prévia interativa do GB+ · sem acesso à sua conta</span>
+              </div>
+              <div class="gbc-features">
+                <article class="gbc-feature gbc-feature-wallet">
+                  <div class="gbc-feature-top">
+                    <span class="gbc-feature-index">01 / ORGANIZAÇÃO</span>
+                    <h3>Contas e cartões no mesmo lugar.</h3>
+                    <p>Alterne entre as visões e descubra uma forma mais prática de organizar o seu financeiro.</p>
+                  </div>
+                  <div class="gbc-feature-window" aria-label="Demonstração das abas Contas e Cartões">
+                    <div class="gbc-demo-switch gbc-wallet-tabs" aria-label="Escolher visualização da carteira">
+                      <button type="button" data-gbc-group="wallet" data-gbc-value="contas" aria-pressed="false">▤ Contas</button>
+                      <button type="button" data-gbc-group="wallet" data-gbc-value="cartoes" class="is-active" aria-pressed="true">▣ Cartões</button>
+                    </div>
+                    <div data-gbc-panel-group="wallet" data-gbc-panel-value="cartoes">
+                      <div class="gbc-window-title"><b>Meus cartões</b><span>Limites e faturas</span></div>
+                      <div class="gbc-window-stats">
+                        <div><small>Limite total</small><strong>R$ 0,00</strong></div>
+                        <div><small>Utilizado</small><strong>R$ 0,00</strong></div>
+                        <div><small>Disponível</small><strong>R$ 0,00</strong></div>
+                      </div>
+                      <div class="gbc-window-row"><span>▣ Cartões cadastrados</span><b>0</b></div>
+                    </div>
+                    <div data-gbc-panel-group="wallet" data-gbc-panel-value="contas" hidden>
+                      <div class="gbc-window-title"><b>Minhas contas</b><span>Saldos bancários</span></div>
+                      <div class="gbc-window-balance"><small>Saldo total disponível</small><strong>R$ 0,00</strong></div>
+                      <div class="gbc-window-row"><span>▤ Contas cadastradas</span><b>0</b></div>
+                    </div>
+                  </div>
+                  <div class="gbc-feature-bottom"><span>Toque para explorar as abas</span><a href="/gbplus/?web=1">Experimentar o GB+ ↗</a></div>
+                </article>
+                <article class="gbc-feature gbc-feature-launch">
+                  <div class="gbc-feature-top">
+                    <span class="gbc-feature-index">02 / PRATICIDADE</span>
+                    <h3>Lançamentos em poucos passos.</h3>
+                    <p>Veja como receitas e despesas são organizadas em três etapas fáceis de acompanhar.</p>
+                  </div>
+                  <div class="gbc-feature-window gbc-entry-demo" aria-label="Demonstração do formulário de lançamentos">
+                    <div class="gbc-entry-topline"><strong>Novo lançamento</strong><span data-gbc-step-indicator>Etapa 1 de 3</span></div>
+                    <div class="gbc-steps" aria-label="Etapas da demonstração">
+                      <button type="button" class="is-active" data-gbc-group="step" data-gbc-value="1" aria-pressed="true">1</button>
+                      <button type="button" data-gbc-group="step" data-gbc-value="2" aria-pressed="false">2</button>
+                      <button type="button" data-gbc-group="step" data-gbc-value="3" aria-pressed="false">3</button>
+                    </div>
+                    <div class="gbc-demo-switch gbc-kind-switch" aria-label="Tipo de lançamento">
+                      <button type="button" class="is-active" data-gbc-group="kind" data-gbc-value="despesa" aria-pressed="true">↓ Despesa</button>
+                      <button type="button" data-gbc-group="kind" data-gbc-value="receita" aria-pressed="false">↑ Receita</button>
+                    </div>
+                    <div class="gbc-entry-panel" data-gbc-panel-group="step" data-gbc-panel-value="1">
+                      <div class="gbc-entry-amount"><small>Valor do lançamento</small><strong>R$ 0,00</strong></div>
+                      <div class="gbc-field"><small>Categoria</small><b data-gbc-bind="category">Serviços</b></div>
+                    </div>
+                    <div class="gbc-entry-panel" data-gbc-panel-group="step" data-gbc-panel-value="2" hidden>
+                      <div class="gbc-field"><small>Periodicidade</small><b>Única</b></div>
+                      <div class="gbc-field"><small>Observações</small><b>Adicionar detalhes</b></div>
+                    </div>
+                    <div class="gbc-entry-panel" data-gbc-panel-group="step" data-gbc-panel-value="3" hidden>
+                      <div class="gbc-field"><small>Tipo</small><b data-gbc-bind="type">Despesa</b></div>
+                      <div class="gbc-field"><small>Situação</small><b>Pendente</b></div>
+                    </div>
+                    <div class="gbc-step-controls">
+                      <button type="button" data-gbc-direction="prev" disabled aria-label="Etapa anterior">←</button>
+                      <button type="button" class="gbc-step-next" data-gbc-direction="next">Próximo passo →</button>
+                    </div>
+                  </div>
+                  <div class="gbc-feature-bottom"><span>Apenas uma simulação visual</span><a href="/gbplus/?web=1">Criar lançamento no app ↗</a></div>
+                </article>
+              </div>
             </div>
+            <p class="gbc-disclaimer">As interações acima são demonstrações com valores ilustrativos e não movimentam dados financeiros.</p>
           </div>
           <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5">
             <a href="https://gaveblue.com.br/recibos/" class="group rounded-[1.5rem] sm:rounded-[1.75rem] border border-slate-700/50 bg-white/[0.04] p-5 sm:p-7 hover:bg-white/[0.06] hover:border-blue-400/40 transition-all relative overflow-hidden">
@@ -103,6 +168,15 @@ const pages = {
               </div>
               <h3 class="text-xl sm:text-2xl font-bold text-white mb-3">WeFrotas</h3>
               <p class="text-slate-300 leading-relaxed">Gerencie veículos, motoristas, ordens de serviço, financeiro e relatórios em uma central pensada para operações de frota.</p>
+            </a>
+            <a href="/gbplus/?web=1" class="group rounded-[1.5rem] sm:rounded-[1.75rem] border border-blue-200 bg-white/[0.04] p-5 sm:p-7 hover:border-blue-400/40 transition-all relative overflow-hidden" aria-label="Abrir o módulo GB+ de finanças pessoais">
+              <span class="module-badge module-badge--free">Grátis</span>
+              <div class="w-14 h-14 rounded-2xl bg-blue-500/15 border border-blue-400/20 flex items-center justify-center mb-5">
+                <span class="text-blue-600 font-black text-lg tracking-tight" aria-hidden="true">GB+</span>
+              </div>
+              <h3 class="text-xl sm:text-2xl font-bold text-white mb-3">GB+</h3>
+              <p class="text-slate-300 leading-relaxed">Gerencie suas contas, cartões, receitas, despesas e previsões em um único aplicativo financeiro.</p>
+              <span class="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-blue-600">Abrir GB+ <span aria-hidden="true">↗</span></span>
             </a>
             <a href="https://gaveblue.com.br/weconsultas/" class="group rounded-[1.5rem] sm:rounded-[1.75rem] border border-slate-700/50 bg-white/[0.04] p-5 sm:p-7 hover:bg-white/[0.06] hover:border-purple-400/40 transition-all relative overflow-hidden">
               <div class="w-14 h-14 rounded-2xl bg-purple-500/15 border border-purple-400/20 flex items-center justify-center mb-5">
