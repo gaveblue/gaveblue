@@ -5683,7 +5683,7 @@
       currentModalType = 'premium';
       currentEditingId = null;
       currentFinanceEntryType = null;
-      if (type === 'order') window.WeFrotasOsGuide?.reset();
+
       const backdrop = document.getElementById('modal-backdrop');
       const fields = document.getElementById('modal-fields');
       const kicker = document.getElementById('modal-kicker');
@@ -5815,6 +5815,7 @@
       currentModalType = type;
       currentEditingId = null;
       currentFinanceEntryType = null;
+      if (type === 'order') window.WeFrotasOsGuide?.reset();
       const backdrop = document.getElementById('modal-backdrop');
       const fields = document.getElementById('modal-fields');
       const kicker = document.getElementById('modal-kicker');
@@ -6156,6 +6157,7 @@
             <p class="wf-os-step-noquestions" id="wf-os-step-noquestions" hidden>Esta OS não exige avaliação de indisponibilidade. Continue para a conferência.</p>
           </div>
           <div id="wf-os-step-review" class="wf-os-step-review" aria-live="polite" hidden></div>
+          <p id="wf-os-step-error" class="wf-os-step-error" role="alert" aria-live="assertive" hidden></p>
           <div id="wf-os-step-actions" class="wf-os-step-actions">
             <button type="button" id="wf-os-step-back" data-os-step-back>Voltar</button>
             <button type="button" id="wf-os-step-next" data-os-step-next>Continuar</button>
@@ -15334,9 +15336,16 @@
       }
 
       if (currentModalType === 'order') {
-        if (window.WeFrotasOsGuide?.wizardStep?.() !== 3) {
-          window.WeFrotasOsGuide?.nextWizard();
-          return;
+        // Only sinistro uses the guided steps. Other OSs save immediately.
+        if (document.getElementById('order-tipo-os')?.value === 'sinistro') {
+          if (!window.WeFrotasOsGuide?.wizardStep) {
+            showToast('Formulário de sinistro indisponível. Atualize a página.');
+            return;
+          }
+          if (window.WeFrotasOsGuide.wizardStep() !== 3) {
+            window.WeFrotasOsGuide.nextWizard();
+            return;
+          }
         }
         const form = document.getElementById('cadastro-form');
         if (form.dataset.orderSavePending === 'true') return;
