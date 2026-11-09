@@ -229,7 +229,7 @@
   ],
   "release_status": "candidate_pending_homologation",
   "homologation": {
-    "status": "static_review_in_progress_real_device_qa_pending",
-    "notes": "Mudança ampla de interface; verificar regressões das contas, categorias, faturas, validação e submissão de formulários, acessibilidade e atualização de cache antes de mesclar na main. Testes visuais Android/desktop pendentes."
+    "status": "isolated_visual_regression_passed_ci_and_device_qa_pending",
+    "notes": "Sintaxe JS dos módulos afetados analisada; execução isolada do roteiro gbplus-300-visual-regression.mjs concluiu com sucesso no ambiente JS de verificação. GitHub Actions run 42563325658 falhou sem runner e sem steps, logo a suíte Node do checkout não foi executada; validação real Android/PWA, PC, persistência online e acessibilidade continuam pendentes. Não classificar como homologada."
   }
 }
