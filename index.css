@@ -270,7 +270,7 @@ footer [class*="bg-white/[0.03]"] {
 #main-content section:first-of-type > div.grid > a:nth-child(1) > span.absolute,
 #main-content section:first-of-type > div.grid > a:nth-child(2) > span.absolute,
 #main-content section:first-of-type > div.grid > a:nth-child(3) > span.absolute,
-#main-content section:first-of-type > div.grid > a:nth-child(7) > span.absolute {
+#main-content section:first-of-type > div.grid > a:nth-child(8) > span.absolute {
   display: none !important;
 }
 
