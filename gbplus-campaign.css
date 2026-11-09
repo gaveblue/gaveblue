@@ -1,0 +1,70 @@
+/* Vitrine institucional GB+ — exclusivamente para a home da GaveBlue */
+#gbplus-campaign.gbc { margin: 0 auto 2.25rem; }
+#gbplus-campaign .gbc-intro { display:flex;align-items:end;justify-content:space-between;gap:1rem;margin:0 0 1rem;text-align:left; }
+#gbplus-campaign .gbc-kicker { display:inline-block;letter-spacing:.19em;font-size:.67rem;font-weight:800;color:#2358ed;text-transform:uppercase;margin-bottom:.55rem; }
+#gbplus-campaign .gbc-title { margin:0;font-size:clamp(1.4rem,2.8vw,2.1rem);letter-spacing:-.045em;line-height:1.12;color:#121927!important;font-weight:800; }
+#gbplus-campaign .gbc-intro > a { flex:none;text-decoration:none;display:inline-flex;align-items:center;gap:.4rem;padding:.75rem .95rem;border:1px solid #d7e1f4;background:#fff;border-radius:999px;color:#1849cc;font-size:.77rem;font-weight:800;transition:background .2s,transform .2s; }
+#gbplus-campaign .gbc-intro > a:hover {background:#edf4ff;transform:translateY(-2px)}
+#gbplus-campaign .gbc-grid { display:grid;grid-template-columns:1.17fr 1fr 1fr;gap:1rem;align-items:stretch; }
+#gbplus-campaign .gbc-card { position:relative;isolation:isolate;min-width:0;min-height:465px;overflow:hidden;border-radius:24px;border:1px solid #e1e9f7;padding:clamp(1.3rem,2vw,1.8rem);box-shadow:0 14px 38px rgba(25,53,112,.075);transition:transform .23s,box-shadow .23s;display:flex;flex-direction:column;align-items:stretch; }
+#gbplus-campaign .gbc-card:hover { transform:translateY(-4px);box-shadow:0 20px 48px rgba(25,53,112,.12); }
+#gbplus-campaign .gbc-card--brand { background:linear-gradient(145deg,#122cdd 4%,#174efa 52%,#6484ff 100%);color:white; }
+#gbplus-campaign .gbc-card--brand:before { content:"";position:absolute;inset:auto -45% -60% 25%;height:90%;border:1px solid rgba(255,255,255,.18);transform:rotate(-24deg);border-radius:50%;pointer-events:none; }
+#gbplus-campaign .gbc-card--brand:after { content:"";position:absolute;right:-80px;top:-120px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.23),transparent 70%);pointer-events:none; }
+#gbplus-campaign .gbc-card--cards { background:linear-gradient(168deg,#f7faff,#ffffff 55%,#e9f0ff); }
+#gbplus-campaign .gbc-card--entries { background:linear-gradient(152deg,#091b52,#1739bb 55%,#3663f2);color:white; }
+#gbplus-campaign .gbc-overline { display:block;font-size:.63rem;letter-spacing:.19em;font-weight:800;text-transform:uppercase;color:#dbe5ff; }
+#gbplus-campaign .gbc-card--cards .gbc-overline {color:#2d57ce}
+#gbplus-campaign .gbc-card h3 { margin:.65rem 0 .5rem;font-size:clamp(1.27rem,2vw,1.7rem);line-height:1.14;letter-spacing:-.05em;font-weight:800; }
+#gbplus-campaign .gbc-card--brand h3 {font-size:clamp(2.7rem,4vw,4.2rem);margin:.25rem 0 .25rem;color:white!important}
+#gbplus-campaign .gbc-card--entries h3 {color:#fff!important}
+#gbplus-campaign .gbc-card--cards h3 {color:#101828!important}
+#gbplus-campaign .gbc-card p {font-size:.85rem;line-height:1.53;max-width:28rem;margin:0;opacity:.9}
+#gbplus-campaign .gbc-card--brand p,#gbplus-campaign .gbc-card--entries p {color:#eaf0ff!important}
+#gbplus-campaign .gbc-card--cards p {color:#5f6d87!important}
+#gbplus-campaign .gbc-card .gbc-cta {position:relative;z-index:2;align-self:flex-start;display:inline-flex;align-items:center;gap:.5rem;padding:.7rem .95rem;margin-top:auto;border-radius:12px;background:white;color:#1438c6;font-size:.78rem;font-weight:800;text-decoration:none;box-shadow:0 8px 20px rgba(13,35,92,.12)}
+#gbplus-campaign .gbc-card--cards .gbc-cta {background:#123ce5;color:#fff}
+#gbplus-campaign .gbc-phone { position:absolute;right:8%;bottom:25px;width:49%;max-width:195px;aspect-ratio:220/476;background:#111727;border:7px solid #1c2334;border-radius:28px;box-shadow:8px 14px 26px rgba(0,7,58,.3);transform:rotate(8deg);overflow:hidden; }
+#gbplus-campaign .gbc-phone:before {content:"";position:absolute;z-index:2;top:6px;left:50%;transform:translateX(-50%);width:30%;height:7px;border-radius:30px;background:#0c1020}
+#gbplus-campaign .gbc-phone img {width:100%;height:100%;display:block;object-fit:cover;object-position:top}
+#gbplus-campaign .gbc-brand-desc {max-width:55%!important}
+#gbplus-campaign .gbc-card--brand .gbc-cta {max-width:55%}
+#gbplus-campaign .gbc-mock-cards {margin:1.3rem 0 1rem;background:#fff;border-radius:19px;border:1px solid #dfe6f3;box-shadow:0 9px 26px rgba(29,68,134,.08);padding:.9rem;display:flex;flex-direction:column;gap:.8rem;transform:rotate(-2deg);}
+#gbplus-campaign .gbc-mock-switch {display:grid;grid-template-columns:1fr 1fr;padding:4px;border-radius:999px;background:#f3f5fa;color:#6c7589;text-align:center;font-size:.69rem;font-weight:700;}
+#gbplus-campaign .gbc-mock-switch span {padding:.44rem}
+#gbplus-campaign .gbc-mock-switch span:last-child {color:#111827;background:#fff;border-radius:999px;box-shadow:0 3px 10px rgba(0,0,0,.07)}
+#gbplus-campaign .gbc-mock-label {display:flex;align-items:center;justify-content:space-between;font-size:.74rem;color:#111827;font-weight:800}
+#gbplus-campaign .gbc-mock-label em {font-style:normal;color:#5870a3;font-size:.62rem;font-weight:700}
+#gbplus-campaign .gbc-mock-stats {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.36rem}
+#gbplus-campaign .gbc-mock-stats span {padding:.55rem .36rem;background:#f7f9fd;border:1px solid #e7ebf5;border-radius:11px;min-width:0;font-size:.56rem;line-height:1.38;color:#65748c}
+#gbplus-campaign .gbc-mock-stats strong {display:block;margin-top:.25rem;font-size:.83rem;letter-spacing:-.04em;color:#151922;white-space:nowrap}
+#gbplus-campaign .gbc-mock-footer {height:26px;background:linear-gradient(90deg,#eff4ff,#f8faff);border-radius:9px}
+#gbplus-campaign .gbc-mock-entry {margin:1.2rem 0 1.2rem;background:#fff;color:#1d2432;border:1px solid #e6ebf5;border-radius:18px;padding:1rem;box-shadow:0 16px 30px rgba(1,18,74,.18);transform:rotate(2deg)}
+#gbplus-campaign .gbc-mock-step {display:flex;gap:.25rem;font-size:.6rem;font-weight:700;color:#6d7485;margin-bottom:.85rem}
+#gbplus-campaign .gbc-mock-step span {flex:1;text-align:center;background:#f2f4f8;border-radius:7px;padding:.37rem .15rem}
+#gbplus-campaign .gbc-mock-step span:first-child {background:#141b27;color:white}
+#gbplus-campaign .gbc-mock-entry .gbc-mock-type {border-radius:8px;background:#f4f5f8;display:flex;justify-content:space-around;padding:.55rem;font-size:.7rem;font-weight:800;}
+#gbplus-campaign .gbc-mock-entry .gbc-mock-value {text-align:center;padding:1rem 0;font-size:2rem;font-weight:800;letter-spacing:-.06em;}
+#gbplus-campaign .gbc-mock-entry .gbc-mock-field {padding:.7rem;border:1px solid #e1e5ef;border-radius:9px;margin-bottom:.4rem;font-size:.7rem;font-weight:700;color:#404b61}
+#gbplus-campaign .gbc-mock-entry .gbc-mock-field:last-child {color:#8791a4}
+#gbplus-campaign .gbc-dots {color:#a9beff;font-size:1.6rem;line-height:1;letter-spacing:.2em;position:absolute;bottom:15px;right:20px}
+#gbplus-campaign .gbc-note {display:block;margin-top:.7rem;color:#74839d;font-size:.65rem;}
+@media (max-width:1100px) {
+ #gbplus-campaign .gbc-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #gbplus-campaign .gbc-card--brand{grid-column:span 2;min-height:375px}
+ #gbplus-campaign .gbc-card--brand .gbc-phone{width:195px;right:15%}
+ #gbplus-campaign .gbc-brand-desc,#gbplus-campaign .gbc-card--brand .gbc-cta{max-width:65%!important}
+}
+@media (max-width:650px){
+ #gbplus-campaign .gbc-intro{align-items:flex-start;flex-direction:column}
+ #gbplus-campaign .gbc-intro > a{padding:.65rem .8rem}
+ #gbplus-campaign .gbc-grid{grid-template-columns:minmax(0,1fr)}
+ #gbplus-campaign .gbc-card{min-height:430px;padding:1.45rem}
+ #gbplus-campaign .gbc-card--brand{grid-column:span 1;min-height:390px}
+ #gbplus-campaign .gbc-card--brand .gbc-phone{right:8%;width:41%;max-width:163px;border-width:5px;border-radius:23px;bottom:20px}
+ #gbplus-campaign .gbc-brand-desc,#gbplus-campaign .gbc-card--brand .gbc-cta{max-width:55%!important}
+ #gbplus-campaign .gbc-card--brand h3{font-size:3.2rem}
+ #gbplus-campaign .gbc-card--cards,#gbplus-campaign .gbc-card--entries{min-height:405px}
+ #gbplus-campaign .gbc-mock-cards,#gbplus-campaign .gbc-mock-entry{max-width:330px;width:100%;align-self:center}
+}
+@media (prefers-reduced-motion:reduce){#gbplus-campaign .gbc-card,#gbplus-campaign .gbc-intro>a{transition:none!important;transform:none!important}}
