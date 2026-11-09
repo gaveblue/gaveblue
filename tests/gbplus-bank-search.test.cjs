@@ -90,7 +90,9 @@ test('account form uses bottom sheet while cards/onboarding retain searchable ba
  const forms=fs.readFileSync(path.join(root,'js/forms.js'),'utf8');
  const cards=fs.readFileSync(path.join(root,'js/finance-24-ui.js'),'utf8');
  const setup=fs.readFileSync(path.join(root,'js/setup-ui.js'),'utf8');
- assert.match(forms,/bankPicker\(db,id\)/);
+ assert.match(forms,/data-action="account-bank-picker"/);
+ assert.match(forms,/accountBankPreview\(db,id,legacy\)/);
+ assert.doesNotMatch(forms,/bankPicker\(db,id\)/);
  assert.match(cards,/bankPicker\(db,card\?\.bankId\|\|''\)/);
  assert.match(setup,/bankPicker\(db,d\.bankId\|\|''\)/);
 });
