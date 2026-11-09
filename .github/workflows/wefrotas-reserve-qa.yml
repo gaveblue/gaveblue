@@ -1,0 +1,25 @@
+name: WeFrotas - QA carro reserva
+on:
+  pull_request:
+    paths:
+      - 'wefrotas/**'
+      - 'tests/wefrotas-substitutions.test.cjs'
+      - '.github/workflows/wefrotas-reserve-qa.yml'
+  push:
+    branches:
+      - 'feature/wefrotas-carro-reserva-20261109'
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verificar sintaxe de JS alterado
+        run: |
+          node --check wefrotas/wefrotas.js
+          node --check wefrotas/wefrotas-substitutions.js
+          node --check wefrotas/wefrotas-vehicle-profile.js
+          node --check wefrotas/wefrotas-vehicle-list.js
+      - name: Testar regras do carro reserva
+        run: node --test tests/wefrotas-substitutions.test.cjs
