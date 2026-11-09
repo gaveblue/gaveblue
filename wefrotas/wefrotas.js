@@ -6886,6 +6886,14 @@
       const vehicle = allVehicles.find(item => item.id === vehicleField?.value);
       const currentKm = vehicle ? getVehicleCurrentKm(vehicle.id) : null;
       const nextRevisionKm = currentKm ? (Math.ceil(currentKm / 10000) * 10000 || 10000) : 0;
+      // A pane/sinistro has no known completion date at opening; avoid the
+      // monthly expense default implying the incident will end this month.
+      if (!currentEditingId && ['pane','sinistro'].includes(typeField.value)) {
+        const endField = document.getElementById('order-data-termino');
+        if (endField && endField.value && endField.value === endField.dataset.autoEndDate) {
+          endField.value = '';endField.dataset.autoEndDate = '';
+        }
+      }
       const nextDescription = getOrderTypeDescription(typeField.value, {
         dataInicio: dateField?.value || '',
         vehicle,
@@ -6937,6 +6945,13 @@
       const startField = document.getElementById('order-data-inicio');
       const endField = document.getElementById('order-data-termino');
       if (!startField || !endField || !startField.value) return;
+      const orderType = document.getElementById('order-tipo-os')?.value;
+      if (!currentEditingId && ['sinistro','pane'].includes(orderType)) {
+        if (endField.value && endField.value === endField.dataset.autoEndDate) {
+          endField.value = '';endField.dataset.autoEndDate = '';
+        }
+        return;
+      }
       const suggestedEndDate = getLastDayOfMonthIso(startField.value);
       const previousAutoEndDate = endField.dataset.autoEndDate || '';
       if (!endField.value || endField.value === previousAutoEndDate) {
@@ -15337,6 +15352,10 @@
         try { guidedPlan = window.WeFrotasOsGuide?.collect() || guidedPlan; }
         catch (error) { showToast(error.message); return; }
         const previousOrder = currentEditingId ? allOrders.find(item => item.id === currentEditingId) : previouslyStaged;
+        if (currentEditingId && !previousOrder) {
+          showToast('Esta OS não está mais disponível. Recarregue os dados antes de editar.');
+          return;
+        }
         if (previousOrder?.operationalIncident?.substitutionId &&
             (String(previousOrder.vehicleId)!==String(vehicleId) ||
              String(previousOrder.driverId)!==String(driverId) ||
