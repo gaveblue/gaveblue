@@ -6054,7 +6054,13 @@
         kicker.textContent = 'Ordens de serviço';
         title.textContent = 'Cadastrar OS';
         fields.innerHTML = `
-          <div class="field-wrap">
+          <div class="wf-os-step-header" id="wf-os-step-header">
+            <span data-os-step-label="1">1 · Dados da OS</span>
+            <span data-os-step-label="2">2 · Ocorrência</span>
+            <span data-os-step-label="3">3 · Conferência</span>
+          </div>
+          <div id="wf-os-step-data" class="wf-os-step-data">
+            <div class="field-wrap">
             <label>Nº OS</label>
             <div class="form-input-shell">
               ${fieldIcon('hash')}
@@ -6144,13 +6150,23 @@
               <textarea class="soft-input textarea w-full" id="order-descricao" placeholder="Descreva tudo que deve sair na impressão da OS."></textarea>
             </div>
           </div>
-          ${window.WeFrotasOsGuide?.formHtml() || ''}
+          </div>
+          <div id="wf-os-step-occurrence" class="wf-os-step-content" hidden>
+            ${window.WeFrotasOsGuide?.formHtml() || ''}
+            <p class="wf-os-step-noquestions" id="wf-os-step-noquestions" hidden>Esta OS não exige avaliação de indisponibilidade. Continue para a conferência.</p>
+          </div>
+          <div id="wf-os-step-review" class="wf-os-step-review" aria-live="polite" hidden></div>
+          <div id="wf-os-step-actions" class="wf-os-step-actions">
+            <button type="button" id="wf-os-step-back" data-os-step-back>Voltar</button>
+            <button type="button" id="wf-os-step-next" data-os-step-next>Continuar</button>
+          </div>
         `;
         setOrderAdministrationFormValue(getLastAdministrationValue());
         setDefaultOrderDates();
         updateOrderDescriptionFromType(true);
         updateOrderDateConstraints();
         window.WeFrotasOsGuide?.refresh();
+        window.WeFrotasOsGuide?.startWizard();
       } else if (type === 'finance') {
         setModalVisual('finance', 'Escolha o tipo de lançamento que deseja realizar.');
         kicker.textContent = 'Financeiro';
@@ -15318,6 +15334,10 @@
       }
 
       if (currentModalType === 'order') {
+        if (window.WeFrotasOsGuide?.wizardStep?.() !== 3) {
+          window.WeFrotasOsGuide?.nextWizard();
+          return;
+        }
         const form = document.getElementById('cadastro-form');
         if (form.dataset.orderSavePending === 'true') return;
         const rawNumero = document.getElementById('order-numero').value.trim();
