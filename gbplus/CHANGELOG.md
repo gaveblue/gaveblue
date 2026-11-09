@@ -1,6 +1,9 @@
 # CHANGELOG — GB+ Gestão Financeira
 
-## [2.8.6 — AMPLIAÇÃO DA BIBLIOTECA DE APLICATIVOS E ÍCONES (CANDIDATA; NÃO PUBLICADA)] — 2026-11-08
+## [2.8.6 — BIBLIOTECA, NAVEGAÇÃO E CONSENTIMENTO (MERGE EM MAIN; SITE A VERIFICAR)] — 2026-11-08
+- **Liberação de código:** PR #105 mesclado em `main` no GitHub. O domínio público não pôde ser consultado diretamente deste ambiente; confirmar atualização em PWA Android antes de declarar homologação visual.
+- **Supabase administrativo:** versão 9 da Edge Function `gbplus-admin` implantada, preservando convites, envio de mensagens e histórico; marketing agora exige consentimento válido na versão `2026-11-08-v1` dos Termos e Privacidade imediatamente antes do envio. Nenhuma campanha foi disparada nesta implantação.
+- **QA:** validação de sintaxe dos módulos alterados, regressões isoladas de 128 verificações (2.8.2) e 32 (2.8.5), simulador de bloqueios do painel administrativo (consentimento antigo/ausência de aceite e não administrador). Ainda sem evidência de sessão real de homologação no Android.
 
 ### Consolidação e política de privacidade — build 2866
 - Recebidos e incorporados em arquivos locais os ícones quadrados **Canva, inDrive, 99, Rappi e Globoplay**. Os cinco IDs existentes agora apontam para `.webp` locais. Total: **49 dos 49 serviços com imagem/vetor local**. Sem logotipos inventados, recortes ou dependência de CDN.
