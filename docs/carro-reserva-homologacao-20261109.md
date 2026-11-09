@@ -2,6 +2,26 @@
 
 ## Status: PRONTO PARA HOMOLOGAÇÃO INTEGRADA — NÃO publicado
 
+## Revisão complementar — 09/11/2026
+
+**Resultado: 15/15 casos SQL de integridade passaram** no projeto Supabase real `wkssfugzghwifaddagfr`, com DDL e registros fictícios inteiramente dentro de `BEGIN ... ROLLBACK`. Não foi criado projeto nem branch pago, nem implantado gatilho em produção.
+
+**Código:** a migração `supabase/migrations/202611090001_wefrotas_reserve_exclusivity.sql` agora também impede que uma atualização antiga remova silenciosamente eventos do histórico, além de impedir exclusões de titular, reserva e motorista vinculados. A regressão reproduzível está em `tests/wefrotas-reserve-sql-smoke.sql` e pressupõe migração já aplicada num banco de homologação (para teste pré-instalação, concatenar os dois conteúdos dentro da mesma transação).
+
+Casos aprovados: reserva simultânea duplicada; motorista simultâneo; reserva também como titular; conflito inclusivo no mesmo dia; motorista inexistente; KM final inválido; data impossível; período anterior sem sobreposição; edição apagando a propriedade de histórico; edição substituindo histórico por array vazio; exclusão do titular; exclusão do reserva; exclusão do motorista; isolamento entre duas organizações com IDs iguais; encerramento válido preservando o KM original do titular.
+
+**Revisão estática:** 7 arquivos JS relevantes passaram por compilação sintática (`wefrotas.js`, substituições, perfil, lista, Supabase backend/core e relatórios); isto não equivale a executar a suíte Node ou o aplicativo autenticado. Os testes Node e navegador previamente documentados pelo Codex continuam como evidência da execução anterior, não desta revisão.
+
+**Banco e permissões:** RLS está habilitado em veículos, motoristas, financeiro e estado da empresa; as políticas de leitura para `authenticated` usam `wefrotas_can_read(organization_id)`; `authenticated` não tem INSERT direto nesses quatro objetos. Os dados reais permaneceram inalterados; após o teste foram confirmados 14 veículos, zero organizações fictícias e zero triggers de reserva instalados.
+
+**Ambiente isolado:** a conta Supabase não possui branches de desenvolvimento atualmente. Uma tentativa de criar branch foi bloqueada pela exigência de confirmação de custo. Nenhuma cobrança/branch foi criada. NÃO aplicar DDL em produção apenas para substituir essa etapa.
+
+**Bloqueios reais para declarar homologação e publicar:** criar um ambiente isolado autorizado, aplicar a migração ali e realizar dois clientes autenticados gravando eventos concorrentes; conferir envio pendente e reconexão, isolamento entre perfis reais e aprovação de abastecimento pela Central. Os testes SQL sequenciais de rollback comprovam a regra e o efeito atômico por transação, mas não simulam duas conexões simultâneas com autenticação real.
+
+**GitHub Actions:** não utilizar como critério de conclusão enquanto houver bloqueio de cobrança. O workflow específico foi removido da branch. Manter PR draft e sem merge/publicação até os testes integrados.
+
+
+
 Branch: `feature/wefrotas-carro-reserva-20261109`. Base auditada do PR: `77bafc92ea9b7844d003b5e93f0af38fb47f11e7`.
 Sem merge, publicação, alteração de schema, credenciais, autenticação, RLS, KM ou registros financeiros de produção.
 Os testes de interface usam dados fictícios e bloqueiam todas as requisições externas.
