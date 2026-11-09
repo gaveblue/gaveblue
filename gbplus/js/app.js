@@ -1731,6 +1731,8 @@ async function init(){
   document.body.classList.remove('auth-locked');
   document.documentElement.removeAttribute('data-boot');
   route();window.dispatchEvent(new Event('gbplus-ai-ready'));
+  // Preserve activity summaries used by the existing administration/support panel.
+  import('./activity.js?v=20261107-admin2').then(({startActivity})=>startActivity(authClient(),currentUser)).catch(()=>{});
   if(shouldOfferSetup(db))startSetupWizard();
   pwaReady=true;
   setTimeout(()=>maybeOfferPwaInstall(),1800);
