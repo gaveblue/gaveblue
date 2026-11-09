@@ -8,7 +8,8 @@
     "Ícones renovados para HBO Max, 99Food, Prime Video, WhatsApp, Telegram e Spotify; 13 imagens fornecidas pelo usuário agrupadas em atlas WebP local leve de 256×256.",
     "Catálogo passou de 49 para 56 opções sem trocar, apagar ou migrar IDs dos 49 serviços existentes.",
     "Imagens proporcionais em modo claro e escuro; carregamento local, fallback textual para erro de asset e sem consultas a CDN.",
-    "Alterações restritas à identificação visual/seleção de serviços, cache PWA, documentação e testes; finanças, aceite, autenticação e backend não modificados."
+    "Alterações restritas à identificação visual/seleção de serviços, cache PWA, documentação e testes; finanças, aceite, autenticação e backend não modificados.",
+    "PR #106 mesclado à main; confirmar carregamento da 2.8.7 no domínio e no PWA Android antes de declarar homologação visual."
   ],
   "assets": [
     "./index.html",
@@ -208,9 +209,9 @@
       "description": "Sem migrações de lançamentos ou mudanças em contas, cartões e faturas."
     }
   ],
-  "release_status": "candidate_not_published",
+  "release_status": "merged_to_main_pending_live_verification",
   "homologation": {
-    "status": "pending_new_changes",
-    "notes": "Versão 2.8.7 em branch de revisão. A imagem foi validada por hash Git, resta regressão de catálogo/seletor, teste visual real Android/PWA e revisão antes da liberação."
+    "status": "isolated_regressions_passed_visual_qa_pending",
+    "notes": "PR #106 foi mesclado à main em 08/11/2026. Testes de código do catálogo (56 serviços), painel e atlas local (13 logotipos) aprovados; integridade SHA confirmada. QA visual real Android/PWA e atualização efetiva no domínio gaveblue.com.br não puderam ser confirmados. Nenhuma alteração financeira ou de consentimento nesta versão."
   }
 }
