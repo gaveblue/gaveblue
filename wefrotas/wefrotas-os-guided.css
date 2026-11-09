@@ -59,3 +59,10 @@ body.dark .wf-os-guide-summary,body[data-theme=dark] .wf-os-guide-summary{color:
 body.dark .wf-os-quick-sheet,body[data-theme=dark] .wf-os-quick-sheet{background:#111827;color:#f8fafc}
 body.dark .wf-os-quick-sheet input,body[data-theme=dark] .wf-os-quick-sheet input{background:#1e293b;color:#fff;border-color:#475569}
 body.dark .wf-os-quick-actions,body[data-theme=dark] .wf-os-quick-actions{background:#111827}
+
+/* Fleet classifications are presentation-only; no finance or odometer mutation. */
+.wf-os-vehicle-tabs{display:flex;gap:7px;overflow-x:auto;max-width:100%;padding:2px 0 10px;scrollbar-width:thin}
+.wf-os-vehicle-tabs button{white-space:nowrap;border:1px solid #dbe4f2;background:#fff;color:#4d617d;border-radius:999px;padding:8px 13px;font-size:12px;font-weight:750;cursor:pointer}
+.wf-os-vehicle-tabs button[aria-pressed=true]{color:#fff;background:#173f8c;border-color:#173f8c}
+body.dark .wf-os-vehicle-tabs button,body[data-theme=dark] .wf-os-vehicle-tabs button{background:#1e293b;border-color:#475569;color:#e2e8f0}
+body.dark .wf-os-vehicle-tabs button[aria-pressed=true],body[data-theme=dark] .wf-os-vehicle-tabs button[aria-pressed=true]{background:#244b91;border-color:#618cdd;color:#fff}
