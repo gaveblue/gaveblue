@@ -141,6 +141,9 @@ export function showAuth(mode='signin',error=''){
       '<form id="auth-form" data-mode="'+mode+'">'+
        (mode!=='recovery'?input('E-mail','email','email','email'):'')+
        passwordFields+
+       (mode==='signup'?'<label class="gb-legal-consent gb-legal-signup">'+
+         '<input type="checkbox" name="legal_preaccept" required>'+
+         '<span>Li e concordo com os <a href="./termos-de-uso.html" target="_blank" rel="noopener noreferrer">Termos de Uso</a> e estou ciente da <a href="./privacidade.html" target="_blank" rel="noopener noreferrer">Política de Privacidade</a>. O aceite será registrado no primeiro acesso.</span></label>':'')+
        '<div class="form-error" role="alert">'+esc(error)+'</div>'+
        '<div class="auth-message" role="status"></div>'+
        '<button type="submit" class="auth-primary">'+labels[mode]+'</button>'+
@@ -329,6 +332,7 @@ document.addEventListener('submit',async event=>{
  const email=String(values.email||'').trim().toLowerCase();
  feedback('');feedback('',false);
  if(mode!=='recovery'&&!safeAuthEmail(email)){feedback('Informe um endereço de e-mail válido.');return;}
+ if(mode==='signup'&&values.legal_preaccept!=='on'){feedback('Leia e aceite os Termos de Uso para criar sua conta.');return;}
  if(['signup','recovery'].includes(mode)&&values.password!==values.confirmation){feedback('As senhas precisam ser iguais.');return;}
  if(['signup','recovery'].includes(mode)&&!passwordMeetsMinimum(values.password)){feedback('A senha precisa ter pelo menos 8 caracteres. Letras, números e símbolos podem ser usados livremente.');return;}
  if(!navigator.onLine){feedback('Sem conexão. Conecte-se para continuar.');return;}
