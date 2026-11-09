@@ -153,3 +153,29 @@ test('OS de perda total não oferece retorno automático do titular',()=>{
  set('order-status','fechada');api.refresh();check('os-guide-return','nao');
  const plan=api.collect();assert.equal(plan.closure.titularBack,false);
 });
+
+test('assistente de OS navega dados, ocorrência e conferência sem enviar antes da etapa final',()=>{
+ const {api,set,check,nodes}=setup();
+ const view=(id)=>nodes.set(id,{id,hidden:false,style:{},innerHTML:'',
+   textContent:'',querySelector:()=>null,focus(){},setAttribute(){}});
+ for(const id of ['wf-os-step-data','wf-os-step-occurrence','wf-os-step-review',
+    'wf-os-step-back','wf-os-step-next','modal-submit-btn','order-numero','order-descricao'])view(id);
+ set('order-numero','100');set('order-descricao','Pane mecânica');
+ set('order-tipo-os','pane');
+ api.reset();api.startWizard();
+ assert.equal(api.wizardStep(),1);
+ assert.equal(nodes.get('modal-submit-btn').disabled,true);
+ assert.equal(api.nextWizard(),true);assert.equal(api.wizardStep(),2);
+ check('os-guide-stopped','sim');check('os-guide-reserve','nao');
+ assert.equal(api.nextWizard(),true);assert.equal(api.wizardStep(),3);
+ assert.equal(nodes.get('modal-submit-btn').disabled,false);
+ assert.ok(nodes.get('wf-os-step-review').innerHTML.includes('Conferência')||
+   nodes.get('wf-os-step-review').innerHTML.includes('Confira antes de salvar'));
+ api.backWizard();assert.equal(api.wizardStep(),2);
+});
+test('OS nova com veículo indisponível não pode nascer fechada',()=>{
+ const {api,set,check}=setup();api.reset();
+ set('order-tipo-os','pane');set('order-status','fechada');
+ check('os-guide-stopped','sim');check('os-guide-reserve','nao');
+ assert.throws(()=>api.collect(),/Aberta ou Em andamento/);
+});
