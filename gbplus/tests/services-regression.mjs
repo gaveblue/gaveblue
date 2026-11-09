@@ -32,6 +32,14 @@ for(const [id,mark]of Object.entries(extra)){
   typeof mark[2]==='string'&&mark[2].length>20,'Malformed local vector mark for '+id);
 }
 assert.equal(catalog.SERVICE_CATALOG.filter(s=>Boolean(logos[s.id]||extra[s.id])).length,39);
+assert.equal(catalog.SERVICE_CATALOG.filter(item=>Boolean(item.logoPath)).length,5);
+assert.equal(catalog.SERVICE_CATALOG.filter(item=>Boolean(logos[item.id]||extra[item.id]||item.logoPath)).length,44);
+for(const [id,path] of Object.entries({
+ 'delivery-plusdelivery':'./assets/service-icons/plus-delivery.webp',
+ 'delivery-99food':'./assets/service-icons/99food.png',
+ 'streaming-primevideo':'./assets/service-icons/prime-video.webp',
+ 'streaming-disney':'./assets/service-icons/disney-plus.webp'
+})) assert.equal(catalog.serviceById(id).logoPath,path);
 for(const [id,paths]of Object.entries(logos)){
  assert(catalog.serviceById(id),'Icon references unknown service '+id);
  assert(paths.length>0&&paths.every(p=>typeof p==='string'&&p.length>5),'Missing logo path');
@@ -116,4 +124,4 @@ assert(src('bottom-sheet').includes('data-sheet-choice=""'),'User must be able t
 assert(app.includes('description.value=serviceDisplayName(hidden.value,name.value'), 'Selected service defines description');
 assert(app.includes('description.readOnly=true'),'PF service descriptions are read-only while selected');
 assert(app.includes('const description=serviceId?serviceDisplayName(serviceId,serviceName'), 'Saved title uses canonical service name');
-console.log('GB+ 2.8.6 candidata: catálogo de 49 serviços, 39 marcas locais, fallback e integridade financeira verificados.');
+console.log('GB+ 2.8.6 candidata: catálogo de 49 serviços, 44 marcas locais, 5 fallbacks e integridade financeira verificados.');
