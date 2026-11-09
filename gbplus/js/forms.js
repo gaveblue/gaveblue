@@ -2,7 +2,7 @@ import {today,money,dateLabel,pending,paid,accountBalance} from './domain.js?v=2
 import {esc,field,select,textarea,formFooter,button,icon,titleTable,empty} from './ui.js?v=20261105-72';
 import {INDICATORS} from './store.js?v=20261105-78';
 import {entrySelect} from './entry-select.js?v=20261108-2861';
-import {gbIcon,CATEGORY_ICON_OPTIONS,categoryIconFor} from './gb-icons.js?v=20261108-2821';
+import {gbIcon,CATEGORY_ICON_OPTIONS,categoryIconFor} from './gb-icons.js?v=20261109-2900';
 import {bankOptions,findBank,bankPicker,bankBadge} from './banks.js?v=20261105-87';
 import {dailyStatement} from './daily-statement.js?v=20261105-90';
 import {ACCOUNT_ICON_OPTIONS,GOAL_PRESETS,accountKind,accountIcon,goalPreset} from './account-goals.js?v=20261109-2900';
@@ -234,10 +234,10 @@ export function accountDetail(db,a){
  const groups=ledger.days;
  return '<div class="gb-statement" aria-label="Extrato da conta">'+
   '<div class="gb-statement-account"><span>'+esc(a.name)+'</span><strong>'+money(ledger.closing)+'</strong><small>Saldo atual · Saldo inicial cadastrado: '+money(a.initial)+'</small></div>'+
-  (a.active!==false?'<div class="gb-statement-import"><button class="button" data-action="bank-import-open" data-id="'+esc(a.id)+'">'+icon('upload')+' Importar extrato OFX/CSV</button><small>Arquivo local · só grava após confirmar</small></div>':'')+ 
+  (a.active!==false&&accountKind(a)!=='goal'?'<div class="gb-statement-import"><button class="button" data-action="bank-import-open" data-id="'+esc(a.id)+'">'+icon('upload')+' Importar extrato OFX/CSV</button><small>Arquivo local · só grava após confirmar</small></div>':'')+ 
    '<div class="gb-statement-totals"><div><small>Créditos acumulados</small><strong class="gb-statement-credit">+ '+money(ledger.credits)+'</strong></div>'+
   '<div><small>Débitos acumulados</small><strong class="gb-statement-debit">− '+money(ledger.debits)+'</strong></div></div>'+
-  '<div class="gb-statement-links"><button type="button" class="button" data-action="bank-import-history" data-id="'+esc(a.id)+'">Histórico de conciliações</button></div>'+ 
+  (accountKind(a)==='goal'?'<div class="gb-goal-actions">'+button('Guardar','goal-deposit','small','data-id="'+esc(a.id)+'"')+button('Retirar','goal-withdraw','small','data-id="'+esc(a.id)+'"')+'</div>':'<div class="gb-statement-links"><button type="button" class="button" data-action="bank-import-history" data-id="'+esc(a.id)+'">Histórico de conciliações</button></div>')+ 
    '<p class="gb-statement-note">Movimentações registradas no GB+. O saldo inicial cadastrado é a base dos cálculos. Os vínculos de conciliação não alteram estes valores.</p>'+
   '<div class="gb-statement-days">'+groups.map(day=>
    '<section class="gb-statement-day" aria-label="Movimentações de '+dateLabel(day.date)+'">'+
