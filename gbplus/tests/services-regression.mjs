@@ -32,8 +32,8 @@ for(const [id,mark]of Object.entries(extra)){
   typeof mark[2]==='string'&&mark[2].length>20,'Malformed local vector mark for '+id);
 }
 assert.equal(catalog.SERVICE_CATALOG.filter(s=>Boolean(logos[s.id]||extra[s.id])).length,39);
-assert.equal(catalog.SERVICE_CATALOG.filter(item=>Boolean(item.logoPath)).length,5);
-assert.equal(catalog.SERVICE_CATALOG.filter(item=>Boolean(logos[item.id]||extra[item.id]||item.logoPath)).length,44);
+assert.equal(catalog.SERVICE_CATALOG.filter(item=>Boolean(item.logoPath)).length,10);
+assert.equal(catalog.SERVICE_CATALOG.filter(item=>Boolean(logos[item.id]||extra[item.id]||item.logoPath)).length,49);
 for(const [id,path] of Object.entries({
  'delivery-plusdelivery':'./assets/service-icons/plus-delivery.webp',
  'delivery-99food':'./assets/service-icons/99food.png',
@@ -124,4 +124,4 @@ assert(src('bottom-sheet').includes('data-sheet-choice=""'),'User must be able t
 assert(app.includes('description.value=serviceDisplayName(hidden.value,name.value'), 'Selected service defines description');
 assert(app.includes('description.readOnly=true'),'PF service descriptions are read-only while selected');
 assert(app.includes('const description=serviceId?serviceDisplayName(serviceId,serviceName'), 'Saved title uses canonical service name');
-console.log('GB+ 2.8.6 candidata: catálogo de 49 serviços, 44 marcas locais, 5 fallbacks e integridade financeira verificados.');
+console.log('GB+ 2.8.6 candidata: catálogo de 49 serviços, 49 marcas locais, 0 fallbacks e integridade financeira verificados.');
