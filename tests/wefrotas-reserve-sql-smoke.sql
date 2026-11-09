@@ -44,8 +44,8 @@ BEGIN
             'reserveVehicleId',scenario.reserve, 'driverId',scenario.driver,
             'reason','manutencao', 'startDate',scenario.beginning,
             'endDate',scenario.finish,'startKm',3000,
-            'endKm',CASE WHEN scenario.id='invalid_km' THEN 2000
-                         WHEN scenario.finish <> '' THEN 3200 ELSE '' END)))
+            'endKm',CASE WHEN scenario.id='invalid_km' THEN '2000'
+                         WHEN scenario.finish <> '' THEN '3200' ELSE '' END)))
         WHERE organization_id='00000000-0000-4000-8000-000000000042'
           AND entity_id=scenario.source;
       RAISE EXCEPTION 'rollback successful test' USING ERRCODE='PZ900';
