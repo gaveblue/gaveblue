@@ -18,17 +18,25 @@ const select=(label,name,options,value)=>'<label>'+esc(label)+'<select name="'+e
 const formFooter=()=>'<div class="form-footer"><button type="submit">Salvar</button></div>';
 const button=(txt,action)=>'<button type="button" data-action="'+action+'">'+txt+'</button>';
 const bank={id:'001',name:'Banco de Teste',code:'001'};
+const ACCOUNT_ICON_OPTIONS=[['wallet','Carteira'],['piggy-bank','Cofrinho'],['shield-check','Segurança']];
+const GOAL_PRESETS=[['emergency','Reserva de emergência','shield-check','Reserva de emergência'],['custom','Outro objetivo','piggy-bank','Meu cofrinho']];
+const accountKind=a=>a?.kind||((a?.bank||a?.bankId)?'bank':'custom');
+const accountIcon=a=>a?.icon||(accountKind(a)==='goal'?'piggy-bank':'wallet');
+const goalPreset=id=>GOAL_PRESETS.find(row=>row[0]===id)||GOAL_PRESETS[1];
+const gbIcon=icon;
 const db={banks:[],accounts:[]};
 const findBank=(source,value)=>String(value||'').toLowerCase()===bank.id||
  String(value||'').toLowerCase()===bank.name.toLowerCase()?bank:null;
 const bankBadge=row=>'<span class="bank-logo">'+esc(row.name)+'</span>';
 const forms=compile('js/forms.js',['accountForm','accountBankPreview'],{
- esc,icon,field,select,formFooter,button,findBank,bankBadge
+ esc,icon,gbIcon,field,select,formFooter,button,findBank,bankBadge,ACCOUNT_ICON_OPTIONS,GOAL_PRESETS,accountKind,accountIcon,goalPreset
 });
 const fresh=forms.accountForm(db);
 assert(fresh.includes('id="account-form"')&&fresh.includes('gb-account-edit-form'));
 assert(fresh.includes('data-action="account-bank-picker"')&&fresh.includes('aria-controls="gb-picker-sheet"'));
-assert(fresh.includes('Dinheiro em caixa')&&fresh.includes('Sem banco'));
+assert(fresh.includes('Conta personalizada')&&fresh.includes('Sem banco'));
+assert(fresh.includes('data-action="account-icon"'));
+assert(fresh.includes('data-account-goal-fields'))
 assert(fresh.includes('name="bankId"')&&fresh.includes('name="bank"'));
 assert(fresh.includes('name="initial"')&&!/name="initial"[^>]*required/.test(fresh));
 assert(fresh.includes('name="active" value="true"'),'New account active by default');
@@ -46,7 +54,8 @@ assert(!legacy.includes('name="bankLookup"'),'No duplicate bank search');
 const identified=forms.accountForm(db,{...current,bankId:'001',bank:bank.name});
 assert(identified.includes(bank.name)&&identified.includes('name="bankId" value="001"'));
 const cash=forms.accountBankPreview(db,'','');
-assert(cash.includes('Dinheiro em caixa')&&cash.includes('wallet'));
+assert(cash.includes('Conta personalizada')&&cash.includes('wallet'));
+assert(forms.accountBankPreview(db,'','','goal').includes('Cofrinho'))
 const selected=forms.accountBankPreview(db,'001','');
 assert(selected.includes(bank.name)&&selected.includes('bank-logo'));
 const oldName=forms.accountBankPreview(db,'','Cooperativa antiga');
@@ -63,18 +72,18 @@ const picker=compile('js/bottom-sheet.js',['openGbPickerSheet'],{
  document:{querySelector:()=>sheetRoot,activeElement:{focus(){}}}
 });
 const shown=picker.openGbPickerSheet({
- kind:'bank',selected:'__cash__',items:[
-  {id:'__cash__',name:'Dinheiro em caixa',subtitle:'Sem banco',badgeMarkup:icon('wallet')},
+ kind:'bank',selected:'__custom__',items:[
+  {id:'__custom__',name:'Conta personalizada',subtitle:'Sem banco',badgeMarkup:icon('wallet')},
   {id:'001',name:bank.name,subtitle:'Código 001',badgeMarkup:bankBadge(bank)}
  ],onPick:()=>{}
 });
 assert(shown&&sheetRoot.open&&sheetRoot.dataset.snap==='expanded');
-assert(sheetRoot.innerHTML.indexOf('Dinheiro em caixa')<sheetRoot.innerHTML.indexOf('Bancos disponíveis'));
+assert(sheetRoot.innerHTML.indexOf('Conta personalizada')<sheetRoot.innerHTML.indexOf('Bancos disponíveis'));
 assert(sheetRoot.innerHTML.includes('aria-selected="true" data-sheet-choice="__cash__"'));
 assert(sheetRoot.innerHTML.includes('data-sheet-search-input')&&sheetRoot.innerHTML.includes('Arraste a barra'));
 const app=read('js/app.js');
 assert(app.includes("'account-bank-picker':el=>")&&app.includes("bankPickerCatalog(db)"));
-assert(app.includes("if(id==='__cash__'){source.value='';manual.value='';}"));
+assert(app.includes("id==='__custom__'||id==='__goal__'"));
 assert(app.includes("if(id==='__legacy__'&&legacy)"));
 assert(app.includes('branch:previous?.branch')&&app.includes('number:previous?.number'));
 assert(app.includes("String(v.initial||'').trim()===''?0:cents(v.initial)"));
@@ -83,8 +92,8 @@ assert(css.includes('#account-form.gb-account-edit-form'));
 assert(css.includes('#account-form .gb-account-bank-trigger'));
 assert(css.includes('#account-form .gb-account-opening-control'));
 const version=JSON.parse(read('version.json'));
-assert.equal(version.version,'2.8.9');assert.equal(version.build,2890);
-assert(read('sw.js').includes('gb-plus-shell-v2890'));
+assert.equal(version.version,'2.9.0');assert.equal(version.build,2900);
+assert(read('sw.js').includes('gb-plus-shell-v2900'));
 assert(read('index.html').includes('gbplus-version" content="2.8.9"'));
-assert(read('index.html').includes('app.js?v=20261108-2890'));
-console.log('GB+ 2.8.9: cadastro compacto, caixa sem banco, bottom sheet, dados legados e cache aprovados.');
+assert(read('index.html').includes('app.js?v=20261109-2900'));
+console.log('GB+ 2.9.0: regressão do editor de contas e bottom sheet atualizada.');
