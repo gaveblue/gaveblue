@@ -8,7 +8,7 @@
     "Redimensionamento sem corte, sem forçar escala de 400%, sem filtro de desfoque e com object-fit:contain para preservar logos, fundos e proporções.",
     "IDs e grupos dos 56 aplicativos preservados, inclusive as sete lojas adicionadas na 2.8.7; nenhum lançamento, conta, cartão, fatura ou consentimento foi alterado.",
     "Imagens ficam no próprio repositório, não são buscadas em websites de terceiros e têm fallback textual em caso de erro.",
-    "Cache do PWA e imports atualizados para build 2880; QA visual em Android/PWA exige conferência após integração."
+    "PR #108 integrado à main: versão 2.8.8 build 2880. Atualização efetiva no PWA depende de deploy/caches; ainda sem confirmação do domínio."
   ],
   "assets": [
     "./index.html",
@@ -220,9 +220,9 @@
       "description": "Renderização proporcional em temas claro e escuro."
     }
   ],
-  "release_status": "candidate_qa_pending",
+  "release_status": "merged_to_main_pending_live_verification",
   "homologation": {
-    "status": "pending_tests_and_visual_review",
-    "notes": "Candidata 2.8.8. Necessário executar regressões e verificar nitidez visual no PWA Android antes de declarar homologação visual. Integração ao site ainda não confirmada."
+    "status": "code_regressions_passed_visual_qa_pending",
+    "notes": "PR #108 mesclado à main em 08/11/2026. Treze arquivos WebP individuais de 320×320 verificados no GitHub; testes de catálogo de 56 serviços, seleção, fallbacks e persistência sem alterações financeiras passaram. A homologação visual Android/PWA e a entrega da versão atualizada no domínio ainda não foram verificadas. Nenhuma migração de dados."
   }
 }
