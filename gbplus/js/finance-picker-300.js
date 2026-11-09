@@ -14,7 +14,7 @@ const badge=(markup)=>'<span class="gb30-picker-mark" aria-hidden="true">'+marku
 const preview=item=>'<span class="gb30-picker-preview">'+badge(item.badgeMarkup||icon('wallet'))+
  '<span class="gb30-picker-copy"><strong>'+esc(item.name)+'</strong>'+
  (item.subtitle?'<small>'+esc(item.subtitle)+'</small>':'')+'</span></span>';
-export function financePickerItems(db,kind,{includeInactive=false,selected='',exclude='',type='expense'}={}){
+export function financePickerItems(db,kind,{includeInactive=false,allowEmpty=false,selected='',exclude='',type='expense'}={}){
  if(kind==='bank')return [
   {id:'',name:'Sem banco',subtitle:'Não vincular instituição',badgeMarkup:icon('wallet')},
   ...bankPickerCatalog(db).map(b=>({id:b.id,name:b.name,
@@ -22,7 +22,7 @@ export function financePickerItems(db,kind,{includeInactive=false,selected='',ex
    search:[b.code,b.ispb,b.aliases].filter(Boolean).join(' '),badgeMarkup:bankBadge(b)}))
  ];
  if(kind==='account')return [
-  ...((includeInactive&&selected==='')?[{id:'',name:'Não definir',subtitle:'Selecionar depois',badgeMarkup:icon('wallet')}]:[]),
+  ...(allowEmpty?[{id:'',name:'Não definir',subtitle:'Selecionar depois',badgeMarkup:icon('wallet')}]:[]),
   ...(db.accounts||[]).filter(a=>a.id!==exclude&&(includeInactive||a.active!==false||a.id===selected)).map(a=>({
    id:a.id,name:a.name,
    subtitle:money(accountBalance(db,a.id,today()))+(a.active===false?' · Inativa':' · Saldo disponível'),
@@ -52,8 +52,8 @@ export function financePickerItems(db,kind,{includeInactive=false,selected='',ex
  return [];
 }
 export function financePickerField(db,{kind,name,label,value='',required=false,allowEmpty=false,placeholder='',exclude='',type='expense'}={}){
- const options=financePickerItems(db,kind,{includeInactive:allowEmpty,selected:value,exclude,type});
- const selected=options.some(o=>String(o.id)===String(value))?String(value):options[0]?.id||'';
+ const options=financePickerItems(db,kind,{allowEmpty,selected:value,exclude,type});
+ const selected=options.some(o=>String(o.id)===String(value))?String(value):String(options[0]?.id||'');
  const chosen=labelled(name,options,selected,placeholder||'Selecionar');
  const isIcon=kind==='icon';
  const control=isIcon?
