@@ -66,7 +66,12 @@ const LOCAL_SERVICE_LOGOS=Object.freeze({
  'delivery-plusdelivery':'./assets/service-icons/plus-delivery.webp',
  'delivery-99food':'./assets/service-icons/99food.png',
  'streaming-primevideo':'./assets/service-icons/prime-video.webp',
- 'streaming-disney':'./assets/service-icons/disney-plus.webp'
+ 'streaming-disney':'./assets/service-icons/disney-plus.webp',
+ 'streaming-globoplay':'./assets/service-icons/globoplay.webp',
+ 'delivery-rappi':'./assets/service-icons/rappi.webp',
+ 'mobility-99':'./assets/service-icons/99.webp',
+ 'mobility-indrive':'./assets/service-icons/indrive.webp',
+ 'digital-canva':'./assets/service-icons/canva.webp'
 });
 export const SERVICE_CATALOG=Object.freeze(definitions.map(([id,name,group,billingMode,fallback])=>
  Object.freeze({id,name,group,billingMode,fallback,logoPath:LOCAL_SERVICE_LOGOS[id]||null,logoVerified:Boolean(LOCAL_SERVICE_LOGOS[id])})
