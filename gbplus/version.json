@@ -9,7 +9,8 @@
     "Opção Dinheiro em caixa (sem banco) fica em destaque no topo do painel, útil para dinheiro físico e caixa transitório, usando o ícone de carteira.",
     "Removidos somente do editor de contas: faixa horizontal de bancos, busca duplicada, Outra instituição, agência e número da conta. Dados preexistentes de agência e conta são preservados ao salvar.",
     "Saldo inicial deixa de ser obrigatório na criação; se vazio, inicia em R$ 0,00. Na edição, o saldo continua sendo a base de cálculo existente.",
-    "Sem mudanças em lançamentos, importações, cartões, faturas, termos ou marketing. Corrigido cache dos módulos e CSS no PWA."
+    "Sem mudanças em lançamentos, importações, cartões, faturas, termos ou marketing. Corrigido cache dos módulos e CSS no PWA.",
+    "PR #110 mesclado na main; atualização efetiva do PWA em gaveblue.com.br/gbplus/ ainda não confirmada."
   ],
   "assets": [
     "./index.html",
@@ -221,9 +222,9 @@
       "description": "Agência, número da conta e lançamentos antigos não são apagados."
     }
   ],
-  "release_status": "candidate_qa_pending",
+  "release_status": "merged_to_main_pending_live_verification",
   "homologation": {
-    "status": "pending_tests_and_visual_review",
-    "notes": "2.8.9 em branch. Executar testes de cadastro/edição, opção caixa, banco, dados legados e PWA. QA visual Android ainda pendente."
+    "status": "isolated_regressions_passed_visual_qa_pending",
+    "notes": "PR #110 mesclado em main em 08/11/2026. Testes isolados: regressão 2.8.9, 12 casos de busca de bancos, ação banco/caixa, persistência sem perda de agência/número, 128 verificações da 2.8.2, 32 da 2.8.5, regressão de bottom sheet. Não foi possível acessar o domínio público nem homologar a tela visualmente em Android/PWA real; não declarar QA visual completo."
   }
 }
