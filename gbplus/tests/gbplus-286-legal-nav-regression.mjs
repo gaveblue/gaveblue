@@ -42,10 +42,10 @@ for(const [id,name] of Object.entries(uploaded)){
  assert.equal(catalog.serviceById(id).logoPath,local);
  assert(readFileSync(resolve(root,local)).byteLength>150,'Empty logo: '+id);
 }
-assert.equal(catalog.SERVICE_CATALOG.filter(s=>s.logoPath).length,10);
+assert.equal(catalog.SERVICE_CATALOG.filter(s=>s.logoPath).length,21);
 const old=load('js/service-brand-paths.js',['SERVICE_BRAND_PATHS']);
 const extra=load('js/service-extra-brand-paths.js',['SERVICE_EXTRA_BRAND_PATHS']);
-assert.equal(catalog.SERVICE_CATALOG.filter(s=>s.logoPath||old.SERVICE_BRAND_PATHS[s.id]||extra.SERVICE_EXTRA_BRAND_PATHS[s.id]||s.sprite).length,56);
+assert.equal(catalog.SERVICE_CATALOG.filter(s=>s.logoPath||old.SERVICE_BRAND_PATHS[s.id]||extra.SERVICE_EXTRA_BRAND_PATHS[s.id]).length,56);
 const app=read('js/app.js'),auth=read('js/auth.js'),views=read('js/views.js');
 assert(app.indexOf('await requireLegalAcceptance(authClient())')<app.indexOf('repository=new SupabaseRepository(authClient(),user.id)'));
 assert(app.includes('setMarketingConsent(authClient(),v.marketing===\'on\')'));
@@ -53,9 +53,9 @@ assert(auth.includes('name="legal_preaccept" required')&&auth.includes('termos-d
 assert(views.includes('Preferências de e-mail'));
 assert(read('privacidade.html').includes('2026-11-08-v1')&&read('termos-de-uso.html').includes('2026-11-08-v1'));
 const version=JSON.parse(read('version.json'));
-assert.equal(version.version,'2.8.7');
-assert.equal(version.build,2870);
+assert.equal(version.version,'2.8.8');
+assert.equal(version.build,2880);
 for(const name of Object.values(uploaded))assert(version.assets.includes('./assets/service-icons/'+name+'.webp'));
 assert(read('index.html').includes('legal-consent.css?v=20261108-2866'));
-assert(read('sw.js').includes('gb-plus-shell-v2870'));
+assert(read('sw.js').includes('gb-plus-shell-v2880'));
 console.log('GB+ 2.8.6: aceite obrigatório, opt-in opcional, revogação, barra móvel e 56 ícones locais OK.');

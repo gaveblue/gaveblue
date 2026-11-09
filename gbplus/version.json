@@ -1,15 +1,14 @@
 {
-  "version": "2.8.7",
-  "build": 2870,
+  "version": "2.8.8",
+  "build": 2880,
   "published_at": null,
-  "title": "Biblioteca de aplicativos ampliada e ícones renovados",
+  "title": "Ícones de aplicativos com alta nitidez",
   "notes": [
-    "Novas opções em Compras e pagamentos: TikTok Shop, Shopee, Mercado Livre, Magalu, Casas Bahia, Temu e SHEIN.",
-    "Ícones renovados para HBO Max, 99Food, Prime Video, WhatsApp, Telegram e Spotify; 13 imagens fornecidas pelo usuário agrupadas em atlas WebP local leve de 256×256.",
-    "Catálogo passou de 49 para 56 opções sem trocar, apagar ou migrar IDs dos 49 serviços existentes.",
-    "Imagens proporcionais em modo claro e escuro; carregamento local, fallback textual para erro de asset e sem consultas a CDN.",
-    "Alterações restritas à identificação visual/seleção de serviços, cache PWA, documentação e testes; finanças, aceite, autenticação e backend não modificados.",
-    "PR #106 mesclado à main; confirmar carregamento da 2.8.7 no domínio e no PWA Android antes de declarar homologação visual."
+    "Correção de qualidade visual: substituição do atlas WebP 256×256 com 13 células de 64×64 por 13 arquivos individuais WebP de 320×320, produzidos a partir das imagens fornecidas pelo responsável.",
+    "Redimensionamento sem corte, sem forçar escala de 400%, sem filtro de desfoque e com object-fit:contain para preservar logos, fundos e proporções.",
+    "IDs e grupos dos 56 aplicativos preservados, inclusive as sete lojas adicionadas na 2.8.7; nenhum lançamento, conta, cartão, fatura ou consentimento foi alterado.",
+    "Imagens ficam no próprio repositório, não são buscadas em websites de terceiros e têm fallback textual em caso de erro.",
+    "Cache do PWA e imports atualizados para build 2880; QA visual em Android/PWA exige conferência após integração."
   ],
   "assets": [
     "./index.html",
@@ -190,28 +189,40 @@
     "./js/legal-consent.js",
     "./legal-consent.css",
     "./termos-de-uso.html",
-    "./assets/service-icons/service-brands-287.webp"
+    "./assets/service-icons/hq-99food.webp",
+    "./assets/service-icons/hq-whatsapp.webp",
+    "./assets/service-icons/hq-mercado-livre.webp",
+    "./assets/service-icons/hq-hbo-max.webp",
+    "./assets/service-icons/hq-casas-bahia.webp",
+    "./assets/service-icons/hq-shein.webp",
+    "./assets/service-icons/hq-temu.webp",
+    "./assets/service-icons/hq-magalu.webp",
+    "./assets/service-icons/hq-prime-video.webp",
+    "./assets/service-icons/hq-shopee.webp",
+    "./assets/service-icons/hq-telegram.webp",
+    "./assets/service-icons/hq-spotify.webp",
+    "./assets/service-icons/hq-tiktok-shop.webp"
   ],
   "highlights": [
     {
-      "icon": "shopping-bag",
-      "title": "56 aplicativos",
-      "description": "Casas Bahia, Temu, SHEIN, Magalu, Mercado Livre, Shopee e TikTok Shop adicionados."
-    },
-    {
       "icon": "image",
-      "title": "13 ícones atualizados",
-      "description": "Imagens fornecidas e armazenadas localmente, sem inventar marcas."
+      "title": "13 logotipos mais nítidos",
+      "description": "Arquivos individuais de 320 × 320, sem ampliação artificial do atlas."
     },
     {
-      "icon": "shield",
-      "title": "Seus dados preservados",
-      "description": "Sem migrações de lançamentos ou mudanças em contas, cartões e faturas."
+      "icon": "grid",
+      "title": "56 aplicativos mantidos",
+      "description": "Categorias e vínculos de lançamentos preservados."
+    },
+    {
+      "icon": "smartphone",
+      "title": "Visual adaptado",
+      "description": "Renderização proporcional em temas claro e escuro."
     }
   ],
-  "release_status": "merged_to_main_pending_live_verification",
+  "release_status": "candidate_qa_pending",
   "homologation": {
-    "status": "isolated_regressions_passed_visual_qa_pending",
-    "notes": "PR #106 foi mesclado à main em 08/11/2026. Testes de código do catálogo (56 serviços), painel e atlas local (13 logotipos) aprovados; integridade SHA confirmada. QA visual real Android/PWA e atualização efetiva no domínio gaveblue.com.br não puderam ser confirmados. Nenhuma alteração financeira ou de consentimento nesta versão."
+    "status": "pending_tests_and_visual_review",
+    "notes": "Candidata 2.8.8. Necessário executar regressões e verificar nitidez visual no PWA Android antes de declarar homologação visual. Integração ao site ainda não confirmada."
   }
 }

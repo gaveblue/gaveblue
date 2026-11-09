@@ -32,12 +32,12 @@ for(const [id,mark]of Object.entries(extra)){
   typeof mark[2]==='string'&&mark[2].length>20,'Malformed local vector mark for '+id);
 }
 assert.equal(catalog.SERVICE_CATALOG.filter(s=>Boolean(logos[s.id]||extra[s.id])).length,39);
-assert.equal(catalog.SERVICE_CATALOG.filter(item=>Boolean(item.logoPath)).length,10);
-assert.equal(catalog.SERVICE_CATALOG.filter(item=>Boolean(logos[item.id]||extra[item.id]||item.logoPath||item.sprite)).length,56);
+assert.equal(catalog.SERVICE_CATALOG.filter(item=>Boolean(item.logoPath)).length,21);
+assert.equal(catalog.SERVICE_CATALOG.filter(item=>Boolean(logos[item.id]||extra[item.id]||item.logoPath)).length,56);
 for(const [id,path] of Object.entries({
  'delivery-plusdelivery':'./assets/service-icons/plus-delivery.webp',
- 'delivery-99food':'./assets/service-icons/99food.png',
- 'streaming-primevideo':'./assets/service-icons/prime-video.webp',
+ 'delivery-99food':'./assets/service-icons/hq-99food.webp',
+ 'streaming-primevideo':'./assets/service-icons/hq-prime-video.webp',
  'streaming-disney':'./assets/service-icons/disney-plus.webp'
 })) assert.equal(catalog.serviceById(id).logoPath,path);
 for(const [id,paths]of Object.entries(logos)){
@@ -47,7 +47,7 @@ for(const [id,paths]of Object.entries(logos)){
 const serviceUI=load('service-ui',{
  SERVICE_CATALOG:catalog.SERVICE_CATALOG,SERVICE_GROUPS:catalog.SERVICE_GROUPS,
  serviceById:catalog.serviceById,serviceSearchKey:catalog.serviceSearchKey,
- SERVICE_BRAND_PATHS:logos,SERVICE_EXTRA_BRAND_PATHS:extra,SERVICE_BRAND_COLORS:accents,SERVICE_SPRITE_URL:'./assets/service-icons/service-brands-287.webp',esc
+ SERVICE_BRAND_PATHS:logos,SERVICE_EXTRA_BRAND_PATHS:extra,SERVICE_BRAND_COLORS:accents,esc
 },['servicePickerMarkup','serviceIconMarkup','serviceIdentityMarkup','serviceDisplayName']);
 const page=serviceUI.servicePickerMarkup();
 for(const word of ['name="serviceId"','name="serviceName"','gb-service-field-compact',
@@ -66,7 +66,7 @@ assert(other.includes('&lt;img'));
 assert(serviceUI.serviceIdentityMarkup('streaming-netflix').includes('<svg'));
 assert(serviceUI.serviceIconMarkup('streaming-netflix').includes('#E50914'));
 assert(serviceUI.serviceIconMarkup('streaming-youtube').includes('viewBox="0 0 576 512"'));
-assert(serviceUI.serviceIconMarkup('social-whatsapp').includes('gb-service-sprite-image'));
+assert(serviceUI.serviceIconMarkup('social-whatsapp').includes('hq-whatsapp.webp'));
 assert(serviceUI.serviceIconMarkup('digital-microsoft365').includes('<svg'));
 assert(serviceUI.serviceIconMarkup('digital-googleone').includes('<svg'));
 assert(serviceUI.serviceIconMarkup('delivery-plusdelivery').includes('PD'));
@@ -75,8 +75,8 @@ assert(catalog.searchServices('whatsapp').length===1);
 assert(catalog.searchServices('steam').length===1);
 for(const name of ['Casas Bahia','Temu','SHEIN','TikTok Shop','Shopee','Mercado Livre','Magalu'])assert.equal(catalog.searchServices(name,'shopping').length,1,'Nova loja deve estar no seletor: '+name);
 assert(catalog.searchServices('','social').length===6);
-assert(serviceUI.serviceIconMarkup('music-spotify').includes('gb-service-sprite-image'));
-assert(serviceUI.serviceIconMarkup('music-spotify').includes('service-brands-287.webp'),'Spotify mark must contrast on its original green');
+assert(serviceUI.serviceIconMarkup('music-spotify').includes('hq-spotify.webp'));
+assert(serviceUI.serviceIconMarkup('music-spotify').includes('hq-spotify.webp'),'Spotify mark must contrast on its original green');
 assert(serviceUI.serviceIconMarkup('streaming-netflix').includes('--gb-service-fg:#ffffff'),'Netflix mark must contrast on red');
 assert.equal(serviceUI.serviceDisplayName('streaming-netflix','','outro'),'Netflix');
 assert.equal(serviceUI.serviceDisplayName('custom','Serviço local','outro'),'Serviço local');
@@ -125,4 +125,4 @@ assert(src('bottom-sheet').includes('data-sheet-choice=""'),'User must be able t
 assert(app.includes('description.value=serviceDisplayName(hidden.value,name.value'), 'Selected service defines description');
 assert(app.includes('description.readOnly=true'),'PF service descriptions are read-only while selected');
 assert(app.includes('const description=serviceId?serviceDisplayName(serviceId,serviceName'), 'Saved title uses canonical service name');
-console.log('GB+ 2.8.6 candidata: catálogo de 56 serviços, 56 marcas locais, 0 fallbacks e integridade financeira verificados.');
+console.log('GB+ 2.8.8: catálogo de 56 serviços, 13 logotipos HD locais e integridade financeira e integridade financeira verificados.');

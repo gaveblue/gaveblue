@@ -1,5 +1,14 @@
 # CHANGELOG — GB+ Gestão Financeira
 
+## [2.8.8 — CORREÇÃO DE NITIDEZ DOS ÍCONES (CANDIDATA; QA VISUAL PENDENTE)] — 2026-11-08
+
+- **Problema da 2.8.7:** 13 logos exibidos por grade 4×4 de 256 px (cada marca tinha apenas 64×64 px), ampliados pelo CSS a 400%. Isso resultava em borrões especialmente nos logotipos com letras.
+- **Correção:** 13 arquivos individuais `hq-*.webp`, todos **320×320 px**, criados a partir das imagens originais enviadas nesta conversa, com cores e proporções preservadas. Um arquivo por aplicativo, sem grade, sobreposição, cortes nem novos logotipos fictícios.
+- **Catálogo:** mesmas **56 opções** e mesmos IDs da 2.8.7; nenhuma migração dos dados financeiros nem alterações em políticas ou painel administrativo.
+- **Exibição:** renderer usa `logoPath` local e `object-fit: contain`; eliminada renderização do sprite, posicionamento por coordenadas, escala 400% e CSS antigo. Mantido fallback de imagem, e modos claro/escuro utilizam o mesmo arquivo.
+- **PWA:** cache `gb-plus-shell-v2880`, HTML e imports atualizados, os 13 novos ícones incluídos no manifesto local da versão e o atlas antigo removido do manifesto.
+- **Testes:** regressão de catálogo/renderização, carregamento das 13 imagens individuais e versões do cache. Conferência visual final em Android/PWA ainda precisa de evidência de uso real.
+
 ## [2.8.7 — NOVOS APLICATIVOS E LOGOTIPOS (MERGE EM MAIN; SITE A VERIFICAR)] — 2026-11-08
 
 - **Solicitação:** incorporar diretamente ao GB+ as imagens enviadas em duas mensagens, sem gerar telas/imagens independentes.
