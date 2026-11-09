@@ -11,6 +11,7 @@ import {accountsCardsView} from './accounts-cards-view.js?v=20261108-2811';
 import {renderReactCharts,unmountReactCharts} from './gb-react-loader.js?v=20261105-45';
 import {mountNativeCharts} from './gb-charts-native.js?v=20261106-68';
 import {titleForm,partnerForm,accountForm,accountBankPreview,categoryForm,paymentForm,transferForm,titleDetail,customizeForm,accountDetail} from './forms.js?v=20261108-2890';
+import {ACCOUNT_ICON_OPTIONS,GOAL_PRESETS,accountKind,accountIcon,goalPreset} from './account-goals.js?v=20261109-2900';
 import {serviceById,serviceSearchKey,isServiceExpenseCategory} from './service-catalog.js?v=20261108-2880';
 import {serviceIconMarkup,serviceIdentityMarkup,serviceDisplayName,installServiceIconRecovery} from './service-ui.js?v=20261108-2880';
 import {openGbPickerSheet,openGbScheduleSheet,installGbPickerSheet,installEntryFormDrag} from './bottom-sheet.js?v=20261108-2890';
@@ -898,17 +899,32 @@ const actions={
   'edit-partner':el=>openModal('Editar parceiro',partnerForm(db.partners.find(p=>p.id===el.dataset.id))),
   'partner-detail':el=>{const p=db.partners.find(p=>p.id===el.dataset.id);openModal('Histórico do parceiro',`<h3>${esc(p.name)}</h3><p class="muted">${esc(p.document||'')} ${esc(p.email||'')}</p><p>${esc(p.address||'')}</p><p>${esc(p.notes||'')}</p>${titleTable(db,db.titles.filter(t=>t.partnerId===p.id))}`);},
   'new-account':()=>openModal('Nova conta financeira',accountForm(db)),
+  'new-goal':()=>openModal('Novo cofrinho',accountForm(db,null,{kind:'goal'})),
   'edit-account':el=>openModal('Editar conta',accountForm(db,db.accounts.find(a=>a.id===el.dataset.id))),
+  'account-icon':el=>{
+   const form=el.closest('#account-form'),value=el.dataset.icon;
+   if(!form||!ACCOUNT_ICON_OPTIONS.some(([key])=>key===value))return;
+   form.elements.icon.value=value;
+   form.querySelectorAll('[data-action="account-icon"]').forEach(button=>{
+    const selected=button.dataset.icon===value;
+    button.classList.toggle('is-selected',selected);
+    button.setAttribute('aria-pressed',String(selected));
+   });
+   const preview=form.querySelector('[data-account-bank-preview]');
+   if(preview)preview.innerHTML=accountBankPreview(db,form.elements.bankId.value,form.elements.bank.value,form.elements.kind.value,value);
+  },
   'account-bank-picker':el=>{
    const form=el.closest('#account-form');
    if(!form||!form.isConnected||!modal.open)return;
-   const source=form.elements.bankId,manual=form.elements.bank;
-   if(!source||!manual)return;
+   const source=form.elements.bankId,manual=form.elements.bank,kindField=form.elements.kind;
+   if(!source||!manual||!kindField)return;
    const existing=(db.accounts||[]).find(a=>a.id===form.dataset.id);
    const legacy=existing?.bank&&!findBank(db,existing.bankId||existing.bank)?String(existing.bank):'';
    const items=[
-    {id:'__cash__',name:'Dinheiro em caixa',subtitle:'Sem banco · dinheiro físico ou caixa transitório',
-     search:'dinheiro especie caixa carteira sem banco',badgeMarkup:'<span class="gb-sheet-finance-fallback">'+icon('wallet')+'</span>'},
+    {id:'__custom__',name:'Conta personalizada',subtitle:'Dinheiro físico, carteira ou caixa transitório',
+     search:'personalizada dinheiro especie caixa carteira sem banco',badgeMarkup:'<span class="gb-sheet-finance-fallback">'+gbIcon('wallet')+'</span>'},
+    {id:'__goal__',name:'Cofrinho',subtitle:'Reserva de emergência, casamento, educação e outras metas',
+     search:'cofrinho guardar poupar meta objetivo reserva casamento educacao',badgeMarkup:'<span class="gb-sheet-finance-fallback">'+gbIcon('piggy-bank')+'</span>'},
     ...(legacy?[{id:'__legacy__',name:legacy,subtitle:'Instituição já cadastrada',
      search:legacy,badgeMarkup:'<span class="gb-sheet-finance-fallback">'+icon('wallet')+'</span>'}]:[]),
     ...bankPickerCatalog(db).map(bank=>({
@@ -916,22 +932,44 @@ const actions={
      search:[bank.code,bank.ispb,bank.aliases].filter(Boolean).join(' '),badgeMarkup:bankBadge(bank)
     }))
    ];
-   const selected=source.value||(manual.value?'__legacy__':'__cash__');
+   const selected=kindField.value==='goal'?'__goal__':kindField.value==='custom'?'__custom__':
+    source.value||(manual.value?'__legacy__':'__custom__');
    el.setAttribute('aria-expanded','true');
    const shown=openGbPickerSheet({kind:'bank',items,selected,onPick:id=>{
     if(!form.isConnected)return;
-    if(id==='__cash__'){source.value='';manual.value='';}
-    else if(id==='__legacy__'&&legacy){source.value='';manual.value=legacy;}
-    else{
+    if(id==='__custom__'||id==='__goal__'){
+     source.value='';manual.value='';kindField.value=id==='__goal__'?'goal':'custom';
+    }else if(id==='__legacy__'&&legacy){
+     source.value='';manual.value=legacy;kindField.value='bank';
+    }else{
      const picked=findBank(db,id);
      if(!picked)return;
-     source.value=picked.id;manual.value=picked.name;
+     source.value=picked.id;manual.value=picked.name;kindField.value='bank';
+    }
+    const isGoal=kindField.value==='goal';
+    form.querySelector('[data-account-type-fields]').hidden=kindField.value==='bank';
+    form.querySelector('[data-account-goal-fields]').hidden=!isGoal;
+    if(isGoal&&!form.elements.goalDue.value&&!form.elements.name.value.trim()){
+     const preset=goalPreset('emergency');
+     form.elements.goalCategory.value=preset[0];
+     form.elements.name.value=preset[3];
+     actions['account-icon']({dataset:{icon:preset[2]},closest:()=>form});
     }
     const preview=el.querySelector('[data-account-bank-preview]');
-    if(preview)preview.innerHTML=accountBankPreview(db,source.value,manual.value);
+    if(preview)preview.innerHTML=accountBankPreview(db,source.value,manual.value,kindField.value,form.elements.icon.value);
     source.dispatchEvent(new Event('change',{bubbles:true}));
    }});
    if(!shown)el.setAttribute('aria-expanded','false');
+  },
+  'goal-deposit':el=>{
+   const target=db.accounts.find(a=>a.id===el.dataset.id);
+   if(!target||accountKind(target)!=='goal'||target.active===false)return;
+   openModal('Adicionar ao cofrinho',transferForm(db,{to:target.id}));
+  },
+  'goal-withdraw':el=>{
+   const target=db.accounts.find(a=>a.id===el.dataset.id);
+   if(!target||accountKind(target)!=='goal'||target.active===false)return;
+   openModal('Retirar do cofrinho',transferForm(db,{from:target.id}));
   },
   'account-detail':el=>openModal('Movimentações da conta',accountDetail(db,db.accounts.find(a=>a.id===el.dataset.id))),
   'bank-import-open':el=>openBankImport(el.dataset.id||''),
@@ -1384,6 +1422,16 @@ document.addEventListener('change',async e=>{
  if(draft===bankImportDraft&&modal.open)redrawBankImport();
 });
 document.addEventListener('change',e=>{
+ if(e.target?.matches?.('#account-form select[name="goalCategory"]')){
+  const form=e.target.closest('#account-form');
+  if(form&&form.elements.kind.value==='goal'){
+   const preset=goalPreset(e.target.value);
+   const oldName=form.elements.name.value.trim();
+   const former=GOAL_PRESETS.some(([id,label,key,name])=>name===oldName);
+   if(!oldName||former)form.elements.name.value=preset[3];
+   actions['account-icon']({dataset:{icon:preset[2]},closest:()=>form});
+  }
+ }
  if(e.target?.matches?.('select[name="bankId"]')&&db)syncBankPicker(e.target.closest('.gb-bank-picker'),db);
 });
 document.addEventListener('input',e=>{
@@ -1553,16 +1601,29 @@ document.addEventListener('submit',async e=>{e.preventDefault();if(busy||!db)ret
   }
   else if(form.id==='partner-form'){const roles=new FormData(form).getAll('roles');if(!roles.length)throw Error('Selecione ao menos uma classificação.');const row={...v,id:id||uid(),name:v.name.trim(),active:v.active==='true',roles};await commit(d=>{if(row.document&&d.partners.some(p=>p.id!==row.id&&p.document.replace(/\D/g,'')===row.document.replace(/\D/g,'')))throw Error('Já existe um parceiro com este CPF/CNPJ.');upsert(d.partners,row);});}
   else if(form.id==='account-form'){
-   // The minimal editor never erases existing branch/number or financial links.
+   // Keep legacy bank coordinates, IDs, invoices, payments, transfers and imports.
    const previous=id?db.accounts.find(a=>a.id===id):null;
    if(id&&!previous)throw Error('Conta não encontrada.');
-   const bank=v.bankId?findBank(db,v.bankId):null;
-   if(v.bankId&&!bank)throw Error('Selecione uma instituição válida.');
-   const chosen=bank?bank.name:String(v.bank||'').trim();
+   const kind=String(v.kind||'');
+   if(!['bank','custom','goal'].includes(kind))throw Error('Escolha uma conta válida.');
+   const bank=kind==='bank'&&v.bankId?findBank(db,v.bankId):null;
+   if(kind==='bank'&&v.bankId&&!bank)throw Error('Selecione uma instituição válida.');
+   const chosen=kind==='bank'?(bank?.name||String(v.bank||'').trim()):'';
+   if(kind==='bank'&&!chosen)throw Error('Escolha uma instituição ou uma conta personalizada.');
+   const iconKey=kind==='bank'?'':String(v.icon||'');
+   if(kind!=='bank'&&!ACCOUNT_ICON_OPTIONS.some(([key])=>key===iconKey))throw Error('Escolha um ícone válido.');
    const initial=String(v.initial||'').trim()===''?0:cents(v.initial);
+   if(kind==='goal'&&initial<0)throw Error('O saldo inicial de um cofrinho não pode ser negativo.');
+   const goalCategory=kind==='goal'?String(v.goalCategory||''):'';
+   if(kind==='goal'&&!GOAL_PRESETS.some(([key])=>key===goalCategory))throw Error('Selecione um objetivo para o cofrinho.');
+   const goalTarget=kind==='goal'?cents(v.goalTarget):0;
+   const goalDue=kind==='goal'?String(v.goalDue||''):'';
+   if(kind==='goal'&&(goalTarget<=0||!validDate(goalDue)))throw Error('Informe um valor de meta positivo e uma data válida.');
+   if(kind==='goal'&&goalDue<today()&&(!previous||previous.goalDue!==goalDue))throw Error('Escolha uma data de meta de hoje em diante.');
    await commit(d=>upsert(d.accounts,{
     ...(previous||{}),id:id||uid(),name:String(v.name||'').trim(),
-    bankId:bank?.id||'',bank:chosen,initial,active:v.active==='true',
+    kind,icon:iconKey,goalCategory,goalTarget,goalDue,
+    bankId:kind==='bank'?bank?.id||'':'',bank:chosen,initial,active:v.active==='true',
     branch:previous?.branch||'',number:previous?.number||''
    }));
   }
@@ -1630,7 +1691,7 @@ document.addEventListener('submit',async e=>{e.preventDefault();if(busy||!db)ret
      ()=>commit(d=>applyLaunchPayments(d,ids,v.accountId,v.date),
        summary.count+' baixa(s) registradas. Saldos atualizados.'));
   }
-  else if(form.id==='transfer-form'){await commit(d=>transfer(d,{...v,amount:cents(v.amount)}),'Transferência registrada.');}
+  else if(form.id==='transfer-form'){await commit(d=>{const amount=cents(v.amount);const source=d.accounts.find(a=>a.id===v.from);if(source&&accountKind(source)==='goal'&&accountBalance(d,v.from,today())<amount)throw Error('O cofrinho não tem saldo suficiente para retirar esse valor.');transfer(d,{...v,amount});},'Transferência registrada.');}
   else if(form.id==='customize-form'){await commit(d=>{for(const device of ['desktop','mobile'])for(const key of Object.keys(INDICATORS))d.settings.panel[device][key]=new FormData(form).has(`${device}:${key}`);},'Painel personalizado.');}
   else if(form.id==='period-form'){if(v.from>v.to)throw Error('O início deve ser anterior ao fim do período.');state.period='custom';state.range={from:v.from,to:v.to};savePeriodPreference();state.launchSelected=[];closeModal();render();}
 }catch(error){fail(error);}});
