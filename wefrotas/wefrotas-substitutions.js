@@ -30,11 +30,15 @@
     const match = reserveMatches.find(r=>r.driverId===driverId) || (reserveMatches.length===1?reserveMatches[0]:null);
     return {replacement:match||null,wrongVehicle:false};
   }
-  function association(vehicleId,driverId,date,existingId='') {
+  function association(vehicleId,driverId,date,existingId='',km='') {
     const result=forFuel(vehicleId,driverId,date);
     if(result.wrongVehicle) return {error:'Este veículo está temporariamente substituído. Lance o abastecimento na placa do carro reserva, usando o KM do reserva.'};
     const r=result.replacement;
     if(r && r.driverId && driverId && r.driverId!==driverId) return {error:'O motorista informado não corresponde ao motorista desta substituição.'};
+    if(r && km!=='' && km!=null && Number.isSafeInteger(Number(km)) && Number(km)<Number(r.startKm))
+      return {error:'KM do abastecimento menor que o KM registrado na entrega do carro reserva.'};
+    if(r && r.endDate && km!=='' && km!=null && Number.isSafeInteger(Number(km)) && Number(km)>Number(r.endKm))
+      return {error:'KM do abastecimento maior que o KM registrado na devolução do carro reserva.'};
     if(r && existingId && r.id!==existingId) return {replacementId:r.id,replacedVehicleId:r.sourceVehicleId};
     return r ? {replacementId:r.id,replacedVehicleId:r.sourceVehicleId} : {replacementId:'',replacedVehicleId:''};
   }
