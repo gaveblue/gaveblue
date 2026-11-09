@@ -22,6 +22,7 @@ import {setupPwaInstallation,maybeOfferPwaInstall,showInstallHelp,isPwaInstalled
 import {SupabaseRepository} from '../integrations/supabase/repository.js?v=20261106-2505';
 import {initializeAuth,authClient,currentUser,showAuth,isRecovery,updatePersonalProfile,consumeAuthReturnMessage,consumeSessionNotice,signOutAccount,authError,emailCooldownSeconds,markAuthEmailSent} from './auth.js?v=20261105-69';
 import {profileView,validateProfile,validCPF,formatCPF} from './profile.js?v=20261105-59';
+import {requireLegalAcceptance,readConsent,setMarketingConsent} from './legal-consent.js?v=20261108-2866';
 import {canResetFinancialData,canDeleteAccount,clearFinancialDocument} from './account-safety.js?v=20261106-2610';
 import {resetAccountModal,deleteAccountModal,syncAccountDangerConfirm} from './account-safety-ui.js?v=20261106-2610';
 import {firstSetupView,customMobileNavForm,shortcutsPreview,readMobileNav,firstStepsPanel} from './setup-ui.js?v=20261105-87';
@@ -1017,6 +1018,19 @@ const actions={
     '<div class="button-stack" style="margin-top:16px">'+
     button(icon('sun')+' Modo claro','set-theme',db.settings.theme==='light'?'primary':'','data-value="light"')+
     button(icon('moon')+' Modo escuro','set-theme',db.settings.theme==='dark'?'primary':'','data-value="dark"')+'</div>'),
+  'email-preferences':async()=>{
+    if(!currentUser())throw Error('Entre na sua conta para alterar e-mails promocionais.');
+    const state=await readConsent(authClient());
+    const on=state?.marketing===true;
+    openModal('Preferências de e-mail',
+      '<form id="marketing-consent-form" class="gb-marketing-preferences">'+
+      '<label class="gb-legal-consent"><input type="checkbox" name="marketing" '+(on?'checked':'')+'>'+
+      '<span>Quero receber novidades, dicas e comunicações promocionais do GB+ por e-mail.'+
+      '<small>Opcional. Desmarque e salve para revogar a autorização. Não compartilhamos seus dados financeiros em campanhas.</small></span></label>'+
+      '<p class="form-hint">Leia os <a href="./termos-de-uso.html" target="_blank" rel="noopener noreferrer">Termos de Uso</a> e a '+
+      '<a href="./privacidade.html" target="_blank" rel="noopener noreferrer">Política de Privacidade</a>.</p>'+
+      '<p class="form-error" role="alert"></p>'+formFooter('Salvar escolha')+'</form>');
+  },
   'notification-preferences':()=>{const p=notificationPrefs(db.settings);
     const check=(key,label)=>'<label class="gb-notification-toggle"><input type="checkbox" name="'+key+'" '+(p[key]?'checked':'')+'>'+label+'</label>';
     openModal('Configurar avisos de vencimento',
@@ -1551,7 +1565,12 @@ document.addEventListener('submit',async e=>{e.preventDefault();if(busy||!db)ret
    const result=forecastResult(db,forecastDays,title.id,v.due);
    openModal('Resultado da simulação',result+'<div class="form-footer">'+button('Voltar à previsão','close','primary')+'</div>');
   }
-  else if(form.id==='notification-preferences-form'){
+  else if(form.id==='marketing-consent-form'){
+     if(!navigator.onLine)throw Error('Conecte-se à internet para alterar a preferência de marketing.');
+     await setMarketingConsent(authClient(),v.marketing==='on');
+     closeModal();toast(v.marketing==='on'?'E-mails promocionais autorizados.':'Autorização de marketing revogada.');
+   }
+   else if(form.id==='notification-preferences-form'){
     const value={enabled:v.enabled==='on',daysBefore:Number(v.daysBefore),
       expenses:v.expenses==='on',incomes:v.incomes==='on',includeOverdue:v.includeOverdue==='on'};
     if(!validNotificationPrefs(value))throw Error('Confira as preferências de avisos.');
@@ -1701,6 +1720,8 @@ async function init(){
   const user=await startupLimit(initializeAuth(clearAccount),16000);
   if(!user){const sessionNotice=consumeSessionNotice();showAuth('signin',loginReturnMessage||sessionNotice);return;}
   if(isRecovery()){showAuth('recovery');return;}
+  // Don't display a user's financial data before the updated policies have been accepted.
+  await requireLegalAcceptance(authClient());
   repository=new SupabaseRepository(authClient(),user.id);
   db=await startupLimit(repository.read(),16000);
   const savedPeriod=loadPeriodPreference();
