@@ -6,6 +6,7 @@ import {gbIcon,CATEGORY_ICON_OPTIONS,categoryIconFor} from './gb-icons.js?v=2026
 import {bankOptions,findBank,bankPicker,bankBadge} from './banks.js?v=20261105-87';
 import {dailyStatement} from './daily-statement.js?v=20261105-90';
 import {ACCOUNT_ICON_OPTIONS,GOAL_PRESETS,accountKind,accountIcon,goalPreset} from './account-goals.js?v=20261109-2900';
+import {financePickerField} from './finance-picker-300.js?v=20261109-3000';
 import {servicePickerMarkup,serviceIdentityMarkup,serviceDisplayName} from './service-ui.js?v=20261108-2880';
 import {isServiceExpenseCategory} from './service-catalog.js?v=20261108-2880';
 import {missingCategorySuggestions,isSelectableExpenseCategory,isPrimaryServiceCategory} from './category-library.js?v=20261108-2862';
@@ -156,14 +157,9 @@ export function accountForm(db,a,options={}){
  const currentIcon=accountIcon({kind,icon:a?.icon});
  const initial=a?String((a.initial||0)/100):'';
  const template=goalPreset(a?.goalCategory||'custom');
- const palette=ACCOUNT_ICON_OPTIONS.map(([key,label])=>
-  '<button type="button" class="gb-account-icon-choice'+(currentIcon===key?' is-selected':'')+
-   '" data-action="account-icon" data-icon="'+esc(key)+'" aria-pressed="'+(currentIcon===key)+
-   '" aria-label="Ícone: '+esc(label)+'" title="'+esc(label)+'">'+gbIcon(key)+
-   '<small>'+esc(label)+'</small></button>').join('');
  return '<form id="account-form" class="gb-account-edit-form" data-id="'+esc(a?.id||'')+'">'+
   '<div class="form-grid gb-account-edit-grid">'+
-   '<div class="full">'+field('Nome da conta','name',a?.name||'','text','required maxlength="120" placeholder="Ex.: Reserva de emergência, Carteira, Conta principal"')+'</div>'+
+
    '<div class="full gb-account-bank-field"><span class="gb-account-bank-label" id="account-bank-label">Onde fica o dinheiro?</span>'+
     '<input type="hidden" name="kind" value="'+esc(kind)+'">'+
     '<input type="hidden" name="bankId" value="'+esc(id)+'">'+
@@ -171,16 +167,13 @@ export function accountForm(db,a,options={}){
     '<button type="button" class="gb-account-bank-trigger" data-action="account-bank-picker" aria-labelledby="account-bank-label" aria-haspopup="dialog" aria-controls="gb-picker-sheet" aria-expanded="false">'+
      '<span data-account-bank-preview>'+accountBankPreview(db,id,legacy,kind,currentIcon)+'</span>'+
      icon('chevron')+'</button></div>'+
+   '<div class="full">'+field('Nome da conta','name',a?.name||'','text','required maxlength="120" placeholder="Ex.: Reserva de emergência, Carteira, Conta principal"')+'</div>'+
    '<div class="full gb-account-type-fields" data-account-type-fields '+(kind==='bank'?'hidden':'')+'>'+
-    '<fieldset class="gb-account-icon-picker"><legend>Escolha um ícone</legend>'+
-     '<input type="hidden" name="icon" value="'+esc(currentIcon)+'">'+
-     '<div class="gb-account-icon-grid" role="group" aria-label="Ícones da conta">'+palette+'</div></fieldset>'+
+    financePickerField(db,{kind:'icon',name:'icon',label:'Ícone da conta',value:currentIcon})+
     '<p class="gb-account-kind-hint">Seu ícone aparece nos saldos e nos cartões de contas.</p>'+
    '</div>'+
    '<div class="full gb-account-goal-fields" data-account-goal-fields '+(kind==='goal'?'':'hidden')+'>'+
-    '<label class="field">Qual é seu objetivo? <select name="goalCategory">'+
-     GOAL_PRESETS.map(([value,label])=>'<option value="'+esc(value)+'" '+(template[0]===value?'selected':'')+'>'+esc(label)+'</option>').join('')+
-    '</select></label>'+
+    financePickerField(db,{kind:'goal',name:'goalCategory',label:'Objetivo',value:template[0]})+
     '<div class="gb-account-goal-grid">'+
      field('Valor da meta (R$)','goalTarget',a?.goalTarget?String(a.goalTarget/100):'','number','min="0.01" max="10000000000" step="0.01" inputmode="decimal" placeholder="Ex.: 10000,00"')+
      field('Quando quer alcançar?','goalDue',a?.goalDue||'','date','')+
@@ -191,11 +184,13 @@ export function accountForm(db,a,options={}){
        (m===12?'1 ano':m===24?'2 anos':m+' meses')+'</button>').join('')+'</div>'+ 
     '<p class="gb-account-kind-hint">Acompanhe quanto falta e a sugestão mensal para chegar à meta.</p>'+
    '</div>'+
+   (kind==='goal'&&!a?'<details class="gb30-optional"><summary>Já tenho dinheiro guardado</summary>':'')+
    '<div class="full gb-account-opening"><label for="account-initial">Saldo inicial <small>(opcional)</small></label>'+
     '<div class="gb-account-opening-control"><span aria-hidden="true">R$</span>'+
      '<input id="account-initial" name="initial" type="number" value="'+esc(initial)+'" placeholder="0,00" min="-10000000000" max="10000000000" step="0.01" inputmode="decimal" aria-label="Saldo inicial em reais, opcional"></div>'+
     '<p class="gb-account-opening-hint">Se o dinheiro já está em outra conta do GB+, deixe zero e use Transferir para não contar duas vezes.</p>'+
    '</div>'+
+   (kind==='goal'&&!a?'</details>':'')+
    (a?select('Situação','active',[['true','Ativa'],['false','Inativa']],String(a.active??true)):'<input type="hidden" name="active" value="true">')+
   '</div>'+
   (a?button(icon('trash')+'Excluir conta','delete-account','danger small','data-id="'+esc(a.id)+'" type="button"'):'')+
@@ -204,27 +199,23 @@ export function accountForm(db,a,options={}){
 
 export function categoryForm(c){
  const current=categoryIconFor(c);
- const palette=CATEGORY_ICON_OPTIONS.map(([key,label])=>`<button type="button" class="gb-category-icon-choice ${current===key?'is-selected':''}" data-action="category-icon" data-icon="${esc(key)}" aria-label="Ícone: ${esc(label)}" aria-pressed="${current===key}" title="${esc(label)}">${gbIcon(key)}<small>${esc(label)}</small></button>`).join('');
- return `<form id="category-form" data-id="${esc(c?.id||'')}"><div class="form-grid">
-  ${field('Nome da categoria','name',c?.name||'','text','required maxlength="100"')}
-  ${select('Tipo','type',[['expense','Despesa'],['income','Receita']],c?.type||'expense')}
-  <fieldset class="full gb-category-icon-picker"><legend>Ícone da categoria</legend>
-   <input type="hidden" name="icon" value="${esc(current)}">
-   <label class="gb-category-icon-filter-label" for="gb-category-icon-search">Buscar ícone</label><input id="gb-category-icon-search" class="gb-category-icon-filter" type="search" autocomplete="off" placeholder="Buscar entre ${CATEGORY_ICON_OPTIONS.length} ícones" aria-label="Filtrar ícones">
-   <div class="gb-category-icon-grid">${palette}</div>
-   <small>O ícone aparece nos menus e junto à categoria selecionada.</small>
-  </fieldset>
-  </div>${c?button(icon('trash')+'Excluir categoria','delete-category','danger small',`data-id="${c.id}" type="button"`):''}${formFooter()}</form>`;
+ return '<form id="category-form" data-id="'+esc(c?.id||'')+'"><div class="form-grid">'+
+  field('Nome da categoria','name',c?.name||'','text','required maxlength="100"')+
+  select('Tipo','type',[['expense','Despesa'],['income','Receita']],c?.type||'expense')+
+  financePickerField(null,{kind:'category-icon',name:'icon',label:'Ícone da categoria',value:current})+
+  '</div>'+
+  (c?button(icon('trash')+'Excluir categoria','delete-category','danger small','data-id="'+esc(c.id)+'" type="button"'):'')+
+  formFooter()+'</form>';
 }
-export function paymentForm(db,t){const accounts=db.accounts.filter(a=>a.active);return accounts.length?`<div class="detail-summary"><span>${esc(t.description)}</span><strong>${money(pending(db,t))}</strong><small>Saldo pendente</small></div><form id="payment-form" data-id="${t.id}"><div class="form-grid">${field('Valor da baixa (R$)','amount',pending(db,t)/100,'number',`required min="0.01" max="${pending(db,t)/100}" step="0.01"`)}${field('Data do pagamento / recebimento','date',today(),'date',`required max="${today()}"`)}<div class="full">${select('Conta utilizada','accountId',accounts.map(a=>[a.id,a.name]),t.accountId,'required')}</div></div>${formFooter('Confirmar baixa')}</form>`:empty('Adicione uma conta primeiro','Uma baixa precisa de uma conta financeira para movimentar o saldo.','new-account','Cadastrar conta');}
+export function paymentForm(db,t){const accounts=db.accounts.filter(a=>a.active);return accounts.length?`<div class="detail-summary"><span>${esc(t.description)}</span><strong>${money(pending(db,t))}</strong><small>Saldo pendente</small></div><form id="payment-form" data-id="${t.id}"><div class="form-grid">${field('Valor da baixa (R$)','amount',pending(db,t)/100,'number',`required min="0.01" max="${pending(db,t)/100}" step="0.01"`)}${field('Data do pagamento / recebimento','date',today(),'date',`required max="${today()}"`)}<div class="full">${financePickerField(db,{kind:'account',name:'accountId',label:'Conta utilizada',value:accounts.some(a=>a.id===t.accountId)?t.accountId:accounts[0]?.id||'',required:true})}</div></div>${formFooter('Confirmar baixa')}</form>`:empty('Adicione uma conta primeiro','Uma baixa precisa de uma conta financeira para movimentar o saldo.','new-account','Cadastrar conta');}
 export function transferForm(db,{from='',to=''}={}){
  const active=db.accounts.filter(a=>a.active),options=active.map(a=>[a.id,a.name]);
  if(active.length<2)return empty('São necessárias duas contas ativas','Cadastre as contas de origem e destino para transferir.','new-account','Cadastrar conta');
  const source=options.some(([id])=>id===from)?from:options.find(([id])=>id!==to)?.[0]||options[0][0];
  const target=options.some(([id])=>id===to&&id!==source)?to:options.find(([id])=>id!==source)?.[0]||options[1][0];
  return '<form id="transfer-form"><div class="form-grid">'+
-  select('Conta de origem','from',options,source,'required')+
-  select('Conta de destino','to',options,target,'required')+
+  financePickerField(db,{kind:'account',name:'from',label:'De onde sai',value:source,required:true})+
+  financePickerField(db,{kind:'account',name:'to',label:'Para onde vai',value:target,required:true,exclude:source})+
   field('Valor (R$)','amount','','number','required min="0.01" max="10000000000" step="0.01"')+
   field('Data','date',today(),'date','required max="'+today()+'"')+
   '</div><p class="form-hint">A transferência movimenta as duas contas sem gerar receita ou despesa. Para guardar dinheiro no cofrinho, transfira de uma conta existente.</p>'+

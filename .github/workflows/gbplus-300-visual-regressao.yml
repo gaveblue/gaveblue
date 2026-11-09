@@ -1,0 +1,33 @@
+name: GB+ 3.0.0 - homologacao visual candidata
+on:
+  push:
+    branches:
+      - feat/gbplus-300-visual-system
+  pull_request:
+    paths:
+      - 'gbplus/**'
+      - '.github/workflows/gbplus-300-visual-regressao.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  regressao:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validar sistema visual e fluxo de formulários
+        run: node gbplus/tests/gbplus-300-visual-regression.mjs
+      - name: Regressão de Contas e Cartões
+        run: node gbplus/tests/accounts-cards-unified-regression.mjs
+      - name: Regressão de faturas e baixas
+        run: node gbplus/tests/card-invoice-balance-regression.mjs
+      - name: Regressão financeira
+        run: node gbplus/tests/finance-regression.mjs
+      - name: Regra dos Bottom Sheets
+        run: node gbplus/tests/bottom-sheet-regression.mjs
