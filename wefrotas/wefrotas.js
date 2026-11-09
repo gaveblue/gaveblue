@@ -10951,7 +10951,7 @@
         const previousSubstitution = allFinanceEntries.find(entry => entry.id === currentEditingId)?.substitutionId || '';
         const substitution = window.WeFrotasSubstitutions?.association(payload.vehicleId, payload.driverId, payload.dataAbastecimento, previousSubstitution, payload.km);
         if (substitution?.error) { showToast(substitution.error); return false; }
-        if (substitution) payload = { ...payload, substitutionId: substitution.replacementId, replacedVehicleId: substitution.replacedVehicleId };
+        if (substitution) payload = { ...payload, substitutionId: substitution.replacementId, replacedVehicleId: substitution.replacedVehicleId, sinisterFuelReview: Boolean(substitution.sinisterFuelReview) };
         const mileageError = validateFuelMileageForVehicle({ vehicleId: payload.vehicleId, date: payload.dataAbastecimento, km: payload.km, excludeId: currentEditingId || '' });
         if (mileageError) { showToast(mileageError); return false; }
       }
