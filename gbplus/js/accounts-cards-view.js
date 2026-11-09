@@ -14,6 +14,7 @@ export function accountsCardsView(db,selected='accounts'){
   button(icon('plus')+'Nova conta','new-account','primary');
  const secondary=isCard?
   button(icon('plus')+'Nova compra','new-card-purchase','small'):
+  button('Novo cofrinho','new-goal','small')+
   button('Bancos e ícones','open-banks','small')+
   button(icon('transfer')+'Transferir','new-transfer','small');
  const options=[['accounts','Contas','wallet'],['cards','Cartões','credit-card']];
