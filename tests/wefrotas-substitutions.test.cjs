@@ -167,3 +167,16 @@ test('diagnóstico de risco: merge entre titulares distintos não protege reserv
   vehicles.splice(0,vehicles.length,...merged.vehicles);
   assert.match(api.validate(substitution),/sobreposta/,'business validator detects invalid merged state');
 });
+
+
+test('sinistro permite abastecimento da placa original para conferência administrativa',()=>{
+  const {api,substitution}=fixture();
+  substitution.reason='sinistro';
+  const result=api.association('titular','motorista','2026-11-02');
+  assert.equal(result.error,undefined);
+  assert.equal(result.sinisterFuelReview,true);
+  assert.equal(result.replacementId,'');
+  assert.equal(api.association('titular','motorista','2026-10-31').sinisterFuelReview,false);
+  assert.equal(api.association('reserva','motorista','2026-11-02').replacementId,'sub-1');
+  assert.equal(api.association('reserva','motorista','2026-11-02').sinisterFuelReview,false);
+});

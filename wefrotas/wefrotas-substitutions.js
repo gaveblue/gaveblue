@@ -35,6 +35,7 @@
   }
   function association(vehicleId,driverId,date,existingId='',km='') {
     const result=forFuel(vehicleId,driverId,date);
+    if(result.wrongVehicle && result.replacement?.reason==='sinistro') return {replacementId:'',replacedVehicleId:'',sinisterFuelReview:true};
     if(result.wrongVehicle) return {error:'Este veículo está temporariamente substituído. Lance o abastecimento na placa do carro reserva, usando o KM do reserva.'};
     const r=result.replacement;
     if(r && r.driverId && r.driverId!==driverId) return {error:'O motorista informado não corresponde ao motorista desta substituição.'};
@@ -44,7 +45,7 @@
     if(r && r.endDate && km!=='' && km!=null && Number.isSafeInteger(Number(km)) && Number(km)>Number(r.endKm))
       return {error:'KM do abastecimento maior que o KM registrado na devolução do carro reserva.'};
     if(r && existingId && r.id!==existingId) return {replacementId:r.id,replacedVehicleId:r.sourceVehicleId};
-    return r ? {replacementId:r.id,replacedVehicleId:r.sourceVehicleId} : {replacementId:'',replacedVehicleId:''};
+    return r ? {replacementId:r.id,replacedVehicleId:r.sourceVehicleId,sinisterFuelReview:false} : {replacementId:'',replacedVehicleId:'',sinisterFuelReview:false};
   }
   function statistics(item) {
     const fuel=entries(item).filter(entry=>activeOn(item,fuelDate(entry)));
