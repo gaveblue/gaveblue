@@ -1,0 +1,58 @@
+
+/* Carro reserva / substituições — visual isolado do WeFrotas. */
+.wf-reserve-overlay,.wf-reserve-overlay *{box-sizing:border-box}
+.wf-reserve-container{display:grid;gap:18px;padding:4px 0 20px}
+.wf-reserve-head{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.wf-reserve-head h3{font-size:19px;font-weight:750;margin:0}
+.wf-reserve-head p,.wf-reserve-hint{font-size:12px;line-height:1.55;color:var(--muted-text,#64748b);margin:6px 0 0}
+.wf-reserve-primary,.wf-reserve-button{border:0;border-radius:12px;padding:11px 16px;font-weight:650;cursor:pointer;transition:background .18s,transform .18s}
+.wf-reserve-primary{background:#172554;color:#fff}
+.wf-reserve-primary:hover:not(:disabled){background:#233b7a}
+.wf-reserve-primary:disabled{opacity:.5;cursor:not-allowed}
+.wf-reserve-button{background:#eef2ff;color:#263b72}
+.wf-reserve-card{padding:20px;border:1px solid #e3e8f0;border-radius:16px;background:#fff;box-shadow:0 6px 18px rgba(15,23,42,.03)}
+.wf-reserve-card-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.wf-reserve-card-head h3{margin:4px 0;font-size:17px;font-weight:750;color:#0f172a}
+.wf-reserve-card-head p,.wf-reserve-card-head small{color:#64748b;font-size:12px;margin:0}
+.wf-reserve-facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:18px}
+.wf-reserve-facts div{min-width:0;padding:12px;border-radius:10px;background:#f8fafc;display:grid;gap:5px}
+.wf-reserve-facts span{color:#64748b;font-size:11px}
+.wf-reserve-facts strong{color:#0f172a;font-size:13px;overflow-wrap:anywhere}
+.wf-reserve-overlay{position:fixed;inset:0;z-index:99999;display:flex;justify-content:center;align-items:flex-end}
+.wf-reserve-backdrop{position:absolute;inset:0;background:rgba(9,17,36,.55);backdrop-filter:blur(3px)}
+.wf-reserve-sheet{position:relative;background:#fff;color:#0f172a;width:min(650px,100%);max-height:min(94dvh,960px);overflow-y:auto;border-radius:24px 24px 0 0;padding:12px 25px max(24px,env(safe-area-inset-bottom));box-shadow:0 -20px 45px rgba(0,0,0,.17)}
+.wf-reserve-handle{width:40px;height:5px;margin:0 auto 18px;border-radius:8px;background:#cbd5e1}
+.wf-reserve-sheet-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.wf-reserve-sheet-title small{font-size:11px;color:#64748b}
+.wf-reserve-sheet-title h2{font-size:22px;font-weight:750;letter-spacing:-.02em;margin:4px 0 0}
+.wf-reserve-close{width:37px;height:37px;display:grid;place-items:center;font-size:25px;border-radius:50%;border:0;background:#f1f5f9;cursor:pointer}
+.wf-reserve-source{font-size:13px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:12px;margin:0 0 18px}
+.wf-reserve-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.wf-reserve-form-grid label{font-size:12px;color:#334155;font-weight:650;display:grid;gap:6px}
+.wf-reserve-wide{grid-column:1/-1}
+.wf-reserve-form-grid input,.wf-reserve-form-grid select,.wf-reserve-form-grid textarea{min-width:0;width:100%;font:inherit;background:#fff;color:#0f172a;padding:11px 12px;border:1px solid #cbd5e1;border-radius:10px;font-size:14px}
+.wf-reserve-form-grid input:focus,.wf-reserve-form-grid select:focus,.wf-reserve-form-grid textarea:focus{outline:2px solid #bfd2ff;border-color:#5176cb}
+.wf-reserve-form-grid :disabled{background:#f1f5f9;color:#64748b}
+.wf-reserve-actions{display:flex;justify-content:flex-end;gap:10px;position:sticky;bottom:-24px;background:#fff;padding:18px 0 8px;border-top:1px solid #e2e8f0;margin-top:17px}
+.wf-reserve-actions>button:first-child{border:1px solid #cbd5e1;background:#fff;color:#334155;border-radius:12px;padding:10px 14px;cursor:pointer}
+body.wf-reserve-lock{overflow:hidden}
+@media(max-width:600px){.wf-reserve-facts{grid-template-columns:repeat(2,minmax(0,1fr))}.wf-reserve-sheet{padding:12px 18px max(18px,env(safe-area-inset-bottom))}.wf-reserve-form-grid{grid-template-columns:1fr}.wf-reserve-head{align-items:flex-start}.wf-reserve-card{padding:14px}.wf-reserve-card-head{flex-direction:column}.wf-reserve-actions{display:grid;grid-template-columns:1fr 1fr}}
+body[data-theme="dark"] .wf-reserve-card,body.dark .wf-reserve-card,body[data-theme="dark"] .wf-reserve-sheet,body.dark .wf-reserve-sheet{background:#111827;color:#f8fafc;border-color:#334155}body[data-theme="dark"] .wf-reserve-facts div,body.dark .wf-reserve-facts div,body[data-theme="dark"] .wf-reserve-source,body.dark .wf-reserve-source{background:#1e293b;border-color:#334155}body[data-theme="dark"] .wf-reserve-facts strong,body.dark .wf-reserve-facts strong,body[data-theme="dark"] .wf-reserve-card-head h3,body.dark .wf-reserve-card-head h3{color:#f8fafc}
+
+/* Explicit application theme wins over OS theme and keeps the form legible. */
+body[data-theme="dark"] .wf-reserve-sheet-title h2,body.dark .wf-reserve-sheet-title h2,
+body[data-theme="dark"] .wf-reserve-form-grid label,body.dark .wf-reserve-form-grid label{color:#f8fafc}
+body[data-theme="dark"] .wf-reserve-form-grid input,body.dark .wf-reserve-form-grid input,
+body[data-theme="dark"] .wf-reserve-form-grid select,body.dark .wf-reserve-form-grid select,
+body[data-theme="dark"] .wf-reserve-form-grid textarea,body.dark .wf-reserve-form-grid textarea{
+  background:#1e293b;color:#f8fafc;border-color:#475569
+}
+body[data-theme="dark"] .wf-reserve-actions,body.dark .wf-reserve-actions{background:#111827;border-color:#334155}
+body[data-theme="dark"] .wf-reserve-actions>button:first-child,body.dark .wf-reserve-actions>button:first-child{
+  background:#1e293b;color:#f8fafc;border-color:#475569
+}
+body[data-theme="dark"] .wf-reserve-close,body.dark .wf-reserve-close{background:#334155;color:#f8fafc}
+@media(max-width:600px){
+  .wf-reserve-sheet{max-height:96dvh}
+  .wf-reserve-actions{bottom:-18px}
+}
