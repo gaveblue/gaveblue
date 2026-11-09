@@ -1,6 +1,22 @@
 # Carro reserva — auditoria do PR #113 (09/11/2026)
 
-## Status: PRONTO PARA HOMOLOGAÇÃO INTEGRADA — NÃO publicado
+## Status: PILOTO EM PRODUÇÃO AUTORIZADO — testes operacionais do usuário pendentes
+
+### Preparação para publicação — 09/11/2026
+
+O responsável autorizou explicitamente colocar o módulo no sistema de produção para testá-lo. Esta liberação é classificada como **piloto operacional**, não como homologação final de sincronização em duas sessões.
+
+- **Supabase de produção:** a migração `wefrotas_reserve_exclusivity_20261109` foi aplicada no projeto correto `wkssfugzghwifaddagfr`. Três gatilhos foram confirmados ativos; funções de gatilho sem execução pública para `anon`/`authenticated`.
+- **Regressão SQL pós-migração:** 15/15 cenários de integridade passaram dentro de `BEGIN/ROLLBACK`, sem criar registros fictícios duradouros.
+- **Regressão JavaScript:** 21/21 casos do módulo passaram em executor isolado e todos os arquivos JavaScript relevantes passaram pela verificação de sintaxe; testes de navegador com login real continuam pendentes.
+- **Confirmação online:** o formulário agora só mostra sucesso se a sincronização retornar `supabase-saved`, `supabase-verified` ou `supabase-rebased`; outros modos são relatados como pendentes.
+- **Visual:** contraste do Bottom Sheet, tema escuro explícito, espaçamento móvel e atualização de cache dos 5 recursos ligados ao módulo.
+- **Rollback disponível:** `supabase/rollbacks/wefrotas_reserve_exclusivity_rollback.sql` remove apenas gatilhos/funções da proteção; não altera dados; em caso de incidente, primeiro considerar reverter o frontend.
+- **GitHub Actions:** workflow específico permanece removido devido ao bloqueio de cobrança. Nunca tratar sua ausência como aprovação de testes.
+
+**O histórico de auditoria abaixo descreve etapas anteriores ao piloto.** Não confundir os bloqueios históricos de acesso ao Supabase com o estado atual. Ainda é necessário validar autenticação de perfis reais, ida/volta de abastecimentos via Central, duas sessões concorrentes e retorno após perda de conexão.
+
+
 
 ## Revisão complementar — 09/11/2026
 
