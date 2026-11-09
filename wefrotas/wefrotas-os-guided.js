@@ -394,12 +394,15 @@
   }
   if(doc) {
     doc.addEventListener('change',onChange);
+    // The cadastro modal's inline handleModalBackdrop(event) calls
+    // stopPropagation(), so a bubbling document listener never receives clicks
+    // on Continuar, Voltar, or Novo reserva. Capture before the backdrop.
     doc.addEventListener('click',e=>{
       if(e.target?.closest?.('[data-os-step-next]')){e.preventDefault();nextWizard();return;}
       if(e.target?.closest?.('[data-os-step-back]')){e.preventDefault();backWizard();return;}
       if(e.target?.closest?.('#os-guide-new')){e.preventDefault();showSheet();}
       if(e.target?.closest?.('[data-os-quick-close]')){e.preventDefault();closeSheet(true);}
-    });
+    }, true);
     doc.addEventListener('submit',e=>{if(e.target?.id==='wf-os-quick-form')saveQuick(e);});
     doc.addEventListener('keydown',e=>{if(e.key==='Escape'&&sheetOpen)closeSheet(true);});
   }
