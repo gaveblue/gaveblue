@@ -1,5 +1,15 @@
 # CHANGELOG — GB+ Gestão Financeira
 
+## [2.8.8 — MELHORIA DE QUALIDADE DOS ÍCONES (CANDIDATA)] — 2026-11-08
+
+- **Motivo:** os 13 logos incluídos na 2.8.7 estavam embaçados porque o atlas local limitava cada marca a 64×64 pixels e o CSS ampliava/cortava trechos de uma imagem de 256×256.
+- **Correção:** substituir os tiles por **13 WebP individuais de 320×320 px**, produzidos diretamente das imagens originais enviadas pelo usuário. Compressão visual de alta qualidade (WebP q93), redução com LANCZOS e ajuste discreto de nitidez em logotipos com letras pequenas. Sem reconstrução fictícia, recorte ou modificação do desenho das marcas.
+- **Serviços atualizados:** HBO Max, 99Food, Prime Video, TikTok Shop, WhatsApp, Shopee, Mercado Livre, Telegram, Spotify, Magalu, Casas Bahia, Temu e SHEIN.
+- **Interface:** `serviceIconMarkup` usa somente `logoPath` por aplicativo, com `object-fit:contain`, `image-rendering:auto`, sem `width:400%` ou posicionamento de sprite. Fallback textual permanece caso alguma imagem não carregue.
+- **Compatibilidade:** 56 serviços/IDs mantidos; lançamentos históricos, categorias, cartões e dados não foram alterados. Arquivos antigos podem permanecer para compatibilidade, mas não são mais requisitados; removido o atlas do manifesto `version.json`.
+- **Cache:** atualização de módulos/estilos e service worker para o build `2880`. A nova versão não altera Supabase, autenticação, marketing ou configuração de finanças.
+- **QA:** arquivo de regressão `gbplus-288-crisp-icons-regression.mjs` verifica 13 nomes, MIME/assinatura RIFF-WEBP, tamanho 320×320, IDs e busca, caminhos locais, manifest e cache PWA; verificações visuais reais Android/PWA permanecem necessárias para homologação final.
+
 ## [2.8.7 — NOVOS APLICATIVOS E LOGOTIPOS (MERGE EM MAIN; SITE A VERIFICAR)] — 2026-11-08
 
 - **Solicitação:** incorporar diretamente ao GB+ as imagens enviadas em duas mensagens, sem gerar telas/imagens independentes.
