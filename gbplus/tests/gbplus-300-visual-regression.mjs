@@ -115,7 +115,7 @@ const finance24=load('js/finance-24-ui.js',['cardForm','cardPurchaseForm','cards
  financePickerField:picker.financePickerField,findBank,bankBadge,
  cardUsed:()=>10000,cardAvailable:()=>290000,cardCycle:()=> '2026-11',
  cardDue:()=> '2026-11-17',pending:()=>0,paid:()=>0,status:()=> 'Em aberto',
- dateLabel:s=>s,heading:(name)=>name,empty:(title)=>title
+ dateLabel:s=>s,empty:(title)=>title
 });
 const cardMarkup=finance24.cardForm(db,db.cards[0]);
 assert.match(cardMarkup,/data-field="bankId"/);
