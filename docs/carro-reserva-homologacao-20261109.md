@@ -1,6 +1,6 @@
 # Carro reserva — auditoria do PR #113 (09/11/2026)
 
-## Status: NÃO homologado para produção
+## Status: PRONTO PARA HOMOLOGAÇÃO INTEGRADA — NÃO publicado
 
 Branch: `feature/wefrotas-carro-reserva-20261109`. Base auditada do PR: `77bafc92ea9b7844d003b5e93f0af38fb47f11e7`.
 Sem merge, publicação, alteração de schema, credenciais, autenticação, RLS, KM ou registros financeiros de produção.
@@ -35,7 +35,7 @@ Ambiente: Windows, Node v24.22.1, Chrome headless, Playwright disponível no amb
 | Sintaxe: aplicativo, substituições, perfil e lista | Aprovada |
 | `git -c core.whitespace=cr-at-eol diff --check` | Aprovado |
 | Suíte antiga `wefrotas-supabase-migration.test.cjs` | 83/86; três expectativas estáticas incompatíveis com backend/cutover atual, descritas abaixo |
-| Supabase real / duas sessões / RLS ao vivo | Bloqueado por permissão |
+| Supabase real — auditoria de schema/RPC/RLS | Leitura autorizada na conexão Spba; integração autenticada em duas sessões continua pendente |
 | Safari/iPhone e aparelho Android físico | Não executado; viewport móvel não substitui aparelho real |
 
 O ciclo no navegador cobre: entrega, erro de conexão simulado, tentativa de fechar enquanto salva, reenvio com mesmo ID, inclusão fictícia de abastecimento, devolução, preservação dos dois odômetros, despesa única, permissão negada e dimensões do sheet. A persistência é simulada: não comprova entrega/realtime do servidor.
@@ -49,16 +49,38 @@ As três falhas da suíte antiga são: exigência do antigo `wefrotas-backend.js
 Run `42618738623`, job `129165096331`, commit auditado acima. Job sem steps e sem logs: anotação do check informa **“The job was not started because your account is locked due to a billing issue.”**
 Não é falha de sintaxe nem de teste. Responsável pela conta precisa regularizar/verificar a cobrança; não foi alterada cobrança nem contratado plano. Após resolução, executar QA novamente. O aviso de migração ubuntu-latest não é a causa desse bloqueio.
 
-## Supabase: identidade confirmada, acesso negado
+## Supabase: acesso de leitura confirmado no projeto correto
 
 `wefrotas/supabase-config.js` aponta para `wkssfugzghwifaddagfr.supabase.co`, projeto real esperado do WeFrotas.
-O conector disponível listou somente GB+ (`layrxmkosyqurpobzmku`). Consulta somente leitura `select current_database(), now()` dirigida ao projeto correto foi negada por falta de permissão. Não foi usado GB+ como substituto, nem outra credencial para contornar a negativa.
-É necessário conectar uma conta autorizada ao projeto correto para inspecionar a função transacional, dependências e RLS. Nenhuma alteração de banco foi feita.
+Em 09/11 foi identificada a segunda conexão autorizada de Supabase (Spba), que lista o projeto correto `wkssfugzghwifaddagfr` (`gaveblue.com`). A conexão GB+ permanece separada e **não foi utilizada**. Foram inspecionados esquema, permissões, políticas, RPCs reais `wefrotas_apply_snapshot_delta`, `wefrotas_apply_table_delta`, `wefrotas_commit_changes`, `wefrotas_import_snapshot`, e aprovação da Central, sempre com leitura. A RPC de snapshot bloqueia `wefrotas_workspace_state` por organização e checa revisão otimista; o merge de sessões distintas aceita deltas de veículos distintos. Não foi alterado banco de produção.
+
+## Continuidade e segurança em 09/11/2026
+
+**GitHub Actions indisponível por problema de cobrança:** removido da branch o workflow específico `.github/workflows/wefrotas-reserve-qa.yml`. Não depender do Actions até normalização de cobrança; usar Node, navegador isolado e testes SQL em transação. O trabalho de homologação não deve ficar bloqueado só pelo CI.
+
+**Migração preparada (NÃO aplicada):** `supabase/migrations/202611090001_wefrotas_reserve_exclusivity.sql`. Define um `CONSTRAINT TRIGGER` adiado por transação na tabela de veículos para conferir todas as substituições **após** upserts, com lock da mesma linha `wefrotas_workspace_state` que a RPC de snapshot já usa. É segregado por organização, rejeita eventos inconsistentes, datas/KM inválidos, IDs repetidos, sobreposições de titular/reserva/motorista e cruzamento entre titular e reserva. Gatilhos de exclusão preservam histórico de titulares, reservas e motoristas e também usam lock da organização. Funções de gatilho são `SECURITY DEFINER` com `search_path` fixo e sem `EXECUTE` público.
+
+**Evidência SQL isolada no banco correto:** a migração foi criada em transação de teste `BEGIN ... ROLLBACK`; um conjunto fictício com quatro veículos e dois motoristas retornou:
+
+| Caso | Resultado |
+|---|---|
+| Início de substituição válida | Aceito |
+| Mesmo reserva com período sobreposto | Rejeitado `PT409` |
+| Mesmo motorista com dois veículos simultâneos | Rejeitado `PT409` |
+| Reserva usado como titular em período sobreposto | Rejeitado `PT409` |
+| Período não sobreposto | Aceito |
+| ID de veículo titular divergente | Rejeitado `22023` |
+| Excluir carro reserva com histórico | Rejeitado `PT409` |
+| Excluir titular com histórico | Rejeitado `PT409` |
+| Excluir motorista com histórico | Rejeitado `PT409` |
+
+A última revisão do lock de exclusão passou por revisão estática, mas exige nova execução final de SQL antes de liberar. Após os testes, o banco continuou com 14 veículos, zero eventos de substituição, zero organizações fictícias e **zero gatilhos de reserva implantados**. Nenhum dado financeiro/KM de produção foi modificado.
+
+**Ainda NÃO homologado ao vivo:** faltam testes reais de dois navegadores autenticados, sincronização e offline, comportamento da Central, RLS efetivo por perfis e execução da migração num ambiente de homologação persistente. Não fazer merge ou publicação antes de registrar tais evidências.
 
 ## Bloqueios e riscos antes de qualquer publicação
 
-1. **Concorrência entre veículos diferentes:** o merge atual detecta concorrência na mesma entidade, mas duas sessões podem editar titulares diferentes e atribuir o mesmo reserva/motorista em períodos sobrepostos. O teste diagnóstico reproduz isso usando o core real: `deltasOverlap` retorna falso, e a validação de negócio identifica o estado combinado inválido. Validação apenas no navegador não garante exclusividade.
-   - Alternativa segura: revisar a RPC `wefrotas_apply_snapshot_delta` e todos os caminhos de escrita; validar a exclusividade da combinação final de substituições dentro da transação, sob o mesmo bloqueio/revisão da organização, com erro atômico e cópia local preservada. Não aplicar SQL sem examinar o projeto autorizado e testar em homologação.
+1. **Concorrência entre veículos diferentes:** agora há uma migração SQL com trava no banco e testes transacionais isolados aprovados para rejeitar sobreposição. A proteção ainda NÃO está ativa em produção, e falta o teste real com dois clientes autenticados e ambiente de homologação. A cópia local continua preservada em erro de servidor.
 2. **Confirmação e offline reais:** o bridge mantém alterações locais enquanto o journal tenta sincronizar. O erro é exibido como “não confirmada no servidor”. Não se deve interpretar o cartão local como confirmação remota. Testar perda de resposta, recarga, reconexão, recuperação e duas sessões reais antes da liberação.
 3. **Histórico:** período é inclusivo por data, sem hora; duas substituições do mesmo recurso no mesmo dia são bloqueadas. Ausência de KM não deve virar estimativa automática. Ainda requer cenários de movimentações manuais e leituras de entregas anteriores sem abastecimento entre elas.
 4. **Custos adicionais informativos:** não possuem vínculo próprio com uma despesa; operador pode informar novamente um valor já presente no combustível/outras despesas e inflar a análise do evento (não o Financeiro). Validar orientação/necessidade de vínculo explícito antes de aprovação final.
@@ -67,4 +89,4 @@ O conector disponível listou somente GB+ (`layrxmkosyqurpobzmku`). Consulta som
 
 ## Próxima decisão necessária
 
-Reconectar o projeto Supabase correto para leitura/revisão e disponibilizar homologação isolada para testes transacionais. Até resolver concorrência e completar esses testes, manter o PR draft e NÃO publicar. Autorização futura para merge/publicação deve ser expressa, após novas evidências.
+A conexão de leitura do Supabase correto foi recuperada e a migração de integridade preparada. Executar a migração num ambiente de homologação persistente, validar concorrência com duas sessões e perfis reais e só então considerar sua aplicação em produção, merge e publicação. Manter PR draft e NÃO publicar automaticamente. Autorização futura para merge/publicação deve ser expressa, após novas evidências.
