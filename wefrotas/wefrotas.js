@@ -15348,6 +15348,10 @@
           showToast(`Já existe uma OS com o número ${String(numero).padStart(4, '0')}.`);
           return;
         }
+        if (['sinistro','pane'].includes(tipoOs) && !window.WeFrotasOsGuide?.collect) {
+          showToast('O fluxo de sinistro/pane não foi carregado. Atualize a página antes de cadastrar esta OS.');
+          return;
+        }
         let guidedPlan = {enabled:false};
         try { guidedPlan = window.WeFrotasOsGuide?.collect() || guidedPlan; }
         catch (error) { showToast(error.message); return; }
