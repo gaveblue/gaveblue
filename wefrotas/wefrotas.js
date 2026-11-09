@@ -3775,8 +3775,29 @@
 
       const supplier = resolveFuelSupplierByImportedName(importedData.posto);
       const driver = resolveDriverByImportedName(importedData.motorista);
-      const vehicle = resolveVehicleByImportedDriver(importedData.motorista, driver);
+      const linkedVehicle = resolveVehicleByImportedDriver(importedData.motorista, driver);
+      const recordPlate = String(centralRecord?.placa || centralRecord?.vehiclePlate || centralRecord?.veiculoPlaca || centralRecord?.vehicle?.placa || '').trim();
+      const normalizedRecordPlate = recordPlate.toUpperCase().replace(/[^A-Z0-9]/g, '');
+      const explicitVehicle = normalizedRecordPlate
+        ? allVehicles.find(item => String(item.placa || '').toUpperCase().replace(/[^A-Z0-9]/g, '') === normalizedRecordPlate)
+        : null;
+      const recordVehicleId = String(centralRecord?.vehicleId || centralRecord?.veiculoId || '').trim();
+      const explicitVehicleById = recordVehicleId ? allVehicles.find(item => String(item.id) === recordVehicleId) : null;
+      const activeReplacement = window.WeFrotasSubstitutions?.currentForDriver?.(driver?.id, importedData.dataIso);
+      const reserveVehicle = activeReplacement
+        ? allVehicles.find(item => String(item.id) === String(activeReplacement.reserveVehicleId))
+        : null;
+      // A Central pode informar a placa habitual durante a substituição.
+      // O KM recebido deve ser validado contra o reserva, nunca contra o titular.
+      const recordedVehicle = explicitVehicle || explicitVehicleById;
+      const vehicle = reserveVehicle && (!recordedVehicle
+        || String(recordedVehicle.id) === String(activeReplacement.sourceVehicleId)
+        || String(recordedVehicle.id) === String(reserveVehicle.id))
+        ? reserveVehicle : (recordedVehicle || linkedVehicle);
       const notes = [];
+      if (reserveVehicle && vehicle?.id === reserveVehicle.id && linkedVehicle?.id !== reserveVehicle.id) {
+        notes.push('VEÍCULO RESERVA — abastecimento associado à substituição ativa; KM do veículo reserva.');
+      }
 
       if (document.getElementById('finance-data-abastecimento')) {
         document.getElementById('finance-data-abastecimento').value = importedData.dataIso;
@@ -10669,17 +10690,22 @@
     }
 
     function getCentralReserveBadge(record) {
-      const rawPlate = String(record?.placa || record?.vehiclePlate || record?.veiculoPlaca || record?.vehicle?.placa || record?.vehicle?.plate || '').trim();
-      const plate = rawPlate.toUpperCase().replace(/[^A-Z0-9]/g, '');
-      const vehicleId = String(record?.vehicleId || record?.veiculoId || record?.vehicle?.id || '').trim();
-      const vehicle = allVehicles.find(item => (vehicleId && String(item.id) === vehicleId)
-        || (plate && String(item.placa || '').toUpperCase().replace(/[^A-Z0-9]/g, '') === plate));
-      if (!vehicle) return '';
       const date = getCentralRecordIsoDate(record);
       if (!date) return '';
+      const rawPlate = String(record?.placa || record?.vehiclePlate || record?.veiculoPlaca || record?.vehicle?.placa || '').trim();
+      const plate = rawPlate.toUpperCase().replace(/[^A-Z0-9]/g, '');
+      const vehicleId = String(record?.vehicleId || record?.veiculoId || record?.vehicle?.id || '').trim();
+      const recordedVehicle = allVehicles.find(item => (plate && String(item.placa || '').toUpperCase().replace(/[^A-Z0-9]/g, '') === plate)
+        || (!plate && vehicleId && String(item.id) === vehicleId));
+      const driverName = String(record?.motorista || record?.driver || '').trim();
+      const driver = resolveDriverByImportedName(driverName);
       const substitutions = window.WeFrotasSubstitutions?.all?.() || [];
-      const matches = substitutions.filter(item => String(item.reserveVehicleId) === String(vehicle.id)
-        && item.startDate && date >= item.startDate && (!item.endDate || date <= item.endDate));
+      const matches = substitutions.filter(item => item.startDate && date >= item.startDate
+        && (!item.endDate || date <= item.endDate)
+        && (recordedVehicle
+          ? String(item.reserveVehicleId) === String(recordedVehicle.id)
+            || (String(item.sourceVehicleId) === String(recordedVehicle.id) && driver && String(item.driverId) === String(driver.id))
+          : driver && String(item.driverId) === String(driver.id)));
       if (matches.length !== 1) return '';
       const source = allVehicles.find(item => String(item.id) === String(matches[0].sourceVehicleId));
       const tooltip = 'Abastecimento do veículo reserva' + (source?.placa ? ' — substitui ' + source.placa : '');
