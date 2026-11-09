@@ -1,6 +1,6 @@
 // GB+ PWA network-first candidate release v2862 (2026-11-08; expanded local service icons): do not block installation on network requests,
 // automatically redirect app windows, or reload open financial forms.
-const CACHE='gb-plus-shell-v2865';
+const CACHE='gb-plus-shell-v2866';
 const CORE=['./','./index.html','./styles.css','./js/app.js','./js/update.js','./recuperar.html'];
 const scope=new URL(self.registration.scope);
 const inScope=url=>url.origin===scope.origin&&url.pathname.startsWith(scope.pathname);
