@@ -258,6 +258,7 @@
     }
     if(need){
       if(draftVehicle&&incident.reserveVehicleId===draftVehicle.id){
+        if(incident.origin==='frota')throw Error('Selecione um carro já cadastrado da frota. O cadastro rápido é para veículos emprestados ou locados.');
         draftVehicle.reserveProviderOrigin=incident.origin;
         draftVehicle.propriedade=incident.origin==='locadora'?'locado':'emprestado';
         draftVehicle.locado=incident.origin==='locadora';
