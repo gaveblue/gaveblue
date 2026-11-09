@@ -1,7 +1,7 @@
 // GB+ 2.5.1 — A single, consistent header for accounts and cards.
 // Presentation and navigation only. Financial data and forms stay untouched.
-import {heading,accountsView} from './views.js?v=20261109-2900';
-import {cardsView} from './finance-24-ui.js?v=20261108-2811';
+import {heading,accountsView} from './views.js?v=20261109-3000';
+import {cardsView} from './finance-24-ui.js?v=20261109-3000';
 import {button,icon} from './ui.js?v=20261105-72';
 
 export function accountsCardsView(db,selected='accounts'){
@@ -14,9 +14,12 @@ export function accountsCardsView(db,selected='accounts'){
   button(icon('plus')+'Nova conta','new-account','primary');
  const secondary=isCard?
   button(icon('plus')+'Nova compra','new-card-purchase','small'):
-  button('Novo cofrinho','new-goal','small')+
-  button('Bancos e ícones','open-banks','small')+
-  button(icon('transfer')+'Transferir','new-transfer','small');
+  button(icon('transfer')+'Transferir','new-transfer','small')+
+  '<details class="gb30-more gb30-page-tools"><summary>'+icon('chevron')+' Outras ações</summary>'+
+   '<div class="gb30-more-actions">'+
+    button('Bancos e ícones','open-banks','small')+
+    button('Novo cofrinho','new-goal','small')+
+   '</div></details>';
  const options=[['accounts','Contas','wallet'],['cards','Cartões','credit-card']];
  const switcher='<div class="gb-finance-tabs" role="tablist" aria-label="Contas e cartões">'+
   options.map(([id,label,ico])=>
