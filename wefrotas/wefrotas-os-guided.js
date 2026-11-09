@@ -164,6 +164,8 @@
     }
     const start=byId('os-guide-start');
     if(start&&!start.value)start.value=value('order-data-inicio');
+    if(byId('os-guide-new')){byId('os-guide-new').disabled=value('os-guide-origin')==='frota';
+      byId('os-guide-new').title=value('os-guide-origin')==='frota'?'Selecione um veículo já cadastrado da frota.':'';}
     if(need&&!linked())populateVehicles();
     const created=byId('os-guide-created');
     if(created){created.hidden=!draftVehicle;created.textContent=draftVehicle?
@@ -191,6 +193,7 @@
   function showSheet() {
     if(sheetOpen)return;
     const origin=value('os-guide-origin')||'locadora';
+    if(origin==='frota'){notify('Escolha um veículo já cadastrado da própria frota.');return;}
     const overlay=doc.createElement('div');overlay.id='wf-os-quick-overlay';overlay.className='wf-os-quick-overlay';
     overlay.innerHTML='<div class="wf-os-quick-backdrop" data-os-quick-close></div>'+
       '<section role="dialog" aria-modal="true" aria-labelledby="wf-os-quick-title" class="wf-os-quick-sheet">'+
