@@ -181,6 +181,14 @@ SECURITY DEFINER
 SET search_path = ''
 AS $reserve_delete_guard$
 BEGIN
+  -- Use the same organization-wide lock as the snapshot writer to avoid a
+  -- driver/reserve deletion racing against a concurrent replacement insert.
+  PERFORM 1 FROM public.wefrotas_workspace_state
+   WHERE organization_id = OLD.organization_id FOR UPDATE;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'WEFROTAS_RESERVE_INVALID: workspace unavailable'
+      USING ERRCODE = '22023';
+  END IF;
   IF EXISTS (
     SELECT 1 FROM public.wefrotas_vehicles AS v
     CROSS JOIN LATERAL jsonb_array_elements(
