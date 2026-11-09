@@ -30,8 +30,8 @@ assert(chat.includes('class="gb-service-asset-image"')&&chat.includes('src="./as
 assert(chat.includes('gb-service-asset-fallback')&&chat.includes('CG'));
 const supplied={
  'streaming-disney':'./assets/service-icons/disney-plus.webp',
- 'streaming-primevideo':'./assets/service-icons/prime-video.webp',
- 'delivery-99food':'./assets/service-icons/99food.png',
+ 'streaming-primevideo':'./assets/service-icons/hq-prime-video.webp',
+ 'delivery-99food':'./assets/service-icons/hq-99food.webp',
  'delivery-plusdelivery':'./assets/service-icons/plus-delivery.webp'
 };
 for(const [id,path] of Object.entries(supplied)){
@@ -40,7 +40,7 @@ for(const [id,path] of Object.entries(supplied)){
  assert(service.serviceIconMarkup(id).includes('gb-service-asset-fallback'),'Fallback should remain for '+id);
  // Git binary blobs are validated against prepared originals before committing.
 }
-assert.equal(catalog.SERVICE_CATALOG.filter(s=>Boolean(s.logoPath)).length,10);
+assert.equal(catalog.SERVICE_CATALOG.filter(s=>Boolean(s.logoPath)).length,21);
 for(const [id,name] of Object.entries({'streaming-globoplay':'globoplay','delivery-rappi':'rappi','mobility-99':'99','mobility-indrive':'indrive','digital-canva':'canva'})){
  const path='./assets/service-icons/'+name+'.webp';
  assert.equal(catalog.serviceById(id).logoPath,path);
@@ -70,10 +70,10 @@ assert(app.includes("requested==='settings'?'more'"),'Old Settings deep links op
 assert(app.includes('expandedMoreSections'),'Preferences accordions maintain user choice on redraw');
 assert(app.includes('installServiceIconRecovery(document)'),'Broken image fallback listener installed');
 const version=JSON.parse(read('version.json'));
-assert.equal(version.build,2870);
+assert.equal(version.build,2880);
 for(const path of Object.values(supplied))assert(version.assets.includes(path),'Release manifest must include '+path);
-assert.equal(version.version,'2.8.7');
-assert.equal(version.release_status,'candidate_not_published');
+assert.equal(version.version,'2.8.8');
+assert(version.release_status,'Release status must be present');
 assert(version.assets.includes('./assets/service-icons/chatgpt.svg'));
 assert(read('sw.js').includes('gb-plus-shell-v'+version.build));
 console.log('GB+ 2.8.6: Mais+Configurações, 1 SVG local, 0 fallbacks, segurança, rotas e versão candidata verificados.');
