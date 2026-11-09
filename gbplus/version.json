@@ -10,7 +10,8 @@
     "Marketing promocional: escolha separada, opcional, inicialmente desmarcada e revogável; versão e histórico gravados no Supabase, sem usar dados financeiros para campanhas.",
     "Painel administrativo: consulta específica da audiência promocional somente quando há consentimento válido e e-mail confirmado; o endpoint não dispara mensagens.",
     "Mais e Configurações integrados, categoria Serviços consolidada e registro das alterações no CHANGELOG.",
-    "Homologação da versão 2.8.6 depende da bateria final de testes e verificação de publicação; nenhuma campanha de e-mail foi iniciada."
+    "PR #105 mesclado em main em 08/11/2026; atualização do site em produção depende do deploy e verificação no dispositivo.",
+    "Supabase: função administrativa v9 ativa, preservando envio de convites e e-mails com bloqueio de marketing sem aceite atualizado."
   ],
   "assets": [
     "./index.html",
@@ -209,9 +210,9 @@
       "description": "Início, Lançamentos, Novo, Carteira e Mais."
     }
   ],
-  "release_status": "candidate_not_published",
+  "release_status": "merged_to_main_pending_live_verification",
   "homologation": {
-    "status": "pending_qa_release",
-    "notes": "Build 2866. Testes de código, segurança e integração devem ser anexados antes de publicar; campanhas de e-mail permanecem desativadas."
+    "status": "automated_regressions_passed_visual_qa_pending",
+    "notes": "PR #105 mesclado em main e Edge Function gbplus-admin v9 implantada com consentimento validado na hora do envio. Testes de código/regressão realizados; QA visual real Android/PWA e confirmação de deploy do domínio ainda não verificados neste ambiente. Nenhuma campanha disparada automaticamente."
   }
 }
