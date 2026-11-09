@@ -1,0 +1,112 @@
+/* GB+ 3.0 visual design system. Scoped to financial surfaces; auth/settings unchanged. */
+.gb30-picker-field{display:grid;gap:8px;min-width:0;position:relative}
+.gb30-field-label{font-size:12px;font-weight:680;color:var(--ink);line-height:1.45}
+.gb30-picker-field .gb30-native-select{position:absolute!important;width:1px!important;height:1px!important;
+ padding:0!important;opacity:0!important;pointer-events:none!important;overflow:hidden!important}
+.gb30-picker-trigger{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;min-width:0;
+ min-height:62px;padding:10px 13px;border-radius:14px;background:var(--surface);border:1px solid var(--border);
+ color:var(--ink);font:inherit;text-align:left;cursor:pointer;transition:border-color .16s,background .16s}
+.gb30-picker-trigger:hover{background:var(--soft)}
+.gb30-picker-trigger:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.gb30-picker-trigger>.icon{width:17px;height:17px;flex:none;color:var(--muted)}
+.gb30-picker-preview{display:flex;align-items:center;gap:11px;min-width:0}
+.gb30-picker-mark{display:grid;place-items:center;width:36px;height:36px;flex:none;border-radius:11px;
+ background:var(--soft);border:1px solid var(--border);overflow:hidden}
+.gb30-picker-mark>.gb-bank-badge,.gb30-picker-mark>.gb-account-custom-mark{width:100%!important;height:100%!important;border:none!important;border-radius:10px!important}
+.gb30-picker-mark svg{width:21px;height:21px}
+.gb30-picker-copy{display:flex;flex-direction:column;gap:3px;min-width:0}
+.gb30-picker-copy strong{font-size:13px;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gb30-picker-copy small{font-size:10px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#modal.gb30-finance-modal{width:min(520px,calc(100vw - 24px));max-height:min(90dvh,840px);
+ border-radius:23px;overflow:hidden}
+#modal.gb30-finance-modal #modal-content{display:flex;flex-direction:column;min-height:0;max-height:inherit}
+#modal.gb30-finance-modal .modal-heading{flex:none;padding:17px 21px 15px;border-bottom:1px solid var(--border)}
+#modal.gb30-finance-modal .modal-heading h2{font-size:18px;font-weight:720;letter-spacing:-.02em}
+#modal.gb30-finance-modal .modal-body{min-height:0;overflow:auto;overscroll-behavior:contain;
+ padding:18px 21px 20px;scrollbar-width:thin}
+#modal.gb30-finance-modal .modal-body form{display:flex;flex-direction:column;gap:16px;min-width:0}
+#modal.gb30-finance-modal .form-grid{gap:14px;min-width:0}
+#modal.gb30-finance-modal .form-grid>.field,#modal.gb30-finance-modal .form-grid>.full{min-width:0}
+#modal.gb30-finance-modal .field{font-size:12px;font-weight:660;gap:7px}
+#modal.gb30-finance-modal .field :is(input,select,textarea){width:100%;min-width:0;
+ min-height:47px;border:1px solid var(--border);border-radius:12px;padding:10px 12px;
+ background:var(--surface);color:var(--ink)}
+#modal.gb30-finance-modal .field :is(input,select,textarea):focus-visible{outline:2px solid var(--ink);outline-offset:1px}
+#modal.gb30-finance-modal .form-hint{font-size:11px;line-height:1.6;color:var(--muted);
+ background:var(--soft);border-radius:12px;padding:11px 13px;margin:0}
+#modal.gb30-finance-modal form>.form-footer{position:sticky;z-index:2;bottom:-20px;
+ display:grid;grid-template-columns:1fr 1.25fr;gap:10px;background:var(--surface);
+ margin:2px -21px -20px!important;padding:14px 21px max(15px,env(safe-area-inset-bottom));
+ border-top:1px solid var(--border)}
+#modal.gb30-finance-modal form>.form-footer .button{min-height:46px;justify-content:center}
+#modal.gb30-finance-modal .form-error:empty{display:none}
+#account-form.gb-account-edit-form .gb-account-edit-grid{gap:13px}
+#account-form .gb-account-goal-fields{gap:12px}
+#account-form .gb30-picker-field{margin:0}
+#account-form .gb-account-icon-grid{display:none}
+#account-form .gb-account-opening-control{min-height:57px}
+#account-form .gb-account-opening-control>input{height:40px;font-size:23px}
+.gb-accounts-cards-page{max-width:1200px;margin-inline:auto}
+.gb-accounts-cards-page .page-heading{margin-bottom:10px}
+.gb-accounts-cards-page .page-heading h1{letter-spacing:-.035em}
+.gb-accounts-cards-page .gb-finance-switcher{margin-bottom:15px}
+.gb-accounts-cards-page .gb-finance-actionbar{border:0;background:transparent;padding:5px 0 9px}
+.gb-accounts-cards-page .gb-finance-tools{gap:8px;margin:0 0 18px}
+.gb-accounts-cards-page .gb-finance-tools .button{border-radius:99px;min-height:36px}
+.gb-accounts-cards-page .gb-finance-action-main .button{border-radius:12px}
+.gb-accounts-cards-page .account-grid,.gb-accounts-cards-page .gb-goal-grid,.gb-accounts-cards-page .gb-credit-grid{
+ grid-template-columns:repeat(auto-fill,minmax(min(100%,270px),1fr));gap:13px}
+.gb-accounts-cards-page .account-card,.gb-accounts-cards-page .gb-goal-card,.gb-accounts-cards-page .gb-credit-card{
+ border:1px solid var(--border);border-radius:19px;box-shadow:none;padding:17px;background:var(--surface)}
+.gb-accounts-cards-page .account-card h2,.gb-accounts-cards-page .gb-goal-card h3{font-size:14px;margin:13px 0 3px;line-height:1.3}
+.gb-accounts-cards-page .account-card>p{font-size:11px;color:var(--muted);margin:0 0 12px}
+.gb-accounts-cards-page .account-card>strong,.gb-accounts-cards-page .gb-goal-balance{font-size:clamp(22px,2.2vw,28px);letter-spacing:-.04em}
+.gb-accounts-cards-page .account-card>small{display:block;color:var(--muted);font-size:10px;margin-top:3px}
+.gb-accounts-cards-page .gb-goal-progress{margin-top:10px}
+.gb30-primary-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:17px}
+.gb30-primary-actions .button{min-height:36px;border-radius:10px}
+.gb30-more{margin-top:10px;border-top:1px solid var(--border);padding-top:7px}
+.gb30-more summary{list-style:none;display:flex;align-items:center;gap:7px;cursor:pointer;
+ color:var(--muted);font-size:11px;font-weight:600;padding:7px 1px}
+.gb30-more summary::-webkit-details-marker{display:none}
+.gb30-more summary>.icon{width:14px;height:14px;transition:transform .18s}
+.gb30-more[open] summary>.icon{transform:rotate(90deg)}
+.gb30-more-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.gb30-more-actions .button{min-height:33px;font-size:11px}
+.gb-accounts-cards-page .gb-goals-head{margin-bottom:11px}
+.gb-accounts-cards-page .gb-goals-head h2{font-size:15px}
+.gb-accounts-cards-page .gb-credit-card-balance{margin:15px 0 11px}
+.gb-accounts-cards-page .gb-credit-card-balance>strong{font-size:28px}
+.gb-accounts-cards-page .gb-credit-card-meta span{border:0;background:var(--soft);padding:4px 7px}
+.gb-accounts-cards-page .gb-finance24-intro{font-size:11px;line-height:1.5;margin:6px 0 14px}
+.gb-accounts-cards-page .gb-finance24-stats>div{padding:12px;border-radius:13px;gap:4px}
+.gb-accounts-cards-page .gb-finance24-stats strong{font-size:20px}
+.gb-accounts-cards-page .gb-finance24-stats span{font-size:10px}
+.gb30-card-details{margin-top:15px;border-top:1px solid var(--border);padding-top:4px}
+.gb30-card-details summary{cursor:pointer;font-size:12px;font-weight:650;padding:11px 0;display:flex;justify-content:space-between}
+.gb30-card-details summary::after{content:'⌄';font-size:18px;color:var(--muted)}
+.gb30-card-details[open] summary::after{transform:rotate(180deg)}
+.gb30-card-details h3{margin:16px 0 8px!important}
+.gb30-card-extra{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px}
+.gb30-card-extra .button{font-size:11px}
+#gb-picker-sheet .gb-sheet-choice{min-height:54px}
+#gb-picker-sheet .gb-sheet-finance-badge svg{width:22px;height:22px}
+#gb-picker-sheet .gb-sheet-finance-badge .gb-account-custom-mark{width:100%;height:100%}
+@media(max-width:760px){
+ #modal.gb30-finance-modal{position:fixed;inset:auto 0 0!important;width:100vw;
+ margin:0!important;max-width:none;height:min(90dvh,800px);max-height:calc(100dvh - 12px);
+ border-radius:24px 24px 0 0;border-bottom:0}
+ #modal.gb30-finance-modal .modal-heading{padding:23px 18px 12px}
+ #modal.gb30-finance-modal .modal-body{padding:13px 18px 14px}
+ #modal.gb30-finance-modal .form-grid{gap:12px}
+ #modal.gb30-finance-modal .field :is(input,select,textarea){font-size:16px}
+ #modal.gb30-finance-modal form>.form-footer{margin:2px -18px -14px!important;padding:12px 18px max(15px,env(safe-area-inset-bottom))}
+ .gb-accounts-cards-page .gb-finance24-stats{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .gb-accounts-cards-page .gb-finance24-stats strong{font-size:clamp(14px,3.4vw,19px)}
+ .gb-accounts-cards-page .gb-finance-tools{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+ .gb-accounts-cards-page .gb-finance-tools .button{flex:none}
+ .gb-accounts-cards-page .gb-goals-head{gap:8px}
+ .gb-accounts-cards-page .gb-goals-head .button{font-size:10px}
+}
+@media(min-width:761px){#modal.gb30-finance-modal{width:min(560px,calc(100vw - 50px))}}
+@media(prefers-reduced-motion:reduce){.gb30-picker-trigger,.gb30-more summary>.icon{transition:none}}
