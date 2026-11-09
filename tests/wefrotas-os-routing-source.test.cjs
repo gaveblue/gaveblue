@@ -38,8 +38,11 @@ test('Cache de todos os recursos alterados foi invalidado',()=>{
  assert.ok(html.includes('wefrotas-os-guided.js?v=20261109-click-capture-3'));
 });
 
-test('Clique em Continuar é capturado antes que o modal interrompa o bubble',()=>{
- assert.match(html,/id="modal-backdrop"[^>]+onclick="handleModalBackdrop\(event\)"/);
- assert.match(app,/function handleModalBackdrop\(event\)[\s\S]*?event\.stopPropagation\(\)/);
- assert.match(guide,/doc\.addEventListener\('click',e=>\{[\s\S]*?\[data-os-step-next\][\s\S]*?\}, true\);/);
+test('Botões chamam o assistente diretamente, mesmo com stopPropagation',()=>{
+ assert.ok(app.includes('handleModalBackdrop(event)'));
+ assert.ok(app.includes('event.stopPropagation()'));
+ assert.ok(app.includes("handleWizardAction('next')"));
+ assert.ok(app.includes("handleWizardAction('back')"));
+ assert.ok(guide.includes('function handleWizardAction(action)'));
+ assert.ok(!guide.includes("e.target?.closest?.('[data-os-step-next]')"));
 });
