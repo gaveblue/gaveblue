@@ -10,10 +10,10 @@ import {moreView} from './more-view.js?v=20261108-2863';
 import {accountsCardsView} from './accounts-cards-view.js?v=20261108-2811';
 import {renderReactCharts,unmountReactCharts} from './gb-react-loader.js?v=20261105-45';
 import {mountNativeCharts} from './gb-charts-native.js?v=20261106-68';
-import {titleForm,partnerForm,accountForm,categoryForm,paymentForm,transferForm,titleDetail,customizeForm,accountDetail} from './forms.js?v=20261108-2862';
+import {titleForm,partnerForm,accountForm,accountBankPreview,categoryForm,paymentForm,transferForm,titleDetail,customizeForm,accountDetail} from './forms.js?v=20261108-2890';
 import {serviceById,serviceSearchKey,isServiceExpenseCategory} from './service-catalog.js?v=20261108-2880';
 import {serviceIconMarkup,serviceIdentityMarkup,serviceDisplayName,installServiceIconRecovery} from './service-ui.js?v=20261108-2880';
-import {openGbPickerSheet,openGbScheduleSheet,installGbPickerSheet,installEntryFormDrag} from './bottom-sheet.js?v=20261108-2862';
+import {openGbPickerSheet,openGbScheduleSheet,installGbPickerSheet,installEntryFormDrag} from './bottom-sheet.js?v=20261108-2890';
 import {toggleEntryMenu,chooseEntryOption,syncEntrySelect,closeEntryMenus} from './entry-select.js?v=20261108-2861';
 import {installGbControls,enhanceGbControls} from './custom-controls.js?v=20261104-42';
 import {expectedDates,recurrenceAnchor} from './gb-calendar-rules.js?v=20261105-47';
@@ -26,7 +26,7 @@ import {requireLegalAcceptance,readConsent,setMarketingConsent} from './legal-co
 import {canResetFinancialData,canDeleteAccount,clearFinancialDocument} from './account-safety.js?v=20261106-2610';
 import {resetAccountModal,deleteAccountModal,syncAccountDangerConfirm} from './account-safety-ui.js?v=20261106-2610';
 import {firstSetupView,customMobileNavForm,shortcutsPreview,readMobileNav,firstStepsPanel} from './setup-ui.js?v=20261108-2866';
-import {BANKS,bankCatalog,findBank,bankForAccount,bankBadge,bankName,syncBankPicker,filterBankPicker,filterBankDirectory} from './banks.js?v=20261105-87';
+import {BANKS,bankCatalog,bankPickerCatalog,findBank,bankForAccount,bankBadge,bankName,syncBankPicker,filterBankPicker,filterBankDirectory} from './banks.js?v=20261105-87';
 import {addCardPurchase,registerCardInvoiceBalance,updateCardPurchase,removeCardPurchase,ensureCardMayChange,creditCards,cardPurchases,cardAvailable,cardCycle,shiftCardCycle,cardDue} from './credit-cards.js?v=20261107-2800';
 import {cashForecast} from './forecast.js?v=20261105-72';
 import {missingCategorySuggestions,appendCategorySuggestions,isSelectableExpenseCategory,isPrimaryServiceCategory} from './category-library.js?v=20261108-2862';
@@ -899,6 +899,40 @@ const actions={
   'partner-detail':el=>{const p=db.partners.find(p=>p.id===el.dataset.id);openModal('Histórico do parceiro',`<h3>${esc(p.name)}</h3><p class="muted">${esc(p.document||'')} ${esc(p.email||'')}</p><p>${esc(p.address||'')}</p><p>${esc(p.notes||'')}</p>${titleTable(db,db.titles.filter(t=>t.partnerId===p.id))}`);},
   'new-account':()=>openModal('Nova conta financeira',accountForm(db)),
   'edit-account':el=>openModal('Editar conta',accountForm(db,db.accounts.find(a=>a.id===el.dataset.id))),
+  'account-bank-picker':el=>{
+   const form=el.closest('#account-form');
+   if(!form||!form.isConnected||!modal.open)return;
+   const source=form.elements.bankId,manual=form.elements.bank;
+   if(!source||!manual)return;
+   const existing=(db.accounts||[]).find(a=>a.id===form.dataset.id);
+   const legacy=existing?.bank&&!findBank(db,existing.bankId||existing.bank)?String(existing.bank):'';
+   const items=[
+    {id:'__cash__',name:'Dinheiro em caixa',subtitle:'Sem banco · dinheiro físico ou caixa transitório',
+     search:'dinheiro especie caixa carteira sem banco',badgeMarkup:'<span class="gb-sheet-finance-fallback">'+icon('wallet')+'</span>'},
+    ...(legacy?[{id:'__legacy__',name:legacy,subtitle:'Instituição já cadastrada',
+     search:legacy,badgeMarkup:'<span class="gb-sheet-finance-fallback">'+icon('wallet')+'</span>'}]:[]),
+    ...bankPickerCatalog(db).map(bank=>({
+     id:bank.id,name:bank.name,subtitle:bank.code?'Código '+bank.code:'Instituição financeira',
+     search:[bank.code,bank.ispb,bank.aliases].filter(Boolean).join(' '),badgeMarkup:bankBadge(bank)
+    }))
+   ];
+   const selected=source.value||(manual.value?'__legacy__':'__cash__');
+   el.setAttribute('aria-expanded','true');
+   const shown=openGbPickerSheet({kind:'bank',items,selected,onPick:id=>{
+    if(!form.isConnected)return;
+    if(id==='__cash__'){source.value='';manual.value='';}
+    else if(id==='__legacy__'&&legacy){source.value='';manual.value=legacy;}
+    else{
+     const picked=findBank(db,id);
+     if(!picked)return;
+     source.value=picked.id;manual.value=picked.name;
+    }
+    const preview=el.querySelector('[data-account-bank-preview]');
+    if(preview)preview.innerHTML=accountBankPreview(db,source.value,manual.value);
+    source.dispatchEvent(new Event('change',{bubbles:true}));
+   }});
+   if(!shown)el.setAttribute('aria-expanded','false');
+  },
   'account-detail':el=>openModal('Movimentações da conta',accountDetail(db,db.accounts.find(a=>a.id===el.dataset.id))),
   'bank-import-open':el=>openBankImport(el.dataset.id||''),
   'bank-import-reset':()=>{
@@ -1519,11 +1553,18 @@ document.addEventListener('submit',async e=>{e.preventDefault();if(busy||!db)ret
   }
   else if(form.id==='partner-form'){const roles=new FormData(form).getAll('roles');if(!roles.length)throw Error('Selecione ao menos uma classificação.');const row={...v,id:id||uid(),name:v.name.trim(),active:v.active==='true',roles};await commit(d=>{if(row.document&&d.partners.some(p=>p.id!==row.id&&p.document.replace(/\D/g,'')===row.document.replace(/\D/g,'')))throw Error('Já existe um parceiro com este CPF/CNPJ.');upsert(d.partners,row);});}
   else if(form.id==='account-form'){
-   const bank= v.bankId?findBank(db,v.bankId):null;
-   if(v.bankId&&!bank)throw Error('Selecione um banco válido.');
+   // The minimal editor never erases existing branch/number or financial links.
+   const previous=id?db.accounts.find(a=>a.id===id):null;
+   if(id&&!previous)throw Error('Conta não encontrada.');
+   const bank=v.bankId?findBank(db,v.bankId):null;
+   if(v.bankId&&!bank)throw Error('Selecione uma instituição válida.');
    const chosen=bank?bank.name:String(v.bank||'').trim();
-   const {bankLookup,...accountFields}=v; // A consulta de busca nunca é gravada junto à conta.
-   await commit(d=>upsert(d.accounts,{...accountFields,id:id||uid(),name:v.name.trim(),bankId:bank?.id||'',bank:chosen,initial:cents(v.initial),active:v.active==='true'}));
+   const initial=String(v.initial||'').trim()===''?0:cents(v.initial);
+   await commit(d=>upsert(d.accounts,{
+    ...(previous||{}),id:id||uid(),name:String(v.name||'').trim(),
+    bankId:bank?.id||'',bank:chosen,initial,active:v.active==='true',
+    branch:previous?.branch||'',number:previous?.number||''
+   }));
   }
   else if(form.id==='bank-form'){
    const name=String(v.name||'').trim();
