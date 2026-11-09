@@ -60,7 +60,7 @@ export function financePickerField(db,{kind,name,label,value='',required=false,a
  const control=isIcon?
   '<input type="hidden" name="'+esc(name)+'" value="'+esc(selected)+'">':
   '<select name="'+esc(name)+'" class="gb30-native-select" data-gb-native="true" tabindex="-1" aria-hidden="true"'+
-    (required?' data-gb30-required="true"':'')+' aria-label="'+esc(label)+'">'+
+    (required?' required':'')+' aria-label="'+esc(label)+'">'+
     options.map(o=>'<option value="'+esc(o.id)+'"'+(String(o.id)===String(selected)?' selected':'')+'>'+esc(o.name)+'</option>').join('')+'</select>';
  return '<div class="full gb30-picker-field" data-gb30-picker-field="'+esc(name)+'">'+
   '<label class="gb30-field-label" id="gb30-label-'+esc(name)+'">'+esc(label)+'</label>'+control+
