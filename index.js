@@ -27,6 +27,58 @@ const pages = {
               <span class="text-sm text-slate-300 font-medium">4.99/5</span>
             </div>
           </div>
+          <!-- Vitrine de lançamento GB+; sem alterações no aplicativo financeiro -->
+          <div id="gbplus-campaign" class="gbc" aria-labelledby="gbc-title">
+            <div class="gbc-intro">
+              <div>
+                <span class="gbc-kicker">Um produto GaveBlue</span>
+                <h2 class="gbc-title" id="gbc-title">Conheça o GB+: suas finanças no seu ritmo.</h2>
+              </div>
+              <a href="/gbplus/apresentacao.html">Explorar o GB+ <span aria-hidden="true">↗</span></a>
+            </div>
+            <div class="gbc-grid">
+              <article class="gbc-card gbc-card--brand">
+                <span class="gbc-overline">GaveBlue apresenta</span>
+                <h3>GB+</h3>
+                <p class="gbc-brand-desc">Seu dinheiro, mais simples. Saldos e previsões organizados numa só experiência.</p>
+                <div class="gbc-phone">
+                  <img src="/gbplus/assets/gbplus-dashboard-real.svg" alt="Tela real do painel do GB+, com saldo, contas a receber e a pagar." width="220" height="476" loading="lazy" decoding="async">
+                </div>
+                <a class="gbc-cta" href="/gbplus/apresentacao.html">Conheça o aplicativo <span aria-hidden="true">↗</span></a>
+              </article>
+              <article class="gbc-card gbc-card--cards">
+                <span class="gbc-overline">Controle em um só lugar</span>
+                <h3>Contas e cartões, juntos.</h3>
+                <p>Visualize limites, gerencie seus cartões e acompanhe suas faturas.</p>
+                <div class="gbc-mock-cards" aria-hidden="true">
+                  <div class="gbc-mock-switch"><span>Contas</span><span>Cartões</span></div>
+                  <div class="gbc-mock-label"><span>Meus cartões</span><em>+ Novo cartão</em></div>
+                  <div class="gbc-mock-stats">
+                    <span>Limite total<strong>R$ 0,00</strong></span>
+                    <span>Utilizado<strong>R$ 0,00</strong></span>
+                    <span>Disponível<strong>R$ 0,00</strong></span>
+                  </div>
+                  <div class="gbc-mock-footer"></div>
+                </div>
+                <a class="gbc-cta" href="/gbplus/apresentacao.html">Saiba mais <span aria-hidden="true">↗</span></a>
+                <small class="gbc-note">Prévia ilustrativa da interface de cartões.</small>
+              </article>
+              <article class="gbc-card gbc-card--entries">
+                <span class="gbc-overline">Mais praticidade</span>
+                <h3>Lançamentos sem complicação.</h3>
+                <p>Registre receitas e despesas em um fluxo claro, dividido em etapas.</p>
+                <div class="gbc-mock-entry" aria-hidden="true">
+                  <div class="gbc-mock-step"><span>1 · Lançamento</span><span>2 · Detalhes</span><span>3 · Confirmar</span></div>
+                  <div class="gbc-mock-type"><span>↓ Despesa</span><span>↑ Receita</span></div>
+                  <div class="gbc-mock-value">R$ 0,00</div>
+                  <div class="gbc-mock-field">Categoria · Serviços</div>
+                  <div class="gbc-mock-field">Descrição do lançamento</div>
+                </div>
+                <a class="gbc-cta" href="/gbplus/apresentacao.html">Descubra o GB+ <span aria-hidden="true">↗</span></a>
+                <span class="gbc-dots" aria-hidden="true">···</span>
+              </article>
+            </div>
+          </div>
           <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5">
             <a href="https://gaveblue.com.br/recibos/" class="group rounded-[1.5rem] sm:rounded-[1.75rem] border border-slate-700/50 bg-white/[0.04] p-5 sm:p-7 hover:bg-white/[0.06] hover:border-blue-400/40 transition-all relative overflow-hidden">
               <span class="module-badge module-badge--free">Grátis</span>
