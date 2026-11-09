@@ -14895,6 +14895,7 @@
       const source = allVehicles.find(v => String(v.id) === String(order.vehicleId));
       if (!source) throw new Error('O veículo titular não foi encontrado.');
       if (plan.record) {
+        if (!window.WeFrotasSubstitutions?.validate) throw new Error('Validação do carro reserva indisponível.');
         const existingDraftVehicle = allVehicles.find(v => String(v.id) === String(plan.reserveVehicle?.id));
         const previousVehicles = allVehicles;
         if (plan.reserveVehicle && !existingDraftVehicle) {
@@ -14927,6 +14928,38 @@
           ...v, operationalStatus: plan.incident.perdaTotalConfirmada ? 'imobilizado' :
             order.tipoOs === 'sinistro' ? 'sinistro' : order.tipoOs === 'pane' ? 'manutencao' : 'imobilizado'
         } : v);
+      }
+      if (plan.closure) {
+        const {titularBack, reserveReturned, returnDate, returnKm} = plan.closure;
+        if (titularBack && plan.incident.perdaTotalConfirmada)
+          throw new Error('Veículo com perda total confirmada não pode retornar automaticamente à frota.');
+        if (reserveReturned) {
+          if (!window.WeFrotasSubstitutions?.validate)
+            throw new Error('Validação do carro reserva indisponível.');
+          const titular = allVehicles.find(v => String(v.id) === String(order.vehicleId));
+          const previous = (titular?.vehicleSubstitutions || []).find(r =>
+            String(r.id) === String(plan.incident.substitutionId));
+          if (!previous) throw new Error('Histórico do carro reserva não encontrado. A devolução não foi salva.');
+          const closed = {...previous,endDate:returnDate,endKm:returnKm,
+            updatedAt:new Date().toISOString()};
+          const error = window.WeFrotasSubstitutions.validate(closed);
+          if (error) throw new Error(error);
+          allVehicles = allVehicles.map(v => {
+            if (String(v.id) === String(order.vehicleId)) return {
+              ...v, vehicleSubstitutions:(v.vehicleSubstitutions || []).map(r =>
+                r.id===previous.id ? closed : r)
+            };
+            // Temporary third-party vehicles must stop appearing as available,
+            // while the history and their fuel/financial entries remain intact.
+            if (String(v.id) === String(previous.reserveVehicleId) && v.temporario)
+              return {...v,ativo:false};
+            return v;
+          });
+        }
+        if (titularBack) {
+          allVehicles = allVehicles.map(v => String(v.id) === String(order.vehicleId)
+            ? {...v,operationalStatus:'disponivel'} : v);
+        }
       }
     }
 
