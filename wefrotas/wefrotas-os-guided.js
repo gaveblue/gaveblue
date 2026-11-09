@@ -26,8 +26,8 @@
   const getSaved = () => existingOrder?.operationalIncident || null;
   const linked = () => Boolean(getSaved()?.substitutionId);
   const isPt = () => type()==='sinistro' && value('os-guide-severity')==='pt';
-  const stopped = () => isPt() || value('os-guide-stopped')==='sim';
-  const wantsReserve = () => stopped() && value('os-guide-reserve')==='sim';
+  const stopped = () => isPt() || selectedRadio('os-guide-stopped')==='sim';
+  const wantsReserve = () => stopped() && selectedRadio('os-guide-reserve')==='sim';
   const providerLabel = {frota:'Própria frota',locadora:'Locadora',oficina:'Oficina / concessionária',seguradora:'Seguradora'};
   const vehicleLabel = v => [v.numeroFrota ? 'Frota '+v.numeroFrota : '',v.placa||'',v.modelo||''].filter(Boolean).join(' · ');
   const clone = o => JSON.parse(JSON.stringify(o));
@@ -94,6 +94,10 @@
     const incident=isIncident(type());
     setVisible('os-operational-guide',incident);
     if(!incident)return;
+    if(!existingOrder&&!selectedRadio('os-guide-stopped')){
+      if(type()==='pane')setRadio('os-guide-stopped','sim');
+      else if(['avulsa','revisao'].includes(type()))setRadio('os-guide-stopped','nao');
+    }
     const severity=type()==='sinistro',pt=isPt(),halt=stopped(),need=wantsReserve();
     setVisible('os-guide-severity-block',severity);
     setVisible('os-guide-stopped-block',!pt);
@@ -216,8 +220,8 @@
   function onChange(e) {
     if(!byId('os-operational-guide'))return;
     if(e.target?.id==='order-tipo-os'){
-      if(type()==='pane'&&!selectedRadio('os-guide-stopped'))setRadio('os-guide-stopped','sim');
-      if(['avulsa','revisao'].includes(type())&&!selectedRadio('os-guide-stopped'))setRadio('os-guide-stopped','nao');
+      setRadio('os-guide-stopped',type()==='pane'?'sim':['avulsa','revisao'].includes(type())?'nao':'');
+      setRadio('os-guide-reserve','');
     }
     if(e.target?.id==='order-tipo-os'||e.target?.id==='order-veiculo'||e.target?.id==='order-data-inicio'
       ||e.target?.id==='os-guide-severity'||e.target?.id==='os-guide-start'
