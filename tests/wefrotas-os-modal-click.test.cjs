@@ -6,8 +6,9 @@ const path=require('node:path');
 const vm=require('node:vm');
 
 const source=fs.readFileSync(path.join(__dirname,'../wefrotas/wefrotas-os-guided.js'),'utf8');
+const app=fs.readFileSync(path.join(__dirname,'../wefrotas/wefrotas.js'),'utf8');
 
-test('clicar Continuar dentro do modal avança mesmo que o backdrop dê stopPropagation()',()=>{
+test('clicar Continuar diretamente avança mesmo que modal interrompa a propagação',()=>{
   const nodes=new Map(),listeners=[];
   function el(id,value='') {
     const item={id,value,hidden:false,style:{},dataset:{},innerHTML:'',textContent:'',
@@ -43,20 +44,33 @@ test('clicar Continuar dentro do modal avança mesmo que o backdrop dê stopProp
   guide.reset();guide.startWizard();
   assert.equal(guide.wizardStep(),1);
 
-  const e={
-    target:{closest:selector=>selector==='[data-os-step-next]'?{}:null},
-    defaultPrevented:false,
-    propagationStopped:false,
-    preventDefault(){this.defaultPrevented=true},
-    stopPropagation(){this.propagationStopped=true}
-  };
-  // In the actual page: document capture -> modal-backdrop onclick handler
-  // calls stopPropagation -> document bubble never receives the event.
-  for(const {type,listener,capture} of listeners)if(type==='click'&&capture)listener(e);
-  e.stopPropagation(); // existing inline handleModalBackdrop(event)
-  if(!e.propagationStopped){
-    for(const {type,listener,capture} of listeners)if(type==='click'&&!capture)listener(e);
-  }
-  assert.equal(e.defaultPrevented,true,'Continuar must handle the click');
-  assert.equal(guide.wizardStep(),2,'Continuar must advance to incident questions');
+
+  // Execute the real inline handler embedded in the OS form template.
+  // The modal's stopPropagation occurs AFTER the button's own onclick.
+  const button=app.match(/id="wf-os-step-next"[^>]+onclick="([^"]+)"/);
+  assert.ok(button,'Continuar must have its own onclick handler');
+  let alertText='';
+  new Function('window','alert',button[1])(window,message=>{alertText=message;});
+  assert.equal(alertText,'');
+  assert.equal(guide.wizardStep(),2,'Direct Continuar advances before modal propagation');
+  assert.ok(!listeners.some(l=>l.type==='click'&&String(l.listener).includes("data-os-step-next")),
+    'No duplicate event delegation that could skip a step');
+  const back=app.match(/id="wf-os-step-back"[^>]+onclick="([^"]+)"/);
+  assert.ok(back,'Voltar has its own onclick');
+  new Function('window','alert',back[1])(window,message=>{alertText=message;});
+  assert.equal(guide.wizardStep(),1,'Direct Voltar also works');
+  nodes.get('order-veiculo').value='';
+  new Function('window','alert',button[1])(window,message=>{alertText=message;});
+  assert.equal(guide.wizardStep(),1);
+  assert.equal(nodes.get('wf-os-step-error').hidden,false,
+    'Validation must show persistent error');
+  assert.match(nodes.get('wf-os-step-error').textContent,/Selecione o veículo/);
+});
+
+test('Quando o módulo JS não carrega, Continuar mostra aviso explícito',()=>{
+  const button=app.match(/id="wf-os-step-next"[^>]+onclick="([^"]+)"/);
+  assert.ok(button);
+  let message='';
+  new Function('window','alert',button[1])({},m=>{message=m;});
+  assert.match(message,/assistente de Sinistro não carregou/);
 });
