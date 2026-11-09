@@ -24,7 +24,7 @@
   }
   function forFuel(vehicleId,driverId,date) {
     if(!date) return {replacement:null,wrongVehicle:false};
-    const sourceMatch = all().find(r=>r.sourceVehicleId===vehicleId && activeOn(r,date) && (!driverId || r.driverId===driverId));
+    const sourceMatch = all().find(r=>r.sourceVehicleId===vehicleId && activeOn(r,date));
     if(sourceMatch) return {replacement:sourceMatch,wrongVehicle:true};
     const reserveMatches = all().filter(r=>r.reserveVehicleId===vehicleId && activeOn(r,date));
     const match = reserveMatches.find(r=>r.driverId===driverId) || (reserveMatches.length===1?reserveMatches[0]:null);
@@ -53,9 +53,9 @@
     if(source.id===reserve.id) return 'O titular e o carro reserva precisam ser veículos diferentes.';
     if(!value.driverId || !bridge().drivers().some(d=>d.id===value.driverId)) return 'Selecione um motorista cadastrado.';
     if(!value.startDate) return 'Informe a data de entrega do carro reserva.';
-    if(!Number.isSafeInteger(Number(value.startKm)) || Number(value.startKm)<0) return 'O KM de entrega deve ser inteiro e não negativo.';
+    if(value.startKm==='' || value.startKm==null || !Number.isSafeInteger(Number(value.startKm)) || Number(value.startKm)<0) return 'O KM de entrega deve ser inteiro e não negativo.';
     if(value.endDate && value.endDate<value.startDate) return 'A devolução não pode ser anterior à entrega.';
-    if(value.endDate && (!Number.isSafeInteger(Number(value.endKm)) || Number(value.endKm)<Number(value.startKm))) return 'Informe um KM de devolução válido, igual ou maior que o KM de entrega.';
+    if(value.endDate && (value.endKm==='' || value.endKm==null || !Number.isSafeInteger(Number(value.endKm)) || Number(value.endKm)<Number(value.startKm))) return 'Informe um KM de devolução válido, igual ou maior que o KM de entrega.';
     if(!value.endDate && value.endKm!=='' && value.endKm!=null) return 'Informe também a data de devolução para registrar o KM final.';
     if(!Number.isFinite(Number(value.extraCost)) || Number(value.extraCost)<0) return 'O custo adicional não pode ser negativo.';
     const concurrent=all().find(r=>r.id!==value.id && overlaps(r,value) && (
@@ -67,6 +67,8 @@
       .map(e=>Number(e.km)).filter(n=>Number.isSafeInteger(n) && n>=0);
     if(previous.length && Number(value.startKm)<Math.max(...previous)) return 'KM de entrega inferior ao abastecimento anterior registrado para o reserva.';
     const linked=entries(value).filter(e=>activeOn(value,fuelDate(e)));
+    if(value.id && bridge().finance().some(e=>e.substitutionId===value.id && !activeOn(value,fuelDate(e))))
+      return 'O novo período exclui abastecimentos já vinculados. Revise as datas antes de encerrar.';
     if(linked.some(e=>Number.isSafeInteger(Number(e.km)) && Number(e.km)<Number(value.startKm)))
       return 'Há abastecimento do reserva com KM inferior ao KM de entrega.';
     if(value.endDate && linked.some(e=>Number.isSafeInteger(Number(e.km)) && Number(e.km)>Number(value.endKm)))
