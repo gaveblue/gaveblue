@@ -2,7 +2,7 @@
 (() => {
   'use strict';
   const columns=[['photo','Foto',64],['plate','Placa',120],['model','Veículo',190],['fleet','Frota / Ano',115],['details','Seguro / Chassi',160],['status','Cadastro',110],['km','KM atual',115],['consumption','Consumo estimado (km/L)',155],['perKm','Custo por km (R$/km)',155],['cost','Despesas no período',150]];
-  const state={page:1,size:10,start:'',end:'',hidden:new Set(['details']),signature:'',pageVehicles:[]};
+  const state={page:1,size:10,start:'',end:'',hidden:new Set(['details']),group:'todos',signature:'',pageVehicles:[]};
   const esc=v=>escapeHtml(String(v??''));
   const num=v=>v==null?'Sem base suficiente':Number(v).toLocaleString('pt-BR',{maximumFractionDigits:2});
   function buildRows(vehicles,filters) {
@@ -11,7 +11,14 @@
     return vehicles.map(vehicle=>({vehicle,metrics:window.WeFrotasVehicleReports.vehicleIndicators(vehicle,byVehicle.get(vehicle.id)||[])}));
   }
   function sortedRows() {
-    const rows=buildRows(getVisibleVehicles(),{start:state.start,end:state.end});
+    const visible=getVisibleVehicles().filter(v=>{
+      if(state.group==='frota')return !v.temporario;
+      if(state.group==='temporarios')return v.temporario===true;
+      if(state.group==='parados')return ['manutencao','sinistro','imobilizado'].includes(v.operationalStatus);
+      if(state.group==='reservas')return getVisibleVehicles().some(t=>(t.vehicleSubstitutions||[]).some(r=>r.reserveVehicleId===v.id&&!r.endDate));
+      return true;
+    });
+    const rows=buildRows(visible,{start:state.start,end:state.end});
     const key=vehicleSortState.key;
     if(['cost','consumption','perKm'].includes(key))rows.sort((a,b)=>{
       const x=a.metrics[key==='cost'?'costs':key],y=b.metrics[key==='cost'?'costs':key];
@@ -25,11 +32,20 @@
     const box=document.createElement('div');box.id='vehicle-list-controls';box.className='vehicle-list-controls';
     const source=document.getElementById('module-compact-date-button-relatorios')?.closest('.module-compact-date-range');
     const calendar=source?source.outerHTML.replaceAll('relatorios','vehicleList').replaceAll('report-filter-start','vehicle-list-start').replaceAll('report-filter-end','vehicle-list-end'):'';
-    box.innerHTML=`<div class="vehicle-list-tools"><div><strong>Indicadores por período</strong>${calendar}</div><details class="vehicle-list-columns"><summary class="settings-action-btn">Colunas</summary><div>${columns.filter(([key])=>key!=='plate').map(([key,label])=>`<label><input type="checkbox" data-column="${key}" ${state.hidden.has(key)?'':'checked'}> ${label}</label>`).join('')}</div></details><button type="button" class="settings-action-btn" data-export>Exportar XLSX</button></div><p class="vehicle-list-note">Período aplicado às despesas, consumo e custo/km. KM atual é cadastral/histórico. Consumo estimado entre leituras; não comprova tanque cheio. O filtro Seguro continua independente. Exportação inclui todos os veículos filtrados, não apenas esta página.</p>`;
+    box.innerHTML=`<div class="wf-os-vehicle-tabs" role="group" aria-label="Categorias de veículos">
+      ${[['todos','Todos'],['frota','Frota'],['temporarios','Temporários'],['parados','Parados'],['reservas','Reservas em uso']].map(([key,label])=>`<button type="button" data-vehicle-group="${key}" aria-pressed="${state.group===key?'true':'false'}">${label}</button>`).join('')}
+      </div><div class="vehicle-list-tools"><div><strong>Indicadores por período</strong>${calendar}</div><details class="vehicle-list-columns"><summary class="settings-action-btn">Colunas</summary><div>${columns.filter(([key])=>key!=='plate').map(([key,label])=>`<label><input type="checkbox" data-column="${key}" ${state.hidden.has(key)?'':'checked'}> ${label}</label>`).join('')}</div></details><button type="button" class="settings-action-btn" data-export>Exportar XLSX</button></div><p class="vehicle-list-note">Período aplicado às despesas, consumo e custo/km. KM atual é cadastral/histórico. Consumo estimado entre leituras; não comprova tanque cheio. O filtro Seguro continua independente. Exportação inclui todos os veículos filtrados, não apenas esta página.</p>`;
     box.querySelector('.vehicle-list-tools>div>strong')?.remove();
     const note=box.querySelector('.vehicle-list-note');
     box.title=note.textContent;note.remove();
     panel.querySelector('.orders-toolbar .module-action-toolbar').before(box);
+    box.addEventListener('click',event=>{
+      const key=event.target.closest('[data-vehicle-group]')?.dataset.vehicleGroup;
+      if(!key)return;
+      state.group=key;state.page=1;selectedVehicles.clear();
+      box.querySelectorAll('[data-vehicle-group]').forEach(btn=>btn.setAttribute('aria-pressed',String(btn.dataset.vehicleGroup===key)));
+      renderVehicles();
+    });
     box.addEventListener('change',event=>{const key=event.target.dataset.column;if(!key)return;event.target.checked?state.hidden.delete(key):state.hidden.add(key);renderVehicles();});
     box.querySelector('[data-export]').addEventListener('click',exportRows);
     const footer=document.createElement('div');footer.id='vehicle-list-pagination';footer.className='vp-pagination';panel.querySelector('.orders-table-shell').after(footer);
@@ -39,9 +55,9 @@
   function display(row,key) {
     const v=row.vehicle,m=row.metrics;
     switch(key){
-      case 'plate':return v.placa||'-';case 'model':return v.modelo||'Não informado';case 'fleet':return `${v.numeroFrota||'-'} / ${v.ano||'-'}`;
+      case 'plate':return v.placa||'-';case 'model':return (v.modelo||'Não informado')+(v.temporario?' · Temporário':'');case 'fleet':return `${v.numeroFrota||'-'} / ${v.ano||'-'}`;
       case 'details':return `${v.seguroVencimento?formatDate(v.seguroVencimento):'Sem seguro informado'} / ${v.chassi||'-'}`;
-      case 'status':{const status=({manutencao:'Em manutenção',sinistro:'Sinistrado',imobilizado:'Imobilizado'})[v.operationalStatus];return (isEntityActive(v)?'Ativo':'Inativo')+(status?' · '+status:'');}case 'km':return getVehicleCurrentKm(v.id);
+      case 'status':{const status=({manutencao:'Em manutenção',sinistro:'Sinistrado',imobilizado:'Imobilizado'})[v.operationalStatus];return (isEntityActive(v)?'Ativo':'Inativo')+(v.temporario?' · Emprestado/locado':'')+(status?' · '+status:'');}case 'km':return getVehicleCurrentKm(v.id);
       case 'consumption':return m.consumption;case 'perKm':return m.perKm;case 'cost':return m.costs;default:return '';
     }
   }
@@ -49,7 +65,7 @@
     const panel=document.getElementById('panel-veiculos'),list=document.getElementById('vehicles-list');if(!panel||!list)return;
     controls(panel);
     const rows=sortedRows();
-    const signature=JSON.stringify([rows.map(r=>r.vehicle.id),state.start,state.end]);
+    const signature=JSON.stringify([rows.map(r=>r.vehicle.id),state.group,state.start,state.end]);
     if(signature!==state.signature){state.page=1;state.signature=signature;selectedVehicles.clear();}
     const pages=Math.max(1,Math.ceil(rows.length/state.size));state.page=Math.max(1,Math.min(state.page,pages));
     const pageRows=rows.slice((state.page-1)*state.size,state.page*state.size);state.pageVehicles=pageRows.map(r=>r.vehicle);
