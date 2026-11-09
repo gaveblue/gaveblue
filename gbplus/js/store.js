@@ -1,5 +1,5 @@
 import {uid,validDate,paid,today} from './domain.js?v=20261105-72';
-import {CATEGORY_ICON_OPTIONS} from './gb-icons.js?v=20261108-2821';
+import {CATEGORY_ICON_OPTIONS} from './gb-icons.js?v=20261109-2900';
 import {ACCOUNT_ICON_OPTIONS,GOAL_PRESETS,accountKind} from './account-goals.js?v=20261109-2900';
 import {BANKS} from './banks.js?v=20261105-87';
 import {CATEGORY_SUGGESTIONS} from './category-library.js?v=20261108-2862';
