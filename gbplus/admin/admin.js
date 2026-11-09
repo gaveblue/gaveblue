@@ -5,7 +5,7 @@ const client = createGbplusClient(window.supabase.createClient,cloudConfig);
 const main = document.querySelector('#main'), dialog = document.querySelector('#editor');
 const esc = value => String(value ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const date = value => value ? new Intl.DateTimeFormat('pt-BR',{dateStyle:'short'}).format(new Date(value)) : 'Nunca acessou';
-let users=[], page=1, total=null, hasMore=false, actor=null, query='', filter='all', busy=false, generation=0;
+let users=[], page=1, total=null, hasMore=false, actor=null, query='', filter='all', busy=false, generation=0, audienceMode=false;
 const notice = message => {document.querySelector('#notice').textContent=message;};
 function clear(){users=[];actor=null;dialog.close();notice('');}
 
@@ -47,8 +47,8 @@ function bindLogout(){document.querySelector('#logout').onclick=async()=>{
 async function load(){
   if(busy)return;busy=true;const requestGeneration=++generation;
   try{
-    const result=await api({action:'list',page});if(requestGeneration!==generation)return;
-    users=result.users;actor=result.actor;total=result.total;hasMore=result.hasMore;render();
+    const result=await api({action:audienceMode?'marketing-audience':'list',page});if(requestGeneration!==generation)return;
+    users=result.users;actor=result.actor;total=result.total;hasMore=result.hasMore;if(audienceMode)renderMarketing();else render();
   }catch(error){
     if(requestGeneration!==generation)return;
     if(error.status===401)login(error.message);else if(error.status===403)denied();
@@ -57,11 +57,13 @@ async function load(){
 }
 function render(){
   main.innerHTML=`<div class="heading"><div><span class="eyebrow">Controle de acesso</span><h1>Usuários e perfis</h1><p>Gerencie quem utiliza o GB+ e mantenha os cadastros em dia.</p></div><div class="session">${esc(actor.email)}<br><button id="logout">Sair do painel</button></div></div>
+  <div class="toolbar"><button id="marketing-audience" type="button">Usuários que autorizaram e-mails promocionais</button></div>
   <section class="cards" aria-label="Resumo de usuários"><div class="card"><span>Usuários cadastrados</span><strong>${total??'—'}</strong><small>Total informado pelo servidor</small></div><div class="card"><span>Confirmados nesta página</span><strong>${users.filter(u=>u.confirmed).length}</strong><small>De ${users.length} perfis carregados</small></div><div class="card"><span>Suspensos nesta página</span><strong>${users.filter(u=>u.suspended).length}</strong><small>Novos logins bloqueados</small></div></section>
   <section class="panel"><div class="toolbar"><label><span>Buscar nesta página</span><input id="search" type="search" placeholder="Nome ou e-mail" value="${esc(query)}" maxlength="254"></label><label><span>Situação</span><select id="filter"><option value="all">Todas as contas</option><option value="active">Login liberado</option><option value="suspended">Login suspenso</option><option value="pending">E-mail não confirmado</option><option value="admin">Administradores</option></select></label><button id="refresh">Atualizar</button></div>
   <div class="table-scroll"><table><thead><tr><th scope="col">Usuário</th><th scope="col">Situação</th><th scope="col">Login</th><th scope="col">Último acesso</th><th scope="col">Gerenciar</th></tr></thead><tbody id="rows"></tbody></table></div>
   <footer class="page-footer"><span id="count"></span><div><button id="prev" ${page===1?'disabled':''}>Anterior</button><button id="next" ${!hasMore?'disabled':''}>Próxima</button></div></footer></section>
   <p class="footnote">Os registros financeiros permanecem nas contas de seus titulares. Senhas não são exibidas nem definidas neste painel.</p>`;
+  document.querySelector('#marketing-audience').onclick=()=>{audienceMode=true;page=1;query='';load();};
   bindLogout();document.querySelector('#filter').value=filter;
   document.querySelector('#search').oninput=e=>{query=e.target.value;rows();};
   document.querySelector('#filter').onchange=e=>{filter=e.target.value;rows();};
@@ -69,6 +71,21 @@ function render(){
   document.querySelector('#prev').onclick=()=>{if(page>1){page--;load();}};
   document.querySelector('#next').onclick=()=>{if(hasMore){page++;load();}};
   rows();
+}
+function renderMarketing(){
+ main.innerHTML=`<div class="heading"><div><span class="eyebrow">Opt-in de marketing</span><h1>Público autorizado</h1>
+ <p>Somente contas com autorização válida e e-mail confirmado. Nenhum dado financeiro é exibido.</p></div>
+ <div class="session">${esc(actor.email)}<br><button id="logout">Sair do painel</button></div></div>
+ <section class="panel"><div class="toolbar"><button id="back-users">Voltar a usuários</button><button id="refresh-audience">Atualizar preferências</button></div>
+ <p class="footnote">O usuário pode revogar a autorização a qualquer momento. O envio de marketing exige nova verificação do consentimento no momento do disparo. Esta tela não envia mensagens.</p>
+ <div class="table-scroll"><table><thead><tr><th scope="col">Nome</th><th scope="col">E-mail autorizado</th><th scope="col">Versão do aceite</th></tr></thead>
+ <tbody>${users.map(u=>`<tr><td>${esc(u.name||'—')}</td><td>${esc(u.email)}</td><td>2026-11-08-v1</td></tr>`).join('')||'<tr><td colspan="3">Nenhum usuário autorizado nesta página.</td></tr>'}</tbody></table></div>
+ <footer class="page-footer"><span>Página ${page} · ${users.length} autorização(ões)</span><div><button id="prev" ${page===1?'disabled':''}>Anterior</button><button id="next" ${!hasMore?'disabled':''}>Próxima</button></div></footer></section>`;
+ bindLogout();
+ document.querySelector('#back-users').onclick=()=>{audienceMode=false;page=1;load();};
+ document.querySelector('#refresh-audience').onclick=load;
+ document.querySelector('#prev').onclick=()=>{if(page>1){page--;load();}};
+ document.querySelector('#next').onclick=()=>{if(hasMore){page++;load();}};
 }
 function rows(){
   const term=query.trim().toLocaleLowerCase('pt-BR');
