@@ -104,3 +104,28 @@ As imagens foram recebidas do usuário nesta conversa e **não redesenhadas**. O
 As demais três células do atlas são vazias. O atlas é acessado exclusivamente por caminho relativo fixo. Antes da homologação visual, conferir legibilidade no tamanho mínimo usado pelo seletor (especialmente Magalu, SHEIN e Casas Bahia), nos temas claro e escuro, e se o navegador carrega o mesmo arquivo em modo offline após atualização do PWA.
 
 A adição ao catálogo não representa um vínculo com as lojas nem autoriza uso promocional de suas marcas. A proveniência é a imagem enviada pelo titular do projeto, não um download separado certificado por cada marca.
+
+
+## Melhoria de resolução — 2.8.8 (08/11/2026)
+
+A arte continua sendo aquela recebida do responsável no chat. Foram recuperadas as **imagens originais**, e não ampliadas as miniaturas de 64 px da 2.8.7. Cada logo tem agora um arquivo WebP independente **320×320**, qualidade 93, salvo sob `assets/service-icons/`. Nenhum logotipo foi redesenhado ou obtido de um banco de terceiros.
+
+| Serviço | Arquivo atual | Arquivo de origem enviado |
+|---|---|---|
+| HBO Max | `hbo-max.webp` | `309724.jpg` (1536×1536) |
+| 99Food | `99food.webp` | `309723.png` (512×512) |
+| Prime Video | `prime-video.webp` | `309722.png` (512×512) |
+| TikTok Shop | `tiktok-shop.webp` | `309720.webp` (200×200) |
+| WhatsApp | `whatsapp.webp` | `309721.png` (1536×1536) |
+| Shopee | `shopee.webp` | `309719.png` (1536×1536) |
+| Mercado Livre | `mercado-livre.webp` | `309718.png` (512×512) |
+| Telegram | `telegram.webp` | `309715.jpg` (1536×1536) |
+| Spotify | `spotify.webp` | `309714.png` (512×512) |
+| Magalu | `magalu.webp` | `309727.jpg` (1536×1317) |
+| Casas Bahia | `casas-bahia.webp` | `309728.jpg` (1536×1536) |
+| Temu | `temu.webp` | `309726.png` (1536×1536) |
+| SHEIN | `shein.webp` | `309725.png` (1536×1536) |
+
+O único original abaixo de 320 px é o TikTok Shop (200×200); foi redimensionado proporcionalmente, sem alegar recuperar detalhes ausentes. Os 13 hashes Git das imagens são iguais aos hashes produzidos localmente. O arquivo de atlas antigo de 256 px não faz mais parte dos caminhos ativos nem do manifesto de atualização do PWA, mas pode permanecer no histórico por compatibilidade com versões passadas.
+
+A marca e as restrições de terceiros continuam pertencendo aos respectivos titulares. As imagens identificam despesas, sem alegar parceria, endosso ou direitos exclusivos.
