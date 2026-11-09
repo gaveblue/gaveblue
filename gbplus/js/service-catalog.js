@@ -53,7 +53,14 @@ const definitions=[
  ['games-playstation','PlayStation','games','subscription','PS'],
  ['games-xbox','Xbox','games','subscription','XB'],
  ['shopping-amazon','Amazon','shopping','on_demand','AM'],
- ['shopping-paypal','PayPal','shopping','on_demand','PP']
+ ['shopping-paypal','PayPal','shopping','on_demand','PP'],
+ ['shopping-tiktokshop','TikTok Shop','shopping','on_demand','TS'],
+ ['shopping-shopee','Shopee','shopping','on_demand','SH'],
+ ['shopping-mercadolivre','Mercado Livre','shopping','on_demand','ML'],
+ ['shopping-magalu','Magalu','shopping','on_demand','MG'],
+ ['shopping-casasbahia','Casas Bahia','shopping','on_demand','CB'],
+ ['shopping-temu','Temu','shopping','on_demand','TM'],
+ ['shopping-shein','SHEIN','shopping','on_demand','SN']
 ];
 export const SERVICE_GROUPS=Object.freeze({
  streaming:'Streaming e vídeo',music:'Música e conteúdo',delivery:'Delivery',
@@ -73,8 +80,28 @@ const LOCAL_SERVICE_LOGOS=Object.freeze({
  'mobility-indrive':'./assets/service-icons/indrive.webp',
  'digital-canva':'./assets/service-icons/canva.webp'
 });
+// Grade 4×4 de imagens originais enviadas pelo usuário (2026-11-08).
+// O atlas preserva a arte de cada marca; não existe CDN nem redesenho fictício.
+// Células: [coluna, linha], índices 0..3. O logo substitui um ícone anterior,
+// mas não altera o ID de nenhum lançamento existente.
+export const SERVICE_SPRITE_URL='./assets/service-icons/service-brands-287.webp';
+const LOCAL_SERVICE_SPRITES=Object.freeze({
+ 'streaming-hbomax':[0,0],
+ 'delivery-99food':[1,0],
+ 'streaming-primevideo':[2,0],
+ 'shopping-tiktokshop':[3,0],
+ 'social-whatsapp':[0,1],
+ 'shopping-shopee':[1,1],
+ 'shopping-mercadolivre':[2,1],
+ 'social-telegram':[3,1],
+ 'music-spotify':[0,2],
+ 'shopping-magalu':[1,2],
+ 'shopping-casasbahia':[2,2],
+ 'shopping-temu':[3,2],
+ 'shopping-shein':[0,3]
+});
 export const SERVICE_CATALOG=Object.freeze(definitions.map(([id,name,group,billingMode,fallback])=>
- Object.freeze({id,name,group,billingMode,fallback,logoPath:LOCAL_SERVICE_LOGOS[id]||null,logoVerified:Boolean(LOCAL_SERVICE_LOGOS[id])})
+ Object.freeze({id,name,group,billingMode,fallback,logoPath:LOCAL_SERVICE_LOGOS[id]||null,sprite:LOCAL_SERVICE_SPRITES[id]||null,logoVerified:Boolean(LOCAL_SERVICE_LOGOS[id]||LOCAL_SERVICE_SPRITES[id])})
 ));
 export const serviceSearchKey=s=>String(s??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');
 export const serviceById=id=>SERVICE_CATALOG.find(s=>s.id===id)||null;
