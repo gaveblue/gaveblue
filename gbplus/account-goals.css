@@ -1,0 +1,54 @@
+/* GB+ 2.9.0 — small, theme-aware goal / cash-account components. */
+.gb-account-custom-mark{display:inline-flex;align-items:center;justify-content:center;flex:none;
+ width:38px;height:38px;border:1px solid var(--border);border-radius:12px;
+ background:var(--soft);color:var(--ink)}
+.gb-account-custom-mark.is-goal{background:color-mix(in srgb,var(--surface) 88%,#ddb98b);
+ border-color:color-mix(in srgb,var(--border) 75%,#c6ad8a)}
+.gb-account-custom-mark svg{width:21px;height:21px}
+.gb-balance-bank .gb-account-custom-mark{width:27px;height:27px;border-radius:9px}
+.gb-balance-bank .gb-account-custom-mark svg{width:16px;height:16px}
+#account-form .gb-account-type-fields{display:grid;gap:12px;min-width:0}
+#account-form [hidden]{display:none!important}
+#account-form .gb-account-kind-hint{font-size:11px;line-height:1.5;color:var(--muted);margin:0}
+#account-form .gb-account-icon-picker{border:0;padding:0;min-width:0;margin:0}
+#account-form .gb-account-icon-picker legend{font-size:12px;font-weight:680;margin-bottom:9px}
+#account-form .gb-account-icon-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));
+ gap:7px;max-height:185px;overflow-y:auto;overscroll-behavior:contain}
+#account-form .gb-account-icon-choice{display:flex;align-items:center;justify-content:center;flex-direction:column;
+ min-width:0;min-height:54px;gap:5px;border-radius:12px;border:1px solid var(--border);
+ background:var(--surface);color:var(--ink);cursor:pointer}
+#account-form .gb-account-icon-choice svg{width:21px;height:21px}
+#account-form .gb-account-icon-choice small{font-size:9px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#account-form .gb-account-icon-choice.is-selected{border-color:var(--ink);background:var(--soft)}
+#account-form .gb-account-icon-choice:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+#account-form .gb-account-goal-fields{display:grid;gap:12px}
+#account-form .gb-account-goal-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+#account-form .gb-account-goal-grid .field{min-width:0}
+#account-form .gb-account-opening-hint{margin:0;font-size:11px;color:var(--muted);line-height:1.5}
+.gb-goals-section{margin:16px 0 22px}
+.gb-goals-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.gb-goals-head h2{font-size:15px;margin:0}
+.gb-goals-head p{font-size:11px;color:var(--muted);margin:4px 0 0}
+.gb-goal-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr));gap:13px}
+.gb-goal-card{border:1px solid var(--border);border-radius:17px;background:var(--surface);padding:17px;min-width:0}
+.gb-goal-card h3{font-size:15px;line-height:1.4;margin:10px 0 3px}
+.gb-goal-card>.gb-goal-balance{display:block;font-size:23px;font-weight:730;letter-spacing:-.025em;margin:7px 0 14px}
+.gb-goal-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.gb-goal-progress{display:grid;gap:8px}
+.gb-goal-row{display:flex;justify-content:space-between;gap:10px;align-items:center;font-size:12px}
+.gb-goal-row small{font-size:10px;color:var(--muted)}
+.gb-goal-track{height:8px;background:var(--soft);border-radius:20px;overflow:hidden;border:1px solid var(--border)}
+.gb-goal-track>span{display:block;height:100%;background:var(--ink);border-radius:20px;transition:width .25s ease}
+.gb-goal-suggestion{font-size:11px;color:var(--muted);margin:5px 0 0}
+.gb-goal-suggestion strong{color:var(--ink)}
+.gb-goal-actions{display:flex;flex-wrap:wrap;gap:7px;margin-top:16px}
+.gb-goal-actions .button{font-size:11px}
+.gb-standard-accounts-label{font-size:14px;font-weight:700;margin:15px 0 10px}
+.gb-goal-empty{border:1px dashed var(--border);border-radius:15px;padding:16px;
+ display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between}
+.gb-goal-empty p{font-size:12px;color:var(--muted);margin:3px 0 0}
+@media(max-width:460px){
+ #account-form .gb-account-goal-grid{grid-template-columns:1fr}
+ #account-form .gb-account-icon-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+ .gb-goal-card{padding:15px}
+}
