@@ -8,6 +8,7 @@
 - **Aportes e resgates:** botões Guardar e Retirar abrem transferência interna, sem lançamento artificial de receita ou despesa; saídas de cofrinho não podem exceder seu saldo.
 - **Compatibilidade:** arquivos de contas anteriores mantidos; novos campos opcionais em cada conta no documento JSON existente; não há nova tabela, mudança de RLS ou migração SQL.
 - **Escopo:** telas de contas e cartões, visualização de saldos, registro de contas e transferências, validação e cache PWA. Cartões, faturas, lançamentos antigos, onboarding e LGPD mantidos.
+- **Implantação confirmada:** GitHub Pages build + deploy concluídos com status success em 09/11/2026 às 04:18:26 UTC (execução 42561013587, commit 0e3963b4). O domínio final e PWA instalado ainda exigem conferência visual.
 - **Liberação autorizada pelo responsável em 09/11/2026:** dois testes específicos executados em ambiente JS isolado passaram; a suíte integral no GitHub Actions falhou antes do início dos steps, sem evidência de execução. QA visual Android/PWA e validação online seguem pendentes. Não declarar homologado antes dessas evidências.
 
 ## [2.8.9 — CADASTRO DE CONTAS MAIS LIMPO (MERGE NA MAIN; SITE A CONFERIR)] — 2026-11-08
