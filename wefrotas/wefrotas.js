@@ -5683,6 +5683,7 @@
       currentModalType = 'premium';
       currentEditingId = null;
       currentFinanceEntryType = null;
+      if (type === 'order') window.WeFrotasOsGuide?.reset();
       const backdrop = document.getElementById('modal-backdrop');
       const fields = document.getElementById('modal-fields');
       const kicker = document.getElementById('modal-kicker');
@@ -6068,6 +6069,7 @@
                 <option value="avulsa">Avulsa</option>
                 <option value="mensal">Mensal de despesas</option>
                 <option value="revisao">Revisão</option>
+                <option value="pane">Manutenção corretiva / pane</option>
                 <option value="sinistro">Sinistro</option>
               </select>
             </div>
@@ -6142,11 +6144,13 @@
               <textarea class="soft-input textarea w-full" id="order-descricao" placeholder="Descreva tudo que deve sair na impressão da OS."></textarea>
             </div>
           </div>
+          ${window.WeFrotasOsGuide?.formHtml() || ''}
         `;
         setOrderAdministrationFormValue(getLastAdministrationValue());
         setDefaultOrderDates();
         updateOrderDescriptionFromType(true);
         updateOrderDateConstraints();
+        window.WeFrotasOsGuide?.refresh();
       } else if (type === 'finance') {
         setModalVisual('finance', 'Escolha o tipo de lançamento que deseja realizar.');
         kicker.textContent = 'Financeiro';
@@ -6856,6 +6860,7 @@
       if (type === 'mensal') return getMonthlyExpenseDescription(options.dataInicio);
       if (type === 'revisao') return getRevisionDescription(options.revisionKm, options.vehicle);
       if (type === 'sinistro') return 'SINISTRO';
+      if (type === 'pane') return 'MANUTENÇÃO CORRETIVA / PANE';
       return '';
     }
 
@@ -12982,6 +12987,9 @@
           .join('')
           .toUpperCase() || 'OS';
         const serviceLabel = order.descricao || 'Serviço não informado';
+        const incident = order.operationalIncident;
+        const incidentState = incident?.perdaTotalConfirmada ? 'Perda total' : incident?.substitutionId ? 'Carro reserva vinculado' : incident?.stopped ? 'Veículo parado' : '';
+        const incidentCss = incident?.perdaTotalConfirmada ? 'is-pt' : 'is-stopped';
         return `
           <div class="orders-table-row ${selectedOrders.has(order.id) ? 'selected' : ''}" role="button" tabindex="0" onclick="toggleOrderSelection(event, '${order.id}')" onkeydown="handleOrderRowSelectionKey(event, '${order.id}')">
             <div class="orders-table-cell orders-table-cell--check">
@@ -13015,6 +13023,7 @@
             </div>
             <div class="orders-table-cell">
               <div class="orders-main-text">${escapeHtml(serviceLabel)}</div>
+              ${incidentState ? `<span class="wf-os-order-pill ${incidentCss}">${escapeHtml(incidentState)}</span>` : ''}
             </div>
             <div class="orders-table-cell orders-table-cell--value">
               <span class="orders-value-text">${formatCurrency(totalFinance)}</span>
@@ -13611,6 +13620,7 @@
       const generatedDescription = getOrderGeneratedDescription(order);
       document.getElementById('order-descricao').dataset.generatedDescription = order.descricao === generatedDescription ? generatedDescription : '';
       document.getElementById('modal-title').textContent = 'Editar OS';
+      window.WeFrotasOsGuide?.loadOrder(order);
     }
 
     function editSelectedFinance() {
@@ -14870,6 +14880,54 @@
         </html>
       `);
       printWindow.document.close();
+    }
+
+
+    // One snapshot commits the OS, the unavailable titular and its reserve.
+    window.WeFrotasOsGuide?.configure({
+      vehicles: () => allVehicles,
+      drivers: () => allDrivers,
+      toast: message => showToast(message)
+    });
+
+    function applyGuidedIncident(order, plan) {
+      if (!plan?.enabled) return;
+      const source = allVehicles.find(v => String(v.id) === String(order.vehicleId));
+      if (!source) throw new Error('O veículo titular não foi encontrado.');
+      if (plan.record) {
+        const existingDraftVehicle = allVehicles.find(v => String(v.id) === String(plan.reserveVehicle?.id));
+        const previousVehicles = allVehicles;
+        if (plan.reserveVehicle && !existingDraftVehicle) {
+          allVehicles = [...allVehicles, plan.reserveVehicle];
+        }
+        let error = '';
+        try {
+          error = window.WeFrotasSubstitutions?.validate(plan.record) || '';
+        } finally {
+          allVehicles = previousVehicles;
+        }
+        if (error) throw new Error(error);
+        if (plan.reserveVehicle && !existingDraftVehicle) allVehicles = [...allVehicles, plan.reserveVehicle];
+        allVehicles = allVehicles.map(v => {
+          if (String(v.id) !== String(order.vehicleId)) return v;
+          const prior = Array.isArray(v.vehicleSubstitutions) ? v.vehicleSubstitutions : [];
+          const exists = prior.some(item => String(item.id) === String(plan.record.id));
+          return {
+            ...v,
+            operationalStatus: plan.incident.perdaTotalConfirmada ? 'imobilizado' :
+              order.tipoOs === 'sinistro' ? 'sinistro' : order.tipoOs === 'pane' ? 'manutencao' : 'imobilizado',
+            vehicleSubstitutions: exists ? prior : [...prior, {
+              ...plan.record, orderId: order.id, orderNumber: order.numero,
+              notes: 'Substituição vinculada à OS ' + order.numero
+            }]
+          };
+        });
+      } else if (plan.incident.stopped) {
+        allVehicles = allVehicles.map(v => String(v.id) === String(order.vehicleId) ? {
+          ...v, operationalStatus: plan.incident.perdaTotalConfirmada ? 'imobilizado' :
+            order.tipoOs === 'sinistro' ? 'sinistro' : order.tipoOs === 'pane' ? 'manutencao' : 'imobilizado'
+        } : v);
+      }
     }
 
     // Substituições ficam no JSONB do titular e não alteram a placa abastecida.
