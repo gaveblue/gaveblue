@@ -1,5 +1,15 @@
 # CHANGELOG — GB+ Gestão Financeira
 
+## [2.8.9 — CADASTRO DE CONTAS MAIS LIMPO (CANDIDATA; QA PENDENTE)] — 2026-11-08
+
+- **Escopo exclusivo:** tela Nova conta / Editar conta. Nenhum outro formulário sofreu redesign.
+- **Seleção de instituição:** o campo único “Onde fica o dinheiro?” mostra a escolha atual e abre o **bottom sheet** já utilizado em lançamentos. Lista pesquisável com logo, abre totalmente expandida, pode ser recolhida à metade por gesto e fechada sem perder o formulário.
+- **Caixa sem banco:** opção “Dinheiro em caixa” com ícone de carteira e subtítulo “Sem banco · caixa transitório”; não exige cadastro de instituição fictícia e grava `bankId=''` e `bank=''`.
+- **Editor reduzido:** mantém Nome da conta, a seleção de banco/caixa, Saldo inicial opcional com valor destacado e Situação somente para conta existente. Removidos a busca em faixa, Outra instituição, Agência e Número da conta do formulário.
+- **Compatibilidade:** dados legados de agência, número e instituição manual são mantidos ao editar; opção de instituição manual antiga permanece acessível no painel, sem adicionar novo campo. Todos os IDs e vínculos financeiros existentes permanecem intactos.
+- **Saldo inicial:** opcional ao criar (vazio equivale a zero); seu significado contábil de saldo de abertura continua inalterado. Nada é transformado em receita.
+- **QA e publicação:** regressões de UI/dados e confirmação visual Android/PWA antes de declarar homologado. Sem migração no banco.
+
 ## [2.8.8 — ÍCONES HD (MERGE EM MAIN; SITE A VERIFICAR)] — 2026-11-08
 
 - **Problema da 2.8.7:** 13 logos exibidos por grade 4×4 de 256 px (cada marca tinha apenas 64×64 px), ampliados pelo CSS a 400%. Isso resultava em borrões especialmente nos logotipos com letras.

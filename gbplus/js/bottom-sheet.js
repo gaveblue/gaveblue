@@ -70,12 +70,11 @@ function serviceSections(selected){
  return sections;
 }
 function financialSections(kind,items,selected){
- const ordered=[...items].sort((a,b)=>collator.compare(a.name,b.name));
+ // Bank picker keeps the popular-bank ordering; other financial lists are alphabetical.
+ const ordered=kind==='bank'?[...items]:[...items].sort((a,b)=>collator.compare(a.name,b.name));
  const options=ordered.map(item=>{
-  const id=String(item.id),name=String(item.name);
-  const chosen=id===selected;
-  // badgeMarkup is produced locally by the trusted bankBadge/icon renderer,
-  // never from user-provided HTML. Names, hints and searchable text are escaped.
+  const id=String(item.id),name=String(item.name),chosen=id===selected;
+  // Logos are rendered with the trusted bankBadge function; all labels are escaped.
   const badge=String(item.badgeMarkup||'');
   const detail=String(item.subtitle||'');
   return '<button type="button" class="gb-sheet-choice gb-sheet-finance-choice'+(chosen?' is-selected':'')+
@@ -85,6 +84,13 @@ function financialSections(kind,items,selected){
    '<span class="gb-sheet-finance-text"><strong>'+esc(name)+'</strong><small>'+esc(detail)+'</small></span>'+
    (chosen?icon('check','gb-sheet-choice-check'):'')+'</button>';
  });
+ if(kind==='bank'){
+  // Always show cash / legacy non-banking options first, ahead of the bank directory.
+  const split=ordered.findIndex(item=>!String(item.id).startsWith('__'));
+  const top=split<0?options:options.slice(0,split);
+  const banks=split<0?[]:options.slice(split);
+  return [{title:'Sem banco',items:top},{title:'Bancos disponíveis',items:banks}];
+ }
  return [{title:kind==='account'?'Contas disponíveis':'Cartões disponíveis',items:options}];
 }
 export function sheetGroupsCount(groups){
@@ -92,15 +98,15 @@ export function sheetGroupsCount(groups){
 }
 export function openGbPickerSheet({kind,items=[],selected='',onPick}){
  const root=picker();
- if(!root||!['category','service','account','card'].includes(kind)||typeof onPick!=='function')return false;
+ if(!root||!['category','service','account','card','bank'].includes(kind)||typeof onPick!=='function')return false;
  // Never replace a live dialog: wait for its close event before opening another.
  if(root.open)return false;
  const sections=kind==='category'?categorySections(items,selected):
   kind==='service'?serviceSections(selected):financialSections(kind,items,selected);
  const titles={category:'Selecione a categoria',service:'Selecione o serviço',
-  account:'Selecione uma conta',card:'Selecione um cartão'};
+  account:'Selecione uma conta',card:'Selecione um cartão',bank:'Selecione onde fica o dinheiro'};
  const hints={category:'Busque por uma categoria',service:'Busque por um serviço',
-  account:'Busque por uma conta',card:'Busque por um cartão'};
+  account:'Busque por uma conta',card:'Busque por um cartão',bank:'Busque pelo banco ou instituição'};
  const title=titles[kind],searchHint=hints[kind];
  const count=sheetGroupsCount(sections);
  const groups=sections.map((section,i)=>

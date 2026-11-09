@@ -1081,3 +1081,44 @@ body.auth-locked .mobile-nav-fade{display:none!important}
  .gb-credit-purchase{gap:6px;flex-wrap:wrap}
  .gb-credit-purchase>.gb-credit-purchase-actions{margin-left:auto}
 }
+
+
+/* GB+ 2.8.9 — only the bank account editor is simplified. All other forms unchanged. */
+#account-form.gb-account-edit-form{max-width:100%;min-width:0}
+#account-form .gb-account-edit-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:17px;align-items:start}
+#account-form .gb-account-edit-grid>.full{grid-column:1/-1;min-width:0}
+#account-form .gb-account-bank-field{display:grid;gap:8px}
+#account-form .gb-account-bank-label,
+#account-form .gb-account-opening>label{font-size:12px;font-weight:680;color:var(--ink);line-height:1.5}
+#account-form .gb-account-bank-trigger{
+ display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;min-width:0;
+ min-height:66px;padding:10px 14px;text-align:left;font:inherit;color:var(--ink);
+ background:var(--surface);border:1px solid var(--border);border-radius:14px;cursor:pointer
+}
+#account-form .gb-account-bank-trigger:hover{background:var(--soft)}
+#account-form .gb-account-bank-trigger:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+#account-form .gb-account-bank-trigger>.icon{flex:none;width:17px;height:17px;color:var(--muted)}
+#account-form .gb-account-bank-preview{display:flex;align-items:center;gap:11px;min-width:0}
+#account-form .gb-account-bank-preview>.gb-bank-badge{flex:none;width:37px;height:37px;border-radius:12px}
+#account-form .gb-account-cash-mark{display:grid;place-items:center;flex:none;width:37px;height:37px;border-radius:12px;background:var(--soft);color:var(--ink);border:1px solid var(--border)}
+#account-form .gb-account-cash-mark>.icon{width:20px;height:20px}
+#account-form .gb-account-bank-copy{display:flex;flex-direction:column;gap:2px;min-width:0;line-height:1.35}
+#account-form .gb-account-bank-copy strong{font-size:13px;font-weight:680;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#account-form .gb-account-bank-copy small{color:var(--muted);font-size:10px}
+#account-form .gb-account-opening{display:grid;gap:8px}
+#account-form .gb-account-opening>label small{font-size:10px;font-weight:500;color:var(--muted)}
+#account-form .gb-account-opening-control{display:flex;align-items:center;gap:9px;width:100%;min-height:68px;padding:9px 16px;
+ border:1px solid var(--border);border-radius:14px;background:var(--surface);color:var(--ink)}
+#account-form .gb-account-opening-control:focus-within{border-color:var(--ink);outline:2px solid color-mix(in srgb,var(--ink) 12%,transparent)}
+#account-form .gb-account-opening-control>span{font-size:17px;font-weight:640;color:var(--muted)}
+#account-form .gb-account-opening-control>input{display:block;flex:1;min-width:0;height:43px;padding:0;border:0!important;outline:0!important;
+ background:transparent!important;color:var(--ink);font-size:26px;font-weight:730;letter-spacing:-.03em;font-variant-numeric:tabular-nums;
+ appearance:textfield;-moz-appearance:textfield}
+#account-form .gb-account-opening-control>input::-webkit-inner-spin-button,
+#account-form .gb-account-opening-control>input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+#account-form>.form-footer{margin-top:22px}
+@media(max-width:760px){
+ #account-form .gb-account-edit-grid{gap:15px}
+ #account-form .gb-account-opening-control{min-height:63px}
+ #account-form .gb-account-opening-control>input{font-size:24px}
+}
