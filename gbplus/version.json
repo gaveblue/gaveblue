@@ -1,13 +1,14 @@
 {
   "version": "2.8.6",
-  "build": 2864,
+  "build": 2865,
   "published_at": null,
   "title": "Mais e Configurações integrados; biblioteca de marcas em revisão",
   "notes": [
+    "Quatro imagens de marcas recebidas do responsável incorporadas localmente: Plus Delivery, 99Food, Prime Video e Disney+, com proporções originais e visualização sem recortes.",
+    "44 serviços do catálogo usam arte local; restam 5 com iniciais provisórias: Globoplay, Rappi, 99, inDrive e Canva.",
+    "Logotipos horizontais são exibidos com object-fit: contain em fundo neutro, inclusive nos temas claro e escuro; SVGs e demais ícones permanecem preservados.",
     "A tela Mais incorpora preferências, backup, dados e segurança, atualizações e suporte em grupos expansíveis, mantendo Minha Conta sem duplicação.",
     "Rotas antigas #settings redirecionam para #more; controles de excluir conta e restaurar dados permanecem com confirmações existentes.",
-    "ChatGPT utiliza arquivo SVG local de símbolo vetorial público verificado, com fallback de letras caso a imagem falhe.",
-    "Aguardam arquivo utilizável e verificação de licença: Disney+, Prime Video, Globoplay, 99Food, Plus Delivery, Rappi, 99, inDrive e Canva.",
     "Catálogo de 49 serviços e categoria Serviços única para novos lançamentos. Categorias legadas ficam preservadas em históricos.",
     "Versão candidata apenas; testes integrados e homologação visual em Android/PWA ainda necessários."
   ],
@@ -177,28 +178,32 @@
     "./next-282.css",
     "./js/category-library.js",
     "./js/notification-rules.js",
-    "./assets/service-icons/chatgpt.svg"
+    "./assets/service-icons/chatgpt.svg",
+    "./assets/service-icons/plus-delivery.webp",
+    "./assets/service-icons/99food.png",
+    "./assets/service-icons/prime-video.webp",
+    "./assets/service-icons/disney-plus.webp"
   ],
   "highlights": [
     {
       "icon": "grid",
       "title": "Mais com Configurações",
-      "description": "Acesso direto a preferências, dados e segurança, sistema e suporte na mesma tela."
+      "description": "Preferências, privacidade, dados, atualizações e suporte reunidos."
     },
     {
       "icon": "file",
-      "title": "ChatGPT com SVG local",
-      "description": "Marca vetorial com tratamento seguro de falha; demais ícones oficiais aguardam arquivos."
+      "title": "44 marcas locais",
+      "description": "Plus Delivery, 99Food, Prime Video e Disney+ incorporados a partir de imagens enviadas."
     },
     {
       "icon": "check",
       "title": "Categorias organizadas",
-      "description": "Streaming e assinaturas agrupados em Serviços, preservando o histórico."
+      "description": "Streaming, transporte por aplicativo e assinaturas dentro de Serviços."
     }
   ],
   "release_status": "candidate_not_published",
   "homologation": {
     "status": "pending_full_qa_and_visual_review",
-    "notes": "PR de rascunho; nenhuma homologação ou liberação da 2.8.6. Testes isolados de código não substituem teste visual Android/PWA nem teste em Supabase autenticado. Manter 2.8.5 pública."
+    "notes": "Candidata 2.8.6 build 2865 em PR draft. Quatro arquivos de marca recebidos e verificados por hash Git em repositório. QA visual real Android/PWA em claro/escuro e aprovação final continuam pendentes. Não publicada."
   }
 }
