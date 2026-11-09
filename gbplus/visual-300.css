@@ -147,3 +147,19 @@
  .gb30-accounts-summary strong{font-size:18px}
  .gb-accounts-cards-page .gb-credit-card{padding:14px}
 }
+
+/* On larger screens the same searchable Bottom Sheet becomes a right-side panel. */
+@media(min-width:900px){
+ dialog#gb-picker-sheet{
+  inset:22px 22px 22px auto!important;top:22px!important;bottom:22px!important;
+  right:22px!important;left:auto!important;margin:0!important;
+  width:min(430px,calc(100vw - 50px));max-width:430px;
+  min-height:300px;height:min(63dvh,710px);
+  max-height:calc(100dvh - 44px);
+  border-radius:22px;border:1px solid var(--border);
+  box-shadow:0 18px 85px #0002
+ }
+ dialog#gb-picker-sheet[data-snap="expanded"]{height:calc(100dvh - 44px)}
+ dialog#gb-picker-sheet[data-snap="partial"]{height:min(63dvh,710px)}
+ dialog#gb-picker-sheet .gb-sheet-results{padding-bottom:16px}
+}
