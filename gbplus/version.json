@@ -1,16 +1,16 @@
 {
   "version": "2.8.6",
-  "build": 2865,
+  "build": 2866,
   "published_at": null,
-  "title": "Mais e Configurações integrados; biblioteca de marcas em revisão",
+  "title": "Biblioteca completa, novo padrão de navegação e aceite LGPD",
   "notes": [
-    "Quatro imagens de marcas recebidas do responsável incorporadas localmente: Plus Delivery, 99Food, Prime Video e Disney+, com proporções originais e visualização sem recortes.",
-    "44 serviços do catálogo usam arte local; restam 5 com iniciais provisórias: Globoplay, Rappi, 99, inDrive e Canva.",
-    "Logotipos horizontais são exibidos com object-fit: contain em fundo neutro, inclusive nos temas claro e escuro; SVGs e demais ícones permanecem preservados.",
-    "A tela Mais incorpora preferências, backup, dados e segurança, atualizações e suporte em grupos expansíveis, mantendo Minha Conta sem duplicação.",
-    "Rotas antigas #settings redirecionam para #more; controles de excluir conta e restaurar dados permanecem com confirmações existentes.",
-    "Catálogo de 49 serviços e categoria Serviços única para novos lançamentos. Categorias legadas ficam preservadas em históricos.",
-    "Versão candidata apenas; testes integrados e homologação visual em Android/PWA ainda necessários."
+    "Biblioteca: 49 aplicativos/serviços com 49 símbolos ou imagens locais, incluindo os cinco ícones mais recentes fornecidos pelo proprietário (Canva, inDrive, 99, Rappi e Globoplay).",
+    "Navegação padrão no celular: Início, Lançamentos, Novo, Carteira, Mais. Preferências realmente personalizadas continuam respeitadas.",
+    "Termos de Uso e Política de Privacidade atualizados na versão 2026-11-08-v1, com aviso obrigatório após login para usuários sem aceite registrado.",
+    "Marketing promocional: escolha separada, opcional, inicialmente desmarcada e revogável; versão e histórico gravados no Supabase, sem usar dados financeiros para campanhas.",
+    "Painel administrativo: consulta específica da audiência promocional somente quando há consentimento válido e e-mail confirmado; o endpoint não dispara mensagens.",
+    "Mais e Configurações integrados, categoria Serviços consolidada e registro das alterações no CHANGELOG.",
+    "Homologação da versão 2.8.6 depende da bateria final de testes e verificação de publicação; nenhuma campanha de e-mail foi iniciada."
   ],
   "assets": [
     "./index.html",
@@ -182,28 +182,36 @@
     "./assets/service-icons/plus-delivery.webp",
     "./assets/service-icons/99food.png",
     "./assets/service-icons/prime-video.webp",
-    "./assets/service-icons/disney-plus.webp"
+    "./assets/service-icons/disney-plus.webp",
+    "./assets/service-icons/canva.webp",
+    "./assets/service-icons/indrive.webp",
+    "./assets/service-icons/99.webp",
+    "./assets/service-icons/rappi.webp",
+    "./assets/service-icons/globoplay.webp",
+    "./js/legal-consent.js",
+    "./legal-consent.css",
+    "./termos-de-uso.html"
   ],
   "highlights": [
     {
       "icon": "grid",
-      "title": "Mais com Configurações",
-      "description": "Preferências, privacidade, dados, atualizações e suporte reunidos."
-    },
-    {
-      "icon": "file",
-      "title": "44 marcas locais",
-      "description": "Plus Delivery, 99Food, Prime Video e Disney+ incorporados a partir de imagens enviadas."
+      "title": "49 logos locais",
+      "description": "Catálogo completo com ícones reais fornecidos."
     },
     {
       "icon": "check",
-      "title": "Categorias organizadas",
-      "description": "Streaming, transporte por aplicativo e assinaturas dentro de Serviços."
+      "title": "Aceite de privacidade",
+      "description": "Controle documentado e revogável para comunicações promocionais."
+    },
+    {
+      "icon": "wallet",
+      "title": "Navegação simplificada",
+      "description": "Início, Lançamentos, Novo, Carteira e Mais."
     }
   ],
   "release_status": "candidate_not_published",
   "homologation": {
-    "status": "pending_full_qa_and_visual_review",
-    "notes": "Candidata 2.8.6 build 2865 em PR draft. Quatro arquivos de marca recebidos e verificados por hash Git em repositório. QA visual real Android/PWA em claro/escuro e aprovação final continuam pendentes. Não publicada."
+    "status": "pending_qa_release",
+    "notes": "Build 2866. Testes de código, segurança e integração devem ser anexados antes de publicar; campanhas de e-mail permanecem desativadas."
   }
 }
