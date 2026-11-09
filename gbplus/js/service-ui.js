@@ -1,6 +1,6 @@
 // GB+ 2.6.0 — optional service identities for expense titles.
 // The picker does not submit, subscribe, pay or reconcile anything.
-import {serviceById,SERVICE_SPRITE_URL} from './service-catalog.js?v=20261108-2870';
+import {serviceById} from './service-catalog.js?v=20261108-2880';
 import {SERVICE_BRAND_PATHS} from './service-brand-paths.js?v=20261106-2600';
 import {SERVICE_EXTRA_BRAND_PATHS} from './service-extra-brand-paths.js?v=20261108-2861';
 import {SERVICE_BRAND_COLORS} from './service-brand-colors.js?v=20261106-2620';
@@ -16,17 +16,6 @@ export function serviceIconMarkup(service,size='small'){
  const bright=valid&&(rgb[0]*.2126+rgb[1]*.7152+rgb[2]*.0722)>150;
  const style=valid?' style="--gb-service-color:#'+hex+';--gb-service-fg:'+(bright?'#151515':'#ffffff')+'"':'';
  const dark=hex==='000000'?' gb-service-logo-dark':'';
- if(Array.isArray(item.sprite)&&item.sprite.length===2&&
-    item.sprite.every(n=>Number.isInteger(n)&&n>=0&&n<4)){
-   const [column,row]=item.sprite;
-   // A single locally cached WebP contains 13 provided images. Shift an entire
-   // 128px tile into view, never stretch or crop the original logo within it.
-   return '<span class="gb-service-logo gb-service-asset gb-service-sprite" aria-hidden="true">'+
-    '<span class="gb-service-asset-fallback">'+esc(item.fallback||item.name.slice(0,2))+'</span>'+
-    '<img class="gb-service-asset-image gb-service-sprite-image" src="'+SERVICE_SPRITE_URL+
-    '" alt="" decoding="async" loading="lazy" style="left:-'+(column*100)+'%!important;top:-'+
-    (row*100)+'%!important"></span>';
- }
  if(item.logoPath && /^\.\/assets\/service-icons\/[a-z0-9-]+\.(?:svg|png|webp)$/.test(item.logoPath)){
   // Static, known local asset (SVG/PNG/WebP). Fallback monogram remains if loading fails.
   return '<span class="gb-service-logo gb-service-asset" aria-hidden="true">'+
