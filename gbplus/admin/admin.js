@@ -5,7 +5,9 @@ const client = createGbplusClient(window.supabase.createClient,cloudConfig);
 const main = document.querySelector('#main'), dialog = document.querySelector('#editor');
 const esc = value => String(value ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const date = value => value ? new Intl.DateTimeFormat('pt-BR',{dateStyle:'short'}).format(new Date(value)) : 'Nunca acessou';
-let users=[], page=1, total=null, hasMore=false, actor=null, query='', filter='all', busy=false, generation=0, audienceMode=false;
+let users=[], page=1, total=null, hasMore=false, actor=null, query='', filter='all', busy=false, generation=0,mailReady=false;
+const dateTime=value=>value?new Intl.DateTimeFormat('pt-BR',{dateStyle:'short',timeStyle:'short'}).format(new Date(value)):'Sem registro';
+const duration=value=>value==null?'Ainda não medido':`${Math.floor(value/3600)}h ${Math.floor(value%3600/60)}min`;
 const notice = message => {document.querySelector('#notice').textContent=message;};
 function clear(){users=[];actor=null;dialog.close();notice('');}
 
@@ -47,8 +49,8 @@ function bindLogout(){document.querySelector('#logout').onclick=async()=>{
 async function load(){
   if(busy)return;busy=true;const requestGeneration=++generation;
   try{
-    const result=await api({action:audienceMode?'marketing-audience':'list',page});if(requestGeneration!==generation)return;
-    users=result.users;actor=result.actor;total=result.total;hasMore=result.hasMore;if(audienceMode)renderMarketing();else render();
+    const result=await api({action:'list',page});if(requestGeneration!==generation)return;
+    users=result.users;actor=result.actor;total=result.total;hasMore=result.hasMore;mailReady=result.mail_ready===true;render();
   }catch(error){
     if(requestGeneration!==generation)return;
     if(error.status===401)login(error.message);else if(error.status===403)denied();
@@ -57,50 +59,42 @@ async function load(){
 }
 function render(){
   main.innerHTML=`<div class="heading"><div><span class="eyebrow">Controle de acesso</span><h1>Usuários e perfis</h1><p>Gerencie quem utiliza o GB+ e mantenha os cadastros em dia.</p></div><div class="session">${esc(actor.email)}<br><button id="logout">Sair do painel</button></div></div>
-  <div class="toolbar"><button id="marketing-audience" type="button">Usuários que autorizaram e-mails promocionais</button></div>
-  <section class="cards" aria-label="Resumo de usuários"><div class="card"><span>Usuários cadastrados</span><strong>${total??'—'}</strong><small>Total informado pelo servidor</small></div><div class="card"><span>Confirmados nesta página</span><strong>${users.filter(u=>u.confirmed).length}</strong><small>De ${users.length} perfis carregados</small></div><div class="card"><span>Suspensos nesta página</span><strong>${users.filter(u=>u.suspended).length}</strong><small>Novos logins bloqueados</small></div></section>
+  <section class="cards" aria-label="Resumo de usuários"><div class="card"><span>Usuários cadastrados</span><strong>${total??'—'}</strong><small>Total informado pelo servidor</small></div><div class="card"><span>Online nesta página</span><strong>${users.filter(u=>u.usage?.online).length}</strong><small>Atividade nos últimos 75 segundos</small></div><div class="card"><span>Marketing autorizado</span><strong>${users.filter(u=>u.usage?.marketing).length}</strong><small>De ${users.length} perfis carregados</small></div><div class="card"><span>Suspensos nesta página</span><strong>${users.filter(u=>u.suspended).length}</strong><small>Novos logins bloqueados</small></div></section>
+  <nav class="admin-actions" aria-label="Ações administrativas"><button id="invite" class="primary">+ Cadastrar e convidar</button><button id="compose" ${mailReady?'':'disabled'}>Escrever e-mail</button><button id="history">Histórico de envios</button></nav>
+  ${mailReady?'':'<p class="note">O envio de mensagens personalizadas aguarda a configuração segura do provedor.</p>'}
   <section class="panel"><div class="toolbar"><label><span>Buscar nesta página</span><input id="search" type="search" placeholder="Nome ou e-mail" value="${esc(query)}" maxlength="254"></label><label><span>Situação</span><select id="filter"><option value="all">Todas as contas</option><option value="active">Login liberado</option><option value="suspended">Login suspenso</option><option value="pending">E-mail não confirmado</option><option value="admin">Administradores</option></select></label><button id="refresh">Atualizar</button></div>
-  <div class="table-scroll"><table><thead><tr><th scope="col">Usuário</th><th scope="col">Situação</th><th scope="col">Login</th><th scope="col">Último acesso</th><th scope="col">Gerenciar</th></tr></thead><tbody id="rows"></tbody></table></div>
+  <div class="table-scroll"><table><thead><tr><th scope="col">Usuário</th><th scope="col">Situação</th><th scope="col">Atividade</th><th scope="col">Uso do GB+</th><th scope="col">Último login</th><th scope="col">Gerenciar</th></tr></thead><tbody id="rows"></tbody></table></div>
   <footer class="page-footer"><span id="count"></span><div><button id="prev" ${page===1?'disabled':''}>Anterior</button><button id="next" ${!hasMore?'disabled':''}>Próxima</button></div></footer></section>
-  <p class="footnote">Os registros financeiros permanecem nas contas de seus titulares. Senhas não são exibidas nem definidas neste painel.</p>`;
-  document.querySelector('#marketing-audience').onclick=()=>{audienceMode=true;page=1;query='';load();};
+  <p class="footnote">Online indica atividade recente, não conexão garantida. Tempo aproximado em primeiro plano é medido a partir desta atualização, sem reconstrução do passado. Atualização automática a cada 60 segundos quando nenhum formulário está aberto.</p><p class="footnote">Exibimos quantidades, sem nomes de contas, saldos ou lançamentos. Senhas não são exibidas. Envios aceitos pelo provedor ainda podem falhar na entrega; consulte o Resend para confirmação.</p>`;
   bindLogout();document.querySelector('#filter').value=filter;
   document.querySelector('#search').oninput=e=>{query=e.target.value;rows();};
   document.querySelector('#filter').onchange=e=>{filter=e.target.value;rows();};
   document.querySelector('#refresh').onclick=load;
   document.querySelector('#prev').onclick=()=>{if(page>1){page--;load();}};
   document.querySelector('#next').onclick=()=>{if(hasMore){page++;load();}};
+  document.querySelector('#invite').onclick=inviteForm;
+  document.querySelector('#compose').onclick=()=>composeForm();
+  document.querySelector('#history').onclick=mailHistory;
   rows();
-}
-function renderMarketing(){
- main.innerHTML=`<div class="heading"><div><span class="eyebrow">Opt-in de marketing</span><h1>Público autorizado</h1>
- <p>Somente contas com autorização válida e e-mail confirmado. Nenhum dado financeiro é exibido.</p></div>
- <div class="session">${esc(actor.email)}<br><button id="logout">Sair do painel</button></div></div>
- <section class="panel"><div class="toolbar"><button id="back-users">Voltar a usuários</button><button id="refresh-audience">Atualizar preferências</button></div>
- <p class="footnote">O usuário pode revogar a autorização a qualquer momento. O envio de marketing exige nova verificação do consentimento no momento do disparo. Esta tela não envia mensagens.</p>
- <div class="table-scroll"><table><thead><tr><th scope="col">Nome</th><th scope="col">E-mail autorizado</th><th scope="col">Versão do aceite</th></tr></thead>
- <tbody>${users.map(u=>`<tr><td>${esc(u.name||'—')}</td><td>${esc(u.email)}</td><td>2026-11-08-v1</td></tr>`).join('')||'<tr><td colspan="3">Nenhum usuário autorizado nesta página.</td></tr>'}</tbody></table></div>
- <footer class="page-footer"><span>Página ${page} · ${users.length} autorização(ões)</span><div><button id="prev" ${page===1?'disabled':''}>Anterior</button><button id="next" ${!hasMore?'disabled':''}>Próxima</button></div></footer></section>`;
- bindLogout();
- document.querySelector('#back-users').onclick=()=>{audienceMode=false;page=1;load();};
- document.querySelector('#refresh-audience').onclick=load;
- document.querySelector('#prev').onclick=()=>{if(page>1){page--;load();}};
- document.querySelector('#next').onclick=()=>{if(hasMore){page++;load();}};
 }
 function rows(){
   const term=query.trim().toLocaleLowerCase('pt-BR');
   const visible=users.filter(u=>(`${u.name} ${u.email}`).toLocaleLowerCase('pt-BR').includes(term)&&
     (filter==='all'||filter==='active'&&!u.suspended||filter==='suspended'&&u.suspended||filter==='pending'&&!u.confirmed||filter==='admin'&&u.admin));
-  document.querySelector('#rows').innerHTML=visible.map(u=>`<tr><td><div class="person"><span class="avatar">${esc((u.name||u.email||'?').slice(0,2).toUpperCase())}</span><div><strong>${esc(u.name||'Sem nome cadastrado')}</strong><span class="sub">${esc(u.email)}</span></div></div></td><td><span class="badge ${u.suspended?'paused':!u.confirmed?'pending':''}">${u.suspended?'Suspenso':u.confirmed?'Ativo':'Não confirmado'}</span>${u.admin?'<span class="badge admin">Admin</span>':''}</td><td>${u.providers.map(p=>p==='google'?'Google':'E-mail').join(' + ')||'—'}</td><td>${date(u.last_sign_in_at)}<span class="sub">Cadastro: ${date(u.created_at)}</span></td><td><button data-id="${esc(u.id)}" aria-label="Gerenciar ${esc(u.email)}">Gerenciar</button></td></tr>`).join('')||'<tr><td colspan="5" class="empty">Nenhum usuário encontrado nesta página.</td></tr>';
+  document.querySelector('#rows').innerHTML=visible.map(u=>`<tr><td><div class="person"><span class="avatar">${esc((u.name||u.email||'?').slice(0,2).toUpperCase())}</span><div><strong>${esc(u.name||'Sem nome cadastrado')}</strong><span class="sub">${esc(u.email)}</span></div></div></td><td><span class="badge ${u.suspended?'paused':!u.confirmed?'pending':''}">${u.suspended?'Suspenso':u.confirmed?'Ativo':u.invited_at?'Convidado':'Não confirmado'}</span>${u.admin?'<span class="badge admin">Admin</span>':''}</td><td><span class="badge ${u.usage?.online?'':'pending'}">${u.usage?.online?'Online recente':u.usage?.tracked_since?'Sem atividade recente':'Ainda não medido'}</span><span class="sub">${duration(u.usage?.active_seconds)}</span></td><td>${u.usage?.accounts??'—'} contas · ${u.usage?.cards??'—'} cartões<span class="sub">${u.usage?.titles??'—'} lançamentos</span></td><td>${dateTime(u.last_sign_in_at)}<span class="sub">${u.providers.map(p=>p==='google'?'Google':'E-mail').join(' + ')||'—'}</span></td><td><button data-id="${esc(u.id)}" aria-label="Gerenciar ${esc(u.email)}">Gerenciar</button></td></tr>`).join('')||'<tr><td colspan="6" class="empty">Nenhum usuário encontrado nesta página.</td></tr>';
   document.querySelector('#count').textContent=`Página ${page} · ${visible.length} de ${users.length} perfis carregados`;
   document.querySelectorAll('[data-id]').forEach(b=>b.onclick=()=>openUser(users.find(u=>u.id===b.dataset.id)));
 }
 function showDialog(content){dialog.innerHTML=content;dialog.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>dialog.close());if(!dialog.open)dialog.showModal();}
 function openUser(user){
   if(!user)return;
-  showDialog(`<h2 id="dialog-title">Gerenciar perfil</h2><p>${esc(user.email)}</p><div class="note">Cadastro em ${date(user.created_at)} · ${user.confirmed?'E-mail confirmado':'E-mail não confirmado'}</div><div class="details"><button id="edit">Editar nome e celular</button><button id="recover" ${user.suspended?'disabled':''}>Enviar recuperação de acesso</button>${!user.admin?`<button id="status" class="${user.suspended?'':'danger'}">${user.suspended?'Reativar login':'Suspender login'}</button>`:'<p class="note">O acesso de administradores é protegido contra suspensão por este painel.</p>'}</div><div class="actions"><button data-close>Fechar</button></div>`);
+  const usage=user.usage||{};
+  showDialog(`<h2 id="dialog-title">${esc(user.name||'Gerenciar perfil')}</h2><p>${esc(user.email)}</p><div class="note">Cadastro em ${date(user.created_at)} · ${user.confirmed?'E-mail confirmado':'E-mail não confirmado'}</div>
+  <dl class="profile-summary"><dt>Celular informado</dt><dd>${esc(user.phone||'Não informado')}</dd><dt>Cidade / UF</dt><dd>${esc([user.city,user.state].filter(Boolean).join(' / ')||'Não informado')}</dd><dt>Última atividade</dt><dd>${dateTime(usage.last_seen_at)}</dd><dt>Tempo aproximado</dt><dd>${duration(usage.active_seconds)}</dd><dt>Medição iniciada</dt><dd>${dateTime(usage.tracked_since)}</dd><dt>Registros cadastrados</dt><dd>${usage.accounts??0} contas, ${usage.cards??0} cartões, ${usage.titles??0} lançamentos, ${usage.partners??0} parceiros</dd><dt>Última gravação financeira</dt><dd>${dateTime(usage.data_updated_at)}</dd><dt>Marketing</dt><dd>${usage.marketing?'Autorizado pelo usuário':'Não autorizado'}<br><small>${dateTime(usage.consent_changed_at)}</small></dd></dl>
+  <div class="details"><button id="edit">Editar nome e celular</button><button id="write-user" ${mailReady&&!user.suspended&&user.confirmed?'':'disabled'}>Escrever e-mail para este usuário</button><button id="recover" ${user.suspended?'disabled':''}>Enviar recuperação de acesso</button>${!user.admin?`<button id="status" class="${user.suspended?'':'danger'}">${user.suspended?'Reativar login':'Suspender login'}</button>`:'<p class="note">O acesso de administradores é protegido contra suspensão por este painel.</p>'}</div><div class="actions"><button data-close>Fechar</button></div>`);
   document.querySelector('#edit').onclick=()=>editUser(user);
   document.querySelector('#recover').onclick=()=>confirmAction(user,'recovery');
+  document.querySelector('#write-user').onclick=()=>composeForm({ids:[user.id]});
   const status=document.querySelector('#status');if(status)status.onclick=()=>confirmAction(user,user.suspended?'reactivate':'suspend');
 }
 function editUser(user){
@@ -118,6 +112,65 @@ async function mutate(user,action,extra={}){
   catch(error){if(error.status===401){generation++;login(error.message);}else if(error.status===403){generation++;denied();}else{const el=dialog.querySelector('.error');if(el)el.textContent=error.message;}}
   finally{dialog.dataset.busy='false';dialog.querySelectorAll('button').forEach(b=>b.disabled=false);}
 }
+function inviteForm(values={}){
+ showDialog(`<h2 id="dialog-title">Cadastrar e convidar</h2><p>O novo usuário recebe um convite e define a própria senha. Este cadastro não concede administração nem autoriza marketing.</p><form id="invite-form"><label><span>Nome</span><input name="name" required minlength="2" maxlength="120" value="${esc(values.name||'')}"></label><label><span>E-mail</span><input name="email" type="email" required maxlength="254" value="${esc(values.email||'')}"></label><p class="error" role="alert"></p><div class="actions"><button type="button" data-close>Cancelar</button><button class="primary">Revisar convite</button></div></form>`);
+ document.querySelector('#invite-form').onsubmit=event=>{
+  event.preventDefault();const fields=Object.fromEntries(new FormData(event.currentTarget));
+  const operation_id=crypto.randomUUID();
+  showDialog(`<h2 id="dialog-title">Confirmar convite</h2><p>Cadastrar <strong>${esc(fields.name)}</strong> e enviar o convite para <strong>${esc(fields.email)}</strong>?</p><p>O limite do painel é de 30 envios em 24 horas, compartilhado com suas mensagens personalizadas.</p><p class="error" role="alert"></p><div class="actions"><button id="back-invite">Voltar</button><button id="send-invite" class="primary">Cadastrar e enviar convite</button></div>`);
+  document.querySelector('#back-invite').onclick=()=>inviteForm(fields);
+  document.querySelector('#send-invite').onclick=async()=>{
+   dialog.dataset.busy='true';dialog.querySelectorAll('button').forEach(b=>b.disabled=true);
+   try{await api({action:'invite',...fields,operation_id});dialog.close();await load();notice('Convite aceito pelo serviço de envio. Confira o histórico e a entrega no provedor.');}
+   catch(error){dialog.querySelector('.error').textContent=error.message;document.querySelector('#back-invite').disabled=false;}
+   finally{dialog.dataset.busy='false';}
+  };
+ };
+}
+function composeForm(draft={}){
+ const kind=draft.kind||'service',ids=draft.ids||[];
+ const options=users.filter(u=>u.confirmed&&!u.suspended);
+ showDialog(`<h2 id="dialog-title">Escrever e-mail</h2><p>Envio individual, sem expor os endereços dos demais destinatários. Selecione até 10 usuários da página atual.</p><form id="compose-form"><label><span>Tipo de comunicação</span><select name="kind"><option value="service">Aviso de serviço / suporte</option><option value="marketing">Marketing / novidades / ofertas</option></select></label><p class="note" id="mail-kind-help"></p><fieldset class="recipients"><legend>Destinatários</legend>${options.map(u=>`<label class="recipient" data-marketing="${Boolean(u.usage?.marketing)}"><input type="checkbox" name="recipient" value="${esc(u.id)}" ${ids.includes(u.id)?'checked':''}><span>${esc(u.name||u.email)}<small>${esc(u.email)} · ${u.usage?.marketing?'marketing autorizado':'sem autorização de marketing'}</small></span></label>`).join('')||'<p>Nenhum destinatário elegível nesta página.</p>'}</fieldset><label><span>Assunto</span><input name="subject" required minlength="3" maxlength="150" value="${esc(draft.subject||'')}"></label><label><span>Mensagem</span><textarea name="message" required minlength="10" maxlength="5000" rows="8" placeholder="Escreva sua mensagem. A assinatura e o descadastro são adicionados automaticamente.">${esc(draft.message||'')}</textarea></label><p class="error" role="alert"></p><div class="actions"><button type="button" data-close>Cancelar</button><button class="primary">Revisar mensagem</button></div></form>`);
+ const form=document.querySelector('#compose-form');form.elements.kind.value=kind;
+ const applyKind=()=>{
+  const marketing=form.elements.kind.value==='marketing';
+  document.querySelector('#mail-kind-help').textContent=marketing?'Somente usuários que autorizaram marketing podem receber. O e-mail inclui um link de descadastro.':'Use apenas para informações necessárias à conta, ao funcionamento do serviço ou atendimento. Conteúdo promocional deve usar a opção Marketing.';
+  form.querySelectorAll('.recipient').forEach(row=>{const box=row.querySelector('input');box.disabled=marketing&&row.dataset.marketing!=='true';if(box.disabled)box.checked=false;});
+ };
+ form.elements.kind.onchange=applyKind;applyKind();
+ form.onsubmit=event=>{
+  event.preventDefault();const fields=new FormData(form),chosen=fields.getAll('recipient');
+  if(chosen.length<1||chosen.length>10){form.querySelector('.error').textContent='Selecione entre 1 e 10 destinatários.';return;}
+  previewMessage({kind:fields.get('kind'),subject:String(fields.get('subject')).trim(),message:String(fields.get('message')).trim(),ids:chosen});
+ };
+}
+function previewMessage(draft){
+ const recipients=draft.ids.map(id=>users.find(u=>u.id===id)).filter(Boolean);
+ showDialog(`<h2 id="dialog-title">Prévia do e-mail</h2><p><strong>${draft.kind==='marketing'?'Marketing':'Serviço / suporte'}</strong> · ${recipients.length} destinatário(s)</p><p class="recipient-list">${recipients.map(u=>esc(u.email)).join('<br>')}</p><article class="mail-preview"><strong>GB+ Gestão Financeira</strong><h3>${esc(draft.subject)}</h3><div class="mail-text">${esc(draft.message)}</div><hr><small>${draft.kind==='marketing'?'Você autorizou novidades do GB+. Cancelar recebimento (link individual incluído no envio).':'Mensagem de serviço. Suporte: contato@gaveblue.com.br'}<br>Política de privacidade do GB+</small></article><p class="note">Após confirmar, cada mensagem será enviada individualmente. O consentimento é verificado novamente no servidor. Limite de 30 envios do painel em 24 horas.</p><div id="send-results" role="status"></div><div class="actions"><button id="back-compose">Voltar e editar</button><button id="send-message" class="primary">Confirmar e enviar ${recipients.length} e-mail(s)</button></div>`);
+ document.querySelector('#back-compose').onclick=()=>composeForm(draft);
+ document.querySelector('#send-message').onclick=async()=>{
+  dialog.dataset.busy='true';dialog.querySelectorAll('button').forEach(b=>b.disabled=true);
+  const results=document.querySelector('#send-results');let accepted=0;
+  for(const [i,user] of recipients.entries()){
+   const row=document.createElement('p');row.textContent=`${user.email}: enviando…`;results.append(row);
+   try{await api({action:'send_email',user_id:user.id,kind:draft.kind,subject:draft.subject,message:draft.message,operation_id:crypto.randomUUID()});row.textContent=`${user.email}: aceito pelo provedor`;accepted++;}
+   catch(error){row.textContent=`${user.email}: ${error.message}`;if(error.status===401||error.status===403)break;}
+   if(i<recipients.length-1)await new Promise(resolve=>setTimeout(resolve,1100));
+  }
+  dialog.dataset.busy='false';dialog.querySelector('.actions').innerHTML='<button id="done-message">Concluir</button>';
+  document.querySelector('#done-message').onclick=()=>{dialog.close();load();};
+  notice(`${accepted} de ${recipients.length} mensagem(ns) aceita(s) pelo provedor. Confira os resultados individuais.`);
+ };
+}
+async function mailHistory(){
+ showDialog('<h2 id="dialog-title">Histórico de envios</h2><p role="status">Carregando…</p><div class="actions"><button data-close>Fechar</button></div>');
+ try{const result=await api({action:'mail_history'});if(!dialog.open)return;
+  const status={accepted:'Aceito pelo provedor',failed:'Falhou',unknown:'Resultado incerto — conferir Resend',sending:'Processando — conferir antes de repetir'};
+  showDialog(`<h2 id="dialog-title">Histórico de envios</h2><p>Últimas 50 operações. “Aceito” não confirma entrega ou leitura. Sem rastreamento de abertura.</p><div class="history-list">${result.jobs.map(job=>`<article><strong>${esc(job.subject)}</strong><p>${esc(job.recipient)}<br>${dateTime(job.created_at)} · ${esc({invite:'Convite',service:'Serviço',marketing:'Marketing'}[job.kind])}<br><span class="badge ${job.status==='accepted'?'':'pending'}">${esc(status[job.status]||job.status)}</span></p></article>`).join('')||'<p>Nenhum envio feito pelo painel.</p>'}</div><div class="actions"><button data-close>Fechar</button></div>`);
+ }catch(error){showDialog(`<h2 id="dialog-title">Histórico indisponível</h2><p>${esc(error.message)}</p><div class="actions"><button data-close>Fechar</button></div>`);}
+}
+dialog.addEventListener('cancel',event=>{if(dialog.dataset.busy==='true')event.preventDefault();});
+setInterval(()=>{if(actor&&!document.hidden&&!dialog.open&&document.activeElement?.id!=='search')void load();},60000);
 client.auth.onAuthStateChange((event,session)=>{
   if(event==='SIGNED_OUT'){generation++;login();}
   if(event==='SIGNED_IN'&&actor&&session?.user?.id!==actor.id){
