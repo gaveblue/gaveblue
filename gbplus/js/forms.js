@@ -185,6 +185,10 @@ export function accountForm(db,a,options={}){
      field('Valor da meta (R$)','goalTarget',a?.goalTarget?String(a.goalTarget/100):'','number','min="0.01" max="10000000000" step="0.01" inputmode="decimal" placeholder="Ex.: 10000,00"')+
      field('Quando quer alcançar?','goalDue',a?.goalDue||'','date','')+
     '</div>'+
+    '<div class="gb-goal-duration" role="group" aria-label="Escolher prazo da meta">'+
+     '<span>Prazo rápido</span>'+[3,6,12,24].map(m=>
+      '<button type="button" class="button small" data-action="goal-duration" data-months="'+m+'">'+
+       (m===12?'1 ano':m===24?'2 anos':m+' meses')+'</button>').join('')+'</div>'+ 
     '<p class="gb-account-kind-hint">Acompanhe quanto falta e a sugestão mensal para chegar à meta.</p>'+
    '</div>'+
    '<div class="full gb-account-opening"><label for="account-initial">Saldo inicial <small>(opcional)</small></label>'+
