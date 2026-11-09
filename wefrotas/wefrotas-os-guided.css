@@ -96,3 +96,9 @@ body.dark .wf-os-review-row strong,body[data-theme=dark] .wf-os-review-row stron
 body.dark .wf-os-step-actions button,body[data-theme=dark] .wf-os-step-actions button{background:#1e293b;color:#e2e8f0;border-color:#475569}
 body.dark .wf-os-step-actions button[data-os-step-next],body[data-theme=dark] .wf-os-step-actions button[data-os-step-next]{background:#2353a3;color:#fff}
 @media(max-width:640px){.wf-os-step-data{grid-template-columns:1fr}.wf-os-step-header span{font-size:10px;padding:9px 2px}.wf-os-step-review{padding:12px}.wf-os-step-actions button{flex:1}}
+
+/* Hotfix: restore the native OS form for non-sinistro types. */
+#wf-os-step-header[hidden],#wf-os-step-actions[hidden],#wf-os-step-error[hidden]{display:none!important}
+.wf-os-step-error{grid-column:1/-1;margin:8px 0;padding:13px 15px;border-radius:12px;border:1px solid #ef9a9a;background:#fff0f0;color:#991b1b;font-size:13px;font-weight:700;line-height:1.55}
+.wf-os-step-data [aria-invalid="true"],.wf-os-step-content [aria-invalid="true"]{outline:2px solid #dc2626;outline-offset:2px}
+body.dark .wf-os-step-error,body.dark-mode .wf-os-step-error,body[data-theme=dark] .wf-os-step-error{background:#4c1717;border-color:#ad4545;color:#ffe4e4}
