@@ -104,3 +104,30 @@ As imagens foram recebidas do usuário nesta conversa e **não redesenhadas**. O
 As demais três células do atlas são vazias. O atlas é acessado exclusivamente por caminho relativo fixo. Antes da homologação visual, conferir legibilidade no tamanho mínimo usado pelo seletor (especialmente Magalu, SHEIN e Casas Bahia), nos temas claro e escuro, e se o navegador carrega o mesmo arquivo em modo offline após atualização do PWA.
 
 A adição ao catálogo não representa um vínculo com as lojas nem autoriza uso promocional de suas marcas. A proveniência é a imagem enviada pelo titular do projeto, não um download separado certificado por cada marca.
+
+
+## Atualização de qualidade — 2.8.8 (08/11/2026)
+
+**Substituição definitiva:** o atlas de 13 logos usado na 2.8.7 foi descontinuado por causar perda de nitidez (64 px por marca). Seu arquivo `service-brands-287.webp` não faz mais parte do código nem do repositório ativo.
+
+As mesmas 13 imagens de referência fornecidas pelo responsável pelo GB+ foram preparadas como arquivos **WebP individuais de 320 × 320 px**, sem recorte, sem aumento CSS a 400%, com cores e proporções preservadas:
+
+| Serviço | Arquivo individual |
+|---|---|
+| HBO Max | `hq-hbo-max.webp` |
+| 99Food | `hq-99food.webp` |
+| Prime Video | `hq-prime-video.webp` |
+| TikTok Shop | `hq-tiktok-shop.webp` |
+| WhatsApp | `hq-whatsapp.webp` |
+| Shopee | `hq-shopee.webp` |
+| Mercado Livre | `hq-mercado-livre.webp` |
+| Telegram | `hq-telegram.webp` |
+| Spotify | `hq-spotify.webp` |
+| Magalu | `hq-magalu.webp` |
+| Casas Bahia | `hq-casas-bahia.webp` |
+| Temu | `hq-temu.webp` |
+| SHEIN | `hq-shein.webp` |
+
+Todos estão armazenados em `gbplus/assets/service-icons/` e referenciados por ID já existente em `js/service-catalog.js`. O renderizador `js/service-ui.js` usa a imagem individual com `object-fit: contain`, sem reamostragem de atlas. A troca é apenas visual: não altera pagamentos, categorias, serviços associados, contas, faturas ou autorizações de marketing.
+
+**Validação:** 13 imagens conferidas no GitHub com assinatura RIFF/WEBP, 320 × 320 px. A conferência visual final no aplicativo instalado e em ambos os temas ainda deve ser documentada antes de declarar homologação visual.
