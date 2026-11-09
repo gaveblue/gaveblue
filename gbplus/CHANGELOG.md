@@ -2,6 +2,15 @@
 
 ## [2.8.6 — AMPLIAÇÃO DA BIBLIOTECA DE APLICATIVOS E ÍCONES (CANDIDATA; NÃO PUBLICADA)] — 2026-11-08
 
+### Recebimento de quatro logotipos — 08/11/2026 (revisão candidata build 2865)
+- **Arquivos recebidos nesta conversa e incorporados à branch de desenvolvimento:** `Plus Delivery` → `assets/service-icons/plus-delivery.webp` (160×160), `99Food` → `assets/service-icons/99food.png` (261×258), `Prime Video` → `assets/service-icons/prime-video.webp` (128×39) e `Disney+` → `assets/service-icons/disney-plus.webp` (180×101).
+- **Integridade:** cada objeto binário enviado ao GitHub foi comparado com o hash Git do arquivo preparado localmente; quatro coincidências confirmadas. Redução de tamanho e transcodificação não modificam a composição dos logos, as cores principais nem a proporção.
+- **Renderer:** `serviceIconMarkup` aceita exclusivamente caminhos relativos locais fixados no catálogo para SVG/PNG/WebP e mantém fallback textual caso a imagem falhe. O CSS usa fundo neutro e `object-fit: contain` em ambos os temas; não recortar wordmarks horizontais.
+- **Status da biblioteca:** **44 de 49 serviços com arte local**, 5 ainda sem arquivo: Globoplay, Rappi, 99, inDrive e Canva. Disney+ é imagem horizontal enviada (não ícone quadrado oficial); pode ser substituída posteriormente por asset quadrado.
+- **PWA:** referências e versão de cache atualizadas para `2865`, quatro novos arquivos incluídos no manifesto de atualização. Mantidos IDs e lançamentos existentes, sem alterações financeiras.
+- **Status:** somente branch/PR em rascunho, não publicado e não homologado. Testes de código e visualização final em Android/PWA ainda necessários.
+
+
 - **Mais + Configurações (solicitado):** a tela Mais passa a exibir as opções de configurações em seções expansíveis; Preferências vem expandida por padrão e Dados e Registros, Sistema, Suporte e Administração ficam acessíveis sem navegar para uma rota duplicada. Minha Conta continua no topo, única. A rota `#settings` redireciona para `#more`, inclusive em atalhos antigos. Backup, notificações, aparência, exclusão de conta e confirmação de limpeza reutilizam as ações existentes.
 - **ChatGPT (símbolo incorporado):** `assets/service-icons/chatgpt.svg` agora é um arquivo local, sem requisição a terceiros. Fonte vetorial identificada: SuperTinyIcons `images/svg/chatgpt.svg` (licença MIT; crédito no documento de fontes). O arquivo não foi extraído do ZIP oficial da OpenAI; tratar como reprodução pública identificativa da marca, sujeita às regras da OpenAI. O carregamento utiliza caminho fixo validado e fallback neutro caso o arquivo falhe. Modo claro e escuro conservam o branco/preto do desenho.
 - **Ícones oficiais ainda pendentes (9):** Disney+, Prime Video, Globoplay, 99Food, Plus Delivery, Rappi, 99, inDrive e Canva. As páginas fornecidas foram avaliadas, mas os downloads binários/ZIPs ou imagens de lojas não puderam ser incorporados com verificação de conteúdo neste ambiente. Permanecem letras neutras; **não** afirmar que já possuem logo oficial.
