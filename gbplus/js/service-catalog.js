@@ -61,7 +61,13 @@ export const SERVICE_GROUPS=Object.freeze({
  social:'Redes sociais e comunicação',games:'Games e entretenimento',shopping:'Compras e pagamentos'
 });
 // Assets are audited, relative and committed to this repository; no CDN calls.
-const LOCAL_SERVICE_LOGOS=Object.freeze({'digital-chatgpt':'./assets/service-icons/chatgpt.svg'});
+const LOCAL_SERVICE_LOGOS=Object.freeze({
+ 'digital-chatgpt':'./assets/service-icons/chatgpt.svg',
+ 'delivery-plusdelivery':'./assets/service-icons/plus-delivery.webp',
+ 'delivery-99food':'./assets/service-icons/99food.png',
+ 'streaming-primevideo':'./assets/service-icons/prime-video.webp',
+ 'streaming-disney':'./assets/service-icons/disney-plus.webp'
+});
 export const SERVICE_CATALOG=Object.freeze(definitions.map(([id,name,group,billingMode,fallback])=>
  Object.freeze({id,name,group,billingMode,fallback,logoPath:LOCAL_SERVICE_LOGOS[id]||null,logoVerified:Boolean(LOCAL_SERVICE_LOGOS[id])})
 ));
