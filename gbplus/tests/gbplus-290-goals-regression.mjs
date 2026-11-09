@@ -56,7 +56,7 @@ const select=(label,name,options,value)=>'<label>'+esc(label)+'<select name="'+e
  options.map(([v,l])=>'<option value="'+esc(v)+'" '+(v===value?'selected':'')+'>'+esc(l)+'</option>').join('')+'</select></label>';
 const button=(title,action,kind='',extra='')=>'<button data-action="'+action+'" '+extra+'>'+title+'</button>';
 const forms=load('js/forms.js',['accountForm','accountBankPreview','transferForm'],{
- esc,icon,gbIcon,field,select,button,formFooter:()=>'<button type="submit">Salvar</button>',
+ esc,icon,gbIcon,field,select,button,formFooter:(label='Salvar')=>'<button type="submit">'+esc(label)+'</button>',
  findBank:()=>null,bankBadge:()=>'',accountKind:goals.accountKind,accountIcon:goals.accountIcon,
  goalPreset:goals.goalPreset,ACCOUNT_ICON_OPTIONS:goals.ACCOUNT_ICON_OPTIONS,GOAL_PRESETS:goals.GOAL_PRESETS,
  today
