@@ -199,17 +199,13 @@ export function accountForm(db,a,options={}){
 
 export function categoryForm(c){
  const current=categoryIconFor(c);
- const palette=CATEGORY_ICON_OPTIONS.map(([key,label])=>`<button type="button" class="gb-category-icon-choice ${current===key?'is-selected':''}" data-action="category-icon" data-icon="${esc(key)}" aria-label="Ícone: ${esc(label)}" aria-pressed="${current===key}" title="${esc(label)}">${gbIcon(key)}<small>${esc(label)}</small></button>`).join('');
- return `<form id="category-form" data-id="${esc(c?.id||'')}"><div class="form-grid">
-  ${field('Nome da categoria','name',c?.name||'','text','required maxlength="100"')}
-  ${select('Tipo','type',[['expense','Despesa'],['income','Receita']],c?.type||'expense')}
-  <fieldset class="full gb-category-icon-picker"><legend>Ícone da categoria</legend>
-   <input type="hidden" name="icon" value="${esc(current)}">
-   <label class="gb-category-icon-filter-label" for="gb-category-icon-search">Buscar ícone</label><input id="gb-category-icon-search" class="gb-category-icon-filter" type="search" autocomplete="off" placeholder="Buscar entre ${CATEGORY_ICON_OPTIONS.length} ícones" aria-label="Filtrar ícones">
-   <div class="gb-category-icon-grid">${palette}</div>
-   <small>O ícone aparece nos menus e junto à categoria selecionada.</small>
-  </fieldset>
-  </div>${c?button(icon('trash')+'Excluir categoria','delete-category','danger small',`data-id="${c.id}" type="button"`):''}${formFooter()}</form>`;
+ return '<form id="category-form" data-id="'+esc(c?.id||'')+'"><div class="form-grid">'+
+  field('Nome da categoria','name',c?.name||'','text','required maxlength="100"')+
+  select('Tipo','type',[['expense','Despesa'],['income','Receita']],c?.type||'expense')+
+  financePickerField(null,{kind:'category-icon',name:'icon',label:'Ícone da categoria',value:current})+
+  '</div>'+
+  (c?button(icon('trash')+'Excluir categoria','delete-category','danger small','data-id="'+esc(c.id)+'" type="button"'):'')+
+  formFooter()+'</form>';
 }
 export function paymentForm(db,t){const accounts=db.accounts.filter(a=>a.active);return accounts.length?`<div class="detail-summary"><span>${esc(t.description)}</span><strong>${money(pending(db,t))}</strong><small>Saldo pendente</small></div><form id="payment-form" data-id="${t.id}"><div class="form-grid">${field('Valor da baixa (R$)','amount',pending(db,t)/100,'number',`required min="0.01" max="${pending(db,t)/100}" step="0.01"`)}${field('Data do pagamento / recebimento','date',today(),'date',`required max="${today()}"`)}<div class="full">${financePickerField(db,{kind:'account',name:'accountId',label:'Conta utilizada',value:t.accountId||accounts[0]?.id||'',required:true})}</div></div>${formFooter('Confirmar baixa')}</form>`:empty('Adicione uma conta primeiro','Uma baixa precisa de uma conta financeira para movimentar o saldo.','new-account','Cadastrar conta');}
 export function transferForm(db,{from='',to=''}={}){
