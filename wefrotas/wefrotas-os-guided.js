@@ -23,7 +23,7 @@
   const allDrivers = () => bridge?.drivers?.() || [];
   const sourceId = () => value('order-veiculo');
   const type = () => value('order-tipo-os');
-  const isIncident = t => ['sinistro','pane','revisao','avulsa'].includes(t);
+  const isIncident = t => t === 'sinistro';
   const setVisible = (id, show) => {const el=byId(id); if(el)el.hidden=!show;};
   const getSaved = () => existingOrder?.operationalIncident || null;
   const linked = () => Boolean(getSaved()?.substitutionId);
@@ -288,77 +288,105 @@
       ...(closure?.titularBack?{restoredAt:value('order-data-termino')||new Date().toISOString().slice(0,10)}:{})
     },closure};
   }
+  function clearWizardError() {
+    const error=byId('wf-os-step-error');
+    if(error){error.textContent='';error.hidden=true;}
+    doc.querySelectorAll('#wf-os-step-data [aria-invalid="true"], #wf-os-step-occurrence [aria-invalid="true"]')
+      .forEach(input=>input.removeAttribute('aria-invalid'));
+  }
+  function showWizardError(message,fieldId='') {
+    const error=byId('wf-os-step-error');
+    if(error){error.textContent=message;error.hidden=false;error.setAttribute('role','alert');}
+    const field=fieldId?byId(fieldId):null;
+    if(field){
+      field.setAttribute('aria-invalid','true');
+      const visible=field.closest?.('.custom-select-shell')?.querySelector?.('.custom-select-button')||field;
+      visible.focus?.();
+      visible.scrollIntoView?.({block:'nearest',behavior:'smooth'});
+    }else error?.scrollIntoView?.({block:'nearest',behavior:'smooth'});
+    notify(message);
+    return false;
+  }
   function drawWizard() {
     const data=byId('wf-os-step-data'),occurrence=byId('wf-os-step-occurrence'),review=byId('wf-os-step-review');
     if(!data||!occurrence||!review)return;
-    data.hidden=wizardStage!==1;
-    occurrence.hidden=wizardStage!==2;
-    review.hidden=wizardStage!==3;
+    const guided=type()==='sinistro';
+    if(!guided)wizardStage=1;
+    const header=byId('wf-os-step-header'),actions=byId('wf-os-step-actions');
+    if(header)header.hidden=!guided;
+    if(actions)actions.hidden=!guided;
+    data.hidden=guided&&wizardStage!==1;
+    occurrence.hidden=!guided||wizardStage!==2;
+    review.hidden=!guided||wizardStage!==3;
     const prev=byId('wf-os-step-back'),next=byId('wf-os-step-next');
-    if(prev)prev.hidden=wizardStage===1;
-    if(next)next.hidden=wizardStage===3;
+    if(prev)prev.hidden=!guided||wizardStage===1;
+    if(next)next.hidden=!guided||wizardStage===3;
     doc.querySelectorAll('[data-os-step-label]').forEach(node=>{
-      node.setAttribute('aria-current',String(Number(node.dataset.osStepLabel)===wizardStage));
+      node.setAttribute('aria-current',String(guided&&Number(node.dataset.osStepLabel)===wizardStage));
     });
     const submit=byId('modal-submit-btn');
     if(submit){
-      const enabled=wizardStage===3;
+      const enabled=!guided||wizardStage===3;
       submit.hidden=!enabled;
       submit.disabled=!enabled;
       submit.style.display=enabled?'inline-flex':'none';
-      if(enabled){
-        const label=submit.querySelector('span');
-        if(label)label.textContent='Salvar OS';else submit.textContent='Salvar OS';
-      }
+      const label=submit.querySelector('span');
+      if(label)label.textContent='Salvar OS';else submit.textContent='Salvar OS';
+    }
+    if(!guided){
+      clearWizardError();
+      return;
     }
     if(wizardStage===3){
       const vehicle=allVehicles().find(v=>String(v.id)===sourceId());
       const driver=allDrivers().find(d=>String(d.id)===value('order-driver'));
-      const typeLabel=({sinistro:'Sinistro',pane:'Manutenção corretiva / pane',revisao:'Revisão',
-        avulsa:'Avulsa',mensal:'Mensal de despesas'})[type()]||type();
       const stoppedText=isPt()?'Perda total confirmada':stopped()?'Indisponível':'Em operação';
       const reserve=wantsReserve()?allVehicles().find(v=>String(v.id)===value('os-guide-vehicle'))||draftVehicle:null;
       const reserveText=linked()?'Já vinculado ao histórico':
-        wantsReserve()?vehicleLabel(reserve):stopped()?'Não vinculado / definir depois':'Não necessário';
+        wantsReserve()?(reserve?vehicleLabel(reserve):'Não selecionado'):stopped()?'Não vinculado / definir depois':'Não necessário';
       const rows=[
         ['OS',value('order-numero')||'Numeração automática'],
-        ['Tipo',typeLabel],
+        ['Tipo','Sinistro'],
         ['Veículo titular',vehicle?vehicleLabel(vehicle):'Não selecionado'],
         ['Motorista',driver?.nome||'Não informado'],
-        ['Situação',type()==='mensal'?'Sem alteração':stoppedText],
-        ['Reserva',type()==='mensal'?'Não se aplica':reserveText],
+        ['Situação',stoppedText],
+        ['Reserva',reserveText],
         ['Entrega',wantsReserve()?value('os-guide-start')+' · '+value('os-guide-km')+' km':'Não se aplica']
       ];
-      const closing=isClosing();
-      if(closing) rows.push(['Encerramento','Verificação da devolução e retorno do titular']);
-      review.innerHTML='<div class="wf-os-review-heading"><strong>Confira antes de salvar</strong><p>As informações serão gravadas juntas no WeFrotas e só serão confirmadas depois da resposta do Supabase.</p></div>'+
+      if(isClosing())rows.push(['Encerramento','Verificação da devolução e retorno do titular']);
+      review.innerHTML='<div class="wf-os-review-heading"><strong>Confira antes de salvar</strong><p>Os dados serão gravados juntos após confirmação do Supabase.</p></div>'+
         rows.map(row=>'<div class="wf-os-review-row"><span>'+esc(row[0])+'</span><strong>'+esc(row[1])+'</strong></div>').join('');
     }
     const fields=byId('modal-fields');if(fields)fields.scrollTop=0;
   }
   function nextWizard() {
+    if(type()!=='sinistro')return false;
+    clearWizardError();
     if(wizardStage===1){
-      if(!value('order-veiculo')||!value('order-descricao')){
-        notify('Selecione o veículo e informe a descrição da OS para continuar.');return false;
-      }
-      if(!value('order-numero')){notify('Informe o número da OS.');return false;}
+      if(!sourceId())return showWizardError('Selecione o veículo da OS antes de continuar.','order-veiculo');
+      if(!value('order-descricao'))return showWizardError('Preencha a descrição da ocorrência para continuar.','order-descricao');
+      if(!value('order-numero'))return showWizardError('Informe o número da OS.','order-numero');
       const start=value('order-data-inicio'),end=value('order-data-termino');
-      if((start&&!validDate(start))||(end&&!validDate(end))||(start&&end&&end<start)){
-        notify('Verifique as datas da OS antes de continuar.');return false;
-      }
+      if((start&&!validDate(start))||(end&&!validDate(end))||(start&&end&&end<start))
+        return showWizardError('Verifique as datas da OS antes de continuar.','order-data-inicio');
     }else if(wizardStage===2){
-      try{collect()}catch(error){notify(error.message);return false;}
+      try{collect()}catch(error){return showWizardError(error.message);}
     }
     wizardStage=Math.min(3,wizardStage+1);drawWizard();return true;
   }
-  function backWizard(){wizardStage=Math.max(1,wizardStage-1);drawWizard();}
-  function startWizard(){wizardStage=1;refresh();drawWizard();}
+  function backWizard(){if(type()!=='sinistro')return;clearWizardError();wizardStage=Math.max(1,wizardStage-1);drawWizard();}
+  function startWizard(){wizardStage=1;clearWizardError();refresh();drawWizard();}
   function onChange(e) {
     if(!byId('os-operational-guide'))return;
     if(existingOrder&&!getSaved()&&(e.target?.id==='order-tipo-os'||e.target?.closest?.('#os-operational-guide')))legacyEdited=true;
     if(e.target?.id==='order-tipo-os'){
-      setRadio('os-guide-stopped',type()==='pane'?'sim':['avulsa','revisao'].includes(type())?'nao':'');
+      wizardStage=1;
+      setRadio('os-guide-stopped','');
       setRadio('os-guide-reserve','');
+      clearWizardError();
+      refresh();
+      drawWizard();
+      return;
     }
     if(e.target?.id==='order-tipo-os'||e.target?.id==='order-veiculo'||e.target?.id==='order-data-inicio'||e.target?.id==='order-status'
       ||e.target?.id==='os-guide-severity'||e.target?.id==='os-guide-start'
