@@ -91,22 +91,31 @@ function financialSections(kind,items,selected){
   const banks=split<0?[]:options.slice(split);
   return [{title:'Sem banco',items:top},{title:'Bancos disponíveis',items:banks}];
  }
- return [{title:kind==='account'?'Contas disponíveis':'Cartões disponíveis',items:options}];
+ const sectionTitle={
+  account:'Contas disponíveis',card:'Cartões disponíveis',icon:'Escolha seu ícone',
+  goal:'Escolha o objetivo',partner:'Parceiros disponíveis',
+  'expense-category':'Categorias de despesa'
+ }[kind]||'Opções disponíveis';
+ return [{title:sectionTitle,items:options}];
 }
 export function sheetGroupsCount(groups){
  return groups.reduce((count,group)=>count+group.items.length,0);
 }
 export function openGbPickerSheet({kind,items=[],selected='',onPick}){
  const root=picker();
- if(!root||!['category','service','account','card','bank'].includes(kind)||typeof onPick!=='function')return false;
+ if(!root||!['category','service','account','card','bank','icon','goal','partner','expense-category'].includes(kind)||typeof onPick!=='function')return false;
  // Never replace a live dialog: wait for its close event before opening another.
  if(root.open)return false;
  const sections=kind==='category'?categorySections(items,selected):
   kind==='service'?serviceSections(selected):financialSections(kind,items,selected);
  const titles={category:'Selecione a categoria',service:'Selecione o serviço',
-  account:'Selecione uma conta',card:'Selecione um cartão',bank:'Selecione onde fica o dinheiro'};
+  account:'Selecione uma conta',card:'Selecione um cartão',bank:'Selecione onde fica o dinheiro',
+  icon:'Escolha um ícone',goal:'Qual é o objetivo?',partner:'Selecione um parceiro',
+  'expense-category':'Escolha uma categoria'};
  const hints={category:'Busque por uma categoria',service:'Busque por um serviço',
-  account:'Busque por uma conta',card:'Busque por um cartão',bank:'Busque pelo banco ou instituição'};
+  account:'Busque por uma conta',card:'Busque por um cartão',bank:'Busque pelo banco ou instituição',
+  icon:'Busque por um ícone',goal:'Busque por um objetivo',partner:'Busque por um parceiro',
+  'expense-category':'Busque por uma categoria'};
  const title=titles[kind],searchHint=hints[kind];
  const count=sheetGroupsCount(sections);
  const groups=sections.map((section,i)=>
