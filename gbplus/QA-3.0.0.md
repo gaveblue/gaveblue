@@ -7,10 +7,12 @@
 - [x] Regressão específica `gbplus/tests/gbplus-300-visual-regression.mjs` executada em ambiente JS isolado, com validação de renderização de seletores, nomes de campos, ações disponíveis, versão e assets.
 - [x] Versão, imports com cache-busting, CSS e Service Worker apontam à candidata 3.0.0 / build 3000.
 - [x] Domínio de saldos, geração de lançamentos, compras e faturas não editado.
+- [x] Node 22 independente dos testes Functions: 16 verificações do componente financeiro (renderização HTML e seleção) e 9 das ações de troca de origem/destino passaram com fixtures locais baseadas no código da branch. **Não equivalem a teste completo do app.**
 - [ ] Execução real de todos os testes Node no checkout do repositório.
 - [ ] GitHub Actions: execução 42563325658 terminou em **failure antes de iniciar steps**, sem runner nem logs de teste. Não equivale a falha comprovada do teste, tampouco a aprovação.
-- [ ] Verificação de interação real no navegador desktop e Android/PWA.
-- [ ] Aprovação do responsável e checklist final antes da liberação.
+- [ ] Verificação de interação real no navegador desktop e Android/PWA. A tentativa de iniciar Chromium headless no container não concluiu; não existe evidência de teste E2E.
+- [x] Autorização expressa do responsável para liberação mesmo com QA parcial em 09/11/2026. Não equivale à homologação técnica.
+- [ ] Homologação técnica completa e correções pós-publicação.
 
 ## Roteiro de homologação
 1. **Contas:** criar/editar conta bancária, conta personalizada com ícone e cofrinho com objetivo, prazo e valor. Conferir situação ativa/inativa, edição legada e persistência após recarga.
