@@ -70,3 +70,12 @@ O catálogo passou de **26 para 49 opções** na branch de desenvolvimento da ve
 Recebimento das imagens pelo usuário não constitui, por si só, comprovação de licença de uso ou extração oficial. Referências oficiais fornecidas no chat estão documentadas anteriormente. Todos os arquivos são identificadores visuais de despesas, sem afiliação ou endosso dos proprietários das marcas.
 
 **Verificação:** quatro hashes Git do blob coincidiram com os arquivos locais enviados; nenhum URL remoto é usado na interface. **Pendentes (5):** Globoplay, Rappi, 99, inDrive, Canva. A escolha visual final no modo claro/escuro precisa ser avaliada em aparelho Android antes da publicação.
+
+## Ícones finais recebidos do responsável — 08/11/2026, build 2866
+- `digital-canva` — `assets/service-icons/canva.webp`, imagem quadrada Canva.
+- `mobility-indrive` — `assets/service-icons/indrive.webp`, imagem quadrada inDrive.
+- `mobility-99` — `assets/service-icons/99.webp`, imagem quadrada 99.
+- `delivery-rappi` — `assets/service-icons/rappi.webp`, imagem quadrada Rappi.
+- `streaming-globoplay` — `assets/service-icons/globoplay.webp`, imagem quadrada Globoplay.
+
+Todos transcodificados de arquivos enviados diretamente nesta conversa para WebP de 96×96, preservando a composição quadrada, cores e contraste. São identidades visuais fornecidas pelo usuário e não representam afiliação com essas empresas. O PWA não consulta URLs de marcas externas. A aplicação agora possui 49 serviços com recursos gráficos locais, incluindo os 39 SVGs vetoriais originais e 10 arquivos específicos.
