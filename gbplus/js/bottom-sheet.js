@@ -86,7 +86,7 @@ function financialSections(kind,items,selected){
  });
  if(kind==='bank'){
   // Always show cash / legacy non-banking options first, ahead of the bank directory.
-  const split=ordered.findIndex(item=>!String(item.id).startsWith('__'));
+  const split=ordered.findIndex(item=>item.id!==''&&!String(item.id).startsWith('__'));
   const top=split<0?options:options.slice(0,split);
   const banks=split<0?[]:options.slice(split);
   return [{title:'Sem banco',items:top},{title:'Bancos disponíveis',items:banks}];
