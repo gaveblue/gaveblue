@@ -7,6 +7,7 @@
   let draftOrderId = '';
   let existingOrder = null;
   let sheetOpen = false;
+  let legacyEdited = false;
 
   const text = value => String(value ?? '');
   const esc = value => text(value).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
@@ -35,7 +36,7 @@
     return '<option value="">'+esc(placeholder)+'</option>'+list.map(item=>'<option value="'+esc(item.id)+'">'+esc(vehicleLabel(item))+'</option>').join('');
   }
   function reset() {
-    draftVehicle=null;draftSubstitutionId='';draftOrderId=identifier('os-');existingOrder=null;
+    draftVehicle=null;draftSubstitutionId='';draftOrderId=identifier('os-');existingOrder=null;legacyEdited=false;
     closeSheet(true);
   }
   function formHtml() {
@@ -105,6 +106,8 @@
     setVisible('os-guide-reserve-block',halt&&!linked());
     setVisible('os-guide-detail',need&&!linked());
     setVisible('os-guide-linked',linked());
+    if(byId('os-guide-severity'))byId('os-guide-severity').disabled=linked();
+    doc.querySelectorAll('input[name="os-guide-stopped"]').forEach(el=>{el.disabled=linked()});
     const linkedBox=byId('os-guide-linked');
     if(linkedBox&&linked()){
       linkedBox.innerHTML='<strong>Carro reserva já vinculado</strong><p>A substituição desta OS tem histórico protegido. Para informar devolução ou acompanhar custos, abra a aba Carro reserva na ficha do veículo titular.</p>';
@@ -125,7 +128,7 @@
       'Cadastro temporário preparado: '+vehicleLabel(draftVehicle)+'. Será salvo somente com a OS.':'';}
   }
   function loadOrder(order) {
-    existingOrder=order||null;draftVehicle=null;
+    existingOrder=order||null;draftVehicle=null;legacyEdited=false;
     const old=getSaved();
     draftSubstitutionId=old?.substitutionId||'';
     setRadio('os-guide-stopped',old?.stopped?'sim':old?'nao':'');
@@ -180,7 +183,7 @@
   function collect() {
     if(!isIncident(type()))return {enabled:false};
     const prior=getSaved();
-    if(existingOrder&&!prior)return {enabled:false,legacy:true};
+    if(existingOrder&&!prior&&!legacyEdited)return {enabled:false,legacy:true};
     const severity=type()==='sinistro'?value('os-guide-severity'):'';
     const halt=stopped(),need=wantsReserve();
     const source=sourceId(),driver=value('order-driver'),date=value('os-guide-start')||value('order-data-inicio');
@@ -201,6 +204,11 @@
       // These fields cannot silently change a historical substitution.
       insurer:incident.insurer,protocol:incident.protocol,bo:incident.bo}};
     if(need){
+      if(draftVehicle&&incident.reserveVehicleId===draftVehicle.id){
+        draftVehicle.reserveProviderOrigin=incident.origin;
+        draftVehicle.propriedade=incident.origin==='locadora'?'locado':'emprestado';
+        draftVehicle.locado=incident.origin==='locadora';
+      }
       if(!source||!driver)throw Error('Selecione o veículo e o motorista responsável pelo reserva.');
       if(!incident.reserveVehicleId)throw Error('Escolha ou cadastre o carro reserva.');
       if(incident.reserveVehicleId===source)throw Error('O titular não pode ser o próprio carro reserva.');
@@ -219,6 +227,7 @@
   }
   function onChange(e) {
     if(!byId('os-operational-guide'))return;
+    if(existingOrder&&!getSaved()&&(e.target?.id==='order-tipo-os'||e.target?.closest?.('#os-operational-guide')))legacyEdited=true;
     if(e.target?.id==='order-tipo-os'){
       setRadio('os-guide-stopped',type()==='pane'?'sim':['avulsa','revisao'].includes(type())?'nao':'');
       setRadio('os-guide-reserve','');
