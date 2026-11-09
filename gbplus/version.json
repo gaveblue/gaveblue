@@ -9,7 +9,7 @@
     "Cartões de metas exibem saldo, porcentagem alcançada, valor que falta, prazo e sugestão aproximada de aporte mensal.",
     "Depósitos e retiradas em cofrinhos usam transferências entre contas existentes; não contam como receita/despesa nem duplicam saldo total.",
     "Dados anteriores e vínculos financeiros existentes são preservados. Metadados opcionais no JSON de contas, sem nova tabela ou migração SQL.",
-    "Versão candidata em branch de desenvolvimento; publicação e homologação visual Android/PWA pendentes."
+    "Liberação autorizada pelo proprietário; testes integrais no CI e validação visual Android/PWA ainda sem evidências."
   ],
   "assets": [
     "./index.html",
@@ -223,9 +223,9 @@
       "description": "Transferências internas preservam o saldo geral."
     }
   ],
-  "release_status": "candidate_pending_qa",
+  "release_status": "user_authorized_release_qa_incomplete",
   "homologation": {
-    "status": "implementation_pending_regressions_and_android_visual_qa",
-    "notes": "Implementação em branch isolada. Testes automatizados, revisão do PR e conferência visual Android/PWA são pré-requisitos para aprovação/publicação."
+    "status": "specific_regressions_passed_ci_and_visual_pending",
+    "notes": "Liberação solicitada expressamente pelo responsável em 09/11/2026. Dois testes específicos do editor de contas e metas executados em ambiente JS isolado passaram; o workflow GitHub Actions falhou antes de registrar execução de steps, logo a suíte integral e o QA visual Android/PWA ainda não foram comprovados. Não classificar como homologada."
   }
 }
