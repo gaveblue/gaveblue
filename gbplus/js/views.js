@@ -4,6 +4,7 @@ import {INDICATORS} from './store.js?v=20261105-78';
 import {esc,icon,button,empty,titleTable,chart,select,field} from './ui.js?v=20261105-72';
 import {gbIcon,categoryIconFor} from './gb-icons.js?v=20261108-2821';
 import {bankBadge,bankForAccount,bankName} from './banks.js?v=20261105-87';
+import {accountKind,accountMark,accountTypeLabel,goalProgressMarkup} from './account-goals.js?v=20261109-2900';
 import {missingCategorySuggestions,isLegacyServiceCategory} from './category-library.js?v=20261108-2862';
 import {calculateDueAlerts,notificationPrefs} from './notification-rules.js?v=20261108-2821';
 export const routes=[['dashboard','Dashboard','home'],['titles','Lançamentos','titles'],['payable','Contas a pagar','down'],['receivable','Contas a receber','up'],['provisions','Provisões','layers'],['flow','Fluxo de caixa','chart'],['partners','Parceiros','people'],['accounts','Contas e cartões','wallet'],['forecast','Previsão financeira','chart'],['banks','Bancos','building-2'],['categories','Categorias','category'],['reports','Relatórios','chart'],['notifications','Notificações','bell'],['more','Mais','more']];
@@ -16,7 +17,7 @@ function balanceAccountStrip(db){
    const amount=money(accountBalance(db,a.id,today()));
    return '<button type="button" class="gb-balance-bank" data-action="account-detail" data-id="'+esc(a.id)+'" '+
     'title="'+esc(a.name)+' · '+esc(amount)+'" aria-label="Abrir movimentações de '+esc(a.name)+'. Saldo: '+esc(amount)+'">'+
-    bankBadge(bankForAccount(db,a))+
+    accountMark(db,a)+
     '<span class="gb-balance-bank-amount">'+esc(amount)+'</span></button>';
   }).join('')+'</div>';
 }
@@ -114,7 +115,52 @@ export function notificationsView(db){
 }
 
 export function partnersView(db,state){const ps=db.partners.filter(p=>`${p.name} ${p.tradeName} ${p.document}`.toLowerCase().includes(state.partnerQuery.toLowerCase()));return `${heading('Parceiros','Pessoas e empresas que fazem parte do seu negócio.',button(icon('plus')+'Novo parceiro','new-partner','primary'))}<section class="panel"><div class="filters"><label class="search-field">${icon('search')}<input id="partner-search" type="search" placeholder="Buscar nome, CPF ou CNPJ" aria-label="Pesquisar parceiros" value="${esc(state.partnerQuery)}"></label><span class="muted">${ps.length} parceiros</span></div>${ps.length?`<div class="partner-grid">${ps.map(p=>`<article class="partner-card"><div class="partner-top"><div class="partner-avatar">${esc(p.name.slice(0,2).toUpperCase())}</div><span class="badge">${p.active?'Ativo':'Inativo'}</span></div><h3>${esc(p.name)}</h3><p>${esc(p.tradeName||p.email||'Sem nome fantasia')}</p><div class="role-list">${p.roles.map(r=>`<span>${esc(r)}</span>`).join('')}</div><div class="partner-bottom">${button('Ver histórico','partner-detail','small',`data-id="${p.id}"`)}<button class="icon-button" data-action="edit-partner" data-id="${p.id}" aria-label="Editar ${esc(p.name)}">${icon('edit')}</button></div></article>`).join('')}</div>`:empty('Bons negócios começam com boas conexões','Cadastre clientes, fornecedores e outros parceiros.','new-partner','Adicionar parceiro')}</section>`;}
-export function accountsView(db,{embedded=false}={}){return `${embedded?'':heading('Contas bancárias','Saldos reais. Todas as contas sob seu controle.',button('Bancos e ícones','open-banks','small')+button(icon('transfer')+'Transferir','new-transfer')+button(icon('plus')+'Nova conta','new-account','primary'))}<div class="account-grid">${db.accounts.map(a=>`<article class="panel account-card"><div class="panel-heading"><span class="gb-account-bank-logo">${bankBadge(bankForAccount(db,a))}</span><span class="badge">${a.active?'Ativa':'Inativa'}</span></div><h2>${esc(a.name)}</h2><p>${esc(bankName(db,a.bankId,a.bank)||'Conta financeira')}</p><strong>${money(accountBalance(db,a.id,today()))}</strong><small>Saldo atual · Inicial: ${money(a.initial)}</small><div class="partner-bottom">${button('Movimentações','account-detail','small',`data-id="${a.id}"`)}${button('Conciliações','bank-import-history','small',`data-id="${a.id}"`)}${a.active!==false?button(icon('upload')+'Importar extrato','bank-import-open','small',`data-id="${a.id}"`):''}<button class="icon-button" data-action="edit-account" data-id="${a.id}" aria-label="Editar conta ${esc(a.name)}">${icon('edit')}</button></div></article>`).join('')}</div>${!db.accounts.length?`<section class="panel">${empty('Onde seu dinheiro se movimenta?','Adicione uma conta bancária, carteira ou caixa para registrar baixas.','new-account','Adicionar conta')}</section>`:''}`;}
+export function accountsView(db,{embedded=false}={}){
+ const accounts=db.accounts.filter(a=>accountKind(a)!=='goal');
+ const goals=db.accounts.filter(a=>accountKind(a)==='goal');
+ const goalCards=goals.map(a=>
+  '<article class="gb-goal-card" data-goal-id="'+esc(a.id)+'">'+
+   '<div class="gb-goal-top">'+accountMark(db,a)+
+    '<span class="badge">'+(a.active?'Ativo':'Inativo')+'</span></div>'+
+   '<h3>'+esc(a.name)+'</h3>'+
+   '<span class="gb-goal-balance">'+money(accountBalance(db,a.id,today()))+'</span>'+
+   goalProgressMarkup(db,a)+
+   '<div class="gb-goal-actions">'+
+    (a.active!==false?button(icon('plus')+'Guardar','goal-deposit','small','data-id="'+esc(a.id)+'"')+
+     button('Retirar','goal-withdraw','small','data-id="'+esc(a.id)+'"'):'')+
+    button('Movimentações','account-detail','small','data-id="'+esc(a.id)+'"')+
+    '<button type="button" class="icon-button" data-action="edit-account" data-id="'+esc(a.id)+'" aria-label="Editar cofrinho '+esc(a.name)+'">'+icon('edit')+'</button>'+
+   '</div></article>').join('');
+ const accountCards=accounts.map(a=>
+  '<article class="panel account-card"><div class="panel-heading">'+
+   '<span class="gb-account-bank-logo">'+accountMark(db,a)+'</span>'+
+   '<span class="badge">'+(a.active?'Ativa':'Inativa')+'</span></div>'+
+   '<h2>'+esc(a.name)+'</h2>'+
+   '<p>'+esc(accountKind(a)==='bank'?(bankName(db,a.bankId,a.bank)||'Conta financeira'):accountTypeLabel(a))+'</p>'+
+   '<strong>'+money(accountBalance(db,a.id,today()))+'</strong>'+
+   '<small>Saldo atual · Inicial: '+money(a.initial)+'</small>'+
+   '<div class="partner-bottom">'+
+    button('Movimentações','account-detail','small','data-id="'+esc(a.id)+'"')+
+    button('Conciliações','bank-import-history','small','data-id="'+esc(a.id)+'"')+
+    (a.active!==false?button(icon('upload')+'Importar extrato','bank-import-open','small','data-id="'+esc(a.id)+'"'):'')+
+    '<button class="icon-button" data-action="edit-account" data-id="'+esc(a.id)+'" aria-label="Editar conta '+esc(a.name)+'">'+icon('edit')+'</button>'+
+   '</div></article>').join('');
+ return (embedded?'':heading('Contas financeiras','Bancos, contas personalizadas e metas num só lugar.',
+  button('Novo cofrinho','new-goal','small')+
+  button(icon('plus')+'Nova conta','new-account','primary')))+
+  '<section class="gb-goals-section" aria-label="Cofrinhos e metas">'+
+   '<div class="gb-goals-head"><div><h2>Meus cofrinhos</h2><p>Acompanhe seus objetivos, sem misturar transferências com receitas.</p></div>'+
+    button(icon('plus')+'Criar meta','new-goal','small')+'</div>'+
+   (goals.length?'<div class="gb-goal-grid">'+goalCards+'</div>':
+    '<div class="gb-goal-empty"><div><strong>Seu primeiro cofrinho</strong><p>Reserve para emergências, casamento, educação ou qualquer sonho.</p></div>'+
+    button('Criar cofrinho','new-goal','small')+'</div>')+
+  '</section>'+
+  '<h2 class="gb-standard-accounts-label">Contas e dinheiro disponível</h2>'+
+  '<div class="account-grid">'+accountCards+'</div>'+
+  (!accounts.length?'<section class="panel">'+
+    empty('Onde seu dinheiro se movimenta?','Adicione uma conta bancária ou personalizada para guardar e transferir valores.','new-account','Adicionar conta')+
+   '</section>':'');
+}
 export function categoriesView(db){
  const missing=missingCategorySuggestions(db.categories);
  // Do not destroy legacy IDs: card purchases, statement imports and older titles
