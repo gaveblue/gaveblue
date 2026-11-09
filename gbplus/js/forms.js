@@ -3,7 +3,7 @@ import {esc,field,select,textarea,formFooter,button,icon,titleTable,empty} from 
 import {INDICATORS} from './store.js?v=20261105-78';
 import {entrySelect} from './entry-select.js?v=20261108-2861';
 import {gbIcon,CATEGORY_ICON_OPTIONS,categoryIconFor} from './gb-icons.js?v=20261108-2821';
-import {bankOptions,findBank,bankPicker} from './banks.js?v=20261105-87';
+import {bankOptions,findBank,bankPicker,bankBadge} from './banks.js?v=20261105-87';
 import {dailyStatement} from './daily-statement.js?v=20261105-90';
 import {servicePickerMarkup,serviceIdentityMarkup,serviceDisplayName} from './service-ui.js?v=20261108-2880';
 import {isServiceExpenseCategory} from './service-catalog.js?v=20261108-2880';
@@ -134,19 +134,39 @@ export function titleForm(db,t,type='expense'){
  </form>`;
 }
 export function partnerForm(p){return `<form id="partner-form" data-id="${p?.id||''}"><div class="form-grid">${field('Nome ou razão social','name',p?.name||'','text',required)}${field('Nome fantasia','tradeName',p?.tradeName||'','text','maxlength="200"')}${field('CPF ou CNPJ','document',p?.document||'','text','maxlength="18"')}${field('Telefone','phone',p?.phone||'','tel','maxlength="30"')}${field('E-mail','email',p?.email||'','email','maxlength="200"')}${select('Situação','active',[['true','Ativo'],['false','Inativo']],String(p?.active??true))}<fieldset class="full roles"><legend>Classificações · escolha uma ou mais</legend>${['Cliente','Fornecedor','Transportadora','Funcionário','Outros'].map(r=>`<label><input type="checkbox" name="roles" value="${r}" ${p?.roles.includes(r)?'checked':''}>${r}</label>`).join('')}</fieldset><div class="full">${field('Endereço','address',p?.address||'','text','maxlength="500"')}</div>${textarea('Observações','notes',p?.notes)}</div>${p?button(icon('trash')+'Excluir parceiro','delete-partner','danger small',`data-id="${p.id}" type="button"`):''}${formFooter()}</form>`;}
+/** Compact, shared account-bank preview. No persisted "cash" bank ID is needed. */
+export function accountBankPreview(db,bankId='',manualBank=''){
+ const bank=findBank(db,bankId);
+ const legacy=!bank?String(manualBank||'').trim():'';
+ const label=bank?.name||legacy||'Dinheiro em caixa';
+ const sub=bank?'Banco ou instituição':legacy?'Instituição já cadastrada':'Sem banco · caixa transitório';
+ const mark=bank?bankBadge(bank):
+  '<span class="gb-account-cash-mark" aria-hidden="true">'+icon('wallet')+'</span>';
+ return '<span class="gb-account-bank-preview">'+mark+
+  '<span class="gb-account-bank-copy"><strong>'+esc(label)+'</strong><small>'+esc(sub)+'</small></span></span>';
+}
 export function accountForm(db,a){
- const id=a?.bankId||findBank(db,a?.bank)?.id||'';
- return '<form id="account-form" data-id="'+esc(a?.id||'')+'"><div class="form-grid">'+
- field('Nome da conta','name',a?.name||'','text','required maxlength="120"')+
- bankPicker(db,id)+
- '<div class="full">'+field('Outra instituição (opcional)','bank',a?.bank&&!id?a.bank:'','text','maxlength="120" placeholder="Ex.: Cooperativa regional"')+'</div>'+
- field('Agência (opcional)','branch',a?.branch||'','text','maxlength="80"')+
- field('Número da conta (opcional)','number',a?.number||'','text','maxlength="80"')+
- field('Saldo inicial (R$)','initial',(a?.initial||0)/100,'number','required step="0.01" min="-10000000000" max="10000000000"')+
- select('Situação','active',[['true','Ativa'],['false','Inativa']],String(a?.active??true))+
- '<p class="form-hint full">Selecione um banco para exibir seu logo. Se não aparecer, você pode cadastrar uma instituição em Bancos. O saldo inicial é o ponto de partida da conta; alterá-lo recalcula o saldo atual.</p></div>'+
- (a?button(icon('trash')+'Excluir conta','delete-account','danger small','data-id="'+esc(a.id)+'" type="button"'):'')+
- formFooter()+'</form>';
+ const matched=findBank(db,a?.bankId)||findBank(db,a?.bank);
+ const id=matched?.id||'';
+ const legacy=a?.bank&&!matched?String(a.bank):'';
+ const initial=a?String((a.initial||0)/100):'';
+ return '<form id="account-form" class="gb-account-edit-form" data-id="'+esc(a?.id||'')+'">'+
+  '<div class="form-grid gb-account-edit-grid">'+
+   '<div class="full">'+field('Nome da conta','name',a?.name||'','text','required maxlength="120" placeholder="Ex.: Conta principal, Caixa da empresa"')+'</div>'+
+   '<div class="full gb-account-bank-field"><span class="gb-account-bank-label" id="account-bank-label">Onde fica o dinheiro?</span>'+
+    '<input type="hidden" name="bankId" value="'+esc(id)+'">'+
+    '<input type="hidden" name="bank" value="'+esc(legacy)+'">'+
+    '<button type="button" class="gb-account-bank-trigger" data-action="account-bank-picker" aria-labelledby="account-bank-label" aria-haspopup="dialog" aria-controls="gb-picker-sheet" aria-expanded="false">'+
+     '<span data-account-bank-preview>'+accountBankPreview(db,id,legacy)+'</span>'+
+     icon('chevron')+'</button></div>'+
+   '<div class="full gb-account-opening"><label for="account-initial">Saldo inicial <small>(opcional)</small></label>'+
+    '<div class="gb-account-opening-control"><span aria-hidden="true">R$</span>'+
+     '<input id="account-initial" name="initial" type="number" value="'+esc(initial)+'" placeholder="0,00" min="-10000000000" max="10000000000" step="0.01" inputmode="decimal" aria-label="Saldo inicial em reais, opcional"></div>'+
+   '</div>'+
+   (a?select('Situação','active',[['true','Ativa'],['false','Inativa']],String(a.active??true)):'<input type="hidden" name="active" value="true">')+
+  '</div>'+
+  (a?button(icon('trash')+'Excluir conta','delete-account','danger small','data-id="'+esc(a.id)+'" type="button"'):'')+
+  formFooter()+'</form>';
 }
 
 export function categoryForm(c){
