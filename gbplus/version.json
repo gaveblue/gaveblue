@@ -1,7 +1,7 @@
 {
   "version": "3.0.0",
   "build": 3000,
-  "published_at": null,
+  "published_at": "2026-11-09T11:18:07Z",
   "title": "Interface financeira padronizada e formulários compactos",
   "notes": [
     "Contas e cartões reorganizados com ações principais visíveis, informações complementares em Mais opções, saldos em contas separados visualmente de valores guardados em cofrinhos (sem alteração do cálculo financeiro).",
@@ -227,9 +227,9 @@
       "description": "Saldo em destaque e ações secundárias recolhidas."
     }
   ],
-  "release_status": "user_authorized_release_partial_qa",
+  "release_status": "deployed_github_pages_user_authorized_qa_partial",
   "homologation": {
     "status": "local_node_component_checks_passed_full_qa_pending",
-    "notes": "Autorização expressa do responsável para publicar em 09/11/2026. Testes independentes no Node 22 fora de Functions: 16 verificações de seletores e 9 verificações de eventos de origem/destino, FormData e sincronização por scripts locais que reproduzem os componentes; passaram. Asserções específicas de UI também haviam passado no ambiente JS isolado. Execução de Chromium local não completou inicialização; nenhuma homologação visual ou E2E real foi obtida. GitHub Actions run 42607108897 teve failure sem runner e sem steps: não houve suíte Node completa no CI. Validação Android/PWA e testes de gravação com conta online permanecem pendentes. Não declarar homologado."
+    "notes": "Autorização expressa do responsável para publicar em 09/11/2026. Testes independentes no Node 22 fora de Functions: 16 verificações de seletores e 9 verificações de eventos de origem/destino, FormData e sincronização por scripts locais que reproduzem os componentes; passaram. Asserções específicas de UI também haviam passado no ambiente JS isolado. Execução de Chromium local não completou inicialização; nenhuma homologação visual ou E2E real foi obtida. GitHub Actions run 42607108897 teve failure sem runner e sem steps: não houve suíte Node completa no CI. Validação Android/PWA e testes de gravação com conta online permanecem pendentes. Não declarar homologado. Deploy no GitHub Pages concluído com sucesso em 09/11/2026 às 11:18:07 UTC, run 42607752722, merge bfa613cf0cb12c0285db30b9fcfee59f4a841894. A URL customizada e o uso real Android/desktop ainda não foram validados."
   }
 }
