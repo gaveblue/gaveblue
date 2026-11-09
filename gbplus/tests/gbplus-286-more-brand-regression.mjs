@@ -11,7 +11,7 @@ const compile=(file,names,deps={})=>Function(...Object.keys(deps),strip(read(fil
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const icon=name=>'<svg data-icon="'+esc(name)+'"></svg>';
 const catalog=compile('js/service-catalog.js',['SERVICE_CATALOG','serviceById']);
-assert.equal(catalog.SERVICE_CATALOG.length,49);
+assert.equal(catalog.SERVICE_CATALOG.length,56);
 assert.equal(catalog.serviceById('digital-chatgpt').logoPath,'./assets/service-icons/chatgpt.svg');
 const file=read('assets/service-icons/chatgpt.svg');
 assert(file.startsWith('<svg')&&file.includes('viewBox="0 0 512 512"'));
@@ -70,9 +70,9 @@ assert(app.includes("requested==='settings'?'more'"),'Old Settings deep links op
 assert(app.includes('expandedMoreSections'),'Preferences accordions maintain user choice on redraw');
 assert(app.includes('installServiceIconRecovery(document)'),'Broken image fallback listener installed');
 const version=JSON.parse(read('version.json'));
-assert.equal(version.build,2866);
+assert.equal(version.build,2870);
 for(const path of Object.values(supplied))assert(version.assets.includes(path),'Release manifest must include '+path);
-assert.equal(version.version,'2.8.6');
+assert.equal(version.version,'2.8.7');
 assert.equal(version.release_status,'candidate_not_published');
 assert(version.assets.includes('./assets/service-icons/chatgpt.svg'));
 assert(read('sw.js').includes('gb-plus-shell-v'+version.build));

@@ -79,3 +79,28 @@ Recebimento das imagens pelo usuário não constitui, por si só, comprovação 
 - `streaming-globoplay` — `assets/service-icons/globoplay.webp`, imagem quadrada Globoplay.
 
 Todos transcodificados de arquivos enviados diretamente nesta conversa para WebP de 96×96, preservando a composição quadrada, cores e contraste. São identidades visuais fornecidas pelo usuário e não representam afiliação com essas empresas. O PWA não consulta URLs de marcas externas. A aplicação agora possui 49 serviços com recursos gráficos locais, incluindo os 39 SVGs vetoriais originais e 10 arquivos específicos.
+
+
+## Arquivos fornecidos no chat — lote de 13 ícones (08/11/2026; candidata 2.8.7)
+
+As imagens foram recebidas do usuário nesta conversa e **não redesenhadas**. O atlas compacto local `assets/service-icons/service-brands-287.webp` contém as versões proporcionais das imagens em 4 colunas × 4 linhas, células de 64 px, para uso como ícones de identificação de despesas no GB+. São logotipos de terceiros, sem afiliação ou endosso.
+
+| Linha, coluna (base 0) | ID preservado ou criado | Nome | Operação |
+|---|---|---|---|
+| 0, 0 | `streaming-hbomax` | HBO Max | Atualiza |
+| 0, 1 | `delivery-99food` | 99Food | Atualiza |
+| 0, 2 | `streaming-primevideo` | Prime Video | Atualiza |
+| 0, 3 | `shopping-tiktokshop` | TikTok Shop | Novo |
+| 1, 0 | `social-whatsapp` | WhatsApp | Atualiza |
+| 1, 1 | `shopping-shopee` | Shopee | Novo |
+| 1, 2 | `shopping-mercadolivre` | Mercado Livre | Novo |
+| 1, 3 | `social-telegram` | Telegram | Atualiza |
+| 2, 0 | `music-spotify` | Spotify | Atualiza |
+| 2, 1 | `shopping-magalu` | Magalu | Novo |
+| 2, 2 | `shopping-casasbahia` | Casas Bahia | Novo |
+| 2, 3 | `shopping-temu` | Temu | Novo |
+| 3, 0 | `shopping-shein` | SHEIN | Novo |
+
+As demais três células do atlas são vazias. O atlas é acessado exclusivamente por caminho relativo fixo. Antes da homologação visual, conferir legibilidade no tamanho mínimo usado pelo seletor (especialmente Magalu, SHEIN e Casas Bahia), nos temas claro e escuro, e se o navegador carrega o mesmo arquivo em modo offline após atualização do PWA.
+
+A adição ao catálogo não representa um vínculo com as lojas nem autoriza uso promocional de suas marcas. A proveniência é a imagem enviada pelo titular do projeto, não um download separado certificado por cada marca.

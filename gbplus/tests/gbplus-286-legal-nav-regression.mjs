@@ -34,7 +34,7 @@ assert.deepEqual(store.effectiveMobileNav({mobileNav:['titles','partners','menu'
 assert.deepEqual(store.effectiveMobileNav({mobileNav:['flow','cards','menu']}),['flow','cards','menu']);
 assert(store.validMobileNav(['titles','cards','menu']));
 const catalog=load('js/service-catalog.js',['SERVICE_CATALOG','serviceById']);
-assert.equal(catalog.SERVICE_CATALOG.length,49);
+assert.equal(catalog.SERVICE_CATALOG.length,56);
 const uploaded={ 'digital-canva':'canva','mobility-indrive':'indrive','mobility-99':'99',
  'delivery-rappi':'rappi','streaming-globoplay':'globoplay' };
 for(const [id,name] of Object.entries(uploaded)){
@@ -45,7 +45,7 @@ for(const [id,name] of Object.entries(uploaded)){
 assert.equal(catalog.SERVICE_CATALOG.filter(s=>s.logoPath).length,10);
 const old=load('js/service-brand-paths.js',['SERVICE_BRAND_PATHS']);
 const extra=load('js/service-extra-brand-paths.js',['SERVICE_EXTRA_BRAND_PATHS']);
-assert.equal(catalog.SERVICE_CATALOG.filter(s=>s.logoPath||old.SERVICE_BRAND_PATHS[s.id]||extra.SERVICE_EXTRA_BRAND_PATHS[s.id]).length,49);
+assert.equal(catalog.SERVICE_CATALOG.filter(s=>s.logoPath||old.SERVICE_BRAND_PATHS[s.id]||extra.SERVICE_EXTRA_BRAND_PATHS[s.id]||s.sprite).length,56);
 const app=read('js/app.js'),auth=read('js/auth.js'),views=read('js/views.js');
 assert(app.indexOf('await requireLegalAcceptance(authClient())')<app.indexOf('repository=new SupabaseRepository(authClient(),user.id)'));
 assert(app.includes('setMarketingConsent(authClient(),v.marketing===\'on\')'));
@@ -53,9 +53,9 @@ assert(auth.includes('name="legal_preaccept" required')&&auth.includes('termos-d
 assert(views.includes('Preferências de e-mail'));
 assert(read('privacidade.html').includes('2026-11-08-v1')&&read('termos-de-uso.html').includes('2026-11-08-v1'));
 const version=JSON.parse(read('version.json'));
-assert.equal(version.version,'2.8.6');
-assert.equal(version.build,2866);
+assert.equal(version.version,'2.8.7');
+assert.equal(version.build,2870);
 for(const name of Object.values(uploaded))assert(version.assets.includes('./assets/service-icons/'+name+'.webp'));
 assert(read('index.html').includes('legal-consent.css?v=20261108-2866'));
-assert(read('sw.js').includes('gb-plus-shell-v2866'));
-console.log('GB+ 2.8.6: aceite obrigatório, opt-in opcional, revogação, barra móvel e 49 ícones locais OK.');
+assert(read('sw.js').includes('gb-plus-shell-v2870'));
+console.log('GB+ 2.8.6: aceite obrigatório, opt-in opcional, revogação, barra móvel e 56 ícones locais OK.');

@@ -1,17 +1,14 @@
 {
-  "version": "2.8.6",
-  "build": 2866,
+  "version": "2.8.7",
+  "build": 2870,
   "published_at": null,
-  "title": "Biblioteca completa, novo padrão de navegação e aceite LGPD",
+  "title": "Biblioteca de aplicativos ampliada e ícones renovados",
   "notes": [
-    "Biblioteca: 49 aplicativos/serviços com 49 símbolos ou imagens locais, incluindo os cinco ícones mais recentes fornecidos pelo proprietário (Canva, inDrive, 99, Rappi e Globoplay).",
-    "Navegação padrão no celular: Início, Lançamentos, Novo, Carteira, Mais. Preferências realmente personalizadas continuam respeitadas.",
-    "Termos de Uso e Política de Privacidade atualizados na versão 2026-11-08-v1, com aviso obrigatório após login para usuários sem aceite registrado.",
-    "Marketing promocional: escolha separada, opcional, inicialmente desmarcada e revogável; versão e histórico gravados no Supabase, sem usar dados financeiros para campanhas.",
-    "Painel administrativo: consulta específica da audiência promocional somente quando há consentimento válido e e-mail confirmado; o endpoint não dispara mensagens.",
-    "Mais e Configurações integrados, categoria Serviços consolidada e registro das alterações no CHANGELOG.",
-    "PR #105 mesclado em main em 08/11/2026; atualização do site em produção depende do deploy e verificação no dispositivo.",
-    "Supabase: função administrativa v9 ativa, preservando envio de convites e e-mails com bloqueio de marketing sem aceite atualizado."
+    "Novas opções em Compras e pagamentos: TikTok Shop, Shopee, Mercado Livre, Magalu, Casas Bahia, Temu e SHEIN.",
+    "Ícones renovados para HBO Max, 99Food, Prime Video, WhatsApp, Telegram e Spotify; 13 imagens fornecidas pelo usuário agrupadas em atlas WebP local leve de 256×256.",
+    "Catálogo passou de 49 para 56 opções sem trocar, apagar ou migrar IDs dos 49 serviços existentes.",
+    "Imagens proporcionais em modo claro e escuro; carregamento local, fallback textual para erro de asset e sem consultas a CDN.",
+    "Alterações restritas à identificação visual/seleção de serviços, cache PWA, documentação e testes; finanças, aceite, autenticação e backend não modificados."
   ],
   "assets": [
     "./index.html",
@@ -191,28 +188,29 @@
     "./assets/service-icons/globoplay.webp",
     "./js/legal-consent.js",
     "./legal-consent.css",
-    "./termos-de-uso.html"
+    "./termos-de-uso.html",
+    "./assets/service-icons/service-brands-287.webp"
   ],
   "highlights": [
     {
-      "icon": "grid",
-      "title": "49 logos locais",
-      "description": "Catálogo completo com ícones reais fornecidos."
+      "icon": "shopping-bag",
+      "title": "56 aplicativos",
+      "description": "Casas Bahia, Temu, SHEIN, Magalu, Mercado Livre, Shopee e TikTok Shop adicionados."
     },
     {
-      "icon": "check",
-      "title": "Aceite de privacidade",
-      "description": "Controle documentado e revogável para comunicações promocionais."
+      "icon": "image",
+      "title": "13 ícones atualizados",
+      "description": "Imagens fornecidas e armazenadas localmente, sem inventar marcas."
     },
     {
-      "icon": "wallet",
-      "title": "Navegação simplificada",
-      "description": "Início, Lançamentos, Novo, Carteira e Mais."
+      "icon": "shield",
+      "title": "Seus dados preservados",
+      "description": "Sem migrações de lançamentos ou mudanças em contas, cartões e faturas."
     }
   ],
-  "release_status": "merged_to_main_pending_live_verification",
+  "release_status": "candidate_not_published",
   "homologation": {
-    "status": "automated_regressions_passed_visual_qa_pending",
-    "notes": "PR #105 mesclado em main e Edge Function gbplus-admin v9 implantada com consentimento validado na hora do envio. Testes de código/regressão realizados; QA visual real Android/PWA e confirmação de deploy do domínio ainda não verificados neste ambiente. Nenhuma campanha disparada automaticamente."
+    "status": "pending_new_changes",
+    "notes": "Versão 2.8.7 em branch de revisão. A imagem foi validada por hash Git, resta regressão de catálogo/seletor, teste visual real Android/PWA e revisão antes da liberação."
   }
 }
