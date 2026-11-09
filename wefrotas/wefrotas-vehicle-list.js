@@ -41,7 +41,7 @@
     switch(key){
       case 'plate':return v.placa||'-';case 'model':return v.modelo||'Não informado';case 'fleet':return `${v.numeroFrota||'-'} / ${v.ano||'-'}`;
       case 'details':return `${v.seguroVencimento?formatDate(v.seguroVencimento):'Sem seguro informado'} / ${v.chassi||'-'}`;
-      case 'status':return isEntityActive(v)?'Ativo':'Inativo';case 'km':return getVehicleCurrentKm(v.id);
+      case 'status':{const status=({manutencao:'Em manutenção',sinistro:'Sinistrado',imobilizado:'Imobilizado'})[v.operationalStatus];return (isEntityActive(v)?'Ativo':'Inativo')+(status?' · '+status:'');}case 'km':return getVehicleCurrentKm(v.id);
       case 'consumption':return m.consumption;case 'perKm':return m.perKm;case 'cost':return m.costs;default:return '';
     }
   }
