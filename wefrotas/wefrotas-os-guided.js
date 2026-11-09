@@ -235,6 +235,8 @@
     if(existingOrder&&!prior&&!legacyEdited)return {enabled:false,legacy:true};
     const severity=type()==='sinistro'?value('os-guide-severity'):'';
     const halt=stopped(),need=wantsReserve();
+    if(!existingOrder && halt && value('order-status')==='fechada')
+      throw Error('Abra a OS como Aberta ou Em andamento. A conclusão exige conferir retorno do titular e devolução do reserva.');
     const source=sourceId(),driver=value('order-driver'),date=value('os-guide-start')||value('order-data-inicio');
     if(type()==='sinistro'&&!['leve','avaliacao','pt'].includes(severity))throw Error('Selecione a situação do sinistro.');
     if(!isPt()&&!selectedRadio('os-guide-stopped'))throw Error('Informe se o veículo ficará parado.');
