@@ -52,3 +52,8 @@
  #account-form .gb-account-icon-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
  .gb-goal-card{padding:15px}
 }
+
+#account-form .gb-goal-duration{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+#account-form .gb-goal-duration>span{font-size:10px;color:var(--muted);margin-right:5px}
+#account-form .gb-goal-duration>.button{font-size:10px;padding:7px 10px}
+#account-form .gb-goal-duration>.button.is-selected{background:var(--ink);color:var(--surface)}
