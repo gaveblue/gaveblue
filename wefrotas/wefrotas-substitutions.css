@@ -37,4 +37,22 @@
 .wf-reserve-actions>button:first-child{border:1px solid #cbd5e1;background:#fff;color:#334155;border-radius:12px;padding:10px 14px;cursor:pointer}
 body.wf-reserve-lock{overflow:hidden}
 @media(max-width:600px){.wf-reserve-facts{grid-template-columns:repeat(2,minmax(0,1fr))}.wf-reserve-sheet{padding:12px 18px max(18px,env(safe-area-inset-bottom))}.wf-reserve-form-grid{grid-template-columns:1fr}.wf-reserve-head{align-items:flex-start}.wf-reserve-card{padding:14px}.wf-reserve-card-head{flex-direction:column}.wf-reserve-actions{display:grid;grid-template-columns:1fr 1fr}}
-@media(prefers-color-scheme:dark){body[data-theme="dark"] .wf-reserve-card,body.dark .wf-reserve-card,body[data-theme="dark"] .wf-reserve-sheet,body.dark .wf-reserve-sheet{background:#111827;color:#f8fafc;border-color:#334155}body[data-theme="dark"] .wf-reserve-facts div,body.dark .wf-reserve-facts div,body[data-theme="dark"] .wf-reserve-source,body.dark .wf-reserve-source{background:#1e293b;border-color:#334155}body[data-theme="dark"] .wf-reserve-facts strong,body.dark .wf-reserve-facts strong,body[data-theme="dark"] .wf-reserve-card-head h3,body.dark .wf-reserve-card-head h3{color:#f8fafc}}
+body[data-theme="dark"] .wf-reserve-card,body.dark .wf-reserve-card,body[data-theme="dark"] .wf-reserve-sheet,body.dark .wf-reserve-sheet{background:#111827;color:#f8fafc;border-color:#334155}body[data-theme="dark"] .wf-reserve-facts div,body.dark .wf-reserve-facts div,body[data-theme="dark"] .wf-reserve-source,body.dark .wf-reserve-source{background:#1e293b;border-color:#334155}body[data-theme="dark"] .wf-reserve-facts strong,body.dark .wf-reserve-facts strong,body[data-theme="dark"] .wf-reserve-card-head h3,body.dark .wf-reserve-card-head h3{color:#f8fafc}
+
+/* Explicit application theme wins over OS theme and keeps the form legible. */
+body[data-theme="dark"] .wf-reserve-sheet-title h2,body.dark .wf-reserve-sheet-title h2,
+body[data-theme="dark"] .wf-reserve-form-grid label,body.dark .wf-reserve-form-grid label{color:#f8fafc}
+body[data-theme="dark"] .wf-reserve-form-grid input,body.dark .wf-reserve-form-grid input,
+body[data-theme="dark"] .wf-reserve-form-grid select,body.dark .wf-reserve-form-grid select,
+body[data-theme="dark"] .wf-reserve-form-grid textarea,body.dark .wf-reserve-form-grid textarea{
+  background:#1e293b;color:#f8fafc;border-color:#475569
+}
+body[data-theme="dark"] .wf-reserve-actions,body.dark .wf-reserve-actions{background:#111827;border-color:#334155}
+body[data-theme="dark"] .wf-reserve-actions>button:first-child,body.dark .wf-reserve-actions>button:first-child{
+  background:#1e293b;color:#f8fafc;border-color:#475569
+}
+body[data-theme="dark"] .wf-reserve-close,body.dark .wf-reserve-close{background:#334155;color:#f8fafc}
+@media(max-width:600px){
+  .wf-reserve-sheet{max-height:96dvh}
+  .wf-reserve-actions{bottom:-18px}
+}
