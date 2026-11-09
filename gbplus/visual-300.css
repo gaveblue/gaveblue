@@ -110,3 +110,40 @@
 }
 @media(min-width:761px){#modal.gb30-finance-modal{width:min(560px,calc(100vw - 50px))}}
 @media(prefers-reduced-motion:reduce){.gb30-picker-trigger,.gb30-more summary>.icon{transition:none}}
+
+
+/* Final compact surfaces */
+.gb30-accounts-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:6px 0 20px}
+.gb30-accounts-summary>div{display:flex;flex-direction:column;gap:5px;min-width:0;
+ padding:15px 17px;border:1px solid var(--border);border-radius:16px;background:var(--surface)}
+.gb30-accounts-summary small{font-size:11px;color:var(--muted)}
+.gb30-accounts-summary strong{font-size:clamp(18px,2vw,24px);letter-spacing:-.035em;overflow-wrap:anywhere}
+#modal.gb30-finance-modal .gb30-optional{grid-column:1/-1;min-width:0;border:1px solid var(--border);
+ border-radius:12px;padding:0 12px;background:var(--surface)}
+#modal.gb30-finance-modal .gb30-optional>summary{padding:13px 1px;cursor:pointer;
+ color:var(--ink);font-size:12px;font-weight:650;list-style:none}
+#modal.gb30-finance-modal .gb30-optional>summary::-webkit-details-marker{display:none}
+#modal.gb30-finance-modal .gb30-optional>summary:after{content:'⌄';float:right;color:var(--muted)}
+#modal.gb30-finance-modal .gb30-optional[open]>summary:after{transform:rotate(180deg)}
+#modal.gb30-finance-modal .gb30-optional .gb30-optional-body{display:grid;gap:11px;padding:0 0 13px}
+#modal.gb30-finance-modal .gb30-optional .gb-account-opening{margin:0 0 12px}
+#account-form .gb30-optional .gb-account-opening-hint{line-height:1.45}
+.gb30-page-tools{display:inline-block;margin:0;padding:0;border:0;min-width:0}
+.gb30-page-tools summary{font-size:11px;white-space:nowrap;border:1px solid var(--border);
+ border-radius:99px;padding:10px 13px;min-height:36px;color:var(--ink)}
+.gb30-page-tools[open]{position:relative;z-index:5}
+.gb30-page-tools .gb30-more-actions{position:absolute;z-index:7;right:0;top:100%;
+ width:max-content;max-width:min(300px,90vw);border:1px solid var(--border);border-radius:14px;
+ background:var(--surface);box-shadow:0 10px 28px #0001;padding:9px;display:grid;gap:7px}
+.gb30-page-tools .gb30-more-actions .button{white-space:nowrap}
+.gb30-page-tools summary:focus-visible,.gb30-more summary:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+#modal.gb30-finance-modal .gb30-picker-field>.gb30-native-select{margin:0!important}
+.gb-accounts-cards-page .gb-goals-section{margin-top:7px}
+.gb-accounts-cards-page .gb-goal-track>span{background:var(--ink)}
+.gb-accounts-cards-page .gb30-more[open]>.gb30-more-actions{padding-bottom:5px}
+@media(max-width:420px){
+ .gb30-accounts-summary{gap:8px}
+ .gb30-accounts-summary>div{padding:12px}
+ .gb30-accounts-summary strong{font-size:18px}
+ .gb-accounts-cards-page .gb-credit-card{padding:14px}
+}
