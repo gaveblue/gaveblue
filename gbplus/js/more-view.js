@@ -1,6 +1,6 @@
 // GB+ 2.8.1 — a área Mais é uma rota de página, nunca um modal.
 import {esc,icon} from './ui.js?v=20261105-72';
-import {settingsView} from './views.js?v=20261108-2863';
+import {settingsView} from './views.js?v=20261108-2866';
 
 const groups=[
   {label:'VISÃO GERAL E LANÇAMENTOS',entries:[
