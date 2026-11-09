@@ -10,6 +10,7 @@
 - **PC e celular:** Bottom Sheet expandido no celular e painel lateral no desktop; respeita tema claro/escuro, áreas seguras e redução de movimento. Formulário de lançamento mantém suas três etapas e botões inferiores existentes.
 - **Conservação:** sem mutação do domínio financeiro, sem migração SQL, sem alteração da lógica de cartão e faturas, sem mudança de IDs ou dados anteriores.
 - **3.0.0 visual:** painel administrativo e as respectivas proteções de acesso **não são incluídos** nesta entrega. Precisam de planejamento e homologação própria.
+- **Verificação nesta execução:** regressão específica de seletores, formulários, cartões, cofrinhos e assets passou em execução JS isolada; sintaxe dos módulos revisada. GitHub Actions 42563325658 reportou failure sem runner e sem steps, não comprovando execução da suíte Node; QA visual Android/PWA e desktop segue pendente.
 - **QA/publicação:** candidata em branch isolada; testes automatizados, regressões de fluxos existentes e validação real Android/desktop ainda requerem evidências. Não declarar homologação ou publicação antes da checagem.
 
 ## [2.9.0 — COFRINHOS E CONTAS PERSONALIZADAS (LIBERAÇÃO AUTORIZADA; QA VISUAL PENDENTE)] — 2026-11-09
