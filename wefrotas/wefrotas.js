@@ -15270,10 +15270,14 @@
       }
 
       if (currentModalType === 'order') {
+        const form = document.getElementById('cadastro-form');
+        if (form.dataset.orderSavePending === 'true') return;
         const rawNumero = document.getElementById('order-numero').value.trim();
+        const provisionalId = currentEditingId || window.WeFrotasOsGuide?.draftOrderId?.() || generateId();
+        const previouslyStaged = allOrders.find(item => String(item.id) === String(provisionalId));
         const numero = allowManualOrderNumberEditing || currentEditingId
           ? normalizeOrderNumberInput(rawNumero)
-          : String(getNextOrderCounterValue());
+          : previouslyStaged?.numero || String(getNextOrderCounterValue());
         const administracao = getOrderAdministrationFormValue();
         const tipoOs = document.getElementById('order-tipo-os')?.value || 'avulsa';
         const vehicleId = document.getElementById('order-veiculo').value;
@@ -15291,30 +15295,45 @@
           showToast('Informe um número válido para a OS.');
           return;
         }
-        if (!validateOrderDateRange(dataInicio, dataTermino)) {
-          return;
-        }
-        if (findOrderNumberDuplicate(numero, currentEditingId)) {
+        if (!validateOrderDateRange(dataInicio, dataTermino)) return;
+        if (findOrderNumberDuplicate(numero, provisionalId)) {
           showToast(`Já existe uma OS com o número ${String(numero).padStart(4, '0')}.`);
           return;
         }
-        if (currentEditingId) {
-          const previousOrder = allOrders.find(order => order.id === currentEditingId);
-          const nextOrderPayload = { numero, administracao, tipoOs, vehicleId, driverId, responsavelNome, dataInicio, dataTermino, status, descricao };
-          const persistUpdatedOrder = async (historyEntry = null) => {
+        let guidedPlan = {enabled:false};
+        try { guidedPlan = window.WeFrotasOsGuide?.collect() || guidedPlan; }
+        catch (error) { showToast(error.message); return; }
+        const previousOrder = currentEditingId ? allOrders.find(item => item.id === currentEditingId) : previouslyStaged;
+        if (previousOrder?.operationalIncident?.substitutionId &&
+            (String(previousOrder.vehicleId)!==String(vehicleId) ||
+             String(previousOrder.driverId)!==String(driverId) ||
+             String(previousOrder.tipoOs)!==String(tipoOs))) {
+          showToast('Esta OS já possui carro reserva com histórico. Não altere veículo, responsável ou tipo.');
+          return;
+        }
+        const nextOrderPayload = { numero, administracao, tipoOs, vehicleId, driverId,
+          responsavelNome, dataInicio, dataTermino, status, descricao,
+          ...(guidedPlan.enabled ? {operationalIncident:guidedPlan.incident} : {}) };
+        const confirmedModes = ['supabase-saved','supabase-verified','supabase-rebased'];
+        const persistUpdatedOrder = async (historyEntry = null) => {
+          form.dataset.orderSavePending = 'true';
+          try {
+            const nextOrder = {...previousOrder,...nextOrderPayload,id:currentEditingId};
+            if (guidedPlan.record) applyGuidedIncident(nextOrder,guidedPlan);
             allOrders = allOrders.map(order => {
               if (order.id !== currentEditingId) return order;
               const updatedOrder = { ...order, ...nextOrderPayload };
               return historyEntry ? appendOrderHistory(updatedOrder, historyEntry) : updatedOrder;
             });
             syncOrderCounterWithOrders();
-            try { await persistOperationalDataImmediately(); }
-            catch (error) { renderAll(); showToast(`OS não confirmada no servidor: ${error.message}`); return; }
-            renderAll();
-            closeCadastroModal();
-            showToast('OS atualizada com sucesso.');
-          };
-
+            const response = await persistOperationalDataImmediately();
+            if (!confirmedModes.includes(response?.mode)) throw new Error('Sincronização pendente.');
+            renderAll();closeCadastroModal();showToast('OS atualizada e sincronizada.');
+          } catch (error) {
+            renderAll();showToast(`OS não confirmada no servidor: ${error.message}. A cópia local foi preservada.`);
+          } finally { form.dataset.orderSavePending = ''; }
+        };
+        if (currentEditingId) {
           if (previousOrder && String(previousOrder.descricao || '').trim() !== descricao) {
             openPromptModal({
               title: 'Justificar alteração da OS',
@@ -15322,21 +15341,29 @@
               placeholder: 'Ex.: ajuste da referência mensal, revisão corrigida, complemento do serviço...',
               confirmLabel: 'Salvar alteração',
               cancelLabel: 'Cancelar',
-              onConfirm: (justification) => persistUpdatedOrder(createOrderHistoryEntry('description_edit', justification))
+              onConfirm: justification => persistUpdatedOrder(createOrderHistoryEntry('description_edit', justification))
             });
             return;
           }
           await persistUpdatedOrder();
           return;
-        } else {
-          allOrders.unshift({ id: generateId(), numero, administracao, tipoOs, vehicleId, driverId, responsavelNome, dataInicio, dataTermino, status, descricao });
-          syncOrderCounterWithOrders();
         }
-        try { await persistOperationalDataImmediately(); }
-        catch (error) { renderAll(); showToast(`OS não confirmada no servidor: ${error.message}`); return; }
-        showToast('OS cadastrada e sincronizada.');
-        renderAll();
-        closeCadastroModal();
+        form.dataset.orderSavePending = 'true';
+        try {
+          const newOrder = {...previousOrder,...nextOrderPayload,id:provisionalId};
+          if (guidedPlan.enabled) applyGuidedIncident(newOrder,guidedPlan);
+          if (previouslyStaged) {
+            allOrders = allOrders.map(item => item.id === provisionalId ? newOrder : item);
+          } else {
+            allOrders.unshift(newOrder);
+          }
+          syncOrderCounterWithOrders();
+          const response = await persistOperationalDataImmediately();
+          if (!confirmedModes.includes(response?.mode)) throw new Error('Sincronização pendente.');
+          renderAll();closeCadastroModal();showToast('OS cadastrada e sincronizada com a situação operacional.');
+        } catch (error) {
+          renderAll();showToast(`OS não confirmada no servidor: ${error.message}. A cópia local foi preservada para nova tentativa.`);
+        } finally { form.dataset.orderSavePending = ''; }
       }
 
       if (currentModalType === 'finance') {
