@@ -1,5 +1,17 @@
 # CHANGELOG — GB+ Gestão Financeira
 
+## [3.0.0 — SISTEMA VISUAL FINANCEIRO UNIFICADO (CANDIDATA; QA PENDENTE)] — 2026-11-09
+
+- **Escopo:** unificação visual de contas, cartões, cofrinhos, pagamentos, transferências, categorias e formulários. A regra de negócio financeira foi mantida.
+- **Seletores:** o componente reutilizável `finance-picker-300.js` usa o Bottom Sheet existente, com busca, logos/ícones e valor selecionado. Opções de banco, conta, cartão, parceiro, categoria de compra, objetivos e ícones são exibidas no painel. O campo nativo permanece como fonte de `FormData`.
+- **Conta personalizada e cofrinho:** ícone e objetivo usam Bottom Sheets; prazo e valor permanecem campos diretos; o saldo inicial opcional de novo cofrinho fica em seção expansível; ações e saldos preservados.
+- **Contas e Cartões:** agrupamentos compactos, resumo visual de dinheiro em contas versus cofrinhos, ação principal clara, ações secundárias em `Mais opções`, cartões com compras e faturas recolhíveis sem remoção de dados.
+- **Formulários:** Conta, Cartão, Compra, Categoria, Transferência e Baixa aplicam campos com o mesmo padrão visual. Campos opcionais de cartão recolhidos. Valor e data permanecem entradas diretas; diálogo compacto com rodapé de ações aderente ao scroll.
+- **PC e celular:** Bottom Sheet expandido no celular e painel lateral no desktop; respeita tema claro/escuro, áreas seguras e redução de movimento. Formulário de lançamento mantém suas três etapas e botões inferiores existentes.
+- **Conservação:** sem mutação do domínio financeiro, sem migração SQL, sem alteração da lógica de cartão e faturas, sem mudança de IDs ou dados anteriores.
+- **3.0.0 visual:** painel administrativo e as respectivas proteções de acesso **não são incluídos** nesta entrega. Precisam de planejamento e homologação própria.
+- **QA/publicação:** candidata em branch isolada; testes automatizados, regressões de fluxos existentes e validação real Android/desktop ainda requerem evidências. Não declarar homologação ou publicação antes da checagem.
+
 ## [2.9.0 — COFRINHOS E CONTAS PERSONALIZADAS (LIBERAÇÃO AUTORIZADA; QA VISUAL PENDENTE)] — 2026-11-09
 
 - **Conta personalizada:** substitui “Dinheiro em caixa” na seleção de tipos; nome livre e ícone escolhido de uma paleta de pictogramas locais. Sem vínculo com instituição bancária.
