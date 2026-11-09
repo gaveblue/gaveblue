@@ -10668,6 +10668,24 @@
       return pending;
     }
 
+    function getCentralReserveBadge(record) {
+      const rawPlate = String(record?.placa || record?.vehiclePlate || record?.veiculoPlaca || record?.vehicle?.placa || record?.vehicle?.plate || '').trim();
+      const plate = rawPlate.toUpperCase().replace(/[^A-Z0-9]/g, '');
+      const vehicleId = String(record?.vehicleId || record?.veiculoId || record?.vehicle?.id || '').trim();
+      const vehicle = allVehicles.find(item => (vehicleId && String(item.id) === vehicleId)
+        || (plate && String(item.placa || '').toUpperCase().replace(/[^A-Z0-9]/g, '') === plate));
+      if (!vehicle) return '';
+      const date = getCentralRecordIsoDate(record);
+      if (!date) return '';
+      const substitutions = window.WeFrotasSubstitutions?.all?.() || [];
+      const matches = substitutions.filter(item => String(item.reserveVehicleId) === String(vehicle.id)
+        && item.startDate && date >= item.startDate && (!item.endDate || date <= item.endDate));
+      if (matches.length !== 1) return '';
+      const source = allVehicles.find(item => String(item.id) === String(matches[0].sourceVehicleId));
+      const tooltip = 'Abastecimento do veículo reserva' + (source?.placa ? ' — substitui ' + source.placa : '');
+      return '<span class="central-pending-reserve-badge" title="' + escapeHtml(tooltip) + '" style="display:inline-flex;align-items:center;margin-top:4px;padding:3px 7px;border-radius:6px;background:#fff3d6;color:#875700;border:1px solid #e7c980;font-size:10px;font-weight:800;letter-spacing:.035em">VEÍCULO RESERVA</span>';
+    }
+
     function renderCentralPendingRecords() {
       const historyPending = renderCentralHistoryPendingNotice();
       const list = document.getElementById('central-pending-list');
@@ -10710,7 +10728,7 @@
         return `
           <tr class="${selectedCentralPending.has(getCentralPendingRecordId(record)) ? 'is-selected' : ''}" onclick="toggleCentralPendingRecord('${rowId}')">
             <td>${getCentralPendingDate(record)}</td>
-            <td>${escapeHtml(getCentralPendingDriverVehicleLabel(record))}</td>
+            <td>${escapeHtml(getCentralPendingDriverVehicleLabel(record))}<div>${getCentralReserveBadge(record)}</div></td>
             <td>${escapeHtml(getCentralPendingSupplier(record))}</td>
             <td>${escapeHtml(record?.km || '-')}</td>
             <td class="central-pending-value">${getCentralPendingValue(record)}</td>
