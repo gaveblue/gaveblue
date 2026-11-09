@@ -8,6 +8,7 @@
   let existingOrder = null;
   let sheetOpen = false;
   let legacyEdited = false;
+  let wizardStage = 1;
 
   const text = value => String(value ?? '');
   const esc = value => text(value).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
@@ -36,7 +37,7 @@
     return '<option value="">'+esc(placeholder)+'</option>'+list.map(item=>'<option value="'+esc(item.id)+'">'+esc(vehicleLabel(item))+'</option>').join('');
   }
   function reset() {
-    draftVehicle=null;draftSubstitutionId='';draftOrderId=identifier('os-');existingOrder=null;legacyEdited=false;
+    draftVehicle=null;draftSubstitutionId='';draftOrderId=identifier('os-');existingOrder=null;legacyEdited=false;wizardStage=1;
     closeSheet(true);
   }
   function formHtml() {
@@ -132,6 +133,7 @@
     const root=byId('os-operational-guide');if(!root)return;
     const incident=isIncident(type());
     setVisible('os-operational-guide',incident);
+    setVisible('wf-os-step-noquestions',!incident);
     if(!incident)return;
     if(!existingOrder&&!selectedRadio('os-guide-stopped')){
       if(type()==='pane')setRadio('os-guide-stopped','sim');
@@ -185,6 +187,7 @@
     setRadio('os-guide-back','');setRadio('os-guide-return','');
     refresh();
     if(old?.reserveVehicleId&&byId('os-guide-vehicle'))byId('os-guide-vehicle').value=old.reserveVehicleId;
+    wizardStage=1;drawWizard();
   }
   function notify(message){bridge?.toast?.(message);}
   function closeSheet(force=false) {
@@ -283,6 +286,71 @@
       ...(closure?.titularBack?{restoredAt:value('order-data-termino')||new Date().toISOString().slice(0,10)}:{})
     },closure};
   }
+  function drawWizard() {
+    const data=byId('wf-os-step-data'),occurrence=byId('wf-os-step-occurrence'),review=byId('wf-os-step-review');
+    if(!data||!occurrence||!review)return;
+    data.hidden=wizardStage!==1;
+    occurrence.hidden=wizardStage!==2;
+    review.hidden=wizardStage!==3;
+    const prev=byId('wf-os-step-back'),next=byId('wf-os-step-next');
+    if(prev)prev.hidden=wizardStage===1;
+    if(next)next.hidden=wizardStage===3;
+    doc.querySelectorAll('[data-os-step-label]').forEach(node=>{
+      node.setAttribute('aria-current',String(Number(node.dataset.osStepLabel)===wizardStage));
+    });
+    const submit=byId('modal-submit-btn');
+    if(submit){
+      const enabled=wizardStage===3;
+      submit.hidden=!enabled;
+      submit.disabled=!enabled;
+      submit.style.display=enabled?'inline-flex':'none';
+      if(enabled){
+        const label=submit.querySelector('span');
+        if(label)label.textContent='Salvar OS';else submit.textContent='Salvar OS';
+      }
+    }
+    if(wizardStage===3){
+      const vehicle=allVehicles().find(v=>String(v.id)===sourceId());
+      const driver=allDrivers().find(d=>String(d.id)===value('order-driver'));
+      const typeLabel=({sinistro:'Sinistro',pane:'Manutenção corretiva / pane',revisao:'Revisão',
+        avulsa:'Avulsa',mensal:'Mensal de despesas'})[type()]||type();
+      const stoppedText=isPt()?'Perda total confirmada':stopped()?'Indisponível':'Em operação';
+      const reserve=wantsReserve()?allVehicles().find(v=>String(v.id)===value('os-guide-vehicle'))||draftVehicle:null;
+      const reserveText=linked()?'Já vinculado ao histórico':
+        wantsReserve()?vehicleLabel(reserve):stopped()?'Não vinculado / definir depois':'Não necessário';
+      const rows=[
+        ['OS',value('order-numero')||'Numeração automática'],
+        ['Tipo',typeLabel],
+        ['Veículo titular',vehicle?vehicleLabel(vehicle):'Não selecionado'],
+        ['Motorista',driver?.nome||'Não informado'],
+        ['Situação',type()==='mensal'?'Sem alteração':stoppedText],
+        ['Reserva',type()==='mensal'?'Não se aplica':reserveText],
+        ['Entrega',wantsReserve()?value('os-guide-start')+' · '+value('os-guide-km')+' km':'Não se aplica']
+      ];
+      const closing=isClosing();
+      if(closing) rows.push(['Encerramento','Verificação da devolução e retorno do titular']);
+      review.innerHTML='<div class="wf-os-review-heading"><strong>Confira antes de salvar</strong><p>As informações serão gravadas juntas no WeFrotas e só serão confirmadas depois da resposta do Supabase.</p></div>'+
+        rows.map(row=>'<div class="wf-os-review-row"><span>'+esc(row[0])+'</span><strong>'+esc(row[1])+'</strong></div>').join('');
+    }
+    const fields=byId('modal-fields');if(fields)fields.scrollTop=0;
+  }
+  function nextWizard() {
+    if(wizardStage===1){
+      if(!value('order-veiculo')||!value('order-descricao')){
+        notify('Selecione o veículo e informe a descrição da OS para continuar.');return false;
+      }
+      if(!value('order-numero')){notify('Informe o número da OS.');return false;}
+      const start=value('order-data-inicio'),end=value('order-data-termino');
+      if((start&&!validDate(start))||(end&&!validDate(end))||(start&&end&&end<start)){
+        notify('Verifique as datas da OS antes de continuar.');return false;
+      }
+    }else if(wizardStage===2){
+      try{collect()}catch(error){notify(error.message);return false;}
+    }
+    wizardStage=Math.min(3,wizardStage+1);drawWizard();return true;
+  }
+  function backWizard(){wizardStage=Math.max(1,wizardStage-1);drawWizard();}
+  function startWizard(){wizardStage=1;refresh();drawWizard();}
   function onChange(e) {
     if(!byId('os-operational-guide'))return;
     if(existingOrder&&!getSaved()&&(e.target?.id==='order-tipo-os'||e.target?.closest?.('#os-operational-guide')))legacyEdited=true;
@@ -297,6 +365,8 @@
   if(doc) {
     doc.addEventListener('change',onChange);
     doc.addEventListener('click',e=>{
+      if(e.target?.closest?.('[data-os-step-next]')){e.preventDefault();nextWizard();return;}
+      if(e.target?.closest?.('[data-os-step-back]')){e.preventDefault();backWizard();return;}
       if(e.target?.closest?.('#os-guide-new')){e.preventDefault();showSheet();}
       if(e.target?.closest?.('[data-os-quick-close]')){e.preventDefault();closeSheet(true);}
     });
@@ -305,7 +375,7 @@
   }
   global.WeFrotasOsGuide=Object.freeze({
     configure(api){bridge=api;},
-    reset,formHtml,refresh,loadOrder,collect,
+    reset,formHtml,refresh,loadOrder,collect,startWizard,nextWizard,backWizard,wizardStep:()=>wizardStage,
     draftOrderId:()=>draftOrderId,
     getDraftVehicle:()=>draftVehicle,
     __test:{plateKey,validDate}
