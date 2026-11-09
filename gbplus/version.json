@@ -1,15 +1,17 @@
 {
-  "version": "2.9.0",
-  "build": 2900,
-  "published_at": "2026-11-09T04:18:26Z",
-  "title": "Cofrinhos de metas e contas personalizadas",
+  "version": "3.0.0",
+  "build": 3000,
+  "published_at": null,
+  "title": "Interface financeira padronizada e formulários compactos",
   "notes": [
-    "Conta personalizada substitui a opção Dinheiro em caixa e permite escolher um ícone local para representar dinheiro físico, carteira ou caixa transitório.",
-    "Cofrinhos são contas internas com ícones personalizáveis, objetivos predefinidos (emergência, casamento, educação, viagem, casa ou outro), valor-alvo e data prevista.",
-    "Cartões de metas exibem saldo, porcentagem alcançada, valor que falta, prazo e sugestão aproximada de aporte mensal.",
-    "Depósitos e retiradas em cofrinhos usam transferências entre contas existentes; não contam como receita/despesa nem duplicam saldo total.",
-    "Dados anteriores e vínculos financeiros existentes são preservados. Metadados opcionais no JSON de contas, sem nova tabela ou migração SQL.",
-    "Liberação autorizada pelo proprietário; testes integrais no CI e validação visual Android/PWA ainda sem evidências."
+    "Contas e cartões reorganizados com ações principais visíveis, informações complementares em Mais opções, saldos em contas separados visualmente de valores guardados em cofrinhos (sem alteração do cálculo financeiro).",
+    "Cadastro de conta personalizada, bancária e cofrinho mais compacto; escolha de ícones e objetivos em Bottom Sheets pesquisáveis; campos financeiros antigos e vínculos preservados.",
+    "Formulários de cartão, compra no cartão, baixa, transferências e categorias com seletores reutilizáveis de bancos, contas, cartões, parceiros e ícones.",
+    "Seletor universal abre expandido no celular e usa painel lateral no desktop; opções visuais e campos nativos preservam FormData e validações preexistentes.",
+    "Cartões mais enxutos, com detalhes de faturas e compras recolhíveis; ações de importação e edição permanecem disponíveis em Mais opções.",
+    "Cadastro de lançamentos mantém três etapas, navegação inferior e fluxo de faturas; melhorias de consistência CSS sem mudança nos cálculos ou gravação.",
+    "Versão visual 3.0.0 candidata. Não inclui painel administrativo nem novo controle de acesso; esses recursos exigem trabalho e homologação independentes.",
+    "Sem migrações SQL, sem redefinição de chaves de usuário, sem mudanças em recibos, pagamentos, transferências ou regras financeiras."
   ],
   "assets": [
     "./index.html",
@@ -204,28 +206,30 @@
     "./assets/service-icons/hq-spotify.webp",
     "./assets/service-icons/hq-tiktok-shop.webp",
     "./account-goals.css",
-    "./js/account-goals.js"
+    "./js/account-goals.js",
+    "./visual-300.css",
+    "./js/finance-picker-300.js"
   ],
   "highlights": [
     {
-      "icon": "piggy-bank",
-      "title": "Meus cofrinhos",
-      "description": "Metas personalizadas e progresso visível."
+      "icon": "layers",
+      "title": "Interface integrada",
+      "description": "Mesmo padrão em contas, cartões e formulários."
+    },
+    {
+      "icon": "search",
+      "title": "Bottom Sheets",
+      "description": "Escolhas rápidas, com busca e exibição adequada ao dispositivo."
     },
     {
       "icon": "wallet",
-      "title": "Conta personalizada",
-      "description": "Sem banco e com ícone à sua escolha."
-    },
-    {
-      "icon": "transfer",
-      "title": "Aportes sem duplicar",
-      "description": "Transferências internas preservam o saldo geral."
+      "title": "Menos poluição",
+      "description": "Saldo em destaque e ações secundárias recolhidas."
     }
   ],
-  "release_status": "deployed_github_pages_qa_incomplete",
+  "release_status": "candidate_pending_homologation",
   "homologation": {
-    "status": "specific_regressions_passed_ci_and_visual_pending",
-    "notes": "Liberação solicitada expressamente pelo responsável em 09/11/2026. Dois testes específicos do editor de contas e metas executados em ambiente JS isolado passaram; o workflow GitHub Actions falhou antes de registrar execução de steps, logo a suíte integral e o QA visual Android/PWA ainda não foram comprovados. Não classificar como homologada. Deploy GitHub Pages concluído com sucesso no run 42561013587 para merge 0e3963b4c28d072bae3e92dc225125dc047df605. Site em Android/PWA real ainda não inspecionado."
+    "status": "static_review_in_progress_real_device_qa_pending",
+    "notes": "Mudança ampla de interface; verificar regressões das contas, categorias, faturas, validação e submissão de formulários, acessibilidade e atualização de cache antes de mesclar na main. Testes visuais Android/desktop pendentes."
   }
 }
