@@ -961,6 +961,16 @@ const actions={
    }});
    if(!shown)el.setAttribute('aria-expanded','false');
   },
+  'goal-duration':el=>{
+   const form=el.closest('#account-form');
+   if(!form||form.elements.kind.value!=='goal')return;
+   const months=Number(el.dataset.months);
+   if(![3,6,12,24].includes(months))return;
+   form.elements.goalDue.value=addMonths(today(),months);
+   form.querySelectorAll('[data-action="goal-duration"]').forEach(button=>{
+    button.classList.toggle('is-selected',Number(button.dataset.months)===months);
+   });
+  },
   'goal-deposit':el=>{
    const target=db.accounts.find(a=>a.id===el.dataset.id);
    if(!target||accountKind(target)!=='goal'||target.active===false)return;
@@ -1691,7 +1701,7 @@ document.addEventListener('submit',async e=>{e.preventDefault();if(busy||!db)ret
      ()=>commit(d=>applyLaunchPayments(d,ids,v.accountId,v.date),
        summary.count+' baixa(s) registradas. Saldos atualizados.'));
   }
-  else if(form.id==='transfer-form'){await commit(d=>{const amount=cents(v.amount);const source=d.accounts.find(a=>a.id===v.from);if(source&&accountKind(source)==='goal'&&accountBalance(d,v.from,today())<amount)throw Error('O cofrinho não tem saldo suficiente para retirar esse valor.');transfer(d,{...v,amount});},'Transferência registrada.');}
+  else if(form.id==='transfer-form'){await commit(d=>{const amount=cents(v.amount);const source=d.accounts.find(a=>a.id===v.from);const dest=d.accounts.find(a=>a.id===v.to);if((accountKind(source)==='goal'||accountKind(dest)==='goal')&&accountBalance(d,v.from,v.date)<amount)throw Error('Saldo insuficiente para transferir dinheiro para ou de um cofrinho.');transfer(d,{...v,amount});},'Transferência registrada.');}
   else if(form.id==='customize-form'){await commit(d=>{for(const device of ['desktop','mobile'])for(const key of Object.keys(INDICATORS))d.settings.panel[device][key]=new FormData(form).has(`${device}:${key}`);},'Painel personalizado.');}
   else if(form.id==='period-form'){if(v.from>v.to)throw Error('O início deve ser anterior ao fim do período.');state.period='custom';state.range={from:v.from,to:v.to};savePeriodPreference();state.launchSelected=[];closeModal();render();}
 }catch(error){fail(error);}});
