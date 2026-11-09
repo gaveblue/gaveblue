@@ -3775,8 +3775,29 @@
 
       const supplier = resolveFuelSupplierByImportedName(importedData.posto);
       const driver = resolveDriverByImportedName(importedData.motorista);
-      const vehicle = resolveVehicleByImportedDriver(importedData.motorista, driver);
+      const linkedVehicle = resolveVehicleByImportedDriver(importedData.motorista, driver);
+      const recordPlate = String(centralRecord?.placa || centralRecord?.vehiclePlate || centralRecord?.veiculoPlaca || centralRecord?.vehicle?.placa || '').trim();
+      const normalizedRecordPlate = recordPlate.toUpperCase().replace(/[^A-Z0-9]/g, '');
+      const explicitVehicle = normalizedRecordPlate
+        ? allVehicles.find(item => String(item.placa || '').toUpperCase().replace(/[^A-Z0-9]/g, '') === normalizedRecordPlate)
+        : null;
+      const recordVehicleId = String(centralRecord?.vehicleId || centralRecord?.veiculoId || '').trim();
+      const explicitVehicleById = recordVehicleId ? allVehicles.find(item => String(item.id) === recordVehicleId) : null;
+      const activeReplacement = window.WeFrotasSubstitutions?.currentForDriver?.(driver?.id, importedData.dataIso);
+      const reserveVehicle = activeReplacement
+        ? allVehicles.find(item => String(item.id) === String(activeReplacement.reserveVehicleId))
+        : null;
+      // A Central pode informar a placa habitual durante a substituição.
+      // O KM recebido deve ser validado contra o reserva, nunca contra o titular.
+      const recordedVehicle = explicitVehicle || explicitVehicleById;
+      const vehicle = reserveVehicle && (!recordedVehicle
+        || String(recordedVehicle.id) === String(activeReplacement.sourceVehicleId)
+        || String(recordedVehicle.id) === String(reserveVehicle.id))
+        ? reserveVehicle : (recordedVehicle || linkedVehicle);
       const notes = [];
+      if (reserveVehicle && vehicle?.id === reserveVehicle.id && linkedVehicle?.id !== reserveVehicle.id) {
+        notes.push('VEÍCULO RESERVA — abastecimento associado à substituição ativa; KM do veículo reserva.');
+      }
 
       if (document.getElementById('finance-data-abastecimento')) {
         document.getElementById('finance-data-abastecimento').value = importedData.dataIso;
