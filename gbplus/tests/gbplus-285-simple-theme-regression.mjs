@@ -28,7 +28,7 @@ check(/sun:'M12 8|sun:'M12|sun:'M12 /.test(ui),'Ícone de sol está incluído na
 check(/moon:'M20 14/.test(ui),'Ícone de lua está incluído na biblioteca.');
 check(views.includes("cfgOption('Aparência','Escolha entre modo claro e escuro'"),'Preferências não devem anunciar Liquid Glass.');
 check(!app.includes('O controle Liquid Glass agora')&&!app.includes('Arraste-o para alternar'),'A ajuda não deve instruir arrastar.');
-check(page.includes('next-282.css?v=20261108-2851')&&page.includes('app.js?v=20261108-2864'),'Cache do app e CSS atualizado.');
+check(page.includes('next-282.css?v=20261108-2851')&&page.includes('app.js?v=20261108-2865'),'Cache do app e CSS atualizado.');
 check(app.includes("views.js?v=20261108-2862"),'Cache das instruções da tela Aparência atualizado.');
 check(!/data-theme="light"[^>]*<\/iframe>/.test(page),'Nenhum iframe de tema no cabeçalho.');
 
