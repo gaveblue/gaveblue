@@ -360,10 +360,7 @@
 /* Local brand asset with safe fallback, preserving full icon colours on both themes. */
 .gb-service-logo.gb-service-asset{position:relative;overflow:hidden;background:#fff!important;border-color:#dedee2!important;color:#171717!important}
 .gb-service-asset-fallback{display:grid;place-items:center;position:absolute;inset:0;font-size:10px;font-weight:750;line-height:1}
-.gb-service-asset-image{position:absolute;inset:0;display:block;width:100%!important;height:100%!important;object-fit:contain;background:#fff}
+.gb-service-asset-image{position:absolute;inset:0;display:block;width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;object-fit:contain;object-position:center;background:#fff;transform:none!important;filter:none!important;image-rendering:auto}
 .gb-service-asset-image[hidden]{display:none!important}
 
-/* GB+ 2.8.7 — atlas de logos recebidos (4×4), sem downloads externos. */
-.gb-service-logo.gb-service-sprite{position:relative;display:inline-block;overflow:hidden;background:#fff!important;color:#171717!important;border-color:#dedee2!important}
-.gb-service-logo.gb-service-sprite .gb-service-sprite-image{position:absolute!important;display:block;width:400%!important;height:400%!important;max-width:none!important;max-height:none!important;object-fit:fill!important;background:none!important;inset:auto!important}
-.gb-service-logo.gb-service-sprite .gb-service-sprite-image[hidden]{display:none!important}
+/* GB+ 2.8.8 — imagens individuais 320px sem sprite ou redimensionamento 4x. */
