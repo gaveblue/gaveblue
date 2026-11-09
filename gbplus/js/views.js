@@ -125,12 +125,14 @@ export function accountsView(db,{embedded=false}={}){
    '<h3>'+esc(a.name)+'</h3>'+
    '<span class="gb-goal-balance">'+money(accountBalance(db,a.id,today()))+'</span>'+
    goalProgressMarkup(db,a)+
-   '<div class="gb-goal-actions">'+
-    (a.active!==false?button(icon('plus')+'Guardar','goal-deposit','small','data-id="'+esc(a.id)+'"')+
-     button('Retirar','goal-withdraw','small','data-id="'+esc(a.id)+'"'):'')+
+   '<div class="gb30-primary-actions">'+
+    (a.active!==false?button(icon('plus')+'Guardar','goal-deposit','primary small','data-id="'+esc(a.id)+'"'):'')+
+   '</div>'+
+   '<details class="gb30-more"><summary>'+icon('chevron')+' Mais opções</summary><div class="gb30-more-actions">'+
+    (a.active!==false?button('Retirar','goal-withdraw','small','data-id="'+esc(a.id)+'"'):'')+
     button('Movimentações','account-detail','small','data-id="'+esc(a.id)+'"')+
-    '<button type="button" class="icon-button" data-action="edit-account" data-id="'+esc(a.id)+'" aria-label="Editar cofrinho '+esc(a.name)+'">'+icon('edit')+'</button>'+
-   '</div></article>').join('');
+    button('Editar cofrinho','edit-account','small','data-id="'+esc(a.id)+'"')+
+   '</div></details></article>').join('');
  const accountCards=accounts.map(a=>
   '<article class="panel account-card"><div class="panel-heading">'+
    '<span class="gb-account-bank-logo">'+accountMark(db,a)+'</span>'+
@@ -138,16 +140,24 @@ export function accountsView(db,{embedded=false}={}){
    '<h2>'+esc(a.name)+'</h2>'+
    '<p>'+esc(accountKind(a)==='bank'?(bankName(db,a.bankId,a.bank)||'Conta financeira'):accountTypeLabel(a))+'</p>'+
    '<strong>'+money(accountBalance(db,a.id,today()))+'</strong>'+
-   '<small>Saldo atual · Inicial: '+money(a.initial)+'</small>'+
-   '<div class="partner-bottom">'+
+   '<small>Saldo atual</small>'+
+   '<div class="gb30-primary-actions">'+
     button('Movimentações','account-detail','small','data-id="'+esc(a.id)+'"')+
+   '</div>'+
+   '<details class="gb30-more"><summary>'+icon('chevron')+' Mais opções</summary><div class="gb30-more-actions">'+
+    button('Editar conta','edit-account','small','data-id="'+esc(a.id)+'"')+
     button('Conciliações','bank-import-history','small','data-id="'+esc(a.id)+'"')+
     (a.active!==false?button(icon('upload')+'Importar extrato','bank-import-open','small','data-id="'+esc(a.id)+'"'):'')+
-    '<button class="icon-button" data-action="edit-account" data-id="'+esc(a.id)+'" aria-label="Editar conta '+esc(a.name)+'">'+icon('edit')+'</button>'+
-   '</div></article>').join('');
+   '</div></details></article>').join('');
+ const saved=goals.reduce((sum,a)=>sum+accountBalance(db,a.id,today()),0);
+ const available=accounts.reduce((sum,a)=>sum+accountBalance(db,a.id,today()),0);
  return (embedded?'':heading('Contas financeiras','Bancos, contas personalizadas e metas num só lugar.',
   button('Novo cofrinho','new-goal','small')+
   button(icon('plus')+'Nova conta','new-account','primary')))+
+  '<div class="gb30-accounts-summary" aria-label="Resumo das contas">'+
+   '<div><small>Em contas</small><strong>'+money(available)+'</strong></div>'+
+   '<div><small>Nos cofrinhos</small><strong>'+money(saved)+'</strong></div>'+
+  '</div>'+
   '<section class="gb-goals-section" aria-label="Cofrinhos e metas">'+
    '<div class="gb-goals-head"><div><h2>Meus cofrinhos</h2><p>Acompanhe seus objetivos, sem misturar transferências com receitas.</p></div>'+
     button(icon('plus')+'Criar meta','new-goal','small')+'</div>'+
