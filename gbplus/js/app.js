@@ -10,11 +10,12 @@ import {moreView} from './more-view.js?v=20261108-2863';
 import {accountsCardsView} from './accounts-cards-view.js?v=20261109-2900';
 import {renderReactCharts,unmountReactCharts} from './gb-react-loader.js?v=20261105-45';
 import {mountNativeCharts} from './gb-charts-native.js?v=20261106-68';
-import {titleForm,partnerForm,accountForm,accountBankPreview,categoryForm,paymentForm,transferForm,titleDetail,customizeForm,accountDetail} from './forms.js?v=20261109-2900';
+import {titleForm,partnerForm,accountForm,accountBankPreview,categoryForm,paymentForm,transferForm,titleDetail,customizeForm,accountDetail} from './forms.js?v=20261109-3000';
 import {ACCOUNT_ICON_OPTIONS,GOAL_PRESETS,accountKind,accountIcon,goalPreset} from './account-goals.js?v=20261109-2900';
 import {serviceById,serviceSearchKey,isServiceExpenseCategory} from './service-catalog.js?v=20261108-2880';
 import {serviceIconMarkup,serviceIdentityMarkup,serviceDisplayName,installServiceIconRecovery} from './service-ui.js?v=20261108-2880';
-import {openGbPickerSheet,openGbScheduleSheet,installGbPickerSheet,installEntryFormDrag} from './bottom-sheet.js?v=20261108-2890';
+import {openGbPickerSheet,openGbScheduleSheet,installGbPickerSheet,installEntryFormDrag} from './bottom-sheet.js?v=20261109-3000';
+import {financePickerItems,refreshFinancePicker} from './finance-picker-300.js?v=20261109-3000';
 import {toggleEntryMenu,chooseEntryOption,syncEntrySelect,closeEntryMenus} from './entry-select.js?v=20261108-2861';
 import {installGbControls,enhanceGbControls} from './custom-controls.js?v=20261104-42';
 import {expectedDates,recurrenceAnchor} from './gb-calendar-rules.js?v=20261105-47';
@@ -32,7 +33,7 @@ import {addCardPurchase,registerCardInvoiceBalance,updateCardPurchase,removeCard
 import {cashForecast} from './forecast.js?v=20261105-72';
 import {missingCategorySuggestions,appendCategorySuggestions,isSelectableExpenseCategory,isPrimaryServiceCategory} from './category-library.js?v=20261108-2862';
 import {calculateDueAlerts,notificationPrefs,validNotificationPrefs,NOTIFICATION_DAYS} from './notification-rules.js?v=20261108-2821';
-import {banksView,bankForm,cardForm,cardPurchaseForm,cardInvoiceBalanceForm,forecastView,forecastSummary,forecastScenarioForm,forecastResult} from './finance-24-ui.js?v=20261108-2811';
+import {banksView,bankForm,cardForm,cardPurchaseForm,cardInvoiceBalanceForm,forecastView,forecastSummary,forecastScenarioForm,forecastResult} from './finance-24-ui.js?v=20261109-3000';
 import {launchesView} from './launches-view.js?v=20261108-2861';
 import {installLaunchGestures} from './launches-gestures.js?v=20261104-38';
 import {launchSelection,paymentSelection,paymentSummary,applyLaunchPayments,reversedSelection,applyLaunchReversals,deletionSelection,applyLaunchDeletions} from './launch-actions.js?v=20261105-72';
@@ -81,6 +82,9 @@ function toast(message){const el=document.querySelector('#toast');el.textContent
 function openModal(title,content){
  const isEntry=content.includes('id="title-form"');
  modal.classList.toggle('gb-entry-modal',isEntry);
+ const compactForms=['account-form','transfer-form','payment-form','card-form',
+   'card-purchase-form','card-invoice-balance-form','category-form','partner-form'];
+ modal.classList.toggle('gb30-finance-modal',!isEntry&&compactForms.some(id=>content.includes('id="'+id+'"')));
  modal.classList.toggle('gb-bank-import-modal',content.includes('id="gb-import-workspace"'));
  if(isEntry)modal.dataset.gbSnap='partial';
  else{delete modal.dataset.gbSnap;delete modal.dataset.gbEntryStep;}
@@ -707,6 +711,37 @@ function refreshEntrySchedule(form){
  }catch(error){target.textContent=error.message||'Revise os vencimentos.';}
 }
 const actions={
+  'gb30-picker':el=>{
+   const form=el.closest('form'),kind=el.dataset.kind,name=el.dataset.field;
+   if(!form?.isConnected||!modal.open||!kind||!name)return;
+   const field=form.elements[name];
+   if(!field)return;
+   const opposite=form.id==='transfer-form'?(name==='from'?'to':name==='to'?'from':''):'';
+   const excluded=opposite?String(form.elements[opposite]?.value||''):'';
+   const allowEmpty=['payAccountId','partnerId'].includes(name)||kind==='bank';
+   const selected=String(field.value||'');
+   const items=financePickerItems(db,kind,{selected,allowEmpty,exclude:excluded});
+   if(!items.length){toast('Nenhuma opção disponível para selecionar.');return;}
+   el.setAttribute('aria-expanded','true');
+   const shown=openGbPickerSheet({kind,items,selected,onPick:id=>{
+    if(!form.isConnected)return;
+    const item=items.find(x=>String(x.id)===String(id));
+    if(!item)return;
+    if(field.tagName==='SELECT'&&![...field.options].some(o=>o.value===id)){
+     field.add(new Option(item.name,id));
+    }
+    field.value=id;
+    refreshFinancePicker(form,name,item);
+    if(kind==='icon'&&form.id==='account-form'){
+     actions['account-icon']({dataset:{icon:id},closest:()=>form});
+    }else if(kind==='category-icon'&&form.id==='category-form'){
+     actions['category-icon']({dataset:{icon:id},closest:()=>form});
+    }
+    field.dispatchEvent(new Event('change',{bubbles:true}));
+   }});
+   if(!shown)el.setAttribute('aria-expanded','false');
+  },
+
   close:closeModal,
   'toggle-sidebar':()=>syncSidebarVisibility(!document.documentElement.classList.contains('sidebar-hidden'),true),
   confirm:async()=>{const fn=confirmAction;if(fn&&!busy){confirmAction=null;try{await fn();}catch(e){confirmAction=fn;throw e;}}},
@@ -825,6 +860,7 @@ const actions={
    const form=el.closest('#category-form'),value=el.dataset.icon;
    if(!form||!CATEGORY_ICON_OPTIONS.some(([key])=>key===value))return;
    form.elements.icon.value=value;
+   refreshFinancePicker(form,'icon',financePickerItems(db,'category-icon').find(item=>item.id===value));
    form.querySelectorAll('.gb-category-icon-choice').forEach(button=>{
     const selected=button.dataset.icon===value;
     button.classList.toggle('is-selected',selected);
@@ -912,6 +948,7 @@ const actions={
    });
    const preview=form.querySelector('[data-account-bank-preview]');
    if(preview)preview.innerHTML=accountBankPreview(db,form.elements.bankId.value,form.elements.bank.value,form.elements.kind.value,value);
+   refreshFinancePicker(form,'icon',financePickerItems(db,'icon').find(item=>item.id===value));
   },
   'account-bank-picker':el=>{
    const form=el.closest('#account-form');
@@ -1433,6 +1470,8 @@ document.addEventListener('change',async e=>{
 });
 document.addEventListener('change',e=>{
  if(e.target?.matches?.('#account-form select[name="goalCategory"]')){
+  const choice=financePickerItems(db,'goal').find(item=>item.id===e.target.value);
+  refreshFinancePicker(e.target.closest('#account-form'),'goalCategory',choice);
   const form=e.target.closest('#account-form');
   if(form&&form.elements.kind.value==='goal'){
    const preset=goalPreset(e.target.value);
