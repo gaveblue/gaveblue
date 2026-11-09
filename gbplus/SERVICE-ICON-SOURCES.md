@@ -60,3 +60,13 @@ O catálogo passou de **26 para 49 opções** na branch de desenvolvimento da ve
 - Canva: https://www.canva.dev/assets/connect/Canva-logos.zip — ZIP não extraído
 
 **Controle de qualidade:** manter monogramas até que um arquivo SVG/PNG/WebP seja de fato incorporado ao repositório e testado, sem buscar imagens externas na execução. Validar não conter SVG ativo (scripts, links externos ou eventos), verificar termos de marca e preferir símbolo quadrado sem distorcer. O catálogo de IDs e valores financeiros não muda por falta desses arquivos.
+
+## Arquivos recebidos do usuário (08/11/2026; revisão 2.8.6 build 2865)
+- `delivery-plusdelivery`: arquivo local `assets/service-icons/plus-delivery.webp`, 160×160, derivado do PNG enviado no chat (imagem da identidade visual Plus Delivery).
+- `delivery-99food`: `assets/service-icons/99food.png`, 261×258, bytes originais do PNG enviado no chat; marca escura exige fundo claro.
+- `streaming-primevideo`: `assets/service-icons/prime-video.webp`, 128×39, versão local otimizada do PNG transparente enviado; **wordmark horizontal, não o ícone quadrado da plataforma**.
+- `streaming-disney`: `assets/service-icons/disney-plus.webp`, 180×101, versão local otimizada do JPG enviado; **imagem horizontal ilustrativa do logo, não ícone quadrado do aplicativo**.
+
+Recebimento das imagens pelo usuário não constitui, por si só, comprovação de licença de uso ou extração oficial. Referências oficiais fornecidas no chat estão documentadas anteriormente. Todos os arquivos são identificadores visuais de despesas, sem afiliação ou endosso dos proprietários das marcas.
+
+**Verificação:** quatro hashes Git do blob coincidiram com os arquivos locais enviados; nenhum URL remoto é usado na interface. **Pendentes (5):** Globoplay, Rappi, 99, inDrive, Canva. A escolha visual final no modo claro/escuro precisa ser avaliada em aparelho Android antes da publicação.
