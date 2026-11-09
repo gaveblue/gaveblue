@@ -33,6 +33,13 @@ test('Falhas do botão Continuar são exibidas no formulário',()=>{
  assert.match(css,/#wf-os-step-error\[hidden\]/);
 });
 test('Cache de todos os recursos alterados foi invalidado',()=>{
- for(const filename of ['wefrotas-os-guided.js','wefrotas-os-guided.css','wefrotas.js'])
+ for(const filename of ['wefrotas-os-guided.css','wefrotas.js'])
    assert.ok(html.includes(filename+'?v=20261109-os-hotfix-sinistro-2'),filename);
+ assert.ok(html.includes('wefrotas-os-guided.js?v=20261109-click-capture-3'));
+});
+
+test('Clique em Continuar é capturado antes que o modal interrompa o bubble',()=>{
+ assert.match(html,/id="modal-backdrop"[^>]+onclick="handleModalBackdrop\(event\)"/);
+ assert.match(app,/function handleModalBackdrop\(event\)[\s\S]*?event\.stopPropagation\(\)/);
+ assert.match(guide,/doc\.addEventListener\('click',e=>\{[\s\S]*?\[data-os-step-next\][\s\S]*?\}, true\);/);
 });
