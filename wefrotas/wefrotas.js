@@ -14906,7 +14906,10 @@
             : vehicle);
         }
         renderAll();
-        await persistOperationalDataImmediately();
+        const confirmation = await persistOperationalDataImmediately();
+        if (!['supabase-saved', 'supabase-verified', 'supabase-rebased'].includes(confirmation?.mode)) {
+          throw new Error('Gravação ainda não confirmada no Supabase. A cópia local foi preservada para nova tentativa.');
+        }
       }
     });
 
