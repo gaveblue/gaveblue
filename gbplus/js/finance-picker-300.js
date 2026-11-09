@@ -4,7 +4,7 @@ import {esc,icon} from './ui.js?v=20261105-72';
 import {money,accountBalance,today} from './domain.js?v=20261105-72';
 import {bankPickerCatalog,bankBadge,findBank} from './banks.js?v=20261105-87';
 import {accountMark,ACCOUNT_ICON_OPTIONS,GOAL_PRESETS} from './account-goals.js?v=20261109-2900';
-import {gbIcon,categoryIconFor} from './gb-icons.js?v=20261109-2900';
+import {gbIcon,categoryIconFor,CATEGORY_ICON_OPTIONS} from './gb-icons.js?v=20261109-2900';
 
 const labelled=(name,options,value,placeholder='Selecione uma opção')=>{
  const row=options.find(x=>String(x.id)===String(value));
@@ -37,6 +37,7 @@ export function financePickerItems(db,kind,{includeInactive=false,allowEmpty=fal
  if(kind==='icon')return ACCOUNT_ICON_OPTIONS.map(([id,name])=>({
   id,name,subtitle:'Ícone da conta',badgeMarkup:gbIcon(id)
  }));
+ if(kind==='category-icon')return CATEGORY_ICON_OPTIONS.map(([id,name])=>({id,name,subtitle:'Ícone de categoria',badgeMarkup:gbIcon(id)}));
  if(kind==='goal')return GOAL_PRESETS.map(([id,name,ico])=>({
   id,name,subtitle:'Objetivo do cofrinho',badgeMarkup:gbIcon(ico)
  }));
