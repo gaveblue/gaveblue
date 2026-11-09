@@ -1,15 +1,15 @@
 {
-  "version": "2.8.7",
-  "build": 2870,
+  "version": "2.8.8",
+  "build": 2880,
   "published_at": null,
-  "title": "Biblioteca de aplicativos ampliada e ícones renovados",
+  "title": "Correção de nitidez dos ícones de aplicativos",
   "notes": [
-    "Novas opções em Compras e pagamentos: TikTok Shop, Shopee, Mercado Livre, Magalu, Casas Bahia, Temu e SHEIN.",
-    "Ícones renovados para HBO Max, 99Food, Prime Video, WhatsApp, Telegram e Spotify; 13 imagens fornecidas pelo usuário agrupadas em atlas WebP local leve de 256×256.",
-    "Catálogo passou de 49 para 56 opções sem trocar, apagar ou migrar IDs dos 49 serviços existentes.",
-    "Imagens proporcionais em modo claro e escuro; carregamento local, fallback textual para erro de asset e sem consultas a CDN.",
-    "Alterações restritas à identificação visual/seleção de serviços, cache PWA, documentação e testes; finanças, aceite, autenticação e backend não modificados.",
-    "PR #106 mesclado à main; confirmar carregamento da 2.8.7 no domínio e no PWA Android antes de declarar homologação visual."
+    "Os 13 ícones do lote de aplicativos foram substituídos por arquivos WebP individuais de 320×320 px gerados diretamente a partir das imagens originais enviadas.",
+    "Foi eliminado o atlas 4×4 de 256×256 px que limitava cada ícone a 64 px e provocava perda de nitidez.",
+    "Respeitadas proporções, cores e características das marcas, com object-fit: contain e sem filtro, escala artificial ou recorte.",
+    "A exibição de Serviços usa os mesmos IDs, categorias e vínculos existentes; 56 aplicativos permanecem disponíveis.",
+    "Os arquivos permanecem no repositório para funcionar sem dependência de URLs de terceiros; cache PWA atualizado.",
+    "Nenhuma alteração em lançamentos, saldos, cartões, autenticação, LGPD ou painel administrativo."
   ],
   "assets": [
     "./index.html",
@@ -190,28 +190,39 @@
     "./js/legal-consent.js",
     "./legal-consent.css",
     "./termos-de-uso.html",
-    "./assets/service-icons/service-brands-287.webp"
+    "./assets/service-icons/hbo-max.webp",
+    "./assets/service-icons/99food.webp",
+    "./assets/service-icons/tiktok-shop.webp",
+    "./assets/service-icons/whatsapp.webp",
+    "./assets/service-icons/shopee.webp",
+    "./assets/service-icons/mercado-livre.webp",
+    "./assets/service-icons/telegram.webp",
+    "./assets/service-icons/spotify.webp",
+    "./assets/service-icons/magalu.webp",
+    "./assets/service-icons/casas-bahia.webp",
+    "./assets/service-icons/temu.webp",
+    "./assets/service-icons/shein.webp"
   ],
   "highlights": [
     {
-      "icon": "shopping-bag",
-      "title": "56 aplicativos",
-      "description": "Casas Bahia, Temu, SHEIN, Magalu, Mercado Livre, Shopee e TikTok Shop adicionados."
-    },
-    {
       "icon": "image",
-      "title": "13 ícones atualizados",
-      "description": "Imagens fornecidas e armazenadas localmente, sem inventar marcas."
+      "title": "Ícones mais nítidos",
+      "description": "13 imagens individuais em 320 × 320 px, sem compressão excessiva."
     },
     {
-      "icon": "shield",
-      "title": "Seus dados preservados",
-      "description": "Sem migrações de lançamentos ou mudanças em contas, cartões e faturas."
+      "icon": "grid",
+      "title": "56 aplicativos",
+      "description": "Mesmo catálogo de serviços e compras, com logotipos aprimorados."
+    },
+    {
+      "icon": "shield-check",
+      "title": "Dados preservados",
+      "description": "Ajustes visuais apenas; nenhuma alteração financeira."
     }
   ],
-  "release_status": "merged_to_main_pending_live_verification",
+  "release_status": "candidate_not_published",
   "homologation": {
-    "status": "isolated_regressions_passed_visual_qa_pending",
-    "notes": "PR #106 foi mesclado à main em 08/11/2026. Testes de código do catálogo (56 serviços), painel e atlas local (13 logotipos) aprovados; integridade SHA confirmada. QA visual real Android/PWA e atualização efetiva no domínio gaveblue.com.br não puderam ser confirmados. Nenhuma alteração financeira ou de consentimento nesta versão."
+    "status": "pending_qa_visual",
+    "notes": "Build 2880 em branch isolada. Testes dirigidos e inspeção de imagem realizados; revisão visual no Android/PWA claro e escuro pendente antes da homologação final."
   }
 }
