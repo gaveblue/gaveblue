@@ -5,6 +5,7 @@ import {entrySelect} from './entry-select.js?v=20261108-2861';
 import {gbIcon,CATEGORY_ICON_OPTIONS,categoryIconFor} from './gb-icons.js?v=20261108-2821';
 import {bankOptions,findBank,bankPicker,bankBadge} from './banks.js?v=20261105-87';
 import {dailyStatement} from './daily-statement.js?v=20261105-90';
+import {ACCOUNT_ICON_OPTIONS,GOAL_PRESETS,accountKind,accountIcon,goalPreset} from './account-goals.js?v=20261109-2900';
 import {servicePickerMarkup,serviceIdentityMarkup,serviceDisplayName} from './service-ui.js?v=20261108-2880';
 import {isServiceExpenseCategory} from './service-catalog.js?v=20261108-2880';
 import {missingCategorySuggestions,isSelectableExpenseCategory,isPrimaryServiceCategory} from './category-library.js?v=20261108-2862';
@@ -134,34 +135,62 @@ export function titleForm(db,t,type='expense'){
  </form>`;
 }
 export function partnerForm(p){return `<form id="partner-form" data-id="${p?.id||''}"><div class="form-grid">${field('Nome ou razão social','name',p?.name||'','text',required)}${field('Nome fantasia','tradeName',p?.tradeName||'','text','maxlength="200"')}${field('CPF ou CNPJ','document',p?.document||'','text','maxlength="18"')}${field('Telefone','phone',p?.phone||'','tel','maxlength="30"')}${field('E-mail','email',p?.email||'','email','maxlength="200"')}${select('Situação','active',[['true','Ativo'],['false','Inativo']],String(p?.active??true))}<fieldset class="full roles"><legend>Classificações · escolha uma ou mais</legend>${['Cliente','Fornecedor','Transportadora','Funcionário','Outros'].map(r=>`<label><input type="checkbox" name="roles" value="${r}" ${p?.roles.includes(r)?'checked':''}>${r}</label>`).join('')}</fieldset><div class="full">${field('Endereço','address',p?.address||'','text','maxlength="500"')}</div>${textarea('Observações','notes',p?.notes)}</div>${p?button(icon('trash')+'Excluir parceiro','delete-partner','danger small',`data-id="${p.id}" type="button"`):''}${formFooter()}</form>`;}
-/** Compact, shared account-bank preview. No persisted "cash" bank ID is needed. */
-export function accountBankPreview(db,bankId='',manualBank=''){
+/** The selector is shared by banks, custom cash accounts and goal cofrinhos. */
+export function accountBankPreview(db,bankId='',manualBank='',kind='bank',ico=''){
  const bank=findBank(db,bankId);
  const legacy=!bank?String(manualBank||'').trim():'';
- const label=bank?.name||legacy||'Dinheiro em caixa';
- const sub=bank?'Banco ou instituição':legacy?'Instituição já cadastrada':'Sem banco · caixa transitório';
- const mark=bank?bankBadge(bank):
-  '<span class="gb-account-cash-mark" aria-hidden="true">'+icon('wallet')+'</span>';
+ const type=kind==='goal'?'goal':kind==='custom'||(!bank&&!legacy)?'custom':'bank';
+ const label=type==='goal'?'Cofrinho':type==='custom'?'Conta personalizada':bank?.name||legacy;
+ const sub=type==='goal'?'Guarde dinheiro para um objetivo':type==='custom'?'Sem banco · personalize como quiser':
+  bank?'Banco ou instituição':'Instituição já cadastrada';
+ const mark=type==='bank'&&bank?bankBadge(bank):
+  '<span class="gb-account-cash-mark" aria-hidden="true">'+gbIcon(accountIcon({kind:type,icon:ico}))+'</span>';
  return '<span class="gb-account-bank-preview">'+mark+
   '<span class="gb-account-bank-copy"><strong>'+esc(label)+'</strong><small>'+esc(sub)+'</small></span></span>';
 }
-export function accountForm(db,a){
+export function accountForm(db,a,options={}){
  const matched=findBank(db,a?.bankId)||findBank(db,a?.bank);
  const id=matched?.id||'';
  const legacy=a?.bank&&!matched?String(a.bank):'';
+ const kind=a?accountKind(a):options.kind==='goal'?'goal':'custom';
+ const currentIcon=accountIcon({kind,icon:a?.icon});
  const initial=a?String((a.initial||0)/100):'';
+ const template=goalPreset(a?.goalCategory||'custom');
+ const palette=ACCOUNT_ICON_OPTIONS.map(([key,label])=>
+  '<button type="button" class="gb-account-icon-choice'+(currentIcon===key?' is-selected':'')+
+   '" data-action="account-icon" data-icon="'+esc(key)+'" aria-pressed="'+(currentIcon===key)+
+   '" aria-label="Ícone: '+esc(label)+'" title="'+esc(label)+'">'+gbIcon(key)+
+   '<small>'+esc(label)+'</small></button>').join('');
  return '<form id="account-form" class="gb-account-edit-form" data-id="'+esc(a?.id||'')+'">'+
   '<div class="form-grid gb-account-edit-grid">'+
-   '<div class="full">'+field('Nome da conta','name',a?.name||'','text','required maxlength="120" placeholder="Ex.: Conta principal, Caixa da empresa"')+'</div>'+
+   '<div class="full">'+field('Nome da conta','name',a?.name||'','text','required maxlength="120" placeholder="Ex.: Reserva de emergência, Carteira, Conta principal"')+'</div>'+
    '<div class="full gb-account-bank-field"><span class="gb-account-bank-label" id="account-bank-label">Onde fica o dinheiro?</span>'+
+    '<input type="hidden" name="kind" value="'+esc(kind)+'">'+
     '<input type="hidden" name="bankId" value="'+esc(id)+'">'+
     '<input type="hidden" name="bank" value="'+esc(legacy)+'">'+
     '<button type="button" class="gb-account-bank-trigger" data-action="account-bank-picker" aria-labelledby="account-bank-label" aria-haspopup="dialog" aria-controls="gb-picker-sheet" aria-expanded="false">'+
-     '<span data-account-bank-preview>'+accountBankPreview(db,id,legacy)+'</span>'+
+     '<span data-account-bank-preview>'+accountBankPreview(db,id,legacy,kind,currentIcon)+'</span>'+
      icon('chevron')+'</button></div>'+
+   '<div class="full gb-account-type-fields" data-account-type-fields '+(kind==='bank'?'hidden':'')+'>'+
+    '<fieldset class="gb-account-icon-picker"><legend>Escolha um ícone</legend>'+
+     '<input type="hidden" name="icon" value="'+esc(currentIcon)+'">'+
+     '<div class="gb-account-icon-grid" role="group" aria-label="Ícones da conta">'+palette+'</div></fieldset>'+
+    '<p class="gb-account-kind-hint">Seu ícone aparece nos saldos e nos cartões de contas.</p>'+
+   '</div>'+
+   '<div class="full gb-account-goal-fields" data-account-goal-fields '+(kind==='goal'?'':'hidden')+'>'+
+    '<label class="field">Qual é seu objetivo? <select name="goalCategory">'+
+     GOAL_PRESETS.map(([value,label])=>'<option value="'+esc(value)+'" '+(template[0]===value?'selected':'')+'>'+esc(label)+'</option>').join('')+
+    '</select></label>'+
+    '<div class="gb-account-goal-grid">'+
+     field('Valor da meta (R$)','goalTarget',a?.goalTarget?String(a.goalTarget/100):'','number','min="0.01" max="10000000000" step="0.01" inputmode="decimal" placeholder="Ex.: 10000,00"')+
+     field('Quando quer alcançar?','goalDue',a?.goalDue||'','date','')+
+    '</div>'+
+    '<p class="gb-account-kind-hint">Acompanhe quanto falta e a sugestão mensal para chegar à meta.</p>'+
+   '</div>'+
    '<div class="full gb-account-opening"><label for="account-initial">Saldo inicial <small>(opcional)</small></label>'+
     '<div class="gb-account-opening-control"><span aria-hidden="true">R$</span>'+
      '<input id="account-initial" name="initial" type="number" value="'+esc(initial)+'" placeholder="0,00" min="-10000000000" max="10000000000" step="0.01" inputmode="decimal" aria-label="Saldo inicial em reais, opcional"></div>'+
+    '<p class="gb-account-opening-hint">Se o dinheiro já está em outra conta do GB+, deixe zero e use Transferir para não contar duas vezes.</p>'+
    '</div>'+
    (a?select('Situação','active',[['true','Ativa'],['false','Inativa']],String(a.active??true)):'<input type="hidden" name="active" value="true">')+
   '</div>'+
