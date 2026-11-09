@@ -116,7 +116,7 @@
       const statusLabel=r.endDate?'Encerrada':'Em utilização';
       return `<article class="wf-reserve-card">
         <div class="wf-reserve-card-head"><div><small>${esc(r.reason==='sinistro'?'Sinistro':r.reason==='manutencao'?'Manutenção':'Indisponibilidade')} · ${esc(statusLabel)}</small>
-        <h3>${esc(vehicleLabel(reserve))}</h3><p>${esc(driver?.nome||'Motorista não localizado')}</p></div>
+        <h3>${esc(vehicleLabel(reserve))}</h3><p>${esc(driver?.nome||'Motorista não localizado')}${r.orderNumber ? ' · OS ' + esc(r.orderNumber) : ''}</p></div>
         <button type="button" class="wf-reserve-button" data-wf-open="${esc(sourceId)}" data-wf-edit="${esc(r.id)}">${r.endDate?'Ver / editar':'Gerenciar'}</button></div>
         <div class="wf-reserve-facts"><div><span>Período</span><strong>${esc(r.startDate)} — ${esc(r.endDate||'em uso')}</strong></div><div><span>Odômetro do reserva</span><strong>${number(r.startKm)} — ${r.endKm!=='' && r.endKm!=null?number(r.endKm):'não devolvido'}</strong></div>
         <div><span>Combustível</span><strong>${money(s.spent)}</strong></div><div><span>Custo adicional informado</span><strong>${money(s.extra)}</strong></div><div><span>Distância do reserva</span><strong>${s.km===null?'Aguardando leitura':number(s.km)+' km'}</strong></div>
