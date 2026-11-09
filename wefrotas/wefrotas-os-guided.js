@@ -69,6 +69,17 @@
       '<label for="os-guide-km">KM do carro reserva na entrega<input id="os-guide-km" type="number" min="0" step="1" inputmode="numeric" placeholder="Ex.: 24000"></label></div>'+
       '<p class="wf-os-guide-small">O abastecimento será lançado na placa do reserva, nunca no KM do titular. Data e KM de devolução serão informados ao encerrar a substituição.</p></div>'+
       '<div class="wf-os-guide-alert" id="os-guide-linked" hidden></div>'+
+      '<div id="os-guide-closure" class="wf-os-guide-block wf-os-guide-reserve-detail" hidden>'+
+      '<strong>Antes de encerrar esta OS</strong><p class="wf-os-guide-small">Confirme as movimentações. Encerrar a OS não presume a devolução do reserva.</p>'+
+      '<div id="os-guide-back-block"><span class="wf-os-guide-label">O veículo titular voltou a operar?</span>'+
+      '<div class="wf-os-guide-choices"><label><input name="os-guide-back" type="radio" value="sim"> Sim, voltou</label>'+
+      '<label><input name="os-guide-back" type="radio" value="nao"> Não, continua parado</label></div></div>'+
+      '<div id="os-guide-return-block"><span class="wf-os-guide-label">O carro reserva já foi devolvido?</span>'+
+      '<div class="wf-os-guide-choices"><label><input name="os-guide-return" type="radio" value="sim"> Sim, devolvido</label>'+
+      '<label><input name="os-guide-return" type="radio" value="nao"> Não, continua em uso</label></div></div>'+
+      '<div id="os-guide-return-detail" class="wf-os-guide-subgrid" hidden>'+
+      '<label for="os-guide-return-date">Data da devolução<input type="date" id="os-guide-return-date"></label>'+
+      '<label for="os-guide-return-km">KM na devolução<input type="number" id="os-guide-return-km" min="0" step="1" inputmode="numeric"></label></div></div>'+
       '<div class="wf-os-guide-summary" id="os-guide-summary"></div>'+
       '</section>';
   }
@@ -90,6 +101,33 @@
     if(rows.some(r=>String(r.id)===previous)||previous===draftVehicle?.id)el.value=previous;
     else if(draftVehicle)el.value=draftVehicle.id;
   }
+  function currentRecord() {
+    const old=getSaved();if(!old?.substitutionId)return null;
+    const vehicle=allVehicles().find(v=>String(v.id)===String(existingOrder?.vehicleId));
+    return (vehicle?.vehicleSubstitutions||[]).find(r=>r.id===old.substitutionId)||null;
+  }
+  function isClosing() {
+    return Boolean(existingOrder&&existingOrder.status!=='fechada'&&
+      value('order-status')==='fechada'&&getSaved()?.stopped);
+  }
+  function readClosure() {
+    if(!isClosing())return null;
+    const prior=getSaved(),record=currentRecord();
+    const back=prior.perdaTotalConfirmada?'nao':selectedRadio('os-guide-back');
+    if(!back)throw Error('Confirme se o veículo titular voltou a operar.');
+    const active=Boolean(record&&!record.endDate);
+    const returned=active?selectedRadio('os-guide-return'):'nao';
+    if(active&&!returned)throw Error('Informe se o carro reserva já foi devolvido.');
+    if(returned==='sim') {
+      const returnDate=value('os-guide-return-date'),returnKm=value('os-guide-return-km');
+      if(!validDate(returnDate))throw Error('Informe a data válida de devolução do reserva.');
+      if(!/^\d+$/.test(returnKm)||!Number.isSafeInteger(Number(returnKm))||
+         Number(returnKm)<Number(record.startKm))
+        throw Error('Informe o KM final válido do carro reserva.');
+      return {titularBack:back==='sim',reserveReturned:true,returnDate,returnKm:Number(returnKm)};
+    }
+    return {titularBack:back==='sim',reserveReturned:false};
+  }
   function refresh() {
     const root=byId('os-operational-guide');if(!root)return;
     const incident=isIncident(type());
@@ -106,6 +144,10 @@
     setVisible('os-guide-reserve-block',halt&&!linked());
     setVisible('os-guide-detail',need&&!linked());
     setVisible('os-guide-linked',linked());
+    setVisible('os-guide-closure',isClosing());
+    setVisible('os-guide-back-block',isClosing()&&!getSaved()?.perdaTotalConfirmada);
+    setVisible('os-guide-return-block',isClosing()&&Boolean(currentRecord()&&!currentRecord().endDate));
+    setVisible('os-guide-return-detail',isClosing()&&selectedRadio('os-guide-return')==='sim');
     if(byId('os-guide-severity'))byId('os-guide-severity').disabled=linked();
     doc.querySelectorAll('input[name="os-guide-stopped"]').forEach(el=>{el.disabled=linked()});
     const linkedBox=byId('os-guide-linked');
@@ -138,6 +180,7 @@
       ['os-guide-origin','origin'],['os-guide-start','startDate'],['os-guide-km','startKm']]){
       if(byId(id)&&old?.[k]!=null)byId(id).value=old[k];
     }
+    setRadio('os-guide-back','');setRadio('os-guide-return','');
     refresh();
     if(old?.reserveVehicleId&&byId('os-guide-vehicle'))byId('os-guide-vehicle').value=old.reserveVehicleId;
   }
@@ -200,9 +243,14 @@
       startKm:need?value('os-guide-km'):prior?.startKm||'',
       reserveStatus:linked()?prior.reserveStatus:halt?(need?'em_uso':'pendente'):'nao_necessario'
     };
-    if(linked())return {enabled:true,incident:{...prior,
-      // These fields cannot silently change a historical substitution.
-      insurer:incident.insurer,protocol:incident.protocol,bo:incident.bo}};
+    if(linked()){
+      const closure=readClosure();
+      return {enabled:true,incident:{...prior,
+        insurer:incident.insurer,protocol:incident.protocol,bo:incident.bo,
+        ...(closure?.reserveReturned?{reserveStatus:'devolvido'}:{}),
+        ...(closure?.titularBack?{restoredAt: value('order-data-termino')||new Date().toISOString().slice(0,10)}:{})
+      },closure};
+    }
     if(need){
       if(draftVehicle&&incident.reserveVehicleId===draftVehicle.id){
         draftVehicle.reserveProviderOrigin=incident.origin;
@@ -223,7 +271,11 @@
         extraCost:0,notes:'Vinculado à ordem de serviço',createdAt:new Date().toISOString()};
       return {enabled:true,incident,reserveVehicle:draftVehicle?.id===reserve.id?clone(draftVehicle):null,record};
     }
-    return {enabled:true,incident};
+    const closure=readClosure();
+    return {enabled:true,incident:{
+      ...incident,
+      ...(closure?.titularBack?{restoredAt:value('order-data-termino')||new Date().toISOString().slice(0,10)}:{})
+    },closure};
   }
   function onChange(e) {
     if(!byId('os-operational-guide'))return;
@@ -232,7 +284,7 @@
       setRadio('os-guide-stopped',type()==='pane'?'sim':['avulsa','revisao'].includes(type())?'nao':'');
       setRadio('os-guide-reserve','');
     }
-    if(e.target?.id==='order-tipo-os'||e.target?.id==='order-veiculo'||e.target?.id==='order-data-inicio'
+    if(e.target?.id==='order-tipo-os'||e.target?.id==='order-veiculo'||e.target?.id==='order-data-inicio'||e.target?.id==='order-status'
       ||e.target?.id==='os-guide-severity'||e.target?.id==='os-guide-start'
       ||e.target?.id==='os-guide-origin'||e.target?.closest?.('#os-operational-guide'))refresh();
   }
