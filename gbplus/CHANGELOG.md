@@ -2,6 +2,8 @@
 
 ## [3.0.0 — SISTEMA VISUAL FINANCEIRO UNIFICADO (LIBERAÇÃO AUTORIZADA; QA PARCIAL)] — 2026-11-09
 
+- **Implantação confirmada:** build e deploy do GitHub Pages concluídos com sucesso em 09/11/2026 às 11:18:07 UTC (run 42607752722, commit bfa613cf). O acesso pelo domínio próprio e a experiência Android/PWA ainda precisam ser verificados.
+
 - **Liberação autorizada em 09/11/2026:** testes fora de Functions em Node 22 para seletores (16 verificações) e ações de seleção (9 verificações) aprovados, após correção de required nativo e agrupamento Sem banco. Não houve execução de E2E visual: Chromium não iniciou; GitHub Actions falhou sem steps/runner. Publicação por decisão expressa do responsável, sem declarar homologação completa.
 - **Escopo:** unificação visual de contas, cartões, cofrinhos, pagamentos, transferências, categorias e formulários. A regra de negócio financeira foi mantida.
 - **Seletores:** o componente reutilizável `finance-picker-300.js` usa o Bottom Sheet existente, com busca, logos/ícones e valor selecionado. Opções de banco, conta, cartão, parceiro, categoria de compra, objetivos e ícones são exibidas no painel. O campo nativo permanece como fonte de `FormData`.
