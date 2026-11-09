@@ -2,6 +2,15 @@
 
 ## [2.8.6 — AMPLIAÇÃO DA BIBLIOTECA DE APLICATIVOS E ÍCONES (CANDIDATA; NÃO PUBLICADA)] — 2026-11-08
 
+### Consolidação e política de privacidade — build 2866
+- Recebidos e incorporados em arquivos locais os ícones quadrados **Canva, inDrive, 99, Rappi e Globoplay**. Os cinco IDs existentes agora apontam para `.webp` locais. Total: **49 dos 49 serviços com imagem/vetor local**. Sem logotipos inventados, recortes ou dependência de CDN.
+- Novo padrão dos cinco botões móveis: **Início, Lançamentos, Novo, Carteira, Mais**. A configuração antiga padrão é migrada visualmente, sem sobrescrever atalhos que o usuário tenha personalizado.
+- **Termos de Uso e Privacidade 2026-11-08-v1**: páginas vinculadas, aviso de mudança após login com aceite obrigatório apenas dos termos, marketing em segunda caixa opcional e desmarcada; registro server-side do consentimento e de suas versões.
+- **Marketing**: preferências configuráveis em Mais, revogação gratuita, eventos auditados no Supabase; API administrativa `marketing-audience` retorna somente usuários com opt-in válido, confirmação de e-mail e políticas atualizadas, **sem saldos ou lançamentos**. Nenhuma campanha é enviada por essa implementação; futuros envios devem revalidar a autorização no momento do disparo.
+- Proteção: RLS e permissões restritas em tabela de termos; RPCs autenticadas com `auth.uid()` para obter estado, aceitar políticas e revogar consentimento; versão e horário gerados pelo banco.
+- Testes e publicação: registrar evidências e estado da implantação no PR, sem confundir aprovação do usuário para lançar com a execução efetiva do QA.
+
+
 ### Recebimento de quatro logotipos — 08/11/2026 (revisão candidata build 2865)
 - **Arquivos recebidos nesta conversa e incorporados à branch de desenvolvimento:** `Plus Delivery` → `assets/service-icons/plus-delivery.webp` (160×160), `99Food` → `assets/service-icons/99food.png` (261×258), `Prime Video` → `assets/service-icons/prime-video.webp` (128×39) e `Disney+` → `assets/service-icons/disney-plus.webp` (180×101).
 - **Integridade:** cada objeto binário enviado ao GitHub foi comparado com o hash Git do arquivo preparado localmente; quatro coincidências confirmadas. Redução de tamanho e transcodificação não modificam a composição dos logos, as cores principais nem a proporção.
