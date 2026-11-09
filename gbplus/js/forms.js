@@ -6,7 +6,7 @@ import {gbIcon,CATEGORY_ICON_OPTIONS,categoryIconFor} from './gb-icons.js?v=2026
 import {bankOptions,findBank,bankPicker} from './banks.js?v=20261105-87';
 import {dailyStatement} from './daily-statement.js?v=20261105-90';
 import {servicePickerMarkup,serviceIdentityMarkup,serviceDisplayName} from './service-ui.js?v=20261108-2865';
-import {isServiceExpenseCategory} from './service-catalog.js?v=20261108-2865';
+import {isServiceExpenseCategory} from './service-catalog.js?v=20261108-2866';
 import {missingCategorySuggestions,isSelectableExpenseCategory,isPrimaryServiceCategory} from './category-library.js?v=20261108-2862';
 const required='required maxlength="200"';
 export function titleForm(db,t,type='expense'){
