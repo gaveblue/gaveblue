@@ -9004,7 +9004,7 @@
       enhanceModalSelects();
       updateFinanceReceiptPreview('');
       document.getElementById('finance-data-abastecimento')?.addEventListener('change', () => {
-        if (document.getElementById('finance-driver-id')?.value) suggestFinanceVehicleFromDriver();
+        if (!currentEditingId && document.getElementById('finance-driver-id')?.value) suggestFinanceVehicleFromDriver();
       });
     }
 
@@ -10910,6 +10910,10 @@
         return false;
       }
       if (isFuelEntry(payload)) {
+        const previousSubstitution = allFinanceEntries.find(entry => entry.id === currentEditingId)?.substitutionId || '';
+        const substitution = window.WeFrotasSubstitutions?.association(payload.vehicleId, payload.driverId, payload.dataAbastecimento, previousSubstitution, payload.km);
+        if (substitution?.error) { showToast(substitution.error); return false; }
+        if (substitution) payload = { ...payload, substitutionId: substitution.replacementId, replacedVehicleId: substitution.replacedVehicleId };
         const mileageError = validateFuelMileageForVehicle({ vehicleId: payload.vehicleId, date: payload.dataAbastecimento, km: payload.km, excludeId: currentEditingId || '' });
         if (mileageError) { showToast(mileageError); return false; }
       }
@@ -11010,6 +11014,11 @@
       const vehicle = isService || !isEntityActive(importedDriver) ? null : resolveVehicleByImportedDriver(imported.motorista, importedDriver);
       const centralEntryDate = getCentralRecordIsoDate(record, imported);
       const activeReplacement = window.WeFrotasSubstitutions?.currentForDriver(importedDriver?.id, centralEntryDate);
+      if (activeReplacement) {
+        prepareCentralPendingRecord(rowId);
+        showToast('Há uma substituição nesta data. Confirme a placa física e o KM do reserva antes de aprovar o comprovante.');
+        return;
+      }
       const effectiveVehicle = activeReplacement
         ? allVehicles.find(item => item.id === activeReplacement.reserveVehicleId)
         : vehicle;
@@ -14869,10 +14878,18 @@
       drivers: () => allDrivers,
       finance: () => allFinanceEntries,
       netCost: entry => getFinanceNetTotal(entry),
+      costRows: record => {
+        if (!window.WeFrotasVehicleReports) throw new Error('Relatórios ainda não carregados.');
+        return window.WeFrotasVehicleReports.detailRows({vehicleId: record.reserveVehicleId, start: record.startDate, end: record.endDate});
+      },
       toast: message => showToast(message),
       async save(sourceId, record) {
         if (wefrotasRecoveryRequired) throw new Error('Resolva as cópias pendentes antes de alterar as substituições.');
         if (!requireWefrotasPermission('editOperations', 'Seu perfil não permite gerenciar substituições.')) throw new Error('Sem permissão de alteração.');
+        if (sourceId !== record.sourceVehicleId || !record.id) throw new Error('Identificação da substituição inválida.');
+        if (!window.WeFrotasSubstitutions) throw new Error('Módulo de substituições indisponível.');
+        const validationError = window.WeFrotasSubstitutions.validate(record);
+        if (validationError) throw new Error(validationError);
         const source = allVehicles.find(v => String(v.id) === String(sourceId));
         if (!source) throw new Error('Veículo titular não encontrado.');
         const existing = Array.isArray(source.vehicleSubstitutions) ? source.vehicleSubstitutions : [];
@@ -14883,7 +14900,7 @@
         } else {
           allVehicles = allVehicles.map(vehicle => vehicle.id === source.id
             ? { ...vehicle,
-              operationalStatus: record.reason === 'sinistro' ? 'sinistro' : record.reason === 'manutencao' ? 'manutencao' : vehicle.operationalStatus || 'imobilizado',
+              operationalStatus: record.reason === 'sinistro' ? 'sinistro' : record.reason === 'manutencao' ? 'manutencao' : 'imobilizado',
               vehicleSubstitutions: [...existing, record]
             }
             : vehicle);

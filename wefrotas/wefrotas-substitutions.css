@@ -1,5 +1,6 @@
 
 /* Carro reserva / substituições — visual isolado do WeFrotas. */
+.wf-reserve-overlay,.wf-reserve-overlay *{box-sizing:border-box}
 .wf-reserve-container{display:grid;gap:18px;padding:4px 0 20px}
 .wf-reserve-head{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
 .wf-reserve-head h3{font-size:19px;font-weight:750;margin:0}
