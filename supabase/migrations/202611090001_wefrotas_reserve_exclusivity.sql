@@ -17,6 +17,29 @@ DECLARE
   overlap_a text;
   overlap_b text;
 BEGIN
+  -- Existing historical events are append-only at the identity level. The UI
+  -- allows closing/editing a substitution but never deleting its audit record.
+  -- A stale browser snapshot must not erase another session's history.
+  IF TG_OP = 'UPDATE'
+     AND jsonb_typeof(OLD.data->'vehicleSubstitutions') = 'array'
+     AND jsonb_array_length(OLD.data->'vehicleSubstitutions') > 0 THEN
+    IF jsonb_typeof(NEW.data->'vehicleSubstitutions') IS DISTINCT FROM 'array'
+       OR EXISTS (
+         SELECT 1 FROM jsonb_array_elements(OLD.data->'vehicleSubstitutions') AS earlier(item)
+         WHERE NOT EXISTS (
+           SELECT 1
+             FROM jsonb_array_elements(
+               CASE WHEN jsonb_typeof(NEW.data->'vehicleSubstitutions') = 'array'
+                 THEN NEW.data->'vehicleSubstitutions' ELSE '[]'::jsonb END
+             ) AS later(item)
+            WHERE later.item->>'id' = earlier.item->>'id'
+         )
+       ) THEN
+      RAISE EXCEPTION 'WEFROTAS_RESERVE_CONFLICT: replacement history cannot be removed'
+        USING ERRCODE = 'PT409';
+    END IF;
+  END IF;
+
   -- Most normal vehicle saves do not change substitutions.
   IF TG_OP = 'UPDATE' AND
      NEW.data->'vehicleSubstitutions' IS NOT DISTINCT FROM OLD.data->'vehicleSubstitutions' THEN
