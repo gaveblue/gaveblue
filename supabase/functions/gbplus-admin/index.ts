@@ -57,6 +57,34 @@ export function createHandler(getAdmin, audit = event => console.info(JSON.strin
           total:Number.isFinite(result.data.total) ? result.data.total : null,
           hasMore:result.data.nextPage != null ? Boolean(result.data.nextPage) : result.data.users.length === 50});
       }
+      if (action === 'marketing-audience') {
+        // Authorized audience only: no balances, purchases, CPF or financial documents.
+        // This is NOT an email-sending API; sending must re-check consent at dispatch.
+        const page = input.page ?? 1;
+        if (!Number.isInteger(page) || page < 1 || page > 100000) return respond(400,{error:'Página inválida.'});
+        const result = await admin.auth.admin.listUsers({page,perPage:50});
+        if (result.error) throw result.error;
+        const people = result.data.users.filter(u=>u.email&&u.email_confirmed_at&&!suspended(u));
+        const ids = people.map(u=>u.id);
+        let eligible = new Set();
+        if (ids.length) {
+          const {data:prefs,error:prefError}=await admin.from('gbplus_email_preferences')
+            .select('user_id').in('user_id',ids).eq('marketing',true).eq('consent_version','2026-11-08-v1');
+          if(prefError)throw prefError;
+          const selected=(prefs||[]).map(p=>p.user_id);
+          if(selected.length){
+            const {data:legal,error:legalError}=await admin.from('gbplus_legal_acceptances')
+              .select('user_id').in('user_id',selected)
+              .eq('terms_version','2026-11-08-v1').eq('privacy_version','2026-11-08-v1');
+            if(legalError)throw legalError;
+            eligible=new Set((legal||[]).map(row=>row.user_id));
+          }
+        }
+        return respond(200,{actor:safeUser(actor),purpose:'marketing-email',consentVersion:'2026-11-08-v1',
+          users:people.filter(u=>eligible.has(u.id)).map(u=>({id:u.id,email:u.email,
+            name:safeUser(u).name})),page,
+          total:null,hasMore:result.data.nextPage!=null?Boolean(result.data.nextPage):result.data.users.length===50});
+      }
       if (!['profile','suspend','reactivate','recovery'].includes(action)) return respond(400,{error:'Operação não permitida.'});
       if (typeof input.user_id !== 'string' || !UUID.test(input.user_id)) return respond(400,{error:'Usuário inválido.'});
       const targetResult = await admin.auth.admin.getUserById(input.user_id);
