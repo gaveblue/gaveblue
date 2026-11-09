@@ -95,7 +95,7 @@ assert.match(newAccount,/data-kind="goal"/);
 assert.match(newAccount,/gb30-optional/);
 assert(!newAccount.includes('gb-account-icon-grid'),'No massive icon grid by default');
 const editAccount=forms.accountForm(db,db.accounts[2]);
-assert.match(editAccount,/Editar/); // Edit form includes optional delete button.
+assert.match(editAccount,/Excluir conta/); // Existing account retains edit/delete controls.
 const transferForm=forms.transferForm(db,{to:'goal'});
 assert.match(transferForm,/data-field="from"/);
 assert.match(transferForm,/data-field="to"/);
