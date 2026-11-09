@@ -244,10 +244,12 @@
       reserveStatus:linked()?prior.reserveStatus:halt?(need?'em_uso':'pendente'):'nao_necessario'
     };
     if(linked()){
+      const record=currentRecord();
+      if(!record)throw Error('Vínculo do carro reserva não localizado. Revise o histórico antes de editar esta OS.');
       const closure=readClosure();
       return {enabled:true,incident:{...prior,
         insurer:incident.insurer,protocol:incident.protocol,bo:incident.bo,
-        ...(closure?.reserveReturned?{reserveStatus:'devolvido'}:{}),
+        ...(record.endDate||closure?.reserveReturned?{reserveStatus:'devolvido'}:{}),
         ...(closure?.titularBack?{restoredAt: value('order-data-termino')||new Date().toISOString().slice(0,10)}:{})
       },closure};
     }
