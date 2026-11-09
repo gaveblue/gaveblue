@@ -989,6 +989,7 @@ const actions={
     if(isGoal&&!form.elements.goalDue.value&&!form.elements.name.value.trim()){
      const preset=goalPreset('emergency');
      form.elements.goalCategory.value=preset[0];
+     refreshFinancePicker(form,'goalCategory',financePickerItems(db,'goal').find(item=>item.id===preset[0]));
      form.elements.name.value=preset[3];
      actions['account-icon']({dataset:{icon:preset[2]},closest:()=>form});
     }
