@@ -35,7 +35,8 @@
   }
   function association(vehicleId,driverId,date,existingId='',km='') {
     const result=forFuel(vehicleId,driverId,date);
-    if(result.wrongVehicle) return {replacementId:'',replacedVehicleId:'',sinisterFuelReview:true};
+    if(result.wrongVehicle && result.replacement?.reason==='sinistro') return {replacementId:'',replacedVehicleId:'',sinisterFuelReview:true};
+    if(result.wrongVehicle) return {error:'Este veículo está temporariamente substituído. Lance o abastecimento na placa do carro reserva, usando o KM do reserva.'};
     const r=result.replacement;
     if(r && r.driverId && r.driverId!==driverId) return {error:'O motorista informado não corresponde ao motorista desta substituição.'};
     if(existingId && (!r || r.id!==existingId)) return {error:'Este abastecimento já está vinculado a uma substituição. Revise o vínculo antes de alterar veículo, motorista ou período.'};
