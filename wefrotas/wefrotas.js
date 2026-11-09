@@ -11038,7 +11038,7 @@
       };
 
       if (!isService) {
-        const association = window.WeFrotasSubstitutions?.association(entry.vehicleId, entry.driverId, entry.dataAbastecimento);
+        const association = window.WeFrotasSubstitutions?.association(entry.vehicleId, entry.driverId, entry.dataAbastecimento, '', entry.km);
         if (association?.error) { prepareCentralPendingRecord(rowId); showToast(association.error); return; }
         entry.substitutionId = association?.replacementId || '';
         entry.replacedVehicleId = association?.replacedVehicleId || '';
@@ -15315,7 +15315,7 @@
 
           const replacementAssociation = window.WeFrotasSubstitutions?.association(
             vehicleId, driverId, dataAbastecimento,
-            allFinanceEntries.find(item => item.id === currentEditingId)?.substitutionId || ''
+            allFinanceEntries.find(item => item.id === currentEditingId)?.substitutionId || '', km
           ) || { replacementId: '', replacedVehicleId: '' };
           if (replacementAssociation.error) { showToast(replacementAssociation.error); return; }
 
