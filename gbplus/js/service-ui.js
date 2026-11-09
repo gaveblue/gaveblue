@@ -16,8 +16,8 @@ export function serviceIconMarkup(service,size='small'){
  const bright=valid&&(rgb[0]*.2126+rgb[1]*.7152+rgb[2]*.0722)>150;
  const style=valid?' style="--gb-service-color:#'+hex+';--gb-service-fg:'+(bright?'#151515':'#ffffff')+'"':'';
  const dark=hex==='000000'?' gb-service-logo-dark':'';
- if(item.logoPath && /^\.\/assets\/service-icons\/[a-z0-9-]+\.svg$/.test(item.logoPath)){
-  // Static, verified repo asset. Fallback monogram remains visible if loading fails.
+ if(item.logoPath && /^\.\/assets\/service-icons\/[a-z0-9-]+\.(?:svg|png|webp)$/.test(item.logoPath)){
+  // Static, known local asset (SVG/PNG/WebP). Fallback monogram remains if loading fails.
   return '<span class="gb-service-logo gb-service-asset" aria-hidden="true">'+
    '<span class="gb-service-asset-fallback">'+esc(item.fallback||item.name.slice(0,2))+'</span>'+
    '<img class="gb-service-asset-image" src="'+item.logoPath+'" alt="" decoding="async" loading="lazy"></span>';
