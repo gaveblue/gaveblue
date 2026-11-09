@@ -76,3 +76,14 @@ test('impede encerrar substituição deixando lançamento vinculado fora do per�
   const {api,substitution}=fixture();
   assert.match(api.validate({...substitution,endDate:'2026-11-01',endKm:32660}),/exclui abastecimentos/);
 });
+
+test('rejeita KM de abastecimento inferior ao KM de entrega',()=>{
+  const {api}=fixture();
+  assert.match(api.association('reserva','motorista','2026-11-02','',32399).error,/menor que o KM/);
+  assert.equal(api.association('reserva','motorista','2026-11-02','',32400).replacementId,'sub-1');
+});
+test('rejeita KM de abastecimento superior ao KM de devolução',()=>{
+  const {api,substitution}=fixture();
+  substitution.endDate='2026-11-03';substitution.endKm=32660;
+  assert.match(api.association('reserva','motorista','2026-11-03','',32661).error,/maior que o KM/);
+});
