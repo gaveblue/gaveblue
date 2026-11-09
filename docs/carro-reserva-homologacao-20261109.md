@@ -74,7 +74,7 @@ Em 09/11 foi identificada a segunda conexão autorizada de Supabase (Spba), que 
 | Excluir titular com histórico | Rejeitado `PT409` |
 | Excluir motorista com histórico | Rejeitado `PT409` |
 
-A última revisão do lock de exclusão passou por revisão estática, mas exige nova execução final de SQL antes de liberar. Após os testes, o banco continuou com 14 veículos, zero eventos de substituição, zero organizações fictícias e **zero gatilhos de reserva implantados**. Nenhum dado financeiro/KM de produção foi modificado.
+A última revisão do lock de exclusão foi executada novamente em transação com rollback: conflitos de reserva, exclusão de motorista e exclusão do reserva foram **rejeitados com PT409**. Continua faltando simulação de duas transações simultâneas reais. Após os testes, o banco continuou com 14 veículos, zero eventos de substituição, zero organizações fictícias e **zero gatilhos de reserva implantados**. Nenhum dado financeiro/KM de produção foi modificado.
 
 **Ainda NÃO homologado ao vivo:** faltam testes reais de dois navegadores autenticados, sincronização e offline, comportamento da Central, RLS efetivo por perfis e execução da migração num ambiente de homologação persistente. Não fazer merge ou publicação antes de registrar tais evidências.
 
