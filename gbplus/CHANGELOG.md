@@ -1,6 +1,6 @@
 # CHANGELOG — GB+ Gestão Financeira
 
-## [2.8.7 — NOVOS APLICATIVOS E ATUALIZAÇÃO DE LOGOTIPOS (CANDIDATA; NÃO PUBLICADA)] — 2026-11-08
+## [2.8.7 — NOVOS APLICATIVOS E LOGOTIPOS (MERGE EM MAIN; SITE A VERIFICAR)] — 2026-11-08
 
 - **Solicitação:** incorporar diretamente ao GB+ as imagens enviadas em duas mensagens, sem gerar telas/imagens independentes.
 - **7 novas opções em Compras e pagamentos:** TikTok Shop, Shopee, Mercado Livre, Magalu, Casas Bahia, Temu e SHEIN. Todos com IDs novos estáveis (`shopping-*`), sem alterar IDs, nomes, categorias ou lançamentos dos 49 serviços anteriores.
@@ -8,7 +8,7 @@
 - **13 artes locais:** atlas `assets/service-icons/service-brands-287.webp` de 256 × 256 pixels, organizado em 4 × 4 células de 64 × 64, com três células vazias. Imagens recebidas no chat, redimensionadas proporcionalmente, sem redesenhar marcas. Blob Git SHA `eb53925361d7e27940b6ae978c2debd1239229ab` conferido contra arquivo original preparado.
 - **Exibição:** seletor Serviços e detalhes do lançamento usam posição do ícone na grade e fallback textual em caso de falha no carregamento; um único recurso armazenado localmente, sem CDN. Layout responsivo mantém modos claro e escuro.
 - **Catálogo:** 49 → **56 serviços**. A página e os módulos tiveram as referências de cache atualizadas para build 2870; sem banco novo, migrações, disparos de marketing ou alterações em políticas.
-- **Homologação:** testes dirigidos e validação visual Android/PWA necessários antes de marcar esta versão como aprovada. Nenhuma mudança de status da 2.8.6 anterior.
+- **Liberação:** PR #106 mesclado à branch `main`. Passaram os testes isolados de catálogo (56 serviços), painel e atlas (13 ícones), com hash Git confirmado. Ainda falta conferir em aparelho Android/PWA e confirmar a atualização efetiva do domínio; não declarar homologação visual antecipadamente.
 
 ## [2.8.6 — BIBLIOTECA, NAVEGAÇÃO E CONSENTIMENTO (MERGE EM MAIN; SITE A VERIFICAR)] — 2026-11-08
 - **Liberação de código:** PR #105 mesclado em `main` no GitHub. O domínio público não pôde ser consultado diretamente deste ambiente; confirmar atualização em PWA Android antes de declarar homologação visual.
