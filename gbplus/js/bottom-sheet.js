@@ -94,7 +94,7 @@ function financialSections(kind,items,selected){
  const sectionTitle={
   account:'Contas disponíveis',card:'Cartões disponíveis',icon:'Escolha seu ícone',
   goal:'Escolha o objetivo',partner:'Parceiros disponíveis',
-  'expense-category':'Categorias de despesa'
+  'expense-category':'Categorias de despesa','category-icon':'Ícones de categorias'
  }[kind]||'Opções disponíveis';
  return [{title:sectionTitle,items:options}];
 }
@@ -103,7 +103,7 @@ export function sheetGroupsCount(groups){
 }
 export function openGbPickerSheet({kind,items=[],selected='',onPick}){
  const root=picker();
- if(!root||!['category','service','account','card','bank','icon','goal','partner','expense-category'].includes(kind)||typeof onPick!=='function')return false;
+ if(!root||!['category','service','account','card','bank','icon','goal','partner','expense-category','category-icon'].includes(kind)||typeof onPick!=='function')return false;
  // Never replace a live dialog: wait for its close event before opening another.
  if(root.open)return false;
  const sections=kind==='category'?categorySections(items,selected):
@@ -111,11 +111,11 @@ export function openGbPickerSheet({kind,items=[],selected='',onPick}){
  const titles={category:'Selecione a categoria',service:'Selecione o serviço',
   account:'Selecione uma conta',card:'Selecione um cartão',bank:'Selecione onde fica o dinheiro',
   icon:'Escolha um ícone',goal:'Qual é o objetivo?',partner:'Selecione um parceiro',
-  'expense-category':'Escolha uma categoria'};
+  'expense-category':'Escolha uma categoria','category-icon':'Escolha um ícone'};
  const hints={category:'Busque por uma categoria',service:'Busque por um serviço',
   account:'Busque por uma conta',card:'Busque por um cartão',bank:'Busque pelo banco ou instituição',
   icon:'Busque por um ícone',goal:'Busque por um objetivo',partner:'Busque por um parceiro',
-  'expense-category':'Busque por uma categoria'};
+  'expense-category':'Busque por uma categoria','category-icon':'Busque por um ícone'};
  const title=titles[kind],searchHint=hints[kind];
  const count=sheetGroupsCount(sections);
  const groups=sections.map((section,i)=>
