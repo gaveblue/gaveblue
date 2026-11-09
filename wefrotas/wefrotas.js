@@ -6159,8 +6159,8 @@
           <div id="wf-os-step-review" class="wf-os-step-review" aria-live="polite" hidden></div>
           <p id="wf-os-step-error" class="wf-os-step-error" role="alert" aria-live="assertive" hidden></p>
           <div id="wf-os-step-actions" class="wf-os-step-actions">
-            <button type="button" id="wf-os-step-back" data-os-step-back>Voltar</button>
-            <button type="button" id="wf-os-step-next" data-os-step-next>Continuar</button>
+            <button type="button" id="wf-os-step-back" data-os-step-back onclick="if(window.WeFrotasOsGuide?.handleWizardAction){window.WeFrotasOsGuide.handleWizardAction('back')}else{alert('O assistente de Sinistro não carregou. Atualize a página e tente novamente.')}">Voltar</button>
+            <button type="button" id="wf-os-step-next" data-os-step-next onclick="if(window.WeFrotasOsGuide?.handleWizardAction){window.WeFrotasOsGuide.handleWizardAction('next')}else{alert('O assistente de Sinistro não carregou. Atualize a página e tente novamente.')}">Continuar</button>
           </div>
         `;
         setOrderAdministrationFormValue(getLastAdministrationValue());

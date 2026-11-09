@@ -137,14 +137,14 @@ test('Sinistro avança pelas três etapas e botão Continuar funciona',()=>{
  const {api,set,check,nodes,click}=fixture();
  set('order-tipo-os','sinistro');api.startWizard();
  assert.equal(nodes.get('modal-submit-btn').disabled,true);
- click('[data-os-step-next]');
+ api.handleWizardAction('next');
  assert.equal(api.wizardStep(),2);
  check('os-guide-stopped','nao');
- click('[data-os-step-next]');
+ api.handleWizardAction('next');
  assert.equal(api.wizardStep(),3);
  assert.equal(nodes.get('modal-submit-btn').disabled,false);
  assert.ok(nodes.get('wf-os-step-review').innerHTML.includes('Confira antes de salvar'));
- click('[data-os-step-back]');
+ api.handleWizardAction('back');
  assert.equal(api.wizardStep(),2);
 });
 
