@@ -1,6 +1,7 @@
 import {esc,icon,button,field,select,formFooter,empty} from './ui.js?v=20261105-72';
 import {today,money,dateLabel,pending,paid,status,accountBalance} from './domain.js?v=20261105-72';
 import {BANKS,bankCatalog,bankOptions,findBank,bankBadge,bankPicker} from './banks.js?v=20261105-87';
+import {financePickerField} from './finance-picker-300.js?v=20261109-3000';
 import {creditCards,cardPurchases,cardUsed,cardAvailable,cardCycle,cardDue} from './credit-cards.js?v=20261107-2800';
 import {cashForecast} from './forecast.js?v=20261105-72';
 
@@ -54,8 +55,9 @@ export function cardsView(db,{embedded=false}={}){
    '<div class="gb-credit-card-meta"><span>Fecha dia <b>'+card.closingDay+'</b></span><span>Vence dia <b>'+card.dueDay+'</b></span>'+
    '<span>'+esc(card.active?'Ativo':'Inativo')+'</span></div>'+
    '<p class="gb-invoice-next">Próximo fechamento: <strong>'+dateLabel(upcomingClose)+'</strong> · Vencimento previsto: <strong>'+dateLabel(upcomingDue)+'</strong></p>'+ 
-   '<div class="gb-credit-card-buttons">'+button(icon('plus')+'Compra no cartão','new-card-purchase','primary small','data-id="'+esc(card.id)+'"')+
-    button('Informar saldo de fatura','new-card-invoice','small','data-id="'+esc(card.id)+'"')+'</div>'+
+   '<div class="gb-credit-card-buttons">'+button(icon('plus')+'Nova compra','new-card-purchase','primary small','data-id="'+esc(card.id)+'"')+'</div>'+
+   '<details class="gb30-card-details"><summary>Faturas e compras</summary>'+ 
+   '<div class="gb30-card-extra">'+button('Informar saldo de fatura','new-card-invoice','small','data-id="'+esc(card.id)+'"')+'</div>'+ 
    '<h3>Faturas <small class="gb-invoice-total">'+money(totalPending)+' a pagar</small></h3>'+(invoices.length?invoices.slice(0,12).map(t=>
     '<div class="gb-credit-invoice-row"><button type="button" class="gb-credit-invoice" data-action="title-detail" data-id="'+esc(t.id)+'"><span>'+dateLabel(t.due)+
     '<small>'+esc(t.description)+' · '+(cardPurchases(db).some(p=>p.invoiceId===t.id&&p.source==='invoice-balance')?'Saldo informado · ':'')+status(db,t)+(paid(db,t.id)>0&&pending(db,t)>0?' · '+money(paid(db,t.id))+' pagos':'')+'</small></span><strong>'+money(pending(db,t))+'</strong></button>' +
@@ -66,7 +68,7 @@ export function cardsView(db,{embedded=false}={}){
     ' · parcela '+p.sequence+'/'+p.count+'</small></div><span>'+money(p.amount)+'</span>'+
     '<div class="gb-credit-purchase-actions">'+button('Editar','edit-card-purchase','small','data-id="'+esc(p.id)+'" aria-label="Editar compra"')+
     button(icon('trash'),'delete-card-purchase','small','data-id="'+esc(p.id)+'" aria-label="Excluir compra"')+'</div></div>').join(''):
-    '<p class="muted">Nenhuma compra cadastrada neste cartão.</p>')+'</section>';
+    '<p class="muted">Nenhuma compra cadastrada neste cartão.</p>')+'</details></section>';
  }).join('')+'</div>':empty('Cadastre seu primeiro cartão','Informe limite e dias de fechamento e vencimento para gerar suas faturas.','new-card','Cadastrar cartão'));
 }
 export function cardInvoiceBalanceForm(db,cardId=''){
@@ -83,16 +85,20 @@ export function cardInvoiceBalanceForm(db,cardId=''){
   formFooter('Gerar fatura a pagar')+'</form>';
 }
 export function cardForm(db,card){
- const options=bankOptions(db);
+
  return '<form id="card-form" data-id="'+esc(card?.id||'')+'"><div class="form-grid">'+
   '<div class="full">'+field('Apelido do cartão','name',card?.name||'','text','required maxlength="120" placeholder="Ex.: Cartão principal"')+'</div>'+
-  bankPicker(db,card?.bankId||'')+
-  '<div class="full">'+select('Conta prevista para pagamento da fatura','payAccountId',[['','Não definir'],...db.accounts.map(a=>[a.id,a.name])],card?.payAccountId||'')+'</div>'+
-  field('Últimos 4 dígitos (opcional)','last4',card?.last4||'','text','inputmode="numeric" pattern="[0-9]{4}" maxlength="4" placeholder="1234"')+
+  financePickerField(db,{kind:'bank',name:'bankId',label:'Banco ou instituição',value:card?.bankId||'',allowEmpty:true})+
+  financePickerField(db,{kind:'account',name:'payAccountId',label:'Conta prevista para pagar a fatura',value:card?.payAccountId||'',allowEmpty:true})+
+
   field('Limite total (R$)','limit',(card?.limit||0)/100||'','number','required min="0.01" max="10000000000" step="0.01"')+
   field('Dia do fechamento','closingDay',card?.closingDay||10,'number','required min="1" max="28" step="1"')+
   field('Dia do vencimento','dueDay',card?.dueDay||17,'number','required min="1" max="28" step="1"')+
+  '<details class="full gb30-optional"><summary>Mais opções do cartão</summary><div class="gb30-optional-body">'+
+  field('Últimos 4 dígitos (opcional)','last4',card?.last4||'','text','inputmode="numeric" pattern="[0-9]{4}" maxlength="4" placeholder="1234"')+
   select('Situação','active',[['true','Ativo'],['false','Inativo']],String(card?.active??true))+
+  '</div></details>'+
+
   '</div><p class="form-hint">A conta escolhida é usada somente para prever o saldo das novas faturas; o dinheiro sai apenas quando a baixa for registrada. Use dias de 1 a 28. Após registrar compras, fechamento e vencimento ficam fixos. Não informe número completo, CVV ou senha.</p>'+
   formFooter(card?'Salvar cartão':'Cadastrar cartão')+'</form>';
 }
@@ -119,10 +125,10 @@ export function cardPurchaseForm(db,cardId='',purchase=null){
    formFooter('Salvar saldo da fatura')+'</form>';
  }
  return '<form id="card-purchase-form" data-id="'+esc(purchase?.id||'')+'"><div class="form-grid">'+
-  '<div class="full">'+select('Cartão utilizado','cardId',active.map(c=>[c.id,c.name+(c.active?'':' (inativo)')]),selected,'required')+'</div>'+
+  financePickerField(db,{kind:'card',name:'cardId',label:'Cartão utilizado',value:selected,required:true})+
   '<div class="full">'+field(imported?'Descrição do saldo da fatura':'Descrição da despesa','description',purchase?.description||'','text','required maxlength="300" placeholder="Ex.: Compra no supermercado"')+'</div>'+
-  '<div class="full">'+select('Categoria da despesa','categoryId',db.categories.filter(c=>c.type==='expense').map(c=>[c.id,c.name]),purchase?.categoryId||'','required')+'</div>'+
-  '<div class="full">'+select('Parceiro (opcional)','partnerId',[['','Sem parceiro'],...db.partners.filter(p=>p.active||p.id===purchase?.partnerId).map(p=>[p.id,p.name])],purchase?.partnerId||'')+'</div>'+
+  financePickerField(db,{kind:'expense-category',name:'categoryId',label:'Categoria',value:purchase?.categoryId||'',required:true})+
+  financePickerField(db,{kind:'partner',name:'partnerId',label:'Parceiro',value:purchase?.partnerId||'',allowEmpty:true})+
   field('Data da compra','date',purchase?.date||today(),'date','required max="'+today()+'"')+
   field('Valor total (R$)','amount',purchase?total/100:'','number','required min="0.01" step="0.01" max="10000000000"')+
   field('Número de parcelas','count',group.length||1,'number','required min="1" max="36" step="1"')+
