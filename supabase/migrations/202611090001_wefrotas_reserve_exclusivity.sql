@@ -170,3 +170,46 @@ CREATE CONSTRAINT TRIGGER wefrotas_reserve_exclusivity
   DEFERRABLE INITIALLY DEFERRED
   FOR EACH ROW
   EXECUTE FUNCTION public.wefrotas_assert_reserve_exclusivity();
+
+
+-- Never orphan a historical replacement by deleting a registered vehicle or
+-- its driver. This applies to both current and finished substitutions.
+CREATE OR REPLACE FUNCTION public.wefrotas_prevent_reserve_reference_delete()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $reserve_delete_guard$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM public.wefrotas_vehicles AS v
+    CROSS JOIN LATERAL jsonb_array_elements(
+      CASE WHEN jsonb_typeof(v.data->'vehicleSubstitutions') = 'array'
+        THEN v.data->'vehicleSubstitutions' ELSE '[]'::jsonb END
+    ) AS e(item)
+    WHERE v.organization_id = OLD.organization_id
+      AND (
+        (TG_TABLE_NAME = 'wefrotas_vehicles'
+          AND (v.entity_id = OLD.entity_id
+            OR e.item->>'reserveVehicleId' = OLD.entity_id))
+        OR (TG_TABLE_NAME = 'wefrotas_drivers'
+          AND e.item->>'driverId' = OLD.entity_id)
+      )
+  ) THEN
+    RAISE EXCEPTION 'WEFROTAS_RESERVE_CONFLICT: vehicle or driver has replacement history'
+      USING ERRCODE = 'PT409';
+  END IF;
+  RETURN OLD;
+END;
+$reserve_delete_guard$;
+
+REVOKE ALL ON FUNCTION public.wefrotas_prevent_reserve_reference_delete()
+  FROM PUBLIC, anon, authenticated;
+
+CREATE TRIGGER wefrotas_reserve_vehicle_delete_guard
+  BEFORE DELETE ON public.wefrotas_vehicles
+  FOR EACH ROW EXECUTE FUNCTION public.wefrotas_prevent_reserve_reference_delete();
+
+CREATE TRIGGER wefrotas_reserve_driver_delete_guard
+  BEFORE DELETE ON public.wefrotas_drivers
+  FOR EACH ROW EXECUTE FUNCTION public.wefrotas_prevent_reserve_reference_delete();
