@@ -66,3 +66,4 @@ body.dark .wf-os-quick-actions,body[data-theme=dark] .wf-os-quick-actions{backgr
 .wf-os-vehicle-tabs button[aria-pressed=true]{color:#fff;background:#173f8c;border-color:#173f8c}
 body.dark .wf-os-vehicle-tabs button,body[data-theme=dark] .wf-os-vehicle-tabs button{background:#1e293b;border-color:#475569;color:#e2e8f0}
 body.dark .wf-os-vehicle-tabs button[aria-pressed=true],body[data-theme=dark] .wf-os-vehicle-tabs button[aria-pressed=true]{background:#244b91;border-color:#618cdd;color:#fff}
+.wf-os-guide-new:disabled{opacity:.45;cursor:not-allowed;background:#94a3b8}
