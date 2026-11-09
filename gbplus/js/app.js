@@ -3,35 +3,36 @@ import {bankImportMarkup,bankImportHistoryMarkup,bankImportFilteredRows,bankImpo
 import {reviewSelection,applyReconciliationBatch,undoReconciliationBatch,reconciliationRecordKey,knownReconciliationKeys} from './bank-reconciliation.js?v=20261106-2505';
 import {filterFlowRows} from './gb-flow-filters.js?v=20261106-68';
 import {uid,today,money,dateLabel,cents,addMonths,validDate,generateTitles,addPayment,transfer,updateTitle,pending,accountBalance,flow,within} from './domain.js?v=20261105-72';
-import {KEY,INDICATORS,defaultPanel,parseBackup,backupText,MOBILE_SHORTCUTS,defaultMobileNav,effectiveMobileNav,validMobileNav,shouldOfferSetup} from './store.js?v=20261108-2821';
+import {KEY,INDICATORS,defaultPanel,parseBackup,backupText,MOBILE_SHORTCUTS,defaultMobileNav,effectiveMobileNav,validMobileNav,shouldOfferSetup} from './store.js?v=20261108-2866';
 import {esc,icon,button,field,select,formFooter,download,csv,titleTable} from './ui.js?v=20261105-72';
-import {routes,dashboard,titlesView,partnersView,categoriesView,flowView,reportsView,settingsView,notificationsView,filteredTitles,reportData} from './views.js?v=20261108-2851-admin2';
-import {moreView} from './more-view.js?v=20261108-2811';
+import {routes,dashboard,titlesView,partnersView,categoriesView,flowView,reportsView,settingsView,notificationsView,filteredTitles,reportData} from './views.js?v=20261108-2866';
+import {moreView} from './more-view.js?v=20261108-2863';
 import {accountsCardsView} from './accounts-cards-view.js?v=20261108-2811';
 import {renderReactCharts,unmountReactCharts} from './gb-react-loader.js?v=20261105-45';
 import {mountNativeCharts} from './gb-charts-native.js?v=20261106-68';
-import {titleForm,partnerForm,accountForm,categoryForm,paymentForm,transferForm,titleDetail,customizeForm,accountDetail} from './forms.js?v=20261108-2821';
-import {serviceById,serviceSearchKey,isServiceExpenseCategory} from './service-catalog.js?v=20261106-2630';
-import {serviceIconMarkup,serviceIdentityMarkup,serviceDisplayName} from './service-ui.js?v=20261107-2720';
-import {openGbPickerSheet,openGbScheduleSheet,installGbPickerSheet,installEntryFormDrag} from './bottom-sheet.js?v=20261107-2770';
-import {toggleEntryMenu,chooseEntryOption,syncEntrySelect,closeEntryMenus} from './entry-select.js?v=20261107-2720';
+import {titleForm,partnerForm,accountForm,categoryForm,paymentForm,transferForm,titleDetail,customizeForm,accountDetail} from './forms.js?v=20261108-2862';
+import {serviceById,serviceSearchKey,isServiceExpenseCategory} from './service-catalog.js?v=20261108-2866';
+import {serviceIconMarkup,serviceIdentityMarkup,serviceDisplayName,installServiceIconRecovery} from './service-ui.js?v=20261108-2865';
+import {openGbPickerSheet,openGbScheduleSheet,installGbPickerSheet,installEntryFormDrag} from './bottom-sheet.js?v=20261108-2862';
+import {toggleEntryMenu,chooseEntryOption,syncEntrySelect,closeEntryMenus} from './entry-select.js?v=20261108-2861';
 import {installGbControls,enhanceGbControls} from './custom-controls.js?v=20261104-42';
 import {expectedDates,recurrenceAnchor} from './gb-calendar-rules.js?v=20261105-47';
 import {CATEGORY_ICON_OPTIONS,categoryIconFor,gbIcon} from './gb-icons.js?v=20261108-2821';
 import {setupPwaInstallation,maybeOfferPwaInstall,showInstallHelp,isPwaInstalled} from './pwa-install.js?v=20261104-40';
 import {SupabaseRepository} from '../integrations/supabase/repository.js?v=20261106-2505';
-import {initializeAuth,authClient,currentUser,showAuth,isRecovery,updatePersonalProfile,consumeAuthReturnMessage,consumeSessionNotice,signOutAccount,authError,emailCooldownSeconds,markAuthEmailSent} from './auth.js?v=20261105-69';
+import {initializeAuth,authClient,currentUser,showAuth,isRecovery,updatePersonalProfile,consumeAuthReturnMessage,consumeSessionNotice,signOutAccount,authError,emailCooldownSeconds,markAuthEmailSent} from './auth.js?v=20261108-2866';
 import {profileView,validateProfile,validCPF,formatCPF} from './profile.js?v=20261105-59';
+import {requireLegalAcceptance,readConsent,setMarketingConsent} from './legal-consent.js?v=20261108-2866';
 import {canResetFinancialData,canDeleteAccount,clearFinancialDocument} from './account-safety.js?v=20261106-2610';
 import {resetAccountModal,deleteAccountModal,syncAccountDangerConfirm} from './account-safety-ui.js?v=20261106-2610';
-import {firstSetupView,customMobileNavForm,shortcutsPreview,readMobileNav,firstStepsPanel} from './setup-ui.js?v=20261105-87';
+import {firstSetupView,customMobileNavForm,shortcutsPreview,readMobileNav,firstStepsPanel} from './setup-ui.js?v=20261108-2866';
 import {BANKS,bankCatalog,findBank,bankForAccount,bankBadge,bankName,syncBankPicker,filterBankPicker,filterBankDirectory} from './banks.js?v=20261105-87';
 import {addCardPurchase,registerCardInvoiceBalance,updateCardPurchase,removeCardPurchase,ensureCardMayChange,creditCards,cardPurchases,cardAvailable,cardCycle,shiftCardCycle,cardDue} from './credit-cards.js?v=20261107-2800';
 import {cashForecast} from './forecast.js?v=20261105-72';
-import {missingCategorySuggestions,appendCategorySuggestions} from './category-library.js?v=20261108-2821';
+import {missingCategorySuggestions,appendCategorySuggestions,isSelectableExpenseCategory,isPrimaryServiceCategory} from './category-library.js?v=20261108-2862';
 import {calculateDueAlerts,notificationPrefs,validNotificationPrefs,NOTIFICATION_DAYS} from './notification-rules.js?v=20261108-2821';
 import {banksView,bankForm,cardForm,cardPurchaseForm,cardInvoiceBalanceForm,forecastView,forecastSummary,forecastScenarioForm,forecastResult} from './finance-24-ui.js?v=20261108-2811';
-import {launchesView} from './launches-view.js?v=20261107-2760';
+import {launchesView} from './launches-view.js?v=20261108-2861';
 import {installLaunchGestures} from './launches-gestures.js?v=20261104-38';
 import {launchSelection,paymentSelection,paymentSummary,applyLaunchPayments,reversedSelection,applyLaunchReversals,deletionSelection,applyLaunchDeletions} from './launch-actions.js?v=20261105-72';
 import {readPeriodPreference,writePeriodPreference} from './period-preference.js?v=20261107-2730';
@@ -50,6 +51,8 @@ function firstStepsDismissed(){
 let profileCpfStatus={userId:null,cpf:'',ready:false,loading:false,error:''};
 let bankImportDraft=null; // Memory-only preview; released on modal close.
 
+// Install once; offline image failures degrade to the existing neutral monogram.
+installServiceIconRecovery(document);
 const state={route:'dashboard',accountCardsTab:'accounts',period:'all',range:{},query:'',status:'',type:'',partner:'',category:'',partnerQuery:'',granularity:'month',flowChartMode:'bars',flowStatus:'all',report:'payable',reportPartner:'',moreFilters:false,launchSelected:[],launchStatusOpen:false,launchSearchOpen:false};
 const modal=document.querySelector('#modal');
 // O controle de tema do cabeçalho é um botão normal. A ação "top-theme"
@@ -237,18 +240,27 @@ gbMobileNav.innerHTML=(()=>{
  const custom=effectiveMobileNav(db.settings);
  const slots=[['dashboard','Início','home'],renderMobileShortcut(custom[0]),['new','Novo','plus'],renderMobileShortcut(custom[1]),renderMobileShortcut(custom[2])];
   // Mais é uma página navegável; Início e Novo permanecem fixos.
-  const isActive=key=>key==='menu'?state.route==='more':
+  const isActive=key=>key==='menu'||key==='settings'?state.route==='more':
     key==='accounts'||key==='cards'?state.route==='accounts'&&state.accountCardsTab===key:
     state.route===key;
   const activeIndex=slots.findIndex(([key])=>isActive(key));
   gbMobileNav.style.setProperty('--gb-liquid-visible',activeIndex<0?'0':'1');
   return slots.map(([key,label,ico])=>{
     if(key==='new')return '<button type="button" data-action="new-title" class="mobile-new" aria-label="Novo">'+icon(ico)+'<span>Novo</span></button>';
-    const actual=key==='menu'?'more':key;
+    const actual=key==='menu'||key==='settings'?'more':key;
     const active=isActive(key);
     return '<a href="#'+actual+'" class="'+(active?'active':'')+'" '+(active?'aria-current="page"':'')+'>'+icon(ico)+'<span>'+esc(label)+'</span></a>';
   }).join('');
-})();requestAnimationFrame(alignLiquidNavIndicator);const views={dashboard:()=>dashboard(db,state,!!currentUser(),currentUser()),more:()=>moreView(!!currentUser()),titles:()=>launchesView(db,state),payable:()=>titlesView(db,state),receivable:()=>titlesView(db,state),partners:()=>partnersView(db,state),accounts:()=>accountsCardsView(db,state.accountCardsTab),categories:()=>categoriesView(db),flow:()=>flowView(db,state),provisions:()=>flowView(db,state),reports:()=>reportsView(db,state),settings:()=>settingsView(db,!isInstalledApp(),!!currentUser(),currentUser(),isInstalledApp()),notifications:()=>notificationsView(db),banks:()=>banksView(db),cards:()=>accountsCardsView(db,'cards'),forecast:()=>forecastView(db,forecastDays),profile:()=>profileView(currentUser(),profileCpfStatus.userId===currentUser()?.id?profileCpfStatus:{ready:false,cpf:'',error:''})};document.body.classList.toggle('gb-settings-page',state.route==='settings');unmountReactCharts();document.querySelector('#main').innerHTML=(views[state.route]||views.dashboard)();if(state.route==='dashboard'){
+})();requestAnimationFrame(alignLiquidNavIndicator);const views={dashboard:()=>dashboard(db,state,!!currentUser(),currentUser()),more:()=>moreView(!!currentUser(),db,currentUser(),isInstalledApp()),titles:()=>launchesView(db,state),payable:()=>titlesView(db,state),receivable:()=>titlesView(db,state),partners:()=>partnersView(db,state),accounts:()=>accountsCardsView(db,state.accountCardsTab),categories:()=>categoriesView(db),flow:()=>flowView(db,state),provisions:()=>flowView(db,state),reports:()=>reportsView(db,state),settings:()=>settingsView(db,!isInstalledApp(),!!currentUser(),currentUser(),isInstalledApp()),notifications:()=>notificationsView(db),banks:()=>banksView(db),cards:()=>accountsCardsView(db,'cards'),forecast:()=>forecastView(db,forecastDays),profile:()=>profileView(currentUser(),profileCpfStatus.userId===currentUser()?.id?profileCpfStatus:{ready:false,cpf:'',error:''})};document.body.classList.toggle('gb-settings-page',state.route==='settings');
+const expandedMoreSections=state.route==='more'&&document.querySelector('#main .gb-more-integrated')
+ ? [...document.querySelectorAll('#main .gb-more-cfg-group')].filter(node=>node.open).map(node=>node.getAttribute('aria-label')) : null;
+unmountReactCharts();document.querySelector('#main').innerHTML=(views[state.route]||views.dashboard)();
+if(expandedMoreSections!==null){
+ document.querySelectorAll('#main .gb-more-cfg-group').forEach(node=>{
+  node.open=expandedMoreSections.includes(node.getAttribute('aria-label'));
+ });
+}
+if(state.route==='dashboard'){
  const flowSection=document.querySelector('#main .dashboard-middle');
  if(flowSection)flowSection.insertAdjacentHTML('beforebegin',forecastSummary(db));
 }
@@ -339,7 +351,7 @@ function initializeProfileDirtyState(){
  syncProfileSaveState(form);
 }
 function applyPanel(){const device=matchMedia('(max-width: 760px)').matches?'mobile':'desktop';document.querySelectorAll('[data-indicator]').forEach(el=>{el.hidden=!db.settings.panel[device][el.dataset.indicator];});document.querySelectorAll('.dashboard-middle,.results-grid,.stats-grid').forEach(el=>el.hidden=![...el.children].some(x=>!x.hidden));}
-function route(){if(!db)return;const requested=location.hash.slice(1);const next=requested==='cards'?'accounts':requested;if(requested==='cards'){state.accountCardsTab='cards';history.replaceState(null,'','#accounts');}if(next==='main'&&document.querySelector('#main').childElementCount)return;const previous=state.route;state.route=next==='profile'||next==='more'||routes.some(r=>r[0]===next)?next:'dashboard';if(previous!==state.route){state.launchSelected=[];state.launchStatusOpen=false;}state.type=state.route==='payable'?'expense':state.route==='receivable'?'income':'';closeModal();render();window.scrollTo(0,0);}
+function route(){if(!db)return;const requested=location.hash.slice(1);const next=requested==='cards'?'accounts':requested==='settings'?'more':requested;if(requested==='cards'){state.accountCardsTab='cards';history.replaceState(null,'','#accounts');}if(requested==='settings')history.replaceState(null,'','#more');if(next==='main'&&document.querySelector('#main').childElementCount)return;const previous=state.route;state.route=next==='profile'||next==='more'||routes.some(r=>r[0]===next)?next:'dashboard';if(previous!==state.route){state.launchSelected=[];state.launchStatusOpen=false;}state.type=state.route==='payable'?'expense':state.route==='receivable'?'income':'';closeModal();render();window.scrollTo(0,0);}
 function formValues(form){return Object.fromEntries(new FormData(form));}
 function getTitle(id){const t=db.titles.find(t=>t.id===id);if(!t)throw Error('Título não encontrado.');return t;}
 function fail(error){
@@ -743,7 +755,7 @@ const actions={
     el.setAttribute('aria-expanded','true');
     const shown=openGbPickerSheet({
      kind:'category',
-     items:db.categories.filter(c=>c.type===form.elements.type?.value),
+     items:db.categories.filter(c=>c.type===form.elements.type?.value&&isSelectableExpenseCategory(c,source?.value||'')),
      selected:source?.value||'',
      onPick:id=>{
       if(!form.isConnected||!source||![...source.options].some(o=>o.value===id))return;
@@ -1006,6 +1018,19 @@ const actions={
     '<div class="button-stack" style="margin-top:16px">'+
     button(icon('sun')+' Modo claro','set-theme',db.settings.theme==='light'?'primary':'','data-value="light"')+
     button(icon('moon')+' Modo escuro','set-theme',db.settings.theme==='dark'?'primary':'','data-value="dark"')+'</div>'),
+  'email-preferences':async()=>{
+    if(!currentUser())throw Error('Entre na sua conta para alterar e-mails promocionais.');
+    const state=await readConsent(authClient());
+    const on=state?.marketing===true;
+    openModal('Preferências de e-mail',
+      '<form id="marketing-consent-form" class="gb-marketing-preferences">'+
+      '<label class="gb-legal-consent"><input type="checkbox" name="marketing" '+(on?'checked':'')+'>'+
+      '<span>Quero receber novidades, dicas e comunicações promocionais do GB+ por e-mail.'+
+      '<small>Opcional. Desmarque e salve para revogar a autorização. Não compartilhamos seus dados financeiros em campanhas.</small></span></label>'+
+      '<p class="form-hint">Leia os <a href="./termos-de-uso.html" target="_blank" rel="noopener noreferrer">Termos de Uso</a> e a '+
+      '<a href="./privacidade.html" target="_blank" rel="noopener noreferrer">Política de Privacidade</a>.</p>'+
+      '<p class="form-error" role="alert"></p>'+formFooter('Salvar escolha')+'</form>');
+  },
   'notification-preferences':()=>{const p=notificationPrefs(db.settings);
     const check=(key,label)=>'<label class="gb-notification-toggle"><input type="checkbox" name="'+key+'" '+(p[key]?'checked':'')+'>'+label+'</label>';
     openModal('Configurar avisos de vencimento',
@@ -1540,7 +1565,12 @@ document.addEventListener('submit',async e=>{e.preventDefault();if(busy||!db)ret
    const result=forecastResult(db,forecastDays,title.id,v.due);
    openModal('Resultado da simulação',result+'<div class="form-footer">'+button('Voltar à previsão','close','primary')+'</div>');
   }
-  else if(form.id==='notification-preferences-form'){
+  else if(form.id==='marketing-consent-form'){
+     if(!navigator.onLine)throw Error('Conecte-se à internet para alterar a preferência de marketing.');
+     await setMarketingConsent(authClient(),v.marketing==='on');
+     closeModal();toast(v.marketing==='on'?'E-mails promocionais autorizados.':'Autorização de marketing revogada.');
+   }
+   else if(form.id==='notification-preferences-form'){
     const value={enabled:v.enabled==='on',daysBefore:Number(v.daysBefore),
       expenses:v.expenses==='on',incomes:v.incomes==='on',includeOverdue:v.includeOverdue==='on'};
     if(!validNotificationPrefs(value))throw Error('Confira as preferências de avisos.');
@@ -1571,8 +1601,8 @@ document.addEventListener('change',async e=>{if(!db)return;const el=e.target;try
   if(el.id==='entry-type'){
    const select=el.form?.querySelector('#entry-category');
    if(select){
-    select.innerHTML=db.categories.filter(c=>c.type===el.value).map(c=>
-     `<option value="${esc(c.id)}" data-icon="${esc(categoryIconFor(c))}" data-service-preview="${isServiceExpenseCategory(c)}">${esc(c.name)}</option>`).join('');
+    select.innerHTML=db.categories.filter(c=>c.type===el.value&&isSelectableExpenseCategory(c,select.value)).map(c=>
+     `<option value="${esc(c.id)}" data-icon="${esc(categoryIconFor(c))}" data-service-preview="${isPrimaryServiceCategory(c)}">${esc(c.name)}</option>`).join('');
     syncEntrySelect(select);
    }
    syncEntryServiceCategory(el.form);
@@ -1690,6 +1720,8 @@ async function init(){
   const user=await startupLimit(initializeAuth(clearAccount),16000);
   if(!user){const sessionNotice=consumeSessionNotice();showAuth('signin',loginReturnMessage||sessionNotice);return;}
   if(isRecovery()){showAuth('recovery');return;}
+  // Don't display a user's financial data before the updated policies have been accepted.
+  await requireLegalAcceptance(authClient());
   repository=new SupabaseRepository(authClient(),user.id);
   db=await startupLimit(repository.read(),16000);
   const savedPeriod=loadPeriodPreference();
@@ -1698,8 +1730,9 @@ async function init(){
   document.querySelector('#auth-gate').hidden=true;
   document.body.classList.remove('auth-locked');
   document.documentElement.removeAttribute('data-boot');
-  import('./activity.js?v=20261107-admin2').then(({startActivity})=>startActivity(authClient(),currentUser)).catch(()=>{});
   route();window.dispatchEvent(new Event('gbplus-ai-ready'));
+  // Preserve activity summaries used by the existing administration/support panel.
+  import('./activity.js?v=20261107-admin2').then(({startActivity})=>startActivity(authClient(),currentUser)).catch(()=>{});
   if(shouldOfferSetup(db))startSetupWizard();
   pwaReady=true;
   setTimeout(()=>maybeOfferPwaInstall(),1800);

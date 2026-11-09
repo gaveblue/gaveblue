@@ -30,11 +30,11 @@ if(token){
     catch(error){document.querySelector('#status').textContent=error.message;button.disabled=false;}
    };
   }else{
-   const pref=await client.rpc('gbplus_email_preference');if(pref.error)throw Error('Não foi possível consultar suas preferências. Tente novamente.');
+   const pref=await client.rpc('gbplus_get_consent_state');if(pref.error)throw Error('Não foi possível consultar suas preferências. Tente novamente.');
    main.innerHTML=`<h1>Preferências de e-mail</h1><p>${esc(user.email)}</p><form id="preference"><label class="consent-option"><input id="marketing" type="checkbox" ${pref.data?.marketing?'checked':''}><span>Quero receber novidades, dicas e ofertas do GB+ por e-mail.</span></label><p>Opcional. Você pode retirar esta autorização a qualquer momento. Avisos de acesso e suporte não dependem dessa opção.</p><button class="primary">Salvar preferência</button><p id="status" role="status"></p></form><p>O GB+ registra atividade recente e tempo aproximado de uso em primeiro plano para administração e suporte. <a href="./privacidade.html">Saiba mais na política de privacidade.</a></p>${back}`;
    document.querySelector('#preference').onsubmit=async event=>{
     event.preventDefault();const button=event.currentTarget.querySelector('button');button.disabled=true;
-    const saved=await client.rpc('gbplus_email_preference',{p_marketing:document.querySelector('#marketing').checked});
+    const saved=await client.rpc('gbplus_set_marketing_consent',{p_marketing:document.querySelector('#marketing').checked});
     document.querySelector('#status').textContent=saved.error?'Não foi possível salvar. Tente novamente.':'Preferência salva.';button.disabled=false;
    };
   }

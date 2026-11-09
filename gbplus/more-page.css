@@ -31,3 +31,41 @@ html[data-theme=dark] .gb-more-row:not(:last-child):after{border-color:#343540}
   .gb-more-row:not(:last-child):after{left:60px}
 }
 @media(prefers-reduced-motion:reduce){.gb-more-row{transition:none}}
+
+/* GB+ 2.8.6 candidata — Configurações incorporadas à página Mais.
+   Painéis nativos por details/summary, sem nova rota ou dependência externa. */
+.gb-more-integrated .gb-settings-layout{
+ max-width:100%;padding:0;background:none;isolation:auto;
+}
+.gb-more-integrated .gb-settings-layout::before{display:none}
+.gb-more-integrated .gb-more-cfg-group{margin:0 0 10px}
+.gb-more-integrated .gb-more-cfg-summary{
+ list-style:none;display:flex;align-items:center;justify-content:space-between;
+ gap:14px;padding:15px 18px;border:1px solid var(--border);
+ background:var(--surface);border-radius:17px;cursor:pointer;
+ color:var(--ink);font-size:12px;font-weight:750;letter-spacing:.9px;
+ min-height:54px;
+}
+.gb-more-integrated .gb-more-cfg-summary::-webkit-details-marker{display:none}
+.gb-more-integrated .gb-more-cfg-summary .icon{width:16px;height:16px;color:var(--muted);transition:transform .18s ease}
+.gb-more-integrated details[open]>.gb-more-cfg-summary .icon{transform:rotate(90deg)}
+.gb-more-integrated .gb-more-cfg-summary:focus-visible{outline:2px solid #7295e9;outline-offset:2px}
+.gb-more-integrated .gb-more-cfg-group .gb-cfg-list{
+ margin-top:6px;border:1px solid var(--border);box-shadow:none;
+ border-radius:17px;background:var(--surface);
+}
+.gb-more-integrated .gb-cfg-row{min-height:68px;padding:11px 13px;gap:12px}
+.gb-more-integrated .gb-cfg-row-icon{width:37px;height:37px;flex-basis:37px}
+.gb-more-integrated .gb-cfg-row-icon .icon{height:23px;width:23px}
+.gb-more-integrated .gb-cfg-row:not(:last-child)::after{left:62px;right:13px}
+.gb-more-integrated .gb-cfg-row-label strong{font-size:13px}
+.gb-more-integrated .gb-cfg-row-label small{font-size:10.5px}
+.gb-more-integrated .gb-cfg-delete{margin-top:17px;min-height:74px}
+.gb-more-integrated .gb-cfg-delete .gb-cfg-row-icon{width:43px;height:43px;flex-basis:43px}
+.gb-more-integrated .gb-cfg-empty{display:none}
+html[data-theme="dark"] .gb-more-integrated .gb-more-cfg-summary,
+html[data-theme="dark"] .gb-more-integrated .gb-cfg-list{
+ background:linear-gradient(132deg,#1e1f28,#17181d 75%,#20202a);
+ border-color:#353541;
+}
+@media(prefers-reduced-motion:reduce){.gb-more-integrated .gb-more-cfg-summary .icon{transition:none}}

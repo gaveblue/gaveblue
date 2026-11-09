@@ -13,17 +13,33 @@ const load=(name,deps,exports)=>Function(...Object.keys(deps),
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
 const logos=load('service-brand-paths',{},['SERVICE_BRAND_PATHS']).SERVICE_BRAND_PATHS;
 const accents=load('service-brand-colors',{},['SERVICE_BRAND_COLORS']).SERVICE_BRAND_COLORS;
+const extra=load('service-extra-brand-paths',{},['SERVICE_EXTRA_BRAND_PATHS']).SERVICE_EXTRA_BRAND_PATHS;
 const catalog=load('service-catalog',{},['SERVICE_CATALOG','SERVICE_GROUPS','serviceById','searchServices','serviceSearchKey']);
-assert.equal(catalog.SERVICE_CATALOG.length,26);
-assert.equal(new Set(catalog.SERVICE_CATALOG.map(s=>s.id)).size,26);
-assert.equal(Object.keys(catalog.SERVICE_GROUPS).length,5);
+assert.equal(catalog.SERVICE_CATALOG.length,49);
+assert.equal(new Set(catalog.SERVICE_CATALOG.map(s=>s.id)).size,49);
+assert.equal(Object.keys(catalog.SERVICE_GROUPS).length,8);
 assert.equal(Object.keys(logos).length,13);
+assert.equal(Object.keys(extra).length,26);
 assert.equal(catalog.searchServices('netflix').length,1);
 assert.equal(catalog.searchServices('ifood').length,1);
 assert.equal(catalog.searchServices('','delivery').length,5);
 assert(catalog.SERVICE_CATALOG.some(s=>s.name==='Plus Delivery'));
 assert(catalog.SERVICE_CATALOG.some(s=>s.name==='ChatGPT'));
 assert.equal(catalog.serviceSearchKey('Música + Vídeo'),'musicavideo');
+for(const [id,mark]of Object.entries(extra)){
+ assert(catalog.serviceById(id),'Extra icon has an unknown service '+id);
+ assert(Array.isArray(mark)&&mark.length===3&&mark[0]>0&&mark[1]>0&&
+  typeof mark[2]==='string'&&mark[2].length>20,'Malformed local vector mark for '+id);
+}
+assert.equal(catalog.SERVICE_CATALOG.filter(s=>Boolean(logos[s.id]||extra[s.id])).length,39);
+assert.equal(catalog.SERVICE_CATALOG.filter(item=>Boolean(item.logoPath)).length,10);
+assert.equal(catalog.SERVICE_CATALOG.filter(item=>Boolean(logos[item.id]||extra[item.id]||item.logoPath)).length,49);
+for(const [id,path] of Object.entries({
+ 'delivery-plusdelivery':'./assets/service-icons/plus-delivery.webp',
+ 'delivery-99food':'./assets/service-icons/99food.png',
+ 'streaming-primevideo':'./assets/service-icons/prime-video.webp',
+ 'streaming-disney':'./assets/service-icons/disney-plus.webp'
+})) assert.equal(catalog.serviceById(id).logoPath,path);
 for(const [id,paths]of Object.entries(logos)){
  assert(catalog.serviceById(id),'Icon references unknown service '+id);
  assert(paths.length>0&&paths.every(p=>typeof p==='string'&&p.length>5),'Missing logo path');
@@ -31,14 +47,14 @@ for(const [id,paths]of Object.entries(logos)){
 const serviceUI=load('service-ui',{
  SERVICE_CATALOG:catalog.SERVICE_CATALOG,SERVICE_GROUPS:catalog.SERVICE_GROUPS,
  serviceById:catalog.serviceById,serviceSearchKey:catalog.serviceSearchKey,
- SERVICE_BRAND_PATHS:logos,SERVICE_BRAND_COLORS:accents,esc
+ SERVICE_BRAND_PATHS:logos,SERVICE_EXTRA_BRAND_PATHS:extra,SERVICE_BRAND_COLORS:accents,esc
 },['servicePickerMarkup','serviceIconMarkup','serviceIdentityMarkup','serviceDisplayName']);
 const page=serviceUI.servicePickerMarkup();
 for(const word of ['name="serviceId"','name="serviceName"','gb-service-field-compact',
  'gb-service-compact','aria-haspopup="dialog"','aria-controls="gb-picker-sheet"','data-action="title-service-toggle"']){
  assert(page.includes(word),'Missing '+word);
 }
-assert(!page.includes('gb-service-options'),'The 26 options now belong to the full-height sheet');
+assert(!page.includes('gb-service-options'),'Service options belong to the full-height sheet');
 assert(!page.includes('Qual serviço?'),'The large service-question field must be removed');
 assert(!page.includes('gb-service-heading'),'No large heading is displayed in the first step');
 assert(src('bottom-sheet').includes('SERVICE_CATALOG.filter'),'The full catalog must be in the sheet');
@@ -49,6 +65,15 @@ assert(!other.includes('<img onerror'));
 assert(other.includes('&lt;img'));
 assert(serviceUI.serviceIdentityMarkup('streaming-netflix').includes('<svg'));
 assert(serviceUI.serviceIconMarkup('streaming-netflix').includes('#E50914'));
+assert(serviceUI.serviceIconMarkup('streaming-youtube').includes('viewBox="0 0 576 512"'));
+assert(serviceUI.serviceIconMarkup('social-whatsapp').includes('<svg'));
+assert(serviceUI.serviceIconMarkup('digital-microsoft365').includes('<svg'));
+assert(serviceUI.serviceIconMarkup('digital-googleone').includes('<svg'));
+assert(serviceUI.serviceIconMarkup('delivery-plusdelivery').includes('PD'));
+assert(!serviceUI.serviceIconMarkup('social-instagram').includes('<img'));
+assert(catalog.searchServices('whatsapp').length===1);
+assert(catalog.searchServices('steam').length===1);
+assert(catalog.searchServices('','social').length===6);
 assert(serviceUI.serviceIconMarkup('music-spotify').includes('#1ED760'));
 assert(serviceUI.serviceIconMarkup('music-spotify').includes('--gb-service-fg:#151515'),'Spotify mark must contrast on its original green');
 assert(serviceUI.serviceIconMarkup('streaming-netflix').includes('--gb-service-fg:#ffffff'),'Netflix mark must contrast on red');
@@ -58,7 +83,8 @@ assert(serviceUI.serviceIdentityMarkup('delivery-plusdelivery').includes('PD'));
 let seq=0;
 const store=load('store',{
  uid:()=> 'id'+(++seq), validDate:d=>/^\d{4}-\d\d-\d\d$/.test(d),
- paid:()=>0,today:()=> '2026-11-06',CATEGORY_ICON_OPTIONS:[],BANKS:[]
+ paid:()=>0,today:()=> '2026-11-06',CATEGORY_ICON_OPTIONS:[],BANKS:[],
+ CATEGORY_SUGGESTIONS:[],DEFAULT_NOTIFICATION_PREFS:{},validNotificationPrefs:()=>true
 },['emptyDatabase','validateDatabase']);
 const db=store.emptyDatabase();
 const initial=JSON.stringify(db);
@@ -73,6 +99,14 @@ assert.equal(store.validateDatabase(db),db);
 assert.equal(store.validateDatabase(JSON.parse(JSON.stringify(db))).titles[0].serviceId,'streaming-netflix');
 const saved=JSON.parse(JSON.stringify(db));
 assert.equal(saved.titles[0].serviceId,'streaming-netflix','Backup must preserve service ID');
+for(const newId of ['social-whatsapp','games-steam','shopping-amazon']){
+ t.serviceId=newId;
+ assert.equal(store.validateDatabase(db),db,'New category service must persist: '+newId);
+ assert.equal(JSON.parse(JSON.stringify(db)).titles[0].serviceId,newId,'Backup must preserve '+newId);
+}
+t.serviceId='unknown-app';
+assert.throws(()=>store.validateDatabase(db),/identificador do serviço/,'Unknown prefix must be rejected');
+t.serviceId='streaming-netflix';
 t.serviceId='custom';t.serviceName='Lavanderia da cidade';
 assert.equal(store.validateDatabase(db),db,'Custom service must remain valid');
 t.serviceName='';
@@ -90,4 +124,4 @@ assert(src('bottom-sheet').includes('data-sheet-choice=""'),'User must be able t
 assert(app.includes('description.value=serviceDisplayName(hidden.value,name.value'), 'Selected service defines description');
 assert(app.includes('description.readOnly=true'),'PF service descriptions are read-only while selected');
 assert(app.includes('const description=serviceId?serviceDisplayName(serviceId,serviceName'), 'Saved title uses canonical service name');
-console.log('GB+ 2.7.0: serviços opcionais, nomes, marcas e seleção por sheet verificados.');
+console.log('GB+ 2.8.6 candidata: catálogo de 49 serviços, 49 marcas locais, 0 fallbacks e integridade financeira verificados.');

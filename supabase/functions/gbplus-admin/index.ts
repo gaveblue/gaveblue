@@ -97,9 +97,16 @@ export function createHandler(getAdmin, audit = event => console.info(JSON.strin
         if(targetResult.error||!target?.email||!target.email_confirmed_at||suspended(target))return respond(409,{error:'O destinatário precisa ter e-mail confirmado e conta ativa.'});
         let unsubscribeUrl='',oneClickUrl='';
         if(input.kind==='marketing'){
-          const pref=await admin.from('gbplus_email_preferences').select('marketing').eq('user_id',target.id).maybeSingle();
+          // Revalidate BOTH the latest marketing preference and accepted policies
+          // at dispatch time. Old opt-ins do not carry over to 2026-11-08-v1.
+          const pref=await admin.from('gbplus_email_preferences').select('marketing,consent_version').eq('user_id',target.id).maybeSingle();
           if(pref.error)throw pref.error;
-          if(pref.data?.marketing!==true)return respond(409,{error:'Este usuário não autorizou e-mails de marketing.'});
+          if(pref.data?.marketing!==true||pref.data.consent_version!=='2026-11-08-v1')
+            return respond(409,{error:'Este usuário não autorizou marketing na política atualizada.'});
+          const legal=await admin.from('gbplus_legal_acceptances').select('terms_version,privacy_version').eq('user_id',target.id).maybeSingle();
+          if(legal.error)throw legal.error;
+          if(legal.data?.terms_version!=='2026-11-08-v1'||legal.data?.privacy_version!=='2026-11-08-v1')
+            return respond(409,{error:'O aceite atualizado dos documentos ainda não foi registrado.'});
           const token=crypto.randomUUID()+crypto.randomUUID();
           const saved=await admin.from('gbplus_mail_unsubscribe').insert({token_hash:await sha256(token),user_id:target.id});
           if(saved.error)throw saved.error;

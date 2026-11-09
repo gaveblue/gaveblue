@@ -1,5 +1,45 @@
 # CHANGELOG — GB+ Gestão Financeira
 
+## [2.8.6 — AMPLIAÇÃO DA BIBLIOTECA DE APLICATIVOS E ÍCONES (CANDIDATA; NÃO PUBLICADA)] — 2026-11-08
+
+### Consolidação e política de privacidade — build 2866
+- Recebidos e incorporados em arquivos locais os ícones quadrados **Canva, inDrive, 99, Rappi e Globoplay**. Os cinco IDs existentes agora apontam para `.webp` locais. Total: **49 dos 49 serviços com imagem/vetor local**. Sem logotipos inventados, recortes ou dependência de CDN.
+- Novo padrão dos cinco botões móveis: **Início, Lançamentos, Novo, Carteira, Mais**. A configuração antiga padrão é migrada visualmente, sem sobrescrever atalhos que o usuário tenha personalizado.
+- **Termos de Uso e Privacidade 2026-11-08-v1**: páginas vinculadas, aviso de mudança após login com aceite obrigatório apenas dos termos, marketing em segunda caixa opcional e desmarcada; registro server-side do consentimento e de suas versões.
+- **Marketing**: preferências configuráveis em Mais, revogação gratuita, eventos auditados no Supabase; API administrativa `marketing-audience` retorna somente usuários com opt-in válido, confirmação de e-mail e políticas atualizadas, **sem saldos ou lançamentos**. Nenhuma campanha é enviada por essa implementação; futuros envios devem revalidar a autorização no momento do disparo.
+- Proteção: RLS e permissões restritas em tabela de termos; RPCs autenticadas com `auth.uid()` para obter estado, aceitar políticas e revogar consentimento; versão e horário gerados pelo banco.
+- Testes e publicação: registrar evidências e estado da implantação no PR, sem confundir aprovação do usuário para lançar com a execução efetiva do QA.
+
+
+### Recebimento de quatro logotipos — 08/11/2026 (revisão candidata build 2865)
+- **Arquivos recebidos nesta conversa e incorporados à branch de desenvolvimento:** `Plus Delivery` → `assets/service-icons/plus-delivery.webp` (160×160), `99Food` → `assets/service-icons/99food.png` (261×258), `Prime Video` → `assets/service-icons/prime-video.webp` (128×39) e `Disney+` → `assets/service-icons/disney-plus.webp` (180×101).
+- **Integridade:** cada objeto binário enviado ao GitHub foi comparado com o hash Git do arquivo preparado localmente; quatro coincidências confirmadas. Redução de tamanho e transcodificação não modificam a composição dos logos, as cores principais nem a proporção.
+- **Renderer:** `serviceIconMarkup` aceita exclusivamente caminhos relativos locais fixados no catálogo para SVG/PNG/WebP e mantém fallback textual caso a imagem falhe. O CSS usa fundo neutro e `object-fit: contain` em ambos os temas; não recortar wordmarks horizontais.
+- **Status da biblioteca:** **44 de 49 serviços com arte local**, 5 ainda sem arquivo: Globoplay, Rappi, 99, inDrive e Canva. Disney+ é imagem horizontal enviada (não ícone quadrado oficial); pode ser substituída posteriormente por asset quadrado.
+- **PWA:** referências e versão de cache atualizadas para `2865`, quatro novos arquivos incluídos no manifesto de atualização. Mantidos IDs e lançamentos existentes, sem alterações financeiras.
+- **Status:** somente branch/PR em rascunho, não publicado e não homologado. Testes de código e visualização final em Android/PWA ainda necessários.
+
+
+- **Mais + Configurações (solicitado):** a tela Mais passa a exibir as opções de configurações em seções expansíveis; Preferências vem expandida por padrão e Dados e Registros, Sistema, Suporte e Administração ficam acessíveis sem navegar para uma rota duplicada. Minha Conta continua no topo, única. A rota `#settings` redireciona para `#more`, inclusive em atalhos antigos. Backup, notificações, aparência, exclusão de conta e confirmação de limpeza reutilizam as ações existentes.
+- **ChatGPT (símbolo incorporado):** `assets/service-icons/chatgpt.svg` agora é um arquivo local, sem requisição a terceiros. Fonte vetorial identificada: SuperTinyIcons `images/svg/chatgpt.svg` (licença MIT; crédito no documento de fontes). O arquivo não foi extraído do ZIP oficial da OpenAI; tratar como reprodução pública identificativa da marca, sujeita às regras da OpenAI. O carregamento utiliza caminho fixo validado e fallback neutro caso o arquivo falhe. Modo claro e escuro conservam o branco/preto do desenho.
+- **Ícones oficiais ainda pendentes (9):** Disney+, Prime Video, Globoplay, 99Food, Plus Delivery, Rappi, 99, inDrive e Canva. As páginas fornecidas foram avaliadas, mas os downloads binários/ZIPs ou imagens de lojas não puderam ser incorporados com verificação de conteúdo neste ambiente. Permanecem letras neutras; **não** afirmar que já possuem logo oficial.
+- **Publicação:** todos os arquivos preparados apenas no PR de rascunho. Sem merge, deploy ou alteração na versão pública 2.8.5. QA real Android/PWA e Supabase continuam pendentes.
+- **Testes isolados executados com fontes atuais da branch:** `gbplus-286-more-brand-regression.mjs` (Mais + Configurações + SVG local + fallbacks + navegação), `services-regression.mjs`, `bottom-sheet-regression.mjs`, `category-service-auto-regression.mjs`, `picker-expanded-regression.mjs`, `pf-entry-ui-regression.mjs`, `gbplus-281-interface-regression.mjs` (20 verificações), `gbplus-282-regression.mjs` (128 verificações), `gbplus-285-simple-theme-regression.mjs` (32 verificações). Todos passaram em execução isolada V8 com dependências locais simuladas. Ainda não equivalem a uma sessão de navegação real no Android.
+- **Total de ícones locais agora:** 13 Simple Icons + 26 Font Awesome vetoriais (39) + 1 arquivo `ChatGPT.svg` (40 serviços com arte local). 9 continuam em monograma.
+
+
+**Solicitação:** ampliar o catálogo de aplicativos usados para identificar despesas e substituir identificações genéricas por símbolos públicos confiáveis onde possível. O responsável informou que a versão 2.8.5 estava homologada; isso não constitui homologação antecipada das alterações 2.8.6.
+
+- **Correção das categorias (captura Android):** removidas das sugestões para novos cadastros as categorias duplicadas **Aplicativos de transporte, Assinaturas digitais e Streaming**. A categoria única **Serviços** passa a ser o ponto de entrada para os oito grupos internos do catálogo, e a prévia Netflix/Spotify/iFood aparece só nela. O seletor do lançamento oculta as três opções antigas para novos registros. IDs antigos permanecem preservados para títulos, compras no cartão e importações já vinculados; na edição de um título antigo, a categoria previamente selecionada continua disponível. Na gestão de categorias, as opções legadas sem vínculo deixam de poluir a tela e aquelas com histórico são identificadas.
+- **Navegação:** proposta de reunir configurações na tela Mais discutida com o responsável; **não implementada nesta candidata** para permitir validar a organização antes de alterar as rotas.
+- **Catálogo:** 26 → **49 serviços**, com IDs antigos preservados e novos grupos Redes sociais e comunicação, Games e entretenimento e Compras e pagamentos. Disponibilizados YouTube, Twitch, SoundCloud, Bandcamp, Google Drive, Dropbox, Slack, Trello, Figma, GitHub, Discord, Patreon, Instagram, TikTok, WhatsApp, Telegram, Facebook, X, Steam, PlayStation, Xbox, Amazon e PayPal.
+- **Logotipos:** 13 símbolos Simple Icons existentes permanecem locais; incorporados 26 mapeamentos Font Awesome Free Brands (23 novos e YouTube Premium, Google One, Microsoft 365), totalizando **39 serviços com vetor local**. As 10 marcas sem arquivo fiel confirmado usam monogramas legíveis, sem tentativa de fabricar uma marca.
+- **Privacidade e offline:** somente SVG paths incorporados aos módulos, sem novas consultas de imagem/CDN no aplicativo. Dimensões originais preservadas via viewBox. Fontes e licenças em `SERVICE-ICON-SOURCES.md`.
+- **Compatibilidade:** seletor expansível, pesquisa, personalização, nomes de serviço, receitas, saldos, cartões, faturas e dados existentes não alterados.
+- **Integridade dos dados:** validação da base foi atualizada para aceitar IDs dos novos grupos `social`, `games` e `shopping`, com teste de salvamento/restauração e rejeição de IDs desconhecidos. Importações da validação sincronizadas com revisão de cache, inclusive adaptador Supabase. Sem cobranças ou novos lançamentos automáticos.
+- **Cache:** módulos dependentes, identificador da página e shell PWA preparados para a candidata. `version.json` indica expressamente `candidate_not_published` e não inventa data de publicação.
+- **Testes:** regressões de catálogo e seletor atualizadas para 49 serviços, integridade de IDs, ícones locais e fallbacks. Verificações de integração Android/PWA, Supabase e aceite visual ainda necessários para homologar e publicar. Não atribuir status “homologado” sem evidência da 2.8.6.
+
 ## [2.8.5 — BOTÃO DE TEMA SIMPLES, SOL E LUA (LIBERAÇÃO WEB PARA TESTE; HOMOLOGAÇÃO PARCIAL)] — 2026-11-08
 
 **Motivo:** o usuário rejeitou a aparência e o funcionamento do seletor Liquid Glass que continuava visualmente inadequado no PWA Android. Solicitou retirar completamente o controle e substituí-lo por uma flag normal, com sol/lua simples de biblioteca. A versão foi preparada para ser publicada e testada no celular.

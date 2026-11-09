@@ -1,15 +1,16 @@
 {
-  "version": "2.8.5",
-  "build": 1,
-  "published_at": "2026-11-08T21:46:55.998Z",
-  "title": "Botão de tema simples com sol e lua",
+  "version": "2.8.6",
+  "build": 2866,
+  "published_at": null,
+  "title": "Biblioteca completa, novo padrão de navegação e aceite LGPD",
   "notes": [
-    "O antigo seletor Liquid Glass do cabeçalho foi removido a pedido do responsável, incluindo molduras, arrasto, iluminação orbital e iframe.",
-    "Novo interruptor pequeno e discreto com ícones normais de sol e lua da biblioteca local Lucide-style; em modo claro mantém tons claros e no escuro usa cores suaves.",
-    "Toque para alternar imediatamente entre modo claro e escuro, mantendo a preferência sincronizada pelo mecanismo existente de gravação do GB+.",
-    "Acessibilidade: rótulo dinâmico, função de interruptor, navegação por teclado, indicador de foco e respeito a movimento reduzido.",
-    "Sem alterações de valores financeiros, contas, cartões, faturas, lançamentos ou navegação inferior.",
-    "Liberação web solicitada para teste no PWA instalado. Testes direcionados aprovados; confirmação visual no Android e homologação Supabase autenticada ainda pendentes."
+    "Biblioteca: 49 aplicativos/serviços com 49 símbolos ou imagens locais, incluindo os cinco ícones mais recentes fornecidos pelo proprietário (Canva, inDrive, 99, Rappi e Globoplay).",
+    "Navegação padrão no celular: Início, Lançamentos, Novo, Carteira, Mais. Preferências realmente personalizadas continuam respeitadas.",
+    "Termos de Uso e Política de Privacidade atualizados na versão 2026-11-08-v1, com aviso obrigatório após login para usuários sem aceite registrado.",
+    "Marketing promocional: escolha separada, opcional, inicialmente desmarcada e revogável; versão e histórico gravados no Supabase, sem usar dados financeiros para campanhas.",
+    "Painel administrativo: consulta específica da audiência promocional somente quando há consentimento válido e e-mail confirmado; o endpoint não dispara mensagens.",
+    "Mais e Configurações integrados, categoria Serviços consolidada e registro das alterações no CHANGELOG.",
+    "Homologação da versão 2.8.6 depende da bateria final de testes e verificação de publicação; nenhuma campanha de e-mail foi iniciada."
   ],
   "assets": [
     "./index.html",
@@ -163,6 +164,7 @@
     "./js/accounts-cards-view.js",
     "./js/service-catalog.js",
     "./js/service-brand-paths.js",
+    "./js/service-extra-brand-paths.js",
     "./js/service-ui.js",
     "./js/account-safety.js",
     "./js/account-safety-ui.js",
@@ -175,28 +177,41 @@
     "./more-page.css",
     "./next-282.css",
     "./js/category-library.js",
-    "./js/notification-rules.js"
+    "./js/notification-rules.js",
+    "./assets/service-icons/chatgpt.svg",
+    "./assets/service-icons/plus-delivery.webp",
+    "./assets/service-icons/99food.png",
+    "./assets/service-icons/prime-video.webp",
+    "./assets/service-icons/disney-plus.webp",
+    "./assets/service-icons/canva.webp",
+    "./assets/service-icons/indrive.webp",
+    "./assets/service-icons/99.webp",
+    "./assets/service-icons/rappi.webp",
+    "./assets/service-icons/globoplay.webp",
+    "./js/legal-consent.js",
+    "./legal-consent.css",
+    "./termos-de-uso.html"
   ],
   "highlights": [
     {
-      "icon": "sun",
-      "title": "Modo claro e escuro sem complicação",
-      "description": "Interruptor simples com sol e lua no topo."
+      "icon": "grid",
+      "title": "49 logos locais",
+      "description": "Catálogo completo com ícones reais fornecidos."
     },
     {
-      "icon": "moon",
-      "title": "Sem moldura preta nem efeitos",
-      "description": "Removidos o vidro animado e a luz orbital do botão de tema."
+      "icon": "check",
+      "title": "Aceite de privacidade",
+      "description": "Controle documentado e revogável para comunicações promocionais."
     },
     {
-      "icon": "check-circle",
-      "title": "Preferência preservada",
-      "description": "A troca de tema continua salva no GB+."
+      "icon": "wallet",
+      "title": "Navegação simplificada",
+      "description": "Início, Lançamentos, Novo, Carteira e Mais."
     }
   ],
-  "release_status": "web_release_2_8_5_simple_theme_for_android_testing",
+  "release_status": "candidate_not_published",
   "homologation": {
-    "status": "web_release_authorized_for_device_testing_full_validation_pending",
-    "notes": "Em 08/11/2026 o responsável rejeitou o seletor Liquid Glass e pediu desfazer a experiência e publicar uma flag normal. Implementado botão simples com ícones locais e ação de tema persistida via commit. Testes dirigidos (32 da flag, 131 de categorias, 26 de alertas, 20 de cartões e navegação) aprovados em V8 isolado; validação visual integrada em Android/PWA e Supabase autenticado pendentes. GitHub Actions não utilizado para compilar APK."
+    "status": "pending_qa_release",
+    "notes": "Build 2866. Testes de código, segurança e integração devem ser anexados antes de publicar; campanhas de e-mail permanecem desativadas."
   }
 }

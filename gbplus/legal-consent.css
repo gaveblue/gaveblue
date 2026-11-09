@@ -1,0 +1,20 @@
+/* GB+ 2.8.6 — caixa de ciência dos termos e opt-in promocional independente. */
+.gb-legal-page .gb-legal-card{max-width:510px;padding:20px 0 32px}
+.gb-legal-page .auth-brand{margin-bottom:24px}
+.gb-legal-page .auth-wordmark{font-size:54px;letter-spacing:-6px}
+.gb-legal-page .auth-brand p{font-size:16px}
+.gb-legal-page .auth-title{font-size:25px;text-align:left;margin-bottom:10px}
+.gb-legal-page .auth-description{font-size:13px;line-height:1.65;text-align:left;margin-bottom:23px}
+.gb-legal-consent{display:flex;align-items:flex-start;gap:12px;padding:14px 15px;border:1px solid #d9d9df;border-radius:14px;background:#fbfbfc;margin:10px 0;color:#16171b;font-size:13px;line-height:1.58;cursor:pointer}
+.gb-legal-consent input[type="checkbox"]{flex:none;width:19px;height:19px;margin:2px 0 0;accent-color:#151519;cursor:pointer}
+.gb-legal-consent span{min-width:0}.gb-legal-consent a{font-weight:700;color:inherit;text-decoration:underline;text-underline-offset:3px}
+.gb-legal-consent small{display:block;font-size:11px;line-height:1.5;color:#656773;margin-top:5px}
+.gb-legal-hint{font-size:12px;line-height:1.65;color:#70727b;margin:12px 0}
+.gb-legal-error{font-size:12px;color:#aa2424;margin:9px 0}.gb-legal-error:empty{display:none}
+.gb-legal-page .auth-primary{margin-top:17px}
+.gb-legal-signup{margin-top:18px}
+.gb-marketing-preferences .gb-legal-consent{margin-top:14px}
+html[data-theme="dark"] .gb-marketing-preferences .gb-legal-consent{background:#23252b;color:#f2f2f5;border-color:#42434c}
+html[data-theme="dark"] .gb-marketing-preferences .gb-legal-consent small{color:#b0b1c0}
+html[data-theme="dark"] .gb-marketing-preferences .gb-legal-consent input{accent-color:#cfcff4}
+@media(max-width:760px){.gb-legal-page .gb-legal-card{padding:20px 18px 60px}.gb-legal-page .auth-brand{margin-bottom:25px}.gb-legal-consent{padding:13px}.gb-legal-page .auth-title{font-size:23px}}

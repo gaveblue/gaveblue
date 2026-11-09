@@ -57,7 +57,7 @@ test('rejects untrusted origins and oversized input before authorization',async(
 
 function mailFixture({consent=false,reserved=true,mailerResult={ok:true,id:'provider-id'},fail=false}={}){
  const calls=[];const target={...member,email_confirmed_at:'2026-01-01'};
- const chain=table=>({select(){return this;},eq(){return this;},maybeSingle:async()=>({data:{marketing:consent}}),
+ const chain=table=>({select(){return this;},eq(){return this;},maybeSingle:async()=>({data:table==='gbplus_email_preferences'?{marketing:consent,consent_version:'2026-11-08-v1'}:{terms_version:'2026-11-08-v1',privacy_version:'2026-11-08-v1'}}),
   insert:async data=>{calls.push(['insert',table,data]);return {};},
   update:data=>{calls.push(['update',table,data]);return {eq:async()=>({})};}});
  const admin={auth:{getUser:async()=>({data:{user:owner}}),admin:{getUserById:async()=>({data:{user:target}}),inviteUserByEmail:async(email,options)=>{calls.push(['invite',email,options]);return {data:{user:target}};}}},

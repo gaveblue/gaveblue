@@ -1,7 +1,7 @@
 import {uid,validDate,paid,today} from './domain.js?v=20261105-72';
 import {CATEGORY_ICON_OPTIONS} from './gb-icons.js?v=20261108-2821';
 import {BANKS} from './banks.js?v=20261105-87';
-import {CATEGORY_SUGGESTIONS} from './category-library.js?v=20261108-2821';
+import {CATEGORY_SUGGESTIONS} from './category-library.js?v=20261108-2862';
 import {DEFAULT_NOTIFICATION_PREFS,validNotificationPrefs} from './notification-rules.js?v=20261108-2821';
 export const KEY='gb-plus:data:v1';
 export const INDICATORS={balance:'Saldo disponível',receivable:'A receber',payable:'A pagar',provisions:'Provisões líquidas',received:'Receitas recebidas',spent:'Despesas pagas',result:'Resultado financeiro',overdue:'Títulos vencidos',chart:'Fluxo de caixa',upcoming:'Próximos vencimentos'};
@@ -16,9 +16,15 @@ export const MOBILE_SHORTCUTS=[
  ['notifications','Notificações','bell'],['settings','Configurações','settings'],
  ['profile','Meu perfil','user'],['menu','Mais','more']
 ];
-export const defaultMobileNav=()=>['titles','partners','menu'];
+// New default (2.8.6): Início | Lançamentos | Novo | Carteira | Mais.
+export const defaultMobileNav=()=>['titles','cards','menu'];
 export const validMobileNav=values=>Array.isArray(values)&&values.length===3&&new Set(values).size===3&&values.every(value=>MOBILE_SHORTCUTS.some(([key])=>key===value));
-export const effectiveMobileNav=settings=>validMobileNav(settings?.mobileNav)?settings.mobileNav:defaultMobileNav();
+// Respect real customizations; users who still have the old DEFAULT get the new standard.
+export const effectiveMobileNav=settings=>{
+ const saved=settings?.mobileNav;
+ if(!validMobileNav(saved)||saved.join('|')==='titles|partners|menu')return defaultMobileNav();
+ return saved;
+};
 export function shouldOfferSetup(db){
  if(db?.settings?.setupCompleted===true)return false;
  if(db?.settings?.setupCompleted===false)return true;
@@ -184,7 +190,7 @@ export function validateDatabase(db){
    const serviceId=title.serviceId??'',serviceName=title.serviceName??'';
    assert(str(serviceId,100)&&str(serviceName,120),'identificação do serviço.');
    assert(!serviceId||title.type==='expense','serviço associado apenas a despesa.');
-   assert(!serviceId||serviceId==='custom'||/^(streaming|music|delivery|mobility|digital)-[a-z0-9-]+$/.test(serviceId),'identificador do serviço.');
+   assert(!serviceId||serviceId==='custom'||/^(streaming|music|delivery|mobility|digital|social|games|shopping)-[a-z0-9-]+$/.test(serviceId),'identificador do serviço.');
    assert(serviceId!=='custom'||serviceName.trim().length>0,'nome do serviço personalizado.');
    assert(serviceId==='custom'||serviceName==='','nome de serviço não personalizado.');
   }

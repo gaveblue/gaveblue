@@ -12,6 +12,7 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({
  '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
 })[c]);
 const catalog=load('service-catalog',{},['SERVICE_CATALOG','SERVICE_GROUPS','serviceSearchKey']);
+const categoriesLib=load('category-library',{},['isSelectableExpenseCategory','isPrimaryServiceCategory']);
 const calls={};
 const handle={attributes:{},focus(){},setAttribute(k,v){this.attributes[k]=v;},setPointerCapture(){}};
 const focus={isConnected:true,attributes:{},setAttribute(k,v){this.attributes[k]=v;},focus(){calls.focus=(calls.focus||0)+1;}};
@@ -29,6 +30,8 @@ const document={querySelector:selector=>selector==='#gb-picker-sheet'?fakeDialog
 const sheet=load('bottom-sheet',{
  document,esc,icon:()=>'<svg></svg>',gbIcon:()=>'<svg class="gb-symbol"></svg>',
  categoryIconFor:()=> 'tag',
+ isSelectableExpenseCategory:categoriesLib.isSelectableExpenseCategory,
+ isPrimaryServiceCategory:categoriesLib.isPrimaryServiceCategory,
  SERVICE_CATALOG:catalog.SERVICE_CATALOG,
  SERVICE_GROUPS:catalog.SERVICE_GROUPS,
  serviceSearchKey:catalog.serviceSearchKey,
@@ -36,15 +39,15 @@ const sheet=load('bottom-sheet',{
  serviceCategoryPreviewMarkup:()=>'<span class="gb-service-category-preview">Netflix Spotify iFood</span>',
  serviceIconMarkup:()=>'<span class="gb-service-logo">Marca</span>'
 },['openGbPickerSheet','filterGbPickerSheet','sheetGroupsCount','installGbPickerSheet','installEntryFormDrag']);
-assert.equal(catalog.SERVICE_CATALOG.length,26);
-assert.equal(Object.keys(catalog.SERVICE_GROUPS).length,5);
+assert.equal(catalog.SERVICE_CATALOG.length,49);
+assert.equal(Object.keys(catalog.SERVICE_GROUPS).length,8);
 assert.equal(sheet.sheetGroupsCount([{items:[1,2]},{items:[3]}]),3);
 sheet.installGbPickerSheet();
 assert.equal(fakeDialog.dataset.gbReady,'true');
 let picked;
 assert(sheet.openGbPickerSheet({kind:'service',selected:'streaming-netflix',onPick:value=>picked=value}));
 assert(fakeDialog.open);
-assert.equal((fakeDialog.innerHTML.match(/data-sheet-choice="(?:streaming|music|delivery|mobility|digital)-/g)||[]).length,26);
+assert.equal((fakeDialog.innerHTML.match(/data-sheet-choice="(?:streaming|music|delivery|mobility|digital|social|games|shopping)-/g)||[]).length,49);
 for(const service of ['Netflix','HBO Max','Spotify','iFood','Plus Delivery','ChatGPT']){
  assert(fakeDialog.innerHTML.includes(service),'Missing service '+service);
 }
@@ -62,14 +65,26 @@ assert(calls.focus>=1);
 
 const categories=[{id:'agua',name:'Água',type:'expense'},
  {id:'servicos',name:'Serviços',type:'expense'},
+ {id:'legacy-streaming',name:'Streaming',type:'expense'},
+ {id:'legacy-assinatura',name:'Assinaturas digitais',type:'expense'},
+ {id:'legacy-transporte',name:'Aplicativos de transporte',type:'expense'},
  {id:'injection',name:'<img src=x onerror=alert(1)>',type:'expense'}];
 assert(sheet.openGbPickerSheet({kind:'category',items:categories,selected:'servicos',onPick:value=>picked=value}));
 assert(fakeDialog.innerHTML.includes('data-sheet-choice="agua"'));
 assert(fakeDialog.innerHTML.includes('data-sheet-choice="servicos"'));
+for(const legacy of ['legacy-streaming','legacy-assinatura','legacy-transporte']){
+ assert(!fakeDialog.innerHTML.includes('data-sheet-choice="'+legacy+'"'),legacy+' should only remain in existing titles');
+}
+assert.equal((fakeDialog.innerHTML.match(/gb-service-category-preview/g)||[]).length,1,'Single preview on Serviços');
 assert(fakeDialog.innerHTML.includes('gb-service-category-preview'),'Service category must show overlapping service examples');
 assert(!fakeDialog.innerHTML.includes('<img src=x'),'Untrusted category names must be escaped');
 assert(fakeDialog.innerHTML.includes('&lt;img'));
 assert(fakeDialog.innerHTML.includes('aria-selected="true"'));
+fakeDialog.close();
+assert(sheet.openGbPickerSheet({kind:'category',items:categories,selected:'legacy-streaming',onPick:value=>picked=value}));
+assert(fakeDialog.innerHTML.includes('data-sheet-choice="legacy-streaming"'),'Existing historical category must be editable');
+assert(!fakeDialog.innerHTML.includes('data-sheet-choice="legacy-assinatura"'),'Only the active legacy category may appear');
+assert(!fakeDialog.innerHTML.includes('data-sheet-choice="legacy-transporte"'),'Other legacy categories remain hidden');
 const listItems=[
  {dataset:{sheetSearch:'agua'},hidden:false},
  {dataset:{sheetSearch:'servicos'},hidden:false},
@@ -122,4 +137,4 @@ assert(app.includes("source.dispatchEvent(new Event('change',{bubbles:true}))"),
  'Choosing category must retain original category/form event rules');
 const html=readFileSync(resolve(root,'../index.html'),'utf8');
 assert(html.includes('id="gb-picker-sheet"')&&html.includes('bottom-sheet.css'));
-console.log('GB+ 2.7.0: 26 serviços, categorias, busca, gesto, foco, proteção do formulário e ícones OK.');
+console.log('GB+ 2.8.6 candidata: 49 serviços, categorias, busca, gesto, foco e preservação do formulário.');

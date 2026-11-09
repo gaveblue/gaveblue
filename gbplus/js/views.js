@@ -4,9 +4,9 @@ import {INDICATORS} from './store.js?v=20261105-78';
 import {esc,icon,button,empty,titleTable,chart,select,field} from './ui.js?v=20261105-72';
 import {gbIcon,categoryIconFor} from './gb-icons.js?v=20261108-2821';
 import {bankBadge,bankForAccount,bankName} from './banks.js?v=20261105-87';
-import {missingCategorySuggestions} from './category-library.js?v=20261108-2821';
+import {missingCategorySuggestions,isLegacyServiceCategory} from './category-library.js?v=20261108-2862';
 import {calculateDueAlerts,notificationPrefs} from './notification-rules.js?v=20261108-2821';
-export const routes=[['dashboard','Dashboard','home'],['titles','Lançamentos','titles'],['payable','Contas a pagar','down'],['receivable','Contas a receber','up'],['provisions','Provisões','layers'],['flow','Fluxo de caixa','chart'],['partners','Parceiros','people'],['accounts','Contas e cartões','wallet'],['forecast','Previsão financeira','chart'],['banks','Bancos','building-2'],['categories','Categorias','category'],['reports','Relatórios','chart'],['notifications','Notificações','bell'],['settings','Configurações','settings']];
+export const routes=[['dashboard','Dashboard','home'],['titles','Lançamentos','titles'],['payable','Contas a pagar','down'],['receivable','Contas a receber','up'],['provisions','Provisões','layers'],['flow','Fluxo de caixa','chart'],['partners','Parceiros','people'],['accounts','Contas e cartões','wallet'],['forecast','Previsão financeira','chart'],['banks','Bancos','building-2'],['categories','Categorias','category'],['reports','Relatórios','chart'],['notifications','Notificações','bell'],['more','Mais','more']];
 const stat=(key,value,subtitle,ico,extra='',footer='')=>`<article class="stat ${extra}" data-indicator="${key}"><div class="stat-top"><span class="stat-icon">${icon(ico)}</span>${key==='balance'?'<span class="stat-tag">AGORA</span>':''}</div><p>${INDICATORS[key]}</p><strong>${money(value)}</strong><small>${subtitle}</small>${footer}</article>`;
 function balanceAccountStrip(db){
  const accounts=(db.accounts||[]).filter(a=>a.active!==false);
@@ -115,7 +115,18 @@ export function notificationsView(db){
 
 export function partnersView(db,state){const ps=db.partners.filter(p=>`${p.name} ${p.tradeName} ${p.document}`.toLowerCase().includes(state.partnerQuery.toLowerCase()));return `${heading('Parceiros','Pessoas e empresas que fazem parte do seu negócio.',button(icon('plus')+'Novo parceiro','new-partner','primary'))}<section class="panel"><div class="filters"><label class="search-field">${icon('search')}<input id="partner-search" type="search" placeholder="Buscar nome, CPF ou CNPJ" aria-label="Pesquisar parceiros" value="${esc(state.partnerQuery)}"></label><span class="muted">${ps.length} parceiros</span></div>${ps.length?`<div class="partner-grid">${ps.map(p=>`<article class="partner-card"><div class="partner-top"><div class="partner-avatar">${esc(p.name.slice(0,2).toUpperCase())}</div><span class="badge">${p.active?'Ativo':'Inativo'}</span></div><h3>${esc(p.name)}</h3><p>${esc(p.tradeName||p.email||'Sem nome fantasia')}</p><div class="role-list">${p.roles.map(r=>`<span>${esc(r)}</span>`).join('')}</div><div class="partner-bottom">${button('Ver histórico','partner-detail','small',`data-id="${p.id}"`)}<button class="icon-button" data-action="edit-partner" data-id="${p.id}" aria-label="Editar ${esc(p.name)}">${icon('edit')}</button></div></article>`).join('')}</div>`:empty('Bons negócios começam com boas conexões','Cadastre clientes, fornecedores e outros parceiros.','new-partner','Adicionar parceiro')}</section>`;}
 export function accountsView(db,{embedded=false}={}){return `${embedded?'':heading('Contas bancárias','Saldos reais. Todas as contas sob seu controle.',button('Bancos e ícones','open-banks','small')+button(icon('transfer')+'Transferir','new-transfer')+button(icon('plus')+'Nova conta','new-account','primary'))}<div class="account-grid">${db.accounts.map(a=>`<article class="panel account-card"><div class="panel-heading"><span class="gb-account-bank-logo">${bankBadge(bankForAccount(db,a))}</span><span class="badge">${a.active?'Ativa':'Inativa'}</span></div><h2>${esc(a.name)}</h2><p>${esc(bankName(db,a.bankId,a.bank)||'Conta financeira')}</p><strong>${money(accountBalance(db,a.id,today()))}</strong><small>Saldo atual · Inicial: ${money(a.initial)}</small><div class="partner-bottom">${button('Movimentações','account-detail','small',`data-id="${a.id}"`)}${button('Conciliações','bank-import-history','small',`data-id="${a.id}"`)}${a.active!==false?button(icon('upload')+'Importar extrato','bank-import-open','small',`data-id="${a.id}"`):''}<button class="icon-button" data-action="edit-account" data-id="${a.id}" aria-label="Editar conta ${esc(a.name)}">${icon('edit')}</button></div></article>`).join('')}</div>${!db.accounts.length?`<section class="panel">${empty('Onde seu dinheiro se movimenta?','Adicione uma conta bancária, carteira ou caixa para registrar baixas.','new-account','Adicionar conta')}</section>`:''}`;}
-export function categoriesView(db){const missing=missingCategorySuggestions(db.categories);return `${heading('Categorias','Dê significado a cada entrada e saída.',button(icon('plus')+'Nova categoria','new-category','primary')+(missing.length?button('Adicionar '+missing.length+' sugestões','add-suggested-categories','small') : ''))}<div class="two-columns">${['income','expense'].map(type=>`<section class="panel"><div class="panel-heading"><h2>${icon(type==='income'?'up':'down')} ${type==='income'?'Receitas':'Despesas'}</h2><span class="badge">${db.categories.filter(c=>c.type===type).length}</span></div><div class="category-list">${db.categories.filter(c=>c.type===type).map(c=>`<div><span class="gb-category-list-label"><span class="gb-category-list-icon">${gbIcon(categoryIconFor(c))}</span>${esc(c.name)}</span><button class="icon-button" data-action="edit-category" data-id="${c.id}" aria-label="Editar ${esc(c.name)}">${icon('edit')}</button></div>`).join('')}</div></section>`).join('')}</div>`;}
+export function categoriesView(db){
+ const missing=missingCategorySuggestions(db.categories);
+ // Do not destroy legacy IDs: card purchases, statement imports and older titles
+ // may still reference them. Keep referenced legacy categories editable.
+ const historicalIds=new Set([
+  ...(db.titles||[]).map(t=>t.categoryId),
+  ...(db.cardPurchases||[]).map(p=>p.categoryId),
+  ...(db.bankImportBatches||[]).flatMap(b=>(b.entries||[]).map(e=>e.categoryId))
+ ]);
+ const visible=db.categories.filter(c=>!isLegacyServiceCategory(c)||historicalIds.has(c.id));
+ return `${heading('Categorias','Dê significado a cada entrada e saída.',button(icon('plus')+'Nova categoria','new-category','primary')+(missing.length?button('Adicionar '+missing.length+' sugestões','add-suggested-categories','small') : ''))}<div class="two-columns">${['income','expense'].map(type=>`<section class="panel"><div class="panel-heading"><h2>${icon(type==='income'?'up':'down')} ${type==='income'?'Receitas':'Despesas'}</h2><span class="badge">${visible.filter(c=>c.type===type).length}</span></div><div class="category-list">${visible.filter(c=>c.type===type).map(c=>`<div><span class="gb-category-list-label"><span class="gb-category-list-icon">${gbIcon(categoryIconFor(c))}</span>${esc(c.name)}${isLegacyServiceCategory(c)?' <small>(categoria antiga)</small>':''}</span><button class="icon-button" data-action="edit-category" data-id="${c.id}" aria-label="Editar ${esc(c.name)}">${icon('edit')}</button></div>`).join('')}</div></section>`).join('')}</div>`;
+}
 export function flowView(db,state){
  const status=['all','paid','pending'].includes(state.flowStatus)?state.flowStatus:'all';
  const rows=filterFlowRows(flow(db,state.range,state.granularity),status);
@@ -168,41 +179,41 @@ export function reportsView(db,state){const data=reportData(db,state);return `${
 function cfgOption(title,description,ico,color,action,badge=''){
  return `<button type="button" class="gb-cfg-row" data-action="${action}" data-settings-keywords="${esc(title+' '+description)}"><span class="gb-cfg-row-icon tone-${color}">${icon(ico)}</span><span class="gb-cfg-row-label"><strong>${esc(title)}</strong><small>${esc(description)}</small></span>${badge?`<span class="gb-cfg-version">${esc(badge)}</span>`:''}<span class="gb-cfg-next">${icon('chevron')}</span></button>`;
 }
-function cfgSection(label,rows){
+function cfgSection(label,rows,embedded=false){
+ if(embedded)return `<details class="gb-cfg-group gb-more-cfg-group" aria-label="${esc(label)}" ${label==='PREFERÊNCIAS'?'open':''}><summary class="gb-more-cfg-summary"><span>${esc(label)}</span>${icon('chevron')}</summary><div class="gb-cfg-list">${rows}</div></details>`;
  return `<section class="gb-cfg-group" aria-label="${esc(label)}"><h2>${esc(label)}</h2><div class="gb-cfg-list">${rows}</div></section>`;
 }
-export function settingsView(db,canInstall,online=false,user=null,installed=false){
+export function settingsView(db,canInstall,online=false,user=null,installed=false,embedded=false){
+ const section=(label,rows)=>cfgSection(label,rows,embedded);
  const appVersion=document.querySelector('meta[name="gbplus-version"]')?.content||'2.1.3';
  const name=String(user?.user_metadata?.gbplus_profile?.full_name||user?.user_metadata?.full_name||user?.user_metadata?.name||user?.email?.split('@')[0]||'Minha conta').trim();
  // Visibility is restricted to the owner; the admin API independently validates
  // the authenticated user's live app_metadata on every request.
  const administration=online&&user?.id==='aa9701df-8e84-42cc-b2bd-4b644a983260'&&user?.app_metadata?.gbplus_admin===true
-  ?cfgSection('ADMINISTRAÇÃO',`<a href="./admin.html" class="gb-cfg-row" data-settings-keywords="painel administrativo usuários perfis gerenciar"><span class="gb-cfg-row-icon tone-purple">${icon('shield')}</span><span class="gb-cfg-row-label"><strong>Painel administrativo</strong><small>Gerenciar usuários e perfis do GB+</small></span><span class="gb-cfg-next">${icon('chevron')}</span></a>`):'';
- const preferences=cfgSection('PREFERÊNCIAS',
-  `<a href="./email-preferencias.html" class="gb-cfg-row" data-settings-keywords="e-mail marketing consentimento privacidade"><span class="gb-cfg-row-icon tone-blue">${icon('bell')}</span><span class="gb-cfg-row-label"><strong>Preferências de e-mail</strong><small>Escolha se deseja receber novidades e ofertas</small></span><span class="gb-cfg-next">${icon('chevron')}</span></a>`+
+  ?section('ADMINISTRAÇÃO',`<a href="./admin.html" class="gb-cfg-row" data-settings-keywords="painel administrativo usuários perfis gerenciar"><span class="gb-cfg-row-icon tone-purple">${icon('shield')}</span><span class="gb-cfg-row-label"><strong>Painel administrativo</strong><small>Gerenciar usuários e perfis do GB+</small></span><span class="gb-cfg-next">${icon('chevron')}</span></a>`):'';
+ const preferences=section('PREFERÊNCIAS',
   cfgOption('Aparência','Escolha entre modo claro e escuro','palette','purple','settings-appearance')+
   cfgOption('Avisos de vencimento','Escolha prazos e tipos de lembretes','bell','orange','notification-preferences')+
+  cfgOption('Preferências de e-mail','Autorize ou cancele mensagens promocionais','bell','green','email-preferences')+
   cfgOption('Personalizar painel','Escolha e organize os cards do início','grid','blue','customize')+
   cfgOption('Barra de ações','Defina os atalhos exibidos na navegação','phone','cyan','customize-mobile-nav'));
- const records=cfgSection('DADOS E REGISTROS',
+ const records=section('DADOS E REGISTROS',
   cfgOption('Backup e restauração','Exportar ou restaurar seus dados','cloud','green','settings-backup')+
   cfgOption('Dados da conta','Registros, sincronização e armazenamento','database','blue','settings-data')+
   cfgOption('Limpar todos os dados','Recomeçar o financeiro sem excluir seu login','trash','neutral','settings-reset')+
   cfgOption('Configuração inicial','Ajustes básicos e saldo inicial','gear','orange','restart-setup')+
   cfgOption('Bancos e instituições','Gerenciar logos e instituições personalizadas','wallet','blue','open-banks')+
   cfgOption('Cartões de crédito','Limites, faturas e compras parceladas','credit-card','purple','open-cards'));
- const system=cfgSection('SISTEMA',
+ const system=section('SISTEMA',
   cfgOption('Atualizações do GB+','Verificar nova versão e instalar','refresh','blue','settings-updates','v'+appVersion)+
   (installed?'':cfgOption('Instalar aplicativo','Adicionar o GB+ à tela inicial','download','purple','install')));
- const support=cfgSection('SUPORTE E SOBRE',
+ const support=section('SUPORTE E SOBRE',
   cfgOption('Convidar um amigo','Compartilhe o GB+ com seus amigos','share','green','invite-friend')+
   cfgOption('Ajuda e suporte','Dúvidas, tutoriais e contato','help','blue','settings-help')+
   cfgOption('Sobre o GB+','Versão, novidades e licenças','info','neutral','settings-about'));
- return `<div class="gb-settings-layout">
-  <header class="gb-cfg-header"><a href="#dashboard" class="gb-cfg-back" aria-label="Voltar ao início">${icon('arrow')}</a><h1>Configurações</h1><button type="button" class="gb-cfg-search-trigger" data-action="settings-search" aria-label="Pesquisar nas configurações" aria-expanded="false" aria-controls="gb-cfg-search">${icon('search')}</button></header>
+ return `<div class="gb-settings-layout${embedded?' gb-more-settings':''}">\n  ${embedded?'':`  <header class="gb-cfg-header"><a href="#dashboard" class="gb-cfg-back" aria-label="Voltar ao início">${icon('arrow')}</a><h1>Configurações</h1><button type="button" class="gb-cfg-search-trigger" data-action="settings-search" aria-label="Pesquisar nas configurações" aria-expanded="false" aria-controls="gb-cfg-search">${icon('search')}</button></header>
   <div id="gb-cfg-search" class="gb-cfg-search" hidden><label for="settings-search-input" class="sr-only">Buscar configurações</label>${icon('search')}<input type="search" id="settings-search-input" placeholder="Pesquisar configurações" autocomplete="off" aria-label="Pesquisar configurações"></div>
-  <a href="#profile" class="gb-cfg-profile"><span class="gb-cfg-profile-avatar">${icon('user')}</span><span class="gb-cfg-profile-label"><strong>${esc(name)}</strong><small>Gerenciar conta, dados e segurança</small></span><span class="gb-cfg-next">${icon('chevron')}</span></a>
-  ${administration}${preferences}${records}${system}${support}
+  <a href="#profile" class="gb-cfg-profile"><span class="gb-cfg-profile-avatar">${icon('user')}</span><span class="gb-cfg-profile-label"><strong>${esc(name)}</strong><small>Gerenciar conta, dados e segurança</small></span><span class="gb-cfg-next">${icon('chevron')}</span></a>`}\n  ${administration}${preferences}${records}${system}${support}
   ${online?'<button type="button" class="gb-cfg-delete gb-cfg-row" data-action="settings-delete" data-settings-keywords="excluir conta remover permanentemente dados"><span class="gb-cfg-row-icon">'+icon('trash')+'</span><span class="gb-cfg-row-label"><strong>Excluir conta</strong><small>Excluir cadastro, login e dados permanentemente</small></span><span class="gb-cfg-next">'+icon('chevron')+'</span></button>':''}
   <p class="gb-cfg-empty" id="gb-cfg-no-results" hidden>Nenhuma configuração encontrada.</p>
   <input type="file" id="backup-input" accept=".json,application/json" hidden>
