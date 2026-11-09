@@ -375,6 +375,26 @@
     wizardStage=Math.min(3,wizardStage+1);drawWizard();return true;
   }
   function backWizard(){if(type()!=='sinistro')return;clearWizardError();wizardStage=Math.max(1,wizardStage-1);drawWizard();}
+  function handleWizardAction(action) {
+    // Invoked directly by the button: independent of the modal backdrop's
+    // stopPropagation() and independent of document-level event delegation.
+    try {
+      if(type() !== 'sinistro') return showWizardError('Escolha Sinistro para usar o assistente de etapas.');
+      if(action==='next')return nextWizard();
+      if(action==='back')return backWizard();
+      return showWizardError('Ação desconhecida no formulário de Sinistro.');
+    } catch(error) {
+      const message = 'Não foi possível ' + (action==='next'?'continuar':'voltar') +
+        ': ' + (error?.message || 'erro inesperado de interface');
+      try{return showWizardError(message);}
+      catch(_) {
+        const box=byId('wf-os-step-error');
+        if(box){box.textContent=message;box.hidden=false;}
+        else if(global.alert)global.alert(message);
+        return false;
+      }
+    }
+  }
   function startWizard(){wizardStage=1;clearWizardError();refresh();drawWizard();}
   function onChange(e) {
     if(!byId('os-operational-guide'))return;
@@ -398,8 +418,6 @@
     // stopPropagation(), so a bubbling document listener never receives clicks
     // on Continuar, Voltar, or Novo reserva. Capture before the backdrop.
     doc.addEventListener('click',e=>{
-      if(e.target?.closest?.('[data-os-step-next]')){e.preventDefault();nextWizard();return;}
-      if(e.target?.closest?.('[data-os-step-back]')){e.preventDefault();backWizard();return;}
       if(e.target?.closest?.('#os-guide-new')){e.preventDefault();showSheet();}
       if(e.target?.closest?.('[data-os-quick-close]')){e.preventDefault();closeSheet(true);}
     }, true);
@@ -408,7 +426,7 @@
   }
   global.WeFrotasOsGuide=Object.freeze({
     configure(api){bridge=api;},
-    reset,formHtml,refresh,loadOrder,collect,startWizard,nextWizard,backWizard,wizardStep:()=>wizardStage,
+    reset,formHtml,refresh,loadOrder,collect,startWizard,nextWizard,backWizard,handleWizardAction,wizardStep:()=>wizardStage,
     draftOrderId:()=>draftOrderId,
     getDraftVehicle:()=>draftVehicle,
     __test:{plateKey,validDate}
