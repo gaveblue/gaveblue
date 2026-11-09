@@ -112,7 +112,8 @@ assert.equal(store.validateDatabase(legacy),legacy,'Contas antigas continuam vá
 const app=read('js/app.js');
 assert(app.includes("'new-goal':()=>")&&app.includes("'goal-deposit':el=>"));
 assert(app.includes("'goal-withdraw':el=>")&&app.includes("'account-icon':el=>"));
-assert(app.includes("accountBalance(d,v.from,today())<amount"),'Resgate sem saldo deve ser bloqueado');
+assert(app.includes("'goal-duration':el=>"));
+assert(app.includes("accountBalance(d,v.from,v.date)<amount"),'Resgate sem saldo deve ser bloqueado');
 assert(app.includes('branch:previous?.branch')&&app.includes('number:previous?.number'));
 const index=read('index.html');
 assert(index.includes('account-goals.css?v=20261109-2900'));
