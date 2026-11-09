@@ -3420,7 +3420,10 @@
     function suggestFinanceVehicleFromDriver() {
       const driverId = document.getElementById('finance-driver-id')?.value || '';
       const driver = allDrivers.find((item) => item.id === driverId);
-      const vehicle = findVehicleByLinkedDriverId(driver?.id);
+      const activeReplacement = window.WeFrotasSubstitutions?.currentForDriver(driver?.id, document.getElementById('finance-data-abastecimento')?.value || getLocalIsoDate());
+      const vehicle = activeReplacement
+        ? allVehicles.find(item => item.id === activeReplacement.reserveVehicleId)
+        : findVehicleByLinkedDriverId(driver?.id);
       if (!vehicle) return;
 
       const vehicleIdField = document.getElementById('finance-vehicle-id');
@@ -5848,6 +5851,15 @@
           <div class="field-wrap">
             <label>Vencimento do seguro</label>
             <input class="soft-input w-full" id="vehicle-seguro" type="date">
+          </div>
+          <div class="field-wrap">
+            <label>Situação operacional</label>
+            <select class="soft-input w-full" id="vehicle-operational-status">
+              <option value="disponivel">Disponível</option>
+              <option value="manutencao">Em manutenção</option>
+              <option value="sinistro">Sinistrado</option>
+              <option value="imobilizado">Imobilizado</option>
+            </select>
           </div>
           <div class="field-wrap">
             <label>Motorista vinculado</label>
@@ -8991,6 +9003,9 @@
       attachModalInputMasks();
       enhanceModalSelects();
       updateFinanceReceiptPreview('');
+      document.getElementById('finance-data-abastecimento')?.addEventListener('change', () => {
+        if (document.getElementById('finance-driver-id')?.value) suggestFinanceVehicleFromDriver();
+      });
     }
 
     function openFuelGroupingModal(editId = null, options = {}) {
@@ -10993,9 +11008,13 @@
           })();
       const importedDriver = isService ? null : resolveDriverByImportedName(imported.motorista);
       const vehicle = isService || !isEntityActive(importedDriver) ? null : resolveVehicleByImportedDriver(imported.motorista, importedDriver);
-      const activeVehicle = vehicle && isEntityActive(vehicle) ? vehicle : null;
-      const total = getCentralRecordTotal(record) || parseCurrencyInputValue(imported.valor || '');
       const centralEntryDate = getCentralRecordIsoDate(record, imported);
+      const activeReplacement = window.WeFrotasSubstitutions?.currentForDriver(importedDriver?.id, centralEntryDate);
+      const effectiveVehicle = activeReplacement
+        ? allVehicles.find(item => item.id === activeReplacement.reserveVehicleId)
+        : vehicle;
+      const activeVehicle = effectiveVehicle && isEntityActive(effectiveVehicle) ? effectiveVehicle : null;
+      const total = getCentralRecordTotal(record) || parseCurrencyInputValue(imported.valor || '');
       const isReady = isService
         ? !!(supplier && centralEntryDate && total)
         : !!(supplier && activeVehicle && centralEntryDate && imported.tipoCombustivel && imported.litros && total);
@@ -11019,6 +11038,10 @@
       };
 
       if (!isService) {
+        const association = window.WeFrotasSubstitutions?.association(entry.vehicleId, entry.driverId, entry.dataAbastecimento);
+        if (association?.error) { prepareCentralPendingRecord(rowId); showToast(association.error); return; }
+        entry.substitutionId = association?.replacementId || '';
+        entry.replacedVehicleId = association?.replacedVehicleId || '';
         const mileageError = validateFuelMileageForVehicle({ vehicleId: entry.vehicleId, date: entry.dataAbastecimento, km: entry.km, excludeId: entry.id });
         if (mileageError) {
           prepareCentralPendingRecord(rowId);
@@ -13479,6 +13502,7 @@
       document.getElementById('vehicle-ano').value = vehicle.ano;
       document.getElementById('vehicle-cor').value = vehicle.cor || '';
       document.getElementById('vehicle-seguro').value = vehicle.seguroVencimento || '';
+      document.getElementById('vehicle-operational-status').value = vehicle.operationalStatus || 'disponivel';
       const linkedDrivers = getVehicleLinkedDrivers(vehicle);
       document.getElementById('vehicle-motorista').value = linkedDrivers.length === 1 ? linkedDrivers[0].id : vehicle.motoristaId || '';
       document.getElementById('vehicle-rented').checked = vehicle.propriedade === 'locado' || (!vehicle.propriedade && vehicle.locado === true);
@@ -14839,6 +14863,36 @@
       printWindow.document.close();
     }
 
+    // Substituições ficam no JSONB do titular e não alteram a placa abastecida.
+    window.WeFrotasReplacementBridge = Object.freeze({
+      vehicles: () => allVehicles,
+      drivers: () => allDrivers,
+      finance: () => allFinanceEntries,
+      netCost: entry => getFinanceNetTotal(entry),
+      toast: message => showToast(message),
+      async save(sourceId, record) {
+        if (wefrotasRecoveryRequired) throw new Error('Resolva as cópias pendentes antes de alterar as substituições.');
+        if (!requireWefrotasPermission('editOperations', 'Seu perfil não permite gerenciar substituições.')) throw new Error('Sem permissão de alteração.');
+        const source = allVehicles.find(v => String(v.id) === String(sourceId));
+        if (!source) throw new Error('Veículo titular não encontrado.');
+        const existing = Array.isArray(source.vehicleSubstitutions) ? source.vehicleSubstitutions : [];
+        if (record.id && existing.some(item => item.id === record.id)) {
+          allVehicles = allVehicles.map(vehicle => vehicle.id === source.id
+            ? { ...vehicle, vehicleSubstitutions: existing.map(item => item.id === record.id ? { ...item, ...record } : item) }
+            : vehicle);
+        } else {
+          allVehicles = allVehicles.map(vehicle => vehicle.id === source.id
+            ? { ...vehicle,
+              operationalStatus: record.reason === 'sinistro' ? 'sinistro' : record.reason === 'manutencao' ? 'manutencao' : vehicle.operationalStatus || 'imobilizado',
+              vehicleSubstitutions: [...existing, record]
+            }
+            : vehicle);
+        }
+        renderAll();
+        await persistOperationalDataImmediately();
+      }
+    });
+
     function renderAll() {
       // The profile is read-only and refreshed after the existing module renders.
       syncAllocatedOrderStatuses();
@@ -14971,6 +15025,7 @@
         const ano = document.getElementById('vehicle-ano').value.trim();
         const cor = document.getElementById('vehicle-cor').value.trim();
         const seguroVencimento = document.getElementById('vehicle-seguro').value.trim();
+        const operationalStatus = document.getElementById('vehicle-operational-status')?.value || 'disponivel';
         const motoristaId = document.getElementById('vehicle-motorista').value.trim();
         const ownershipChoices = [['vehicle-owned','proprio'],['vehicle-rented','locado'],['vehicle-borrowed','emprestado']].filter(([id])=>document.getElementById(id)?.checked);
         if (ownershipChoices.length > 1) { showToast('Selecione apenas uma opção de propriedade do veículo.'); return; }
@@ -15015,12 +15070,12 @@
         const vehicleWasEdited = Boolean(currentEditingId);
         if (currentEditingId) {
           allVehicles = allVehicles.map(vehicle => vehicle.id === currentEditingId
-            ? { ...vehicle, numeroFrota, placa, modelo, ano, cor, seguroVencimento, motoristaId, locado, chassi, ativo, propriedade, vehicleImageUrl, vehicleImageFileId }
+            ? { ...vehicle, numeroFrota, placa, modelo, ano, cor, seguroVencimento, operationalStatus, motoristaId, locado, chassi, ativo, propriedade, vehicleImageUrl, vehicleImageFileId }
             : vehicle);
           syncDriversWithVehicle(currentEditingId, motoristaId);
         } else {
           const newVehicleId = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-          allVehicles.unshift({ id: newVehicleId, createdAt: new Date().toISOString(), numeroFrota, placa, modelo, ano, cor, seguroVencimento, motoristaId, locado, chassi, ativo, propriedade, vehicleImageUrl, vehicleImageFileId });
+          allVehicles.unshift({ id: newVehicleId, createdAt: new Date().toISOString(), numeroFrota, placa, modelo, ano, cor, seguroVencimento, operationalStatus, motoristaId, locado, chassi, ativo, propriedade, vehicleImageUrl, vehicleImageFileId });
           syncDriversWithVehicle(newVehicleId, motoristaId);
         }
         renderAll();
@@ -15258,9 +15313,17 @@
             return;
           }
 
+          const replacementAssociation = window.WeFrotasSubstitutions?.association(
+            vehicleId, driverId, dataAbastecimento,
+            allFinanceEntries.find(item => item.id === currentEditingId)?.substitutionId || ''
+          ) || { replacementId: '', replacedVehicleId: '' };
+          if (replacementAssociation.error) { showToast(replacementAssociation.error); return; }
+
           const payload = {
             entryType,
             vehicleId,
+            substitutionId: replacementAssociation.replacementId,
+            replacedVehicleId: replacementAssociation.replacedVehicleId,
             orderId: '',
             kind,
             kindLabel: 'Despesa',
