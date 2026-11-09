@@ -194,6 +194,7 @@ export function settingsView(db,canInstall,online=false,user=null,installed=fals
  const preferences=section('PREFERÊNCIAS',
   cfgOption('Aparência','Escolha entre modo claro e escuro','palette','purple','settings-appearance')+
   cfgOption('Avisos de vencimento','Escolha prazos e tipos de lembretes','bell','orange','notification-preferences')+
+  cfgOption('Preferências de e-mail','Autorize ou cancele mensagens promocionais','bell','green','email-preferences')+
   cfgOption('Personalizar painel','Escolha e organize os cards do início','grid','blue','customize')+
   cfgOption('Barra de ações','Defina os atalhos exibidos na navegação','phone','cyan','customize-mobile-nav'));
  const records=section('DADOS E REGISTROS',
