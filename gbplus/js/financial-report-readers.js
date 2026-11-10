@@ -1,5 +1,5 @@
 // GB+ 3.0.7 — leitores locais no navegador de desktop. Nenhum arquivo é enviado.
-import {normalizeTabularReport,normalizeSicoobPositionedPages,normalizeReceivableOcr,fold} from './financial-report-core.js';
+import {normalizeTabularReport,normalizeSicoobPositionedPages,normalizeReceivableOcr,fold,brlCents} from './financial-report-core.js?v=20261110-307';
 const MAX_BYTES=12_000_000,MAX_ROWS=5000;
 const decoder=new TextDecoder('utf-8');
 function decodeCSV(buffer){
@@ -100,6 +100,36 @@ async function pdfLibrary(){
   return lib;
  }catch{throw Error('Não foi possível carregar o leitor de PDF. Confira a conexão ou use uma planilha Excel/CSV.');}
 }
+function verifySicoobFooter(pages,result){
+ const lines=[];
+ for(const page of pages){
+  const map=new Map();
+  for(const item of page.items){
+   const y=Math.round(item.y/2)*2;
+   if(!map.has(y))map.set(y,[]);
+   map.get(y).push(item);
+  }
+  for(const items of map.values())lines.push(items.sort((a,b)=>a.x-b.x).map(v=>v.str).join(' '));
+ }
+ const all=lines.map(fold);
+ const declared=(pattern)=>{
+  const i=all.findIndex(l=>pattern.test(l));
+  const text=i<0?'':lines[i];
+  const m=text.match(/(\d[\d.,]*)\s*$/);
+  return m?.[1]||'';
+ };
+ const actualCount=result.records.length;
+ const bankCount=Number(declared(/total de registros liquidados/).replace(/[^\d]/g,'')||0);
+ const declaredAmount=declared(/total de valores liquidados/);
+ let amount=0;try{if(declaredAmount)amount=brlCents(declaredAmount);}catch{}
+ if((bankCount&&bankCount!==actualCount)||(amount&&amount!==result.bankTotals.liquidated)){
+  result.verificationFailed=true;
+  result.warnings.push('Conferência bancária divergente: o PDF declara '+(bankCount||'?')+
+   ' liquidações ('+declaredAmount+') e o leitor identificou '+actualCount+
+   ' ('+(result.bankTotals.liquidated/100).toFixed(2)+'). Nenhum título poderá ser importado até corrigir o relatório.');
+ }
+ return result;
+}
 async function pdfRead(file,kind,notify){
  const lib=await pdfLibrary();
  const doc=await lib.getDocument({data:new Uint8Array(await file.arrayBuffer()),useSystemFonts:true}).promise;
@@ -116,7 +146,7 @@ async function pdfRead(file,kind,notify){
   const fullText=printed.join('\n');
   if(kind==='received'){
    if(!/liquida|sicoob|nosso numero|t.tulos por per.odo/i.test(fold(fullText)))throw Error('Este PDF não parece um relatório de liquidação de títulos do Sicoob.');
-   return normalizeSicoobPositionedPages(pages);
+   return verifySicoobFooter(pages,normalizeSicoobPositionedPages(pages));
   }
   // PDFs de títulos digitalizados são imagens sem texto selecionável. OCR somente no PC.
   if(pages.every(p=>p.items.length<15)){
