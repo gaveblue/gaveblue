@@ -112,16 +112,16 @@ async function load(){
  });
 }
 function clear(){
- editing=null;$('editor-heading').textContent='Nova notícia';$('article-form').reset();$('author').value='Redação ORVIA NEWS';$('image-current').textContent='Opcional. Use apenas imagens com autorização de publicação.';window.scrollTo({top:0,behavior:'smooth'});
+ editing=null;$('editor-heading').textContent='Nova notícia';$('draft').textContent='Salvar rascunho';$('publish').textContent='Publicar notícia';$('article-form').reset();$('author').value='Redação ORVIA NEWS';$('image-current').textContent='Opcional. Use apenas imagens com autorização de publicação.';window.scrollTo({top:0,behavior:'smooth'});
 }
 $('reset').onclick=clear;$('refresh').onclick=load;
 function editArticle(a){
- editing=a;$('editor-heading').textContent='Editar matéria';$('title').value=a.title;$('summary').value=a.summary||'';$('category').value=a.category;$('author').value=a.author||'Redação ORVIA NEWS';$('body').value=a.body||'';$('image-credit').value=a.image_credit||'';$('featured').checked=!!a.featured;$('image').value='';$('image-current').textContent=a.image_url?'Imagem atual já cadastrada. Selecione outra para substituir.':'Nenhuma imagem cadastrada.';window.scrollTo({top:0,behavior:'smooth'});
+ editing=a;$('editor-heading').textContent='Editar matéria';$('draft').textContent=a.status==='published'?'Salvar alterações':'Salvar rascunho';$('publish').textContent=a.status==='published'?'Atualizar publicação':'Publicar notícia';$('title').value=a.title;$('summary').value=a.summary||'';$('category').value=a.category;$('author').value=a.author||'Redação ORVIA NEWS';$('body').value=a.body||'';$('image-credit').value=a.image_credit||'';$('featured').checked=!!a.featured;$('image').value='';$('image-current').textContent=a.image_url?'Imagem atual já cadastrada. Selecione outra para substituir.':'Nenhuma imagem cadastrada.';window.scrollTo({top:0,behavior:'smooth'});
 }
 function payload(){
  const title=$('title').value.trim();return {title,summary:$('summary').value.trim(),category:$('category').value,author:$('author').value.trim()||'Redação ORVIA NEWS',body:$('body').value.trim(),featured:$('featured').checked,image_credit:$('image-credit').value.trim()};
 }
-function valid(){return $('article-form').checkValidity() ? true : ($('article-form').reportValidity(),false);}
+function valid(){if($('article-form').checkValidity())return true;const bad=$('article-form').querySelector(':invalid');const label=bad?.closest('.field')?.querySelector('label')?.textContent||'Campo obrigatório';message('Confira o campo “'+label+'”. '+(bad?.validationMessage||'Preencha as informações obrigatórias.'),'error');bad?.focus();$('article-form').reportValidity();return false;}
 function slug(title){return title.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,65)+'-'+crypto.randomUUID().slice(0,8);}
 async function persist(status){
  if(busy||!valid())return;setBusy(true);
@@ -137,23 +137,25 @@ async function persist(status){
   p.status=status;p.published_at=status==='published'?(editing?.published_at||new Date().toISOString()):null;p.review_state=status==='published'?'approved':'draft';
   if(!editing){p.slug=slug(p.title);p.created_by=session.id;}
   const op=editing?db.from('orvia_articles').update(p).eq('id',editing.id):db.from('orvia_articles').insert(p);
-  const {error}=await op;if(error)throw error;
-  clear();await load();message(status==='published'?'Notícia publicada! Ela já pode aparecer no site.':'Rascunho salvo. Ainda não está público.','success');
+  const {data:saved,error}=await op.select('id,status,updated_at').maybeSingle();
+  if(error)throw error;
+  if(!saved)throw Error('O banco não confirmou a gravação. Verifique o acesso e tente novamente.');
+  clear();await load();message(status==='published'?'Publicação salva e confirmada no banco.':'Rascunho salvo e confirmado no banco.','success');
  }catch(err){message('Não foi possível salvar: '+errorText(err),'error');}
  finally{setBusy(false);}
 }
 $('article-form').addEventListener('submit',e=>{e.preventDefault();persist('published')});
-$('draft').onclick=()=>persist('draft');
+$('draft').onclick=()=>persist(editing?.status==='published'?'published':'draft');
 async function changeStatus(a){
  const next=a.status==='published'?'draft':'published';
  if(!confirm(next==='published'?'Publicar esta matéria no portal?':'Retirar esta matéria do ar?'))return;
- const {error}=await db.from('orvia_articles').update({status:next,published_at:next==='published'?(a.published_at||new Date().toISOString()):null,review_state:next==='published'?'approved':'changes_requested'}).eq('id',a.id);
- if(error)message(errorText(error),'error');else{await load();message(next==='published'?'Matéria publicada.':'Matéria retirada do ar.','success');}
+ const {data:changed,error}=await db.from('orvia_articles').update({status:next,published_at:next==='published'?(a.published_at||new Date().toISOString()):null,review_state:next==='published'?'approved':'changes_requested'}).eq('id',a.id).select('id,status').maybeSingle();
+ if(error||!changed)message(errorText(error||new Error('O banco não confirmou a mudança.')),'error');else{await load();message(next==='published'?'Matéria publicada.':'Matéria retirada do ar.','success');}
 }
 async function deleteArticle(a){
  if(!confirm('Excluir permanentemente a matéria "'+a.title+'"?'))return;
- const {error}=await db.from('orvia_articles').delete().eq('id',a.id);
- if(error)message(errorText(error),'error');else{if(editing?.id===a.id)clear();await load();message('Matéria excluída.','success');}
+ const {data:removed,error}=await db.from('orvia_articles').delete().eq('id',a.id).select('id').maybeSingle();
+ if(error||!removed)message(errorText(error||new Error('Exclusão não confirmada pelo banco.')),'error');else{if(editing?.id===a.id)clear();await load();message('Matéria excluída.','success');}
 }
 $('copy-ai').onclick=async()=>{
  const p=payload(),prompt='Você é assistente de revisão da ORVIA NEWS. Sem inventar dados ou fontes, sugira melhorias para manchete, linha fina e estrutura; indique riscos, informações que precisam de apuração, checagem de datas, nomes e potencial difamação. Não declare algo verificado sem comprovação.\n\nManchete: '+p.title+'\nResumo: '+p.summary+'\nTexto: '+p.body;
