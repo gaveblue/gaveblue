@@ -1,7 +1,7 @@
-// GB+ PWA network-first visual release v3000 (2026-11-09; unified finance sheets): do not block installation on network requests,
+// GB+ PWA network-first visual release v3001 (2026-11-10; splash logo reveal): do not block installation on network requests,
 // automatically redirect app windows, or reload open financial forms.
-const CACHE='gb-plus-shell-v3000';
-const CORE=['./','./index.html','./styles.css','./js/app.js','./js/update.js','./recuperar.html'];
+const CACHE='gb-plus-shell-v3001';
+const CORE=['./','./index.html','./styles.css','./js/app.js','./js/update.js','./splash.css','./recuperar.html'];
 const scope=new URL(self.registration.scope);
 const inScope=url=>url.origin===scope.origin&&url.pathname.startsWith(scope.pathname);
 const delay=(ms)=>new Promise((_,reject)=>setTimeout(()=>reject(new Error('NETWORK_TIMEOUT')),ms));
