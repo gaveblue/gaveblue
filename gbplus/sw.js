@@ -1,6 +1,6 @@
-// GB+ PWA network-first visual release v3006 (2026-11-10; splash automática e rastro luminoso): do not block installation on network requests,
+// GB+ PWA network-first visual release v3007 (2026-11-10; relatórios financeiros no PC): do not block installation on network requests,
 // automatically redirect app windows, or reload open financial forms.
-const CACHE='gb-plus-shell-v3006';
+const CACHE='gb-plus-shell-v3007';
 const CORE=['./','./index.html','./styles.css','./js/app.js','./js/update.js','./splash.css','./recuperar.html'];
 const scope=new URL(self.registration.scope);
 const inScope=url=>url.origin===scope.origin&&url.pathname.startsWith(scope.pathname);
