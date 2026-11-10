@@ -149,9 +149,16 @@ export function reportDuplicates(db,rows){
  return rows.map(r=>{
   const sameFile=seen.has(r.sourceKey);seen.add(r.sourceKey);
   const imported=(db.titles||[]).some(t=>t.importKey===r.sourceKey);
-  const exact=(db.titles||[]).some(t=>t.type===(r.kind==='payable'?'expense':'income') &&
-   String(t.document||'').replace(/\D/g,'')===String(r.kind==='received'?r.reference:(r.invoice||r.reference)).replace(/\D/g,'') &&
-   t.due===r.due&&t.amount===r.amount);
+  const exact=(db.titles||[]).some(t=>{
+   if(t.type!==(r.kind==='payable'?'expense':'income')||t.due!==r.due)return false;
+   const digits=s=>String(s||'').replace(/\D/g,'');
+   const doc=digits(t.document),refs=[digits(r.reference),digits(r.invoice)].filter(Boolean);
+   const documentMatch=doc&&refs.includes(doc);
+   const partnerName=(db.partners||[]).find(p=>p.id===t.partnerId)?.name||t.description||'';
+   const partnerMatch=fold(partnerName).includes(fold(r.partner))||fold(r.partner).includes(fold(partnerName));
+   return (documentMatch&&(t.amount===r.amount||t.amount===r.principal||r.kind==='received'))||
+    (partnerMatch&&(t.amount===r.amount||r.principal!=null&&t.amount===r.principal));
+  });
   return {...r,duplicate:sameFile||imported||exact,duplicateReason:sameFile?'Repetido no arquivo':imported?'Já importado':'Possível título já existente'};
  });
 }
