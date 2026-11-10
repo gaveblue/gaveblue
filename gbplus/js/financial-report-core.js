@@ -10,7 +10,7 @@ export function brlCents(value){
  let decimal=s;
  if(s.includes(',')&&s.includes('.')) decimal=s.replace(/\./g,'').replace(',','.');
  else if(s.includes(','))decimal=s.replace(',','.');
- else if((s.match(/\./g)||[]).length>1)decimal=s.replace(/\./g,'');
+ else if((s.match(/\./g)||[]).length>1||/^\d{1,3}(?:\.\d{3})+$/.test(s))decimal=s.replace(/\./g,'');
  const n=Number(decimal);if(!Number.isFinite(n)||n<0||n>1e10)throw Error('Valor fora do limite.');
  return Math.round(n*100);
 }
@@ -61,6 +61,10 @@ export function normalizeTabularReport(kind,rows){
  const principalIndex=column(header,['Valor (R$)','Valor original','Principal']);
  const interestIndex=column(header,['Vlr. Mora','Juros','Mora']);
  const methodIndex=column(header,['Tipo','Forma de pagamento','Modalidade']);
+ const sellerIndex=column(header,['Vendedor']);
+ const reconciliationIndex=column(header,['Conciliação','Conciliacao']);
+ const settlementAccountIndex=column(header,['Conta da Baixa','Conta pagamento']);
+ const provisionIndex=column(header,['Provisão','Provisao']);
  const results=[],excluded=[],warnings=[];
  for(const row of body){
   if(!Array.isArray(row)||row.every(v=>v===null||v===undefined||clean(v)===''))continue;
@@ -68,6 +72,7 @@ export function normalizeTabularReport(kind,rows){
   if(!name||/^total\b/i.test(name))continue;
   const status=fold(value(row,statusIndex));
   if(kind==='received'&&(/baixa/.test(status)&&!/liquid/.test(status))){excluded.push({partner:name,amount:clean(value(row,amountIndex)),reason:'Baixa bancária, sem liquidação comprovada'});continue;}
+  if(kind==='received'&&status&& !/(liquid|recebid|pago)/.test(status)){excluded.push({partner:name,amount:clean(value(row,amountIndex)),reason:'Sem liquidação confirmada no relatório'});continue;}
   try{
    const paid=kind==='received'||/^(pago|recebido|liquidado)$/.test(status);
    const issued=isoDate(value(row,issueIndex));
@@ -77,7 +82,13 @@ export function normalizeTabularReport(kind,rows){
    results.push(reportRecord(kind,{partner:name,reference:value(row,refIndex),invoice:value(row,invoiceIndex),due:value(row,dueIndex),
     issue:issued,paymentDate:paid?date:'',status:paid?'paid':'open',amount,principal,
     interest:kind==='received'&&interestIndex>=0?value(row,interestIndex):0,
-    method:value(row,methodIndex),source:'Planilha',notes:paid?'Situação informada: '+clean(value(row,statusIndex)):''}));
+    method:value(row,methodIndex),source:'Planilha',notes:[
+     clean(value(row,sellerIndex))?'Vendedor: '+clean(value(row,sellerIndex)):'',
+     clean(value(row,reconciliationIndex))?'Conciliação: '+clean(value(row,reconciliationIndex)):'',
+     clean(value(row,settlementAccountIndex))?'Conta da baixa: '+clean(value(row,settlementAccountIndex)):'',
+     clean(value(row,provisionIndex))?'Provisão: '+clean(value(row,provisionIndex)):'',
+     clean(value(row,statusIndex))?'Situação: '+clean(value(row,statusIndex)):''
+    ].filter(Boolean).join(' · ')}));
   }catch(e){excluded.push({partner:name,amount:clean(value(row,amountIndex)),reason:e.message});}
  }
  if(!results.length)throw Error('Nenhum título válido foi identificado. Confira o formato e as colunas.');
