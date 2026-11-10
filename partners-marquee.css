@@ -43,34 +43,58 @@
   #gb-partners-marquee .gbpm-viewport{overflow-x:auto;scrollbar-width:thin;mask-image:none;-webkit-mask-image:none}
   #gb-partners-marquee .gbpm-item,#gb-partners-marquee .gbpm-item img,#gb-partners-marquee .gbpm-cta{transition:none!important}
 }
-/* Ajuste de legibilidade e escala do carrossel — 10/11/2026 */
-#gb-partners-marquee .gbpm-heading{max-width:780px;margin-bottom:1.6rem}
-#gb-partners-marquee .gbpm-viewport{padding:.7rem 0 1.2rem}
-#gb-partners-marquee .gbpm-track{animation-duration:29s}
-#gb-partners-marquee .gbpm-group{gap:2.35rem;padding-right:2.35rem}
+/* Ajuste de proporção, cores originais e remoção das legendas — 10/11/2026 */
+#gb-partners-marquee .gbpm-heading{max-width:780px;margin-bottom:1.1rem}
+#gb-partners-marquee .gbpm-viewport{padding:.35rem 0 .65rem}
+#gb-partners-marquee .gbpm-track{animation-duration:25s}
+#gb-partners-marquee .gbpm-group{gap:2.2rem;padding-right:2.2rem}
 #main-content #gb-partners-marquee .gbpm-item{
-  flex:0 0 250px;width:250px;height:133px;
-  display:flex;flex-direction:column;justify-content:center;align-items:center;
-  gap:.6rem;opacity:.9;background:transparent!important;box-shadow:none!important;
+  flex:0 0 230px;width:230px;height:113px;display:flex;align-items:center;
+  justify-content:center;flex-direction:row;opacity:1;
+  background:transparent!important;box-shadow:none!important;
+  border:0!important;gap:0;
 }
-#gb-partners-marquee .gbpm-item img{
-  width:100%;height:91px;max-width:245px;max-height:91px;object-fit:contain;
-  filter:grayscale(1) contrast(1.08) brightness(.78);opacity:.93;
+#main-content #gb-partners-marquee .gbpm-logo-stage{
+  position:relative;display:flex;flex:none;align-items:center;justify-content:center;
+  width:224px;height:106px;overflow:hidden;
 }
+#main-content #gb-partners-marquee .gbpm-item img{
+  display:block;width:210px;max-width:210px;height:91px;max-height:91px;
+  object-fit:contain;opacity:1;filter:none;
+  transition:transform .2s ease;
+}
+#main-content #gb-partners-marquee .gbpm-item--covre-agricola img,
+#main-content #gb-partners-marquee .gbpm-item--covre-cia img{
+  /* As imagens originais possuem amplas margens transparentes.
+     Ampliar apenas seu conteúdo visível sem modificar o arquivo da marca. */
+  transform:scale(3.0);
+  filter:brightness(0) saturate(100%) invert(17%) sepia(34%) saturate(1420%) hue-rotate(181deg) brightness(88%) contrast(96%);
+}
+#main-content #gb-partners-marquee .gbpm-item--digital img{transform:scale(.82)}
 #main-content #gb-partners-marquee .gbpm-item:hover,
 #main-content #gb-partners-marquee .gbpm-item:focus-visible{opacity:1}
-#gb-partners-marquee .gbpm-item:hover img,
-#gb-partners-marquee .gbpm-item:focus-visible img{filter:none;opacity:1}
-#gb-partners-marquee .gbpm-brand-label{
-  color:#5e7697!important;text-align:center;text-transform:uppercase;letter-spacing:.09em;
-  font-size:11px;line-height:1.25;font-weight:800;white-space:nowrap;
+#main-content #gb-partners-marquee .gbpm-item:hover img,
+#main-content #gb-partners-marquee .gbpm-item:focus-visible img{opacity:1}
+#main-content #gb-partners-marquee .gbpm-item--digital:hover img,
+#main-content #gb-partners-marquee .gbpm-item--digital:focus-visible img{
+  transform:scale(.86);filter:none;
+}
+#main-content #gb-partners-marquee .gbpm-item--covre-agricola:hover img,
+#main-content #gb-partners-marquee .gbpm-item--covre-cia:hover img,
+#main-content #gb-partners-marquee .gbpm-item--covre-agricola:focus-visible img,
+#main-content #gb-partners-marquee .gbpm-item--covre-cia:focus-visible img{
+  transform:scale(3.08);
+  filter:brightness(0) saturate(100%) invert(17%) sepia(34%) saturate(1420%) hue-rotate(181deg) brightness(88%) contrast(96%);
 }
 @media(max-width:640px){
-  #gb-partners-marquee .gbpm-heading{margin-bottom:1rem}
-  #gb-partners-marquee .gbpm-track{animation-duration:26s}
-  #gb-partners-marquee .gbpm-group{gap:1.35rem;padding-right:1.35rem}
-  #main-content #gb-partners-marquee .gbpm-item{flex-basis:192px;width:192px;height:116px;gap:.35rem}
-  #gb-partners-marquee .gbpm-item img{max-width:188px;height:81px;max-height:81px}
-  #gb-partners-marquee .gbpm-brand-label{font-size:10px}
+  #gb-partners-marquee .gbpm-heading{margin-bottom:.85rem}
+  #gb-partners-marquee .gbpm-track{animation-duration:23s}
+  #gb-partners-marquee .gbpm-group{gap:1.25rem;padding-right:1.25rem}
+  #main-content #gb-partners-marquee .gbpm-item{flex-basis:182px;width:182px;height:100px}
+  #main-content #gb-partners-marquee .gbpm-logo-stage{width:180px;height:95px}
+  #main-content #gb-partners-marquee .gbpm-item img{width:178px;max-width:178px;height:84px;max-height:84px}
+  #main-content #gb-partners-marquee .gbpm-item--digital img{transform:scale(.91)}
+  #main-content #gb-partners-marquee .gbpm-item--digital:hover img,
+  #main-content #gb-partners-marquee .gbpm-item--digital:focus-visible img{transform:scale(.94)}
 }
-@media(prefers-reduced-motion:reduce){#gb-partners-marquee .gbpm-track{animation:none}}
+@media(prefers-reduced-motion:reduce){#gb-partners-marquee .gbpm-track{animation:none!important}}
