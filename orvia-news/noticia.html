@@ -10,7 +10,7 @@
 <script src="config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.2/dist/umd/supabase.js"></script>
 <script>
 (()=>{'use strict';const $=id=>document.getElementById(id);const db=window.supabase.createClient(ORVIA_CONFIG.url,ORVIA_CONFIG.publishableKey,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
-const params=new URLSearchParams(location.search),slug=params.get('slug'),demo=params.get('demo');
+const params=new URLSearchParams(location.search),slug=params.get('slug'),articleId=params.get('id'),demo=params.get('demo');
 const shareBase=ORVIA_CONFIG.url+'/functions/v1/orvia-share?slug=';
 function el(tag,cls,text){const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n}
 const checkUrl=u=>typeof u==='string'&&/^https:\/\//i.test(u)?u:null;
@@ -38,13 +38,27 @@ async function render(post,demonstration){
 }
 async function load(){try{
  let post=null,demonstration=false;
- if(slug && /^[a-z0-9-]{2,120}$/.test(slug)){
-  const {data,error}=await db.from('orvia_articles').select('slug,title,summary,body,category,image_url,image_credit,author,published_at').eq('slug',slug).eq('status','published').lte('published_at',new Date().toISOString()).maybeSingle();if(error)throw error;post=data;
- }else if(demo){demonstration=true;post={title:'ORVIA NEWS: uma nova forma de acompanhar as notícias',summary:'Prévia do formato de reportagem para celular e computador.',category:'Demonstração'};}
- if(!post){$('article').replaceChildren(el('h1',null,'Notícia não encontrada'),el('p',null,'A matéria não existe, foi retirada do ar ou ainda não foi aprovada.'));return;}
+ if(slug && /^[a-z0-9-]{2,120}$/.test(slug) && slug!=='undefined'){
+  const {data,error}=await db.from('orvia_articles').select('id,slug,title,summary,body,category,image_url,image_credit,author,published_at').eq('slug',slug).eq('status','published').lte('published_at',new Date().toISOString()).maybeSingle();
+  if(error)throw error;
+  post=data;
+ }
+ if(!post && articleId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(articleId)){
+  const {data,error}=await db.from('orvia_articles').select('id,slug,title,summary,body,category,image_url,image_credit,author,published_at').eq('id',articleId).eq('status','published').lte('published_at',new Date().toISOString()).maybeSingle();
+  if(error)throw error;
+  post=data;
+ }
+ if(!post && demo){demonstration=true;post={title:'ORVIA NEWS: uma nova forma de acompanhar as notícias',summary:'Prévia do formato de reportagem para celular e computador.',category:'Demonstração'};}
+ if(!post){
+  const area=$('article');area.replaceChildren(el('h1',null,'Notícia não encontrada'));
+  area.append(el('p',null,slug==='undefined'?'Este endereço foi gerado por uma versão antiga do portal. Volte à página inicial e abra novamente a notícia.':'A matéria não existe, foi retirada do ar ou ainda não foi aprovada.'));
+  const home=el('a','btn red','Ver notícias publicadas');home.href='./';area.append(home);
+  $('related-links').replaceChildren(el('p',null,'Acesse a página inicial para encontrar outras notícias.'));
+  return;
+ }
  await render(post,demonstration);
  const {data}=await db.from('orvia_articles').select('slug,title,category').eq('status','published').lte('published_at',new Date().toISOString()).order('published_at',{ascending:false}).limit(5);const rel=$('related-links');rel.replaceChildren();
- for(const p of (data||[]).filter(p=>p.slug!==slug).slice(0,4)){const a=el('a','related');a.href='noticia.html?slug='+encodeURIComponent(p.slug);a.append(el('span',null,p.category),el('strong',null,p.title));rel.append(a)}if(!rel.childNodes.length)rel.append(el('p','small','Novas reportagens em breve.'));
+ for(const p of (data||[]).filter(p=>p.slug!==post.slug).slice(0,4)){const a=el('a','related');a.href='noticia.html?slug='+encodeURIComponent(p.slug);a.append(el('span',null,p.category),el('strong',null,p.title));rel.append(a)}if(!rel.childNodes.length)rel.append(el('p','small','Novas reportagens em breve.'));
  }catch(e){$('article').replaceChildren(el('div','error','Não foi possível carregar a notícia no momento. Tente novamente.'));console.error(e)}}
 load();
 })();
