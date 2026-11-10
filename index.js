@@ -1,3 +1,21 @@
+// Marcas existentes na area de parceiros; adicione outras aqui quando aprovadas.
+const partnerBrands = [
+  { name: 'Covre Agrícola', image: 'https://i.imgur.com/ruFvnwS.png', url: 'https://instagram.com/covreagricola' },
+  { name: 'Covre e Cia', image: 'https://i.imgur.com/YuuzkEM.png', url: 'https://instagram.com/covreecia' }
+];
+function renderPartnerLogos(isClone = false) {
+  // Repeticao interna para preencher telas largas sem lacunas no carrossel.
+  return Array.from({ length: 3 }, (_, round) => partnerBrands.map(brand => {
+    const decorative = isClone || round !== 0;
+    const accessibility = decorative
+      ? 'aria-hidden="true" tabindex="-1"'
+      : 'aria-label="Visitar ' + brand.name + '"';
+    return `<a class="gbpm-item" href="${brand.url}" target="_blank" rel="noopener noreferrer" ${accessibility}>
+      <img src="${brand.image}" alt="${decorative ? '' : brand.name}" width="195" height="72" loading="lazy" decoding="async">
+    </a>`;
+  }).join('')).join('');
+}
+
 const pages = {
       inicio: () => `
         <section class="mt-10 sm:mt-16 px-1 sm:px-0">
@@ -255,57 +273,25 @@ const pages = {
             </a>
           </div>
         </section>
-        <section class="mt-12 sm:mt-16 rounded-[1.5rem] sm:rounded-[2rem] border border-slate-700/50 bg-gradient-to-br from-slate-950/90 via-slate-900/85 to-slate-950/90 p-5 sm:p-8 lg:p-10 shadow-2xl shadow-cyan-950/20">
-          <div class="max-w-3xl mx-auto text-center mb-10">
-            <span class="inline-flex items-center px-4 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-400/20 text-cyan-200 text-sm font-semibold mb-4">Nossos parceiros</span>
-            <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-4">Empresas e marcas que caminham com a GaveBlue</h2>
-            <p class="text-slate-300 leading-relaxed">Construímos conexões com parceiros que fortalecem nossa entrega, ampliam nosso alcance e ajudam a criar soluções mais completas para quem usa o ecossistema GaveBlue.</p>
+        <section id="gb-partners-marquee" aria-labelledby="gbpm-title">
+          <div class="gbpm-heading">
+            <span class="gbpm-kicker">CONEXÕES QUE MOVEM IDEIAS</span>
+            <h2 id="gbpm-title" class="gbpm-title">Marcas que caminham com a GaveBlue</h2>
+            <p class="gbpm-desc">Parcerias que fazem parte do nosso ecossistema.</p>
           </div>
-          <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-            <a href="https://instagram.com/covreagricola" target="_blank" rel="noopener noreferrer" class="partner-card group rounded-[1.5rem] border border-slate-700/50 p-5 sm:p-6 hover:border-cyan-400/40 transition-all">
-              <div class="partner-logo-wrap rounded-[1.2rem] border border-white/10 p-4">
-                <img src="https://i.imgur.com/ruFvnwS.png" alt="Covre Agrícola" class="w-full h-28 sm:h-32 object-contain" loading="lazy">
+          <div class="gbpm-viewport" role="region" aria-label="Logotipos dos parceiros: Covre Agrícola e Covre e Cia">
+            <div class="gbpm-track">
+              <div class="gbpm-group">
+                ${renderPartnerLogos(false)}
               </div>
-              <div class="mt-5">
-                <h3 class="text-xl font-bold text-white">Covre Agrícola</h3>
-                <p class="mt-2 text-slate-300 leading-relaxed">Parceiro com presença no setor agro, fortalecendo conexões da GaveBlue com operações reais, comunicação digital e projetos que aproximam tecnologia e mercado.</p>
-                <span class="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-cyan-300">Visitar parceiro
-                  <svg class="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h4m0 0v4m0-4L10 14" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5h6M5 5v14h14v-6" /></svg>
-                </span>
+              <div class="gbpm-group" aria-hidden="true">
+                ${renderPartnerLogos(true)}
               </div>
-            </a>
-            <a href="https://instagram.com/covreecia" target="_blank" rel="noopener noreferrer" class="partner-card group rounded-[1.5rem] border border-slate-700/50 p-5 sm:p-6 hover:border-cyan-400/40 transition-all">
-              <div class="partner-logo-wrap rounded-[1.2rem] border border-white/10 p-4">
-                <img src="https://i.imgur.com/YuuzkEM.png" alt="Covre e Cia" class="w-full h-28 sm:h-32 object-contain" loading="lazy">
-              </div>
-              <div class="mt-5">
-                <h3 class="text-xl font-bold text-white">Covre e Cia</h3>
-                <p class="mt-2 text-slate-300 leading-relaxed">Uma parceria voltada a relacionamento, visibilidade e presença digital, ampliando a rede de atuação da GaveBlue com marcas que compartilham da mesma visão de crescimento.</p>
-                <span class="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-cyan-300">Visitar parceiro
-                  <svg class="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h4m0 0v4m0-4L10 14" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5h6M5 5v14h14v-6" /></svg>
-                </span>
-              </div>
-            </a>
-            <a href="https://wa.me/5527988790381" target="_blank" rel="noopener noreferrer" class="group rounded-[1.5rem] border border-dashed border-emerald-400/35 bg-emerald-500/[0.06] p-5 sm:p-6 hover:bg-emerald-500/[0.10] hover:border-emerald-300/50 transition-all">
-              <div class="rounded-[1.2rem] border border-dashed border-emerald-300/30 bg-slate-950/60 p-4 flex items-center justify-center">
-                <div class="flex h-28 sm:h-32 w-full items-center justify-center rounded-[1rem] bg-emerald-500/10 text-center">
-                  <span class="text-xl sm:text-2xl font-extrabold tracking-wide text-emerald-200">Sua marca aqui</span>
-                </div>
-              </div>
-              <div class="mt-5">
-                <h3 class="text-xl font-bold text-white">Seja parceiro da GaveBlue</h3>
-                <p class="mt-2 text-slate-300 leading-relaxed">Coloque sua marca em destaque dentro do ecossistema GaveBlue e fortaleça sua presença com uma vitrine pensada para gerar conexão, confiança e novas oportunidades.</p>
-                <span class="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-emerald-300">Quero aparecer aqui
-                  <svg class="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h4m0 0v4m0-4L10 14" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5h6M5 5v14h14v-6" /></svg>
-                </span>
-              </div>
-            </a>
+            </div>
           </div>
-          <div class="mt-8 flex justify-center">
-            <a href="https://wa.me/5527988790381" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 rounded-xl border border-emerald-400/20 bg-emerald-500/10 px-5 py-3 text-sm font-semibold text-emerald-200 transition hover:bg-emerald-500/15">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-4 4v-4z" /></svg>
-              Quero ser parceiro da GaveBlue
-            </a>
+          <div class="gbpm-bottom">
+            <span class="gbpm-note">Sua empresa pode fazer parte dessa história.</span>
+            <a class="gbpm-cta" href="https://wa.me/5527988790381" target="_blank" rel="noopener noreferrer">Seja um parceiro <span aria-hidden="true">↗</span></a>
           </div>
         </section>
       `
