@@ -1,6 +1,6 @@
-// GB+ PWA network-first visual release v3001 (2026-11-10; splash logo reveal): do not block installation on network requests,
+// GB+ PWA network-first visual release v3002 (2026-11-10; brand reveal e iniciar): do not block installation on network requests,
 // automatically redirect app windows, or reload open financial forms.
-const CACHE='gb-plus-shell-v3001';
+const CACHE='gb-plus-shell-v3002';
 const CORE=['./','./index.html','./styles.css','./js/app.js','./js/update.js','./splash.css','./recuperar.html'];
 const scope=new URL(self.registration.scope);
 const inScope=url=>url.origin===scope.origin&&url.pathname.startsWith(scope.pathname);
