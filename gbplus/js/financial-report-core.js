@@ -126,6 +126,13 @@ export function normalizeReceivableOcr(text){
  if(!records.length)throw Error('Não consegui identificar as colunas do PDF digitalizado. Exporte este relatório em Excel/CSV para importar sem risco.');
  return {kind:'receivable',records,excluded,warnings:['Este PDF foi lido por OCR. Confira nomes, notas, datas e valores antes de importar. O nome pode conter o vendedor.'],sourceFormat:'PDF · OCR',needsOcrReview:true};
 }
+export function editReportRecord(record,patch){
+ const copy={...record,...patch,
+  amount:patch.amount===undefined?record.amount/100:patch.amount,
+  principal:record.principal==null?null:record.principal/100,
+  interest:record.interest/100};
+ return reportRecord(record.kind,copy);
+}
 export function reportDuplicates(db,rows){
  const seen=new Set();
  return rows.map(r=>{
