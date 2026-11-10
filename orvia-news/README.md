@@ -18,7 +18,7 @@ Recomendação administrativa futura (a conexão Supabase disponível aqui não 
 2. Configure **Site URL** como `https://gaveblue.com.br/orvia-news/editor.html`.
 3. Inclua essa URL em **Redirect URLs**, para que futuros links de confirmação e recuperação retornem à redação.
 
-O e-mail autorizado inicial é o do proprietário da conta GitHub conectada: `contato.lucaspimenteloliveira@gmail.com`.
+O e-mail autorizado para o painel editorial é: `guddubrowncontato@gmail.com`.
 Para cadastrar outro editor depois, a administração do Supabase deve inserir o e-mail verificado na tabela `public.orvia_editors`; **não conceda permissões a qualquer usuário automaticamente**.
 
 ## Como publicar uma notícia
