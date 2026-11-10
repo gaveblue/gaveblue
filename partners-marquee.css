@@ -43,58 +43,76 @@
   #gb-partners-marquee .gbpm-viewport{overflow-x:auto;scrollbar-width:thin;mask-image:none;-webkit-mask-image:none}
   #gb-partners-marquee .gbpm-item,#gb-partners-marquee .gbpm-item img,#gb-partners-marquee .gbpm-cta{transition:none!important}
 }
-/* Ajuste de proporção, cores originais e remoção das legendas — 10/11/2026 */
-#gb-partners-marquee .gbpm-heading{max-width:780px;margin-bottom:1.1rem}
-#gb-partners-marquee .gbpm-viewport{padding:.35rem 0 .65rem}
-#gb-partners-marquee .gbpm-track{animation-duration:25s}
-#gb-partners-marquee .gbpm-group{gap:2.2rem;padding-right:2.2rem}
+/* Ajuste definitivo: área sem corte e escala equilibrada das marcas.
+   A máscara continua aplicada somente nas bordas EXTERNAS da faixa. */
+#gb-partners-marquee .gbpm-heading{max-width:780px;margin-bottom:1.15rem}
+#gb-partners-marquee .gbpm-viewport{padding:.55rem 0 1rem}
+#gb-partners-marquee .gbpm-track{animation-duration:29s}
+#gb-partners-marquee .gbpm-group{gap:2.25rem;padding-right:2.25rem}
 #main-content #gb-partners-marquee .gbpm-item{
-  flex:0 0 230px;width:230px;height:113px;display:flex;align-items:center;
-  justify-content:center;flex-direction:row;opacity:1;
-  background:transparent!important;box-shadow:none!important;
-  border:0!important;gap:0;
+  flex:0 0 226px;width:226px;height:140px;
+  display:flex;flex-direction:row;align-items:center;justify-content:center;
+  opacity:1;background:transparent!important;border:0!important;box-shadow:none!important;
+  transition:opacity .2s ease;
 }
 #main-content #gb-partners-marquee .gbpm-logo-stage{
-  position:relative;display:flex;flex:none;align-items:center;justify-content:center;
-  width:224px;height:106px;overflow:hidden;
+  width:220px;height:140px;display:flex;flex:0 0 auto;
+  align-items:center;justify-content:center;
+  overflow:visible; /* impede recorte das logos ao ampliar */
 }
 #main-content #gb-partners-marquee .gbpm-item img{
-  display:block;width:210px;max-width:210px;height:91px;max-height:91px;
-  object-fit:contain;opacity:1;filter:none;
+  display:block;width:200px;max-width:200px;height:94px;max-height:94px;
+  object-fit:contain;opacity:1;filter:none;transform-origin:center;
   transition:transform .2s ease;
 }
-#main-content #gb-partners-marquee .gbpm-item--covre-agricola img,
-#main-content #gb-partners-marquee .gbpm-item--covre-cia img{
-  /* As imagens originais possuem amplas margens transparentes.
-     Ampliar apenas seu conteúdo visível sem modificar o arquivo da marca. */
-  transform:scale(3.0);
+/* As marcas Covre possuem margem transparente ampla no arquivo original.
+   Compensamos esse respiro, SEM esconder o desenho e SEM aplicar crop. */
+#main-content #gb-partners-marquee .gbpm-item--covre-agricola img{
+  transform:scale(2.04);
   filter:brightness(0) saturate(100%) invert(17%) sepia(34%) saturate(1420%) hue-rotate(181deg) brightness(88%) contrast(96%);
 }
-#main-content #gb-partners-marquee .gbpm-item--digital img{transform:scale(.82)}
-#main-content #gb-partners-marquee .gbpm-item:hover,
-#main-content #gb-partners-marquee .gbpm-item:focus-visible{opacity:1}
+#main-content #gb-partners-marquee .gbpm-item--covre-cia img{
+  transform:scale(1.94);
+  filter:brightness(0) saturate(100%) invert(17%) sepia(34%) saturate(1420%) hue-rotate(181deg) brightness(88%) contrast(96%);
+}
+#main-content #gb-partners-marquee .gbpm-item--digital img{
+  transform:scale(.84);filter:none;
+}
 #main-content #gb-partners-marquee .gbpm-item:hover img,
 #main-content #gb-partners-marquee .gbpm-item:focus-visible img{opacity:1}
+#main-content #gb-partners-marquee .gbpm-item--covre-agricola:hover img,
+#main-content #gb-partners-marquee .gbpm-item--covre-agricola:focus-visible img{
+  transform:scale(2.08);
+}
+#main-content #gb-partners-marquee .gbpm-item--covre-cia:hover img,
+#main-content #gb-partners-marquee .gbpm-item--covre-cia:focus-visible img{
+  transform:scale(1.98);
+}
 #main-content #gb-partners-marquee .gbpm-item--digital:hover img,
 #main-content #gb-partners-marquee .gbpm-item--digital:focus-visible img{
-  transform:scale(.86);filter:none;
-}
-#main-content #gb-partners-marquee .gbpm-item--covre-agricola:hover img,
-#main-content #gb-partners-marquee .gbpm-item--covre-cia:hover img,
-#main-content #gb-partners-marquee .gbpm-item--covre-agricola:focus-visible img,
-#main-content #gb-partners-marquee .gbpm-item--covre-cia:focus-visible img{
-  transform:scale(3.08);
-  filter:brightness(0) saturate(100%) invert(17%) sepia(34%) saturate(1420%) hue-rotate(181deg) brightness(88%) contrast(96%);
+  transform:scale(.88);filter:none;
 }
 @media(max-width:640px){
-  #gb-partners-marquee .gbpm-heading{margin-bottom:.85rem}
-  #gb-partners-marquee .gbpm-track{animation-duration:23s}
-  #gb-partners-marquee .gbpm-group{gap:1.25rem;padding-right:1.25rem}
-  #main-content #gb-partners-marquee .gbpm-item{flex-basis:182px;width:182px;height:100px}
-  #main-content #gb-partners-marquee .gbpm-logo-stage{width:180px;height:95px}
-  #main-content #gb-partners-marquee .gbpm-item img{width:178px;max-width:178px;height:84px;max-height:84px}
-  #main-content #gb-partners-marquee .gbpm-item--digital img{transform:scale(.91)}
+  #gb-partners-marquee .gbpm-heading{margin-bottom:.8rem}
+  #gb-partners-marquee .gbpm-viewport{padding:.5rem 0 .9rem}
+  #gb-partners-marquee .gbpm-track{animation-duration:25s}
+  #gb-partners-marquee .gbpm-group{gap:1.65rem;padding-right:1.65rem}
+  #main-content #gb-partners-marquee .gbpm-item{
+    flex:0 0 206px;width:206px;height:128px;
+  }
+  #main-content #gb-partners-marquee .gbpm-logo-stage{
+    width:204px;height:128px;overflow:visible;
+  }
+  #main-content #gb-partners-marquee .gbpm-item img{
+    width:185px;max-width:185px;height:89px;max-height:89px;
+  }
+  #main-content #gb-partners-marquee .gbpm-item--covre-agricola img{transform:scale(2.04)}
+  #main-content #gb-partners-marquee .gbpm-item--covre-cia img{transform:scale(1.94)}
+  #main-content #gb-partners-marquee .gbpm-item--digital img{transform:scale(.9)}
   #main-content #gb-partners-marquee .gbpm-item--digital:hover img,
   #main-content #gb-partners-marquee .gbpm-item--digital:focus-visible img{transform:scale(.94)}
 }
-@media(prefers-reduced-motion:reduce){#gb-partners-marquee .gbpm-track{animation:none!important}}
+@media(prefers-reduced-motion:reduce){
+  #gb-partners-marquee .gbpm-track{animation:none!important}
+  #main-content #gb-partners-marquee .gbpm-item img{transition:none!important}
+}
