@@ -4,7 +4,7 @@ import {fold,brlCents,isoDate} from './financial-report-core.js?v=20261110-307';
 export const ERP_SOURCE='sankhya-fin-v1';
 const trim=s=>String(s??'').trim();
 const id=v=>{const s=trim(v);return /^\d+(?:\.0+)?$/.test(s)?s.replace(/\.0+$/,''):s;};
-const positive=v=>{if(v===null||v===undefined||trim(v)==='')return 0;return Math.round(Number(v)*100);};
+const positive=v=>{if(v===null||v===undefined||trim(v)==='')return 0;const n=Number(v);return Number.isFinite(n)&&n>=0?Math.round(n*100):NaN;};
 const validDate=d=>/^\d{4}-\d{2}-\d{2}$/.test(d)&&!Number.isNaN(Date.parse(d))&&new Date(d+'T12:00:00Z').toISOString().slice(0,10)===d;
 const heading=s=>fold(s).replace(/ /g,'');
 const findHeader=(rows,required)=>rows.findIndex((row,i)=>i<=15&&required.every(s=>row.some(v=>heading(v)===heading(s))));
@@ -84,7 +84,7 @@ export function partnerDecisions(db,items){
   const tax=doc(r.document),taxMatches=(tax&&tax!=='00000000000'&&tax!=='00000000000000')?byDoc.get(tax)||[]:[];
   if(taxMatches.length===1&&!taxMatches[0].sankhyaCode)return {...r,decision:'match',targetId:taxMatches[0].id};
   if(taxMatches.length)return {...r,decision:'conflict',reason:'Documento vinculado a outro código ou várias pessoas'};
-  const nameMatches=byName.get(fold(r.name))||[];
+  const nameMatches=[...(byName.get(fold(r.name))||[]),...(byName.get(fold(r.legalName))||[])];
   if(nameMatches.length)return {...r,decision:'conflict',reason:'Mesmo nome já cadastrado sem correspondência de código/documento'};
   return {...r,decision:'create'};
  });
@@ -96,7 +96,7 @@ function mergePartner(p,r,roles){
   complement:r.complement,neighborhood:r.neighborhood,city:r.city,mobile:r.mobile,
   matrixCode:r.matrixCode,created:r.created,attributes:r.attributes};
  p.sankhyaCode=r.code;p.sankhyaProfile=ext;
- p.name=r.name;p.tradeName=r.legalName&&r.legalName!==r.name?r.legalName:(p.tradeName||'');
+ p.name=r.legalName||r.name;p.tradeName=r.name!==p.name?r.name:(p.tradeName||'');
  p.document=r.document||p.document||'';p.phone=r.phone||p.phone||'';
  p.email=r.email||p.email||'';p.address=r.address||p.address||'';
  p.active=r.active;p.roles=[...new Set([...roleFor(p),...(roles||[])])];
@@ -184,7 +184,7 @@ export function parseErpMovements(rows,partnerItems=[]){
  }
  for(const [k,partes] of grouped){
   if(partes.length<2)continue;
-  if(partes.length>120){partes.forEach(r=>ignored.push({unique:r.unique,code:r.partnerCode,reason:'Série com mais de 120 parcelas: verificar manualmente'}));continue;}
+  if(partes.length>120){partes.forEach(r=>{r.groupConflict=true;ignored.push({unique:r.unique,code:r.partnerCode,reason:'Série com mais de 120 parcelas: não importar sem revisão'});});continue;}
   partes.sort((a,b)=>a.due.localeCompare(b.due)||Number(a.unique)-Number(b.unique));
   for(let i=0;i<partes.length;i++){partes[i].groupKey='erpinst-'+fp(k);partes[i].sequence=i+1;partes[i].count=partes.length;}
  }
@@ -198,6 +198,7 @@ export function movementDecisions(db,items,now){
  const sameDoc=(r)=>(db.titles||[]).filter(t=>!t.importKey&&t.type===r.kind&&t.due===r.due&&
    String(t.document||'')===String(r.invoice||r.unique)&&t.amount===r.principal);
  return items.map(r=>{
+  if(r.groupConflict)return {...r,decision:'blocked',reason:'Agrupamento de parcelas acima do limite de 120'};
   const partner=partnerByCode.get(r.partnerCode);
   if(!partner)return {...r,decision:'blocked',reason:'Código de parceiro '+r.partnerCode+' não cadastrado. Importe Parceiros.xlsx antes.'};
   const present=byKey.get(r.key),future=!!r.paidDate&&r.paidDate>now;
