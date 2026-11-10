@@ -10,9 +10,12 @@ function renderPartnerLogos(isClone = false) {
     const accessibility = isClone
       ? 'aria-hidden="true" tabindex="-1"'
       : 'aria-label="Conhecer ' + brand.name + '"';
-    return `<a class="gbpm-item" href="${brand.url}" target="_blank" rel="noopener noreferrer" ${accessibility}>
-      <img src="${brand.image}" alt="" width="252" height="96" loading="eager" decoding="async" onerror="this.style.display='none'">
-      <span class="gbpm-brand-label" aria-hidden="true">${brand.name}</span>
+    const type = brand.name === 'Covre Agrícola' ? 'covre-agricola'
+      : brand.name === 'Covre e Cia' ? 'covre-cia' : 'digital';
+    return `<a class="gbpm-item gbpm-item--${type}" href="${brand.url}" target="_blank" rel="noopener noreferrer" ${accessibility}>
+      <span class="gbpm-logo-stage">
+        <img src="${brand.image}" alt="${isClone ? '' : brand.name}" width="220" height="96" loading="eager" decoding="async">
+      </span>
     </a>`;
   }).join('');
 }
