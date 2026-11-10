@@ -83,6 +83,7 @@ export function reportImportMarkup(db,draft){
    summary('Possíveis duplicados',nfmt(duplicates))+
    summary('Selecionados',nfmt(chosen.count))+
    summary('Valor a importar',money(chosen.total))+
+   (draft.parsed.bankTotals?summary('Baixas do cedente · excluídas',money(draft.parsed.bankTotals.administrative)):'')+
   '</div>'+warning+error+loading+
   '<div class="gb-fin-list-header"><strong>Conferência dos títulos</strong><span>'+
   '<button class="button" type="button" data-action="financial-import-all">Selecionar novos</button>'+
