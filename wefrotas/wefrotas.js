@@ -3773,6 +3773,7 @@
         organizationId: String(window.WeFrotasBackend?.getOrganizationContext?.()?.id || '')
       } : null;
 
+      const fuelDate = centralRecord ? getCentralRecordIsoDate(centralRecord, importedData) : importedData.dataIso;
       const supplier = resolveFuelSupplierByImportedName(importedData.posto);
       const driver = resolveDriverByImportedName(importedData.motorista);
       const linkedVehicle = resolveVehicleByImportedDriver(importedData.motorista, driver);
@@ -3787,7 +3788,7 @@
       // resolves the active OS and validates mileage against the reserve only.
       const recordedVehicle = explicitVehicle || explicitVehicleById || linkedVehicle;
       const decision = window.WeFrotasSubstitutions?.resolveCentralFuel?.(
-        recordedVehicle?.id, driver?.id, importedData.dataIso
+        recordedVehicle?.id, driver?.id, fuelDate
       );
       const reserveVehicle = decision?.isReserve
         ? allVehicles.find(item => String(item.id) === String(decision.vehicleId))
@@ -3802,7 +3803,7 @@
       if (decision?.periodWarning) notes.push('CONFERIR DATA DO RESERVA: ' + decision.periodWarning);
 
       if (document.getElementById('finance-data-abastecimento')) {
-        document.getElementById('finance-data-abastecimento').value = importedData.dataIso;
+        document.getElementById('finance-data-abastecimento').value = fuelDate;
       }
       if (document.getElementById('finance-km')) {
         document.getElementById('finance-km').value = importedData.km || '';
