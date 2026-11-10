@@ -1,7 +1,7 @@
 {
   "version": "3.0.3",
   "build": 3003,
-  "published_at": null,
+  "published_at": "2026-11-10T17:25:27Z",
   "title": "Refinamentos na abertura GB+ — anéis animados e espaçamento",
   "notes": [
     "Símbolo + aproximado do B, mantendo o recorte das letras corrigido no Android.",
@@ -220,9 +220,9 @@
       "description": "Preparando sua experiência e GB+ sem sobreposição."
     }
   ],
-  "release_status": "publication_authorized_qa_partial_deploy_pending",
+  "release_status": "published_authorized_qa_partial",
   "homologation": {
-    "status": "qa_structural_pending_e2e",
-    "notes": "Correção CSS solicitada pelo responsável em 10/11/2026; pendente QA visual Android/PWA e desktop, redução de movimento, offline e conferência final do deploy."
+    "status": "published_qa_partial_visual_pending",
+    "notes": "PR #125 mesclado no commit b714b0062a5ba7485ced9d6b8e15a9692ead49d3; GitHub Pages run 42864681342 concluído com sucesso em 10/11/2026 às 17:25:27 UTC. 20 verificações estruturais passaram; workflows de regressão reportaram failure sem steps executados (não comprova falha do código). QA visual Android/PWA, desktop e offline ainda pendente. Liberação solicitada pelo responsável, homologação integral não comprovada."
   }
 }
