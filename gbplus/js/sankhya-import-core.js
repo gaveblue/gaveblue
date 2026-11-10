@@ -213,7 +213,10 @@ export function movementDecisions(db,items,now){
    return {...r,partnerId:partner.id,decision:'create',future};
   }
   const meta=present.sankhyaMovement||{};
-  if(present.type!==r.kind||meta.partnerCode&&meta.partnerCode!==r.partnerCode||
+  const expectedAmount=(meta.paidAmount&&meta.paidDate&&meta.paidDate<=now)?meta.paidAmount:meta.originalCents;
+  if(present.cancelled||present.partnerId!==partner.id||
+    (Number.isSafeInteger(expectedAmount)&&present.amount!==expectedAmount)||
+    present.type!==r.kind||meta.partnerCode&&meta.partnerCode!==r.partnerCode||
     meta.originalCents!==undefined&&meta.originalCents!==r.principal ||
     meta.invoice&&meta.invoice!==r.invoice || present.due!==r.due)
    return {...r,decision:'blocked',reason:'Mesmo Nro Único com campos divergentes do lançamento existente',existingId:present.id};
