@@ -195,6 +195,26 @@ export function validateDatabase(db){
    if(['custom','goal'].includes(a.kind))assert(!a.bankId&&!a.bank,'conta não bancária.');
   }
   for(const p of db.partners)assert(str(p.name,200)&&p.name.trim()&&['tradeName','document','phone','email','address','notes'].every(k=>str(p[k]))&&typeof p.active==='boolean'&&Array.isArray(p.roles)&&p.roles.length>0&&p.roles.every(r=>['Cliente','Fornecedor','Transportadora','Funcionário','Outros'].includes(r)),'parceiro.');
+  // Metadados opcionais de importação Sankhya: backups antigos seguem compatíveis.
+  const codes=new Set(),erpKeys=new Set();
+  for(const p of db.partners){
+   if(p.sankhyaCode===undefined)continue;
+   assert(typeof p.sankhyaCode==='string'&&/^\d{1,12}$/.test(p.sankhyaCode)&&!codes.has(p.sankhyaCode),'código único de parceiro Sankhya.');
+   codes.add(p.sankhyaCode);
+   const s=p.sankhyaProfile;
+   assert(s&&s.source==='sankhya-fin-v1'&&s.code===p.sankhyaCode,'referência do cadastro Sankhya.');
+   assert(['legacyCode','legalName','personType','identity','zip','street','number','complement','neighborhood','city','mobile','matrixCode','created'].every(k=>str(s[k]||'',300)),'campos adicionais Sankhya.');
+   assert(s.attributes&&typeof s.attributes==='object'&&!Array.isArray(s.attributes)&&Object.keys(s.attributes).length<=60&&
+    Object.entries(s.attributes).every(([k,v])=>str(k,100)&&str(v,300)),'colunas de origem do parceiro.');
+  }
+  for(const t of db.titles){
+   if(!t.importKey?.startsWith('sankhya-fin-v1:'))continue;
+   assert(!erpKeys.has(t.importKey)&&str(t.importKey,140),'Nro Único Sankhya repetido.');erpKeys.add(t.importKey);
+   const m=t.sankhyaMovement;
+   assert(m&&m.source==='sankhya-fin-v1'&&/^\d+$/.test(String(m.unique))&&/^\d+$/.test(String(m.partnerCode))&&
+    Number.isSafeInteger(m.originalCents)&&m.originalCents>0&&
+    str(m.company||'',30)&&str(m.invoice||'',100)&&str(m.groupKey||'',100),'metadados da movimentação Sankhya.');
+  }
   for(const t of db.titles){assert(str(t.description,300)&&t.description.trim()&&str(t.document,100)&&str(t.notes)&&['income','expense'].includes(t.type)&&amount(t.amount)&&t.amount>0&&validDate(t.issue)&&validDate(t.due)&&typeof t.cancelled==='boolean','título.');assert((!t.partnerId||has('partners',t.partnerId))&&(!t.accountId||has('accounts',t.accountId))&&db.categories.some(c=>c.id===t.categoryId&&c.type===t.type),'referência do título.');assert(['single','installment','recurring'].includes(t.mode)&&Number.isInteger(t.sequence)&&Number.isInteger(t.count)&&t.sequence>=1&&t.sequence<=t.count&&t.count<=120&&(t.groupId===null||str(t.groupId,100)),'série do título.');}
   // Optional service identity: preserved by local backups and Supabase JSON payloads.
   // Never confuses a service label with a payment, subscription, bank account or partner.
