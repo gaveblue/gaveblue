@@ -1,5 +1,12 @@
 # CHANGELOG — GB+ Gestão Financeira
 
+## [3.0.4 — ABERTURA BRANCA COM DISCO ORBITAL (PUBLICAÇÃO AUTORIZADA; QA VISUAL PENDENTE)] — 2026-11-10
+- **Identidade:** fundo da abertura alterado para **branco**, logotipo GB em grafite, cartão do **+** azul mantido e textos/barra/cantos ajustados para contraste no tema claro.
+- **Anel orbital:** os anéis de fundo passaram a circundar diretamente o logotipo, em vez da área central inteira. O disco elíptico gira continuamente (volta completa a cada 13 segundos), com rastro, brilho, ponto luminoso e arco em primeiro plano, inspirado no disco de acreção de um buraco negro.
+- **Responsividade:** diâmetros próprios para telas móveis, mantendo legibilidade da marca e do botão **Iniciar**, sem novos controles. Preferência `prefers-reduced-motion` suspende a órbita contínua.
+- **Segurança de UI:** mudanças confinadas à `#gb-splash` e às classes `gbintro-*`; fluxo de login, callbacks, dados financeiros, componentes e banco de dados preservados. Cache PWA `gb-plus-shell-v3004` e referência CSS atualizada.
+- **Validação:** verificação estrutural e teste de regressão incluídos; QA visual em Android/PWA, desktop, redução de movimento e offline permanece pendente. Autorizada publicação pelo responsável; publicação não equivale a homologação integral.
+
 ## [3.0.3 — REFINAMENTO DA ABERTURA: ANÉIS E ESPAÇAMENTO (PUBLICAÇÃO AUTORIZADA; QA VISUAL PENDENTE)] — 2026-11-10
 - **Marca:** aproximação do símbolo **+** ao **B** no computador e principalmente no celular, sem reduzir a área de recorte segura das letras.
 - **Fundo:** anéis elípticos animados com oscilação lenta e pulso do anel interno, após a entrada inicial; animações continuam sutis e obedecem a `prefers-reduced-motion`.
