@@ -42,10 +42,15 @@ export function parseErpPartners(rows){
   if(seen.has(code)){ignored.push({code,name,reason:'Código repetido dentro da planilha'});continue;}
   seen.add(code);
   const attrs={};
-  // Preserve all Sankhya columns including fiscal ones, without introducing
-  // 53 editable fields into the daily finance form.
-  header.forEach((key,i)=>{const raw=cell(row,i);if(!key||raw===null||raw===undefined||trim(raw)==='')return;
-   const val=trim(raw);attrs[key.slice(0,100)]=val.slice(0,300);});
+  // Known fields have dedicated properties below. Preserve the other fiscal,
+  // commercial and address-catalog columns without duplicating large records
+  // in localStorage/Supabase (53-column originals can be very large).
+  const inStandard=new Set(['Cód. Parceiro','Razão social','Nome Parceiro','Ativo','Tipo de pessoa',
+   'CNPJ / CPF','Insc. Estadual / Identidade','Data cadastramento','Cód. Sistema Anterior',
+   'Matriz','Email','Telefone','Celular/Fax','Nome (Endereço)','Número','Complemento',
+   'Nome (Bairro)','Nome + UF (Cidade)','CEP']);
+  header.forEach((key,i)=>{const raw=cell(row,i);if(!key||inStandard.has(key)||raw===null||raw===undefined||trim(raw)==='')return;
+   attrs[key.slice(0,100)]=trim(raw).slice(0,300);});
   const street=trim(cell(row,cStreet))||trim(cell(row,cAddress));
   const address=[street,trim(cell(row,cNumber)),trim(cell(row,cComplement)),trim(cell(row,cNeighborhood)),trim(cell(row,cCity))].filter(Boolean).join(', ');
   const active=heading(cell(row,cActive))!=='nao';
