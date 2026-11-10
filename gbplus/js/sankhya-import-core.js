@@ -188,9 +188,10 @@ export function parseErpMovements(rows,partnerItems=[]){
   grouped.get(k).push(r);
  }
  for(const [k,partes] of grouped){
-  if(partes.length<2)continue;
   if(partes.length>120){partes.forEach(r=>{r.groupConflict=true;ignored.push({unique:r.unique,code:r.partnerCode,reason:'Série com mais de 120 parcelas: não importar sem revisão'});});continue;}
   partes.sort((a,b)=>a.due.localeCompare(b.due)||Number(a.unique)-Number(b.unique));
+  // Even a singleton retains the stable source group key: later daily files
+  // may contain other installments of the same note/operation.
   for(let i=0;i<partes.length;i++){partes[i].groupKey='erpinst-'+fp(k);partes[i].sequence=i+1;partes[i].count=partes.length;}
  }
  return {kind:'movements',rows:rowsOut,ignored,accounts:[...accounts.values()],
@@ -276,6 +277,18 @@ export function applyErpMovements(db,items,options,makeId,now){
    db.payments.push({id:makeId(),titleId:t.id,accountId:bank,date:r.paidDate,amount});
    addRole(partner,r.kind);result.settled++;
   }
+ }
+ // Reconcile installment series across daily imports. The source group key
+ // combines company, partner code, invoice, negotiation date, operation and type.
+ // Nro Único remains unique; multiple invoices/parcel numbers are not duplicates.
+ const touched=new Set(items.map(r=>r.groupKey).filter(Boolean));
+ for(const group of touched){
+  const titles=db.titles.filter(t=>t.sankhyaMovement?.groupKey===group)
+   .sort((a,b)=>a.due.localeCompare(b.due)||Number(a.sankhyaMovement.unique)-Number(b.sankhyaMovement.unique));
+  if(titles.length<2)continue;
+  if(titles.length>120)throw Error('Grupo de parcelas excede 120 títulos.');
+  const count=Math.max(titles.length,...titles.map(t=>t.count||1));
+  titles.forEach((t,i)=>{t.mode='installment';t.groupId=group;t.sequence=i+1;t.count=count;});
  }
  return result;
 }
