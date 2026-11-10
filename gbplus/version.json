@@ -1,7 +1,7 @@
 {
   "version": "3.0.8",
   "build": 3008,
-  "published_at": null,
+  "published_at": "2026-11-10T21:12:47Z",
   "title": "Importação Sankhya de Parceiros e Movimentação financeira diária no PC",
   "notes": [
     "Nova importação no PC, em Relatórios: Parceiros.xlsx primeiro, depois Movimentacao_Financeira.xlsx, com prévia e confirmação explícita.",
@@ -234,9 +234,9 @@
       "description": "Nro Único controla a identidade e baixas posteriores são conciliadas com o registro existente."
     }
   ],
-  "release_status": "candidate_validation_pending",
+  "release_status": "published_assisted_qa_partial",
   "homologation": {
-    "status": "candidate_partial_qa",
-    "notes": "Nova versão 3.0.8 testada por amostras sintéticas e verificação estática. Ainda requer execução de importação das duas planilhas reais no desktop, QA da persistência e do uso recorrente. Nenhum dado dos arquivos foi gravado na conta do usuário."
+    "status": "published_qa_partial_desktop_e2e_pending",
+    "notes": "PR #130 mesclado ao main no commit 3645c75f9619333001d0d08abfdaeffb2ab7135c. GitHub Pages run 42902704835 concluído com sucesso em 10/11/2026 às 21:12:47 UTC. 21 verificações estruturais passaram, validação do schema sintético e cenários de reimportação/parcelamento/baixa testados. Actions CI de regressão registraram failure com zero steps, portanto sem evidência de execução em runner. Testes no navegador com os dois arquivos reais, armazenamento e saldos ainda pendentes. Nenhuma importação automática dos arquivos do usuário."
   }
 }
