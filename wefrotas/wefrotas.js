@@ -3783,21 +3783,23 @@
         : null;
       const recordVehicleId = String(centralRecord?.vehicleId || centralRecord?.veiculoId || '').trim();
       const explicitVehicleById = recordVehicleId ? allVehicles.find(item => String(item.id) === recordVehicleId) : null;
-      const activeReplacement = window.WeFrotasSubstitutions?.currentForDriver?.(driver?.id, importedData.dataIso);
-      const reserveVehicle = activeReplacement
-        ? allVehicles.find(item => String(item.id) === String(activeReplacement.reserveVehicleId))
+      // The Central keeps its original driver/device; the administrative intake
+      // resolves the active OS and validates mileage against the reserve only.
+      const recordedVehicle = explicitVehicle || explicitVehicleById || linkedVehicle;
+      const decision = window.WeFrotasSubstitutions?.resolveCentralFuel?.(
+        recordedVehicle?.id, driver?.id, importedData.dataIso
+      );
+      const reserveVehicle = decision?.isReserve
+        ? allVehicles.find(item => String(item.id) === String(decision.vehicleId))
         : null;
-      // A Central pode informar a placa habitual durante a substituição.
-      // O KM recebido deve ser validado contra o reserva, nunca contra o titular.
-      const recordedVehicle = explicitVehicle || explicitVehicleById;
-      const vehicle = reserveVehicle && (!recordedVehicle
-        || String(recordedVehicle.id) === String(activeReplacement.sourceVehicleId)
-        || String(recordedVehicle.id) === String(reserveVehicle.id))
-        ? reserveVehicle : (recordedVehicle || linkedVehicle);
+      // An unexpected third plate must be reviewed, never silently associated.
+      const vehicle = decision?.review ? null : (reserveVehicle || recordedVehicle);
       const notes = [];
-      if (reserveVehicle && vehicle?.id === reserveVehicle.id && linkedVehicle?.id !== reserveVehicle.id) {
+      if (reserveVehicle) {
         notes.push('VEÍCULO RESERVA — abastecimento associado à substituição ativa; KM do veículo reserva.');
       }
+      if (decision?.review && decision.reason) notes.push('REVISAR PLACA: ' + decision.reason);
+      if (decision?.periodWarning) notes.push('CONFERIR DATA DO RESERVA: ' + decision.periodWarning);
 
       if (document.getElementById('finance-data-abastecimento')) {
         document.getElementById('finance-data-abastecimento').value = importedData.dataIso;
@@ -3855,7 +3857,9 @@
       if (!importedData.tipoCombustivel) pendingFields.push('tipo de combustível');
       if (!importedData.litros) pendingFields.push('quantidade em litros');
       if (!importedData.valor || !parseCurrencyInputValue(importedData.valor)) pendingFields.push('valor');
-      showImportResolutionFeedback(pendingFields, 'Abastecimento importado. Revise os dados e finalize o lançamento.');
+      showImportResolutionFeedback(pendingFields,
+        decision?.review ? decision.reason
+          : decision?.periodWarning || 'Abastecimento importado. Revise os dados e finalize o lançamento.');
     }
 
     function openImportedLooseNoteLaunch(importedData, centralRecord = null) {
@@ -10706,7 +10710,15 @@
           ? String(item.reserveVehicleId) === String(recordedVehicle.id)
             || (String(item.sourceVehicleId) === String(recordedVehicle.id) && driver && String(item.driverId) === String(driver.id))
           : driver && String(item.driverId) === String(driver.id)));
-      if (matches.length !== 1) return '';
+      if (matches.length !== 1) {
+        const warning = window.WeFrotasSubstitutions?.resolveCentralFuel?.(
+          recordedVehicle?.id, driver?.id, date
+        )?.periodWarning;
+        return warning
+          ? '<span class="central-pending-reserve-badge" title="' + escapeHtml(warning)
+            + '" style="display:inline-flex;align-items:center;margin-top:4px;padding:3px 7px;border-radius:6px;background:#fff3d6;color:#875700;border:1px solid #e7c980;font-size:10px;font-weight:800">CONFERIR DATA DO RESERVA</span>'
+          : '';
+      }
       const source = allVehicles.find(item => String(item.id) === String(matches[0].sourceVehicleId));
       const tooltip = 'Abastecimento do veículo reserva' + (source?.placa ? ' — substitui ' + source.placa : '');
       return '<span class="central-pending-reserve-badge" title="' + escapeHtml(tooltip) + '" style="display:inline-flex;align-items:center;margin-top:4px;padding:3px 7px;border-radius:6px;background:#fff3d6;color:#875700;border:1px solid #e7c980;font-size:10px;font-weight:800;letter-spacing:.035em">VEÍCULO RESERVA</span>';
