@@ -1,14 +1,14 @@
 {
-  "version": "3.0.3",
-  "build": 3003,
-  "published_at": "2026-11-10T17:25:27Z",
-  "title": "Refinamentos na abertura GB+ — anéis animados e espaçamento",
+  "version": "3.0.4",
+  "build": 3004,
+  "published_at": null,
+  "title": "Abertura branca com órbita gravitacional ao redor do GB+",
   "notes": [
-    "Símbolo + aproximado do B, mantendo o recorte das letras corrigido no Android.",
-    "Dois anéis de fundo com movimento contínuo suave e pulsação sutil após a entrada da marca; movimentos reduzidos respeitados.",
-    "Corrigida a classe CSS do cabeçalho de progresso que impedia a aplicação do estilo e deixava 'experiênciaGB+' colados; agora separados em flex com espaçamento consistente inclusive em telas estreitas.",
-    "Corrigidos nomes CSS duplicados da linha luminosa e o endereço SVG de ruído no fundo. Sem alterações de login, saldos, contas, cartões, lançamentos ou armazenamento.",
-    "Publicação solicitada pelo responsável em 10/11/2026. QA visual em Android/PWA e desktop ainda não concluído."
+    "Fundo da abertura branco, com letras GB em grafite escuro e símbolo + azul preservado.",
+    "O anel elíptico foi transformado em disco orbital que gira 360° continuamente ao redor do logotipo GB+, com efeitos de profundidade, trilho secundário, ponto luminoso e arco em primeiro plano.",
+    "O novo disco permanece ancorado ao logotipo e foi ajustado para telas estreitas e computadores; reduz movimento quando solicitado pelo sistema.",
+    "Conservados botão Iniciar, o texto de carregamento com espaçamento corrigido, as rotas de autenticação e a navegação real no GB+.",
+    "Mudança exclusivamente visual, sem modificação de saldos, lançamentos, contas, cartões, Supabase ou armazenamento. Testes visuais Android/PWA e desktop ainda pendentes."
   ],
   "assets": [
     "./splash.css",
@@ -211,18 +211,23 @@
   "highlights": [
     {
       "icon": "sparkles",
-      "title": "Identidade GB+ refinada",
-      "description": "Símbolo + mais próximo e anéis animados discretamente."
+      "title": "Abertura branca",
+      "description": "Um cenário claro, elegante e minimalista para receber o GB+."
     },
     {
-      "icon": "check",
-      "title": "Progresso mais legível",
-      "description": "Preparando sua experiência e GB+ sem sobreposição."
+      "icon": "repeat",
+      "title": "Anel gravitacional",
+      "description": "Órbita giratória com luz e profundidade em volta da marca."
+    },
+    {
+      "icon": "shield",
+      "title": "Financeiro preservado",
+      "description": "Nenhuma alteração em contas, dados ou autenticação."
     }
   ],
-  "release_status": "published_authorized_qa_partial",
+  "release_status": "publication_authorized_qa_partial_deploy_pending",
   "homologation": {
-    "status": "published_qa_partial_visual_pending",
-    "notes": "PR #125 mesclado no commit b714b0062a5ba7485ced9d6b8e15a9692ead49d3; GitHub Pages run 42864681342 concluído com sucesso em 10/11/2026 às 17:25:27 UTC. 20 verificações estruturais passaram; workflows de regressão reportaram failure sem steps executados (não comprova falha do código). QA visual Android/PWA, desktop e offline ainda pendente. Liberação solicitada pelo responsável, homologação integral não comprovada."
+    "status": "static_review_pending_visual_tests",
+    "notes": "Solicitação de mudança visual na abertura em 10/11/2026. Revisão estática prevista; QA visual Android/PWA e desktop, offline e acessibilidade ainda sem evidência. Publicação autorizada em continuidade ao fluxo de lançamento do GB+."
   }
 }
