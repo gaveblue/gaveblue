@@ -85,9 +85,9 @@ async function persist(review_state){
 $('news-form').onsubmit=e=>{e.preventDefault();persist('submitted')};
 $('save-draft').onclick=()=>persist('draft');
 $('copy-ai').onclick=async()=>{
- const title=s($('title').value),summary=s($('summary').value),body=s($('body').value),sources=s($('sources').value);
- const prompt='Atue como assistente de edição jornalística da ORVIA NEWS. Ajude a estruturar e revisar o texto abaixo sem inventar fatos, falas, números, entrevistas ou fontes. Destaque o que precisa ser checado antes da publicação. Entregue: manchete objetiva, linha fina, texto revisado, perguntas de apuração e possíveis riscos de imprecisão.\\n\\nTítulo: '+title+'\\nResumo: '+summary+'\\nTexto: '+body+'\\nFontes: '+sources;
- try{await navigator.clipboard.writeText(prompt);alertMsg('Prompt copiado! Abra o ChatGPT ou Gemini, cole o texto e confira as sugestões. Não publique sem verificar.');}catch{alertMsg('A cópia automática falhou: selecione e copie seu texto e peça uma revisão à IA.',true)}
+ const title=s($('title').value),summary=s($('summary').value),body=s($('body').value);
+ const prompt='Atue como assistente de edição jornalística da ORVIA NEWS. Ajude a estruturar e revisar o texto abaixo sem inventar fatos, falas, números, entrevistas ou fontes. Destaque o que precisa ser checado antes da publicação. Entregue: manchete objetiva, linha fina, texto revisado, perguntas de apuração e possíveis riscos de imprecisão.\\n\\nTítulo: '+title+'\\nResumo: '+summary+'\\nTexto: '+body;
+ try{await navigator.clipboard.writeText(prompt);alertMsg('Prompt copiado. Cole no ChatGPT ou Gemini; não compartilhe dados pessoais ou fontes confidenciais com a IA. Verifique os resultados.');}catch{alertMsg('A cópia automática falhou: selecione e copie seu texto e peça uma revisão à IA.',true)}
 };
 loadAuth().catch(e=>alertMsg(e.message,true));
 })();
