@@ -1,0 +1,41 @@
+// GB+ 3.0.1 — regressão estática e invariantes da splash screen.
+// Execução: node gbplus/tests/gbplus-301-splash-regression.mjs
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {fileURLToPath} from 'node:url';
+import {resolve,dirname} from 'node:path';
+const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
+const read=name=>readFileSync(resolve(root,name),'utf8');
+const html=read('index.html');
+const css=read('splash.css');
+const sw=read('sw.js');
+const version=JSON.parse(read('version.json'));
+
+assert(html.includes('id="gb-splash"'));
+assert(html.indexOf('id="gb-splash"')<html.indexOf('id="auth-gate"'));
+assert(html.includes('class="gb-reveal-g">G</span>'));
+assert(html.includes('class="gb-reveal-b">B</span>'));
+assert(html.includes('class="gb-reveal-plus"'));
+assert(html.includes('href="./splash.css?v=20261110-3001"'));
+assert(html.includes('document.getElementById("gb-splash")?.remove(),2400'));
+assert(html.includes('aria-hidden="true"'));
+assert(html.includes('src="./js/app.js?v=20261109-3000"'), 'App financeiro deve permanecer intacto');
+assert(html.includes('class="auth-locked"'), 'Auth existente deve permanecer intacta');
+assert(css.includes('html[data-theme="light"] #gb-splash'));
+assert(css.includes('@media(prefers-reduced-motion:reduce)'));
+assert(css.includes('#gb-splash{display:none!important'));
+assert(css.includes('animation:gb-splash-dismiss 2.05s'));
+assert(css.includes('visibility:hidden;pointer-events:none'));
+assert(css.includes('@keyframes gb-reveal-draw'));
+assert(css.includes('@keyframes gb-reveal-horizontal'));
+assert(css.includes('@keyframes gb-reveal-vertical'));
+assert(!/@import\b/.test(css), 'Não carregar fontes/estilos remotos na abertura');
+assert.equal((css.match(/{/g)||[]).length,(css.match(/}/g)||[]).length);
+assert(sw.includes("gb-plus-shell-v3001"));
+assert(sw.includes("'./splash.css'"));
+assert.equal(version.version,'3.0.1');
+assert.equal(version.build,3001);
+assert.equal(version.release_status,'candidate_not_published');
+assert.equal(version.published_at,null);
+assert(version.assets.includes('./splash.css'));
+console.log('GB+ 3.0.1: 29 verificações da abertura e isolamento visual passaram.');
