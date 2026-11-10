@@ -1,6 +1,6 @@
 # CHANGELOG — GB+ Gestão Financeira
 
-## [3.0.1 — ABERTURA ANIMADA LOGO REVEAL (CANDIDATA; NÃO PUBLICADA)] — 2026-11-10
+## [3.0.1 — ABERTURA ANIMADA LOGO REVEAL (LIBERAÇÃO AUTORIZADA; QA PARCIAL)] — 2026-11-10
 
 - **Identidade:** introdução minimalista com G e B formando-se gradualmente, finalizada pelo símbolo + azul; duração de 2,05 segundos e saída em fade suave.
 - **Desempenho:** implementação em CSS local sem GIF, bibliotecas externas ou novos dados; transição não depende do carregamento da autenticação nem bloqueia o login após a animação.
@@ -8,7 +8,7 @@
 - **Tema:** cores apropriadas a claro/escuro aplicadas antes do primeiro desenho, com estilo isolado dos formulários financeiros.
 - **PWA:** `splash.css` identificado no manifesto de atualização, CSS com cache-busting e versão de cache do service worker reservada para 3.0.1; não força reload de páginas abertas.
 - **Conservação:** sem alteração de JavaScript financeiro, banco de dados, Supabase, saldos, lançamentos, faturas, contas ou fluxo de login.
-- **Validação:** PR de desenvolvimento; regressão estática específica e conferência visual Android/desktop/instalação/offline exigidas antes de homologar e publicar. **Não declarar publicada/homologada nesta etapa.**
+- **Validação:** PR de desenvolvimento; regressão estática específica e conferência visual Android/desktop/instalação/offline exigidas antes de homologar e publicar. **Liberação expressamente autorizada em 10/11/2026 pelo responsável, mesmo com QA parcial; GitHub Actions 42843996230 falhou sem steps, sem teste executado. Não declarar homologação completa. Confirmar deploy separadamente antes de declarar publicação efetiva.**
 
 
 ## [3.0.0 — SISTEMA VISUAL FINANCEIRO UNIFICADO (LIBERAÇÃO AUTORIZADA; QA PARCIAL)] — 2026-11-09
