@@ -134,3 +134,11 @@ border:1px dashed #9cacc4;border-radius:18px;background:rgba(112,147,194,.035);c
 .gb-erp-end .button{min-width:225px;justify-content:center;}
 .gb-partner-erp-code{padding:10px 12px;border-radius:10px;background:rgba(107,143,203,.08);font-size:12px;color:var(--text,#24324a);}
 @media(max-width:760px){.gb-erp-switch,.gb-erp-fields,.gb-erp-summary-grid{grid-template-columns:1fr 1fr;}}
+
+.gb-partner-erp-details{margin-top:6px;border:1px solid rgba(126,145,175,.22);border-radius:12px;padding:12px;}
+.gb-partner-erp-details summary{font-weight:650;cursor:pointer;font-size:12px;}
+.gb-partner-erp-details p{margin:9px 0;color:var(--muted,#758294);font-size:11px;}
+.gb-partner-erp-details dl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin:12px 0 0;max-height:300px;overflow:auto;}
+.gb-partner-erp-details dl>div{border-radius:8px;padding:9px;background:rgba(115,145,190,.05);}
+.gb-partner-erp-details dt{color:var(--muted,#738195);font-size:10px;}
+.gb-partner-erp-details dd{margin:5px 0 0;font-weight:500;font-size:12px;overflow-wrap:anywhere;}
