@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#ffffff">
+<title>Redação | ORVIA NEWS</title>
+<style>
+:root{--red:#e90019;--ink:#111217;--muted:#70737c;--line:#e8e9eb;--soft:#f7f7f8}
+*{box-sizing:border-box}body{margin:0;font:15px/1.5 Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;color:var(--ink);background:#fff}a{color:inherit;text-decoration:none}button,input,textarea,select{font:inherit}button{cursor:pointer}button:disabled{opacity:.55;cursor:wait}.hide{display:none!important}.container{width:min(1130px,calc(100% - 38px));margin:auto}
+header{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid var(--line)}.header{height:78px;display:flex;align-items:center;justify-content:space-between;gap:16px}.brand{font-weight:950;font-size:25px;letter-spacing:-1.7px}.brand b{color:var(--red)}.brand small{display:block;letter-spacing:5px;font-size:9px;font-weight:500;text-align:center;line-height:1}.head-actions{display:flex;gap:10px;align-items:center}.back{color:var(--muted);font-size:13px;font-weight:650}
+main{padding:38px 0 90px}.intro{margin-bottom:24px}.eyebrow{color:var(--red);font-weight:850;letter-spacing:.11em;font-size:11px}.intro h1{font-size:clamp(27px,4vw,38px);letter-spacing:-1.6px;margin:4px 0}.intro p{color:var(--muted);margin:0;font-size:14px}
+.panel{border:1px solid var(--line);border-radius:18px;padding:25px;background:#fff;box-shadow:0 5px 28px #10111607}
+h2{font-size:19px;letter-spacing:-.6px;margin:0 0 16px}label{display:block;font-weight:700;font-size:12px;margin-bottom:6px}.field{margin-bottom:16px}input:not([type=checkbox]),textarea,select{width:100%;border:1px solid #dfe0e4;border-radius:11px;padding:13px;background:white;color:var(--ink);outline-offset:3px}textarea{min-height:105px;resize:vertical}textarea[name=body]{min-height:280px;line-height:1.7}.help{font-size:11px;color:var(--muted);margin-top:5px}
+.btn{border:1px solid var(--line);background:#fff;border-radius:11px;padding:12px 17px;font-weight:750;font-size:13px;color:var(--ink)}.btn.red{background:var(--red);border-color:var(--red);color:#fff}.btn:hover{filter:brightness(.98)}.btn.ghost{border:0;color:var(--red)}.btn.small{padding:8px 11px;font-size:11px}.row{display:flex;gap:11px;flex-wrap:wrap;align-items:center}.grid{display:grid;grid-template-columns:1fr;gap:22px}.editor-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(260px,.85fr);gap:22px;align-items:start}.twocol{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+#login{max-width:470px;margin:25px auto}#login .row .btn{flex:1}.tag{display:inline-block;padding:3px 9px;border-radius:99px;background:#f9f0f1;color:#c60018;font-weight:750;font-size:10px}.tag.draft{color:#535965;background:#f1f2f4}
+.article-item{padding:15px 0;border-bottom:1px solid var(--line)}.article-item:last-child{border:0}.article-item strong{display:block;line-height:1.4;margin:7px 0;font-size:14px}.article-item small{color:var(--muted)}.article-item .row{margin-top:9px;gap:6px}.notice{padding:11px 14px;border-radius:10px;background:#f7f7f8;font-size:12px;color:#565860;margin-bottom:18px}.notice.error{background:#fff0f1;color:#b50017}.notice.success{background:#eef9f0;color:#146628}.checkbox{display:flex;gap:8px;align-items:center;font-size:13px;margin:8px 0 20px;font-weight:650}.checkbox input{accent-color:var(--red)}
+#preview-dialog{border:0;border-radius:17px;padding:26px;width:min(670px,calc(100% - 30px));max-height:85vh;overflow:auto;box-shadow:0 20px 100px #0005}#preview-dialog::backdrop{background:#0009}#preview-dialog h2{font-size:28px;line-height:1.2}#preview-dialog p{white-space:pre-wrap;line-height:1.7}
+footer{text-align:center;padding:20px;color:#9b9da2;font-size:11px;border-top:1px solid var(--line)}
+@media(max-width:790px){.editor-grid{grid-template-columns:1fr}.twocol{grid-template-columns:1fr}.panel{padding:19px}main{padding-top:24px}.header{height:69px}}
+</style>
+</head>
+<body>
+<header><div class="container header"><a href="./" class="brand">ORVI<b>A</b><small>NEWS</small></a><div class="head-actions"><a class="back" href="./">Ver o portal ↗</a><button id="logout" class="btn small hide" type="button">Sair</button></div></div></header>
+<main class="container">
+<div class="intro"><span class="eyebrow">ÁREA EDITORIAL</span><h1>Redação ORVIA NEWS</h1><p>Escreva, revise e publique notícias sem alterar arquivos do site.</p></div>
+<div id="alert" class="notice hide" role="status" aria-live="polite"></div>
+<section id="login" class="panel">
+<h2>Entrar na redação</h2><p style="color:var(--muted);font-size:13px;margin-top:-8px">Acesso restrito a editores autorizados.</p>
+<form id="login-form">
+<div class="field"><label for="email">E-mail</label><input id="email" type="email" autocomplete="email" required placeholder="seu@email.com"></div>
+<div class="field"><label for="password">Senha</label><input id="password" type="password" minlength="8" autocomplete="current-password" required placeholder="Mínimo de 8 caracteres"></div>
+<div class="row"><button class="btn red" type="submit">Entrar</button><button class="btn" type="button" id="register">Criar meu acesso</button></div>
+<p class="help">No primeiro acesso, use o e-mail autorizado e selecione “Criar meu acesso”. Você receberá uma confirmação por e-mail antes de entrar.</p>
+</form></section>
+<section id="workspace" class="hide">
+<div class="notice" id="account-note">Carregando sua redação...</div>
+<div class="editor-grid">
+<div class="panel">
+<div class="row" style="justify-content:space-between"><h2 id="editor-heading">Nova notícia</h2><button class="btn small" id="reset" type="button">+ Nova notícia</button></div>
+<form id="article-form">
+<div class="field"><label for="title">Título da notícia *</label><input id="title" name="title" required minlength="5" maxlength="240" placeholder="Escreva a manchete principal"></div>
+<div class="field"><label for="summary">Linha fina / resumo *</label><textarea id="summary" name="summary" minlength="15" maxlength="500" required placeholder="Resuma o fato em 1 ou 2 frases" style="min-height:92px"></textarea></div>
+<div class="twocol">
+<div class="field"><label for="category">Editoria</label><select id="category" name="category"><option>Cidades</option><option>Política</option><option>Segurança</option><option>Agro</option><option>Tecnologia</option><option>Entretenimento</option><option>Brasil</option><option>Economia</option><option>Esportes</option></select></div>
+<div class="field"><label for="author">Autor / crédito</label><input id="author" name="author" value="Redação ORVIA NEWS"></div>
+</div>
+<div class="field"><label for="body">Texto completo *</label><textarea id="body" name="body" required minlength="30" placeholder="Escreva aqui a matéria completa. Separe os parágrafos com Enter."></textarea><div class="help">Texto simples: parágrafos são preservados na leitura, sem código HTML.</div></div>
+<div class="field"><label for="image">Imagem de capa (JPG, PNG ou WebP, até 5 MB)</label><input id="image" name="image" type="file" accept="image/jpeg,image/png,image/webp"><div id="image-current" class="help">Opcional. Use apenas imagens com autorização de publicação.</div></div>
+<div class="field"><label for="image-credit">Crédito da imagem</label><input id="image-credit" name="image_credit" placeholder="Fotógrafo, agência ou arquivo próprio"></div>
+<label class="checkbox"><input type="checkbox" id="featured"> Destacar a notícia na página inicial</label>
+<div class="row"><button class="btn" type="button" id="preview">Pré-visualizar</button><button class="btn" type="button" id="draft">Salvar rascunho</button><button class="btn red" type="submit" id="publish">Publicar notícia</button></div>
+<div class="help" style="margin-top:12px">Rascunhos não aparecem para os leitores. Apenas “Publicar notícia” disponibiliza a matéria no portal.</div>
+</form>
+</div>
+<aside class="panel"><h2>Minhas matérias</h2><div class="row" style="margin-bottom:10px"><span id="count" class="tag draft">0 matérias</span><button class="btn small" id="refresh" type="button">Atualizar</button></div><div id="article-list"><p class="help">Carregando...</p></div></aside>
+</div>
+</section>
+</main>
+<dialog id="preview-dialog"><div class="row" style="justify-content:space-between;margin-bottom:20px"><span class="eyebrow">PRÉ-VISUALIZAÇÃO · NÃO PUBLICADA</span><button class="btn small" id="close-preview" type="button">Fechar</button></div><span class="eyebrow" id="p-cat"></span><h2 id="p-title"></h2><h3 id="p-summary" style="color:#777;font-size:17px;font-weight:450"></h3><p id="p-body"></p></dialog>
+<footer>ORVIA NEWS · Painel editorial protegido pelo Supabase Auth e políticas de acesso.</footer>
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.2/dist/umd/supabase.min.js"></script>
+<script>
+(function(){
+'use strict';
+const $=id=>document.getElementById(id);
+let db=null,session=null,editing=null,items=[],busy=false;
+function message(msg,kind){const a=$('alert');a.textContent=msg;a.className='notice '+(kind||'');a.classList.remove('hide');a.scrollIntoView({behavior:'smooth',block:'nearest'});}
+function setBusy(on){busy=on;document.querySelectorAll('#article-form button,#login-form button').forEach(b=>b.disabled=on);}
+function errorText(e){return e?.message || 'Ocorreu uma falha. Verifique sua conexão.';}
+try{db=window.supabase.createClient(window.ORVIA_CONFIG.url,window.ORVIA_CONFIG.publishableKey)}catch(e){message('Configuração do banco indisponível.','error');return;}
+const date=v=>v?new Date(v).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'}):'';
+async function verifyAccess(){
+ const {data:{user},error}=await db.auth.getUser();
+ if(error||!user){$('workspace').classList.add('hide');$('login').classList.remove('hide');$('logout').classList.add('hide');return;}
+ const {data:editor,error:edErr}=await db.from('orvia_editors').select('email').eq('email',user.email.toLowerCase()).maybeSingle();
+ if(edErr||!editor){await db.auth.signOut();message('Este e-mail ainda não está autorizado como editor da ORVIA NEWS.','error');return;}
+ session=user;$('login').classList.add('hide');$('workspace').classList.remove('hide');$('logout').classList.remove('hide');
+ $('account-note').textContent='Conectado como '+user.email+' · Suas alterações são armazenadas no projeto ORVIA NEWS.';
+ await load();
+}
+$('login-form').addEventListener('submit',async e=>{
+ e.preventDefault();setBusy(true);
+ try{const {error}=await db.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});if(error)throw error;await verifyAccess();}
+ catch(err){message('Não foi possível entrar: '+errorText(err),'error');}
+ finally{setBusy(false);}
+});
+$('register').onclick=async()=>{
+ const email=$('email').value.trim(),password=$('password').value;
+ if(!email||password.length<8){message('Informe e-mail e senha de pelo menos 8 caracteres.','error');return;}
+ setBusy(true);
+ try{const {error}=await db.auth.signUp({email,password,options:{emailRedirectTo:location.href}});if(error)throw error;message('Cadastro solicitado. Confira a caixa de entrada e confirme seu e-mail; depois volte para entrar.','success');}
+ catch(err){message('Falha ao criar acesso: '+errorText(err),'error');}
+ finally{setBusy(false);}
+};
+$('logout').onclick=async()=>{await db.auth.signOut();session=null;editing=null;await verifyAccess();message('Você saiu da redação.','success');};
+function elt(tag,txt,cls){const el=document.createElement(tag);if(txt!==undefined)el.textContent=txt;if(cls)el.className=cls;return el;}
+async function load(){
+ const {data,error}=await db.from('orvia_articles').select('*').order('updated_at',{ascending:false});
+ if(error){message('Não foi possível consultar as matérias: '+errorText(error),'error');return;}
+ items=data||[];$('count').textContent=items.length+' matéria(s)';
+ const list=$('article-list');list.replaceChildren();
+ if(!items.length){list.append(elt('p','Nenhuma matéria cadastrada ainda. Crie sua primeira notícia no formulário.','help'));return;}
+ items.forEach(a=>{
+   const wrap=elt('div',undefined,'article-item');const label=elt('span',a.status==='published'?'Publicado':'Rascunho','tag '+(a.status==='published'?'':'draft'));wrap.append(label,elt('strong',a.title),elt('small',a.category+' · '+date(a.updated_at)));
+   const actions=elt('div',undefined,'row');
+   const edit=elt('button','Editar','btn small'),toggle=elt('button',a.status==='published'?'Retirar do ar':'Publicar','btn small'),del=elt('button','Excluir','btn ghost small');
+   edit.type=toggle.type=del.type='button';
+   edit.onclick=()=>editArticle(a);toggle.onclick=()=>changeStatus(a);del.onclick=()=>deleteArticle(a);
+   actions.append(edit,toggle,del);wrap.append(actions);list.append(wrap);
+ });
+}
+function clear(){
+ editing=null;$('editor-heading').textContent='Nova notícia';$('article-form').reset();$('author').value='Redação ORVIA NEWS';$('image-current').textContent='Opcional. Use apenas imagens com autorização de publicação.';window.scrollTo({top:0,behavior:'smooth'});
+}
+$('reset').onclick=clear;$('refresh').onclick=load;
+function editArticle(a){
+ editing=a;$('editor-heading').textContent='Editar matéria';$('title').value=a.title;$('summary').value=a.summary||'';$('category').value=a.category;$('author').value=a.author||'Redação ORVIA NEWS';$('body').value=a.body||'';$('image-credit').value=a.image_credit||'';$('featured').checked=!!a.featured;$('image').value='';$('image-current').textContent=a.image_url?'Imagem atual já cadastrada. Selecione outra para substituir.':'Nenhuma imagem cadastrada.';window.scrollTo({top:0,behavior:'smooth'});
+}
+function payload(){
+ const title=$('title').value.trim();return {title,summary:$('summary').value.trim(),category:$('category').value,author:$('author').value.trim()||'Redação ORVIA NEWS',body:$('body').value.trim(),featured:$('featured').checked,image_credit:$('image-credit').value.trim()};
+}
+function valid(){return $('article-form').checkValidity() ? true : ($('article-form').reportValidity(),false);}
+function slug(title){return title.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,65)+'-'+crypto.randomUUID().slice(0,8);}
+async function persist(status){
+ if(busy||!valid())return;setBusy(true);
+ try{
+  const p=payload(),file=$('image').files?.[0];if(file){
+   if(file.size>5*1024*1024||!['image/jpeg','image/png','image/webp'].includes(file.type))throw Error('A imagem deve ser JPG, PNG ou WebP com até 5 MB.');
+   const ext=file.type==='image/png'?'png':file.type==='image/webp'?'webp':'jpg';
+   const path=new Date().toISOString().slice(0,7)+'/'+crypto.randomUUID()+'.'+ext;
+   const {error:upErr}=await db.storage.from('orvia-news-images').upload(path,file,{contentType:file.type,upsert:false});
+   if(upErr)throw upErr;
+   p.image_url=db.storage.from('orvia-news-images').getPublicUrl(path).data.publicUrl;
+  }else if(editing)p.image_url=editing.image_url||null;
+  p.status=status;p.published_at=status==='published'?(editing?.published_at||new Date().toISOString()):null;
+  if(!editing){p.slug=slug(p.title);p.created_by=session.id;}
+  const op=editing?db.from('orvia_articles').update(p).eq('id',editing.id):db.from('orvia_articles').insert(p);
+  const {error}=await op;if(error)throw error;
+  clear();await load();message(status==='published'?'Notícia publicada! Ela já pode aparecer no site.':'Rascunho salvo. Ainda não está público.','success');
+ }catch(err){message('Não foi possível salvar: '+errorText(err),'error');}
+ finally{setBusy(false);}
+}
+$('article-form').addEventListener('submit',e=>{e.preventDefault();persist('published')});
+$('draft').onclick=()=>persist('draft');
+async function changeStatus(a){
+ const next=a.status==='published'?'draft':'published';
+ if(!confirm(next==='published'?'Publicar esta matéria no portal?':'Retirar esta matéria do ar?'))return;
+ const {error}=await db.from('orvia_articles').update({status:next,published_at:next==='published'?(a.published_at||new Date().toISOString()):null}).eq('id',a.id);
+ if(error)message(errorText(error),'error');else{await load();message(next==='published'?'Matéria publicada.':'Matéria retirada do ar.','success');}
+}
+async function deleteArticle(a){
+ if(!confirm('Excluir permanentemente a matéria "'+a.title+'"?'))return;
+ const {error}=await db.from('orvia_articles').delete().eq('id',a.id);
+ if(error)message(errorText(error),'error');else{if(editing?.id===a.id)clear();await load();message('Matéria excluída.','success');}
+}
+$('preview').onclick=()=>{
+ const p=payload();$('p-cat').textContent=p.category;$('p-title').textContent=p.title||'Título da notícia';$('p-summary').textContent=p.summary;$('p-body').textContent=p.body||'O texto aparecerá aqui.';$('preview-dialog').showModal();
+};
+$('close-preview').onclick=()=>$('preview-dialog').close();
+verifyAccess().catch(e=>message('Não foi possível carregar seu acesso: '+errorText(e),'error'));
+})();
+</script>
+</body>
+</html>
