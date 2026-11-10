@@ -25,6 +25,31 @@
     if(!driverId || !date) return null;
     return all().find(r => String(r.driverId)===String(driverId) && activeOn(r,date)) || null;
   }
+  // Resolve a Central record against the physical reserve, not the driver's habitual car.
+  // Never silently switch an unrelated plate or reinterpret events outside the OS period.
+  function resolveCentralFuel(recordedVehicleId,driverId,date) {
+    const recordedId=String(recordedVehicleId||'');
+    const active=currentForDriver(driverId,date);
+    if (!active) {
+      const upcoming=all().filter(r=>String(r.sourceVehicleId)===recordedId
+        && driverId && String(r.driverId)===String(driverId) && r.startDate>date)
+        .sort((a,b)=>a.startDate.localeCompare(b.startDate))[0];
+      const days=upcoming ? Math.round((Date.parse(upcoming.startDate)-Date.parse(date))/86400000) : -1;
+      return {vehicleId:recordedId,isReserve:false,review:false,
+        periodWarning:days>=1 && days<=7
+          ? 'A entrega do carro reserva está registrada para '+upcoming.startDate+'. O abastecimento é anterior. Confira a data na OS caso o KM seja do reserva.'
+          : ''};
+    }
+    const sourceId=String(active.sourceVehicleId),reserveId=String(active.reserveVehicleId);
+    if (recordedId && recordedId!==sourceId && recordedId!==reserveId)
+      return {vehicleId:'',isReserve:false,review:true,
+        reason:'O veículo registrado na Central é diferente do titular e do reserva desta substituição. Confirme a placa física antes de aprovar.'};
+    if (!vehicle(reserveId))
+      return {vehicleId:'',isReserve:false,review:true,
+        reason:'O carro reserva desta substituição não foi encontrado no cadastro. Confira a OS.'};
+    return {vehicleId:reserveId,isReserve:true,review:false,
+      replacementId:active.id,replacedVehicleId:sourceId};
+  }
   function forFuel(vehicleId,driverId,date) {
     if(!date) return {replacement:null,wrongVehicle:false};
     const sourceMatch = all().find(r=>r.sourceVehicleId===vehicleId && activeOn(r,date));
@@ -35,8 +60,9 @@
   }
   function association(vehicleId,driverId,date,existingId='',km='') {
     const result=forFuel(vehicleId,driverId,date);
-    if(result.wrongVehicle && result.replacement?.reason==='sinistro') return {replacementId:'',replacedVehicleId:'',sinisterFuelReview:true};
-    if(result.wrongVehicle) return {error:'Este veículo está temporariamente substituído. Lance o abastecimento na placa do carro reserva, usando o KM do reserva.'};
+    if(result.wrongVehicle) return {error:result.replacement?.reason==='sinistro'
+      ? 'Este veículo está sinistrado e possui carro reserva ativo. Selecione a placa física do reserva e informe o KM do reserva antes de salvar.'
+      : 'Este veículo está temporariamente substituído. Lance o abastecimento na placa do carro reserva, usando o KM do reserva.'};
     const r=result.replacement;
     if(r && r.driverId && r.driverId!==driverId) return {error:'O motorista informado não corresponde ao motorista desta substituição.'};
     if(existingId && (!r || r.id!==existingId)) return {error:'Este abastecimento já está vinculado a uma substituição. Revise o vínculo antes de alterar veículo, motorista ou período.'};
@@ -223,5 +249,5 @@
       else if(!event.shiftKey && document.activeElement===last){event.preventDefault();first.focus();}
     }
   });
-  window.WeFrotasSubstitutions={all,forFuel,association,currentForDriver,statistics,validate,renderProfile,open:openSheet,close:closeSheet};
+  window.WeFrotasSubstitutions={all,forFuel,association,currentForDriver,resolveCentralFuel,statistics,validate,renderProfile,open:openSheet,close:closeSheet};
 })();

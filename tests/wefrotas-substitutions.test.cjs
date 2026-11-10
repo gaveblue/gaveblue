@@ -169,14 +169,41 @@ test('diagnóstico de risco: merge entre titulares distintos não protege reserv
 });
 
 
-test('sinistro permite abastecimento da placa original para conferência administrativa',()=>{
+test('sinistro impede atribuir KM do carro reserva ao titular',()=>{
   const {api,substitution}=fixture();
   substitution.reason='sinistro';
   const result=api.association('titular','motorista','2026-11-02');
-  assert.equal(result.error,undefined);
-  assert.equal(result.sinisterFuelReview,true);
-  assert.equal(result.replacementId,'');
-  assert.equal(api.association('titular','motorista','2026-10-31').sinisterFuelReview,false);
+  assert.match(result.error,/sinistrado/);
+  assert.equal(result.replacementId,undefined);
   assert.equal(api.association('reserva','motorista','2026-11-02').replacementId,'sub-1');
-  assert.equal(api.association('reserva','motorista','2026-11-02').sinisterFuelReview,false);
+});
+
+test('Central associa registro da placa habitual ao reserva somente no período da OS',()=>{
+  const {api,substitution}=fixture();
+  substitution.reason='sinistro';
+  const resolved=api.resolveCentralFuel('titular','motorista','2026-11-02');
+  assert.equal(resolved.vehicleId,'reserva');
+  assert.equal(resolved.replacementId,'sub-1');
+  assert.equal(resolved.replacedVehicleId,'titular');
+  assert.equal(resolved.isReserve,true);
+  const directReserve=api.resolveCentralFuel('reserva','motorista','2026-11-02');
+  assert.equal(directReserve.vehicleId,'reserva');
+  assert.equal(api.resolveCentralFuel('titular','motorista','2026-10-31').vehicleId,'titular');
+});
+
+test('Central bloqueia placa estranha à substituição em vez de escolher veículo errado',()=>{
+  const {api}=fixture();
+  const result=api.resolveCentralFuel('terceiro','motorista','2026-11-02');
+  assert.equal(result.review,true);
+  assert.equal(result.vehicleId,'');
+  assert.match(result.reason,/placa física/);
+});
+
+test('Central alerta quando data do abastecimento antecede por poucos dias a entrega do reserva',()=>{
+  const {api}=fixture();
+  const before=api.resolveCentralFuel('titular','motorista','2026-10-31');
+  assert.equal(before.isReserve,false);
+  assert.match(before.periodWarning,/2026-11-01/);
+  const unrelated=api.resolveCentralFuel('terceiro','motorista','2026-10-31');
+  assert.equal(unrelated.periodWarning,'');
 });

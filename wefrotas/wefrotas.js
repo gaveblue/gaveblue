@@ -3773,6 +3773,7 @@
         organizationId: String(window.WeFrotasBackend?.getOrganizationContext?.()?.id || '')
       } : null;
 
+      const fuelDate = centralRecord ? getCentralRecordIsoDate(centralRecord, importedData) : importedData.dataIso;
       const supplier = resolveFuelSupplierByImportedName(importedData.posto);
       const driver = resolveDriverByImportedName(importedData.motorista);
       const linkedVehicle = resolveVehicleByImportedDriver(importedData.motorista, driver);
@@ -3783,24 +3784,26 @@
         : null;
       const recordVehicleId = String(centralRecord?.vehicleId || centralRecord?.veiculoId || '').trim();
       const explicitVehicleById = recordVehicleId ? allVehicles.find(item => String(item.id) === recordVehicleId) : null;
-      const activeReplacement = window.WeFrotasSubstitutions?.currentForDriver?.(driver?.id, importedData.dataIso);
-      const reserveVehicle = activeReplacement
-        ? allVehicles.find(item => String(item.id) === String(activeReplacement.reserveVehicleId))
+      // The Central keeps its original driver/device; the administrative intake
+      // resolves the active OS and validates mileage against the reserve only.
+      const recordedVehicle = explicitVehicle || explicitVehicleById || linkedVehicle;
+      const decision = window.WeFrotasSubstitutions?.resolveCentralFuel?.(
+        recordedVehicle?.id, driver?.id, fuelDate
+      );
+      const reserveVehicle = decision?.isReserve
+        ? allVehicles.find(item => String(item.id) === String(decision.vehicleId))
         : null;
-      // A Central pode informar a placa habitual durante a substituição.
-      // O KM recebido deve ser validado contra o reserva, nunca contra o titular.
-      const recordedVehicle = explicitVehicle || explicitVehicleById;
-      const vehicle = reserveVehicle && (!recordedVehicle
-        || String(recordedVehicle.id) === String(activeReplacement.sourceVehicleId)
-        || String(recordedVehicle.id) === String(reserveVehicle.id))
-        ? reserveVehicle : (recordedVehicle || linkedVehicle);
+      // An unexpected third plate must be reviewed, never silently associated.
+      const vehicle = decision?.review ? null : (reserveVehicle || recordedVehicle);
       const notes = [];
-      if (reserveVehicle && vehicle?.id === reserveVehicle.id && linkedVehicle?.id !== reserveVehicle.id) {
+      if (reserveVehicle) {
         notes.push('VEÍCULO RESERVA — abastecimento associado à substituição ativa; KM do veículo reserva.');
       }
+      if (decision?.review && decision.reason) notes.push('REVISAR PLACA: ' + decision.reason);
+      if (decision?.periodWarning) notes.push('CONFERIR DATA DO RESERVA: ' + decision.periodWarning);
 
       if (document.getElementById('finance-data-abastecimento')) {
-        document.getElementById('finance-data-abastecimento').value = importedData.dataIso;
+        document.getElementById('finance-data-abastecimento').value = fuelDate;
       }
       if (document.getElementById('finance-km')) {
         document.getElementById('finance-km').value = importedData.km || '';
@@ -3855,7 +3858,9 @@
       if (!importedData.tipoCombustivel) pendingFields.push('tipo de combustível');
       if (!importedData.litros) pendingFields.push('quantidade em litros');
       if (!importedData.valor || !parseCurrencyInputValue(importedData.valor)) pendingFields.push('valor');
-      showImportResolutionFeedback(pendingFields, 'Abastecimento importado. Revise os dados e finalize o lançamento.');
+      showImportResolutionFeedback(pendingFields,
+        decision?.review ? decision.reason
+          : decision?.periodWarning || 'Abastecimento importado. Revise os dados e finalize o lançamento.');
     }
 
     function openImportedLooseNoteLaunch(importedData, centralRecord = null) {
@@ -6829,11 +6834,57 @@
       }
     }
 
+    // Reserve fuel is charged to the titular OS without transferring its odometer.
+    function getVerifiedReserveRelation(entry) {
+      const api = window.WeFrotasReserveAllocation;
+      if (!api || !entry) return null;
+      if (isFuelGroupEntry(entry)) {
+        const children = getFuelGroupChildren(entry);
+        if (!children.length) return null;
+        const relationships = children.map(child => api.reserveForEntry(child, allVehicles));
+        return relationships.every(Boolean) &&
+          relationships.every(r => String(r.sourceVehicleId) === String(relationships[0].sourceVehicleId) &&
+            String(r.reserveVehicleId) === String(entry.vehicleId)) ? relationships[0] : null;
+      }
+      return api.reserveForEntry(entry, allVehicles);
+    }
+
+    function getEligibleOpenOrdersForFinance(entry) {
+      const physicalVehicleId = String(entry?.vehicleId || '');
+      const reserveRelation = getVerifiedReserveRelation(entry);
+      return getOpenOrdersSorted().filter(order =>
+        !physicalVehicleId || String(order.vehicleId) === physicalVehicleId ||
+        (reserveRelation && String(order.vehicleId) === String(reserveRelation.sourceVehicleId)));
+    }
+
+    function getOrderFinanceReservePrintNote(entry, order) {
+      const children = isFuelGroupEntry(entry) ? getFuelGroupChildren(entry) : [];
+      return window.WeFrotasReserveAllocation?.printReserveLabel(entry, order, allVehicles, children) || '';
+    }
+
+    function getOrderSinistroPrintNotice(order, entries) {
+      const items = entries.map(entry => isFuelGroupEntry(entry)
+        ? { ...entry, children: getFuelGroupChildren(entry) } : entry);
+      const sinistro = window.WeFrotasReserveAllocation?.isSinistroOnOrder(order, items, allVehicles);
+      const hasReserveCosts = entries.some(entry => getOrderFinanceReservePrintNote(entry, order));
+      if (!sinistro && !hasReserveCosts) return '';
+      return '<div style="border:1px solid #333;padding:6px 9px;margin:9px 0 6px;font-size:10px;line-height:1.45;">' +
+        (sinistro ? '<strong>VEÍCULO SINISTRADO</strong>. ' : '') +
+        (hasReserveCosts
+          ? 'Os lançamentos identificados como <strong>VEÍCULO RESERVA</strong> foram realizados no carro substituto. Seus custos constam nesta OS, mas o KM do reserva não compõe o KM inicial/final do veículo titular.'
+          : 'Situação operacional de sinistro identificada para este veículo/OS.') +
+        '</div>';
+    }
+
     function getOrderKmData(orderId) {
+      const order = allOrders.find(item => item.id === orderId);
+      if (!order) return { kmInicial: '', kmFinal: '' };
       const kmEntries = allFinanceEntries
         .filter(entry => entry.orderId === orderId || (entry.groupedIntoId && allFinanceEntries.some(group => group.id === entry.groupedIntoId && group.orderId === orderId)))
         .flatMap(entry => isFuelGroupEntry(entry) ? getFuelGroupChildren(entry) : [entry])
-        .filter(entry => entry && entry.km !== undefined && entry.km !== null && String(entry.km).trim() !== '')
+        // The OS pays the cost, but never inherits another vehicle's odometer.
+        .filter(entry => entry && String(entry.vehicleId || '') === String(order.vehicleId))
+        .filter(entry => entry.km !== undefined && entry.km !== null && String(entry.km).trim() !== '')
         .sort((a, b) => {
           const dateCompare = String(getFinanceEntryDate(a)).localeCompare(String(getFinanceEntryDate(b)));
           if (dateCompare !== 0) return dateCompare;
@@ -6866,7 +6917,7 @@
 
     function getVehicleFuelKmRange(vehicleId, start = '', end = '') {
       const kms = getFuelSheetRows()
-        .filter(row => getEntryLinkedVehicleId(row.entry) === vehicleId || getEntryImmediateVehicleId(row.entry) === vehicleId || row.vehicle?.id === vehicleId)
+        .filter(row => String(row.entry?.vehicleId || '') === String(vehicleId))
         .filter(row => isDateWithinRange(getFinanceEntryDate(row.entry), start, end))
         .map(row => Number(row.entry?.km || 0))
         .filter(km => Number.isFinite(km) && km > 0)
@@ -7402,7 +7453,9 @@
           const currentVehicleId = getEntryLinkedVehicleId(parent);
           if (!vehicleEntriesMap.has(currentVehicleId)) vehicleEntriesMap.set(currentVehicleId, []);
           const children = isFuelGroupEntry(parent) ? getFuelGroupChildren(parent) : [parent];
-          vehicleEntriesMap.get(currentVehicleId).push(...(children.length ? children : [parent]));
+          // Costs follow the OS. Only the physically fuelled vehicle supplies KM.
+          vehicleEntriesMap.get(currentVehicleId).push(...(children.length ? children : [parent])
+            .filter(child => String(child?.vehicleId || '') === String(currentVehicleId)));
         });
 
       vehicleEntriesMap.forEach((entries, currentVehicleId) => {
@@ -9405,9 +9458,15 @@
         return;
       }
 
-      const vehicleId = getEntryVehicleId(entry);
-      const closeOpenOrders = getOpenOrdersSorted()
-        .filter(order => !vehicleId || order.vehicleId === vehicleId);
+      const closeOpenOrders = getEligibleOpenOrdersForFinance(entry);
+      const reserveRelation = getVerifiedReserveRelation(entry);
+      // A legacy Central approval can name the source instead of the real
+      // reserve. Require explicit administrator confirmation before changing it.
+      const recordedSource = isFuelEntry(entry) && !entry.groupedIntoId && !entry.substitutionId
+        ? window.WeFrotasSubstitutions?.forFuel(entry.vehicleId, entry.driverId, getFinanceEntryDate(entry))
+        : null;
+      const confirmableReserve = recordedSource?.wrongVehicle && recordedSource.replacement?.reason === 'sinistro'
+        ? allVehicles.find(vehicle => String(vehicle.id) === String(recordedSource.replacement.reserveVehicleId)) : null;
       const orderOptions = closeOpenOrders
         .map(order => `<option value="${escapeHtml(getOrderAutocompleteLabel(order))}"></option>`)
         .join('');
@@ -9425,6 +9484,14 @@
           <label>Lançamento selecionado</label>
           <div class="soft-input w-full flex items-center">${escapeHtml(isFinanceGroupEntry(entry) ? (isExpenseGroupEntry(entry) ? 'Agrupamento de despesas' : 'Agrupamento de abastecimentos') : (entry.fornecedor || 'Abastecimento'))}</div>
         </div>
+        ${confirmableReserve ? `<div class="field-wrap full" style="padding:10px 12px;border:1px solid #c4b9a3;border-radius:12px;">
+          <label style="display:flex;align-items:flex-start;gap:9px;line-height:1.45;">
+            <input id="finance-close-reserve-confirm" type="checkbox" style="margin-top:4px;accent-color:#2563eb;">
+            <span><strong>Este abastecimento foi no VEÍCULO RESERVA ${escapeHtml(confirmableReserve.placa || '')}.</strong>
+            Confirmo que a quilometragem informada pertence ao reserva, não ao veículo sinistrado.
+            O lançamento será reclassificado com histórico antes de ser alocado na OS.</span>
+          </label>
+        </div>` : ''}
         <div class="field-wrap">
           <label>NF / numero da nota</label>
           <input class="soft-input w-full" id="finance-close-nf" placeholder="Ex: NF 1542">
@@ -9447,6 +9514,7 @@
         </div>
         <div class="field-wrap full">
           <label>${requiredLabel('Alocar na OS')}</label>
+          ${reserveRelation ? '<div class="text-xs font-semibold mb-2" style="color:var(--muted-text,#64748b)">VEÍCULO RESERVA: o abastecimento permanece na placa do reserva. É possível alocar a despesa na OS do titular (sinistro ou mensal), sem transferir o KM.</div>' : ''}
           <input id="finance-close-order-id" type="hidden">
           <input class="soft-input w-full" id="finance-close-order-search" list="finance-close-order-options" placeholder="Digite número da OS, frota, placa ou veículo" autocomplete="off">
           <datalist id="finance-close-order-options">
@@ -10706,7 +10774,15 @@
           ? String(item.reserveVehicleId) === String(recordedVehicle.id)
             || (String(item.sourceVehicleId) === String(recordedVehicle.id) && driver && String(item.driverId) === String(driver.id))
           : driver && String(item.driverId) === String(driver.id)));
-      if (matches.length !== 1) return '';
+      if (matches.length !== 1) {
+        const warning = window.WeFrotasSubstitutions?.resolveCentralFuel?.(
+          recordedVehicle?.id, driver?.id, date
+        )?.periodWarning;
+        return warning
+          ? '<span class="central-pending-reserve-badge" title="' + escapeHtml(warning)
+            + '" style="display:inline-flex;align-items:center;margin-top:4px;padding:3px 7px;border-radius:6px;background:#fff3d6;color:#875700;border:1px solid #e7c980;font-size:10px;font-weight:800">CONFERIR DATA DO RESERVA</span>'
+          : '';
+      }
       const source = allVehicles.find(item => String(item.id) === String(matches[0].sourceVehicleId));
       const tooltip = 'Abastecimento do veículo reserva' + (source?.placa ? ' — substitui ' + source.placa : '');
       return '<span class="central-pending-reserve-badge" title="' + escapeHtml(tooltip) + '" style="display:inline-flex;align-items:center;margin-top:4px;padding:3px 7px;border-radius:6px;background:#fff3d6;color:#875700;border:1px solid #e7c980;font-size:10px;font-weight:800;letter-spacing:.035em">VEÍCULO RESERVA</span>';
@@ -14171,7 +14247,10 @@
         return `
           <tr>
             <td>${entry ? escapeHtml(formatDate(getFinancePaymentDate(entry))) : ''}</td>
-            <td>${entry ? escapeHtml(getFinanceSupplierSummary(entry)) : ''}</td>
+            <td>${entry ? escapeHtml(getFinanceSupplierSummary(entry)) +
+              (getOrderFinanceReservePrintNote(entry, order)
+                ? '<div style="margin-top:3px;font-size:9px;font-weight:800;line-height:1.25;">' +
+                    escapeHtml(getOrderFinanceReservePrintNote(entry, order)) + '</div>' : '') : ''}</td>
             <td class="money">${entry && entry.kind === 'despesa' ? escapeHtml(formatCurrency(entry.total)) : ''}</td>
             <td class="money">${entry && entry.kind === 'receita' ? escapeHtml(formatCurrency(entry.total)) : ''}</td>
             <td class="money">${entry ? escapeHtml(formatCurrency(runningTotal)) : ''}</td>
@@ -14250,6 +14329,7 @@
               <tr><td class="label">Chassi:</td><td>${escapeHtml(vehicle ? vehicle.chassi || '' : '')}</td><td class="label">KM FINAL:</td><td>${escapeHtml(kmData.kmFinal || '')}</td></tr>
               <tr><td class="label">Responsável:</td><td colspan="3">${escapeHtml(driver ? driver.nome : order.responsavelNome || '')}</td></tr>
             </table>
+            ${getOrderSinistroPrintNotice(order, entries)}
             <table class="desc-title block-gap"><tr><td>DESCRIÇÃO DO SERVIÇO/PROBLEMA:</td></tr></table>
             <table class="desc-box"><tr><td>${escapeHtml(printableDescription || '')}</td></tr></table>
             <table class="signature-block block-gap"><tr><td><div class="sign-wrap"><div class="sign-line"></div><div class="sign-label">AUTORIZADOR</div></div></td></tr></table>
@@ -14345,7 +14425,10 @@
         return `
           <tr>
             <td>${entry ? escapeHtml(formatDate(getFinancePaymentDate(entry))) : ''}</td>
-            <td>${entry ? escapeHtml(getFinanceSupplierSummary(entry)) : ''}</td>
+            <td>${entry ? escapeHtml(getFinanceSupplierSummary(entry)) +
+              (getOrderFinanceReservePrintNote(entry, order)
+                ? '<div style="margin-top:3px;font-size:9px;font-weight:800;line-height:1.25;">' +
+                    escapeHtml(getOrderFinanceReservePrintNote(entry, order)) + '</div>' : '') : ''}</td>
             <td class="money">${entry && entry.kind === 'despesa' ? escapeHtml(formatCurrency(entry.total)) : ''}</td>
             <td class="money">${entry && entry.kind === 'receita' ? escapeHtml(formatCurrency(entry.total)) : ''}</td>
             <td class="money">${entry ? escapeHtml(formatCurrency(runningTotal)) : ''}</td>
@@ -14407,7 +14490,8 @@
             </tr>
           </table>
 
-          <table class="desc-title block-gap">
+          ${getOrderSinistroPrintNotice(order, entries)}
+            <table class="desc-title block-gap">
             <tr>
               <td>DESCRIÇÃO DO SERVIÇO/PROBLEMA:</td>
             </tr>
@@ -14529,7 +14613,10 @@
         return `
           <tr>
             <td>${entry ? escapeHtml(formatDate(getFinancePaymentDate(entry))) : ''}</td>
-            <td>${entry ? escapeHtml(getFinanceSupplierSummary(entry)) : ''}</td>
+            <td>${entry ? escapeHtml(getFinanceSupplierSummary(entry)) +
+              (getOrderFinanceReservePrintNote(entry, order)
+                ? '<div style="margin-top:3px;font-size:9px;font-weight:800;line-height:1.25;">' +
+                    escapeHtml(getOrderFinanceReservePrintNote(entry, order)) + '</div>' : '') : ''}</td>
             <td class="money">${entry && entry.kind === 'despesa' ? escapeHtml(formatCurrency(entry.total)) : ''}</td>
             <td class="money">${entry && entry.kind === 'receita' ? escapeHtml(formatCurrency(entry.total)) : ''}</td>
             <td class="money">${entry ? escapeHtml(formatCurrency(runningTotal)) : ''}</td>
@@ -14867,6 +14954,7 @@
               </tr>
             </table>
 
+            ${getOrderSinistroPrintNotice(order, entries)}
             <table class="desc-title block-gap">
               <tr>
                 <td>DESCRIÇÃO DO SERVIÇO/PROBLEMA:</td>
@@ -15800,7 +15888,7 @@
         const closeOrderSearch = document.getElementById('finance-close-order-search')?.value || '';
         let orderId = document.getElementById('finance-close-order-id').value;
         if (!orderId && closeOrderSearch.trim()) {
-          const resolvedOrder = resolveOrderFromSearch(closeOrderSearch, getOpenOrdersSorted().filter(order => !getEntryVehicleId(entry) || order.vehicleId === getEntryVehicleId(entry)));
+          const resolvedOrder = resolveOrderFromSearch(closeOrderSearch, getEligibleOpenOrdersForFinance(entry));
           orderId = resolvedOrder?.id || '';
           const hiddenOrderField = document.getElementById('finance-close-order-id');
           if (hiddenOrderField) hiddenOrderField.value = orderId;
@@ -15814,6 +15902,41 @@
         }
         const discount = parseCurrencyInputValue(document.getElementById('finance-close-discount').value || 0);
         const observacoes = document.getElementById('finance-close-observacoes').value.trim();
+        let correctedEntry = entry;
+        if (document.getElementById('finance-close-reserve-confirm')?.checked) {
+          const result = window.WeFrotasSubstitutions?.forFuel(entry.vehicleId, entry.driverId, getFinanceEntryDate(entry));
+          if (!result?.wrongVehicle || result.replacement?.reason !== 'sinistro' || !isFuelEntry(entry) || entry.substitutionId) {
+            showToast('A substituição não foi encontrada para esta data e motorista. Atualize e confira a OS.');
+            return;
+          }
+          const reserveId = result.replacement.reserveVehicleId;
+          const mapped = window.WeFrotasSubstitutions?.association(
+            reserveId, entry.driverId, getFinanceEntryDate(entry), '', entry.km
+          );
+          if (!mapped || mapped.error || mapped.replacementId !== result.replacement.id) {
+            showToast(mapped?.error || 'Não foi possível confirmar o vínculo com o veículo reserva.');
+            return;
+          }
+          const kmError = validateFuelMileageForVehicle({
+            vehicleId: reserveId, date: getFinanceEntryDate(entry), km: entry.km, excludeId: entry.id
+          });
+          if (kmError) {
+            showToast(kmError);
+            return;
+          }
+          correctedEntry = {
+            ...entry, vehicleId: reserveId,
+            substitutionId: mapped.replacementId, replacedVehicleId: mapped.replacedVehicleId,
+            sinisterFuelReview: false,
+            reserveReclassification: {
+              previousVehicleId: entry.vehicleId,
+              reserveVehicleId: reserveId,
+              substitutionId: mapped.replacementId,
+              confirmedAt: new Date().toISOString(),
+              method: 'confirmacao_administrativa_explicitamente_informada'
+            }
+          };
+        }
         const linkedOrder = orderId ? allOrders.find(item => item.id === orderId) : null;
         if (!orderId || !linkedOrder) {
           showToast('Selecione uma OS aberta para fechar a despesa.');
@@ -15824,12 +15947,16 @@
           showToast('Não é permitido alocar em OS fechada.');
           return;
         }
+        if (!getEligibleOpenOrdersForFinance(correctedEntry).some(order => String(order.id) === String(linkedOrder.id))) {
+          showToast('Esta OS não pertence ao veículo abastecido nem ao titular da substituição comprovada. Confira o carro reserva e a OS.');
+          return;
+        }
 
         const workflowStatus = 'distribuido';
         advanceOrderStatusOnFinancialAllocation(orderId);
         allFinanceEntries = allFinanceEntries.map(item => item.id === currentEditingId
           ? {
-              ...item,
+              ...correctedEntry,
               orderId: orderId || '',
               dataVencimento,
               nf,
