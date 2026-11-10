@@ -1872,7 +1872,7 @@ document.addEventListener('submit',async e=>{e.preventDefault();if(busy||!db)ret
     '<div class="form-error" role="alert"></div><div class="form-footer">'+
     button('Voltar','back-generation')+button('Confirmar geração','save-generation','primary')+'</div>');
   }
-  else if(form.id==='partner-form'){const roles=new FormData(form).getAll('roles');if(!roles.length)throw Error('Selecione ao menos uma classificação.');const existing=id?db.partners.find(p=>p.id===id):null;const row={...(existing||{}),...v,id:id||uid(),name:v.name.trim(),active:v.active==='true',roles};await commit(d=>{if(row.document&&d.partners.some(p=>p.id!==row.id&&p.document.replace(/\D/g,'')===row.document.replace(/\D/g,'')))throw Error('Já existe um parceiro com este CPF/CNPJ.');upsert(d.partners,row);});}
+  else if(form.id==='partner-form'){const roles=new FormData(form).getAll('roles');if(!roles.length)throw Error('Selecione ao menos uma classificação.');const existing=id?db.partners.find(p=>p.id===id):null;const row={...(existing||{}),...v,id:id||uid(),name:v.name.trim(),active:v.active==='true',roles};await commit(d=>{if(row.document&&!row.sankhyaCode&&d.partners.some(p=>p.id!==row.id&&p.document.replace(/\D/g,'')===row.document.replace(/\D/g,'')))throw Error('Já existe um parceiro com este CPF/CNPJ.');upsert(d.partners,row);});}
   else if(form.id==='account-form'){
    // Keep legacy bank coordinates, IDs, invoices, payments, transfers and imports.
    const previous=id?db.accounts.find(a=>a.id===id):null;
