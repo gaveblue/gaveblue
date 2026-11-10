@@ -102,7 +102,7 @@ export function reportImportMarkup(db,draft){
   '<label class="gb-fin-checkbox important"><input type="checkbox" id="gb-fin-confirm" '+(draft.confirmed?'checked':'')+
    '> Confirmo que revisei os documentos, duplicidades e situações. Sei que títulos liquidados/pagos alteram o saldo da conta selecionada.</label>'+
   '<div class="gb-fin-actions"><button type="button" class="button primary" data-action="financial-import-commit" '+
-   (!picked.length||!draft.categoryId||(hasPayments&&!draft.accountId)||!draft.confirmed||(editable&&!draft.ocrReviewed)||draft.loading?'disabled':'')+'>'+
+   (!picked.length||!draft.categoryId||(hasPayments&&!draft.accountId)||!draft.confirmed||(editable&&!draft.ocrReviewed)||draft.loading||draft.parsed.verificationFailed?'disabled':'')+'>'+
    icon('check')+' Importar '+picked.length+' título(s) no GB+</button></div>'+
   hint+'</div>';
 }
