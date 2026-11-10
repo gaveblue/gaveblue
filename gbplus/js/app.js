@@ -1038,7 +1038,7 @@ const actions={
   payment:el=>openModal('Registrar baixa',paymentForm(db,getTitle(el.dataset.id))),
   'new-partner':()=>openModal('Novo parceiro',partnerForm()),
   'edit-partner':el=>openModal('Editar parceiro',partnerForm(db.partners.find(p=>p.id===el.dataset.id))),
-  'partner-detail':el=>{const p=db.partners.find(p=>p.id===el.dataset.id);openModal('Histórico do parceiro',`<h3>${esc(p.name)}</h3><p class="muted">${esc(p.document||'')} ${esc(p.email||'')}</p><p>${esc(p.address||'')}</p><p>${esc(p.notes||'')}</p>${titleTable(db,db.titles.filter(t=>t.partnerId===p.id))}`);},
+  'partner-detail':el=>{const p=db.partners.find(p=>p.id===el.dataset.id);openModal('Histórico do parceiro',`<h3>${esc(p.name)}</h3>${p.sankhyaCode?'<p class="muted">Código Sankhya '+esc(p.sankhyaCode)+'</p>':''}<p class="muted">${esc(p.document||'')} ${esc(p.email||'')}</p><p>${esc(p.address||'')}</p><p>${esc(p.notes||'')}</p>${titleTable(db,db.titles.filter(t=>t.partnerId===p.id))}`);},
   'new-account':()=>openModal('Nova conta financeira',accountForm(db)),
   'new-goal':()=>openModal('Novo cofrinho',accountForm(db,null,{kind:'goal'})),
   'edit-account':el=>openModal('Editar conta',accountForm(db,db.accounts.find(a=>a.id===el.dataset.id))),
@@ -1758,7 +1758,7 @@ document.addEventListener('submit',async e=>{e.preventDefault();if(busy||!db)ret
     '<div class="form-error" role="alert"></div><div class="form-footer">'+
     button('Voltar','back-generation')+button('Confirmar geração','save-generation','primary')+'</div>');
   }
-  else if(form.id==='partner-form'){const roles=new FormData(form).getAll('roles');if(!roles.length)throw Error('Selecione ao menos uma classificação.');const row={...v,id:id||uid(),name:v.name.trim(),active:v.active==='true',roles};await commit(d=>{if(row.document&&d.partners.some(p=>p.id!==row.id&&p.document.replace(/\D/g,'')===row.document.replace(/\D/g,'')))throw Error('Já existe um parceiro com este CPF/CNPJ.');upsert(d.partners,row);});}
+  else if(form.id==='partner-form'){const roles=new FormData(form).getAll('roles');if(!roles.length)throw Error('Selecione ao menos uma classificação.');const existing=id?db.partners.find(p=>p.id===id):null;const row={...(existing||{}),...v,id:id||uid(),name:v.name.trim(),active:v.active==='true',roles};await commit(d=>{if(row.document&&d.partners.some(p=>p.id!==row.id&&p.document.replace(/\D/g,'')===row.document.replace(/\D/g,'')))throw Error('Já existe um parceiro com este CPF/CNPJ.');upsert(d.partners,row);});}
   else if(form.id==='account-form'){
    // Keep legacy bank coordinates, IDs, invoices, payments, transfers and imports.
    const previous=id?db.accounts.find(a=>a.id===id):null;
