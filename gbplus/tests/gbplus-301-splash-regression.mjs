@@ -1,4 +1,4 @@
-// GB+ 3.0.1 — regressão estática e invariantes da splash screen.
+// GB+ 3.0.2 — regressão da abertura vetorial (substitui a regressão da 3.0.1).
 // Execução: node gbplus/tests/gbplus-301-splash-regression.mjs
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
@@ -6,36 +6,35 @@ import {fileURLToPath} from 'node:url';
 import {resolve,dirname} from 'node:path';
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
 const read=name=>readFileSync(resolve(root,name),'utf8');
-const html=read('index.html');
-const css=read('splash.css');
-const sw=read('sw.js');
+const html=read('index.html'),css=read('splash.css'),sw=read('sw.js');
 const version=JSON.parse(read('version.json'));
-
 assert(html.includes('id="gb-splash"'));
 assert(html.indexOf('id="gb-splash"')<html.indexOf('id="auth-gate"'));
-assert(html.includes('class="gb-reveal-g">G</span>'));
-assert(html.includes('class="gb-reveal-b">B</span>'));
-assert(html.includes('class="gb-reveal-plus"'));
-assert(html.includes('href="./splash.css?v=20261110-3001"'));
+assert(html.includes('class="gb-splash-logo"'));
+for(const cls of ['gb-splash-outline-g','gb-splash-outline-b','gb-splash-plus-solid','gb-splash-star'])
+ assert(html.includes(cls),'SVG sem '+cls);
+assert(html.includes('href="./splash.css?v=20261110-3002"'));
 assert(html.includes('document.getElementById("gb-splash")?.remove(),2400'));
 assert(html.includes('aria-hidden="true"'));
-assert(html.includes('src="./js/app.js?v=20261109-3000"'), 'App financeiro deve permanecer intacto');
-assert(html.includes('class="auth-locked"'), 'Auth existente deve permanecer intacta');
-assert(css.includes('html[data-theme="light"] #gb-splash'));
-assert(css.includes('@media(prefers-reduced-motion:reduce)'));
+assert(html.includes('src="./js/app.js?v=20261109-3000"'),'App financeiro inalterado');
+assert(html.includes('class="auth-locked"'),'Autenticação inalterada');
+assert(css.includes('radial-gradient(ellipse 66% 47%'));
+assert(!css.includes('html[data-theme="light"] #gb-splash'),'Fundo deve ser igual ao da prévia');
+assert(css.includes('@media (prefers-reduced-motion:reduce)'));
 assert(css.includes('#gb-splash{display:none!important'));
-assert(css.includes('animation:gb-splash-dismiss 2.05s'));
+assert(css.includes('animation:gb-splash-exit 2.12s'));
 assert(css.includes('visibility:hidden;pointer-events:none'));
-assert(css.includes('@keyframes gb-reveal-draw'));
-assert(css.includes('@keyframes gb-reveal-horizontal'));
-assert(css.includes('@keyframes gb-reveal-vertical'));
-assert(!/@import\b/.test(css), 'Não carregar fontes/estilos remotos na abertura');
+assert(css.includes('@keyframes gb-splash-mark-out'));
+assert(css.includes('@keyframes gb-draw-g'));
+assert(css.includes('@keyframes gb-draw-b'));
+assert(css.includes('@keyframes gb-draw-plus'));
+assert(!/@import\b/.test(css),'Não importar fontes externas na abertura');
 assert.equal((css.match(/{/g)||[]).length,(css.match(/}/g)||[]).length);
-assert(sw.includes("gb-plus-shell-v3001"));
+assert(sw.includes('gb-plus-shell-v3002'));
 assert(sw.includes("'./splash.css'"));
-assert.equal(version.version,'3.0.1');
-assert.equal(version.build,3001);
+assert.equal(version.version,'3.0.2');
+assert.equal(version.build,3002);
 assert.equal(version.release_status,'candidate_not_published');
 assert.equal(version.published_at,null);
 assert(version.assets.includes('./splash.css'));
-console.log('GB+ 3.0.1: 29 verificações da abertura e isolamento visual passaram.');
+console.log('GB+ 3.0.2: aparência vetorial, saída segura, PWA e invariantes aprovados.');
