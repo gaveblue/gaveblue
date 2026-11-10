@@ -63,11 +63,11 @@ async function loadNews(){
 }
 async function reviewArticle(a){
  selected=a;const box=$('review-card');box.replaceChildren(el('h2',null,'Revisar matéria'),el('div','notice','Verifique fatos, autoria, imagens, direito de resposta e fontes antes de publicar.'));
- const {data:priv}=await db.from('orvia_article_evidence').select('notes').eq('article_id',a.id).maybeSingle();
+ const [{data:priv},{data:feedback}]=await Promise.all([db.from('orvia_article_evidence').select('notes').eq('article_id',a.id).maybeSingle(),db.from('orvia_editor_feedback').select('notes').eq('article_id',a.id).maybeSingle()]);
  box.append(el('div','meta','Estado: '+a.review_state+' · '+date(a.updated_at)));
  box.append(field('Título', 'r-title',a.title),field('Resumo','r-summary',a.summary,'textarea'),field('Texto completo','r-body',a.body,'textarea'),field('Categoria','r-category',a.category),field('Crédito do autor','r-author',a.author));
  const privateNote=el('div','notice');privateNote.append(el('strong',null,'Fontes e notas privadas do colaborador (não publicar):'));privateNote.append(el('div','preview',priv?.notes||'Não foram informadas notas adicionais.'));box.append(privateNote);
- box.append(field('Devolutiva editorial para o colaborador','r-notes',a.review_notes,'textarea'));
+ box.append(field('Devolutiva editorial para o colaborador','r-notes',feedback?.notes||'','textarea'));
  const featuredLabel=el('label','row');const featured=el('input');featured.type='checkbox';featured.id='r-featured';featured.checked=!!a.featured;featured.style.width='auto';featuredLabel.append(featured,el('span',null,'Destacar na página inicial'));box.append(featuredLabel);
  const btns=el('div','row');btns.style.marginTop='18px';
  btns.append(rowButton('Salvar revisão',()=>reviewDecision('save')),rowButton('Solicitar correções',()=>reviewDecision('changes_requested')),rowButton('Rejeitar',()=>reviewDecision('rejected'),'danger'),rowButton('Aprovar e publicar',()=>reviewDecision('published'),'primary'));
@@ -78,12 +78,15 @@ async function reviewDecision(action){
  if(!selected)return;const a=selected;
  if(action==='published' && !confirm('Você verificou fontes e direitos de imagem? Publicar esta notícia agora?'))return;
  if(action==='rejected' && !confirm('Rejeitar esta notícia?'))return;
- const payload={title:$('r-title').value.trim(),summary:$('r-summary').value.trim(),body:$('r-body').value.trim(),category:$('r-category').value.trim(),author:$('r-author').value.trim(),review_notes:$('r-notes').value.trim(),featured:$('r-featured').checked,reviewed_by:me.id,reviewed_at:new Date().toISOString()};
+ const payload={title:$('r-title').value.trim(),summary:$('r-summary').value.trim(),body:$('r-body').value.trim(),category:$('r-category').value.trim(),author:$('r-author').value.trim(),featured:$('r-featured').checked};
  if(payload.title.length<5||payload.body.length<30){notice('Título e texto completos são obrigatórios.',true);return;}
  if(action==='published'){payload.status='published';payload.review_state='approved';payload.published_at=a.published_at||new Date().toISOString();}
  if(action==='unpublish'){payload.status='draft';payload.review_state='changes_requested';payload.published_at=null;payload.featured=false;}
  if(action==='changes_requested'||action==='rejected'){payload.status='draft';payload.review_state=action;payload.published_at=null;payload.featured=false;}
  if(action==='save'&&a.status!=='published'){payload.status='draft';payload.published_at=null;}
+ const feedbackPayload={article_id:a.id,notes:$('r-notes').value.trim(),reviewed_by:me.id,reviewed_at:new Date().toISOString()};
+ const {error:feedbackError}=await db.from('orvia_editor_feedback').upsert(feedbackPayload,{onConflict:'article_id'});
+ if(feedbackError){notice('Falha ao guardar a revisão privada: '+feedbackError.message,true);return;}
  const {error}=await db.from('orvia_articles').update(payload).eq('id',a.id);
  if(error){notice('Falha: '+error.message,true);return;}
  selected=null;$('review-card').replaceChildren(el('h2',null,'Revisão salva'),el('p',null,action==='published'?'A matéria foi publicada no portal.':'A decisão editorial foi registrada.'));notice('Matéria atualizada.');await loadNews();
