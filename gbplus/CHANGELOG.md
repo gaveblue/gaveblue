@@ -1,5 +1,14 @@
 # CHANGELOG — GB+ Gestão Financeira
 
+## [3.0.7 — IMPORTAÇÃO ASSISTIDA DE RELATÓRIOS FINANCEIROS NO PC (QA PARCIAL)] — 2026-11-10
+- **Relatórios no computador:** três opções dentro da tela **Relatórios**: **Contas a receber**, **Contas a pagar** e **Contas recebidas**. O fluxo é distinto de extratos bancários, sem alterar a importação OFX/CSV existente.
+- **Formatos:** leitura local de CSV e Excel (.xlsx), além de PDF com texto (Sicoob) e OCR orientado para PDF digitalizado de contas a receber. O leitor de PDF/OCR utiliza bibliotecas remotas versionadas e exige conexão; erros de OCR são exibidos, sem salvar dados automaticamente.
+- **Mapeamento:** preservar financeiro, nota, parceiro, vendedor, negociação, vencimento, forma, valor, pagamento, conciliação, provisão e situação onde disponíveis. Títulos em aberto não são baixados.
+- **Sicoob:** ocorrências **58, 68, 212 e 215** são liquidações; **82 — baixa a pedido do cedente** é exibida como excluída e não gera receita/baixa. Divergências entre o valor ou a quantidade liquidada e o total declarado no PDF bloqueiam a importação.
+- **Segurança:** prévia com seleção de títulos, duplicidades bloqueadas, categoria, conta obrigatória para títulos liquidados, opção explícita de cadastrar parceiros, confirmação final e conferência OCR adicional. Arquivo original não é armazenado; somente registros escolhidos são gravados na base já autenticada.
+- **Desktop:** funcionalidade visível apenas em telas de computador; o app móvel permanece sem interface de importação de relatórios. Versão e cache do PWA atualizados para 3.0.7.
+- **Homologação:** validações estruturais e testes sintéticos incluídos. A execução no GitHub Actions, a leitura dos três arquivos reais no navegador desktop, o OCR e os efeitos no saldo exigem testes práticos antes da declaração de homologação integral.
+
 ## [3.0.6 — ABERTURA AUTOMÁTICA, ESPAÇAMENTO E RASTROS SUAVES (LIBERAÇÃO AUTORIZADA; QA VISUAL PENDENTE)] — 2026-11-10
 - **Transição automática:** removido o botão **Iniciar**; a splash permanece por aproximadamente 6 segundos e sai em fade, revelando o GB+ real sem trocar de página. Um temporizador remove a camada independentemente da animação CSS; callback OAuth, links diretos e modo de movimento reduzido não ficam bloqueados.
 - **Harmonia do GB+:** espaçamento consistente entre G, B e +, removendo margens negativas desiguais e preservando as laterais das letras.
