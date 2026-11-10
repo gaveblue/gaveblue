@@ -1,16 +1,17 @@
 {
-  "version": "3.0.7",
-  "build": 3007,
-  "published_at": "2026-11-10T19:39:46Z",
-  "title": "Importação assistida de contas a receber, pagar e recebidas — desktop",
+  "version": "3.0.8",
+  "build": 3008,
+  "published_at": null,
+  "title": "Importação Sankhya de Parceiros e Movimentação financeira diária no PC",
   "notes": [
-    "Foi preparada na tela Relatórios do computador uma importação separada de extratos bancários, com três opções: Contas a receber, Contas a pagar e Contas recebidas.",
-    "Leitura local de planilhas XLSX/CSV e PDFs; PDFs digitalizados de contas a receber podem usar OCR local, com conferência obrigatória; o leitor de PDF/OCR usa bibliotecas externas quando há conexão.",
-    "Os títulos entram primeiro em pré-visualização com valores, datas, situação, duplicidades e itens excluídos. Nada é gravado antes da seleção, escolha da categoria, conferência das contas e confirmação explícita.",
-    "Relatórios Sicoob só consideram liquidações 58, 68, 212 e 215 como recebimentos. Ocorrência 82 — baixa a pedido do cedente — fica excluída do total financeiro.",
-    "Contas a pagar respeitam status PAGO/A VENCER/VENCE HOJE; pagamentos e recebimentos exigem conta financeira confirmada para gerar baixa e alterar saldo.",
-    "Dados duplicados já importados ou com correspondência exata no sistema são bloqueados. A importação não altera títulos existentes automaticamente.",
-    "O código de importação fica restrito ao módulo do PC; a captura original não é armazenada. Testes visuais de importação real Android/PWA e desktop permanecem pendentes."
+    "Nova importação no PC, em Relatórios: Parceiros.xlsx primeiro, depois Movimentacao_Financeira.xlsx, com prévia e confirmação explícita.",
+    "Parceiros: Cód. Parceiro identifica cadastros; preserva razão social, nome fantasia, CPF/CNPJ, situação, contatos, endereço, tipo de pessoa, dados comerciais/fiscais e demais campos de origem em metadados consultáveis.",
+    "Movimentação: identifica Receita/Despesa pela coluna explícita, validada contra o sinal de Valor Líquido. Vincula parceiro por Cód. Parceiro, sem usar nomes/CPF como identificador primário.",
+    "Utiliza Nro Único junto com Empresa como identidade estável; reimportações diárias não criam outro título. Reconhece nova baixa em título existente e sinaliza campos divergentes como conflito.",
+    "Nro Nota repetida não é duplicidade: reconhece parcelamento por empresa, parceiro, nota, negociação, operação e natureza; mantém Nro Único individual por parcela e sincroniza séries entre imports.",
+    "Para baixas requer mapeamento explícito da Conta Baixa Sankhya para conta ativa do GB+. Data Baixa futura não gera entrada ou saída antes de ocorrer. Valor nominal e valor realizado são preservados.",
+    "Fica na prévia até confirmação, com botões de seleção de novos, atualizações e baixas. PDFs/Excel importadores anteriores permanecem sem alterações conceituais.",
+    "Testes sintéticos de atualização diária e validações estruturais implementados. Testes E2E reais de arquivos, performance e persistência/volumes ainda pendentes de evidência."
   ],
   "assets": [
     "./splash.css",
@@ -212,28 +213,30 @@
     "./financial-report-import.css",
     "./js/financial-report-core.js",
     "./js/financial-report-readers.js",
-    "./js/financial-report-ui.js"
+    "./js/financial-report-ui.js",
+    "./js/sankhya-import-core.js",
+    "./js/sankhya-import-ui.js"
   ],
   "highlights": [
     {
-      "icon": "upload",
-      "title": "Importações de relatórios no PC",
-      "description": "Contas a receber, a pagar e recebimentos liquidados em uma área de conferência."
+      "icon": "people",
+      "title": "Cadastro por código Sankhya",
+      "description": "Importação e atualização de parceiros sem misturar códigos com CPF/CNPJ repetidos."
     },
     {
-      "icon": "check",
-      "title": "Revisão antes de gravar",
-      "description": "Prévia com datas, valores, duplicidades, categoria e conta."
+      "icon": "transfer",
+      "title": "Movimentação diária",
+      "description": "Receitas, despesas, parcelas e liquidações identificadas pela estrutura original."
     },
     {
       "icon": "shield",
-      "title": "Baixa não é recebimento",
-      "description": "Movimentos administrativos do Sicoob permanecem fora das receitas."
+      "title": "Sem títulos duplicados",
+      "description": "Nro Único controla a identidade e baixas posteriores são conciliadas com o registro existente."
     }
   ],
-  "release_status": "published_qa_partial_real_files_pending",
+  "release_status": "candidate_validation_pending",
   "homologation": {
-    "status": "published_qa_partial_e2e_pending",
-    "notes": "PR #129 mesclado no commit d732f11b5e187d8be5f37021aa1d10b4390d7eab e GitHub Pages run 42887386406 concluído com sucesso em 10/11/2026 às 19:39:46 UTC. 16 verificações estruturais e testes sintéticos de títulos/duplicação/baixas aprovados. CI de regressão reportou failure com 0 steps. Leitura dos três documentos reais em navegador desktop, OCR, impacto de saldo, offline e fluxo completo ainda sem evidência; sem homologação integral."
+    "status": "candidate_partial_qa",
+    "notes": "Nova versão 3.0.8 testada por amostras sintéticas e verificação estática. Ainda requer execução de importação das duas planilhas reais no desktop, QA da persistência e do uso recorrente. Nenhum dado dos arquivos foi gravado na conta do usuário."
   }
 }
