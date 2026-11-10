@@ -1,14 +1,15 @@
-/* GB+ 3.0.5 — anéis finos minimalistas, em órbitas lentas e independentes. */
-#gb-splash{--duration:5900ms;--blue:#4c82ff;--light:#152034;--muted:#607087;
+/* GB+ 3.0.6 — animação de entrada automática; anéis minimalistas com rastros suaves. */
+#gb-splash{--duration:5400ms;--blue:#4c82ff;--light:#152034;--muted:#607087;
 position:fixed;inset:0;z-index:20001;width:100%;height:100vh;height:100dvh;
 isolation:isolate;overflow:hidden;background:#fff;color:#152034;
+animation:gbintro-autoDismiss 6000ms linear both;
 font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
 -webkit-font-smoothing:antialiased;}
 #gb-splash *{box-sizing:border-box;}
 #gb-splash button{font:inherit;-webkit-tap-highlight-color:transparent;}
 #gb-splash .gbintro-stage{height:100%;min-height:0;}
 #gb-splash #gb-splash-start{min-width:148px;padding:13px 24px;font-size:14px;}
-#gb-splash.gbintro-leaving{opacity:0;transition:opacity .38s ease;pointer-events:auto;}
+#gb-splash.gbintro-leaving{opacity:0;visibility:hidden;pointer-events:none;}
 
 .gbintro-stage { position:relative; display:grid; place-items:center; height:100svh; min-height:480px; isolation:isolate; overflow:hidden; }
     .gbintro-stage::before { content:""; position:absolute; inset:-40%; z-index:-5; pointer-events:none; background:radial-gradient(ellipse 29% 23% at 50% 45%,rgba(63,117,218,.11),transparent 78%),radial-gradient(ellipse 34% 25% at 20% 16%,rgba(114,153,224,.06),transparent 80%),radial-gradient(ellipse 31% 32% at 82% 87%,rgba(103,150,237,.06),transparent 79%); transform:scale(.78); opacity:0; animation:gbintro-bloom 4s .18s ease-out both; }
@@ -41,18 +42,38 @@ font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans
       border-color:rgba(100,132,181,.18);
       animation:gbintro-orbitCounter 25s linear infinite;
     }
+    /* Arcos de luz quase imperceptíveis: o gradiente se dissipa ao longo de cada órbita.
+       A máscara só colore a borda fina; não recria o disco de acreção. */
+    .gbintro-orbit::before,.gbintro-orbit-secondary::before,
+    .gbintro-orbit::after,.gbintro-orbit-secondary::after {
+      content:"";position:absolute;inset:-1px;border-radius:50%;pointer-events:none;
+      -webkit-mask-image:conic-gradient(from 0deg,transparent 0deg,transparent 187deg,rgba(0,0,0,.07) 225deg,#000 271deg,rgba(0,0,0,.28) 303deg,transparent 333deg);
+      mask-image:conic-gradient(from 0deg,transparent 0deg,transparent 187deg,rgba(0,0,0,.07) 225deg,#000 271deg,rgba(0,0,0,.28) 303deg,transparent 333deg);
+      animation:gbintro-trailBreath 5s ease-in-out infinite;
+    }
+    .gbintro-orbit::before,.gbintro-orbit-secondary::before {
+      border:1px solid rgba(82,143,230,.43);
+      opacity:.65;
+    }
+    .gbintro-orbit::after,.gbintro-orbit-secondary::after {
+      border:2px solid rgba(105,162,243,.17);
+      filter:blur(3px);opacity:.42;
+    }
+    .gbintro-orbit-secondary::before,.gbintro-orbit-secondary::after {
+      animation-delay:-2.5s;
+      opacity:.45;
+    }
     .gbintro-wordmark .gbintro-letter-wrap,
     .gbintro-wordmark .gbintro-plus-box {position:relative;z-index:2;}
 
     .gbintro-beam { position:absolute; width:200%; height:1px; top:49%; left:-50%; opacity:0; background:linear-gradient(90deg,transparent 8%,rgba(137,166,237,.02) 20%,rgba(82,116,183,.22) 50%,rgba(137,166,237,.02) 80%,transparent 92%); transform:scaleX(.3); animation:gbintro-beam 1.5s .9s both; }
     .gbintro-eyebrow { display:flex; align-items:center; justify-content:center; gap:13px; color:#64738a; font-weight:650; font-size:10px; letter-spacing:.31em; text-transform:uppercase; opacity:0; transform:translateY(11px); animation:gbintro-rise .8s .55s both; margin-bottom:clamp(14px,3vw,26px); }
     .gbintro-eyebrow .gbintro-rule { width:27px; height:1px; background:#7899d3; opacity:.72; }
-    .gbintro-wordmark { display:flex; justify-content:center; align-items:center; gap:clamp(2px,.65vw,8px); height:clamp(128px,20vw,245px); position:relative; filter:drop-shadow(0 13px 30px rgba(38,68,119,.08)); }
+    .gbintro-wordmark { display:flex; justify-content:center; align-items:center; gap:clamp(7px,1.35vw,16px); height:clamp(128px,20vw,245px); position:relative; filter:drop-shadow(0 13px 30px rgba(38,68,119,.08)); }
     .gbintro-wordmark .gbintro-letter-wrap { display:block; flex:0 0 auto; overflow:hidden; padding:0 .08em; line-height:.87; }
     .gbintro-wordmark .gbintro-letter { display:block; font-size:clamp(130px,19.2vw,250px); letter-spacing:0; font-weight:820; line-height:1; color:#152034; transform:translateY(115%) skewY(9deg); opacity:.4; filter:blur(10px); }
     .gbintro-wordmark .gbintro-g { animation:gbintro-letterOn 1.25s .85s cubic-bezier(.16,1,.25,1) both; }
     .gbintro-wordmark .gbintro-b { animation:gbintro-letterOn 1.25s 1.08s cubic-bezier(.16,1,.25,1) both; }
-    .gbintro-wordmark .gbintro-letter-wrap:nth-child(2) { margin-left:-.04em; }
     .gbintro-plus-box { display:grid; place-items:center; width:clamp(60px,8vw,101px); height:clamp(60px,8vw,101px); margin:18px 0 0 0; position:relative; border-radius:24%; background:linear-gradient(155deg,#80a3ff 0%,#356ef2 53%,#164bc5 100%); box-shadow:0 11px 34px rgba(52,98,225,.28),inset 0 1px 1px rgba(255,255,255,.37); transform:translateY(34px) rotate(-40deg) scale(.2); filter:blur(9px); opacity:0; animation:gbintro-plusOn 1.2s 1.63s cubic-bezier(.16,1,.26,1) both; }
     .gbintro-plus-box::before,.gbintro-plus-box::after { content:""; position:absolute; border-radius:3px; background:#fff; box-shadow:0 0 12px rgba(255,255,255,.28); }
     .gbintro-plus-box::before { width:42%; height:8%; }
@@ -74,6 +95,15 @@ font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans
     .gbintro-tool.gbintro-primary:hover { background:#2d4673; }
     .gbintro-transition-cover { position:fixed; inset:0; z-index:12; pointer-events:none; background:#f5f7fb; transform:translateY(101%); animation:gbintro-pageExit .75s 5.25s cubic-bezier(.7,0,.2,1) both; }
     .gbintro-demo-mark { position:absolute; z-index:8; left:clamp(36px,7vw,96px); bottom:clamp(35px,7.9vh,74px); text-transform:uppercase; letter-spacing:.14em; font-size:9px; font-weight:700; color:#66738d; opacity:0; animation:gbintro-fadeIn .8s 2.2s both; }
+    @keyframes gbintro-autoDismiss {
+      0%,89% {opacity:1;visibility:visible;pointer-events:auto;}
+      99% {opacity:0;visibility:visible;pointer-events:none;}
+      100% {opacity:0;visibility:hidden;pointer-events:none;}
+    }
+    @keyframes gbintro-trailBreath {
+      0%,100% {opacity:.30;}
+      50% {opacity:.70;}
+    }
     @keyframes gbintro-bloom { 0%{opacity:0;transform:scale(.78)} 35%{opacity:1} 100%{opacity:1;transform:scale(1.08)} }
     @keyframes gbintro-meshIntro { from{opacity:0;transform:scale(1.1)} to{opacity:.42;transform:scale(1)} }
     @keyframes gbintro-corners { from{opacity:0;transform:scale(.8)} to{opacity:1;transform:scale(1)} }
@@ -101,11 +131,11 @@ font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans
       .gbintro-corner.gbintro-tl,.gbintro-corner.gbintro-bl { left:17px; }
       .gbintro-corner.gbintro-tr,.gbintro-corner.gbintro-br { right:17px; }
       .gbintro-center { margin-top:-55px; }
-      .gbintro-wordmark { gap:2px;height:160px; }
+      .gbintro-wordmark { gap:clamp(6px,1.8vw,9px);height:160px; }
       .gbintro-orbit {width:min(90vw,390px);height:clamp(174px,52vw,230px);}
       .gbintro-orbit-secondary {width:min(79vw,340px);height:clamp(150px,44vw,195px);}
       .gbintro-wordmark .gbintro-letter { font-size:clamp(115px,28vw,180px); }
-      .gbintro-plus-box { width:clamp(52px,13vw,78px);height:clamp(52px,13vw,78px); margin-top:10px; margin-left:-6px; }
+      .gbintro-plus-box { width:clamp(52px,13vw,78px);height:clamp(52px,13vw,78px); margin-top:10px; margin-left:0; }
       .gbintro-topright { font-size:9px;letter-spacing:.08em; }
       .gbintro-bottom { bottom:130px;width:min(320px,calc(100vw - 48px)); }
       .gbintro-loading-label { gap:10px; font-size:10px; letter-spacing:.06em; }
@@ -115,6 +145,7 @@ font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans
     @media (max-width:360px) { .gbintro-loading-label { font-size:9px;letter-spacing:.02em;gap:8px; } .gbintro-loading-label .gbintro-count { margin-left:8px; } }
     @media (max-height:620px) and (min-width:701px) { .gbintro-bottom { bottom:42px; } .gbintro-demo-tools,.gbintro-demo-mark { bottom:35px; } .gbintro-center { transform:scale(.8); } }
     @media (prefers-reduced-motion:reduce) {
+      #gb-splash {animation:none!important;display:none!important;pointer-events:none!important;}
       #gb-splash .gbintro-orbit,#gb-splash .gbintro-orbit-secondary {animation:none!important;transform:translate(-50%,-50%) rotate(-19deg)!important;}
  #gb-splash *,#gb-splash *::before,#gb-splash *::after { animation-duration:.001ms !important; animation-delay:0ms !important; transition-duration:.001ms !important; } .gbintro-transition-cover { display:none; } .gbintro-wordmark .gbintro-letter { transform:none;opacity:1;filter:none; } .gbintro-plus-box { transform:none;opacity:1;filter:none; } .gbintro-fill { width:100%; } }
   

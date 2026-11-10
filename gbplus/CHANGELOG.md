@@ -1,5 +1,12 @@
 # CHANGELOG — GB+ Gestão Financeira
 
+## [3.0.6 — ABERTURA AUTOMÁTICA, ESPAÇAMENTO E RASTROS SUAVES (LIBERAÇÃO AUTORIZADA; QA VISUAL PENDENTE)] — 2026-11-10
+- **Transição automática:** removido o botão **Iniciar**; a splash permanece por aproximadamente 6 segundos e sai em fade, revelando o GB+ real sem trocar de página. Um temporizador remove a camada independentemente da animação CSS; callback OAuth, links diretos e modo de movimento reduzido não ficam bloqueados.
+- **Harmonia do GB+:** espaçamento consistente entre G, B e +, removendo margens negativas desiguais e preservando as laterais das letras.
+- **Anéis discretos:** os dois anéis finos continuam se movimentando em sentidos contrários, agora com trilhas de luz azul de baixa intensidade que se dissipam ao longo do próprio contorno. Sem disco de acreção, cometas ou efeitos chamativos.
+- **Integridade:** nenhuma alteração de dados, saldos, lançamentos, contas, cartões, autenticação ou Supabase; mudanças limitadas à abertura, metadados e cache PWA `v3006`.
+- **Validação:** verificação estática e regressão de código incluída; testes visuais Android/PWA, desktop, redução de movimento e offline continuam pendentes de evidência. Publicação autorizada, sem homologação completa.
+
 ## [3.0.5 — ANÉIS DISCRETOS MINIMALISTAS (LIBERAÇÃO AUTORIZADA; QA VISUAL PENDENTE)] — 2026-11-10
 - **Correção do visual:** removido o disco carregado da versão 3.0.4, incluindo gradientes densos, ponto luminoso, brilho intenso e arco em primeiro plano. A apresentação volta a ser minimalista.
 - **Fundo e marca:** permanece o fundo branco, logotipo GB grafite e símbolo + azul próximo do B.

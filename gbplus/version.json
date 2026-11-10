@@ -1,14 +1,15 @@
 {
-  "version": "3.0.5",
-  "build": 3005,
-  "published_at": "2026-11-10T18:14:08Z",
-  "title": "Abertura minimalista com anéis discretos em movimento",
+  "version": "3.0.6",
+  "build": 3006,
+  "published_at": null,
+  "title": "Abertura automática com rastros de luz discretos e GB+ harmonizado",
   "notes": [
-    "Corrigido o excesso visual da 3.0.4: removidos disco de acreção, gradientes fortes, ponto luminoso, arco em primeiro plano e sombras do anel.",
-    "Restaurados dois anéis elípticos de linhas muito finas e transparências suaves, iguais ao conceito visual anterior, sobre fundo branco.",
-    "Anéis giram lentamente em sentidos opostos ao redor do GB+, um em 18 segundos e outro em 25 segundos, mantendo a marca em destaque.",
-    "Responsividade e redução de movimento preservadas. Botão Iniciar, login e financeiro mantidos sem modificações.",
-    "Publicação solicitada pelo responsável após feedback visual. Homologação visual Android/PWA e desktop ainda depende de testes."
+    "Botão Iniciar removido da abertura. A apresentação aparece automaticamente e dá lugar ao login/painel real após cerca de 6 segundos, com fade suave; sem redirecionamento de página.",
+    "O CSS remove a sobreposição no final mesmo sem JavaScript; há temporizador de segurança em JS para remover o elemento após 6,05 segundos.",
+    "Espaçamentos de G, B e + padronizados; removidas margens negativas que desequilibravam a marca, mantendo o recorte seguro das letras.",
+    "Dois anéis mínimos continuam girando em sentidos contrários e recebem um leve rastro azul translúcido, com transparência gradual, sem disco ou efeitos agressivos.",
+    "Callbacks e links diretos contornam a splash. Preferência por movimento reduzido remove a animação. Sem mudanças no financeiro, dados, Supabase ou login.",
+    "Publicação expressamente solicitada pelo responsável; homologação visual Android/PWA, desktop e offline permanece pendente até evidência."
   ],
   "assets": [
     "./splash.css",
@@ -211,18 +212,23 @@
   "highlights": [
     {
       "icon": "sparkles",
-      "title": "Abertura minimalista",
-      "description": "Dois anéis finos e discretos, sem efeitos chamativos."
+      "title": "Abertura automática",
+      "description": "A animação termina sozinha e revela o aplicativo, sem botões."
     },
     {
       "icon": "repeat",
-      "title": "Movimento suave",
-      "description": "As órbitas giram lentamente em sentidos opostos."
+      "title": "Anéis com luz delicada",
+      "description": "Rastros translúcidos desaparecem suavemente enquanto os anéis giram."
+    },
+    {
+      "icon": "check",
+      "title": "Logo harmonizado",
+      "description": "G, B e + com espaços uniformes."
     }
   ],
-  "release_status": "published_authorized_qa_partial",
+  "release_status": "publication_authorized_qa_partial_deploy_pending",
   "homologation": {
-    "status": "published_qa_partial_visual_pending",
-    "notes": "PR #127 incorporado à main no commit a533a15a3454846b20205622a13142cb7f2758e3. GitHub Pages run 42872934395 concluído com sucesso em 10/11/2026 às 18:14:08 UTC. 20 verificações estruturais da candidata passaram. Fluxo CI reportou falha sem etapas executadas. Homologação visual Android/PWA, desktop e offline ainda pendente; publicação autorizada pelo responsável."
+    "status": "static_review_pending_visual_tests",
+    "notes": "Alteração visual solicitada em 10/11/2026. Verificação de invariantes e CI candidatos; QA visual real Android/PWA, desktop, login, acessibilidade e offline não comprovado ainda. Publicação não equivale a homologação integral."
   }
 }
