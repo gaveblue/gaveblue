@@ -1,0 +1,90 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#fff"><meta name="description" content="Participe da ORVIA NEWS: envie uma candidatura para colaborar com notícias do Espírito Santo."><title>Seja colaborador | ORVIA NEWS</title>
+<style>
+:root{--red:#e6001c;--ink:#14151a;--muted:#737681;--line:#e8e8ed}*{box-sizing:border-box}body{font:15px/1.5 system-ui,-apple-system,Arial,sans-serif;background:#fafafa;color:var(--ink);margin:0}a{color:inherit;text-decoration:none}button,input,textarea,select{font:inherit}.wrap{width:min(1030px,calc(100% - 32px));margin:auto}header{background:white;border-bottom:1px solid var(--line)}header .wrap{display:flex;align-items:center;justify-content:space-between;height:76px}.brand{font-size:24px;letter-spacing:-1.5px;font-weight:950}.brand b{color:var(--red)}.brand small{display:block;text-align:center;font-weight:500;letter-spacing:4px;font-size:10px;line-height:1}.back{font-size:13px;font-weight:700;color:#656770}h1{font-size:clamp(30px,5vw,43px);letter-spacing:-1.5px;line-height:1.12;margin:8px 0 12px}h2{font-size:22px;letter-spacing:-.6px}p{color:var(--muted)}main{padding:38px 0 80px}.intro{max-width:690px;margin-bottom:26px}.eyebrow{color:var(--red);font-weight:900;letter-spacing:.08em;font-size:12px}.cols{display:grid;grid-template-columns:1fr .75fr;gap:20px;align-items:start}.card{background:white;border:1px solid var(--line);padding:25px;border-radius:19px;box-shadow:0 6px 25px #00000006}label{display:block;font-weight:750;font-size:12px;margin:0 0 7px}.field{margin:0 0 16px}input,textarea,select{width:100%;border:1px solid #dddfe5;background:#fff;border-radius:11px;padding:13px;outline-color:var(--red)}textarea{resize:vertical;min-height:110px}.body{min-height:310px;line-height:1.7}.buttons{display:flex;align-items:center;gap:9px;flex-wrap:wrap}.button{border:1px solid var(--line);border-radius:12px;background:#fff;padding:12px 18px;font-weight:750;cursor:pointer}.button.red{background:var(--red);border-color:var(--red);color:white}.button:disabled{opacity:.5}.small{color:var(--muted);font-size:12px}.hide{display:none!important}.msg{padding:13px 16px;border-radius:11px;background:#f0f2f5;color:#414550;margin-bottom:15px}.msg.error{background:#fff0f1;color:#ae0017}.msg.ok{background:#eef9f0;color:#245c36}.step{display:flex;gap:11px;align-items:flex-start;margin:18px 0}.num{height:29px;min-width:29px;background:#ffe9ed;color:#d60017;border-radius:9px;display:grid;place-items:center;font-weight:900}.step strong{display:block}.pill{background:#f3f4f6;border-radius:20px;padding:4px 11px;font-size:12px;font-weight:800}.story{padding:13px 0;border-top:1px solid var(--line)}.story strong{display:block}.story button{padding:7px 10px;background:#fff;border:1px solid #eee;border-radius:8px;cursor:pointer;margin-top:6px}.check{display:flex;gap:9px;align-items:flex-start;margin-bottom:16px}.check input{width:auto;margin-top:4px;accent-color:var(--red)}.info{margin-top:12px;font-size:12px;color:#626670}.feature{border-radius:16px;background:#191a20;color:white;padding:22px;margin-top:20px}.feature p{color:#c9cbd2}.feature h2{margin-top:0}footer{border-top:1px solid var(--line);padding:20px;text-align:center;font-size:12px;color:#7e8089}@media(max-width:800px){.cols{grid-template-columns:1fr}.card{padding:20px}main{padding-top:25px}.intro{margin-bottom:20px}}
+</style></head>
+<body><header><div class="wrap"><a href="./" class="brand">ORVI<b>A</b><small>NEWS</small></a><a href="./" class="back">Voltar ao portal ↗</a></div></header>
+<main class="wrap"><div class="intro"><span class="eyebrow">JORNALISMO COLABORATIVO</span><h1>Sua comunidade tem histórias que merecem ser contadas.</h1><p>Participe da ORVIA NEWS como colaborador independente. Qualquer interessado pode se candidatar — os cadastros e as notícias precisam de aprovação editorial.</p></div>
+<div id="msg" class="msg hide" role="status" aria-live="polite"></div>
+<div class="cols"><div>
+<section class="card" id="login-panel"><h2>Entre ou candidate-se</h2><p>Seu cadastro não autoriza publicações automaticamente.</p>
+<form id="auth-form"><div class="field"><label>E-mail</label><input type="email" id="email" autocomplete="email" required></div><div class="field"><label>Senha</label><input type="password" id="password" autocomplete="current-password" minlength="8" required></div><div class="field"><label>Nome para a candidatura</label><input id="name" maxlength="120" minlength="3" placeholder="Nome completo"></div><div class="field"><label>Por que você quer colaborar?</label><textarea id="motivation" maxlength="1200" placeholder="Conte um pouco sobre sua região e os temas que gostaria de cobrir."></textarea></div>
+<div class="buttons"><button class="button red" type="submit">Entrar</button><button class="button" type="button" id="signup">Solicitar cadastro</button></div><div class="info">Para solicitar o cadastro, preencha também seu nome e apresentação. Depois confirme seu e-mail. Caso a confirmação abra outro endereço, retorne aqui e faça login.</div></form>
+</section>
+<section class="card hide" id="waiting"><h2>Seu cadastro editorial</h2><p id="welcome"></p><p id="status"></p><button type="button" id="signout" class="button">Sair da conta</button></section>
+<section class="card hide" id="news-panel"><div class="buttons" style="justify-content:space-between"><h2 id="form-title" style="margin:0 0 16px">Enviar uma notícia</h2><button type="button" id="new" class="button">+ Nova</button></div><div class="msg">Suas matérias vão para análise da redação. Apenas o administrador publica ou solicita correções.</div>
+<form id="news-form"><div class="field"><label>Título *</label><input id="title" minlength="5" maxlength="240" required placeholder="Manchete objetiva e verificável"></div><div class="field"><label>Resumo *</label><textarea id="summary" minlength="15" maxlength="500" required placeholder="O que aconteceu, onde e quando?"></textarea></div><div class="field"><label>Editoria</label><select id="category"><option>Cidades</option><option>Segurança</option><option>Política</option><option>Agro</option><option>Economia</option><option>Entretenimento</option><option>Brasil</option><option>Tecnologia</option><option>Esportes</option></select></div><div class="field"><label>Texto completo *</label><textarea class="body" id="body" required minlength="30" placeholder="Descreva o acontecimento, os envolvidos e as informações verificadas. Separe parágrafos com Enter."></textarea></div><div class="field"><label>Fontes e comprovação</label><textarea id="sources" placeholder="Links, documentos, nomes de fontes públicas, locais, datas e observações para a redação."></textarea></div><div class="field"><label>Foto (JPG, PNG, WebP, até 5 MB)</label><input type="file" id="image" accept="image/jpeg,image/png,image/webp"><p class="small" id="image-note">Somente imagens próprias ou com autorização.</p></div>
+<div class="check"><input type="checkbox" id="responsibility" required><label for="responsibility" style="margin:0;font-weight:500">Confirmo que o texto não é inventado, que indiquei as fontes conhecidas e que tenho direito de compartilhar as imagens enviadas. Sei que a redação poderá corrigir, recusar ou retirar o conteúdo.</label></div>
+<div class="buttons"><button type="button" id="copy-ai" class="button">✨ Preparar texto com IA</button><button type="button" id="save-draft" class="button">Salvar rascunho</button><button type="submit" class="button red">Enviar para revisão</button></div>
+<p class="small">A ajuda da IA prepara um pedido para usar no ChatGPT/Gemini. Não verifica fatos, não acessa suas fontes e nunca publica automaticamente.</p></form>
+</section>
+</div><aside><div class="card"><h2>Como funciona</h2><div class="step"><span class="num">1</span><div><strong>Cadastro aberto</strong><span class="small">Qualquer pessoa pode se candidatar e confirmar o e-mail.</span></div></div><div class="step"><span class="num">2</span><div><strong>Aprovação de colaborador</strong><span class="small">O administrador avalia cada solicitação antes de autorizar o envio.</span></div></div><div class="step"><span class="num">3</span><div><strong>Envio e revisão</strong><span class="small">O conteúdo entra na fila; a redação pode aprovar, pedir ajustes ou rejeitar.</span></div></div><div class="step"><span class="num">4</span><div><strong>Publicação</strong><span class="small">Somente matérias aprovadas são publicadas no site.</span></div></div></div>
+<div class="card" id="my-news" style="margin-top:20px"><h2>Minhas notícias</h2><div id="my-list"><p class="small">Entre para acompanhar suas matérias.</p></div></div>
+<div class="feature"><h2>IA como assistente, jornalista como responsável.</h2><p>Use sugestões para melhorar a clareza e estrutura do texto, mas confira informações, datas, fontes e nomes. A redação faz a decisão final.</p></div></aside></div></main>
+<footer>ORVIA NEWS · Colaboração voluntária sujeita às regras editoriais e à proteção de dados.</footer>
+<script src="config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.2/dist/umd/supabase.js"></script>
+<script>
+(()=>{'use strict';
+const $=id=>document.getElementById(id), db=window.supabase.createClient(ORVIA_CONFIG.url,ORVIA_CONFIG.publishableKey);
+let me=null,profile=null,editing=null,articles=[],working=false;
+function alertMsg(msg,err=false){$('msg').textContent=msg;$('msg').className='msg '+(err?'error':'ok');$('msg').scrollIntoView({block:'nearest',behavior:'smooth'});}
+const s=t=>String(t||'').trim();
+function setBusy(v){working=v;document.querySelectorAll('button').forEach(b=>{if(!['signout','new'].includes(b.id))b.disabled=v;});}
+async function loadAuth(){
+ const {data:{user}}=await db.auth.getUser();me=user||null;profile=null;
+ $('login-panel').classList.toggle('hide',!!me);
+ $('waiting').classList.toggle('hide',!me);
+ $('news-panel').classList.add('hide');
+ if(!me){$('my-list').textContent='Entre para acompanhar suas matérias.';return;}
+ $('welcome').textContent='Conectado como '+(me.email||'');
+ let {data:p,error:readErr}=await db.from('orvia_contributors').select('*').eq('user_id',me.id).maybeSingle();
+ if(readErr){alertMsg('Não foi possível verificar seu cadastro: '+readErr.message,true);return;}
+ if(!p){
+  const name=s(me.user_metadata?.full_name);const motivation=s(me.user_metadata?.motivation);
+  if(!name){$('status').textContent='Complete a candidatura e envie para análise.';return;}
+  const {error}=await db.from('orvia_contributors').insert({user_id:me.id,email:me.email.toLowerCase(),full_name:name,motivation});
+  if(error){alertMsg('Não foi possível registrar candidatura: '+error.message,true);return;}
+  ({data:p}=await db.from('orvia_contributors').select('*').eq('user_id',me.id).maybeSingle());
+ }
+ profile=p;
+ const names={pending:'Sua candidatura aguarda aprovação da administração.',approved:'Seu cadastro foi aprovado. Você pode enviar notícias para análise.',rejected:'Sua candidatura não foi aprovada.',suspended:'Seu cadastro está suspenso.'};
+ $('status').textContent=names[p.approval_status]||'Aguardando análise.';
+ if(p.approval_status==='approved'){$('waiting').classList.add('hide');$('news-panel').classList.remove('hide');}
+ await loadArticles();
+}
+$('auth-form').onsubmit=async e=>{e.preventDefault();setBusy(true);try{const {error}=await db.auth.signInWithPassword({email:s($('email').value),password:$('password').value});if(error)throw error;await loadAuth();}catch(e){alertMsg('Falha no acesso: '+e.message,true);}finally{setBusy(false)}};
+$('signup').onclick=async()=>{const email=s($('email').value),password=$('password').value,full_name=s($('name').value),motivation=s($('motivation').value);
+ if(!email||password.length<8||full_name.length<3||!motivation){alertMsg('Preencha e-mail, senha (8+ caracteres), nome e sua apresentação.',true);return;}
+ setBusy(true);try{const {data,error}=await db.auth.signUp({email,password,options:{data:{full_name,motivation}}});if(error)throw error;alertMsg('Cadastro solicitado. Confirme o e-mail recebido, depois volte e entre. A aprovação é feita pelo administrador.');if(data.session)await loadAuth();}catch(e){alertMsg('Não foi possível solicitar cadastro: '+e.message,true)}finally{setBusy(false)}};
+$('signout').onclick=async()=>{await db.auth.signOut();me=null;await loadAuth()};
+async function loadArticles(){const {data,error}=await db.from('orvia_articles').select('id,title,summary,body,category,image_url,review_state,review_notes,updated_at,status,slug,author').eq('created_by',me.id).order('updated_at',{ascending:false});if(error){alertMsg(error.message,true);return;}articles=data||[];const root=$('my-list');root.replaceChildren();if(!articles.length){root.textContent='Você ainda não enviou notícias.';return;}for(const a of articles){const wrap=document.createElement('div');wrap.className='story';const title=document.createElement('strong');title.textContent=a.title;const state=document.createElement('p');state.className='small';const map={draft:'Rascunho',submitted:'Aguardando revisão',changes_requested:'Correções solicitadas',rejected:'Não aprovada',approved:'Aprovada'};state.textContent=(a.status==='published'?'Publicada':map[a.review_state]||a.review_state)+' · '+new Date(a.updated_at).toLocaleDateString('pt-BR');wrap.append(title,state);if(a.review_notes){const note=document.createElement('p');note.className='small';note.textContent='Redação: '+a.review_notes;wrap.append(note)}if(a.status==='draft'&&['draft','changes_requested'].includes(a.review_state)){const btn=document.createElement('button');btn.textContent='Editar e reenviar';btn.onclick=()=>edit(a);wrap.append(btn)}else if(a.status==='published'){const aLink=document.createElement('a');aLink.href='noticia.html?slug='+encodeURIComponent(a.slug);aLink.textContent='Ler matéria ↗';aLink.className='small';wrap.append(aLink);}root.append(wrap);}}
+function edit(a){editing=a;$('form-title').textContent='Editar notícia';$('title').value=a.title;$('summary').value=a.summary;$('body').value=a.body;$('category').value=a.category;$('image-note').textContent=a.image_url?'Foto atual cadastrada; selecione outra para substituir.':'Somente imagens próprias ou com autorização.';window.scrollTo({top:0,behavior:'smooth'});}
+function clear(){editing=null;$('news-form').reset();$('form-title').textContent='Enviar uma notícia';$('image-note').textContent='Somente imagens próprias ou com autorização.';}
+$('new').onclick=clear;
+function slug(title){return title.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,55)+'-'+crypto.randomUUID().slice(0,8)}
+async function persist(review_state){
+ if(working)return;if(!$('news-form').reportValidity())return;setBusy(true);
+ try{
+  let body=s($('body').value),sources=s($('sources').value);if(sources&&!body.includes('Fontes para a redação:'))body+='\\n\\nFontes para a redação:\\n'+sources;
+  const title=s($('title').value),p={title,summary:s($('summary').value),body,category:$('category').value,author:profile.full_name,status:'draft',review_state,featured:false,published_at:null};
+  const f=$('image').files[0];if(f){
+   if(!['image/jpeg','image/png','image/webp'].includes(f.type)||f.size>5*1024*1024)throw Error('Foto inválida. Envie JPG, PNG ou WebP até 5 MB.');
+   const ext=f.type==='image/png'?'png':f.type==='image/webp'?'webp':'jpg';
+   const path=me.id+'/'+crypto.randomUUID()+'.'+ext;
+   const {error:upErr}=await db.storage.from('orvia-news-images').upload(path,f,{contentType:f.type});if(upErr)throw upErr;
+   p.image_url=db.storage.from('orvia-news-images').getPublicUrl(path).data.publicUrl;
+  }else if(editing)p.image_url=editing.image_url;
+  if(!editing){p.slug=slug(title);p.created_by=me.id;}
+  const {error}=editing?await db.from('orvia_articles').update(p).eq('id',editing.id):await db.from('orvia_articles').insert(p);
+  if(error)throw error;clear();await loadArticles();alertMsg(review_state==='submitted'?'Notícia enviada para aprovação!':'Rascunho salvo.');
+ }catch(e){alertMsg('Falha ao enviar: '+e.message,true)}finally{setBusy(false)}
+}
+$('news-form').onsubmit=e=>{e.preventDefault();persist('submitted')};
+$('save-draft').onclick=()=>persist('draft');
+$('copy-ai').onclick=async()=>{
+ const title=s($('title').value),summary=s($('summary').value),body=s($('body').value),sources=s($('sources').value);
+ const prompt='Atue como assistente de edição jornalística da ORVIA NEWS. Ajude a estruturar e revisar o texto abaixo sem inventar fatos, falas, números, entrevistas ou fontes. Destaque o que precisa ser checado antes da publicação. Entregue: manchete objetiva, linha fina, texto revisado, perguntas de apuração e possíveis riscos de imprecisão.\\n\\nTítulo: '+title+'\\nResumo: '+summary+'\\nTexto: '+body+'\\nFontes: '+sources;
+ try{await navigator.clipboard.writeText(prompt);alertMsg('Prompt copiado! Abra o ChatGPT ou Gemini, cole o texto e confira as sugestões. Não publique sem verificar.');}catch{alertMsg('A cópia automática falhou: selecione e copie seu texto e peça uma revisão à IA.',true)}
+};
+loadAuth().catch(e=>alertMsg(e.message,true));
+})();
+</script></body></html>
