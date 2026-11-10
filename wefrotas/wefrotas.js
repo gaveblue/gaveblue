@@ -9460,6 +9460,13 @@
 
       const closeOpenOrders = getEligibleOpenOrdersForFinance(entry);
       const reserveRelation = getVerifiedReserveRelation(entry);
+      // A legacy Central approval can name the source instead of the real
+      // reserve. Require explicit administrator confirmation before changing it.
+      const recordedSource = isFuelEntry(entry) && !entry.groupedIntoId && !entry.substitutionId
+        ? window.WeFrotasSubstitutions?.forFuel(entry.vehicleId, entry.driverId, getFinanceEntryDate(entry))
+        : null;
+      const confirmableReserve = recordedSource?.wrongVehicle && recordedSource.replacement?.reason === 'sinistro'
+        ? allVehicles.find(vehicle => String(vehicle.id) === String(recordedSource.replacement.reserveVehicleId)) : null;
       const orderOptions = closeOpenOrders
         .map(order => `<option value="${escapeHtml(getOrderAutocompleteLabel(order))}"></option>`)
         .join('');
@@ -9477,6 +9484,14 @@
           <label>Lançamento selecionado</label>
           <div class="soft-input w-full flex items-center">${escapeHtml(isFinanceGroupEntry(entry) ? (isExpenseGroupEntry(entry) ? 'Agrupamento de despesas' : 'Agrupamento de abastecimentos') : (entry.fornecedor || 'Abastecimento'))}</div>
         </div>
+        ${confirmableReserve ? `<div class="field-wrap full" style="padding:10px 12px;border:1px solid #c4b9a3;border-radius:12px;">
+          <label style="display:flex;align-items:flex-start;gap:9px;line-height:1.45;">
+            <input id="finance-close-reserve-confirm" type="checkbox" style="margin-top:4px;accent-color:#2563eb;">
+            <span><strong>Este abastecimento foi no VEÍCULO RESERVA ${escapeHtml(confirmableReserve.placa || '')}.</strong>
+            Confirmo que a quilometragem informada pertence ao reserva, não ao veículo sinistrado.
+            O lançamento será reclassificado com histórico antes de ser alocado na OS.</span>
+          </label>
+        </div>` : ''}
         <div class="field-wrap">
           <label>NF / numero da nota</label>
           <input class="soft-input w-full" id="finance-close-nf" placeholder="Ex: NF 1542">
@@ -15887,6 +15902,41 @@
         }
         const discount = parseCurrencyInputValue(document.getElementById('finance-close-discount').value || 0);
         const observacoes = document.getElementById('finance-close-observacoes').value.trim();
+        let correctedEntry = entry;
+        if (document.getElementById('finance-close-reserve-confirm')?.checked) {
+          const result = window.WeFrotasSubstitutions?.forFuel(entry.vehicleId, entry.driverId, getFinanceEntryDate(entry));
+          if (!result?.wrongVehicle || result.replacement?.reason !== 'sinistro' || !isFuelEntry(entry) || entry.substitutionId) {
+            showToast('A substituição não foi encontrada para esta data e motorista. Atualize e confira a OS.');
+            return;
+          }
+          const reserveId = result.replacement.reserveVehicleId;
+          const mapped = window.WeFrotasSubstitutions?.association(
+            reserveId, entry.driverId, getFinanceEntryDate(entry), '', entry.km
+          );
+          if (!mapped || mapped.error || mapped.replacementId !== result.replacement.id) {
+            showToast(mapped?.error || 'Não foi possível confirmar o vínculo com o veículo reserva.');
+            return;
+          }
+          const kmError = validateFuelMileageForVehicle({
+            vehicleId: reserveId, date: getFinanceEntryDate(entry), km: entry.km, excludeId: entry.id
+          });
+          if (kmError) {
+            showToast(kmError);
+            return;
+          }
+          correctedEntry = {
+            ...entry, vehicleId: reserveId,
+            substitutionId: mapped.replacementId, replacedVehicleId: mapped.replacedVehicleId,
+            sinisterFuelReview: false,
+            reserveReclassification: {
+              previousVehicleId: entry.vehicleId,
+              reserveVehicleId: reserveId,
+              substitutionId: mapped.replacementId,
+              confirmedAt: new Date().toISOString(),
+              method: 'confirmacao_administrativa_explicitamente_informada'
+            }
+          };
+        }
         const linkedOrder = orderId ? allOrders.find(item => item.id === orderId) : null;
         if (!orderId || !linkedOrder) {
           showToast('Selecione uma OS aberta para fechar a despesa.');
@@ -15897,7 +15947,7 @@
           showToast('Não é permitido alocar em OS fechada.');
           return;
         }
-        if (!getEligibleOpenOrdersForFinance(entry).some(order => String(order.id) === String(linkedOrder.id))) {
+        if (!getEligibleOpenOrdersForFinance(correctedEntry).some(order => String(order.id) === String(linkedOrder.id))) {
           showToast('Esta OS não pertence ao veículo abastecido nem ao titular da substituição comprovada. Confira o carro reserva e a OS.');
           return;
         }
@@ -15906,7 +15956,7 @@
         advanceOrderStatusOnFinancialAllocation(orderId);
         allFinanceEntries = allFinanceEntries.map(item => item.id === currentEditingId
           ? {
-              ...item,
+              ...correctedEntry,
               orderId: orderId || '',
               dataVencimento,
               nf,
