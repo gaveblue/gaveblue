@@ -74,3 +74,29 @@ test('script principal carrega o módulo e imprime a observação em visualizaç
   assert.equal((main.match(/getOrderSinistroPrintNotice\(order, entries\)/g)||[]).length>=4,true);
   assert.match(main,/String\(entry\.vehicleId \|\| ''\) === String\(order\.vehicleId\)/);
 });
+
+test('KM físico do titular na OS não incorpora leitura do reserva',()=>{
+  const main=fs.readFileSync(path.join(__dirname,'../wefrotas/wefrotas.js'),'utf8');
+  const fragment=main.match(/    function getOrderKmData\(orderId\) \{[\s\S]*?(?=\r?\n    function getVehicleCurrentKm\()/);
+  assert.ok(fragment);
+  const getOrderKmData=new Function('allOrders','allFinanceEntries','isFuelGroupEntry','getFuelGroupChildren','getFinanceEntryDate',
+    fragment[0]+'\nreturn getOrderKmData;')(
+      [{id:'os-sinistro',vehicleId:'titular'}],
+      [
+        {entryType:'combustivel',vehicleId:'titular',orderId:'os-sinistro',dataAbastecimento:'2026-09-29',km:'36488'},
+        {entryType:'combustivel',vehicleId:'reserva',orderId:'os-sinistro',dataAbastecimento:'2026-10-21',km:'9969'},
+        {entryType:'combustivel',vehicleId:'titular',orderId:'os-sinistro',dataAbastecimento:'2026-10-03',km:'36993'}
+      ],entry=>entry.entryType==='combustivel_agrupado',()=>[],entry=>entry.dataAbastecimento || entry.dataVencimento || '');
+  const km=getOrderKmData('os-sinistro');
+  assert.equal(km.kmInicial,'36488');
+  assert.equal(km.kmFinal,'36993');
+});
+
+test('aprovação antiga pode ser reclassificada apenas por confirmação explícita',()=>{
+  const main=fs.readFileSync(path.join(__dirname,'../wefrotas/wefrotas.js'),'utf8');
+  assert.match(main,/id="finance-close-reserve-confirm" type="checkbox"/);
+  assert.match(main,/if \(document\.getElementById\('finance-close-reserve-confirm'\)\?\.checked\)/);
+  assert.match(main,/reserveReclassification: \{/);
+  assert.match(main,/getEligibleOpenOrdersForFinance\(correctedEntry\)/);
+  assert.match(main,/validateFuelMileageForVehicle\(\{/);
+});
