@@ -76,3 +76,61 @@ border:1px dashed #9cacc4;border-radius:18px;background:rgba(112,147,194,.035);c
 .gb-fin-actions{display:flex;justify-content:flex-end;margin-top:14px;}
 .gb-fin-actions .button{min-width:230px;justify-content:center;}
 @media(max-width:760px){.gb-fin-import-hide-mobile{display:none!important}dialog.gb-fin-report-modal{width:calc(100vw - 16px);} .gb-fin-summary-grid{grid-template-columns:repeat(2,1fr)}.gb-fin-confirm-grid{grid-template-columns:1fr;}}
+
+/* GB+ 3.0.8 — Importação Sankhya. Restringir aos painéis do computador. */
+.gb-erp-secondary-heading{font-size:13px;font-weight:700;margin:25px 0 13px;color:inherit;}
+.gb-erp-import{font-size:13px;color:var(--text,#17253a);}
+.gb-erp-heading{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;}
+.gb-erp-heading h3{font-size:23px;line-height:1.25;letter-spacing:-.04em;margin:5px 0;}
+.gb-erp-heading p{margin:0;color:var(--muted,#717e90);}
+.gb-erp-heading small{font-weight:700;letter-spacing:.12em;font-size:10px;color:#648ac9;}
+.gb-erp-heading>svg{flex:none;color:#7393ce;width:26px;height:26px;}
+.gb-erp-switch{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:23px 0 16px;}
+.gb-erp-switch button{display:flex;flex-direction:column;gap:5px;text-align:left;cursor:pointer;padding:15px;border:1px solid rgba(130,143,164,.25);color:inherit;background:transparent;border-radius:13px;}
+.gb-erp-switch button.active{background:rgba(80,132,224,.08);border-color:#7a9cda;}
+.gb-erp-switch button strong{font-size:13px;}.gb-erp-switch button small{color:var(--muted,#778399);font-size:11px;}
+.gb-erp-note{display:flex;align-items:center;gap:10px;padding:12px 13px;border-radius:11px;background:rgba(99,148,212,.06);font-size:12px;line-height:1.5;color:var(--muted,#748096);}
+.gb-erp-note svg{flex-shrink:0;}
+.gb-erp-drop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;border:1px dashed #95abc9;border-radius:15px;min-height:178px;margin:16px 0;background:rgba(99,148,212,.025);cursor:pointer;text-align:center;padding:24px;}
+.gb-erp-drop svg{width:25px;height:25px;color:#648fce;}
+.gb-erp-drop strong{font-size:15px;}.gb-erp-drop span,.gb-erp-hint{font-size:11px;color:var(--muted,#778399);}
+#gb-erp-file{font-size:12px;max-width:100%;}.gb-erp-progress{padding:12px;background:rgba(69,122,208,.07);border-radius:10px;}
+.gb-erp-error{padding:12px;color:#9f3434;border-radius:10px;background:rgba(221,70,70,.08);}
+.gb-erp-filename{display:flex;align-items:center;gap:10px;margin:18px 0 14px;flex-wrap:wrap;}
+.gb-erp-filename .button{margin-left:auto;}
+.gb-erp-summary-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;}
+.gb-erp-summary-grid.small{margin-top:9px;}
+.gb-erp-summary{min-width:0;display:flex;flex-direction:column;gap:5px;padding:12px 14px;border:1px solid rgba(120,142,180,.13);border-radius:10px;background:rgba(80,120,165,.045);}
+.gb-erp-summary span{font-size:10px;color:var(--muted,#718098);}
+.gb-erp-summary strong{font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums;}
+.gb-erp-row-actions{display:flex;justify-content:space-between;gap:10px;align-items:center;margin:20px 0 11px;}
+.gb-erp-row-actions strong{font-size:14px;}.gb-erp-row-actions>div{display:flex;gap:6px;flex-wrap:wrap;}
+.gb-erp-table-wrap{border:1px solid rgba(120,136,165,.2);border-radius:12px;overflow:auto;max-height:360px;}
+.gb-erp-table-wrap table{border-collapse:collapse;width:100%;min-width:810px;font-size:12px;}
+.gb-erp-table-wrap th{position:sticky;top:0;text-align:left;background:var(--surface,#f9fafc);color:var(--muted,#69788e);font-size:10px;z-index:1;}
+.gb-erp-table-wrap th,.gb-erp-table-wrap td{padding:9px 10px;border-bottom:1px solid rgba(120,136,165,.15);vertical-align:middle;}
+.gb-erp-table-wrap tr:hover{background:rgba(106,150,214,.045);}
+.gb-erp-table-wrap td small{display:block;font-size:10px;margin-top:3px;color:var(--muted,#808c9d);}
+.gb-erp-table-wrap input[type=checkbox],.gb-erp-confirm input{accent-color:#3975d8;}
+.gb-erp-status{display:inline-block;border-radius:99px;padding:4px 8px;font-size:10px;font-weight:650;white-space:nowrap;background:rgba(130,141,159,.11);color:inherit;}
+.gb-erp-status.income,.gb-erp-status.create,.gb-erp-status.match,.gb-erp-status.settle{background:rgba(52,160,102,.10);color:#228451;}
+.gb-erp-status.expense,.gb-erp-status.blocked,.gb-erp-status.conflict{background:rgba(204,68,69,.09);color:#b54d4e;}
+.gb-erp-status.update,.gb-erp-status.warn{background:rgba(209,159,63,.13);color:#936b2b;}
+.gb-erp-status.unchanged{color:#7d8795;}
+.gb-erp-pages{display:flex;justify-content:flex-end;align-items:center;gap:16px;margin:12px 0;}
+.gb-erp-pages button{padding:7px 10px;border:1px solid rgba(130,143,164,.3);border-radius:8px;background:transparent;color:inherit;cursor:pointer;}
+.gb-erp-ignored{margin:16px 0;border:1px solid rgba(197,147,81,.23);border-radius:12px;padding:10px;}
+.gb-erp-ignored summary{cursor:pointer;color:#966f36;font-weight:650;}
+.gb-erp-ignored>div{max-height:170px;overflow:auto;font-size:11px;}
+.gb-erp-config{margin:23px 0 14px;padding:17px;border:1px solid rgba(132,149,174,.2);border-radius:14px;}
+.gb-erp-config h4{margin:0 0 11px;font-size:14px;}
+.gb-erp-config>p{font-size:11px;line-height:1.6;color:var(--muted,#6b798c);}
+.gb-erp-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:15px;}
+.gb-erp-fields label{font-size:11px;font-weight:650;display:flex;flex-direction:column;gap:6px;}
+.gb-erp-fields select{background:var(--surface,#fff);border:1px solid rgba(133,153,179,.36);border-radius:10px;padding:10px;color:inherit;min-width:0;}
+.gb-erp-confirm{display:flex;gap:10px;line-height:1.55;font-size:12px;margin:18px 0;}
+.gb-erp-confirm input{flex:none;margin-top:3px;}
+.gb-erp-end{display:flex;justify-content:flex-end;}
+.gb-erp-end .button{min-width:225px;justify-content:center;}
+.gb-partner-erp-code{padding:10px 12px;border-radius:10px;background:rgba(107,143,203,.08);font-size:12px;color:var(--text,#24324a);}
+@media(max-width:760px){.gb-erp-switch,.gb-erp-fields,.gb-erp-summary-grid{grid-template-columns:1fr 1fr;}}
