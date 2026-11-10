@@ -14286,7 +14286,10 @@
         return `
           <tr>
             <td>${entry ? escapeHtml(formatDate(getFinancePaymentDate(entry))) : ''}</td>
-            <td>${entry ? escapeHtml(getFinanceSupplierSummary(entry)) : ''}</td>
+            <td>${entry ? escapeHtml(getFinanceSupplierSummary(entry)) +
+              (getOrderFinanceReservePrintNote(entry, order)
+                ? '<div style="margin-top:3px;font-size:9px;font-weight:800;line-height:1.25;">' +
+                    escapeHtml(getOrderFinanceReservePrintNote(entry, order)) + '</div>' : '') : ''}</td>
             <td class="money">${entry && entry.kind === 'despesa' ? escapeHtml(formatCurrency(entry.total)) : ''}</td>
             <td class="money">${entry && entry.kind === 'receita' ? escapeHtml(formatCurrency(entry.total)) : ''}</td>
             <td class="money">${entry ? escapeHtml(formatCurrency(runningTotal)) : ''}</td>
@@ -14365,6 +14368,7 @@
               <tr><td class="label">Chassi:</td><td>${escapeHtml(vehicle ? vehicle.chassi || '' : '')}</td><td class="label">KM FINAL:</td><td>${escapeHtml(kmData.kmFinal || '')}</td></tr>
               <tr><td class="label">Responsável:</td><td colspan="3">${escapeHtml(driver ? driver.nome : order.responsavelNome || '')}</td></tr>
             </table>
+            ${getOrderSinistroPrintNotice(order, entries)}
             <table class="desc-title block-gap"><tr><td>DESCRIÇÃO DO SERVIÇO/PROBLEMA:</td></tr></table>
             <table class="desc-box"><tr><td>${escapeHtml(printableDescription || '')}</td></tr></table>
             <table class="signature-block block-gap"><tr><td><div class="sign-wrap"><div class="sign-line"></div><div class="sign-label">AUTORIZADOR</div></div></td></tr></table>
@@ -14460,7 +14464,10 @@
         return `
           <tr>
             <td>${entry ? escapeHtml(formatDate(getFinancePaymentDate(entry))) : ''}</td>
-            <td>${entry ? escapeHtml(getFinanceSupplierSummary(entry)) : ''}</td>
+            <td>${entry ? escapeHtml(getFinanceSupplierSummary(entry)) +
+              (getOrderFinanceReservePrintNote(entry, order)
+                ? '<div style="margin-top:3px;font-size:9px;font-weight:800;line-height:1.25;">' +
+                    escapeHtml(getOrderFinanceReservePrintNote(entry, order)) + '</div>' : '') : ''}</td>
             <td class="money">${entry && entry.kind === 'despesa' ? escapeHtml(formatCurrency(entry.total)) : ''}</td>
             <td class="money">${entry && entry.kind === 'receita' ? escapeHtml(formatCurrency(entry.total)) : ''}</td>
             <td class="money">${entry ? escapeHtml(formatCurrency(runningTotal)) : ''}</td>
@@ -14522,7 +14529,8 @@
             </tr>
           </table>
 
-          <table class="desc-title block-gap">
+          ${getOrderSinistroPrintNotice(order, entries)}
+            <table class="desc-title block-gap">
             <tr>
               <td>DESCRIÇÃO DO SERVIÇO/PROBLEMA:</td>
             </tr>
@@ -14644,7 +14652,10 @@
         return `
           <tr>
             <td>${entry ? escapeHtml(formatDate(getFinancePaymentDate(entry))) : ''}</td>
-            <td>${entry ? escapeHtml(getFinanceSupplierSummary(entry)) : ''}</td>
+            <td>${entry ? escapeHtml(getFinanceSupplierSummary(entry)) +
+              (getOrderFinanceReservePrintNote(entry, order)
+                ? '<div style="margin-top:3px;font-size:9px;font-weight:800;line-height:1.25;">' +
+                    escapeHtml(getOrderFinanceReservePrintNote(entry, order)) + '</div>' : '') : ''}</td>
             <td class="money">${entry && entry.kind === 'despesa' ? escapeHtml(formatCurrency(entry.total)) : ''}</td>
             <td class="money">${entry && entry.kind === 'receita' ? escapeHtml(formatCurrency(entry.total)) : ''}</td>
             <td class="money">${entry ? escapeHtml(formatCurrency(runningTotal)) : ''}</td>
@@ -14982,6 +14993,7 @@
               </tr>
             </table>
 
+            ${getOrderSinistroPrintNotice(order, entries)}
             <table class="desc-title block-gap">
               <tr>
                 <td>DESCRIÇÃO DO SERVIÇO/PROBLEMA:</td>
