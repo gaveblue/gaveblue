@@ -1,15 +1,16 @@
 {
-  "version": "3.0.6",
-  "build": 3006,
-  "published_at": "2026-11-10T18:31:41Z",
-  "title": "Abertura automática com rastros de luz discretos e GB+ harmonizado",
+  "version": "3.0.7",
+  "build": 3007,
+  "published_at": null,
+  "title": "Importação assistida de contas a receber, pagar e recebidas — desktop",
   "notes": [
-    "Botão Iniciar removido da abertura. A apresentação aparece automaticamente e dá lugar ao login/painel real após cerca de 6 segundos, com fade suave; sem redirecionamento de página.",
-    "O CSS remove a sobreposição no final mesmo sem JavaScript; há temporizador de segurança em JS para remover o elemento após 6,05 segundos.",
-    "Espaçamentos de G, B e + padronizados; removidas margens negativas que desequilibravam a marca, mantendo o recorte seguro das letras.",
-    "Dois anéis mínimos continuam girando em sentidos contrários e recebem um leve rastro azul translúcido, com transparência gradual, sem disco ou efeitos agressivos.",
-    "Callbacks e links diretos contornam a splash. Preferência por movimento reduzido remove a animação. Sem mudanças no financeiro, dados, Supabase ou login.",
-    "Publicação expressamente solicitada pelo responsável; homologação visual Android/PWA, desktop e offline permanece pendente até evidência."
+    "Foi preparada na tela Relatórios do computador uma importação separada de extratos bancários, com três opções: Contas a receber, Contas a pagar e Contas recebidas.",
+    "Leitura local de planilhas XLSX/CSV e PDFs; PDFs digitalizados de contas a receber podem usar OCR local, com conferência obrigatória; o leitor de PDF/OCR usa bibliotecas externas quando há conexão.",
+    "Os títulos entram primeiro em pré-visualização com valores, datas, situação, duplicidades e itens excluídos. Nada é gravado antes da seleção, escolha da categoria, conferência das contas e confirmação explícita.",
+    "Relatórios Sicoob só consideram liquidações 58, 68, 212 e 215 como recebimentos. Ocorrência 82 — baixa a pedido do cedente — fica excluída do total financeiro.",
+    "Contas a pagar respeitam status PAGO/A VENCER/VENCE HOJE; pagamentos e recebimentos exigem conta financeira confirmada para gerar baixa e alterar saldo.",
+    "Dados duplicados já importados ou com correspondência exata no sistema são bloqueados. A importação não altera títulos existentes automaticamente.",
+    "O código de importação fica restrito ao módulo do PC; a captura original não é armazenada. Testes visuais de importação real Android/PWA e desktop permanecem pendentes."
   ],
   "assets": [
     "./splash.css",
@@ -207,28 +208,32 @@
     "./account-goals.css",
     "./js/account-goals.js",
     "./visual-300.css",
-    "./js/finance-picker-300.js"
+    "./js/finance-picker-300.js",
+    "./financial-report-import.css",
+    "./js/financial-report-core.js",
+    "./js/financial-report-readers.js",
+    "./js/financial-report-ui.js"
   ],
   "highlights": [
     {
-      "icon": "sparkles",
-      "title": "Abertura automática",
-      "description": "A animação termina sozinha e revela o aplicativo, sem botões."
-    },
-    {
-      "icon": "repeat",
-      "title": "Anéis com luz delicada",
-      "description": "Rastros translúcidos desaparecem suavemente enquanto os anéis giram."
+      "icon": "upload",
+      "title": "Importações de relatórios no PC",
+      "description": "Contas a receber, a pagar e recebimentos liquidados em uma área de conferência."
     },
     {
       "icon": "check",
-      "title": "Logo harmonizado",
-      "description": "G, B e + com espaços uniformes."
+      "title": "Revisão antes de gravar",
+      "description": "Prévia com datas, valores, duplicidades, categoria e conta."
+    },
+    {
+      "icon": "shield",
+      "title": "Baixa não é recebimento",
+      "description": "Movimentos administrativos do Sicoob permanecem fora das receitas."
     }
   ],
-  "release_status": "published_authorized_qa_partial",
+  "release_status": "candidate_validation_pending",
   "homologation": {
-    "status": "published_qa_partial_visual_pending",
-    "notes": "PR #128 mesclado em main no commit 11ecabc0c496f94757e8a4f9e46643c5d512772e. GitHub Pages run 42875835562 concluído com sucesso em 10/11/2026 às 18:31:41 UTC. 20 verificações estruturais no código da candidata passaram e scripts inline possuem sintaxe válida. CI de regressão run 42875762360 falhou sem executar steps: não prova falha do código. QA visual Android/PWA, desktop, offline e auth real permanece pendente; homologação integral não declarada."
+    "status": "pending_end_to_end_tests",
+    "notes": "Versão candidata 3.0.7: testes de leitura e importação contra relatórios reais e navegação desktop precisam ser executados. Não publicar sem validar os exemplos de contas a pagar/receber/recebidas."
   }
 }
