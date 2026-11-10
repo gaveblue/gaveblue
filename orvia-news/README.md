@@ -39,7 +39,7 @@ Os formulários de colaboradores e da redação principal permitem preparar e co
 
 Projeto separado: `ORVIA NEWS` (ref `ckpyhnqrlqxwkjvyurle`), na mesma organização do GB+ e sem alterações nos bancos dos outros sistemas.
 
-Tabelas: `orvia_editors` (administradores), `orvia_contributors` (candidaturas e aprovações), `orvia_articles` (matérias), `orvia_article_evidence` (fontes e notas internas privadas), `orvia_ads` (publicidade).
+Tabelas: `orvia_editors` (administradores), `orvia_contributors` (candidaturas), `orvia_articles` (matérias publicáveis), `orvia_article_evidence` (fontes e comprovação privadas), `orvia_editor_feedback` (devolutivas de revisão privadas) e `orvia_ads` (publicidade).
 
 RLS habilitada em todas as tabelas; colaborações restritas à autoria; fontes e notas privadas nunca são lidas por visitantes anônimos. O bucket `orvia-news-images` só aceita uploads autenticados por administração ou por colaboradores aprovados, cada um em seu prefixo, com limites de tamanho e tipos de imagem. A leitura de imagens publicadas é pública.
 
