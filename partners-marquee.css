@@ -43,3 +43,34 @@
   #gb-partners-marquee .gbpm-viewport{overflow-x:auto;scrollbar-width:thin;mask-image:none;-webkit-mask-image:none}
   #gb-partners-marquee .gbpm-item,#gb-partners-marquee .gbpm-item img,#gb-partners-marquee .gbpm-cta{transition:none!important}
 }
+/* Ajuste de legibilidade e escala do carrossel — 10/11/2026 */
+#gb-partners-marquee .gbpm-heading{max-width:780px;margin-bottom:1.6rem}
+#gb-partners-marquee .gbpm-viewport{padding:.7rem 0 1.2rem}
+#gb-partners-marquee .gbpm-track{animation-duration:29s}
+#gb-partners-marquee .gbpm-group{gap:2.35rem;padding-right:2.35rem}
+#main-content #gb-partners-marquee .gbpm-item{
+  flex:0 0 250px;width:250px;height:133px;
+  display:flex;flex-direction:column;justify-content:center;align-items:center;
+  gap:.6rem;opacity:.9;background:transparent!important;box-shadow:none!important;
+}
+#gb-partners-marquee .gbpm-item img{
+  width:100%;height:91px;max-width:245px;max-height:91px;object-fit:contain;
+  filter:grayscale(1) contrast(1.08) brightness(.78);opacity:.93;
+}
+#main-content #gb-partners-marquee .gbpm-item:hover,
+#main-content #gb-partners-marquee .gbpm-item:focus-visible{opacity:1}
+#gb-partners-marquee .gbpm-item:hover img,
+#gb-partners-marquee .gbpm-item:focus-visible img{filter:none;opacity:1}
+#gb-partners-marquee .gbpm-brand-label{
+  color:#5e7697!important;text-align:center;text-transform:uppercase;letter-spacing:.09em;
+  font-size:11px;line-height:1.25;font-weight:800;white-space:nowrap;
+}
+@media(max-width:640px){
+  #gb-partners-marquee .gbpm-heading{margin-bottom:1rem}
+  #gb-partners-marquee .gbpm-track{animation-duration:26s}
+  #gb-partners-marquee .gbpm-group{gap:1.35rem;padding-right:1.35rem}
+  #main-content #gb-partners-marquee .gbpm-item{flex-basis:192px;width:192px;height:116px;gap:.35rem}
+  #gb-partners-marquee .gbpm-item img{max-width:188px;height:81px;max-height:81px}
+  #gb-partners-marquee .gbpm-brand-label{font-size:10px}
+}
+@media(prefers-reduced-motion:reduce){#gb-partners-marquee .gbpm-track{animation:none}}
