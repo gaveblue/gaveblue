@@ -1,14 +1,14 @@
 {
-  "version": "3.0.2",
-  "build": 3002,
-  "published_at": "2026-11-10T17:15:43Z",
-  "title": "Abertura GB+ — Brand Reveal com botão Iniciar",
+  "version": "3.0.3",
+  "build": 3003,
+  "published_at": null,
+  "title": "Refinamentos na abertura GB+ — anéis animados e espaçamento",
   "notes": [
-    "Adotada na abertura do aplicativo real a animação Brand Reveal da prévia aprovada, com logo GB+ completo, B sem cortes, tema escuro e ambientação de estúdio.",
-    "Controles Rever e Pular abertura removidos; botão único Iniciar termina a apresentação e revela o login ou painel real, sem abrir a tela fictícia do laboratório.",
-    "Links diretos e retornos da autenticação não são interceptados; mantém lançamentos, saldos, contas, cartões e dados armazenados intactos.",
-    "Estilos prefixados para não interferirem no aplicativo, movimento reduzido respeitado e cache do PWA atualizado para 3.0.2.",
-    "Publicação solicitada pelo responsável em 10/11/2026. QA visual Android/PWA e desktop continua pendente até evidência; não registrar homologação sem testes."
+    "Símbolo + aproximado do B, mantendo o recorte das letras corrigido no Android.",
+    "Dois anéis de fundo com movimento contínuo suave e pulsação sutil após a entrada da marca; movimentos reduzidos respeitados.",
+    "Corrigida a classe CSS do cabeçalho de progresso que impedia a aplicação do estilo e deixava 'experiênciaGB+' colados; agora separados em flex com espaçamento consistente inclusive em telas estreitas.",
+    "Corrigidos nomes CSS duplicados da linha luminosa e o endereço SVG de ruído no fundo. Sem alterações de login, saldos, contas, cartões, lançamentos ou armazenamento.",
+    "Publicação solicitada pelo responsável em 10/11/2026. QA visual em Android/PWA e desktop ainda não concluído."
   ],
   "assets": [
     "./splash.css",
@@ -211,23 +211,18 @@
   "highlights": [
     {
       "icon": "sparkles",
-      "title": "Novo visual da abertura",
-      "description": "Logo GB+ se forma com movimentos suaves e atmosfera azul."
+      "title": "Identidade GB+ refinada",
+      "description": "Símbolo + mais próximo e anéis animados discretamente."
     },
     {
       "icon": "check",
-      "title": "Iniciar",
-      "description": "Um único botão abre seu aplicativo real, sem tela de demonstração."
-    },
-    {
-      "icon": "shield",
-      "title": "Navegação protegida",
-      "description": "Continuidade do login e das sessões, sem mudança de dados financeiros."
+      "title": "Progresso mais legível",
+      "description": "Preparando sua experiência e GB+ sem sobreposição."
     }
   ],
-  "release_status": "published_authorized_qa_partial",
+  "release_status": "publication_authorized_qa_partial_deploy_pending",
   "homologation": {
-    "status": "published_qa_partial_visual_pending",
-    "notes": "Versão 3.0.2 mesclada no PR #124, commit f76af02e40aed3ff0a36978949c29e5dc8c3cb99. GitHub Pages run 42862979685 concluído com sucesso em 10/11/2026 às 17:15:43 UTC. Execuções CI de regressão no PR falharam sem steps, sem comprovar falha do código; QA visual Android/PWA, desktop e offline não executado. Publicação expressamente autorizada, homologação integral pendente."
+    "status": "qa_structural_pending_e2e",
+    "notes": "Correção CSS solicitada pelo responsável em 10/11/2026; pendente QA visual Android/PWA e desktop, redução de movimento, offline e conferência final do deploy."
   }
 }

@@ -1,5 +1,13 @@
 # CHANGELOG — GB+ Gestão Financeira
 
+## [3.0.3 — REFINAMENTO DA ABERTURA: ANÉIS E ESPAÇAMENTO (PUBLICAÇÃO AUTORIZADA; QA VISUAL PENDENTE)] — 2026-11-10
+- **Marca:** aproximação do símbolo **+** ao **B** no computador e principalmente no celular, sem reduzir a área de recorte segura das letras.
+- **Fundo:** anéis elípticos animados com oscilação lenta e pulso do anel interno, após a entrada inicial; animações continuam sutis e obedecem a `prefers-reduced-motion`.
+- **Legibilidade:** corrigido o seletor `.gbintro-gbintro-loading-label` duplicado, que deixava “Preparando sua experiênciaGB+” sem estilo. A legenda agora usa `.gbintro-loading-label`, espaçamento flex explícito, largura responsiva e redução da fonte nas telas estreitas.
+- **Outros ajustes CSS:** corrigida a classe da linha luminosa e o namespace do SVG de ruído do fundo.
+- **Conservação:** mantém o botão único **Iniciar**, login/rotas e toda a lógica financeira intactos. Versão 3.0.3 com CSS cache-busted e novo cache PWA; não força atualização da página aberta nem apaga dados.
+- **QA e publicação:** liberação solicitada em 10/11/2026. Executar verificação estrutural e registrar CI; teste visual real Android/PWA, desktop e offline permanece pendente até comprovação. Não declarar homologação integral apenas pela publicação.
+
 ## [3.0.2 — BRAND REVEAL COM INICIAR (PUBLICAÇÃO AUTORIZADA; QA VISUAL PENDENTE)] — 2026-11-10
 - **Abertura:** substituição da animação 3.0.1 pelo protótipo Brand Reveal aprovado: fundo escuro, G e B formados em sequência, símbolo + azul em cartão, órbitas, slogan e barra animada. Corrigido recorte do B em celulares.
 - **Controles:** removidos os botões de teste **Rever** e **Pular abertura**. Existe apenas **Iniciar**; ao tocar, a apresentação desaparece e o usuário continua no login ou painel financeiro real. Nenhum redirecionamento para a tela fictícia.
