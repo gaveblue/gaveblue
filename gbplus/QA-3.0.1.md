@@ -1,6 +1,6 @@
 # GB+ 3.0.1 — QA da abertura Logo Reveal
 
-Data: 10/11/2026. Candidata: `feat/gbplus-301-splash-reveal` (PR #122).
+Data: 10/11/2026. Liberação expressamente autorizada com QA parcial. Candidata: `feat/gbplus-301-splash-reveal` (PR #122).
 
 ## Escopo
 - Sobreposição inicial de aproximadamente 2,05 segundos; efeito G → B → + azul; fade final.
@@ -22,4 +22,4 @@ Data: 10/11/2026. Candidata: `feat/gbplus-301-splash-reveal` (PR #122).
 - [ ] Revisão e homologação para publicar a versão.
 
 ## Regra de liberação
-Não confundir código preparado ou sucesso de verificações estruturais com homologação. PR permanece em rascunho; versão 3.0.1 ainda não está publicada no domínio oficial.
+Não confundir código preparado ou sucesso de verificações estruturais com homologação. Responsável autorizou publicar em 10/11/2026 apesar das pendências; não declarar homologação completa. Confirmar merge e deploy antes de registrar publicada.
