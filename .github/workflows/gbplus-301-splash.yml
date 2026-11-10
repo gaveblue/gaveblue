@@ -1,4 +1,4 @@
-name: GB+ 3.0.1 - verificacao logo reveal
+name: GB+ abertura - regressao 3.0.x
 on:
   push:
     branches:
@@ -21,5 +21,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Verificar abertura GB+ 3.0.1
-        run: node gbplus/tests/gbplus-301-splash-regression.mjs
+      - name: Verificar abertura GB+ instalada
+        run: |
+          if grep -q '"version": "3.0.2"' gbplus/version.json; then
+            node gbplus/tests/gbplus-302-brand-start.mjs
+          else
+            node gbplus/tests/gbplus-301-splash-regression.mjs
+          fi

@@ -1,14 +1,14 @@
 {
-  "version": "3.0.1",
-  "build": 3001,
+  "version": "3.0.2",
+  "build": 3002,
   "published_at": null,
-  "title": "Abertura animada GB+ — Logo Reveal minimalista",
+  "title": "Abertura GB+ — Brand Reveal com botão Iniciar",
   "notes": [
-    "Logo Reveal com letras GB em formação e símbolo + azul luminoso, com duração próxima de dois segundos.",
-    "Abertura visual leve em CSS, sem usar GIF ou bibliotecas externas, com adaptação ao modo claro e escuro.",
-    "Saída garantida por animação CSS e por temporizador de segurança; não interrompe login, dados financeiros, cadastros ou atualização do PWA.",
-    "Respeita a preferência de movimento reduzido; nenhuma alteração nos cálculos, lançamentos, contas, cartões ou autenticação.",
-    "Liberação expressamente autorizada; revisão visual Android/PWA, desktop e offline ainda pendente."
+    "Adotada na abertura do aplicativo real a animação Brand Reveal da prévia aprovada, com logo GB+ completo, B sem cortes, tema escuro e ambientação de estúdio.",
+    "Controles Rever e Pular abertura removidos; botão único Iniciar termina a apresentação e revela o login ou painel real, sem abrir a tela fictícia do laboratório.",
+    "Links diretos e retornos da autenticação não são interceptados; mantém lançamentos, saldos, contas, cartões e dados armazenados intactos.",
+    "Estilos prefixados para não interferirem no aplicativo, movimento reduzido respeitado e cache do PWA atualizado para 3.0.2.",
+    "Publicação solicitada pelo responsável em 10/11/2026. QA visual Android/PWA e desktop continua pendente até evidência; não registrar homologação sem testes."
   ],
   "assets": [
     "./splash.css",
@@ -211,23 +211,23 @@
   "highlights": [
     {
       "icon": "sparkles",
-      "title": "Abertura GB+",
-      "description": "O logotipo se forma em uma transição minimalista."
+      "title": "Novo visual da abertura",
+      "description": "Logo GB+ se forma com movimentos suaves e atmosfera azul."
     },
     {
-      "icon": "moon",
-      "title": "Temas adaptativos",
-      "description": "Fundo e contraste adequados aos modos claro e escuro."
+      "icon": "check",
+      "title": "Iniciar",
+      "description": "Um único botão abre seu aplicativo real, sem tela de demonstração."
     },
     {
-      "icon": "shield-check",
-      "title": "Inicialização protegida",
-      "description": "A animação termina mesmo quando há falha no carregamento."
+      "icon": "shield",
+      "title": "Navegação protegida",
+      "description": "Continuidade do login e das sessões, sem mudança de dados financeiros."
     }
   ],
   "release_status": "publication_authorized_qa_partial_deploy_pending",
   "homologation": {
-    "status": "partial_qa_not_homologated",
-    "notes": "Publicação expressamente autorizada em 10/11/2026, mesmo sem execução comprovada de CI e sem teste visual Android/desktop. A verificação estática de 16 itens passou; GitHub Actions run 42843996230 falhou sem steps. Não declarar homologação completa."
+    "status": "static_review_pending_visual_tests",
+    "notes": "Solicitação expressa de publicação em produção em 10/11/2026. QA estrutural e verificação de scripts previstas; testes E2E Android/PWA, desktop, PWA offline e redução de movimento ainda sem comprovação. A homologação integral não está concluída."
   }
 }
