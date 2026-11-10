@@ -23,7 +23,9 @@ jobs:
           node-version: '22'
       - name: Verificar abertura GB+ instalada
         run: |
-          if grep -q '"version": "3.0.5"' gbplus/version.json; then
+          if grep -q '"version": "3.0.6"' gbplus/version.json; then
+            node gbplus/tests/gbplus-306-auto-glow.mjs
+          elif grep -q '"version": "3.0.5"' gbplus/version.json; then
             node gbplus/tests/gbplus-305-minimal-orbits.mjs
           elif grep -q '"version": "3.0.4"' gbplus/version.json; then
             node gbplus/tests/gbplus-304-white-orbit.mjs
