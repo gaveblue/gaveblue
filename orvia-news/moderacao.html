@@ -1,0 +1,115 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#ffffff"><title>Moderação | ORVIA NEWS</title><style>
+:root{--red:#e9001d;--ink:#16171b;--muted:#71737c;--border:#e7e8eb}*{box-sizing:border-box}body{margin:0;font:14px/1.5 system-ui,-apple-system,Arial,sans-serif;color:var(--ink);background:#f8f8fa}a{color:inherit;text-decoration:none}button,input,select,textarea{font:inherit}button{cursor:pointer}.wrap{width:min(1190px,calc(100% - 32px));margin:auto}header{background:white;border-bottom:1px solid var(--border)}header .wrap{display:flex;align-items:center;justify-content:space-between;height:72px;gap:16px}.logo{font-weight:950;letter-spacing:-1.4px;font-size:24px}.logo b{color:var(--red)}.logo small{display:block;text-align:center;letter-spacing:4px;font-weight:500;font-size:10px;line-height:1}.links{display:flex;align-items:center;gap:12px;font-weight:700;color:#666;font-size:12px}main{padding:30px 0 80px}h1{font-size:clamp(28px,4vw,37px);letter-spacing:-1px;margin:0 0 7px}h2{font-size:19px;letter-spacing:-.6px;margin:0 0 15px}p{color:var(--muted)}.eyebrow{color:var(--red);font-size:11px;letter-spacing:.09em;font-weight:900}.panel{border:1px solid var(--border);border-radius:16px;background:#fff;padding:23px;margin:20px 0;box-shadow:0 4px 22px #00000006}.hide{display:none!important}.tabs{display:flex;gap:7px;overflow-x:auto;margin-top:24px}.tab{white-space:nowrap;border:1px solid #eee;background:white;padding:11px 16px;border-radius:12px;font-weight:750;cursor:pointer}.tab.active{background:var(--red);border-color:var(--red);color:white}label{display:block;font-size:12px;font-weight:750;margin:0 0 7px}input,select,textarea{width:100%;border:1px solid #dde0e4;border-radius:10px;padding:11px 12px;background:white}textarea{min-height:90px;resize:vertical}textarea.large{min-height:210px;line-height:1.7}.field{margin-bottom:13px}.row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.cols{display:grid;grid-template-columns:1fr 1fr;gap:16px}.btn{border:1px solid #dddfe5;background:white;border-radius:10px;padding:10px 13px;font-weight:750;font-size:12px}.btn.primary{background:var(--red);border-color:var(--red);color:#fff}.btn.danger{color:#b7001b}.badge{padding:3px 9px;border-radius:20px;background:#f0f1f4;font-size:11px;font-weight:800;color:#5e616b}.badge.pending,.badge.submitted{color:#a65100;background:#fff3e5}.badge.approved,.badge.published{color:#0b7242;background:#eaf9f0}.item{border-top:1px solid var(--border);padding:16px 0}.item:first-of-type{border-top:0}.item h3{margin:6px 0;font-size:15px}.item p{font-size:12px;margin:5px 0 10px}.meta{font-size:11px;color:#909198}.state{font-size:12px;color:#646771}.notification{padding:14px 16px;border-radius:11px;background:#eaf8ef;color:#266f46;margin-bottom:15px}.notification.error{background:#fff0f1;color:#ac0017}.notice{border-left:3px solid var(--red);padding:12px 14px;background:#f8f8fa;color:#5a5c65;font-size:12px;margin:10px 0}.preview{white-space:pre-wrap;background:#f8f8fa;padding:12px;border-radius:9px;font-size:13px}.list{max-height:620px;overflow:auto}.ad-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}input[type=checkbox]{width:auto;accent-color:var(--red)}@media(max-width:750px){.cols,.ad-row{grid-template-columns:1fr}.panel{padding:17px}.links{gap:8px}.links a:nth-child(2){display:none}}
+</style></head><body><header><div class="wrap"><a class="logo" href="./">ORVI<b>A</b><small>NEWS</small></a><nav class="links"><a href="./">Portal ↗</a><a href="colaborar.html">Colaboradores</a><a href="editor.html">Escrever notícia</a><button class="btn hide" id="logout">Sair</button></nav></div></header>
+<main class="wrap"><div class="eyebrow">ADMINISTRAÇÃO EDITORIAL</div><h1>Central de moderação</h1><p>Controle quem pode colaborar, revise notícias antes da publicação e gerencie publicidade própria.</p>
+<div id="notice" class="notification hide" role="status" aria-live="polite"></div>
+<div class="panel" id="login"><h2>Acesso do administrador</h2><p>Entre com o e-mail autorizado da ORVIA NEWS. O cadastro de colaborador não dá acesso a esta área.</p><form id="login-form" style="max-width:420px"><div class="field"><label>E-mail</label><input type="email" id="email" required autocomplete="email"></div><div class="field"><label>Senha</label><input type="password" id="password" required autocomplete="current-password"></div><button class="btn primary" type="submit">Entrar</button></form></div>
+<section id="dashboard" class="hide">
+<div class="tabs"><button class="tab active" data-tab="submissions">Notícias para revisar <span id="pending-news-count"></span></button><button class="tab" data-tab="applicants">Cadastros pendentes <span id="pending-people-count"></span></button><button class="tab" data-tab="advertising">Publicidade</button></div>
+<div id="tab-submissions"><div class="cols"><section class="panel"><h2>Fila editorial</h2><button class="btn" id="refresh-news">Atualizar lista</button><div class="list" id="submissions"></div></section><section class="panel" id="review-card"><h2>Revisar matéria</h2><p>Escolha uma notícia da lista para ver o texto, editar e decidir sua publicação.</p></section></div></div>
+<div id="tab-applicants" class="hide"><section class="panel"><h2>Solicitações de colaboradores</h2><p>Uma aprovação libera somente o envio de notícias para revisão — nunca a publicação direta.</p><button class="btn" id="refresh-people">Atualizar lista</button><div class="list" id="applicants"></div></section></div>
+<div id="tab-advertising" class="hide"><div class="cols"><section class="panel"><h2 id="ad-heading">Novo anúncio patrocinado</h2><p>As campanhas só aparecem após ativação. O sistema não processa pagamentos.</p><form id="ad-form"><div class="field"><label>Nome do anunciante</label><input id="advertiser" required maxlength="120"></div><div class="field"><label>Chamada publicitária</label><input id="ad-title" required maxlength="160"></div><div class="field"><label>Link do anunciante (https)</label><input id="ad-destination" type="url" required placeholder="https://exemplo.com.br"></div><div class="field"><label>URL da imagem (https, opcional)</label><input id="ad-image" type="url" placeholder="https://.../banner.jpg"></div><div class="field"><label>Posição</label><select id="placement"><option value="home_inline">Página inicial · bloco</option><option value="home_sidebar">Página inicial · lateral</option><option value="article_inline">Dentro da notícia</option><option value="article_sidebar">Notícia · lateral</option></select></div><div class="ad-row"><div class="field"><label>Início (opcional)</label><input id="ad-start" type="datetime-local"></div><div class="field"><label>Fim (opcional)</label><input id="ad-end" type="datetime-local"></div></div><label class="row" style="margin-bottom:18px"><input id="active" type="checkbox"> Campanha ativa</label><div class="row"><button class="btn primary" type="submit">Salvar anúncio</button><button class="btn" type="button" id="ad-reset">Novo</button></div></form></section><section class="panel"><h2>Campanhas cadastradas</h2><div class="notice">Toda publicidade patrocinada será identificada aos leitores. A aprovação do Google AdSense é independente deste painel.</div><div id="ads"></div><p style="font-size:12px"><a href="https://www.google.com/adsense/start/" target="_blank" rel="noopener">Solicitar Google AdSense ↗</a></p></section></div></div>
+</section></main>
+<script src="config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.2/dist/umd/supabase.js"></script>
+<script>
+(()=>{'use strict';
+const $=id=>document.getElementById(id), db=window.supabase.createClient(ORVIA_CONFIG.url,ORVIA_CONFIG.publishableKey);
+let me=null,people=[],news=[],ads=[],selected=null,selectedAd=null;
+function el(tag,cls,txt){const n=document.createElement(tag);if(cls)n.className=cls;if(txt!==undefined)n.textContent=txt;return n}
+function notice(msg,error=false){$('notice').textContent=msg;$('notice').className='notification '+(error?'error':'');$('notice').scrollIntoView({block:'nearest',behavior:'smooth'})}
+const date=s=>s?new Date(s).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'}):'';
+function rowButton(txt,fn,cls=''){const b=el('button','btn '+cls,txt);b.type='button';b.onclick=fn;return b}
+function field(label,id,value,type){const wrap=el('div','field');const l=el('label',null,label);l.htmlFor=id;const inp=type==='textarea'?el('textarea','large'):el('input');inp.id=id;if(type!=='textarea')inp.type='text';inp.value=value||'';wrap.append(l,inp);return wrap}
+async function start(){
+ const {data:{user}}=await db.auth.getUser();me=user||null;
+ if(!me){$('login').classList.remove('hide');$('dashboard').classList.add('hide');$('logout').classList.add('hide');return;}
+ const {data,error}=await db.from('orvia_editors').select('email').eq('email',(me.email||'').toLowerCase()).maybeSingle();
+ if(error||!data){$('login').classList.remove('hide');$('dashboard').classList.add('hide');$('logout').classList.add('hide');notice('Este usuário não tem autorização para administrar a ORVIA NEWS.',true);return;}
+ $('login').classList.add('hide');$('dashboard').classList.remove('hide');$('logout').classList.remove('hide');
+ await Promise.all([loadPeople(),loadNews(),loadAds()]);
+}
+$('login-form').onsubmit=async e=>{e.preventDefault();const {error}=await db.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});if(error)notice(error.message,true);else start()};
+$('logout').onclick=async()=>{await db.auth.signOut();start()};
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tab').forEach(q=>q.classList.toggle('active',q===b));['submissions','applicants','advertising'].forEach(t=>$('tab-'+t).classList.toggle('hide',t!==b.dataset.tab));});
+$('refresh-news').onclick=loadNews;$('refresh-people').onclick=loadPeople;
+async function loadPeople(){
+ const {data,error}=await db.from('orvia_contributors').select('*').order('created_at',{ascending:false});if(error){notice(error.message,true);return;}
+ people=data||[];$('pending-people-count').textContent='('+(people.filter(p=>p.approval_status==='pending').length)+')';
+ const target=$('applicants');target.replaceChildren();
+ if(!people.length){target.append(el('p',null,'Nenhuma candidatura recebida.'));return;}
+ for(const p of [...people].sort((a,b)=>(a.approval_status==='pending'?0:1)-(b.approval_status==='pending'?0:1))){
+  const item=el('div','item');item.append(el('span','badge '+p.approval_status,p.approval_status),el('h3',null,p.full_name),el('p',null,p.email),el('p',null,p.motivation||'Sem apresentação'),el('div','meta','Solicitação: '+date(p.created_at)));
+  const actions=el('div','row');
+  if(p.approval_status!=='approved')actions.append(rowButton('Aprovar cadastro',()=>reviewPerson(p,'approved'),'primary'));
+  if(p.approval_status!=='rejected')actions.append(rowButton('Recusar',()=>reviewPerson(p,'rejected'),'danger'));
+  if(p.approval_status==='approved')actions.append(rowButton('Suspender acesso',()=>reviewPerson(p,'suspended'),'danger'));
+  if(p.approval_status==='suspended')actions.append(rowButton('Reativar',()=>reviewPerson(p,'approved')));
+  item.append(actions);target.append(item);
+ }
+}
+async function reviewPerson(p,status){
+ if(!confirm((status==='approved'?'Aprovar':'Alterar o status de')+' '+p.full_name+'?'))return;
+ const {error}=await db.from('orvia_contributors').update({approval_status:status,reviewed_by:me.id,reviewed_at:new Date().toISOString()}).eq('user_id',p.user_id);
+ if(error)notice(error.message,true);else{notice('Cadastro atualizado.');await loadPeople();}
+}
+async function loadNews(){
+ const {data,error}=await db.from('orvia_articles').select('*').order('updated_at',{ascending:false}).limit(200);if(error){notice(error.message,true);return;}
+ news=data||[];$('pending-news-count').textContent='('+(news.filter(a=>a.review_state==='submitted').length)+')';
+ const target=$('submissions');target.replaceChildren();if(!news.length){target.append(el('p',null,'Nenhuma matéria registrada.'));return;}
+ const sorting={submitted:0,changes_requested:1,draft:2,approved:3,rejected:4};
+ for(const a of [...news].sort((x,y)=>(sorting[x.review_state]??5)-(sorting[y.review_state]??5))){
+  const it=el('div','item');it.append(el('span','badge '+a.review_state,a.status==='published'?'Publicada':a.review_state),el('h3',null,a.title),el('p',null,(a.category||'Notícias')+' · '+(a.author||'Autoria não informada')),el('div','meta','Atualizada: '+date(a.updated_at)));it.append(rowButton('Revisar matéria →',()=>reviewArticle(a),'primary'));target.append(it);
+ }
+}
+async function reviewArticle(a){
+ selected=a;const box=$('review-card');box.replaceChildren(el('h2',null,'Revisar matéria'),el('div','notice','Verifique fatos, autoria, imagens, direito de resposta e fontes antes de publicar.'));
+ const {data:priv}=await db.from('orvia_article_evidence').select('notes').eq('article_id',a.id).maybeSingle();
+ box.append(el('div','meta','Estado: '+a.review_state+' · '+date(a.updated_at)));
+ box.append(field('Título', 'r-title',a.title),field('Resumo','r-summary',a.summary,'textarea'),field('Texto completo','r-body',a.body,'textarea'),field('Categoria','r-category',a.category),field('Crédito do autor','r-author',a.author));
+ const privateNote=el('div','notice');privateNote.append(el('strong',null,'Fontes e notas privadas do colaborador (não publicar):'));privateNote.append(el('div','preview',priv?.notes||'Não foram informadas notas adicionais.'));box.append(privateNote);
+ box.append(field('Devolutiva editorial para o colaborador','r-notes',a.review_notes,'textarea'));
+ const featuredLabel=el('label','row');const featured=el('input');featured.type='checkbox';featured.id='r-featured';featured.checked=!!a.featured;featured.style.width='auto';featuredLabel.append(featured,el('span',null,'Destacar na página inicial'));box.append(featuredLabel);
+ const btns=el('div','row');btns.style.marginTop='18px';
+ btns.append(rowButton('Salvar revisão',()=>reviewDecision('save')),rowButton('Solicitar correções',()=>reviewDecision('changes_requested')),rowButton('Rejeitar',()=>reviewDecision('rejected'),'danger'),rowButton('Aprovar e publicar',()=>reviewDecision('published'),'primary'));
+ if(a.status==='published')btns.append(rowButton('Retirar do ar',()=>reviewDecision('unpublish'),'danger'));
+ box.append(btns);
+}
+async function reviewDecision(action){
+ if(!selected)return;const a=selected;
+ if(action==='published' && !confirm('Você verificou fontes e direitos de imagem? Publicar esta notícia agora?'))return;
+ if(action==='rejected' && !confirm('Rejeitar esta notícia?'))return;
+ const payload={title:$('r-title').value.trim(),summary:$('r-summary').value.trim(),body:$('r-body').value.trim(),category:$('r-category').value.trim(),author:$('r-author').value.trim(),review_notes:$('r-notes').value.trim(),featured:$('r-featured').checked,reviewed_by:me.id,reviewed_at:new Date().toISOString()};
+ if(payload.title.length<5||payload.body.length<30){notice('Título e texto completos são obrigatórios.',true);return;}
+ if(action==='published'){payload.status='published';payload.review_state='approved';payload.published_at=a.published_at||new Date().toISOString();}
+ if(action==='unpublish'){payload.status='draft';payload.review_state='changes_requested';payload.published_at=null;payload.featured=false;}
+ if(action==='changes_requested'||action==='rejected'){payload.status='draft';payload.review_state=action;payload.published_at=null;payload.featured=false;}
+ if(action==='save'&&a.status!=='published'){payload.status='draft';payload.published_at=null;}
+ const {error}=await db.from('orvia_articles').update(payload).eq('id',a.id);
+ if(error){notice('Falha: '+error.message,true);return;}
+ selected=null;$('review-card').replaceChildren(el('h2',null,'Revisão salva'),el('p',null,action==='published'?'A matéria foi publicada no portal.':'A decisão editorial foi registrada.'));notice('Matéria atualizada.');await loadNews();
+}
+function localTime(v){if(!v)return null;const d=new Date(v);if(Number.isNaN(+d))return null;return d.toISOString()}
+function clearAd(){selectedAd=null;$('ad-form').reset();$('ad-heading').textContent='Novo anúncio patrocinado'}
+$('ad-reset').onclick=clearAd;
+async function loadAds(){
+ const {data,error}=await db.from('orvia_ads').select('*').order('created_at',{ascending:false});if(error){notice(error.message,true);return;}
+ ads=data||[];const root=$('ads');root.replaceChildren();
+ if(!ads.length){root.append(el('p',null,'Nenhuma campanha cadastrada.'));return;}
+ for(const a of ads){const it=el('div','item');it.append(el('span','badge '+(a.is_active?'published':''),a.is_active?'Ativo':'Inativo'),el('h3',null,a.title),el('p',null,a.advertiser+' · '+a.placement));
+ const buttons=el('div','row');
+ buttons.append(rowButton('Editar',()=>{selectedAd=a;$('ad-heading').textContent='Editar anúncio';$('advertiser').value=a.advertiser;$('ad-title').value=a.title;$('ad-destination').value=a.destination_url;$('ad-image').value=a.image_url||'';$('placement').value=a.placement;$('active').checked=a.is_active;$('ad-start').value=a.starts_at?new Date(a.starts_at).toISOString().slice(0,16):'';$('ad-end').value=a.ends_at?new Date(a.ends_at).toISOString().slice(0,16):'';window.scrollTo({top:0,behavior:'smooth'})}));
+ buttons.append(rowButton(a.is_active?'Desativar':'Ativar',async()=>{const {error}=await db.from('orvia_ads').update({is_active:!a.is_active}).eq('id',a.id);if(error)notice(error.message,true);else await loadAds();}));
+ buttons.append(rowButton('Excluir',async()=>{if(!confirm('Excluir anúncio?'))return;const {error}=await db.from('orvia_ads').delete().eq('id',a.id);if(error)notice(error.message,true);else await loadAds();},'danger'));
+ it.append(buttons);root.append(it);}
+}
+$('ad-form').onsubmit=async e=>{
+ e.preventDefault();const url=$('ad-destination').value.trim(),image=$('ad-image').value.trim();
+ if(!url.startsWith('https://')||(image&&!image.startsWith('https://'))){notice('O link do anúncio e a imagem devem usar https.',true);return;}
+ const p={advertiser:$('advertiser').value.trim(),title:$('ad-title').value.trim(),destination_url:url,image_url:image||null,placement:$('placement').value,is_active:$('active').checked,starts_at:localTime($('ad-start').value),ends_at:localTime($('ad-end').value)};
+ if(p.ends_at&&p.starts_at&&p.ends_at<=p.starts_at){notice('Fim deve ser posterior ao início.',true);return;}
+ const {error}=selectedAd?await db.from('orvia_ads').update(p).eq('id',selectedAd.id):await db.from('orvia_ads').insert(p);
+ if(error)notice(error.message,true);else{clearAd();await loadAds();notice('Campanha salva com sucesso.');}
+};
+start().catch(e=>notice(e.message,true));
+})();
+</script></body></html>
