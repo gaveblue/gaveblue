@@ -1,19 +1,17 @@
 {
-  "version": "3.0.0",
-  "build": 3000,
-  "published_at": "2026-11-09T11:18:07Z",
-  "title": "Interface financeira padronizada e formulários compactos",
+  "version": "3.0.1",
+  "build": 3001,
+  "published_at": null,
+  "title": "Abertura animada GB+ — Logo Reveal minimalista",
   "notes": [
-    "Contas e cartões reorganizados com ações principais visíveis, informações complementares em Mais opções, saldos em contas separados visualmente de valores guardados em cofrinhos (sem alteração do cálculo financeiro).",
-    "Cadastro de conta personalizada, bancária e cofrinho mais compacto; escolha de ícones e objetivos em Bottom Sheets pesquisáveis; campos financeiros antigos e vínculos preservados.",
-    "Formulários de cartão, compra no cartão, baixa, transferências e categorias com seletores reutilizáveis de bancos, contas, cartões, parceiros e ícones.",
-    "Seletor universal abre expandido no celular e usa painel lateral no desktop; opções visuais e campos nativos preservam FormData e validações preexistentes.",
-    "Cartões mais enxutos, com detalhes de faturas e compras recolhíveis; ações de importação e edição permanecem disponíveis em Mais opções.",
-    "Cadastro de lançamentos mantém três etapas, navegação inferior e fluxo de faturas; melhorias de consistência CSS sem mudança nos cálculos ou gravação.",
-    "Versão visual 3.0.0 candidata. Não inclui painel administrativo nem novo controle de acesso; esses recursos exigem trabalho e homologação independentes.",
-    "Sem migrações SQL, sem redefinição de chaves de usuário, sem mudanças em recibos, pagamentos, transferências ou regras financeiras."
+    "Logo Reveal com letras GB em formação e símbolo + azul luminoso, com duração próxima de dois segundos.",
+    "Abertura visual leve em CSS, sem usar GIF ou bibliotecas externas, com adaptação ao modo claro e escuro.",
+    "Saída garantida por animação CSS e por temporizador de segurança; não interrompe login, dados financeiros, cadastros ou atualização do PWA.",
+    "Respeita a preferência de movimento reduzido; nenhuma alteração nos cálculos, lançamentos, contas, cartões ou autenticação.",
+    "Candidata em PR: homologação técnica e avaliação Android/PWA, desktop e offline pendentes; não declarada publicada."
   ],
   "assets": [
+    "./splash.css",
     "./index.html",
     "./styles.css",
     "./js/app.js",
@@ -212,24 +210,24 @@
   ],
   "highlights": [
     {
-      "icon": "layers",
-      "title": "Interface integrada",
-      "description": "Mesmo padrão em contas, cartões e formulários."
+      "icon": "sparkles",
+      "title": "Abertura GB+",
+      "description": "O logotipo se forma em uma transição minimalista."
     },
     {
-      "icon": "search",
-      "title": "Bottom Sheets",
-      "description": "Escolhas rápidas, com busca e exibição adequada ao dispositivo."
+      "icon": "moon",
+      "title": "Temas adaptativos",
+      "description": "Fundo e contraste adequados aos modos claro e escuro."
     },
     {
-      "icon": "wallet",
-      "title": "Menos poluição",
-      "description": "Saldo em destaque e ações secundárias recolhidas."
+      "icon": "shield-check",
+      "title": "Inicialização protegida",
+      "description": "A animação termina mesmo quando há falha no carregamento."
     }
   ],
-  "release_status": "deployed_github_pages_user_authorized_qa_partial",
+  "release_status": "candidate_not_published",
   "homologation": {
-    "status": "local_node_component_checks_passed_full_qa_pending",
-    "notes": "Autorização expressa do responsável para publicar em 09/11/2026. Testes independentes no Node 22 fora de Functions: 16 verificações de seletores e 9 verificações de eventos de origem/destino, FormData e sincronização por scripts locais que reproduzem os componentes; passaram. Asserções específicas de UI também haviam passado no ambiente JS isolado. Execução de Chromium local não completou inicialização; nenhuma homologação visual ou E2E real foi obtida. GitHub Actions run 42607108897 teve failure sem runner e sem steps: não houve suíte Node completa no CI. Validação Android/PWA e testes de gravação com conta online permanecem pendentes. Não declarar homologado. Deploy no GitHub Pages concluído com sucesso em 09/11/2026 às 11:18:07 UTC, run 42607752722, merge bfa613cf0cb12c0285db30b9fcfee59f4a841894. A URL customizada e o uso real Android/desktop ainda não foram validados."
+    "status": "pending",
+    "notes": "Verificação estrutural e nova regressão específica preparadas. Execução em navegador real e GitHub Actions ainda sem evidência; não considerar homologada."
   }
 }
