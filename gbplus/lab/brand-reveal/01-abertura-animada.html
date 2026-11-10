@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#080b12">
+  <meta name="description" content="Prévia isolada da abertura animada GB+. Sem integração com o aplicativo real.">
+  <title>GB+ — Abertura animada · Prévia isolada</title>
+  <style>
+    :root { color-scheme: dark; --blue:#4c82ff; --light:#f8faff; --muted:#8993a8; --duration:5900ms; }
+    * { box-sizing:border-box; }
+    html,body { height:100%; width:100%; margin:0; }
+    body { overflow:hidden; background:#080b12; color:var(--light); font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; -webkit-font-smoothing:antialiased; }
+    a,button { -webkit-tap-highlight-color:transparent; }
+    button { font:inherit; }
+    .stage { position:relative; display:grid; place-items:center; height:100svh; min-height:480px; isolation:isolate; overflow:hidden; }
+    .stage::before { content:""; position:absolute; inset:-40%; z-index:-5; pointer-events:none; background:radial-gradient(ellipse 26% 22% at 50% 48%,rgba(62,104,225,.21),transparent 80%),radial-gradient(ellipse 30% 24% at 21% 16%,rgba(59,80,164,.12),transparent 80%),radial-gradient(ellipse 30% 32% at 88% 84%,rgba(29,73,153,.10),transparent 78%); transform:scale(.78); opacity:0; animation:bloom 4s .18s ease-out both; }
+    .mesh { position:absolute; inset:0; z-index:-3; background-image:linear-gradient(rgba(159,181,230,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(159,181,230,.045) 1px,transparent 1px); background-size:64px 64px; mask-image:radial-gradient(ellipse 65% 75% at center,black,transparent); opacity:.42; animation:meshIntro 2.5s .2s both; }
+    .grain { position:absolute; inset:0; pointer-events:none; z-index:5; opacity:.13; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.86' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.18'/%3E%3C/svg%3E"); }
+    .corner { position:absolute; width:38px; height:38px; border-color:rgba(168,185,225,.26); opacity:0; animation:corners .9s .25s both; }
+    .corner.tl { top:clamp(24px,6vh,58px); left:clamp(22px,5vw,78px); border-left:1px solid; border-top:1px solid; }
+    .corner.tr { top:clamp(24px,6vh,58px); right:clamp(22px,5vw,78px); border-right:1px solid; border-top:1px solid; }
+    .corner.bl { bottom:clamp(28px,7vh,62px); left:clamp(22px,5vw,78px); border-left:1px solid; border-bottom:1px solid; }
+    .corner.br { bottom:clamp(28px,7vh,62px); right:clamp(22px,5vw,78px); border-right:1px solid; border-bottom:1px solid; }
+    .topbar { position:absolute; z-index:8; left:clamp(36px,7vw,96px); right:clamp(36px,7vw,96px); top:clamp(38px,7.9vh,72px); display:flex; gap:16px; align-items:center; justify-content:space-between; opacity:0; animation:fadeIn 1s .3s both; }
+    .topbrand { font-size:12px; letter-spacing:.22em; font-weight:750; white-space:nowrap; }
+    .topbrand span { color:#7195ff; }
+    .topright { display:flex; align-items:center; gap:10px; color:var(--muted); font-size:10px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; }
+    .blue-dot { width:5px; height:5px; background:#6994ff; border-radius:50%; box-shadow:0 0 12px #6994ff; }
+    .center { position:relative; width:min(94%,950px); text-align:center; margin-top:-32px; }
+    .orbit { width:clamp(270px,40vw,550px); height:clamp(200px,32vw,370px); position:absolute; top:50%; left:50%; transform:translate(-50%,-54%) rotate(-18deg) scale(.9); border:1px solid rgba(112,148,249,.15); border-radius:50%; opacity:0; animation:orbitEnter 2.7s .55s cubic-bezier(.18,.72,.2,1) both; }
+    .orbit::after { content:""; position:absolute; inset:25px; border:1px solid rgba(111,143,219,.09); border-radius:50%; }
+    .beam { position:absolute; width:200%; height:1px; top:49%; left:-50%; opacity:0; background:linear-gradient(90deg,transparent 8%,rgba(137,166,237,.02) 20%,rgba(169,193,255,.49) 50%,rgba(137,166,237,.02) 80%,transparent 92%); transform:scaleX(.3); animation:beam 1.5s .9s both; }
+    .eyebrow { display:flex; align-items:center; justify-content:center; gap:13px; color:#99a7c1; font-weight:650; font-size:10px; letter-spacing:.31em; text-transform:uppercase; opacity:0; transform:translateY(11px); animation:rise .8s .55s both; margin-bottom:clamp(14px,3vw,26px); }
+    .eyebrow .rule { width:27px; height:1px; background:#5977c4; opacity:.72; }
+    .wordmark { display:flex; justify-content:center; align-items:center; gap:clamp(6px,1.8vw,21px); height:clamp(128px,20vw,245px); position:relative; filter:drop-shadow(0 25px 44px rgba(33,64,144,.12)); }
+    .wordmark .letter-wrap { display:block; flex:0 0 auto; overflow:hidden; padding:0 .08em; line-height:.87; }
+    .wordmark .letter { display:block; font-size:clamp(130px,19.2vw,250px); letter-spacing:0; font-weight:820; line-height:1; color:#f4f6ff; transform:translateY(115%) skewY(9deg); opacity:.4; filter:blur(10px); }
+    .wordmark .g { animation:letterOn 1.25s .85s cubic-bezier(.16,1,.25,1) both; }
+    .wordmark .b { animation:letterOn 1.25s 1.08s cubic-bezier(.16,1,.25,1) both; }
+    .wordmark .letter-wrap:nth-child(2) { margin-left:-.04em; }
+    .plus-box { display:grid; place-items:center; width:clamp(60px,8vw,101px); height:clamp(60px,8vw,101px); margin:18px 0 0 clamp(5px,1.8vw,18px); position:relative; border-radius:24%; background:linear-gradient(155deg,#80a3ff 0%,#356ef2 53%,#164bc5 100%); box-shadow:0 11px 34px rgba(52,98,225,.28),inset 0 1px 1px rgba(255,255,255,.37); transform:translateY(34px) rotate(-40deg) scale(.2); filter:blur(9px); opacity:0; animation:plusOn 1.2s 1.63s cubic-bezier(.16,1,.26,1) both; }
+    .plus-box::before,.plus-box::after { content:""; position:absolute; border-radius:3px; background:#fff; box-shadow:0 0 12px rgba(255,255,255,.28); }
+    .plus-box::before { width:42%; height:8%; }
+    .plus-box::after { height:42%; width:8%; }
+    .lightline { position:relative; margin:clamp(9px,3vh,25px) auto 0; width:min(67%,410px); height:1px; background:linear-gradient(90deg,transparent,rgba(151,175,232,.3),transparent); transform:scaleX(0); opacity:0; animation:lineGrow 1.3s 2.0s both; }
+    .tagline { position:relative; color:#e3e9f7; font-size:clamp(17px,2.3vw,23px); font-weight:500; letter-spacing:-.035em; margin:clamp(21px,3.6vh,34px) 0 0; opacity:0; transform:translateY(18px); animation:rise 1.1s 2.36s both; }
+    .tagline strong { font-weight:730; }
+    .subtag { position:relative; color:#8a96ad; font-size:clamp(12px,1.5vw,14px); margin:12px 0 0; letter-spacing:.008em; opacity:0; transform:translateY(12px); animation:rise 1s 2.67s both; }
+    .bottom { position:absolute; left:50%; bottom:clamp(35px,8.8vh,83px); width:min(310px,68vw); transform:translateX(-50%); text-align:center; z-index:6; }
+    .loading-label { display:flex; justify-content:space-between; gap:20px; align-items:center; text-align:left; color:#9ca8bf; font-weight:600; font-size:10px; letter-spacing:.17em; text-transform:uppercase; opacity:0; animation:fadeIn 1s 1.75s both; }
+    .loading-label .count { color:#6d8fe3; font-variant-numeric:tabular-nums; }
+    .track { height:2px; width:100%; margin-top:12px; overflow:hidden; border-radius:3px; background:#293144; opacity:0; animation:fadeIn .7s 1.75s both; }
+    .fill { height:100%; width:0%; background:linear-gradient(90deg,#638cff,#d6e3ff); box-shadow:0 0 11px rgba(117,156,255,.6); animation:loading var(--duration) linear both; }
+    .demo-tools { position:absolute; right:clamp(36px,7vw,96px); bottom:clamp(35px,7.9vh,74px); z-index:11; display:flex; gap:8px; opacity:0; animation:fadeIn .7s 2.2s both; }
+    .tool { text-decoration:none; border:1px solid rgba(183,203,247,.19); color:#c8d4eb; background:rgba(192,211,255,.05); backdrop-filter:blur(12px); padding:10px 13px; border-radius:999px; font-size:11px; font-weight:650; transition:background .25s,transform .25s,border-color .25s; cursor:pointer; }
+    .tool:hover { transform:translateY(-2px); background:rgba(192,211,255,.15); border-color:rgba(183,203,247,.36); }
+    .tool.primary { background:#e4eaff; border-color:transparent; color:#111a31; }
+    .tool.primary:hover { background:white; }
+    .transition-cover { position:fixed; inset:0; z-index:12; pointer-events:none; background:#f5f7fb; transform:translateY(101%); animation:pageExit .75s 5.25s cubic-bezier(.7,0,.2,1) both; }
+    .demo-mark { position:absolute; z-index:8; left:clamp(36px,7vw,96px); bottom:clamp(35px,7.9vh,74px); text-transform:uppercase; letter-spacing:.14em; font-size:9px; font-weight:700; color:#66738d; opacity:0; animation:fadeIn .8s 2.2s both; }
+    @keyframes bloom { 0%{opacity:0;transform:scale(.78)} 35%{opacity:1} 100%{opacity:1;transform:scale(1.08)} }
+    @keyframes meshIntro { from{opacity:0;transform:scale(1.1)} to{opacity:.42;transform:scale(1)} }
+    @keyframes corners { from{opacity:0;transform:scale(.8)} to{opacity:1;transform:scale(1)} }
+    @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+    @keyframes rise { to{opacity:1;transform:translateY(0)} }
+    @keyframes orbitEnter { from{opacity:0;transform:translate(-50%,-54%) rotate(-47deg) scale(.9)} to{opacity:1;transform:translate(-50%,-54%) rotate(-18deg) scale(1)} }
+    @keyframes beam { 0%{opacity:0;transform:scaleX(.12)} 30%{opacity:.8} 100%{opacity:.48;transform:scaleX(1)} }
+    @keyframes letterOn { 0%{transform:translateY(115%) skewY(9deg);filter:blur(10px);opacity:.4} 100%{transform:translateY(0) skewY(0);filter:blur(0);opacity:1} }
+    @keyframes plusOn { 0%{transform:translateY(34px) rotate(-40deg) scale(.2);filter:blur(9px);opacity:0} 70%{opacity:1} 100%{transform:translateY(0) rotate(0) scale(1);filter:blur(0);opacity:1} }
+    @keyframes lineGrow { to{transform:scaleX(1);opacity:1} }
+    @keyframes loading { from{width:0} to{width:100%} }
+    @keyframes pageExit { 0%{transform:translateY(101%)} 100%{transform:translateY(0)} }
+    @media (max-width:700px) {
+      .topbar { top:32px; left:28px; right:28px; }
+      .corner { width:20px;height:20px; }
+      .corner.tl,.corner.tr { top:19px; }
+      .corner.bl,.corner.br { bottom:19px; }
+      .corner.tl,.corner.bl { left:17px; }
+      .corner.tr,.corner.br { right:17px; }
+      .center { margin-top:-55px; }
+      .wordmark { gap:6px;height:160px; }
+      .wordmark .letter { font-size:clamp(115px,28vw,180px); }
+      .plus-box { width:clamp(52px,13vw,78px);height:clamp(52px,13vw,78px); margin-top:10px; margin-left:7px; }
+      .topright { font-size:9px;letter-spacing:.08em; }
+      .bottom { bottom:130px;width:min(260px,64vw); }
+      .demo-tools { left:50%;right:auto;bottom:48px;transform:translateX(-50%);width:max-content; }
+      .demo-mark { bottom:21px;left:50%;transform:translateX(-50%);font-size:8px;white-space:nowrap; }
+    }
+    @media (max-height:620px) and (min-width:701px) { .bottom { bottom:42px; } .demo-tools,.demo-mark { bottom:35px; } .center { transform:scale(.8); } }
+    @media (prefers-reduced-motion:reduce) { *,*::before,*::after { animation-duration:.001ms !important; animation-delay:0ms !important; transition-duration:.001ms !important; } .transition-cover { display:none; } .wordmark .letter { transform:none;opacity:1;filter:none; } .plus-box { transform:none;opacity:1;filter:none; } .fill { width:100%; } }
+  </style>
+</head>
+<body>
+  <main class="stage" aria-label="Animação de abertura da marca GB+">
+    <div class="mesh" aria-hidden="true"></div><div class="grain" aria-hidden="true"></div>
+    <i class="corner tl" aria-hidden="true"></i><i class="corner tr" aria-hidden="true"></i><i class="corner bl" aria-hidden="true"></i><i class="corner br" aria-hidden="true"></i>
+    <header class="topbar"><div class="topbrand">GB<span>+</span><span class="sr-only"></span></div><div class="topright"><span class="blue-dot"></span>Brand reveal / 01</div></header>
+    <section class="center" aria-label="GB+ — Seu dinheiro, em outro nível">
+      <div class="orbit" aria-hidden="true"></div><div class="beam" aria-hidden="true"></div>
+      <div class="eyebrow"><span class="rule"></span>FINANÇAS EM MOVIMENTO<span class="rule"></span></div>
+      <div class="wordmark" role="img" aria-label="GB+"><span class="letter-wrap"><span class="letter g">G</span></span><span class="letter-wrap"><span class="letter b">B</span></span><span class="plus-box" aria-hidden="true"></span></div>
+      <div class="lightline" aria-hidden="true"></div>
+      <p class="tagline">Seu dinheiro. <strong>Em outro nível.</strong></p>
+      <p class="subtag">Simples de entender. Melhor de viver.</p>
+    </section>
+    <div class="bottom" aria-label="Progresso da apresentação"><div class="loading-label"><span>Preparando sua experiência</span><span class="count">GB+</span></div><div class="track"><div class="fill"></div></div></div>
+    <span class="demo-mark">Protótipo visual · Não publicado</span>
+    <nav class="demo-tools" aria-label="Controles de teste"><button type="button" class="tool" id="replay">↻ Rever</button><a class="tool primary" id="skip" href="02-tela-estatica.html">Pular abertura ↗</a></nav>
+    <div class="transition-cover" aria-hidden="true"></div>
+  </main>
+  <script>
+    (() => {
+      'use strict';
+      // DEMONSTRAÇÃO ISOLADA. Nenhuma API, banco de dados, analytics ou serviço de produção.
+      const destination = '02-tela-estatica.html';
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      let navigationTimer;
+      function goToStatic() { window.location.assign(destination); }
+      function scheduleNavigation() { navigationTimer = window.setTimeout(goToStatic, reducedMotion ? 1200 : 6020); }
+      document.getElementById('replay').addEventListener('click', () => {
+        clearTimeout(navigationTimer);
+        window.location.reload();
+      });
+      window.addEventListener('keydown', (event) => {
+        if (event.key.toLowerCase() === 'r' && !event.ctrlKey && !event.metaKey) { event.preventDefault(); clearTimeout(navigationTimer); window.location.reload(); }
+        if (event.key === 'Escape') { clearTimeout(navigationTimer); goToStatic(); }
+      });
+      scheduleNavigation();
+    })();
+  </script>
+</body>
+</html>
