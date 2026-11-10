@@ -803,6 +803,7 @@ const actions={
   'financial-import-commit':async()=>{
    const draft=reportImportDraft;
    if(!draft?.parsed||draft.loading||!draft.confirmed)throw Error('Revise e confirme a importação.');
+   if(draft.parsed.verificationFailed)throw Error('Totais do relatório divergentes. Corrija ou exporte novamente antes de importar.');
    if(draft.parsed.needsOcrReview&&!draft.ocrReviewed)throw Error('Confira todas as linhas lidas por OCR antes de importar.');
    const rows=reportDuplicates(db,draft.parsed.records);
    const selection=[...new Set(draft.selected)].sort((a,b)=>a-b);
