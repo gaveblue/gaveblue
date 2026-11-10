@@ -31,7 +31,7 @@ footer{text-align:center;padding:20px;color:#9b9da2;font-size:11px;border-top:1p
 <div class="field"><label for="email">E-mail</label><input id="email" type="email" autocomplete="email" required placeholder="seu@email.com"></div>
 <div class="field"><label for="password">Senha</label><input id="password" type="password" minlength="8" autocomplete="current-password" required placeholder="Mínimo de 8 caracteres"></div>
 <div class="row"><button class="btn red" type="submit">Entrar</button><button class="btn" type="button" id="register">Criar meu acesso</button></div>
-<p class="help">No primeiro acesso, use o e-mail autorizado e selecione “Criar meu acesso”. Você receberá uma confirmação por e-mail antes de entrar.</p>
+<p class="help">No primeiro acesso, use o e-mail autorizado e selecione “Criar meu acesso”. Confirme a mensagem recebida; depois volte a esta tela e entre. Não é necessário entrar no GitHub para publicar.</p>
 </form></section>
 <section id="workspace" class="hide">
 <div class="notice" id="account-note">Carregando sua redação...</div>
@@ -90,7 +90,7 @@ $('register').onclick=async()=>{
  const email=$('email').value.trim(),password=$('password').value;
  if(!email||password.length<8){message('Informe e-mail e senha de pelo menos 8 caracteres.','error');return;}
  setBusy(true);
- try{const {error}=await db.auth.signUp({email,password,options:{emailRedirectTo:location.href}});if(error)throw error;message('Cadastro solicitado. Confira a caixa de entrada e confirme seu e-mail; depois volte para entrar.','success');}
+ try{const {data,error}=await db.auth.signUp({email,password});if(error)throw error;if(data?.session){await verifyAccess();message('Acesso criado e autenticado. Sua redação está pronta.','success');}else{message('Cadastro solicitado. Abra o e-mail de confirmação e clique no link recebido. Mesmo que ele abra outra página, volte ao endereço da Redação e entre com a senha que você criou.','success');}}
  catch(err){message('Falha ao criar acesso: '+errorText(err),'error');}
  finally{setBusy(false);}
 };
