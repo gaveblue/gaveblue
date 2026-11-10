@@ -1,7 +1,7 @@
 {
   "version": "3.0.7",
   "build": 3007,
-  "published_at": "2026-11-10T19:24:00Z",
+  "published_at": "2026-11-10T19:39:46Z",
   "title": "Importação assistida de contas a receber, pagar e recebidas — desktop",
   "notes": [
     "Foi preparada na tela Relatórios do computador uma importação separada de extratos bancários, com três opções: Contas a receber, Contas a pagar e Contas recebidas.",
@@ -234,6 +234,6 @@
   "release_status": "published_qa_partial_real_files_pending",
   "homologation": {
     "status": "published_qa_partial_e2e_pending",
-    "notes": "PR #129 mesclado no commit d732f11b5e187d8be5f37021aa1d10b4390d7eab e GitHub Pages run 42887386406 concluído com sucesso em 10/11/2026. 16 verificações estruturais e testes sintéticos de títulos/duplicação/baixas aprovados. CI de regressão reportou failure com 0 steps. Leitura dos três documentos reais em navegador desktop, OCR, impacto de saldo, offline e fluxo completo ainda sem evidência; sem homologação integral."
+    "notes": "PR #129 mesclado no commit d732f11b5e187d8be5f37021aa1d10b4390d7eab e GitHub Pages run 42887386406 concluído com sucesso em 10/11/2026 às 19:39:46 UTC. 16 verificações estruturais e testes sintéticos de títulos/duplicação/baixas aprovados. CI de regressão reportou failure com 0 steps. Leitura dos três documentos reais em navegador desktop, OCR, impacto de saldo, offline e fluxo completo ainda sem evidência; sem homologação integral."
   }
 }
