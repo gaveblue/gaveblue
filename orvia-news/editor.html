@@ -134,7 +134,7 @@ async function persist(status){
    if(upErr)throw upErr;
    p.image_url=db.storage.from('orvia-news-images').getPublicUrl(path).data.publicUrl;
   }else if(editing)p.image_url=editing.image_url||null;
-  p.status=status;p.published_at=status==='published'?(editing?.published_at||new Date().toISOString()):null;p.review_state=status==='published'?'approved':'draft';if(status==='published'){p.reviewed_by=session.id;p.reviewed_at=new Date().toISOString();}
+  p.status=status;p.published_at=status==='published'?(editing?.published_at||new Date().toISOString()):null;p.review_state=status==='published'?'approved':'draft';
   if(!editing){p.slug=slug(p.title);p.created_by=session.id;}
   const op=editing?db.from('orvia_articles').update(p).eq('id',editing.id):db.from('orvia_articles').insert(p);
   const {error}=await op;if(error)throw error;
@@ -147,7 +147,7 @@ $('draft').onclick=()=>persist('draft');
 async function changeStatus(a){
  const next=a.status==='published'?'draft':'published';
  if(!confirm(next==='published'?'Publicar esta matéria no portal?':'Retirar esta matéria do ar?'))return;
- const {error}=await db.from('orvia_articles').update({status:next,published_at:next==='published'?(a.published_at||new Date().toISOString()):null,review_state:next==='published'?'approved':'changes_requested',reviewed_by:session.id,reviewed_at:new Date().toISOString()}).eq('id',a.id);
+ const {error}=await db.from('orvia_articles').update({status:next,published_at:next==='published'?(a.published_at||new Date().toISOString()):null,review_state:next==='published'?'approved':'changes_requested'}).eq('id',a.id);
  if(error)message(errorText(error),'error');else{await load();message(next==='published'?'Matéria publicada.':'Matéria retirada do ar.','success');}
 }
 async function deleteArticle(a){
