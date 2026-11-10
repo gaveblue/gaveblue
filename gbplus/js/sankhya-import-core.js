@@ -214,15 +214,17 @@ export function movementDecisions(db,items,now){
    return {...r,partnerId:partner.id,decision:'create',future};
   }
   const meta=present.sankhyaMovement||{};
-  const expectedAmount=(meta.paidAmount&&meta.paidDate&&meta.paidDate<=now)?meta.paidAmount:meta.originalCents;
+  const settlements=(db.payments||[]).filter(p=>p.titleId===present.id);
+  const posted=settlements.reduce((sum,p)=>sum+p.amount,0);
+  // A future "Data Baixa" from yesterday's file may become due today; until a
+  // real payment exists, the GB+ title must still match its original principal.
+  const expectedAmount=posted>0?meta.paidAmount:meta.originalCents;
   if(present.cancelled||present.partnerId!==partner.id||
     (Number.isSafeInteger(expectedAmount)&&present.amount!==expectedAmount)||
     present.type!==r.kind||meta.partnerCode&&meta.partnerCode!==r.partnerCode||
     meta.originalCents!==undefined&&meta.originalCents!==r.principal ||
     meta.invoice&&meta.invoice!==r.invoice || present.due!==r.due)
    return {...r,decision:'blocked',reason:'Mesmo Nro Único com campos divergentes do lançamento existente',existingId:present.id};
-  const settlements=(db.payments||[]).filter(p=>p.titleId===present.id);
-  const posted=settlements.reduce((sum,p)=>sum+p.amount,0);
   if(r.paidDate&&r.paidDate<=now&&!posted)return {...r,decision:'settle',existingId:present.id,partnerId:partner.id};
   if(r.paidDate&&r.paidDate<=now&&posted!==r.paidAmount)
    return {...r,decision:'blocked',existingId:present.id,reason:'Baixa existente com valor diferente: conferir manualmente'};
