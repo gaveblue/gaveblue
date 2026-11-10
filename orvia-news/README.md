@@ -7,13 +7,16 @@ Projeto hospedado dentro do repositório público `gaveblue/gaveblue`, na pasta 
 - Supabase independente: `ORVIA NEWS` (`ckpyhnqrlqxwkjvyurle`), região São Paulo, mesma organização do GB+; o banco do GB+ e o WeFrotas não são utilizados.
 - Apenas a chave *publishable* do Supabase está no navegador; **nenhuma service-role key**.
 
-## Primeira configuração do login (uma vez)
+## Primeiro acesso do editor
 
-No painel do Supabase, selecione o projeto **ORVIA NEWS**.
-Em **Authentication → URL Configuration**:
-1. Defina **Site URL** como `https://gaveblue.com.br/orvia-news/editor.html`.
-2. Adicione a mesma URL em **Redirect URLs**.
-3. Salve. Essa etapa é necessária para confirmação de cadastro por e-mail funcionar corretamente.
+No painel da redação, crie uma senha para o e-mail autorizado e confirme o cadastro pelo link enviado ao e-mail.
+
+O fluxo atual de cadastro utiliza o redirecionamento padrão do Supabase para reduzir a dependência de configurações externas: após confirmar o e-mail, volte diretamente ao painel da ORVIA NEWS e entre com o e-mail e senha. O link de confirmação **pode abrir outro endereço** enquanto o URL Configuration não estiver ajustado.
+
+Recomendação administrativa futura (a conexão Supabase disponível aqui não permite alterar essa opção):
+1. No projeto ORVIA NEWS, abra **Authentication → URL Configuration**.
+2. Configure **Site URL** como `https://gaveblue.com.br/orvia-news/editor.html`.
+3. Inclua essa URL em **Redirect URLs**, para que futuros links de confirmação e recuperação retornem à redação.
 
 O e-mail autorizado inicial é o do proprietário da conta GitHub conectada: `contato.lucaspimenteloliveira@gmail.com`.
 Para cadastrar outro editor depois, a administração do Supabase deve inserir o e-mail verificado na tabela `public.orvia_editors`; **não conceda permissões a qualquer usuário automaticamente**.
