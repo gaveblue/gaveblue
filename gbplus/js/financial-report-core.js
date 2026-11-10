@@ -92,7 +92,7 @@ export function normalizeSicoobPositionedPages(pages){
   const headers=items.filter(i=>i.x<180&&/^(58|68|82|212|215)\s*-\s*/.test(i.str));
   const refs=items.filter(i=>i.x>=180&&i.x<261&&/^\d{5,7}-\d$/.test(i.str));
   for(const ref of refs){
-   const h=headers.find(k=>k.y>ref.y-1);
+   const h=headers.filter(k=>k.y>ref.y-1).sort((a,b)=>a.y-b.y)[0];
    const group=Number(h?.str.match(/^\d+/)?.[0]||0);
    if(![58,68,82,212,215].includes(group))continue;
    const near=(a,b,dy=9)=>items.filter(i=>i.x>=a&&i.x<b&&Math.abs(i.y-ref.y)<=dy);
