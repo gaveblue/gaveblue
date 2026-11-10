@@ -1,7 +1,7 @@
 {
   "version": "3.0.5",
   "build": 3005,
-  "published_at": null,
+  "published_at": "2026-11-10T18:14:08Z",
   "title": "Abertura minimalista com anéis discretos em movimento",
   "notes": [
     "Corrigido o excesso visual da 3.0.4: removidos disco de acreção, gradientes fortes, ponto luminoso, arco em primeiro plano e sombras do anel.",
@@ -220,9 +220,9 @@
       "description": "As órbitas giram lentamente em sentidos opostos."
     }
   ],
-  "release_status": "publication_authorized_qa_partial_deploy_pending",
+  "release_status": "published_authorized_qa_partial",
   "homologation": {
-    "status": "static_review_pending_visual_tests",
-    "notes": "Correção visual da 3.0.4 solicitada em 10/11/2026. Verificações estruturais devem ser feitas; testes visuais Android/PWA, desktop, acessibilidade e offline ainda pendentes. Publicação autorizada, sem declaração de homologação integral."
+    "status": "published_qa_partial_visual_pending",
+    "notes": "PR #127 incorporado à main no commit a533a15a3454846b20205622a13142cb7f2758e3. GitHub Pages run 42872934395 concluído com sucesso em 10/11/2026 às 18:14:08 UTC. 20 verificações estruturais da candidata passaram. Fluxo CI reportou falha sem etapas executadas. Homologação visual Android/PWA, desktop e offline ainda pendente; publicação autorizada pelo responsável."
   }
 }
