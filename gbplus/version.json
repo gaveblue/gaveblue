@@ -1,7 +1,7 @@
 {
   "version": "3.0.6",
   "build": 3006,
-  "published_at": null,
+  "published_at": "2026-11-10T18:31:41Z",
   "title": "Abertura automática com rastros de luz discretos e GB+ harmonizado",
   "notes": [
     "Botão Iniciar removido da abertura. A apresentação aparece automaticamente e dá lugar ao login/painel real após cerca de 6 segundos, com fade suave; sem redirecionamento de página.",
@@ -226,9 +226,9 @@
       "description": "G, B e + com espaços uniformes."
     }
   ],
-  "release_status": "publication_authorized_qa_partial_deploy_pending",
+  "release_status": "published_authorized_qa_partial",
   "homologation": {
-    "status": "static_review_pending_visual_tests",
-    "notes": "Alteração visual solicitada em 10/11/2026. Verificação de invariantes e CI candidatos; QA visual real Android/PWA, desktop, login, acessibilidade e offline não comprovado ainda. Publicação não equivale a homologação integral."
+    "status": "published_qa_partial_visual_pending",
+    "notes": "PR #128 mesclado em main no commit 11ecabc0c496f94757e8a4f9e46643c5d512772e. GitHub Pages run 42875835562 concluído com sucesso em 10/11/2026 às 18:31:41 UTC. 20 verificações estruturais no código da candidata passaram e scripts inline possuem sintaxe válida. CI de regressão run 42875762360 falhou sem executar steps: não prova falha do código. QA visual Android/PWA, desktop, offline e auth real permanece pendente; homologação integral não declarada."
   }
 }
