@@ -1,5 +1,15 @@
 # CHANGELOG — GB+ Gestão Financeira
 
+## [3.0.2 — REVISÃO VISUAL DA ABERTURA (CANDIDATA; NÃO PUBLICADA)] — 2026-11-10
+
+- **Motivo:** a abertura 3.0.1 publicada não correspondeu à qualidade da prévia visual aprovada pelo responsável.
+- **Redesenho:** substituição da revelação por recortes retangulares de letras por arte vetorial SVG de G, B e + com traçado progressivo, preenchimento acetinado discreto e brilho azul no +.
+- **Fundo:** azul-marinho noturno em todas as aparências, fiel à prévia aprovada; a tela do aplicativo continua respeitando sua configuração de tema após o encerramento.
+- **Transição:** logotipo desaparece antes do fade final do fundo, evitando sobreposição visual com conteúdos da tela seguinte. Saída CSS em ~2,12 s e remoção adicional no JavaScript em 2,4 s.
+- **Compatibilidade:** HTML/CSS locais; ícone vetorial embutido, sem nova rede, arquivos binários, fonte externa, armazenamento ou mudanças financeiras.
+- **QA:** quadros inspecionados no Chromium local a 0,4 s, 0,95 s e 1,55 s; testes de regressão e validação real em PWA/Android ainda pendentes. **Não publicar sem avaliação da nova prévia.**
+
+
 ## [3.0.1 — ABERTURA ANIMADA LOGO REVEAL (LIBERAÇÃO AUTORIZADA; QA PARCIAL)] — 2026-11-10
 
 - **Identidade:** introdução minimalista com G e B formando-se gradualmente, finalizada pelo símbolo + azul; duração de 2,05 segundos e saída em fade suave.

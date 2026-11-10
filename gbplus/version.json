@@ -1,14 +1,14 @@
 {
-  "version": "3.0.1",
-  "build": 3001,
+  "version": "3.0.2",
+  "build": 3002,
   "published_at": null,
-  "title": "Abertura animada GB+ — Logo Reveal minimalista",
+  "title": "Abertura animada redesenhada — Logo Reveal vetorial",
   "notes": [
-    "Logo Reveal com letras GB em formação e símbolo + azul luminoso, com duração próxima de dois segundos.",
-    "Abertura visual leve em CSS, sem usar GIF ou bibliotecas externas, com adaptação ao modo claro e escuro.",
-    "Saída garantida por animação CSS e por temporizador de segurança; não interrompe login, dados financeiros, cadastros ou atualização do PWA.",
-    "Respeita a preferência de movimento reduzido; nenhuma alteração nos cálculos, lançamentos, contas, cartões ou autenticação.",
-    "Liberação expressamente autorizada; revisão visual Android/PWA, desktop e offline ainda pendente."
+    "Redesenho fiel à prévia aprovada: fundo azul-marinho escuro sempre, letras vetoriais G e B, símbolo + azul luminoso e brilho discreto.",
+    "Traços vetoriais desenhados gradualmente com finalização suave, evitando o recorte retangular e a aparência tipográfica simplificada da 3.0.1.",
+    "Animação aproximada de 2,12 segundos, com saída que primeiro oculta o logotipo e depois revela a tela do aplicativo.",
+    "Sem fontes externas, GIF pesado, migrações de dados, mudanças no domínio financeiro ou no fluxo de autenticação.",
+    "Prévia HTML navegável produzida para validação visual. Publicação pendente da aprovação da nova animação e verificações finais."
   ],
   "assets": [
     "./splash.css",
@@ -211,23 +211,23 @@
   "highlights": [
     {
       "icon": "sparkles",
-      "title": "Abertura GB+",
-      "description": "O logotipo se forma em uma transição minimalista."
+      "title": "Logo Reveal renovado",
+      "description": "G, B e + formados por traços vetoriais e brilho sutil."
     },
     {
       "icon": "moon",
-      "title": "Temas adaptativos",
-      "description": "Fundo e contraste adequados aos modos claro e escuro."
+      "title": "Fidelidade visual",
+      "description": "A mesma identidade azul-marinho da prévia aprovada em todos os temas."
     },
     {
       "icon": "shield-check",
-      "title": "Inicialização protegida",
-      "description": "A animação termina mesmo quando há falha no carregamento."
+      "title": "Saída segura",
+      "description": "A animação é removida automaticamente sem bloquear o aplicativo."
     }
   ],
-  "release_status": "publication_authorized_qa_partial_deploy_pending",
+  "release_status": "candidate_not_published",
   "homologation": {
-    "status": "partial_qa_not_homologated",
-    "notes": "Publicação expressamente autorizada em 10/11/2026, mesmo sem execução comprovada de CI e sem teste visual Android/desktop. A verificação estática de 16 itens passou; GitHub Actions run 42843996230 falhou sem steps. Não declarar homologação completa."
+    "status": "visual_preview_tested_browser_qa_pending",
+    "notes": "Quadros de animação renderizados em navegador Chromium local e inspecionados. Ainda não houve QA de integração real no app/PWA Android/iPhone; não declarar homologação/publicação."
   }
 }
