@@ -8,7 +8,7 @@
     "Abertura visual leve em CSS, sem usar GIF ou bibliotecas externas, com adaptação ao modo claro e escuro.",
     "Saída garantida por animação CSS e por temporizador de segurança; não interrompe login, dados financeiros, cadastros ou atualização do PWA.",
     "Respeita a preferência de movimento reduzido; nenhuma alteração nos cálculos, lançamentos, contas, cartões ou autenticação.",
-    "Candidata em PR: homologação técnica e avaliação Android/PWA, desktop e offline pendentes; não declarada publicada."
+    "Liberação expressamente autorizada; revisão visual Android/PWA, desktop e offline ainda pendente."
   ],
   "assets": [
     "./splash.css",
@@ -225,9 +225,9 @@
       "description": "A animação termina mesmo quando há falha no carregamento."
     }
   ],
-  "release_status": "candidate_not_published",
+  "release_status": "publication_authorized_qa_partial_deploy_pending",
   "homologation": {
-    "status": "pending",
-    "notes": "Verificação estrutural e nova regressão específica preparadas. Execução em navegador real e GitHub Actions ainda sem evidência; não considerar homologada."
+    "status": "partial_qa_not_homologated",
+    "notes": "Publicação expressamente autorizada em 10/11/2026, mesmo sem execução comprovada de CI e sem teste visual Android/desktop. A verificação estática de 16 itens passou; GitHub Actions run 42843996230 falhou sem steps. Não declarar homologação completa."
   }
 }
