@@ -135,7 +135,20 @@ export function titleForm(db,t,type='expense'){
   </div>
  </form>`;
 }
-export function partnerForm(p){return `<form id="partner-form" data-id="${p?.id||''}"><div class="form-grid">${p?.sankhyaCode?'<div class="full gb-partner-erp-code">Código Sankhya: <strong>'+esc(p.sankhyaCode)+'</strong> · associado à importação financeira</div>':''}${field('Nome ou razão social','name',p?.name||'','text',required)}${field('Nome fantasia','tradeName',p?.tradeName||'','text','maxlength="200"')}${field('CPF ou CNPJ','document',p?.document||'','text','maxlength="18"')}${field('Telefone','phone',p?.phone||'','tel','maxlength="30"')}${field('E-mail','email',p?.email||'','email','maxlength="200"')}${select('Situação','active',[['true','Ativo'],['false','Inativo']],String(p?.active??true))}<fieldset class="full roles"><legend>Classificações · escolha uma ou mais</legend>${['Cliente','Fornecedor','Transportadora','Funcionário','Outros'].map(r=>`<label><input type="checkbox" name="roles" value="${r}" ${p?.roles.includes(r)?'checked':''}>${r}</label>`).join('')}</fieldset><div class="full">${field('Endereço','address',p?.address||'','text','maxlength="500"')}</div>${textarea('Observações','notes',p?.notes)}</div>${p?button(icon('trash')+'Excluir parceiro','delete-partner','danger small',`data-id="${p.id}" type="button"`):''}${formFooter()}</form>`;}
+function partnerErpDetails(p){
+ const m=p?.sankhyaProfile;if(!m)return '';
+ const standard=[['Código de origem',m.code],['Código anterior',m.legacyCode],
+  ['Razão social original',m.legalName],['Tipo de pessoa',m.personType],
+  ['Inscrição estadual / Identidade',m.identity],['CEP',m.zip],['Logradouro',m.street],
+  ['Número',m.number],['Complemento',m.complement],['Bairro',m.neighborhood],
+  ['Cidade/UF',m.city],['Celular/Fax',m.mobile],['Matriz',m.matrixCode]];
+ const attributes=[...standard,...Object.entries(m.attributes||{})].filter(([,value])=>String(value??'').trim());
+ return '<details class="full gb-partner-erp-details">'+
+  '<summary>Dados adicionais de origem (Sankhya)</summary>'+
+  '<p>Os campos adicionais são mantidos para consulta. O código de origem permanece vinculado ao cadastro.</p>'+
+  '<dl>'+attributes.map(([key,value])=>'<div><dt>'+esc(key)+'</dt><dd>'+esc(value)+'</dd></div>').join('')+'</dl></details>';
+}
+export function partnerForm(p){const erpExtra=partnerErpDetails(p);return `<form id="partner-form" data-id="${p?.id||''}"><div class="form-grid">${p?.sankhyaCode?'<div class="full gb-partner-erp-code">Código Sankhya: <strong>'+esc(p.sankhyaCode)+'</strong> · associado à importação financeira</div>':''}${field('Nome ou razão social','name',p?.name||'','text',required)}${field('Nome fantasia','tradeName',p?.tradeName||'','text','maxlength="200"')}${field('CPF ou CNPJ','document',p?.document||'','text','maxlength="18"')}${field('Telefone','phone',p?.phone||'','tel','maxlength="30"')}${field('E-mail','email',p?.email||'','email','maxlength="200"')}${select('Situação','active',[['true','Ativo'],['false','Inativo']],String(p?.active??true))}<fieldset class="full roles"><legend>Classificações · escolha uma ou mais</legend>${['Cliente','Fornecedor','Transportadora','Funcionário','Outros'].map(r=>`<label><input type="checkbox" name="roles" value="${r}" ${p?.roles.includes(r)?'checked':''}>${r}</label>`).join('')}</fieldset><div class="full">${field('Endereço','address',p?.address||'','text','maxlength="500"')}</div>${textarea('Observações','notes',p?.notes)}${erpExtra}</div>${p?button(icon('trash')+'Excluir parceiro','delete-partner','danger small',`data-id="${p.id}" type="button"`):''}${formFooter()}</form>`;}
 /** The selector is shared by banks, custom cash accounts and goal cofrinhos. */
 export function accountBankPreview(db,bankId='',manualBank='',kind='bank',ico=''){
  const bank=findBank(db,bankId);
