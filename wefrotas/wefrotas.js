@@ -1343,60 +1343,6 @@
       return order?.vehicleId || '';
     }
 
-    // Verify the historical substitution before allocating reserve fuel to the source OS.
-    function getReserveFuelContext(entry) {
-      if (!isFuelEntry(entry) || !entry?.vehicleId) return null;
-      const date=String(getFinanceEntryDate(entry)||'').slice(0,10);
-      const matches=(window.WeFrotasSubstitutions?.all?.()||[]).filter(item=>
-        String(item.reserveVehicleId)===String(entry.vehicleId)
-        && item.startDate && date>=item.startDate && (!item.endDate || date<=item.endDate)
-        && (!entry.substitutionId || String(item.id)===String(entry.substitutionId))
-        && (!entry.replacedVehicleId || String(item.sourceVehicleId)===String(entry.replacedVehicleId))
-        && (!item.driverId || !entry.driverId || String(item.driverId)===String(entry.driverId))
-        && (entry.substitutionId || (entry.driverId && String(item.driverId)===String(entry.driverId))));
-      return matches.length===1 ? {substitutionId:matches[0].id,
-        sourceVehicleId:matches[0].sourceVehicleId,reserveVehicleId:matches[0].reserveVehicleId}:null;
-    }
-    function getFinanceCloseEligibleOrders(entry) {
-      const physicalId=String(getEntryVehicleId(entry)||'');
-      const sub=getReserveFuelContext(entry);
-      return getOpenOrdersSorted().filter(order=>!physicalId
-        || String(order.vehicleId)===physicalId
-        || (sub&&String(order.vehicleId)===String(sub.sourceVehicleId)));
-    }
-    function isReserveFuelAllocatedToOrder(entry,order) {
-      const sub=getReserveFuelContext(entry);
-      return !!(sub&&order&&String(order.vehicleId)===String(sub.sourceVehicleId)
-        && String(entry.vehicleId)===String(sub.reserveVehicleId));
-    }
-    function getOrderFinancePrintDescription(entry,order) {
-      const items=isFuelGroupEntry(entry)?getFuelGroupChildren(entry):[entry];
-      const reserve=items.filter(item=>isReserveFuelAllocatedToOrder(item,order));
-      if(!reserve.length)return getFinanceSupplierSummary(entry);
-      const details=reserve.map(item=>{
-        const plate=allVehicles.find(v=>String(v.id)===String(item.vehicleId))?.placa||'não informada';
-        return 'VEÍCULO RESERVA '+plate+(item.km!==''&&item.km!=null?' | KM '+item.km:'');
-      });
-      return [getFinanceSupplierSummary(entry),...new Set(details)].filter(Boolean).join(' — ');
-    }
-    function getOrderReservePrintNotice(order) {
-      const source=allVehicles.find(v=>String(v.id)===String(order.vehicleId));
-      const associated=allFinanceEntries.filter(e=>e.orderId===order.id)
-        .flatMap(e=>isFuelGroupEntry(e)?getFuelGroupChildren(e):[e])
-        .filter(e=>isReserveFuelAllocatedToOrder(e,order));
-      const plates=[...new Set(associated.map(e=>allVehicles.find(v=>String(v.id)===String(e.vehicleId))?.placa).filter(Boolean))];
-      const sinistro=source?.operationalStatus==='sinistro'||order.tipoOs==='sinistro'
-        ||order.operationalIncident?.kind==='sinistro'
-        ||associated.some(e=>(window.WeFrotasSubstitutions?.all?.()||[]).some(item=>
-          item.id===getReserveFuelContext(e)?.substitutionId&&item.reason==='sinistro'));
-      if(!sinistro&&!plates.length)return '';
-      return [
-        sinistro?'VEÍCULO SINISTRADO: '+(source?.placa||'placa não informada'):'',
-        plates.length?'ABASTECIMENTOS DO CARRO RESERVA: '+plates.join(', '):'',
-        plates.length?'Os custos integram esta OS, mas o KM do reserva não altera o KM inicial/final do titular.':''
-      ].filter(Boolean).join(' | ');
-    }
-
     function getEntryLinkedOrder(entry) {
       if (!entry?.orderId) return null;
       return allOrders.find(order => order.id === entry.orderId) || null;
