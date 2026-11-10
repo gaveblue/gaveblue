@@ -8,14 +8,14 @@ import {bankImportMarkup,bankImportHistoryMarkup,bankImportFilteredRows,bankImpo
 import {reviewSelection,applyReconciliationBatch,undoReconciliationBatch,reconciliationRecordKey,knownReconciliationKeys} from './bank-reconciliation.js?v=20261106-2505';
 import {filterFlowRows} from './gb-flow-filters.js?v=20261106-68';
 import {uid,today,money,dateLabel,cents,addMonths,validDate,generateTitles,addPayment,transfer,updateTitle,pending,accountBalance,flow,within} from './domain.js?v=20261105-72';
-import {KEY,INDICATORS,defaultPanel,parseBackup,backupText,MOBILE_SHORTCUTS,defaultMobileNav,effectiveMobileNav,validMobileNav,shouldOfferSetup} from './store.js?v=20261108-2866';
+import {KEY,INDICATORS,defaultPanel,parseBackup,backupText,MOBILE_SHORTCUTS,defaultMobileNav,effectiveMobileNav,validMobileNav,shouldOfferSetup} from './store.js?v=20261110-308';
 import {esc,icon,button,field,select,formFooter,download,csv,titleTable} from './ui.js?v=20261105-72';
 import {routes,dashboard,titlesView,partnersView,categoriesView,flowView,reportsView,settingsView,notificationsView,filteredTitles,reportData} from './views.js?v=20261110-308';
 import {moreView} from './more-view.js?v=20261108-2863';
 import {accountsCardsView} from './accounts-cards-view.js?v=20261109-3000';
 import {renderReactCharts,unmountReactCharts} from './gb-react-loader.js?v=20261105-45';
 import {mountNativeCharts} from './gb-charts-native.js?v=20261106-68';
-import {titleForm,partnerForm,accountForm,accountBankPreview,categoryForm,paymentForm,transferForm,titleDetail,customizeForm,accountDetail} from './forms.js?v=20261109-3000';
+import {titleForm,partnerForm,accountForm,accountBankPreview,categoryForm,paymentForm,transferForm,titleDetail,customizeForm,accountDetail} from './forms.js?v=20261110-308';
 import {ACCOUNT_ICON_OPTIONS,GOAL_PRESETS,accountKind,accountIcon,goalPreset} from './account-goals.js?v=20261109-2900';
 import {serviceById,serviceSearchKey,isServiceExpenseCategory} from './service-catalog.js?v=20261108-2880';
 import {serviceIconMarkup,serviceIdentityMarkup,serviceDisplayName,installServiceIconRecovery} from './service-ui.js?v=20261108-2880';
