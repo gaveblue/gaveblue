@@ -26,3 +26,16 @@
 ## Segurança de publicação
 
 Branch isolada; sem merge, deploy, modificação de schema, RPCs, dados reais, registros financeiros ou app Central.
+
+
+## Alocação do carro reserva à OS do titular — revisão complementar
+
+O WeFrotas deve aceitar a despesa de combustível do **veículo fisicamente abastecido (reserva)** em uma OS do **titular sinistrado**, seja OS de sinistro, seja OS mensal aberta. O vínculo financeiro usa `orderId` da OS do titular; **não muda `vehicleId` nem `km`** do abastecimento. OS fechadas e OS de terceiro não são elegíveis.
+
+- Correção: `wefrotas/wefrotas-reserve-allocation.js` verifica a substituição pelo veículo, motorista e período, sem inferência por KM ou placa habitual.
+- Interface: `Fechar despesa` mostra as OS elegíveis do titular, além das do veículo físico, e sinaliza a substituição.
+- Impressão: OS de sinistro ou titular com sinistro recebe destaque; somente cada lançamento validado do carro reserva recebe etiqueta **VEÍCULO RESERVA** e placa. Visualização, impressão unitária e lote seguem a mesma regra.
+- Odômetro: `getOrderKmData`, faixa de KM por veículo e indicadores financeiros ignoram leituras de outro carro, mesmo quando o custo pertence à OS do titular.
+- Regressões adicionadas em `tests/wefrotas-reserve-allocation.test.cjs`; verificações isoladas no V8 passaram em 13 cenários, incluindo OS mensal, OS de sinistro, placas divergentes, intervalo histórico, bloqueio de OS encerrada e distinção individual de impressão. A suíte Node foi adicionada, mas **não executada neste ambiente**.
+- Consultado somente em leitura: após a correção manual pelo administrador, a substituição da OS 45, **TOK-6F54 → ABC1234**, inicia em **06/10/2026**. Em 10/11/2026 a tabela financeira ainda não tinha abastecimentos lançados com o `vehicleId` do ABC1234 para a substituição. Portanto, a rotina não deve converter lançamentos antigos do titular automaticamente. Cada comprovante precisa ser aprovado ou revisado com a placa física correta.
+- Integração autenticada e impressão no navegador com dados reais permanecem **pendentes de homologação manual**. Sem alteração de dados financeiros ou banco nesta branch.
