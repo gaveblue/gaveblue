@@ -1,5 +1,15 @@
 # CHANGELOG — GB+ Gestão Financeira
 
+## [3.0.8 — IMPORTAÇÃO DIÁRIA SANKHYA: PARCEIROS + MOVIMENTAÇÃO (HOMOLOGAÇÃO PARCIAL)] — 2026-11-10
+- **Cadastro de parceiros (53 colunas / 1.626 registros de referência):** novo importador Excel/CSV no PC, identificado pelo campo **Cód. Parceiro**. Mapeia razão social, nome fantasia, CPF/CNPJ, situação, tipo de pessoa, endereço, contatos e informações comerciais/fiscais; os campos extras permanecem acessíveis em **Dados adicionais de origem (Sankhya)** na edição do parceiro.
+- **Preservação de identidade:** `sankhyaCode` exclusivo para cada parceiro; CPF/CNPJ pode ser compartilhado entre códigos sem misturar históricos. Cadastro repetido é associado por código; possíveis conflitos de código/documento são bloqueados. Edições manuais preservam metadados importados.
+- **Movimentação financeira (24 colunas / 2.123 títulos de referência):** utiliza o campo **Receita/Despesa** e valida o sinal de **Valor Líquido**; associa o parceiro pelo código; distingue previsão de baixa realizada e exige mapeamento da **Conta Baixa** para conta do GB+.
+- **Parcelas não são duplicidades:** **Nro Único** é a chave por `Empresa`; **Nro Nota** repetida pode ser parcela. As séries são associadas por empresa, parceiro, nota, data de negociação, operação e natureza, sem colapsar vencimentos distintos.
+- **Reimportação diária:** títulos já importados são reconhecidos por Nro Único e não geram registros repetidos. Uma baixa nova é aplicada ao título antigo, evitando segunda receita/despesa. Alterações inesperadas de valor, vencimento, código ou natureza geram conflito para revisão.
+- **Cuidados de caixa:** baixa futura não altera saldo; diferença entre valor nominal e valor recebido/pago fica registrada nos metadados. Necessária confirmação explícita antes de gravar títulos, parceiros ou baixas.
+- **Preservação:** módulos financeiros já existentes, autenticação, importações anteriores e banco atual sem migração destrutiva. Versão 3.0.8, cache PWA e testes de regressão atualizados.
+- **QA:** validação estrutural e testes sintéticos de cadastro, parcelas, duplicidade e baixa. Homologação real em desktop com os dois arquivos e conferência dos saldos permanece pendente.
+
 ## [3.0.7 — IMPORTAÇÃO ASSISTIDA DE RELATÓRIOS FINANCEIROS NO PC (QA PARCIAL)] — 2026-11-10
 - **Relatórios no computador:** três opções dentro da tela **Relatórios**: **Contas a receber**, **Contas a pagar** e **Contas recebidas**. O fluxo é distinto de extratos bancários, sem alterar a importação OFX/CSV existente.
 - **Formatos:** leitura local de CSV e Excel (.xlsx), além de PDF com texto (Sicoob) e OCR orientado para PDF digitalizado de contas a receber. O leitor de PDF/OCR utiliza bibliotecas remotas versionadas e exige conexão; erros de OCR são exibidos, sem salvar dados automaticamente.

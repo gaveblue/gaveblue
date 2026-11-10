@@ -82,7 +82,7 @@ export async function xlsxRows(buffer){
   for(const cell of [...row.children].filter(el=>localName(el)==='c')){
    const address=cell.getAttribute('r')||'',letters=address.match(/^[A-Z]+/i)?.[0]?.toUpperCase()||'A';
    let index=0;for(const letter of letters)index=index*26+letter.charCodeAt(0)-64;index--;
-   if(index<0||index>40)continue;
+   if(index<0||index>64)continue;
    const raw=descendants(cell,'v')[0]?.textContent??descendants(cell,'t').map(t=>t.textContent||'').join('')??'';
    const type=cell.getAttribute('t')||'';
    values[index]=type==='s'?shared[Number(raw)]??'':type==='inlineStr'||type==='str'?raw:raw!==''&&!isNaN(Number(raw))?Number(raw):raw;
