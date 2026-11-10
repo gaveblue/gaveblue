@@ -1,5 +1,12 @@
 # CHANGELOG — GB+ Gestão Financeira
 
+## [3.0.5 — ANÉIS DISCRETOS MINIMALISTAS (LIBERAÇÃO AUTORIZADA; QA VISUAL PENDENTE)] — 2026-11-10
+- **Correção do visual:** removido o disco carregado da versão 3.0.4, incluindo gradientes densos, ponto luminoso, brilho intenso e arco em primeiro plano. A apresentação volta a ser minimalista.
+- **Fundo e marca:** permanece o fundo branco, logotipo GB grafite e símbolo + azul próximo do B.
+- **Animação:** apenas dois anéis elípticos de borda fina e translúcida, girando lentamente em sentidos opostos (18 s e 25 s), sem competir com a marca.
+- **Proteção:** CSS exclusivamente visual, responsivo e com movimento reduzido; Iniciar, login, dados financeiros, navegação e PWA preservados. Versão e cache PWA 3.0.5 atualizados.
+- **QA:** revisão estrutural e teste de regressão; verificação visual Android/PWA e desktop segue pendente. Publicação expressamente solicitada; não declarar homologado sem evidência.
+
 ## [3.0.4 — ABERTURA BRANCA COM DISCO ORBITAL (PUBLICAÇÃO AUTORIZADA; QA VISUAL PENDENTE)] — 2026-11-10
 - **Identidade:** fundo da abertura alterado para **branco**, logotipo GB em grafite, cartão do **+** azul mantido e textos/barra/cantos ajustados para contraste no tema claro.
 - **Anel orbital:** os anéis de fundo passaram a circundar diretamente o logotipo, em vez da área central inteira. O disco elíptico gira continuamente (volta completa a cada 13 segundos), com rastro, brilho, ponto luminoso e arco em primeiro plano, inspirado no disco de acreção de um buraco negro.
