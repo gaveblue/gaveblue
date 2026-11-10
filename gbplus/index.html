@@ -51,7 +51,8 @@
   })();
   </script>
   <title>GB+ · Gestão Financeira</title>
-  <link rel="stylesheet" href="./splash.css?v=20261110-3001">\n  <link rel="stylesheet" href="./legal-consent.css?v=20261108-2866">
+  <link rel="stylesheet" href="./splash.css?v=20261110-3001">
+  <link rel="stylesheet" href="./legal-consent.css?v=20261108-2866">
   <link rel="manifest" href="./manifest.webmanifest"><link rel="icon" href="./icons/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="./icons/icon-192.png">
   <link rel="stylesheet" href="./styles.css?v=20261108-2890"><link rel="stylesheet" href="./charts-integration.css?v=20261106-68"><link rel="stylesheet" href="./bank-import.css?v=20261106-2600">
   <link rel="stylesheet" href="./settings-page.css?v=20261106-2610"><link rel="stylesheet" href="./liquid-glass.css?v=20261108-2811"><link rel="stylesheet" href="./more-page.css?v=20261108-2863">
@@ -85,7 +86,10 @@ body.auth-locked .gb-ai-widget{display:none}
 :root[data-theme="dark"] .gb-ai-widget[open]>summary,
 :root[data-theme="dark"] .gb-ai-widget[open]>summary::after{background:#292a30;color:#f1f1f5}
 </style></head>
-<body class="auth-locked">\n  <!-- Always releases itself, even if app bootstrap/authentication does not progress. -->\n  <div id="gb-splash" aria-hidden="true"><div class="gb-reveal-logo"><span class="gb-reveal-g">G</span><span class="gb-reveal-b">B</span><span class="gb-reveal-plus"></span></div></div>\n  <script>window.setTimeout(()=>document.getElementById("gb-splash")?.remove(),2400);</script>
+<body class="auth-locked">
+  <!-- Always releases itself, even if app bootstrap/authentication does not progress. -->
+  <div id="gb-splash" aria-hidden="true"><div class="gb-reveal-logo"><span class="gb-reveal-g">G</span><span class="gb-reveal-b">B</span><span class="gb-reveal-plus"></span></div></div>
+  <script>window.setTimeout(()=>document.getElementById("gb-splash")?.remove(),2400);</script>
   <main id="auth-gate" aria-label="Acesso ao GB+"><section class="auth-page"><div class="auth-card"><header class="auth-brand"><div class="auth-wordmark">GB<span>+</span></div><p>Gestão Financeira</p></header><p class="auth-description" role="status">Preparando seu acesso…</p><noscript>Ative o JavaScript para entrar no GB+.</noscript></div></section></main>
   <a class="skip" href="#main">Pular para o conteúdo</a>
   <aside class="sidebar" id="sidebar"><a class="brand" href="#dashboard" aria-label="GB+ início"><strong>GB<span>+</span></strong><span>Gestão Financeira</span></a><div class="nav-label">SEU FINANCEIRO</div><nav id="navigation" aria-label="Navegação principal"></nav><div class="sidebar-bottom"><div class="local-mark"><span class="status-dot"></span> Armazenamento local<small>Seus dados, neste navegador.</small></div><button class="theme-button" data-action="theme"></button><div class="version">GB+ <span>Versão 3.0.1</span></div></div></aside>
