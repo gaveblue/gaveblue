@@ -1,21 +1,20 @@
-// Marcas existentes na area de parceiros; adicione outras aqui quando aprovadas.
+// Marcas do ecossistema GaveBlue. Edite aqui os links e imagens.
 const partnerBrands = [
-  { name: 'Covre Agrícola', image: 'https://i.imgur.com/ruFvnwS.png', url: 'https://instagram.com/covreagricola' },
-  { name: 'Covre e Cia', image: 'https://i.imgur.com/YuuzkEM.png', url: 'https://instagram.com/covreecia' },
   { name: 'Orvia News', image: '/assets/partners/orvia-news.svg', url: '/orvia-news/' },
-  { name: 'GB+', image: '/assets/partners/gbplus.svg', url: '/gbplus/apresentacao.html' }
+  { name: 'GB+', image: '/assets/partners/gbplus.svg', url: '/gbplus/apresentacao.html' },
+  { name: 'Covre Agrícola', image: 'https://i.imgur.com/ruFvnwS.png', url: 'https://instagram.com/covreagricola' },
+  { name: 'Covre e Cia', image: 'https://i.imgur.com/YuuzkEM.png', url: 'https://www.instagram.com/covre_e_cia?cplk=aXVlaTc1dHRieXVi' }
 ];
 function renderPartnerLogos(isClone = false) {
-  // Repeticao interna para preencher telas largas sem lacunas no carrossel.
-  return Array.from({ length: 3 }, (_, round) => partnerBrands.map(brand => {
-    const decorative = isClone || round !== 0;
-    const accessibility = decorative
+  return partnerBrands.map(brand => {
+    const accessibility = isClone
       ? 'aria-hidden="true" tabindex="-1"'
-      : 'aria-label="Visitar ' + brand.name + '"';
+      : 'aria-label="Conhecer ' + brand.name + '"';
     return `<a class="gbpm-item" href="${brand.url}" target="_blank" rel="noopener noreferrer" ${accessibility}>
-      <img src="${brand.image}" alt="${decorative ? '' : brand.name}" width="195" height="72" loading="lazy" decoding="async">
+      <img src="${brand.image}" alt="" width="252" height="96" loading="eager" decoding="async" onerror="this.style.display='none'">
+      <span class="gbpm-brand-label" aria-hidden="true">${brand.name}</span>
     </a>`;
-  }).join('')).join('');
+  }).join('');
 }
 
 const pages = {
@@ -281,7 +280,7 @@ const pages = {
             <h2 id="gbpm-title" class="gbpm-title">Marcas conectadas à GaveBlue</h2>
             <p class="gbpm-desc">Projetos, produtos e parceiros que fazem parte do nosso ecossistema.</p>
           </div>
-          <div class="gbpm-viewport" role="region" aria-label="Marcas e parceiros: Covre Agrícola, Covre e Cia, Orvia News e GB+">
+          <div class="gbpm-viewport" role="region" aria-label="Marcas e projetos: Orvia News, GB+, Covre Agrícola e Covre e Cia">
             <div class="gbpm-track">
               <div class="gbpm-group">
                 ${renderPartnerLogos(false)}
