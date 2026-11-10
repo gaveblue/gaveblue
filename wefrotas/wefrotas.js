@@ -6888,11 +6888,57 @@
       }
     }
 
+    // Reserve fuel is charged to the titular OS without transferring its odometer.
+    function getVerifiedReserveRelation(entry) {
+      const api = window.WeFrotasReserveAllocation;
+      if (!api || !entry) return null;
+      if (isFuelGroupEntry(entry)) {
+        const children = getFuelGroupChildren(entry);
+        if (!children.length) return null;
+        const relationships = children.map(child => api.reserveForEntry(child, allVehicles));
+        return relationships.every(Boolean) &&
+          relationships.every(r => String(r.sourceVehicleId) === String(relationships[0].sourceVehicleId) &&
+            String(r.reserveVehicleId) === String(entry.vehicleId)) ? relationships[0] : null;
+      }
+      return api.reserveForEntry(entry, allVehicles);
+    }
+
+    function getEligibleOpenOrdersForFinance(entry) {
+      const physicalVehicleId = String(entry?.vehicleId || '');
+      const reserveRelation = getVerifiedReserveRelation(entry);
+      return getOpenOrdersSorted().filter(order =>
+        !physicalVehicleId || String(order.vehicleId) === physicalVehicleId ||
+        (reserveRelation && String(order.vehicleId) === String(reserveRelation.sourceVehicleId)));
+    }
+
+    function getOrderFinanceReservePrintNote(entry, order) {
+      const children = isFuelGroupEntry(entry) ? getFuelGroupChildren(entry) : [];
+      return window.WeFrotasReserveAllocation?.printReserveLabel(entry, order, allVehicles, children) || '';
+    }
+
+    function getOrderSinistroPrintNotice(order, entries) {
+      const items = entries.map(entry => isFuelGroupEntry(entry)
+        ? { ...entry, children: getFuelGroupChildren(entry) } : entry);
+      const sinistro = window.WeFrotasReserveAllocation?.isSinistroOnOrder(order, items, allVehicles);
+      const hasReserveCosts = entries.some(entry => getOrderFinanceReservePrintNote(entry, order));
+      if (!sinistro && !hasReserveCosts) return '';
+      return '<div style="border:1px solid #333;padding:6px 9px;margin:9px 0 6px;font-size:10px;line-height:1.45;">' +
+        (sinistro ? '<strong>VEÍCULO SINISTRADO</strong>. ' : '') +
+        (hasReserveCosts
+          ? 'Os lançamentos identificados como <strong>VEÍCULO RESERVA</strong> foram realizados no carro substituto. Seus custos constam nesta OS, mas o KM do reserva não compõe o KM inicial/final do veículo titular.'
+          : 'Situação operacional de sinistro identificada para este veículo/OS.') +
+        '</div>';
+    }
+
     function getOrderKmData(orderId) {
+      const order = allOrders.find(item => item.id === orderId);
+      if (!order) return { kmInicial: '', kmFinal: '' };
       const kmEntries = allFinanceEntries
         .filter(entry => entry.orderId === orderId || (entry.groupedIntoId && allFinanceEntries.some(group => group.id === entry.groupedIntoId && group.orderId === orderId)))
         .flatMap(entry => isFuelGroupEntry(entry) ? getFuelGroupChildren(entry) : [entry])
-        .filter(entry => entry && entry.km !== undefined && entry.km !== null && String(entry.km).trim() !== '')
+        // The OS pays the cost, but never inherits another vehicle's odometer.
+        .filter(entry => entry && String(entry.vehicleId || '') === String(order.vehicleId))
+        .filter(entry => entry.km !== undefined && entry.km !== null && String(entry.km).trim() !== '')
         .sort((a, b) => {
           const dateCompare = String(getFinanceEntryDate(a)).localeCompare(String(getFinanceEntryDate(b)));
           if (dateCompare !== 0) return dateCompare;
@@ -6925,7 +6971,7 @@
 
     function getVehicleFuelKmRange(vehicleId, start = '', end = '') {
       const kms = getFuelSheetRows()
-        .filter(row => getEntryLinkedVehicleId(row.entry) === vehicleId || getEntryImmediateVehicleId(row.entry) === vehicleId || row.vehicle?.id === vehicleId)
+        .filter(row => String(row.entry?.vehicleId || '') === String(vehicleId))
         .filter(row => isDateWithinRange(getFinanceEntryDate(row.entry), start, end))
         .map(row => Number(row.entry?.km || 0))
         .filter(km => Number.isFinite(km) && km > 0)
@@ -7461,7 +7507,9 @@
           const currentVehicleId = getEntryLinkedVehicleId(parent);
           if (!vehicleEntriesMap.has(currentVehicleId)) vehicleEntriesMap.set(currentVehicleId, []);
           const children = isFuelGroupEntry(parent) ? getFuelGroupChildren(parent) : [parent];
-          vehicleEntriesMap.get(currentVehicleId).push(...(children.length ? children : [parent]));
+          // Costs follow the OS. Only the physically fuelled vehicle supplies KM.
+          vehicleEntriesMap.get(currentVehicleId).push(...(children.length ? children : [parent])
+            .filter(child => String(child?.vehicleId || '') === String(currentVehicleId)));
         });
 
       vehicleEntriesMap.forEach((entries, currentVehicleId) => {
@@ -9464,9 +9512,8 @@
         return;
       }
 
-      const vehicleId = getEntryVehicleId(entry);
-      const closeOpenOrders = getOpenOrdersSorted()
-        .filter(order => !vehicleId || order.vehicleId === vehicleId);
+      const closeOpenOrders = getEligibleOpenOrdersForFinance(entry);
+      const reserveRelation = getVerifiedReserveRelation(entry);
       const orderOptions = closeOpenOrders
         .map(order => `<option value="${escapeHtml(getOrderAutocompleteLabel(order))}"></option>`)
         .join('');
@@ -9506,6 +9553,7 @@
         </div>
         <div class="field-wrap full">
           <label>${requiredLabel('Alocar na OS')}</label>
+          ${reserveRelation ? '<div class="text-xs font-semibold mb-2" style="color:var(--muted-text,#64748b)">VEÍCULO RESERVA: o abastecimento permanece na placa do reserva. É possível alocar a despesa na OS do titular (sinistro ou mensal), sem transferir o KM.</div>' : ''}
           <input id="finance-close-order-id" type="hidden">
           <input class="soft-input w-full" id="finance-close-order-search" list="finance-close-order-options" placeholder="Digite número da OS, frota, placa ou veículo" autocomplete="off">
           <datalist id="finance-close-order-options">
@@ -15867,7 +15915,7 @@
         const closeOrderSearch = document.getElementById('finance-close-order-search')?.value || '';
         let orderId = document.getElementById('finance-close-order-id').value;
         if (!orderId && closeOrderSearch.trim()) {
-          const resolvedOrder = resolveOrderFromSearch(closeOrderSearch, getOpenOrdersSorted().filter(order => !getEntryVehicleId(entry) || order.vehicleId === getEntryVehicleId(entry)));
+          const resolvedOrder = resolveOrderFromSearch(closeOrderSearch, getEligibleOpenOrdersForFinance(entry));
           orderId = resolvedOrder?.id || '';
           const hiddenOrderField = document.getElementById('finance-close-order-id');
           if (hiddenOrderField) hiddenOrderField.value = orderId;
@@ -15889,6 +15937,10 @@
         }
         if (linkedOrder && linkedOrder.status === 'fechada') {
           showToast('Não é permitido alocar em OS fechada.');
+          return;
+        }
+        if (!getEligibleOpenOrdersForFinance(entry).some(order => String(order.id) === String(linkedOrder.id))) {
+          showToast('Esta OS não pertence ao veículo abastecido nem ao titular da substituição comprovada. Confira o carro reserva e a OS.');
           return;
         }
 
