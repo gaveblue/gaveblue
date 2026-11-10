@@ -1,5 +1,13 @@
 # CHANGELOG — GB+ Gestão Financeira
 
+## [3.0.2 — BRAND REVEAL COM INICIAR (PUBLICAÇÃO AUTORIZADA; QA VISUAL PENDENTE)] — 2026-11-10
+- **Abertura:** substituição da animação 3.0.1 pelo protótipo Brand Reveal aprovado: fundo escuro, G e B formados em sequência, símbolo + azul em cartão, órbitas, slogan e barra animada. Corrigido recorte do B em celulares.
+- **Controles:** removidos os botões de teste **Rever** e **Pular abertura**. Existe apenas **Iniciar**; ao tocar, a apresentação desaparece e o usuário continua no login ou painel financeiro real. Nenhum redirecionamento para a tela fictícia.
+- **Isolamento:** classes CSS exclusivas `gbintro-*`, sem bibliotecas externas, alterações financeiras ou mudanças em Supabase. Fluxos de OAuth/callback, links diretos e `prefers-reduced-motion` não exigem interação com a abertura.
+- **PWA:** atualização do CSS de splash com cache-busting e do cache do service worker para `gb-plus-shell-v3002`; sem reload forçado nem limpeza de dados.
+- **Versão:** 3.0.2 registrada no HTML e no manifesto de atualização; base financeira permanece a versão já implementada, sem alterações em cálculos, cartões ou saldos.
+- **QA:** responsável autorizou expressamente implantação em 10/11/2026. Verificação estrutural e CI devem ser registradas; QA visual em Android/PWA, desktop, offline e login segue pendente enquanto não houver evidências. Não confundir autorização de publicar com homologação completa.
+
 ## [3.0.1 — ABERTURA ANIMADA LOGO REVEAL (LIBERAÇÃO AUTORIZADA; QA PARCIAL)] — 2026-11-10
 
 - **Identidade:** introdução minimalista com G e B formando-se gradualmente, finalizada pelo símbolo + azul; duração de 2,05 segundos e saída em fade suave.
