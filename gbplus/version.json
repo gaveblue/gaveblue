@@ -1,7 +1,7 @@
 {
   "version": "3.0.4",
   "build": 3004,
-  "published_at": null,
+  "published_at": "2026-11-10T17:45:57Z",
   "title": "Abertura branca com órbita gravitacional ao redor do GB+",
   "notes": [
     "Fundo da abertura branco, com letras GB em grafite escuro e símbolo + azul preservado.",
@@ -225,9 +225,9 @@
       "description": "Nenhuma alteração em contas, dados ou autenticação."
     }
   ],
-  "release_status": "publication_authorized_qa_partial_deploy_pending",
+  "release_status": "published_authorized_qa_partial",
   "homologation": {
-    "status": "static_review_pending_visual_tests",
-    "notes": "Solicitação de mudança visual na abertura em 10/11/2026. Revisão estática prevista; QA visual Android/PWA e desktop, offline e acessibilidade ainda sem evidência. Publicação autorizada em continuidade ao fluxo de lançamento do GB+."
+    "status": "published_qa_partial_visual_pending",
+    "notes": "Versão 3.0.4 mesclada no PR #126, commit ef68dd35c7d8887e5c8f2e696dd1e3340997d064. GitHub Pages run 42868148759 concluído com sucesso em 2026-11-10 às 17:45:57 UTC. Foram executadas 19 checagens estruturais da proposta; GitHub Actions de regressão registrou failure sem steps executados. Testes visuais em Android/PWA, desktop e offline ainda pendentes, portanto homologação integral não comprovada."
   }
 }
