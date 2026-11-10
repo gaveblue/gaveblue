@@ -1,7 +1,7 @@
 {
   "version": "3.0.2",
   "build": 3002,
-  "published_at": null,
+  "published_at": "2026-11-10T17:15:43Z",
   "title": "Abertura GB+ — Brand Reveal com botão Iniciar",
   "notes": [
     "Adotada na abertura do aplicativo real a animação Brand Reveal da prévia aprovada, com logo GB+ completo, B sem cortes, tema escuro e ambientação de estúdio.",
@@ -225,9 +225,9 @@
       "description": "Continuidade do login e das sessões, sem mudança de dados financeiros."
     }
   ],
-  "release_status": "publication_authorized_qa_partial_deploy_pending",
+  "release_status": "published_authorized_qa_partial",
   "homologation": {
-    "status": "static_review_pending_visual_tests",
-    "notes": "Solicitação expressa de publicação em produção em 10/11/2026. QA estrutural e verificação de scripts previstas; testes E2E Android/PWA, desktop, PWA offline e redução de movimento ainda sem comprovação. A homologação integral não está concluída."
+    "status": "published_qa_partial_visual_pending",
+    "notes": "Versão 3.0.2 mesclada no PR #124, commit f76af02e40aed3ff0a36978949c29e5dc8c3cb99. GitHub Pages run 42862979685 concluído com sucesso em 10/11/2026 às 17:15:43 UTC. Execuções CI de regressão no PR falharam sem steps, sem comprovar falha do código; QA visual Android/PWA, desktop e offline não executado. Publicação expressamente autorizada, homologação integral pendente."
   }
 }
