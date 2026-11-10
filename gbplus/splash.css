@@ -1,4 +1,4 @@
-/* GB+ 3.0.4 — White Orbit Reveal; fundo branco com disco orbital giratório. */
+/* GB+ 3.0.5 — anéis finos minimalistas, em órbitas lentas e independentes. */
 #gb-splash{--duration:5900ms;--blue:#4c82ff;--light:#152034;--muted:#607087;
 position:fixed;inset:0;z-index:20001;width:100%;height:100vh;height:100dvh;
 isolation:isolate;overflow:hidden;background:#fff;color:#152034;
@@ -25,40 +25,24 @@ font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans
     .gbintro-topright { display:flex; align-items:center; gap:10px; color:#606e82; font-size:10px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; }
     .gbintro-blue-dot { width:5px; height:5px; background:#6994ff; border-radius:50%; box-shadow:0 0 12px #6994ff; }
     .gbintro-center { position:relative; width:min(94%,950px); text-align:center; margin-top:-32px; }
-    /* The orbital disk revolves AROUND the GB+ wordmark, not behind the whole section. */
-    .gbintro-orbit,.gbintro-orbit-fore {
-      position:absolute;left:50%;top:50%;width:clamp(355px,56vw,770px);height:clamp(182px,29vw,340px);
-      border-radius:50%;pointer-events:none;transform:translate(-50%,-50%) rotate(-16deg);
-      animation:gbintro-orbitSpin 13s linear infinite;will-change:transform;
+    /* GB+ 3.0.5: dois traços elípticos discretos, como na arte original.
+       Giram lentamente em sentidos opostos; nunca atravessam a frente das letras. */
+    .gbintro-orbit,.gbintro-orbit-secondary {
+      position:absolute;left:50%;top:50%;width:clamp(320px,52vw,540px);height:clamp(180px,26vw,300px);
+      border:1px solid rgba(90,129,198,.27);border-radius:50%;
+      pointer-events:none;z-index:0;transform-origin:center;
+      box-shadow:none;background:none;will-change:transform;
     }
-    .gbintro-orbit {z-index:0; opacity:.98; }
-    .gbintro-orbit::before,.gbintro-orbit-fore::before {
-      content:"";position:absolute;inset:0;border-radius:50%;
-      background:conic-gradient(from 12deg,#101e35 0deg,#4f7dd1 31deg,#c7ddff 49deg,#162440 88deg,#142943 128deg,#91beff 152deg,#233d65 193deg,#162b4a 236deg,#7d9dd6 266deg,#18253c 300deg,#101e35 360deg);
-      -webkit-mask:radial-gradient(ellipse closest-side,transparent 76%,#000 81%,#000 88%,transparent 92%);
-      mask:radial-gradient(ellipse closest-side,transparent 76%,#000 81%,#000 88%,transparent 92%);
+    .gbintro-orbit {
+      animation:gbintro-orbitClockwise 18s linear infinite;
     }
-    .gbintro-orbit::after {
-      content:"";position:absolute;inset:8px;border:1px solid rgba(39,83,145,.26);
-      border-radius:50%;box-shadow:0 0 23px rgba(68,128,231,.09);
+    .gbintro-orbit-secondary {
+      width:clamp(280px,46vw,476px);height:clamp(156px,22vw,260px);
+      border-color:rgba(100,132,181,.18);
+      animation:gbintro-orbitCounter 25s linear infinite;
     }
-    .gbintro-orbit-trace {
-      position:absolute;inset:23px;border:1px solid rgba(33,69,130,.20);
-      border-radius:50%;transform:rotate(-8deg);
-    }
-    .gbintro-orbit-comet {
-      position:absolute;top:50%;right:0;width:11px;height:11px;border-radius:50%;
-      transform:translate(34%,-50%);background:#3888f2;
-      box-shadow:0 0 0 3px rgba(84,151,247,.13),0 0 18px 6px rgba(56,136,242,.40);
-    }
-    .gbintro-orbit-fore {
-      z-index:3;clip-path:inset(50% 0 0);opacity:.76;
-    }
-    .gbintro-orbit-fore::before {
-      background:conic-gradient(from 15deg,#172a49,#4e88e8,#a4c7ff,#162741,#244f95,#172a49);
-    }
-    .gbintro-wordmark .gbintro-letter-wrap {position:relative;z-index:2;}
-    .gbintro-wordmark .gbintro-plus-box {z-index:2;}
+    .gbintro-wordmark .gbintro-letter-wrap,
+    .gbintro-wordmark .gbintro-plus-box {position:relative;z-index:2;}
 
     .gbintro-beam { position:absolute; width:200%; height:1px; top:49%; left:-50%; opacity:0; background:linear-gradient(90deg,transparent 8%,rgba(137,166,237,.02) 20%,rgba(82,116,183,.22) 50%,rgba(137,166,237,.02) 80%,transparent 92%); transform:scaleX(.3); animation:gbintro-beam 1.5s .9s both; }
     .gbintro-eyebrow { display:flex; align-items:center; justify-content:center; gap:13px; color:#64738a; font-weight:650; font-size:10px; letter-spacing:.31em; text-transform:uppercase; opacity:0; transform:translateY(11px); animation:gbintro-rise .8s .55s both; margin-bottom:clamp(14px,3vw,26px); }
@@ -95,12 +79,13 @@ font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans
     @keyframes gbintro-corners { from{opacity:0;transform:scale(.8)} to{opacity:1;transform:scale(1)} }
     @keyframes gbintro-fadeIn { from{opacity:0} to{opacity:1} }
     @keyframes gbintro-rise { to{opacity:1;transform:translateY(0)} }
-    @keyframes gbintro-orbitEnter { from{opacity:0;transform:translate(-50%,-54%) rotate(-47deg) scale(.9)} to{opacity:1;transform:translate(-50%,-54%) rotate(-18deg) scale(1)} }
-    @keyframes gbintro-orbitFloat { 0% { transform:translate(-50%,-54%) rotate(-18deg) scale(1); } 50% { transform:translate(-50%,-52.5%) rotate(-13deg) scale(1.025); } 100% { transform:translate(-50%,-55%) rotate(-22deg) scale(.995); } }
-    @keyframes gbintro-orbitPulse { 0%,100% { inset:25px;opacity:.55; } 50% { inset:18px;opacity:1; } }
-    @keyframes gbintro-orbitSpin {
-      from {transform:translate(-50%,-50%) rotate(-16deg);}
-      to {transform:translate(-50%,-50%) rotate(344deg);}
+    @keyframes gbintro-orbitClockwise {
+      from {transform:translate(-50%,-50%) rotate(-19deg);}
+      to {transform:translate(-50%,-50%) rotate(341deg);}
+    }
+    @keyframes gbintro-orbitCounter {
+      from {transform:translate(-50%,-50%) rotate(17deg);}
+      to {transform:translate(-50%,-50%) rotate(-343deg);}
     }
     @keyframes gbintro-beam { 0%{opacity:0;transform:scaleX(.12)} 30%{opacity:.8} 100%{opacity:.48;transform:scaleX(1)} }
     @keyframes gbintro-letterOn { 0%{transform:translateY(115%) skewY(9deg);filter:blur(10px);opacity:.4} 100%{transform:translateY(0) skewY(0);filter:blur(0);opacity:1} }
@@ -117,7 +102,8 @@ font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans
       .gbintro-corner.gbintro-tr,.gbintro-corner.gbintro-br { right:17px; }
       .gbintro-center { margin-top:-55px; }
       .gbintro-wordmark { gap:2px;height:160px; }
-      .gbintro-orbit,.gbintro-orbit-fore {width:min(98vw,470px);height:clamp(165px,52vw,230px);}
+      .gbintro-orbit {width:min(90vw,390px);height:clamp(174px,52vw,230px);}
+      .gbintro-orbit-secondary {width:min(79vw,340px);height:clamp(150px,44vw,195px);}
       .gbintro-wordmark .gbintro-letter { font-size:clamp(115px,28vw,180px); }
       .gbintro-plus-box { width:clamp(52px,13vw,78px);height:clamp(52px,13vw,78px); margin-top:10px; margin-left:-6px; }
       .gbintro-topright { font-size:9px;letter-spacing:.08em; }
@@ -129,6 +115,6 @@ font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans
     @media (max-width:360px) { .gbintro-loading-label { font-size:9px;letter-spacing:.02em;gap:8px; } .gbintro-loading-label .gbintro-count { margin-left:8px; } }
     @media (max-height:620px) and (min-width:701px) { .gbintro-bottom { bottom:42px; } .gbintro-demo-tools,.gbintro-demo-mark { bottom:35px; } .gbintro-center { transform:scale(.8); } }
     @media (prefers-reduced-motion:reduce) {
-      #gb-splash .gbintro-orbit,#gb-splash .gbintro-orbit-fore {animation:none!important;transform:translate(-50%,-50%) rotate(-16deg)!important;opacity:1!important;}
+      #gb-splash .gbintro-orbit,#gb-splash .gbintro-orbit-secondary {animation:none!important;transform:translate(-50%,-50%) rotate(-19deg)!important;}
  #gb-splash *,#gb-splash *::before,#gb-splash *::after { animation-duration:.001ms !important; animation-delay:0ms !important; transition-duration:.001ms !important; } .gbintro-transition-cover { display:none; } .gbintro-wordmark .gbintro-letter { transform:none;opacity:1;filter:none; } .gbintro-plus-box { transform:none;opacity:1;filter:none; } .gbintro-fill { width:100%; } }
   
