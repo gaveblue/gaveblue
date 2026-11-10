@@ -1,4 +1,6 @@
-import {readFinancialReport} from './financial-report-readers.js?v=20261110-307';
+import {readFinancialReport,xlsxRows,csvRows} from './financial-report-readers.js?v=20261110-308';
+import {parseErpPartners,parseErpMovements,partnerDecisions,movementDecisions,applyErpPartners,applyErpMovements} from './sankhya-import-core.js?v=20261110-308';
+import {erpImportMarkup} from './sankhya-import-ui.js?v=20261110-308';
 import {REPORT_KINDS,reportDuplicates,editReportRecord,applyFinancialReport} from './financial-report-core.js?v=20261110-307';
 import {reportImportMarkup} from './financial-report-ui.js?v=20261110-307';
 import {parseBankStatement,parseBankCsv,inspectBankCsv,proposeReconciliation,readBankFileText} from './bank-import-preview.js?v=20261106-2509';
@@ -8,7 +10,7 @@ import {filterFlowRows} from './gb-flow-filters.js?v=20261106-68';
 import {uid,today,money,dateLabel,cents,addMonths,validDate,generateTitles,addPayment,transfer,updateTitle,pending,accountBalance,flow,within} from './domain.js?v=20261105-72';
 import {KEY,INDICATORS,defaultPanel,parseBackup,backupText,MOBILE_SHORTCUTS,defaultMobileNav,effectiveMobileNav,validMobileNav,shouldOfferSetup} from './store.js?v=20261108-2866';
 import {esc,icon,button,field,select,formFooter,download,csv,titleTable} from './ui.js?v=20261105-72';
-import {routes,dashboard,titlesView,partnersView,categoriesView,flowView,reportsView,settingsView,notificationsView,filteredTitles,reportData} from './views.js?v=20261110-307';
+import {routes,dashboard,titlesView,partnersView,categoriesView,flowView,reportsView,settingsView,notificationsView,filteredTitles,reportData} from './views.js?v=20261110-308';
 import {moreView} from './more-view.js?v=20261108-2863';
 import {accountsCardsView} from './accounts-cards-view.js?v=20261109-3000';
 import {renderReactCharts,unmountReactCharts} from './gb-react-loader.js?v=20261105-45';
@@ -56,6 +58,7 @@ function firstStepsDismissed(){
 let profileCpfStatus={userId:null,cpf:'',ready:false,loading:false,error:''};
 let bankImportDraft=null; // Memory-only preview; released on modal close.
 let reportImportDraft=null; // Importações de relatórios: memória local, sem gravar arquivos.
+let erpImportDraft=null; // Novos leitores Sankhya: revisão em memória até confirmação.
 
 // Install once; offline image failures degrade to the existing neutral monogram.
 installServiceIconRecovery(document);
@@ -90,7 +93,7 @@ function openModal(title,content){
    'card-purchase-form','card-invoice-balance-form','category-form','partner-form'];
  modal.classList.toggle('gb30-finance-modal',!isEntry&&compactForms.some(id=>content.includes('id="'+id+'"')));
  modal.classList.toggle('gb-bank-import-modal',content.includes('id="gb-import-workspace"'));
- modal.classList.toggle('gb-fin-report-modal',content.includes('id="gb-report-workspace"'));
+ modal.classList.toggle('gb-fin-report-modal',content.includes('id="gb-report-workspace"')||content.includes('id="gb-erp-import-workspace"'));
  if(isEntry)modal.dataset.gbSnap='partial';
  else{delete modal.dataset.gbSnap;delete modal.dataset.gbEntryStep;}
  const grab=isEntry?'<button type="button" class="gb-entry-sheet-grab" data-entry-sheet-grab aria-label="Expandir formulário" aria-expanded="false"><span aria-hidden="true"></span></button>':'';
@@ -153,7 +156,7 @@ function serializeEntryFormForReview(form){
   throw Error('Não foi possível preparar a navegação da revisão. Reabra o lançamento.');
  return clone.outerHTML;
 }
-function closeModal(){if(modal.open)modal.close();bankImportDraft=null;reportImportDraft=null;pendingGeneration=null;confirmAction=null;if(pwaReady)setTimeout(()=>maybeOfferPwaInstall(),1100);}
+function closeModal(){if(modal.open)modal.close();bankImportDraft=null;reportImportDraft=null;erpImportDraft=null;pendingGeneration=null;confirmAction=null;if(pwaReady)setTimeout(()=>maybeOfferPwaInstall(),1100);}
 function confirm(title,message,callback){confirmAction=callback;openModal(title,`<p class="confirm-message">${esc(message)}</p><div class="form-error" role="alert"></div><div class="form-footer">${button('Cancelar','close')}${button('Confirmar','confirm','primary')}</div>`);}
 // 2.5.0: preview only, never invokes commit(), Supabase or AI.
 function redrawBankImport(){
@@ -239,6 +242,70 @@ async function financialReportChanged(el){
  if(el.id==='gb-fin-create-partners'){draft.createPartners=el.checked;resetConfirm();redrawFinancialReport();return;}
  if(el.id==='gb-fin-ocr-review'){draft.ocrReviewed=el.checked;resetConfirm();redrawFinancialReport();return;}
  if(el.id==='gb-fin-confirm'){draft.confirmed=el.checked;redrawFinancialReport();return;}
+}
+// Dados Sankhya: tratamento exclusivamente local até seleção e confirmação.
+function makeErpDraft(kind){
+ return {kind,parsed:null,fileName:'',loading:'',error:'',selected:[],page:0,
+  categories:{income:'',expense:''},accounts:{},confirmed:false};
+}
+function redrawErpImport(){
+ if(!erpImportDraft||!modal.open)return;
+ const top=modal.querySelector('.modal-body')?.scrollTop||0;
+ const tableScroll=modal.querySelector('.gb-erp-table-wrap')?.scrollTop||0;
+ openModal('Importar dados Sankhya',erpImportMarkup(db,erpImportDraft,today()));
+ if(modal.querySelector('.modal-body'))modal.querySelector('.modal-body').scrollTop=top;
+ if(modal.querySelector('.gb-erp-table-wrap'))modal.querySelector('.gb-erp-table-wrap').scrollTop=tableScroll;
+}
+function openErpImport(kind='partners'){
+ if(!matchMedia('(min-width:761px)').matches){toast('Importação de planilhas Sankhya disponível no PC.');return;}
+ if(!['partners','movements'].includes(kind))throw Error('Tipo de planilha desconhecido.');
+ erpImportDraft=makeErpDraft(kind);
+ openModal('Importar dados Sankhya',erpImportMarkup(db,erpImportDraft,today()));
+}
+function erpFileDecode(buffer){
+ let text=new TextDecoder('utf-8').decode(buffer);
+ if((text.match(/\uFFFD/g)||[]).length>2)text=new TextDecoder('windows-1252').decode(buffer);
+ return text;
+}
+async function erpChange(el){
+ const d=erpImportDraft;
+ if(!d||!modal.open)return;
+ const reset=()=>{d.error='';d.confirmed=false;};
+ if(el.id==='gb-erp-file'){
+  const file=el.files?.[0];if(!file)return;
+  if(!/\.(xlsx|csv|txt)$/i.test(file.name)||file.size<1||file.size>12_000_000)
+   throw Error('Selecione XLSX ou CSV com até 12 MB.');
+  d.parsed=null;d.fileName=file.name;d.loading='Lendo planilha Sankhya...';d.selected=[];reset();redrawErpImport();
+  try{
+   const buffer=await file.arrayBuffer();
+   const rows=/\.xlsx$/i.test(file.name)?await xlsxRows(buffer):csvRows(erpFileDecode(buffer));
+   const result=d.kind==='partners'?parseErpPartners(rows):parseErpMovements(rows);
+   if(erpImportDraft!==d||!modal.open)return;
+   d.parsed=result;d.loading='';
+   // Not one title/partner is preselected, including existing ones, to prevent silent changes.
+   d.selected=[];d.error='';d.page=0;
+  }catch(error){
+   if(erpImportDraft!==d||!modal.open)return;
+   d.loading='';d.parsed=null;d.error=error?.message||'Não foi possível interpretar a planilha.';
+  }
+  redrawErpImport();return;
+ }
+ if(!d.parsed)return;
+ if(el.matches('[data-erp-pick]')){
+  const i=Number(el.dataset.erpPick),r=d.parsed.rows[i];
+  if(!Number.isSafeInteger(i)||!r)return;
+  const assessed=d.kind==='partners'?partnerDecisions(db,d.parsed.rows):movementDecisions(db,d.parsed.rows,today());
+  if(['conflict','blocked','unchanged'].includes(assessed[i]?.decision))return;
+  const ids=new Set(d.selected);if(el.checked)ids.add(i);else ids.delete(i);
+  d.selected=[...ids].sort((a,b)=>a-b);reset();redrawErpImport();return;
+ }
+ if(el.matches('[data-erp-category]')){
+  d.categories[el.dataset.erpCategory]=el.value;reset();redrawErpImport();return;
+ }
+ if(el.matches('[data-erp-account]')){
+  d.accounts[el.dataset.erpAccount]=el.value;reset();redrawErpImport();return;
+ }
+ if(el.id==='gb-erp-confirm'){d.confirmed=Boolean(el.checked);redrawErpImport();return;}
 }
 // Guided onboarding is opt-in. No financial records are created before final confirmation.
 let setupDraft=null;
@@ -786,6 +853,49 @@ function refreshEntrySchedule(form){
  }catch(error){target.textContent=error.message||'Revise os vencimentos.';}
 }
 const actions={
+  'erp-import-open':el=>openErpImport(el.dataset.kind||'partners'),
+  'erp-import-kind':el=>openErpImport(el.dataset.kind||'partners'),
+  'erp-import-reset':()=>{if(!erpImportDraft)return;erpImportDraft=makeErpDraft(erpImportDraft.kind);redrawErpImport();},
+  'erp-import-select-new':()=>{
+   const d=erpImportDraft;if(!d?.parsed)return;
+   const assessed=d.kind==='partners'?partnerDecisions(db,d.parsed.rows):movementDecisions(db,d.parsed.rows,today());
+   d.selected=assessed.map((r,i)=>r.decision==='create'?i:-1).filter(i=>i>=0);
+   d.confirmed=false;d.error='';redrawErpImport();
+  },
+  'erp-import-select-updates':()=>{
+   const d=erpImportDraft;if(d?.kind!=='partners'||!d.parsed)return;
+   const assessed=partnerDecisions(db,d.parsed.rows),ids=new Set(d.selected);
+   assessed.forEach((r,i)=>{if(['update','match'].includes(r.decision))ids.add(i);});
+   d.selected=[...ids].sort((a,b)=>a-b);d.confirmed=false;redrawErpImport();
+  },
+  'erp-import-select-settlements':()=>{
+   const d=erpImportDraft;if(d?.kind!=='movements'||!d.parsed)return;
+   const assessed=movementDecisions(db,d.parsed.rows,today()),ids=new Set(d.selected);
+   assessed.forEach((r,i)=>{if(r.decision==='settle'||r.decision==='create'&&r.paidDate&&!r.future)ids.add(i);});
+   d.selected=[...ids].sort((a,b)=>a-b);d.confirmed=false;redrawErpImport();
+  },
+  'erp-import-clear':()=>{if(!erpImportDraft)return;erpImportDraft.selected=[];erpImportDraft.confirmed=false;redrawErpImport();},
+  'erp-import-prev':()=>{if(!erpImportDraft)return;erpImportDraft.page=Math.max(0,erpImportDraft.page-1);redrawErpImport();},
+  'erp-import-next':()=>{const d=erpImportDraft;if(!d?.parsed)return;d.page=Math.min(Math.ceil(d.parsed.rows.length/70)-1,d.page+1);redrawErpImport();},
+  'erp-import-commit':async()=>{
+   const d=erpImportDraft;
+   if(!d?.parsed||!d.confirmed||d.loading)throw Error('Confira a seleção e confirme antes de importar.');
+   const selection=[...new Set(d.selected)].sort((a,b)=>a-b);
+   if(!selection.length||selection.length>5000)throw Error('Selecione até 5.000 registros.');
+   const items=selection.map(i=>d.parsed.rows[i]);
+   if(items.some(x=>!x))throw Error('Índice da seleção inválido.');
+   const result=d.kind==='partners'?
+    partnerDecisions(db,items):movementDecisions(db,items,today());
+   if(result.some(x=>['conflict','blocked','unchanged'].includes(x.decision)))
+    throw Error('Há conflitos ou títulos já importados na seleção. Revise antes de gravar.');
+   const opts={confirmed:true,categories:{...d.categories},accounts:{...d.accounts}};
+   let applied;
+   await commit(next=>{
+    applied=d.kind==='partners'?applyErpPartners(next,items,uid,{confirmed:true}):
+      applyErpMovements(next,items,opts,uid,today());
+   },'Importação Sankhya concluída: '+selection.length+' registro(s) confirmado(s).');
+   erpImportDraft=null;
+  },
   'financial-import-open':el=>openFinancialImport(el.dataset.kind||'receivable'),
   'financial-import-kind':el=>openFinancialImport(el.dataset.kind||'receivable'),
   'financial-import-reset':()=>{if(!reportImportDraft)return;const kind=reportImportDraft.kind;reportImportDraft=newFinancialDraft(kind);redrawFinancialReport();},
@@ -1476,6 +1586,10 @@ document.addEventListener('click',e=>{if(!e.target.closest('.gb-entry-select'))c
 // User-selected file bytes stay local and are discarded with the modal.
 document.addEventListener('change',async e=>{
  const el=e.target;
+ if(erpImportDraft&&modal.open&&el?.closest?.('#gb-erp-import-workspace')){
+  try{await erpChange(el);}catch(error){erpImportDraft.error=error?.message||'Confira o arquivo.';redrawErpImport();}
+  return;
+ }
  if(reportImportDraft&&modal.open&&el?.closest?.('#gb-report-workspace')){
   try{await financialReportChanged(el);}catch(error){reportImportDraft.error=error?.message||'Confira o arquivo.';redrawFinancialReport();}
   return;
@@ -1909,8 +2023,8 @@ window.addEventListener('hashchange',route);
 matchMedia('(max-width: 760px)').addEventListener('change',()=>{if(db&&state.route==='dashboard')applyPanel();});
 window.addEventListener('gbplus-installed',()=>{if(db&&state.route==='settings')render();});
 window.addEventListener('storage',e=>{if(e.key===KEY&&!currentUser())toast('Dados alterados em outra aba. Atualize a página antes de continuar.');});
-modal.addEventListener('cancel',()=>{bankImportDraft=null;reportImportDraft=null;pendingGeneration=null;confirmAction=null;});
-modal.addEventListener('close',()=>{if(!modal.open){bankImportDraft=null;reportImportDraft=null;}modal.classList.remove('gb-bank-import-modal');modal.classList.remove('gb-fin-report-modal');});
+modal.addEventListener('cancel',()=>{bankImportDraft=null;reportImportDraft=null;erpImportDraft=null;pendingGeneration=null;confirmAction=null;});
+modal.addEventListener('close',()=>{if(!modal.open){bankImportDraft=null;reportImportDraft=null;erpImportDraft=null;}modal.classList.remove('gb-bank-import-modal');modal.classList.remove('gb-fin-report-modal');});
 
 function clearAccount(){
   db=null;repository?.dispose?.();closeModal();profileCpfStatus={userId:null,cpf:'',ready:false,loading:false,error:''};
