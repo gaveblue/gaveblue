@@ -1,0 +1,25 @@
+name: GB+ 3.0.1 - verificacao logo reveal
+on:
+  push:
+    branches:
+      - feat/gbplus-301-splash-reveal
+  pull_request:
+    paths:
+      - 'gbplus/**'
+      - '.github/workflows/gbplus-301-splash.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  splash:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verificar abertura GB+ 3.0.1
+        run: node gbplus/tests/gbplus-301-splash-regression.mjs
