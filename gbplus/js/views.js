@@ -242,6 +242,12 @@ export function financialReportImportEntry(){
    '<strong>Contas a pagar</strong><small>Fornecedores, notas, vencimentos e títulos pagos.</small></button>'+
   '<button type="button" class="gb-fin-import-type" data-action="financial-import-open" data-kind="received">'+icon('check')+
    '<strong>Contas recebidas</strong><small>Liquidações do Sicoob; baixas administrativas excluídas.</small></button>'+
+  '</div><h4 class="gb-erp-secondary-heading">IMPORTAÇÃO SANKHYA · PLANILHAS</h4>'+
+  '<div class="gb-fin-import-types">'+
+  '<button type="button" class="gb-fin-import-type" data-action="erp-import-open" data-kind="partners">'+icon('people')+
+   '<strong>Cadastro de parceiros</strong><small>Vincula códigos do ERP a clientes e fornecedores. Importe primeiro.</small></button>'+
+  '<button type="button" class="gb-fin-import-type" data-action="erp-import-open" data-kind="movements">'+icon('transfer')+
+   '<strong>Movimentação financeira</strong><small>Receitas, despesas, parcelas e baixas por Nro Único, inclusive reimportações diárias.</small></button>'+
   '</div></section>';
 }
 export function reportsView(db,state){const data=reportData(db,state);return `${heading('Relatórios','Informação organizada para decidir com confiança.',button(icon('download')+'Exportar CSV','export-report','primary'))}<section class="panel"><div class="filters">${select('Relatório','report',reportTypes,state.report,'id="report-type"')}${periodBar(state)}${state.report==='partner'?select('Parceiro','reportPartner',[['','Todos'],...db.partners.map(p=>[p.id,p.name])],state.reportPartner,'id="report-partner"'):''}</div><div class="table-wrap"><table><thead><tr>${data[0].map(v=>`<th>${esc(v)}</th>`).join('')}</tr></thead><tbody>${data.slice(1).map(row=>`<tr>${row.map(v=>`<td>${esc(v)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>${state.report==='card-purchases'?'<p class="form-hint" style="padding:12px 18px">Compras na data original, sem duplicidade: o caixa só é reduzido quando a fatura é paga.</p>':''}${data.length===1?empty('Nenhum registro neste período','Ajuste o período ou adicione lançamentos.'):''}</section>${financialReportImportEntry()}`;}
