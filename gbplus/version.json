@@ -1,14 +1,14 @@
 {
-  "version": "3.0.4",
-  "build": 3004,
-  "published_at": "2026-11-10T17:45:57Z",
-  "title": "Abertura branca com órbita gravitacional ao redor do GB+",
+  "version": "3.0.5",
+  "build": 3005,
+  "published_at": null,
+  "title": "Abertura minimalista com anéis discretos em movimento",
   "notes": [
-    "Fundo da abertura branco, com letras GB em grafite escuro e símbolo + azul preservado.",
-    "O anel elíptico foi transformado em disco orbital que gira 360° continuamente ao redor do logotipo GB+, com efeitos de profundidade, trilho secundário, ponto luminoso e arco em primeiro plano.",
-    "O novo disco permanece ancorado ao logotipo e foi ajustado para telas estreitas e computadores; reduz movimento quando solicitado pelo sistema.",
-    "Conservados botão Iniciar, o texto de carregamento com espaçamento corrigido, as rotas de autenticação e a navegação real no GB+.",
-    "Mudança exclusivamente visual, sem modificação de saldos, lançamentos, contas, cartões, Supabase ou armazenamento. Testes visuais Android/PWA e desktop ainda pendentes."
+    "Corrigido o excesso visual da 3.0.4: removidos disco de acreção, gradientes fortes, ponto luminoso, arco em primeiro plano e sombras do anel.",
+    "Restaurados dois anéis elípticos de linhas muito finas e transparências suaves, iguais ao conceito visual anterior, sobre fundo branco.",
+    "Anéis giram lentamente em sentidos opostos ao redor do GB+, um em 18 segundos e outro em 25 segundos, mantendo a marca em destaque.",
+    "Responsividade e redução de movimento preservadas. Botão Iniciar, login e financeiro mantidos sem modificações.",
+    "Publicação solicitada pelo responsável após feedback visual. Homologação visual Android/PWA e desktop ainda depende de testes."
   ],
   "assets": [
     "./splash.css",
@@ -211,23 +211,18 @@
   "highlights": [
     {
       "icon": "sparkles",
-      "title": "Abertura branca",
-      "description": "Um cenário claro, elegante e minimalista para receber o GB+."
+      "title": "Abertura minimalista",
+      "description": "Dois anéis finos e discretos, sem efeitos chamativos."
     },
     {
       "icon": "repeat",
-      "title": "Anel gravitacional",
-      "description": "Órbita giratória com luz e profundidade em volta da marca."
-    },
-    {
-      "icon": "shield",
-      "title": "Financeiro preservado",
-      "description": "Nenhuma alteração em contas, dados ou autenticação."
+      "title": "Movimento suave",
+      "description": "As órbitas giram lentamente em sentidos opostos."
     }
   ],
-  "release_status": "published_authorized_qa_partial",
+  "release_status": "publication_authorized_qa_partial_deploy_pending",
   "homologation": {
-    "status": "published_qa_partial_visual_pending",
-    "notes": "Versão 3.0.4 mesclada no PR #126, commit ef68dd35c7d8887e5c8f2e696dd1e3340997d064. GitHub Pages run 42868148759 concluído com sucesso em 2026-11-10 às 17:45:57 UTC. Foram executadas 19 checagens estruturais da proposta; GitHub Actions de regressão registrou failure sem steps executados. Testes visuais em Android/PWA, desktop e offline ainda pendentes, portanto homologação integral não comprovada."
+    "status": "static_review_pending_visual_tests",
+    "notes": "Correção visual da 3.0.4 solicitada em 10/11/2026. Verificações estruturais devem ser feitas; testes visuais Android/PWA, desktop, acessibilidade e offline ainda pendentes. Publicação autorizada, sem declaração de homologação integral."
   }
 }
