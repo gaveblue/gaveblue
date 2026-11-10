@@ -120,13 +120,17 @@ function verifySicoobFooter(pages,result){
  };
  const actualCount=result.records.length;
  const bankCount=Number(declared(/total de registros liquidados/).replace(/[^\d]/g,'')||0);
+ const bankBajas=Number(declared(/total de registros baixados/).replace(/[^\d]/g,'')||0);
  const declaredAmount=declared(/total de valores liquidados/);
- let amount=0;try{if(declaredAmount)amount=brlCents(declaredAmount);}catch{}
- if((bankCount&&bankCount!==actualCount)||(amount&&amount!==result.bankTotals.liquidated)){
+ const declaredBajasAmount=declared(/total de valores baixados/);
+ let amount=0,baixas=0;try{if(declaredAmount)amount=brlCents(declaredAmount);if(declaredBajasAmount)baixas=brlCents(declaredBajasAmount);}catch{}
+ const baixados=result.excluded.filter(e=>e.reason.includes('82 —')).length;
+ if(!bankCount||!amount||!bankBajas||!baixas||bankCount!==actualCount||amount!==result.bankTotals.liquidated||bankBajas!==baixados||baixas!==result.bankTotals.administrative){
   result.verificationFailed=true;
-  result.warnings.push('Conferência bancária divergente: o PDF declara '+(bankCount||'?')+
-   ' liquidações ('+declaredAmount+') e o leitor identificou '+actualCount+
-   ' ('+(result.bankTotals.liquidated/100).toFixed(2)+'). Nenhum título poderá ser importado até corrigir o relatório.');
+  result.warnings.push('Não foi possível conciliar automaticamente todos os totais do PDF com os itens reconhecidos: '+
+   (bankCount||'?')+' liquidações declaradas ('+(declaredAmount||'valor ausente')+'), '+actualCount+' identificadas; '+
+   (bankBajas||'?')+' baixas administrativas declaradas ('+(declaredBajasAmount||'valor ausente')+'), '+baixados+' identificadas. '+
+   'A importação fica bloqueada até exportar um relatório íntegro em Excel/CSV.');
  }
  return result;
 }
