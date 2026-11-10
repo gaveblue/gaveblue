@@ -201,15 +201,16 @@ export function parseErpMovements(rows,partnerItems=[]){
 export function movementDecisions(db,items,now){
  const byKey=new Map((db.titles||[]).filter(t=>t.importKey?.startsWith(ERP_SOURCE+':')).map(t=>[t.importKey,t]));
  const partnerByCode=new Map((db.partners||[]).filter(p=>p.sankhyaCode).map(p=>[partnerKey(p.sankhyaCode),p]));
- const sameDoc=(r)=>(db.titles||[]).filter(t=>!t.importKey&&t.type===r.kind&&t.due===r.due&&
-   String(t.document||'')===String(r.invoice||r.unique)&&t.amount===r.principal);
+ const manualKeys=new Set((db.titles||[]).filter(t=>!t.importKey).map(t=>
+  [t.type,t.due,String(t.document||''),t.amount].join('|')));
+ const sameDoc=(r)=>manualKeys.has([r.kind,r.due,String(r.invoice||r.unique),r.principal].join('|'));
  return items.map(r=>{
   if(r.groupConflict)return {...r,decision:'blocked',reason:'Agrupamento de parcelas acima do limite de 120'};
   const partner=partnerByCode.get(r.partnerCode);
   if(!partner)return {...r,decision:'blocked',reason:'Código de parceiro '+r.partnerCode+' não cadastrado. Importe Parceiros.xlsx antes.'};
   const present=byKey.get(r.key),future=!!r.paidDate&&r.paidDate>now;
   if(!present){
-   if(sameDoc(r).length)return {...r,decision:'blocked',reason:'Possível título manual existente: verifique antes de importar'};
+   if(sameDoc(r))return {...r,decision:'blocked',reason:'Possível título manual existente: verifique antes de importar'};
    return {...r,partnerId:partner.id,decision:'create',future};
   }
   const meta=present.sankhyaMovement||{};
