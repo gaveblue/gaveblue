@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
-  <meta name="theme-color" content="#111214"><meta name="color-scheme" content="light dark"><meta name="gbplus-version" content="3.0.0"><meta name="gbplus-build" content="3000"><meta name="description" content="GB+ — gestão financeira local ou online, sob seu controle.">
+  <meta name="theme-color" content="#111214"><meta name="color-scheme" content="light dark"><meta name="gbplus-version" content="3.0.1"><meta name="gbplus-build" content="3001"><meta name="description" content="GB+ — gestão financeira local ou online, sob seu controle.">
   <meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <style>
   /* Full-bleed access screen, applied before the main app stylesheet is painted. */
@@ -51,6 +51,7 @@
   })();
   </script>
   <title>GB+ · Gestão Financeira</title>
+  <link rel="stylesheet" href="./splash.css?v=20261110-3001">
   <link rel="stylesheet" href="./legal-consent.css?v=20261108-2866">
   <link rel="manifest" href="./manifest.webmanifest"><link rel="icon" href="./icons/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="./icons/icon-192.png">
   <link rel="stylesheet" href="./styles.css?v=20261108-2890"><link rel="stylesheet" href="./charts-integration.css?v=20261106-68"><link rel="stylesheet" href="./bank-import.css?v=20261106-2600">
@@ -86,9 +87,12 @@ body.auth-locked .gb-ai-widget{display:none}
 :root[data-theme="dark"] .gb-ai-widget[open]>summary::after{background:#292a30;color:#f1f1f5}
 </style></head>
 <body class="auth-locked">
+  <!-- Always releases itself, even if app bootstrap/authentication does not progress. -->
+  <div id="gb-splash" aria-hidden="true"><div class="gb-reveal-logo"><span class="gb-reveal-g">G</span><span class="gb-reveal-b">B</span><span class="gb-reveal-plus"></span></div></div>
+  <script>window.setTimeout(()=>document.getElementById("gb-splash")?.remove(),2400);</script>
   <main id="auth-gate" aria-label="Acesso ao GB+"><section class="auth-page"><div class="auth-card"><header class="auth-brand"><div class="auth-wordmark">GB<span>+</span></div><p>Gestão Financeira</p></header><p class="auth-description" role="status">Preparando seu acesso…</p><noscript>Ative o JavaScript para entrar no GB+.</noscript></div></section></main>
   <a class="skip" href="#main">Pular para o conteúdo</a>
-  <aside class="sidebar" id="sidebar"><a class="brand" href="#dashboard" aria-label="GB+ início"><strong>GB<span>+</span></strong><span>Gestão Financeira</span></a><div class="nav-label">SEU FINANCEIRO</div><nav id="navigation" aria-label="Navegação principal"></nav><div class="sidebar-bottom"><div class="local-mark"><span class="status-dot"></span> Armazenamento local<small>Seus dados, neste navegador.</small></div><button class="theme-button" data-action="theme"></button><div class="version">GB+ <span>Versão 2.8.6</span></div></div></aside>
+  <aside class="sidebar" id="sidebar"><a class="brand" href="#dashboard" aria-label="GB+ início"><strong>GB<span>+</span></strong><span>Gestão Financeira</span></a><div class="nav-label">SEU FINANCEIRO</div><nav id="navigation" aria-label="Navegação principal"></nav><div class="sidebar-bottom"><div class="local-mark"><span class="status-dot"></span> Armazenamento local<small>Seus dados, neste navegador.</small></div><button class="theme-button" data-action="theme"></button><div class="version">GB+ <span>Versão 3.0.1</span></div></div></aside>
   <div class="workspace"><header class="topbar"><div class="topbar-start"><button type="button" id="sidebar-toggle" class="icon-button sidebar-toggle" data-action="toggle-sidebar" aria-controls="sidebar" aria-expanded="true" aria-label="Ocultar menu lateral" title="Ocultar menu lateral"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><span class="breadcrumb">Workspace <span>/</span> <b id="breadcrumb">Visão geral</b></span></div><a class="mobile-brand" href="#dashboard">GB+</a><div class="top-actions"><span id="connection" class="connection" hidden aria-hidden="true">Disponível offline</span><button class="icon-button" data-action="search" aria-label="Pesquisar lançamentos"></button><button class="icon-button" data-action="notifications" aria-label="Ver títulos vencidos"></button><button type="button" id="gb-theme-toggle" class="gb-theme-toggle" data-action="top-theme" data-theme="light" role="switch" aria-checked="false" aria-label="Ativar modo escuro" title="Alternar entre tema claro e escuro"><span class="gb-theme-toggle-thumb" aria-hidden="true"></span><span class="gb-theme-toggle-option gb-theme-toggle-sun" aria-hidden="true"></span><span class="gb-theme-toggle-option gb-theme-toggle-moon" aria-hidden="true"></span></button></div></header><main id="main" tabindex="-1"></main><footer class="desktop-footer">Uma visão clara. Decisões melhores.<span>GB+ · Gestão Financeira</span></footer></div>
   <details class="gb-ai-widget"><summary aria-label="Abrir ou fechar assistente financeiro">✦</summary><iframe title="Assistente financeiro GB+ AI" src="./ai-lab/?v=20261105-ai82" loading="lazy"></iframe></details>
   <div class="mobile-nav-fade" aria-hidden="true"></div>
