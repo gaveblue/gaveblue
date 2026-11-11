@@ -1,6 +1,6 @@
 import {readFinancialReport,xlsxRows,csvRows} from './financial-report-readers.js?v=20261110-308';
-import {parseErpPartners,parseErpMovements,partnerDecisions,movementDecisions,applyErpPartners,applyErpMovements} from './sankhya-import-core.js?v=20261110-308';
-import {erpImportMarkup} from './sankhya-import-ui.js?v=20261110-308';
+import {parseErpPartners,parseErpMovements,partnerDecisions,movementDecisions,applyErpPartners,applyErpMovements,erpSelectionIndexes,defaultErpCategories} from './sankhya-import-core.js?v=20261110-309';
+import {erpImportMarkup} from './sankhya-import-ui.js?v=20261110-309';
 import {REPORT_KINDS,reportDuplicates,editReportRecord,applyFinancialReport} from './financial-report-core.js?v=20261110-307';
 import {reportImportMarkup} from './financial-report-ui.js?v=20261110-307';
 import {parseBankStatement,parseBankCsv,inspectBankCsv,proposeReconciliation,readBankFileText} from './bank-import-preview.js?v=20261106-2509';
@@ -9,13 +9,13 @@ import {reviewSelection,applyReconciliationBatch,undoReconciliationBatch,reconci
 import {filterFlowRows} from './gb-flow-filters.js?v=20261106-68';
 import {uid,today,money,dateLabel,cents,addMonths,validDate,generateTitles,addPayment,transfer,updateTitle,pending,accountBalance,flow,within} from './domain.js?v=20261105-72';
 import {KEY,INDICATORS,defaultPanel,parseBackup,backupText,MOBILE_SHORTCUTS,defaultMobileNav,effectiveMobileNav,validMobileNav,shouldOfferSetup} from './store.js?v=20261110-308';
-import {esc,icon,button,field,select,formFooter,download,csv,titleTable} from './ui.js?v=20261105-72';
-import {routes,dashboard,titlesView,partnersView,categoriesView,flowView,reportsView,settingsView,notificationsView,filteredTitles,reportData} from './views.js?v=20261110-308';
+import {esc,icon,button,field,select,formFooter,download,csv,titleTable} from './ui.js?v=20261110-309';
+import {routes,dashboard,titlesView,partnersView,categoriesView,flowView,reportsView,settingsView,notificationsView,filteredTitles,reportData} from './views.js?v=20261110-309';
 import {moreView} from './more-view.js?v=20261108-2863';
 import {accountsCardsView} from './accounts-cards-view.js?v=20261109-3000';
 import {renderReactCharts,unmountReactCharts} from './gb-react-loader.js?v=20261105-45';
 import {mountNativeCharts} from './gb-charts-native.js?v=20261106-68';
-import {titleForm,partnerForm,accountForm,accountBankPreview,categoryForm,paymentForm,transferForm,titleDetail,customizeForm,accountDetail} from './forms.js?v=20261110-308';
+import {titleForm,partnerForm,accountForm,accountBankPreview,categoryForm,paymentForm,transferForm,titleDetail,customizeForm,accountDetail} from './forms.js?v=20261110-309';
 import {ACCOUNT_ICON_OPTIONS,GOAL_PRESETS,accountKind,accountIcon,goalPreset} from './account-goals.js?v=20261109-2900';
 import {serviceById,serviceSearchKey,isServiceExpenseCategory} from './service-catalog.js?v=20261108-2880';
 import {serviceIconMarkup,serviceIdentityMarkup,serviceDisplayName,installServiceIconRecovery} from './service-ui.js?v=20261108-2880';
@@ -39,7 +39,7 @@ import {cashForecast} from './forecast.js?v=20261105-72';
 import {missingCategorySuggestions,appendCategorySuggestions,isSelectableExpenseCategory,isPrimaryServiceCategory} from './category-library.js?v=20261108-2862';
 import {calculateDueAlerts,notificationPrefs,validNotificationPrefs,NOTIFICATION_DAYS} from './notification-rules.js?v=20261108-2821';
 import {banksView,bankForm,cardForm,cardPurchaseForm,cardInvoiceBalanceForm,forecastView,forecastSummary,forecastScenarioForm,forecastResult} from './finance-24-ui.js?v=20261109-3000';
-import {launchesView} from './launches-view.js?v=20261108-2861';
+import {launchesView} from './launches-view.js?v=20261110-309';
 import {installLaunchGestures} from './launches-gestures.js?v=20261104-38';
 import {launchSelection,paymentSelection,paymentSummary,applyLaunchPayments,reversedSelection,applyLaunchReversals,deletionSelection,applyLaunchDeletions} from './launch-actions.js?v=20261105-72';
 import {readPeriodPreference,writePeriodPreference} from './period-preference.js?v=20261107-2730';
@@ -62,7 +62,7 @@ let erpImportDraft=null; // Novos leitores Sankhya: revisão em memória até co
 
 // Install once; offline image failures degrade to the existing neutral monogram.
 installServiceIconRecovery(document);
-const state={route:'dashboard',accountCardsTab:'accounts',period:'all',range:{},query:'',status:'',type:'',partner:'',category:'',partnerQuery:'',granularity:'month',flowChartMode:'bars',flowStatus:'all',report:'payable',reportPartner:'',moreFilters:false,launchSelected:[],launchStatusOpen:false,launchSearchOpen:false};
+const state={route:'dashboard',accountCardsTab:'accounts',period:'all',range:{},query:'',status:'',type:'',partner:'',category:'',partnerQuery:'',partnerPage:0,granularity:'month',flowChartMode:'bars',flowStatus:'all',report:'payable',reportPartner:'',moreFilters:false,launchSelected:[],launchStatusOpen:false,launchSearchOpen:false};
 const modal=document.querySelector('#modal');
 // O controle de tema do cabeçalho é um botão normal. A ação "top-theme"
  // usa o mesmo commit autenticado das preferências; não há iframe, arrasto,
@@ -245,8 +245,8 @@ async function financialReportChanged(el){
 }
 // Dados Sankhya: tratamento exclusivamente local até seleção e confirmação.
 function makeErpDraft(kind){
- return {kind,parsed:null,fileName:'',loading:'',error:'',selected:[],page:0,
-  categories:{income:'',expense:''},accounts:{},confirmed:false};
+ return {kind,parsed:null,fileName:'',loading:'',error:'',selected:[],page:0,viewFilter:'all',
+  categories:defaultErpCategories(db),accounts:{},confirmed:false};
 }
 function redrawErpImport(){
  if(!erpImportDraft||!modal.open)return;
@@ -283,7 +283,7 @@ async function erpChange(el){
    if(erpImportDraft!==d||!modal.open)return;
    d.parsed=result;d.loading='';
    // Not one title/partner is preselected, including existing ones, to prevent silent changes.
-   d.selected=[];d.error='';d.page=0;
+   d.selected=[];d.error='';d.page=0;d.viewFilter='all';
   }catch(error){
    if(erpImportDraft!==d||!modal.open)return;
    d.loading='';d.parsed=null;d.error=error?.message||'Não foi possível interpretar a planilha.';
@@ -304,6 +304,10 @@ async function erpChange(el){
  }
  if(el.matches('[data-erp-account]')){
   d.accounts[el.dataset.erpAccount]=el.value;reset();redrawErpImport();return;
+ }
+ if(el.id==='gb-erp-view-filter'){
+  d.viewFilter=['all','pending','settled','new','blocked','unchanged'].includes(el.value)?el.value:'all';
+  d.page=0;redrawErpImport();return;
  }
  if(el.id==='gb-erp-confirm'){d.confirmed=Boolean(el.checked);redrawErpImport();return;}
 }
@@ -853,14 +857,27 @@ function refreshEntrySchedule(form){
  }catch(error){target.textContent=error.message||'Revise os vencimentos.';}
 }
 const actions={
+  'partner-page-prev':()=>{state.partnerPage=Math.max(0,(state.partnerPage||0)-1);render();},
+  'partner-page-next':()=>{
+   const count=db.partners.filter(p=>`${p.name} ${p.tradeName} ${p.document} ${p.sankhyaCode||''}`
+    .toLocaleLowerCase('pt-BR').includes((state.partnerQuery||'').toLocaleLowerCase('pt-BR'))).length;
+   state.partnerPage=Math.min(Math.max(0,Math.ceil(count/75)-1),(state.partnerPage||0)+1);render();
+  },
   'erp-import-open':el=>openErpImport(el.dataset.kind||'partners'),
   'erp-import-kind':el=>openErpImport(el.dataset.kind||'partners'),
   'erp-import-reset':()=>{if(!erpImportDraft)return;erpImportDraft=makeErpDraft(erpImportDraft.kind);redrawErpImport();},
   'erp-import-select-new':()=>{
    const d=erpImportDraft;if(!d?.parsed)return;
-   const assessed=d.kind==='partners'?partnerDecisions(db,d.parsed.rows):movementDecisions(db,d.parsed.rows,today());
-   d.selected=assessed.map((r,i)=>r.decision==='create'?i:-1).filter(i=>i>=0);
+   d.selected=erpSelectionIndexes(db,d.parsed,today(),'new');
+   if(d.kind==='movements'){d.viewFilter='new';d.page=0;}
    d.confirmed=false;d.error='';redrawErpImport();
+  },
+  'erp-import-select-pending':()=>{
+   const d=erpImportDraft;if(d?.kind!=='movements'||!d.parsed)return;
+   // Replace, not append. Never add settled or existing/unchanged entries.
+   d.selected=erpSelectionIndexes(db,d.parsed,today(),'pending');
+   d.viewFilter='pending';d.page=0;d.confirmed=false;d.error='';
+   redrawErpImport();
   },
   'erp-import-select-updates':()=>{
    const d=erpImportDraft;if(d?.kind!=='partners'||!d.parsed)return;
@@ -870,13 +887,24 @@ const actions={
   },
   'erp-import-select-settlements':()=>{
    const d=erpImportDraft;if(d?.kind!=='movements'||!d.parsed)return;
-   const assessed=movementDecisions(db,d.parsed.rows,today()),ids=new Set(d.selected);
-   assessed.forEach((r,i)=>{if(r.decision==='settle'||r.decision==='create'&&r.paidDate&&!r.future)ids.add(i);});
-   d.selected=[...ids].sort((a,b)=>a-b);d.confirmed=false;redrawErpImport();
+   d.selected=erpSelectionIndexes(db,d.parsed,today(),'settlements');
+   d.viewFilter='settled';d.page=0;d.confirmed=false;d.error='';redrawErpImport();
   },
   'erp-import-clear':()=>{if(!erpImportDraft)return;erpImportDraft.selected=[];erpImportDraft.confirmed=false;redrawErpImport();},
   'erp-import-prev':()=>{if(!erpImportDraft)return;erpImportDraft.page=Math.max(0,erpImportDraft.page-1);redrawErpImport();},
-  'erp-import-next':()=>{const d=erpImportDraft;if(!d?.parsed)return;d.page=Math.min(Math.ceil(d.parsed.rows.length/70)-1,d.page+1);redrawErpImport();},
+  'erp-import-next':()=>{
+   const d=erpImportDraft;if(!d?.parsed)return;
+   const rows=d.parsed.rows;
+   const decisions=d.kind==='movements'?movementDecisions(db,rows,today()):[];
+   const visible=d.kind==='partners'?rows.length:decisions.filter(r=>{
+    switch(d.viewFilter){case 'pending':return !r.paidDate||r.paidDate>today();
+     case 'settled':return !!r.paidDate&&r.paidDate<=today();
+     case 'new':return r.decision==='create';
+     case 'blocked':return r.decision==='blocked';
+     case 'unchanged':return r.decision==='unchanged';default:return true;}
+   }).length;
+   d.page=Math.min(Math.max(0,Math.ceil(visible/70)-1),d.page+1);redrawErpImport();
+  },
   'erp-import-commit':async()=>{
    const d=erpImportDraft;
    if(!d?.parsed||!d.confirmed||d.loading)throw Error('Confira a seleção e confirme antes de importar.');
@@ -2002,7 +2030,7 @@ document.addEventListener('input',e=>{if(e.target.id==='entry-amount')fitEntryAm
   field.value=formatCPF(digits);
   profileCpfFeedback(field.form);
  }
- syncProfileSaveState(e.target.form);return;}if(e.target.id==='settings-search-input'){filterSettings(e.target.value);return;}if(!['title-search','partner-search'].includes(e.target.id))return;const el=e.target;const pos=el.selectionStart;state[el.id==='title-search'?'query':'partnerQuery']=el.value;if(el.id==='title-search')state.launchSelected=[];render();const next=document.getElementById(el.id);next.focus();next.setSelectionRange(pos,pos);});
+ syncProfileSaveState(e.target.form);return;}if(e.target.id==='settings-search-input'){filterSettings(e.target.value);return;}if(!['title-search','partner-search'].includes(e.target.id))return;const el=e.target;const pos=el.selectionStart;state[el.id==='title-search'?'query':'partnerQuery']=el.value;if(el.id==='title-search')state.launchSelected=[];else state.partnerPage=0;render();const next=document.getElementById(el.id);next.focus();next.setSelectionRange(pos,pos);});
 document.addEventListener('keydown',event=>{
  const card=event.target.closest?.('.gb-launch-card');
  if(card&&card===event.target&&(event.key==='Enter'||event.key===' ')){

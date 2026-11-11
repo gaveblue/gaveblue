@@ -2,6 +2,26 @@
 // Não altera o banco sem confirmação explícita; Nro Único é a chave do título.
 import {fold,brlCents,isoDate} from './financial-report-core.js?v=20261110-307';
 export const ERP_SOURCE='sankhya-fin-v1';
+export const IMPORT_LABEL='Via importação';
+export const defaultErpCategories=db=>{
+ const find=(kind,target)=>(db.categories||[]).find(c=>c.type===kind&&fold(c.name)===fold(target))?.id||'';
+ return {income:find('income','Outras receitas'),expense:find('expense','Outras despesas')};
+};
+// Data Baixa futura no arquivo não equivale a dinheiro já movimentado.
+export const erpIsPending=(r,now)=>!r.paidDate||r.paidDate>now;
+export const erpIsSettled=(r,now)=>Boolean(r.paidDate&&r.paidDate<=now);
+export const erpSelectionIndexes=(db,parsed,now,mode='new')=>{
+ const assessed=parsed.kind==='partners'?partnerDecisions(db,parsed.rows):movementDecisions(db,parsed.rows,now);
+ return assessed.flatMap((r,i)=>{
+  const good=parsed.kind==='partners'
+   ?mode==='new'?r.decision==='create':mode==='updates'?['update','match'].includes(r.decision):false
+   :mode==='new'?r.decision==='create'
+   :mode==='pending'?r.decision==='create'&&erpIsPending(r,now)
+   :mode==='settlements'?r.decision==='settle'||r.decision==='create'&&erpIsSettled(r,now)
+   :false;
+  return good?[i]:[];
+ });
+};
 const trim=s=>String(s??'').trim();
 const id=v=>{const s=trim(v);return /^\d+(?:\.0+)?$/.test(s)?s.replace(/\.0+$/,''):s;};
 const positive=v=>{if(v===null||v===undefined||trim(v)==='')return 0;const n=Number(v);return Number.isFinite(n)&&n>=0?Math.round(n*100):NaN;};
@@ -255,7 +275,7 @@ export function applyErpMovements(db,items,options,makeId,now){
   if((r.decision==='settle'||r.decision==='create'&&settled)&&!db.accounts.some(a=>a.id===bank&&a.active))
    throw Error('Associe a conta da baixa '+(r.bankLabel||r.bankCode)+' a uma conta ativa do GB+.');
   if(r.decision==='unchanged'){result.unchanged++;continue;}
-  const meta={source:ERP_SOURCE,unique:r.unique,company:r.company,partnerCode:r.partnerCode,
+  const meta={source:ERP_SOURCE,importedVia:IMPORT_LABEL,unique:r.unique,company:r.company,partnerCode:r.partnerCode,
    invoice:r.invoice,operation:r.operation,origin:r.origin,center:r.center,entry:r.entry,
    negotiation:r.issue,titleType:r.titleType,seller:r.seller,originalCents:r.principal,
    netCents:r.netCents,bankCode:r.bankCode,bankLabel:r.bankLabel,paidAmount:r.paidAmount,
@@ -264,11 +284,11 @@ export function applyErpMovements(db,items,options,makeId,now){
   const amount=fullPaid?r.paidAmount:r.principal;
   if(r.decision==='create'){
    const name=partner.name;
-   const notes=['Origem: Sankhya','Financeiro: '+r.unique,r.invoice?'Nota: '+r.invoice:'',
+   const notes=['Via importação · Sankhya','Financeiro: '+r.unique,r.invoice?'Nota: '+r.invoice:'',
     'Código parceiro: '+r.partnerCode,r.groupKey?'Parcela '+r.sequence+'/'+r.count:'',
     'Valor original: '+(r.principal/100).toFixed(2),r.history].filter(Boolean).join(' · ').slice(0,2000);
    const t={id:makeId(),type:r.kind,description:(name+' · '+(r.history||r.invoice||'Movimentação financeira')).slice(0,300),
-    document:r.invoice||r.unique,notes,amount,issue:r.issue,due:r.due,accountId:fullPaid?bank:'',
+    document:r.invoice||r.unique,notes,amount,importSource:'sankhya',issue:r.issue,due:r.due,accountId:fullPaid?bank:'',
     partnerId:partner.id,categoryId,mode:r.count>1?'installment':'single',count:r.count,sequence:r.sequence,
     groupId:r.groupKey||null,cancelled:false,importKey:r.key,sankhyaMovement:meta};
    db.titles.push(t);addRole(partner,r.kind);result.created++;
@@ -279,7 +299,7 @@ export function applyErpMovements(db,items,options,makeId,now){
    if(!t)throw Error('Título a atualizar não encontrado.');
    // The ERP's Vlr Baixa can include mora or discounts; store original in meta
    // and use the realized amount for balance/payment in this data model.
-   t.amount=amount;t.accountId=bank;t.sankhyaMovement=meta;
+   t.amount=amount;t.accountId=bank;t.sankhyaMovement=meta;t.importSource='sankhya';
    db.payments.push({id:makeId(),titleId:t.id,accountId:bank,date:r.paidDate,amount});
    addRole(partner,r.kind);result.settled++;
   }

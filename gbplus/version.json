@@ -1,17 +1,16 @@
 {
-  "version": "3.0.8",
-  "build": 3008,
-  "published_at": "2026-11-10T21:12:47Z",
-  "title": "Importação Sankhya de Parceiros e Movimentação financeira diária no PC",
+  "version": "3.0.9",
+  "build": 3009,
+  "published_at": null,
+  "title": "Importação de pendentes, parceiros em grade e origem Via importação",
   "notes": [
-    "Nova importação no PC, em Relatórios: Parceiros.xlsx primeiro, depois Movimentacao_Financeira.xlsx, com prévia e confirmação explícita.",
-    "Parceiros: Cód. Parceiro identifica cadastros; preserva razão social, nome fantasia, CPF/CNPJ, situação, contatos, endereço, tipo de pessoa, dados comerciais/fiscais e demais campos de origem em metadados consultáveis.",
-    "Movimentação: identifica Receita/Despesa pela coluna explícita, validada contra o sinal de Valor Líquido. Vincula parceiro por Cód. Parceiro, sem usar nomes/CPF como identificador primário.",
-    "Utiliza Nro Único junto com Empresa como identidade estável; reimportações diárias não criam outro título. Reconhece nova baixa em título existente e sinaliza campos divergentes como conflito.",
-    "Nro Nota repetida não é duplicidade: reconhece parcelamento por empresa, parceiro, nota, negociação, operação e natureza; mantém Nro Único individual por parcela e sincroniza séries entre imports.",
-    "Para baixas requer mapeamento explícito da Conta Baixa Sankhya para conta ativa do GB+. Data Baixa futura não gera entrada ou saída antes de ocorrer. Valor nominal e valor realizado são preservados.",
-    "Fica na prévia até confirmação, com botões de seleção de novos, atualizações e baixas. PDFs/Excel importadores anteriores permanecem sem alterações conceituais.",
-    "Testes sintéticos de atualização diária e validações estruturais implementados. Testes E2E reais de arquivos, performance e persistência/volumes ainda pendentes de evidência."
+    "Em Relatórios → Movimentação financeira Sankhya, foram adicionados Selecionar somente pendentes e filtros Todos/Pendentes de baixa/Baixados/Somente novos/Conflitos/Já importados; seleção de pendentes inclui somente títulos novos ainda sem baixa efetivada.",
+    "Registros com Data Baixa futura continuam pendentes na data da consulta, sem afetar saldo até a baixa confirmada. Seleções novas, pendentes e baixadas são mutuamente substitutivas.",
+    "Parceiros agora aparecem em grade compacta com código Sankhya, nome, CPF/CNPJ, classificação, situação e ações; 75 registros por página, pesquisa por nome, documento ou código e comportamento responsivo.",
+    "Categorias de movimentação usam automaticamente Outras receitas e Outras despesas, existentes nas categorias padrão do GB+. Categoria continua editável pelo usuário para classificação futura.",
+    "Via importação virou marcador de origem independente da categoria, visível na lista de lançamentos, cartões, tabela e detalhes; reconhecimento também para títulos Sankhya importados antes da 3.0.9.",
+    "Importador diário continua identificando por Empresa+Nro Único; notas repetidas com parcelas não são deduplicadas. Novo título é criado uma vez, baixa posterior é aplicada ao existente e alterações conflitantes exigem conferência.",
+    "A atualização é apenas de interface, seleção e metadados das novas importações. Nenhum dado financeiro foi alterado ou importado automaticamente."
   ],
   "assets": [
     "./splash.css",
@@ -219,24 +218,24 @@
   ],
   "highlights": [
     {
-      "icon": "people",
-      "title": "Cadastro por código Sankhya",
-      "description": "Importação e atualização de parceiros sem misturar códigos com CPF/CNPJ repetidos."
+      "icon": "filter",
+      "title": "Somente pendentes",
+      "description": "Filtre e selecione títulos novos sem baixa confirmada em um clique."
     },
     {
-      "icon": "transfer",
-      "title": "Movimentação diária",
-      "description": "Receitas, despesas, parcelas e liquidações identificadas pela estrutura original."
+      "icon": "list",
+      "title": "Parceiros em grade",
+      "description": "Lista compacta com código, nome, documento, situação e paginação."
     },
     {
-      "icon": "shield",
-      "title": "Sem títulos duplicados",
-      "description": "Nro Único controla a identidade e baixas posteriores são conciliadas com o registro existente."
+      "icon": "tag",
+      "title": "Via importação",
+      "description": "Origem visível, independente da categoria Outras receitas/Outras despesas."
     }
   ],
-  "release_status": "published_assisted_qa_partial",
+  "release_status": "candidate_validation_pending",
   "homologation": {
-    "status": "published_qa_partial_desktop_e2e_pending",
-    "notes": "PR #130 mesclado ao main no commit 3645c75f9619333001d0d08abfdaeffb2ab7135c. GitHub Pages run 42902704835 concluído com sucesso em 10/11/2026 às 21:12:47 UTC. 21 verificações estruturais passaram, validação do schema sintético e cenários de reimportação/parcelamento/baixa testados. Actions CI de regressão registraram failure com zero steps, portanto sem evidência de execução em runner. Testes no navegador com os dois arquivos reais, armazenamento e saldos ainda pendentes. Nenhuma importação automática dos arquivos do usuário."
+    "status": "candidate_static_and_synthetic_qa",
+    "notes": "Regressão sintética de seleção por status, categorias padrão e grade paginada passou. Conferência visual e persistência com conta real desktop ainda dependem de testes. Nenhuma gravação automática de dados do usuário."
   }
 }

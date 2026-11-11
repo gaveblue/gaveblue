@@ -1,7 +1,7 @@
 // GB+ 3.0.8 — telas de importação Sankhya (desktop). Nenhuma gravação na prévia.
 import {money,dateLabel} from './domain.js?v=20261105-72';
 import {esc,icon} from './ui.js?v=20261105-72';
-import {partnerDecisions,movementDecisions} from './sankhya-import-core.js?v=20261110-308';
+import {partnerDecisions,movementDecisions,erpIsPending,erpIsSettled} from './sankhya-import-core.js?v=20261110-309';
 const fmt=n=>new Intl.NumberFormat('pt-BR').format(n||0);
 const box=(text,value)=>'<div class="gb-erp-summary"><span>'+esc(text)+'</span><strong>'+esc(value)+'</strong></div>';
 const label=(text,status)=>'<span class="gb-erp-status '+esc(status)+'">'+esc(text)+'</span>';
@@ -43,7 +43,10 @@ export function erpImportMarkup(db,draft,now){
   html+='<div class="gb-erp-summary-grid small">'+
    box('Novos lançamentos',fmt(counted('create')))+
    box('Baixas posteriores',fmt(counted('settle')))+
-   box('Já importados',fmt(counted('unchanged')))+'</div>';
+   box('Já importados',fmt(counted('unchanged')))+'</div>'+
+   '<div class="gb-erp-summary-grid small">'+box('Pendentes de baixa',fmt(assessed.filter(r=>erpIsPending(r,now)).length))+
+   box('Baixados no arquivo',fmt(assessed.filter(r=>erpIsSettled(r,now)).length))+
+   box('Novos pendentes',fmt(assessed.filter(r=>r.decision==='create'&&erpIsPending(r,now)).length))+'</div>';
  }
  const ignored=draft.parsed.ignored||[];
  if(ignored.length){
@@ -54,16 +57,32 @@ export function erpImportMarkup(db,draft,now){
  const btn=(action,text)=>'<button type="button" class="button" data-action="'+action+'">'+esc(text)+'</button>';
  html+='<div class="gb-erp-row-actions"><strong>Prévia para revisão</strong><div>'+
   btn('erp-import-select-new','Selecionar novos')+
-  (isPartners?btn('erp-import-select-updates','Selecionar atualizações'):btn('erp-import-select-settlements','Selecionar baixas'))+
+  (isPartners?btn('erp-import-select-updates','Selecionar atualizações'):
+   btn('erp-import-select-pending','Selecionar somente pendentes')+
+   btn('erp-import-select-settlements','Selecionar baixas'))+
   btn('erp-import-clear','Limpar')+'</div></div>';
- const page=Math.min(Math.max(0,Number(draft.page)||0),Math.max(0,Math.ceil(records.length/70)-1));
- const part=assessed.slice(page*70,(page+1)*70);
+ const viewFilter=isPartners?'all':draft.viewFilter||'all';
+ if(!isPartners)html+='<label class="gb-erp-list-filter"><span>Mostrar</span>'+
+  '<select id="gb-erp-view-filter" data-gb-native="true">'+
+  [['all','Todos os títulos'],['pending','Pendentes de baixa'],['settled','Baixados'],['new','Somente novos'],['blocked','Conflitos'],['unchanged','Já importados']]
+   .map(([value,name])=>'<option value="'+value+'" '+(viewFilter===value?'selected':'')+'>'+name+'</option>').join('')+
+  '</select></label>';
+ const indexed=assessed.map((r,i)=>({...r,erpOriginalIndex:i})).filter(r=>{
+  if(viewFilter==='pending')return erpIsPending(r,now);
+  if(viewFilter==='settled')return erpIsSettled(r,now);
+  if(viewFilter==='new')return r.decision==='create';
+  if(viewFilter==='blocked')return r.decision==='blocked';
+  if(viewFilter==='unchanged')return r.decision==='unchanged';
+  return true;
+ });
+ const page=Math.min(Math.max(0,Number(draft.page)||0),Math.max(0,Math.ceil(indexed.length/70)-1));
+ const part=indexed.slice(page*70,(page+1)*70);
  html+='<div class="gb-erp-table-wrap"><table><thead><tr><th></th>'+
   (isPartners?'<th>Código</th><th>Razão social / Nome</th><th>CPF/CNPJ</th><th>Situação</th><th>Ação</th>':
    '<th>Nro Único</th><th>Nota / Parcela</th><th>Parceiro (código)</th><th>Vencimento</th><th>Valor</th><th>Tipo</th><th>Resultado</th>')+
   '</tr></thead><tbody>';
  for(let j=0;j<part.length;j++){
-  const r=part[j],i=page*70+j,blocked=['blocked','conflict','unchanged'].includes(r.decision);
+  const r=part[j],i=r.erpOriginalIndex,blocked=['blocked','conflict','unchanged'].includes(r.decision);
   const statusText={create:'Novo',update:'Atualizar',match:'Associar cadastro',settle:'Baixar existente',unchanged:'Sem mudança',blocked:'Conflito',conflict:'Conflito'}[r.decision]||'Conferir';
   const chk='<td><input type="checkbox" data-erp-pick="'+i+'" '+(selected.has(i)?'checked ':'')+
    (blocked?'disabled ':'')+'aria-label="Selecionar linha '+(i+1)+'"></td>';
@@ -79,19 +98,21 @@ export function erpImportMarkup(db,draft,now){
     '<small>Cód. '+esc(r.partnerCode)+'</small></td>'+
     '<td>'+dateLabel(r.due)+(r.paidDate?'<small>Baixa: '+dateLabel(r.paidDate)+(r.future?' · futura':'')+'</small>':'')+'</td>'+
     '<td><strong>'+money(r.principal)+'</strong>'+(r.paidAmount&&r.paidAmount!==r.principal?'<small>Baixa '+money(r.paidAmount)+'</small>':'')+'</td>'+
-    '<td>'+label(r.kind==='income'?'Receita':'Despesa',r.kind)+'</td>'+
+    '<td>'+label(r.kind==='income'?'Receita':'Despesa',r.kind)+
+    '<small>'+(erpIsPending(r,now)?r.paidDate?'Baixa futura · pendente':'Sem baixa · pendente':'Baixado')+'</small></td>'+
     '<td>'+label(statusText,r.decision)+(r.reason?'<small>'+esc(r.reason)+'</small>':'')+'</td></tr>';
   }
  }
  html+='</tbody></table></div>';
- if(records.length>70)html+='<div class="gb-erp-pages">'+btn('erp-import-prev','Anterior')+
-  '<span>Página '+(page+1)+' / '+Math.ceil(records.length/70)+'</span>'+btn('erp-import-next','Próxima')+'</div>';
+ if(indexed.length>70)html+='<div class="gb-erp-pages">'+btn('erp-import-prev','Anterior')+
+  '<span>Página '+(page+1)+' / '+Math.ceil(indexed.length/70)+'</span>'+btn('erp-import-next','Próxima')+'</div>';
  if(!isPartners){
   const categories=db.categories||[],active=db.accounts.filter(a=>a.active);
   const selectedRows=picked;
   const requires=new Set(selectedRows.filter(r=>['create','settle'].includes(r.decision)&&r.paidDate&&!r.future).map(r=>r.bankCode));
   const hasNew=selectedRows.some(r=>r.decision==='create');
-  html+='<div class="gb-erp-config"><h4>Configuração da importação</h4><div class="gb-erp-fields">'+
+  html+='<div class="gb-erp-config"><h4>Classificação e origem</h4>'+
+   '<p>As receitas entram por padrão em <b>Outras receitas</b> e as despesas em <b>Outras despesas</b>. Todos os títulos ficam identificados como <b>Via importação</b> independentemente da categoria; você pode alterá-la depois.</p><div class="gb-erp-fields">'+
    ['income','expense'].map(k=>'<label>Categoria para '+(k==='income'?'receitas':'despesas')+
     '<select data-erp-category="'+k+'" data-gb-native="true" '+(!hasNew?'disabled':'')+'>'+
     '<option value="">Selecione</option>'+
@@ -117,6 +138,6 @@ export function erpImportMarkup(db,draft,now){
  html+='<div class="gb-erp-end"><button type="button" class="button primary" data-action="erp-import-commit" '+
   (!picked.length||!draft.confirmed||missingCategory||missingAccount||draft.loading?'disabled':'')+'>'+
   icon('check')+' Confirmar '+picked.length+' registro(s)</button></div>'+
-  '<p class="gb-erp-hint">Nro Único identifica cada título. Nota repetida com parcelas não é duplicidade. Reimportar o mesmo título permite conferir uma baixa nova sem recriar o lançamento.</p>';
+  '<p class="gb-erp-hint">Via importação será mostrado nos lançamentos importados. Nro Único identifica cada título. Nota repetida com parcelas não é duplicidade. Reimportar o mesmo título permite conferir uma baixa nova sem recriar o lançamento.</p>';
  return html+'</div>';
 }

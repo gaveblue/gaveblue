@@ -1,5 +1,14 @@
 # CHANGELOG — GB+ Gestão Financeira
 
+## [3.0.9 — PENDENTES NA IMPORTAÇÃO, GRADE DE PARCEIROS E VIA IMPORTAÇÃO (QA PARCIAL)] — 2026-11-10
+- **Movimentação diária:** acrescentadas as ações **Selecionar somente pendentes** (substitui a seleção) e **Selecionar baixas**, com filtro de linhas Todos / Pendentes / Baixados / Novos / Conflitos / Já importados. A paginação respeita os índices originais, evitando marcar uma linha errada após filtrar. Somente títulos novos sem baixa realizada entram na seleção de pendentes; baixa com data futura permanece pendente e não reduz/eleva saldo.
+- **Categorias sem trabalho repetitivo:** seleção inicial automática **Outras receitas** e **Outras despesas**, quando existentes, sem criar novas categorias silenciosamente. É possível mudar a categoria manualmente; faltando uma categoria válida, a confirmação continua bloqueada.
+- **Proveniência:** os novos títulos Sankhya possuem marcador estruturado `importSource=sankhya` e observação **Via importação · Sankhya**. Também se reconhecem registros antigos pelo `importKey`. A etiqueta aparece na visualização principal de lançamentos, tabela, cartões e detalhes, sem confundir origem com categoria.
+- **Parceiros:** cartões extensos substituídos por **grade paginada**, com 75 registros por página, código Sankhya, nome/razão social, CPF/CNPJ, classificação, situação, histórico e edição. Pesquisa por código/nome/documento preservada, e versão mobile pode rolar horizontalmente na grade.
+- **Sem duplicidade:** continua Nro Único+Empresa como chave do título, nota repetida como parcela, e baixa posterior no registro existente. Reimportar o mesmo relatório não cria outros títulos. Conflitos de valor ou vínculo continuam bloqueados.
+- **Preservação:** nenhum lançamento, saldo ou cadastro preexistente foi migrado ou apagado, e nenhuma planilha foi importada automaticamente. Cache PWA e versão atualizados.
+- **Homologação:** testes sintéticos de filtros, categorias padrão e paginação aprovados; validação visual no navegador PC, importações com arquivos reais e efeitos no saldo ainda pendentes.
+
 ## [3.0.8 — IMPORTAÇÃO DIÁRIA SANKHYA: PARCEIROS + MOVIMENTAÇÃO (HOMOLOGAÇÃO PARCIAL)] — 2026-11-10
 - **Cadastro de parceiros (53 colunas / 1.626 registros de referência):** novo importador Excel/CSV no PC, identificado pelo campo **Cód. Parceiro**. Mapeia razão social, nome fantasia, CPF/CNPJ, situação, tipo de pessoa, endereço, contatos e informações comerciais/fiscais; os campos extras permanecem acessíveis em **Dados adicionais de origem (Sankhya)** na edição do parceiro.
 - **Preservação de identidade:** `sankhyaCode` exclusivo para cada parceiro; CPF/CNPJ pode ser compartilhado entre códigos sem misturar históricos. Cadastro repetido é associado por código; possíveis conflitos de código/documento são bloqueados. Edições manuais preservam metadados importados.

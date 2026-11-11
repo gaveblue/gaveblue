@@ -1,7 +1,7 @@
 import {filterFlowRows} from './gb-flow-filters.js?v=20261106-68';
 import {money,today,dateLabel,metrics,pending,paid,status,flow,accountBalance,within} from './domain.js?v=20261105-72';
 import {INDICATORS} from './store.js?v=20261110-308';
-import {esc,icon,button,empty,titleTable,chart,select,field} from './ui.js?v=20261105-72';
+import {esc,icon,button,empty,titleTable,chart,select,field} from './ui.js?v=20261110-309';
 import {gbIcon,categoryIconFor} from './gb-icons.js?v=20261109-2900';
 import {bankBadge,bankForAccount,bankName} from './banks.js?v=20261105-87';
 import {accountKind,accountMark,accountTypeLabel,goalProgressMarkup} from './account-goals.js?v=20261109-2900';
@@ -38,7 +38,7 @@ function mobileTitleCards(db,titles){
   return `<article class="mobile-title-card">
    <span class="mobile-title-arrow ${income?'income-arrow':'expense-arrow'}">${icon(income?'up':'down')}</span>
    <button class="mobile-title-open" data-action="title-detail" data-id="${t.id}" aria-label="Abrir lançamento ${esc(t.description)}">
-    <strong>${esc(t.description)}${t.count>1?` <span class="muted">${t.sequence}/${t.count}</span>`:''}</strong>
+    <strong>${esc(t.description)}${t.importSource==='sankhya'||t.importKey?.startsWith('sankhya-fin-v1:')?' <span class="gb-source-pill">Via importação</span>':''}${t.count>1?` <span class="muted">${t.sequence}/${t.count}</span>`:''}</strong>
     <small>${income?'Receita':'Despesa'} · ${esc(partner)}</small>
     <span class="mobile-title-category">${icon('category')} ${esc(category)}</span>
    </button>
@@ -114,7 +114,40 @@ export function notificationsView(db){
   '<p class="gb-alerts-disclaimer">Estes são lembretes exibidos dentro do GB+. O aplicativo ainda não envia notificações push quando está fechado. As preferências ficam salvas com seus dados.</p>';
 }
 
-export function partnersView(db,state){const ps=db.partners.filter(p=>`${p.name} ${p.tradeName} ${p.document} ${p.sankhyaCode||''}`.toLowerCase().includes(state.partnerQuery.toLowerCase()));return `${heading('Parceiros','Pessoas e empresas que fazem parte do seu negócio.',button(icon('plus')+'Novo parceiro','new-partner','primary'))}<section class="panel"><div class="filters"><label class="search-field">${icon('search')}<input id="partner-search" type="search" placeholder="Buscar nome, CPF, CNPJ ou código" aria-label="Pesquisar parceiros" value="${esc(state.partnerQuery)}"></label><span class="muted">${ps.length} parceiros</span></div>${ps.length?`<div class="partner-grid">${ps.map(p=>`<article class="partner-card"><div class="partner-top"><div class="partner-avatar">${esc(p.name.slice(0,2).toUpperCase())}</div><span class="badge">${p.active?'Ativo':'Inativo'}</span></div><h3>${esc(p.name)}</h3><p>${esc(p.tradeName||p.email||'Sem nome fantasia')}</p>${p.sankhyaCode?'<p class="muted">Sankhya · cód. '+esc(p.sankhyaCode)+'</p>':''}<div class="role-list">${p.roles.map(r=>`<span>${esc(r)}</span>`).join('')}</div><div class="partner-bottom">${button('Ver histórico','partner-detail','small',`data-id="${p.id}"`)}<button class="icon-button" data-action="edit-partner" data-id="${p.id}" aria-label="Editar ${esc(p.name)}">${icon('edit')}</button></div></article>`).join('')}</div>`:empty('Bons negócios começam com boas conexões','Cadastre clientes, fornecedores e outros parceiros.','new-partner','Adicionar parceiro')}</section>`;}
+export function partnersView(db,state){
+ const search=String(state.partnerQuery||'').toLocaleLowerCase('pt-BR');
+ const ps=db.partners.filter(p=>
+  [p.name,p.tradeName,p.document,p.sankhyaCode].some(v=>String(v||'').toLocaleLowerCase('pt-BR').includes(search)))
+  .sort((a,b)=>a.name.localeCompare(b.name,'pt-BR'));
+ const pageSize=75,pages=Math.max(1,Math.ceil(ps.length/pageSize));
+ const page=Math.max(0,Math.min(Number(state.partnerPage)||0,pages-1));
+ const visible=ps.slice(page*pageSize,(page+1)*pageSize);
+ const rows=visible.map(p=>
+  '<tr><td class="gb-partner-code">'+esc(p.sankhyaCode||'—')+'</td>'+
+  '<td><button class="gb-partner-name" type="button" data-action="partner-detail" data-id="'+esc(p.id)+'">'+esc(p.name)+'</button>'+
+  (p.tradeName&&p.tradeName!==p.name?'<small>'+esc(p.tradeName)+'</small>':'')+'</td>'+
+  '<td class="gb-partner-document">'+esc(p.document||'—')+'</td>'+
+  '<td><span class="gb-partner-roles">'+esc((p.roles||[]).filter(r=>r!=='Outros').join(', ')||'Outros')+'</span></td>'+
+  '<td><span class="gb-partner-status '+(p.active?'active':'inactive')+'">'+(p.active?'Ativo':'Inativo')+'</span></td>'+
+  '<td class="gb-partner-actions"><button type="button" class="icon-button" data-action="partner-detail" data-id="'+esc(p.id)+'" aria-label="Histórico de '+esc(p.name)+'">'+icon('eye')+'</button>'+
+  '<button type="button" class="icon-button" data-action="edit-partner" data-id="'+esc(p.id)+'" aria-label="Editar '+esc(p.name)+'">'+icon('edit')+'</button></td></tr>'
+ ).join('');
+ const table=ps.length?'<div class="gb-partner-table-wrap" role="region" aria-label="Grade de parceiros" tabindex="0">'+
+  '<table class="gb-partner-table"><thead><tr><th>Cód. parceiro</th><th>Nome / Razão social</th>'+
+  '<th>CPF/CNPJ</th><th>Classificação</th><th>Situação</th><th>Ações</th></tr></thead><tbody>'+
+  rows+'</tbody></table></div>':
+  empty('Bons negócios começam com boas conexões','Cadastre clientes, fornecedores e outros parceiros.','new-partner','Adicionar parceiro');
+ const pager=ps.length>pageSize?
+  '<div class="gb-partner-pagination"><span>Mostrando '+(page*pageSize+1)+'–'+Math.min(ps.length,(page+1)*pageSize)+' de '+ps.length+
+  '</span><div><button type="button" class="button" data-action="partner-page-prev" '+(page===0?'disabled':'')+'>Anterior</button>'+
+  '<span>Página '+(page+1)+' de '+pages+'</span>'+
+  '<button type="button" class="button" data-action="partner-page-next" '+(page===pages-1?'disabled':'')+'>Próxima</button></div></div>':'';
+ return heading('Parceiros','Pessoas e empresas que fazem parte do seu negócio.',
+   button(icon('plus')+'Novo parceiro','new-partner','primary'))+
+  '<section class="panel gb-partner-list"><div class="filters"><label class="search-field">'+icon('search')+
+  '<input id="partner-search" type="search" placeholder="Buscar nome, CPF, CNPJ ou código" aria-label="Pesquisar parceiros" value="'+esc(state.partnerQuery||'')+'"></label>'+
+  '<span class="muted">'+ps.length+' parceiros</span></div>'+table+pager+'</section>';
+}
 export function accountsView(db,{embedded=false}={}){
  const accounts=db.accounts.filter(a=>accountKind(a)!=='goal');
  const goals=db.accounts.filter(a=>accountKind(a)==='goal');
