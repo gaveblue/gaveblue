@@ -35,7 +35,7 @@ function launchCard(db,t,isSelected){
     role="button" tabindex="0" aria-pressed="${String(isSelected)}" data-action="select-launch" data-id="${esc(t.id)}"
     aria-label="${esc(title)} · ${income?'receita':'despesa'} · ${money(t.amount)}. ${isSelected?'Selecionado':'Toque para selecionar'}">
     <span class="gb-launch-card-icon ${income?'is-income':'is-expense'} ${t.serviceId?'has-service':''}">${t.serviceId?serviceIconMarkup(t.serviceId):icon(income?'up':'down')}</span>
-    <span class="gb-launch-card-title"><strong>${esc(title)}${t.count>1?` <small>${t.sequence}/${t.count}</small>`:''}</strong>
+    <span class="gb-launch-card-title"><strong>${esc(title)}${t.importSource==='sankhya'||t.importKey?.startsWith('sankhya-fin-v1:')?' <span class="gb-source-pill">Via importação</span>':''}${t.count>1?` <small>${t.sequence}/${t.count}</small>`:''}</strong>
       <span>${esc(subtitle)}</span>${subtitle!==category?`<small>${esc(category)}</small>`:''}</span>
     <span class="gb-launch-card-meta"><time datetime="${t.due}">${dateLabel(t.due)}</time>
       <span class="gb-launch-state ${statusStyle}">${esc(label)}</span>
