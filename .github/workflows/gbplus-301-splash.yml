@@ -23,7 +23,9 @@ jobs:
           node-version: '22'
       - name: Verificar abertura GB+ instalada
         run: |
-          if grep -q '"version": "3.0.8"' gbplus/version.json; then
+          if grep -q '"version": "3.0.9"' gbplus/version.json; then
+            node gbplus/tests/sankhya-import-309.mjs
+          elif grep -q '"version": "3.0.8"' gbplus/version.json; then
             node gbplus/tests/sankhya-import-308.mjs
           elif grep -q '"version": "3.0.7"' gbplus/version.json; then
             node gbplus/tests/financial-report-import-307.mjs
