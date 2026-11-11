@@ -1,7 +1,7 @@
 {
   "version": "3.0.9",
   "build": 3009,
-  "published_at": null,
+  "published_at": "2026-11-11T02:24:30Z",
   "title": "Importação de pendentes, parceiros em grade e origem Via importação",
   "notes": [
     "Em Relatórios → Movimentação financeira Sankhya, foram adicionados Selecionar somente pendentes e filtros Todos/Pendentes de baixa/Baixados/Somente novos/Conflitos/Já importados; seleção de pendentes inclui somente títulos novos ainda sem baixa efetivada.",
@@ -233,9 +233,9 @@
       "description": "Origem visível, independente da categoria Outras receitas/Outras despesas."
     }
   ],
-  "release_status": "candidate_validation_pending",
+  "release_status": "published_qa_partial",
   "homologation": {
-    "status": "candidate_static_and_synthetic_qa",
-    "notes": "Regressão sintética de seleção por status, categorias padrão e grade paginada passou. Conferência visual e persistência com conta real desktop ainda dependem de testes. Nenhuma gravação automática de dados do usuário."
+    "status": "published_static_qa_visual_pending",
+    "notes": "PR #131 mesclado no commit b44f7e5315734ad9edc96514ec97ad5cfeb631a5; GitHub Pages run 42945734990 concluído com sucesso em 11/11/2026 às 02:24:30 UTC. 18 verificações estruturais, checagens de sintaxe e 12 testes sintéticos de filtros, categorias e grade passaram na análise. GitHub Actions CI reportou failure com zero steps (não comprova execução/reprovação de código). Testes visuais Chrome/Edge desktop e fluxo real de importação/baixas ainda pendentes. Nenhuma importação automática dos dados do usuário."
   }
 }
