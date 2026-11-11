@@ -38,7 +38,7 @@ function mobileTitleCards(db,titles){
   return `<article class="mobile-title-card">
    <span class="mobile-title-arrow ${income?'income-arrow':'expense-arrow'}">${icon(income?'up':'down')}</span>
    <button class="mobile-title-open" data-action="title-detail" data-id="${t.id}" aria-label="Abrir lançamento ${esc(t.description)}">
-    <strong>${esc(t.description)}${t.count>1?` <span class="muted">${t.sequence}/${t.count}</span>`:''}</strong>
+    <strong>${esc(t.description)}${t.importSource==='sankhya'||t.importKey?.startsWith('sankhya-fin-v1:')?' <span class="gb-source-pill">Via importação</span>':''}${t.count>1?` <span class="muted">${t.sequence}/${t.count}</span>`:''}</strong>
     <small>${income?'Receita':'Despesa'} · ${esc(partner)}</small>
     <span class="mobile-title-category">${icon('category')} ${esc(category)}</span>
    </button>
