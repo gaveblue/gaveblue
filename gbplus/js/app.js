@@ -869,6 +869,7 @@ const actions={
   'erp-import-select-new':()=>{
    const d=erpImportDraft;if(!d?.parsed)return;
    d.selected=erpSelectionIndexes(db,d.parsed,today(),'new');
+   if(d.kind==='movements'){d.viewFilter='new';d.page=0;}
    d.confirmed=false;d.error='';redrawErpImport();
   },
   'erp-import-select-pending':()=>{
@@ -886,9 +887,8 @@ const actions={
   },
   'erp-import-select-settlements':()=>{
    const d=erpImportDraft;if(d?.kind!=='movements'||!d.parsed)return;
-   const assessed=movementDecisions(db,d.parsed.rows,today()),ids=new Set(d.selected);
-   assessed.forEach((r,i)=>{if(r.decision==='settle'||r.decision==='create'&&r.paidDate&&!r.future)ids.add(i);});
-   d.selected=[...ids].sort((a,b)=>a-b);d.confirmed=false;redrawErpImport();
+   d.selected=erpSelectionIndexes(db,d.parsed,today(),'settlements');
+   d.viewFilter='settled';d.page=0;d.confirmed=false;d.error='';redrawErpImport();
   },
   'erp-import-clear':()=>{if(!erpImportDraft)return;erpImportDraft.selected=[];erpImportDraft.confirmed=false;redrawErpImport();},
   'erp-import-prev':()=>{if(!erpImportDraft)return;erpImportDraft.page=Math.max(0,erpImportDraft.page-1);redrawErpImport();},
