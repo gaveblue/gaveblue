@@ -2918,63 +2918,107 @@
     // Eventos do recibo COVRE
     document.getElementById('valor-covre').oninput = function() { formatarMoeda(this); };
 
-    // null indica o formato antigo; [] indica uma tabela de produção sem colaboradores.
+
+    // Interpreta as tabelas de produção, evitando misturar colaboradores e empreiteiros.
     function lerProducaoTrainer(linhas) {
       const registros = [];
       let encontrouCabecalho = false;
       let colunas = null;
 
       linhas.forEach((linha, indice) => {
+        if (!Array.isArray(linha)) return;
         const chaves = linha.map(normalizarChaveImportacao);
-        const nomeColuna = chaves.findIndex(chave => chave.includes('nome'));
-        if (nomeColuna >= 0) {
+        const nomeColuna = chaves.findIndex(chave =>
+          chave === 'nome' || chave === 'nomes' ||
+          (chave.includes('nome') && chave.includes('colaborador'))
+        );
+        const totalColuna = chaves.indexOf('total') >= 0
+          ? chaves.indexOf('total')
+          : chaves.findIndex(chave => chave.startsWith('total'));
+
+        // Cabeçalho típico: NOMES COLABORADORES ... TOTAL.
+        // Um modelo simples Nome/Valor deve seguir o importador padrão.
+        if (nomeColuna >= 0 && totalColuna >= 0) {
           encontrouCabecalho = true;
-          const totalExato = chaves.indexOf('total');
-          const totalColuna = totalExato >= 0
-            ? totalExato
-            : chaves.findIndex(chave => chave.startsWith('total')) >= 0
-              ? chaves.findIndex(chave => chave.startsWith('total'))
-              : chaves.findIndex(chave => chave.includes('total'));
-          if (totalColuna < 0) {
-            throw new Error(`Coluna TOTAL não encontrada no cabeçalho da linha ${indice + 1}.`);
-          }
-          colunas = { nome: nomeColuna, total: totalColuna };
+          colunas = {
+            nome: nomeColuna,
+            total: totalColuna,
+            funcao: chaves.findIndex(chave => chave.includes('funcao'))
+          };
           return;
         }
-        if (!colunas) return;
-        const nome = String(linha[colunas.nome] ?? '').trim();
-        const chaveNome = normalizarChaveImportacao(nome);
-        // O bloco de empreiteiro não pertence à lista de colaboradores.
-        if (/^empreiteir[oa]s?$/.test(chaveNome) || /^total/.test(chaveNome)) {
+        if (nomeColuna >= 0 && chaves[nomeColuna].includes('colaborador') && totalColuna < 0) {
+          throw new Error('Coluna TOTAL não encontrada no cabeçalho da linha ' + (indice + 1) + '.');
+        }
+
+        // Depois de EMPREITEIRO, nenhum nome deve virar recibo de colaborador.
+        if (chaves.some(chave => /^empreiteir/.test(chave))) {
           colunas = null;
           return;
         }
+        if (!colunas) return;
+
+        const nome = String(linha[colunas.nome] ?? '').trim();
         if (!nome) return;
+        const chaveNome = normalizarChaveImportacao(nome);
+        const funcao = colunas.funcao >= 0
+          ? normalizarChaveImportacao(linha[colunas.funcao])
+          : '';
+
+        // Mesmo quando não existe o título EMPREITEIRO, a função EMP identifica a linha.
+        if (/^total/.test(chaveNome) || funcao === 'emp' || /^empreiteir/.test(funcao)) {
+          colunas = null;
+          return;
+        }
 
         const bruto = linha[colunas.total];
         let valor = typeof bruto === 'number' ? bruto : NaN;
         if (typeof bruto === 'string') {
           const texto = bruto.replace(/R\$/gi, '').replace(/\s/g, '');
-          // Valores textuais seguem a notação brasileira; números Excel já são numéricos.
           if (/^-?(?:\d+|\d{1,3}(?:\.\d{3})+)(?:,\d{1,2})?$/.test(texto)) {
             valor = Number(texto.replace(/\./g, '').replace(',', '.'));
           }
         }
         if (!Number.isFinite(valor) || valor < 0) {
-          throw new Error(`TOTAL inválido para ${nome} na linha ${indice + 1}. Confira o valor e salve a planilha novamente no Excel.`);
+          throw new Error('TOTAL inválido para ' + nome + ' na linha ' + (indice + 1) + '. Confira o valor no Excel.');
         }
         registros.push({ Nome: nome, Valor: valor.toFixed(2).replace('.', ',') });
       });
       return encontrouCabecalho ? registros : null;
     }
 
-    function lerLinhasPlanilhaRecibos(planilha, modelo) {
-      if (modelo === 'covre') {
-        const linhas = XLSX.utils.sheet_to_json(planilha, { header: 1, defval: '', blankrows: true });
-        const producao = lerProducaoTrainer(linhas);
-        if (producao !== null) return producao;
-      }
+    function lerLinhasPlanilhaRecibos(planilha) {
+      const linhas = XLSX.utils.sheet_to_json(planilha, { header: 1, defval: '', blankrows: true });
+      const producao = lerProducaoTrainer(linhas);
+      if (producao !== null) return producao;
       return XLSX.utils.sheet_to_json(planilha);
+    }
+
+    function filtrarLinhasValidasRecibos(dados) {
+      if (!Array.isArray(dados)) return [];
+      return dados.filter((row) => {
+        if (!row || typeof row !== 'object') return false;
+        const { valor, recebedor, emitente } = extrairDadosImportados(row);
+        return String(valor ?? '').trim() !== '' &&
+          String(recebedor || emitente || '').trim() !== '';
+      });
+    }
+
+    // Uma aba vazia/formatada não impede a importação de outra aba com dados.
+    function lerDadosValidosWorkbook(workbook) {
+      const erros = [];
+      for (const nomeAba of workbook.SheetNames) {
+        const planilha = workbook.Sheets[nomeAba];
+        if (!planilha) continue;
+        try {
+          const linhas = filtrarLinhasValidasRecibos(lerLinhasPlanilhaRecibos(planilha));
+          if (linhas.length > 0) return linhas;
+        } catch (erro) {
+          erros.push(nomeAba + ': ' + (erro.message || String(erro)));
+        }
+      }
+      if (erros.length > 0) throw new Error(erros.join(' | '));
+      return [];
     }
 
     // Importar Excel
@@ -2988,8 +3032,7 @@
         try {
           const data = new Uint8Array(e.target.result);
           const workbook = XLSX.read(data, { type: 'array' });
-          const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-          jsonData = lerLinhasPlanilhaRecibos(firstSheet, modeloAtual);
+          jsonData = lerDadosValidosWorkbook(workbook);
         } catch (erro) {
           event.target.value = '';
           mostrarMensagem(erro.message || 'Não foi possível ler a planilha.', 'erro');
@@ -3004,7 +3047,7 @@
           : [];
 
         if (!linhasImportadas.length) {
-          mostrarMensagem('A planilha importada está vazia ou sem dados válidos.', 'erro');
+          mostrarMensagem('Não encontrei colaboradores e valores válidos nas abas. Confira as colunas Nome/Recebedor e Valor/TOTAL.', 'erro');
           return;
         }
 
