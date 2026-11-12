@@ -9,40 +9,33 @@ export async function renderPage({supabase,restaurant,box,esc,link}){
  const field=(name,label,value='',extra='')=>'<label>'+label+'<input name="'+name+'" value="'+esc(value)+'" '+extra+'></label>';
  const form=(id,cb)=>{const f=document.getElementById(id);if(f)f.onsubmit=async e=>{e.preventDefault();const b=f.querySelector('button');b.disabled=true;try{await cb(Object.fromEntries(new FormData(f).entries()));await load()}catch(err){alert(err.message);b.disabled=false}}};
  const binding=(sel,cb)=>document.querySelectorAll(sel).forEach(b=>b.onclick=async()=>{b.disabled=true;try{await cb(b);await load()}catch(err){alert(err.message);b.disabled=false}});
- const start=style+'<div class="iv-header"><div><span class="iv-section-caption">CARDÁPIO DO RESTAURANTE</span><h1>'+icon('receipt',25)+' Cardápio e produtos</h1><p>'+esc(restaurant.name)+' · Categorias, preços, fotos e disponibilidade.</p></div><a class="iv-btn secondary" href="'+link('/'+restaurant.slug+'/gestao')+'">'+icon('arrowLeft',16)+' Voltar à gestão</a></div>';
+ const start=style+'<div class="iv-header"><div><span class="iv-section-caption">CARDÁPIO DO RESTAURANTE</span><h1>'+icon('receipt',25)+' Cardápio digital</h1><p>'+esc(restaurant.name)+' · Publicação, categorias e visualização da vitrine.</p></div><a class="iv-btn secondary" href="'+link('/'+restaurant.slug+'/gestao')+'">'+icon('arrowLeft',16)+' Voltar à gestão</a></div>';
  async function load(){
   box(start+'<section class="op-card">Carregando cardápio...</section>');
   try{
   const d=await call('catalog'),cats=d.categories??[],products=d.products??[],options=d.options??[],published=!!d.publication?.is_published;
   let out=start+'<section class="op-card"><h2>Publicação</h2><p>'+ (published?'Visível para os clientes':'Oculto até a publicação') +'</p><p><a href="'+link('/'+restaurant.slug+'/cardapio')+'">Visualizar cardápio público</a></p><p class="op-muted">Compartilhe o endereço ou QR Code somente depois de publicar o cardápio.</p><button type="button" class="op-btn alt" id="copy-menu">Copiar link</button> <button type="button" class="op-btn alt" id="qr-menu">Gerar QR Code</button><div id="qr-preview" style="margin-top:12px"></div><p></p><button id="publish" class="op-btn">'+(published?'Despublicar':'Publicar cardápio')+'</button><p class="op-warn">Nesta fase o cardápio é somente consulta; não recebe pedidos diretos de clientes.</p></section>';
-  out+='<div class="op-cards"><section class="op-card"><h2>Categoria</h2><form id="newcat" class="op-form">'+field('name','Nome','','required minlength="2" maxlength="90"')+'<button class="op-btn">Cadastrar categoria</button></form></section><section class="op-card"><h2>Produto</h2><form id="newprod" class="op-form">'+field('name','Nome','','required minlength="2" maxlength="150"')+'<label>Categoria<select name="category_id" required>'+cats.filter(c=>c.active).map(c=>'<option value="'+esc(c.id)+'">'+esc(c.name)+'</option>').join('')+'</select></label>'+field('price','Preço em R$','','required placeholder="18,50"')+field('description','Descrição','','maxlength="1000"')+field('image_url','URL da foto (HTTPS, opcional)','','type="url" placeholder="https://site.com/foto.jpg" maxlength="1200"')+'<button class="op-btn">Cadastrar produto</button></form></section></div>';
+  out+='<div class="op-cards"><section class="op-card"><h2>'+icon('layers',19)+' Categorias</h2><p class="op-muted">Organize a vitrine em grupos.</p><form id="newcat" class="op-form">'+field('name','Nome da categoria','','required minlength="2" maxlength="90"')+'<button class="op-btn">Cadastrar categoria</button></form></section>'
+    +'<section class="op-card"><h2>'+icon('store',19)+' Cadastro de produtos</h2><p class="op-muted">O nome, preço, foto, disponibilidade e a chave <b>Exibir no cardápio</b> ficam concentrados em <b>Estoque e Produtos → Produtos</b>.</p>'
+    +'<a class="iv-btn" href="'+link('/'+restaurant.slug+'/estoque?aba=produtos')+'">'+icon('arrowRight',17)+' Abrir cadastro de produtos</a></section></div>';
   out+='<h2>Categorias ('+cats.length+')</h2><div class="op-cards">';
   for(const c of cats)out+='<article class="op-card"><strong>'+esc(c.name)+'</strong><p class="op-muted">'+(c.active?'Ativa':'Oculta')+' · '+products.filter(p=>p.category_id===c.id).length+' produto(s)</p><button class="op-btn alt" data-cat="'+esc(c.id)+'">'+(c.active?'Ocultar':'Exibir')+'</button></article>';
-  out+='</div><h2>Produtos ('+products.length+')</h2><div class="op-cards">';
-  for(const p of products){
-    const photo=typeof p.image_url==='string'&&/^https:\/\/[^\s<>"']+$/.test(p.image_url)?p.image_url:null;
-    out+='<article class="op-card">'+(photo?'<img class="op-photo" src="'+esc(photo)+'" alt="Foto de '+esc(p.name)+'" loading="lazy" referrerpolicy="no-referrer">':'<div class="op-photo-placeholder">'+icon('burger',52)+'</div>')
-      +'<h3>'+esc(p.name)+'</h3><b>'+money(p.price_cents)+'</b><p class="op-muted">'+esc(p.description??'')+'</p>'
-      +'<p class="op-muted">'+(p.available?'Disponível':'Indisponível')+'</p>'
-      +'<button class="op-btn alt" data-product="'+esc(p.id)+'">'+(p.available?'Pausar':'Disponibilizar')+'</button>'
-      +'<form class="op-form" data-photo-product="'+esc(p.id)+'" style="margin-top:13px"><label>Foto do produto (URL HTTPS)<input type="url" name="image_url" value="'+esc(p.image_url??'')+'" placeholder="https://..." maxlength="1200"></label><button class="op-btn" type="submit">Salvar foto</button></form>'
-      +'<p class="op-muted">'+options.filter(o=>o.product_id===p.id).map(o=>esc(o.name)+' +'+money(o.price_delta_cents)).join(' · ')+'</p></article>';
-  }
-  out+='</div>';
+  out+='</div><div class="iv-toolbar"><h2>'+icon('receipt',19)+' Produtos do catálogo ('+products.length+')</h2><a href="'+link('/'+restaurant.slug+'/estoque?aba=produtos')+'" class="iv-btn secondary">'+icon('settings',16)+' Editar preços</a></div><div class="op-cards">';
+    for(const p of products){
+      const photo=typeof p.image_url==='string'&&/^https:\/\/[^\s<>"']+$/.test(p.image_url)?p.image_url:null;
+      const visible=!!p.show_on_menu,available=!!p.available;
+      out+='<article class="op-card">'+(photo?'<img class="op-photo" src="'+esc(photo)+'" alt="Foto de '+esc(p.name)+'" loading="lazy" referrerpolicy="no-referrer">':'<div class="op-photo-placeholder">'+icon('store',43)+'</div>')
+        +'<h3>'+esc(p.name)+'</h3><b>'+money(p.price_cents)+'</b><p class="op-muted">'+esc(p.description??'')+'</p>'
+        +'<div class="iv-actions"><span class="iv-chip '+(visible?'orange':'')+'">'+(visible?'Na vitrine':'Oculto no cardápio')+'</span>'
+        +'<span class="iv-chip '+(available?'success':'danger')+'">'+(available?'Disponível':'Venda pausada')+'</span></div></article>';
+    }
+    if(!products.length)out+='<div class="iv-empty">Nenhum produto cadastrado. Cadastre em Estoque e Produtos.</div>';
+    out+='</div>';
   out+='<section class="op-card"><h2>Adicionais</h2><p class="op-warn">Os adicionais podem aparecer no cardápio, mas a composição de adicionais em comandas ainda depende da próxima implementação.</p><form class="op-form" id="newopt"><label>Produto<select name="product_id" required>'+products.map(p=>'<option value="'+esc(p.id)+'">'+esc(p.name)+'</option>').join('')+'</select></label>'+field('name','Nome do adicional','','required minlength="2" maxlength="120"')+field('price','Valor adicional em R$','0,00','required')+'<button class="op-btn">Adicionar</button></form></section>';
   box(out);
   form('newcat',v=>call('category_create',{name:v.name,sort_order:0}));
-  form('newprod',v=>call('product_create',{name:v.name,description:v.description,image_url:v.image_url,price_cents:cents(v.price),category_id:v.category_id,available:true,sort_order:0}));
   form('newopt',v=>call('option_create',{name:v.name,price_delta_cents:cents(v.price),product_id:v.product_id}));
   binding('[data-cat]',b=>{const c=cats.find(c=>c.id===b.dataset.cat);return call('category_update',{id:c.id,name:c.name,sort_order:c.sort_order,active:!c.active})});
-  binding('[data-product]',b=>{const p=products.find(p=>p.id===b.dataset.product);return call('product_update',{id:p.id,name:p.name,description:p.description,image_url:p.image_url??'',category_id:p.category_id,sort_order:p.sort_order,price_cents:Number(p.price_cents),available:!p.available})});
-  document.querySelectorAll('form[data-photo-product]').forEach(f=>f.onsubmit=async e=>{
-    e.preventDefault();const b=f.querySelector('button');b.disabled=true;
-    try{const p=products.find(x=>x.id===f.dataset.photoProduct);
-      await call('product_update',{id:p.id,name:p.name,description:p.description,image_url:f.elements.namedItem('image_url').value.trim(),category_id:p.category_id,sort_order:p.sort_order,price_cents:Number(p.price_cents),available:p.available});
-      await load();
-    }catch(err){alert(err.message);b.disabled=false}
-  });
   binding('#publish',()=>call('menu_publish',{published:!published}));
   const menuUrl=new URL(link('/'+restaurant.slug+'/cardapio'),location.origin).href;
   const copyButton=document.getElementById('copy-menu');
