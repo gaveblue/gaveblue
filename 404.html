@@ -1,6 +1,23 @@
 <!doctype html>
 <html lang="pt-BR" class="h-full">
 <head>
+<script id="INTERVALO_ROUTING_FALLBACK_0_1_0">
+(function () {
+  // Exclusivo das rotas da aplicação Intervalo; demais páginas 404 ficam intactas.
+  try {
+    var p = window.location.pathname;
+    if (!p.startsWith('/intervalo/')) return;
+    var parts = p.slice('/intervalo/'.length).split('/').filter(Boolean);
+    var one = ['login', 'admin', 'inicio', 'ativar', 'redefinir'];
+    var two = ['gestao', 'garcom', 'cozinha', 'caixa', 'cardapio'];
+    var isRoute = (parts.length === 1 && one.includes(parts[0]))
+      || (parts.length === 2 && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(parts[0]) && two.includes(parts[1]));
+    if (!isRoute) return;
+    sessionStorage.setItem('intervalo.deepLink', p + window.location.search + window.location.hash);
+    window.location.replace('/intervalo/');
+  } catch (e) { /* Sem acesso ao storage: mantém a página 404 padrão. */ }
+})();
+</script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>404 — Página não encontrada | GaveBlue</title>
