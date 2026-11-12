@@ -17,11 +17,42 @@ export async function renderPage({supabase,restaurant,module,box,esc,link}){
     form('newtable',v=>call('table_create',{label:v.label,area:v.area,seats:Number(v.seats),active:true}));
     document.querySelectorAll('[data-switch]').forEach(b=>b.onclick=async()=>{b.disabled=true;try{const t=tables.find(t=>t.id===b.dataset.switch);await call('table_update',{id:t.id,label:t.label,area:t.area,seats:t.seats,active:!t.active});await load()}catch(e){alert(e.message);b.disabled=false}});
   }else if(module==='estoque'){
-    const {items=[]}=await call('stock_list');
-    let out=title+'<p class="x-note">O estoque está preparado para cadastro de insumos e saldos iniciais. A baixa automática por venda e as fichas técnicas ainda não estão operacionais.</p><section class="x-panel"><h2>Novo insumo</h2><form id="newstock" class="x-form"><label>Nome<input name="name" required minlength="2" maxlength="120"></label><label>Unidade<select name="unit"><option value="un">Unidades</option><option value="kg">Kg</option><option value="g">Gramas</option><option value="l">Litros</option><option value="ml">mL</option></select></label><label>Saldo inicial<input name="quantity" type="number" min="0" step=".001" value="0" required></label><label>Estoque mínimo<input name="min_quantity" type="number" min="0" step=".001" value="0" required></label><button type="submit">Cadastrar</button></form></section><h2>Insumos ('+items.length+')</h2><div class="x-grid">';
-    for(const item of items)out+='<div class="x-panel"><h3>'+esc(item.name)+'</h3><p>Saldo: '+esc(item.quantity)+' '+esc(item.unit)+'</p><p class="x-muted">Estoque mínimo: '+esc(item.min_quantity)+'</p></div>';
-    out+='</div>';box(out);
+    const {items=[],recipes=[],products=[],movements=[],automatic_deduction=false}=await call('stock_list');
+    const active=items.filter(i=>i.active),missingRecipes=products.filter(p=>p.available&&!recipes.some(r=>r.product_id===p.id));
+    const opts=(rows,id,label)=>rows.map(x=>'<option value="'+esc(x[id])+'">'+esc(x[label])+'</option>').join('');
+    let out=title
+      +'<p class="x-note"><b>Baixa automática '+(automatic_deduction?'ativada':'não disponível')+'.</b> Ao enviar uma comanda para a cozinha, a ficha técnica de cada produto desconta os insumos em uma única transação. Sem ficha cadastrada, o produto não gera baixa. Se faltar saldo, o envio da comanda é impedido.</p>'
+      +(missingRecipes.length?'<section class="x-panel"><b>Atenção: '+missingRecipes.length+' produto(s) disponível(is) ainda sem ficha técnica</b><p class="x-muted">'+missingRecipes.map(p=>esc(p.name)).join(', ')+'</p></section>':'')
+      +'<section class="x-panel"><h2>Novo insumo</h2><form id="newstock" class="x-form"><label>Nome<input name="name" required minlength="2" maxlength="120"></label><label>Unidade<select name="unit"><option value="un">Unidades</option><option value="kg">Kg</option><option value="g">Gramas</option><option value="l">Litros</option><option value="ml">mL</option></select></label><label>Saldo inicial<input name="quantity" type="number" min="0" step=".001" value="0" required></label><label>Estoque mínimo<input name="min_quantity" type="number" min="0" step=".001" value="0" required></label><button type="submit">Cadastrar</button></form></section>'
+      +'<h2>Insumos ('+items.length+')</h2><div class="x-grid">';
+    for(const item of items){
+      const low=Number(item.quantity)<=Number(item.min_quantity);
+      out+='<div class="x-panel"><h3>'+esc(item.name)+'</h3><p>Saldo: <b>'+esc(item.quantity)+' '+esc(item.unit)+'</b></p><p class="x-muted">Mínimo: '+esc(item.min_quantity)+(low?' · <b style="color:#b45309">Estoque baixo</b>':'')+'</p></div>';
+    }
+    out+='</div>';
+    if(active.length){
+      out+='<section class="x-panel"><h2>Entrada, perda ou ajuste</h2><form id="adjuststock" class="x-form"><label>Insumo<select name="stock_item_id" required>'+opts(active,'id','name')+'</select></label><label>Movimentação<select name="reason"><option value="receive">Entrada (+)</option><option value="waste">Perda (-)</option><option value="adjustment">Ajuste (+ ou -)</option></select></label><label>Quantidade (+ ou -)<input name="delta" type="number" step=".001" required placeholder="Ex.: 2 ou -0.5"></label><button type="submit">Registrar movimento</button></form></section>';
+    }
+    if(active.length&&products.length){
+      out+='<section class="x-panel"><h2>Ficha técnica · consumo por produto</h2><p class="x-muted">Informe quanto de cada insumo é consumido por uma unidade vendida do produto. Selecione um ingrediente existente e use 0 para removê-lo da ficha.</p><form id="recipeset" class="x-form"><label>Produto<select name="product_id" required>'+opts(products,'id','name')+'</select></label><label>Ingrediente<select name="stock_item_id" required>'+opts(active,'id','name')+'</select></label><label>Quantidade por unidade<input name="quantity" type="number" min="0" max="10000000" step=".001" required placeholder="Ex.: 0.150"></label><button type="submit">Salvar ficha</button></form><h3>Ingredientes configurados ('+recipes.length+')</h3>';
+      if(!recipes.length)out+='<p class="x-muted">Nenhuma ficha técnica foi cadastrada.</p>';
+      for(const r of recipes){
+        const prod=products.find(p=>p.id===r.product_id),item=items.find(i=>i.id===r.stock_item_id);
+        out+='<p class="x-muted"><b>'+esc(prod?.name??'Produto')+'</b> — '+esc(r.quantity)+' '+esc(item?.unit??'')+' de '+esc(item?.name??'Insumo')+'</p>';
+      }
+      out+='</section>';
+    }
+    out+='<section class="x-panel"><h2>Últimas movimentações</h2>';
+    if(!movements.length)out+='<p class="x-muted">Nenhuma movimentação registrada.</p>';
+    for(const m of movements.slice(0,15)){
+      const item=items.find(i=>i.id===m.stock_item_id);
+      out+='<p class="x-muted">'+esc(m.created_at)+' · '+esc(item?.name??'Insumo')+' · '+esc(m.reason)+' · '+esc(m.quantity_delta)+'</p>';
+    }
+    out+='</section>';
+    box(out);
     form('newstock',v=>call('stock_create',{name:v.name,unit:v.unit,quantity:Number(v.quantity),min_quantity:Number(v.min_quantity)}));
+    form('recipeset',v=>call('recipe_set',{product_id:v.product_id,stock_item_id:v.stock_item_id,quantity:Number(v.quantity)}));
+    form('adjuststock',v=>call('stock_adjust',{stock_item_id:v.stock_item_id,reason:v.reason,delta:Number(v.delta)}));
   }else if(module==='impressao'){
     const {devices=[],jobs=[]}=await call('printers');
     let out=title+'<p class="x-note">A impressora B&G BG-06 depende do agente local no Windows e de teste físico com USB ou Bluetooth. Nenhum equipamento está enviando impressões e as filas não estão processadas automaticamente.</p><section class="x-panel"><h2>Cadastrar equipamento planejado</h2><form id="newprinter" class="x-form"><label>Nome<input name="display_name" value="B&G BG-06" required minlength="2" maxlength="100"></label><label>Estação<select name="station"><option value="cozinha">Cozinha</option><option value="caixa">Caixa</option><option value="balcao">Balcão</option></select></label><button type="submit">Cadastrar desativado</button></form></section><h2>Dispositivos ('+devices.length+')</h2><div class="x-grid">';
