@@ -58,7 +58,7 @@ export async function renderPlatform({supabase,box,esc,link}){
     for(const member of members){
       const account=(data.accounts??[]).find(u=>u.id===member.user_id);
       out+='<div class="p-card" style="padding:12px;background:#f8fafc"><b>'+esc(account?.email??'Conta não encontrada')+'</b><p class="p-info">'+esc(member.role)+' · '+esc(member.status)+(account?.confirmed?' · E-mail confirmado':' · E-mail não confirmado')+'</p>';
-      if(account?.confirmed){
+      if(account?.confirmed&&!account?.is_platform_admin&&member.status!=='revoked'){
         out+='<button type="button" class="p-btn alt" data-reset="'+esc(member.user_id)+'" data-restaurant="'+esc(r.id)+'" data-email="'+esc(account.email)+'">Redefinir senha</button> ';
       }
       if(member.role==='master'&&member.status==='pending')out+='<button type="button" class="p-btn alt" data-renew="'+esc(member.user_id)+'" data-restaurant="'+esc(r.id)+'">Renovar acesso Master</button>';
