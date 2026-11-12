@@ -1,3 +1,4 @@
+import {icon} from './ui-icons.js?v=1.0.0-rc.1';
 // Intervalo 0.9.7 — cardápio público somente consulta. Sem pedidos ou cobranças online.
 export async function renderPublicMenu({supabase,slug,box,esc,link}){
  document.body.classList.add('intervalo-menu');
@@ -16,7 +17,7 @@ export async function renderPublicMenu({supabase,slug,box,esc,link}){
  const cats=data.categories??[],catIds=new Set(cats.map(c=>c.id));
  const products=(data.products??[]).filter(p=>catIds.has(p.category_id));
  const money=n=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(n??0)/100);
- const icon=name=>/bebid|sucos|refriger|drink/i.test(name)?'🥤':/pizza/i.test(name)?'🍕':/sobremesa|doce/i.test(name)?'🍰':/batata|porç|acomp/i.test(name)?'🍟':/cafe|café/i.test(name)?'☕':'🍔';
+ const categoryIcon=name=>icon(/bebid|sucos|refriger|drink/i.test(name)?'cup':/pizza/i.test(name)?'pizza':/sobremesa|doce/i.test(name)?'cake':/batata|porç|acomp/i.test(name)?'package':/cafe|café/i.test(name)?'coffee':'burger',52);
  const safeImage=p=>typeof p.image_url==='string'&&/^https:\/\/[^\s<>"']+$/.test(p.image_url)?p.image_url:null;
  let out=css+bar+'<section class="dm-hero"><span class="dm-tag">Bem-vindo ao nosso cardápio</span><h1>'+esc(data.restaurant.name)+'</h1><p>Encontre seus sabores favoritos. Consulte a equipe do restaurante para realizar seu pedido.</p><button type="button" id="dm-share">Compartilhar cardápio</button><button type="button" id="dm-copy">Copiar link</button></section>'
  +'<section class="dm-tools"><input type="search" id="dm-search" aria-label="Buscar no cardápio" placeholder="Buscar lanches, bebidas, produtos..." autocomplete="off"><div class="dm-categories" role="group" aria-label="Categorias">'
@@ -25,7 +26,7 @@ export async function renderPublicMenu({supabase,slug,box,esc,link}){
  for(const p of products){
   const cat=cats.find(c=>c.id===p.category_id),photo=safeImage(p),extras=(data.options??[]).filter(o=>o.product_id===p.id);
   out+='<article class="dm-card" data-dm-product data-category="'+esc(p.category_id)+'" data-search="'+esc((p.name+' '+(p.description??'')+' '+(cat?.name??'')).toLocaleLowerCase('pt-BR'))+'">'
-    +'<div class="dm-photo">'+(photo?'<img src="'+esc(photo)+'" loading="lazy" decoding="async" referrerpolicy="no-referrer" alt="'+esc(p.name)+'">':'<span aria-hidden="true">'+icon(cat?.name??'')+'</span>')
+    +'<div class="dm-photo">'+(photo?'<img src="'+esc(photo)+'" loading="lazy" decoding="async" referrerpolicy="no-referrer" alt="'+esc(p.name)+'">':'<span aria-hidden="true">'+categoryIcon(cat?.name??'')+'</span>')
     +'<b>'+esc(cat?.name??'Produto')+'</b></div><div class="dm-content"><h3>'+esc(p.name)+'</h3><p>'+esc(p.description??'')+'</p><strong>'+money(p.price_cents)+'</strong>';
   if(extras.length)out+='<details><summary>Opcionais ('+extras.length+')</summary><ul>'+extras.map(o=>'<li>'+esc(o.name)+' · +'+money(o.price_delta_cents)+'</li>').join('')+'</ul></details>';
   out+='</div></article>';
@@ -34,7 +35,7 @@ export async function renderPublicMenu({supabase,slug,box,esc,link}){
  box(out);
  document.querySelectorAll('.dm-photo img').forEach(img=>img.addEventListener('error',()=>{
   const picture=img.parentNode;
-  const fallback=document.createElement('span');fallback.textContent='🍔';fallback.setAttribute('aria-label','Sem foto disponível');
+  const fallback=document.createElement('span');fallback.innerHTML=icon('burger',48);fallback.setAttribute('aria-label','Sem foto disponível');
   img.replaceWith(fallback);
  }));
  const input=document.getElementById('dm-search'),cards=[...document.querySelectorAll('[data-dm-product]')];let category='all';
