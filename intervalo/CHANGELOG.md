@@ -1,5 +1,21 @@
 # Intervalo — CHANGELOG
 
+## 0.9.8 — 2026-11-12 · Correção de instalação do PWA Garçom e liberação para piloto
+
+**Status:** homologação técnica aprovada para TESTE PILOTO assistido. **Ainda sem validação funcional no domínio real, Android/iPhone ou fluxo operacional completo; não é homologação comercial da 1.0.0.**
+
+- Link canônico de instalação: `https://gaveblue.com.br/intervalo/?app=garcom`; a URL aponta para `/intervalo/index.html` existente com parâmetro de inicialização, evitando usar rota sem resposta HTTP 200 como `start_url` do PWA.
+- `manifest-garcom.webmanifest`: atualizado `start_url` e shortcut; mantém `id` exclusivo, ícones SVG e PNG 192/512 e aparência standalone.
+- `404.html` do domínio inclui agora a rota curta `/intervalo/garcom`; o app restaura e reavalia o manifesto após o fallback de URL.
+- Login com `destino=garcom` retorna ao launcher via URL canônica; launcher não redireciona automaticamente para a única empresa, permitindo instalar o PWA antes de escolher restaurante.
+- Novo `offline.html` e service worker: trata navegação sem rede mostrando instrução segura de reconexão; **não** armazena tokens, respostas privadas ou comandas e **não** permite confirmar pedidos offline.
+- Atualizados versionamento/cache imports `0.9.8`, rota e manifesto.
+- Conferência estática de 8 arquivos (HTML principal, fallback, JS Garçom, Cardápio, Catálogo, SW, página offline e manifest); Edge Functions `restaurant-core`, `restaurant-team`, `public-menu` ativas.
+- Não foi possível consultar o domínio vivo devido a DNS indisponível no ambiente; não alegar publicação/propagação confirmada.
+- Ver `QA-0.9.8.md` para resultados, restrições e roteiro de instalação/teste Android/iPhone.
+
+---
+
 ## 0.9.7 — 2026-11-12 · PWA Garçom e Cardápio Digital
 
 **Status:** UI e APIs implantadas no GitHub/Supabase; testes de sintaxe, renderização simulada e transação SQL aprovados. **Sem homologação E2E no domínio nem teste de instalação em aparelhos.** Arquitetura e QA documentados.
