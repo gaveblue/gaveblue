@@ -14,6 +14,7 @@ Deno.serve(async(req:Request)=>{
  if(!token)return out({error:"Sessão obrigatória"},401);
  const {data:{user},error:ue}=await sb.auth.getUser(token);
  if(ue||!user)return out({error:"Sessão inválida"},401);
+ if(user.app_metadata?.intervalo_password_change_required)return out({error:"Troque sua senha provisória primeiro"},403);
  const {data:admin,error:ae}=await sb.from("platform_admins").select("user_id").eq("user_id",user.id).eq("active",true).maybeSingle();
  if(ae)return out({error:"Falha na verificação administrativa"},503);
  if(!admin)return out({error:"Apenas Super Admin"},403);
