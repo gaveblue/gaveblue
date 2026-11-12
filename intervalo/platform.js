@@ -1,5 +1,7 @@
 // Intervalo — painel da Gaveblue: restaurantes, convites Master e módulos.
+import {icon} from './ui-icons.js?v=1.0.0-rc.1';
 export async function renderPlatform({supabase,box,esc,link}){
+ document.body.classList.add('iv-fullwidth','iv-platform');
  const css='<style>.p-grid{display:grid;grid-template-columns:1fr 1.2fr;gap:16px}.p-card{border:1px solid #e2e8f0;border-radius:14px;padding:20px;background:#fff;margin:13px 0}.p-form label{display:block;margin:12px 0;font-weight:700;font-size:12px}.p-form input,.p-form select{display:block;width:100%;margin-top:7px;padding:11px;border:1px solid #cbd5e1;border-radius:9px}.p-btn{padding:11px 14px;background:#0f766e;color:white;border:0;border-radius:9px;cursor:pointer;font-size:12px;font-weight:700}.p-btn.alt{background:#e2e8f0;color:#334155}.p-btn.danger{background:#fff1f2;color:#9f1239}.p-modules{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}.p-module{border:1px solid #cbd5e1;border-radius:8px;background:#fff;color:#334155;padding:9px 10px;font-size:12px;cursor:pointer}.p-module.on{border-color:#99f6e4;background:#f0fdfa;color:#115e59;font-weight:750}.p-info{color:#64748b;font-size:12px}@media(max-width:800px){.p-grid{grid-template-columns:1fr}}</style>';
  const modules=[['gestao','Gestão'],['garcom','Garçom'],['cozinha','Cozinha'],['caixa','Caixa'],['cardapio','Cardápio']];
  const call=async(name,body)=>{const {data,error}=await supabase.functions.invoke(name,{body});if(error||data?.error){let msg=data?.error??error?.message??'Falha';try{const info=await error?.context?.json?.();if(info?.error)msg=info.error}catch{}throw Error(msg)}return data};
@@ -80,8 +82,8 @@ export async function renderPlatform({supabase,box,esc,link}){
   dialog.append(title,msg,inp,hint,copy,close);
   document.body.append(dialog);dialog.showModal();
  }
- const base=css+'<h1>Super Admin Gaveblue</h1><p class="muted">Gestão central dos restaurantes e módulos do Intervalo.</p><p class="p-info">As habilitações são de teste e não geram cobranças. Planos comerciais e pagamentos de assinaturas permanecem desativados.</p>';
- const createPanel='<section class="p-card"><h2>Novo restaurante</h2><form id="platform-new" class="p-form"><label>Nome do restaurante<input name="name" minlength="2" maxlength="120" required></label><label>Slug<input name="slug" minlength="3" maxlength="60" pattern="[a-z0-9]+(-[a-z0-9]+)*" required placeholder="meu-restaurante"></label><button class="p-btn" type="submit">Criar restaurante</button></form><p class="p-info">O restaurante será criado sem exigir e-mail ou confirmação. Depois, no card do restaurante, escolha um Master e configure o acesso.</p></section>';
+ const base=css+'<div class="iv-shell"><aside class="iv-sidebar"><div class="iv-sidebar-brand">Intervalo</div><div class="iv-navlabel">Plataforma</div><nav class="iv-sidenav" aria-label="Navegação Super Admin"><a class="iv-navitem active" href="#platform-overview">'+icon('dashboard',18)+' Visão geral</a><a class="iv-navitem" href="#platform-restaurants">'+icon('store',18)+' Restaurantes</a><a class="iv-navitem" href="#platform-create">'+icon('plus',18)+' Novo restaurante</a><a class="iv-navitem" href="'+link('/minha-conta')+'">'+icon('user',18)+' Minha conta</a><a class="iv-navitem" href="'+link('/inicio')+'">'+icon('arrowLeft',18)+' Meus restaurantes</a></nav><div class="iv-sidebar-foot">'+icon('shield',18)+' <b>Super Admin</b><br>Controle exclusivo da plataforma. Operações sensíveis exigem autenticação.</div></aside><div class="iv-workspace"><div class="iv-worktop"><span>Plataforma / Administração</span><div class="iv-worktop-right">'+icon('shield',17)+' Super Admin <span class="iv-avatar">SA</span></div></div><div class="iv-header" id="platform-overview"><div><span class="iv-section-caption">PAINEL DA PLATAFORMA</span><h1>Visão geral do Intervalo</h1><p>Restaurantes, usuários e módulos em um só lugar.</p></div><span class="iv-chip orange">'+icon('info',14)+' Indicadores operacionais reais</span></div>' + '<p class="iv-note">Planos e cobrança de assinaturas ainda não estão habilitados. Os indicadores abaixo não representam faturamento financeiro.</p>';
+ const createPanel='<section id="platform-create" class="p-card"><h2>'+icon('plus',20)+' Novo restaurante</h2><form id="platform-new" class="p-form"><label>Nome do restaurante<input name="name" minlength="2" maxlength="120" required></label><label>Slug<input name="slug" minlength="3" maxlength="60" pattern="[a-z0-9]+(-[a-z0-9]+)*" required placeholder="meu-restaurante"></label><button class="p-btn" type="submit">Criar restaurante</button></form><p class="p-info">O restaurante será criado sem exigir e-mail ou confirmação. Depois, no card do restaurante, escolha um Master e configure o acesso.</p></section>';
  function bindCreateForm(){
    const form=document.getElementById('platform-new');
    if(!form)return;
@@ -105,11 +107,22 @@ export async function renderPlatform({supabase,box,esc,link}){
   bindCreateForm();
   try{
    const data=await call('platform-control',{action:'list'});
-   let out=base+(data.warnings?.length?'<p class="p-info">Alguns dados secundários estão indisponíveis; o cadastro de restaurantes continua ativo.</p>':'')+'<div class="p-grid">'+createPanel+'<section><h2>Restaurantes ('+(data.restaurants??[]).length+')</h2>';
+   const restaurants=data.restaurants??[],activeCount=restaurants.filter(r=>r.status==='active').length;
+    const userCount=new Set((data.members??[]).filter(m=>m.status!=='revoked').map(m=>m.user_id)).size;
+    const modulesOn=(data.modules??[]).filter(m=>m.enabled).length;
+    const kpis='<div class="iv-stats">'+[
+      ['store','Restaurantes',restaurants.length,'Cadastrados na plataforma'],
+      ['checkCircle','Ativos',activeCount,'Estabelecimentos habilitados'],
+      ['users','Usuários vinculados',userCount,'Contas com acesso não revogado'],
+      ['layers','Módulos ativos',modulesOn,'Habilitações por restaurante']
+    ].map(([ic,name,value,caption])=>'<article class="iv-stat"><div class="iv-stat-head">'+esc(name)+icon(ic,20)+'</div><div class="iv-stat-val">'+value+'</div><div class="iv-stat-foot">'+esc(caption)+'</div></article>').join('')+'</div>';
+    let out=base+kpis+(data.warnings?.length?'<p class="iv-note">Alguns dados secundários não estão disponíveis; o cadastro de restaurantes continua ativo.</p>':'')
+     +'<div class="iv-toolbar" id="platform-restaurants"><h2>'+icon('store',20)+' Restaurantes ('+restaurants.length+')</h2><div class="iv-search"><input type="search" id="platform-search" autocomplete="off" placeholder="Buscar restaurante..." aria-label="Buscar restaurante"></div></div>'
+     +'<div class="p-grid">'+createPanel+'<section class="iv-restaurant-list"><div class="iv-muted">Selecione um restaurante para abrir os controles de acesso e seus módulos.</div>';
    for(const r of data.restaurants??[]){
     const flags=(data.modules??[]).filter(m=>m.restaurant_id===r.id);
     const sub=(data.subscriptions??[]).find(s=>s.restaurant_id===r.id);
-    out+='<article class="p-card"><h3>'+esc(r.name)+'</h3><p class="p-info">/'+esc(r.slug)+' · '+esc(r.status)+' · '+esc(sub?.status??'Sem assinatura')+'</p><div class="p-modules">';
+    out+='<article class="p-card" data-restaurant-card data-name="'+esc(r.name.toLocaleLowerCase('pt-BR'))+'"><h3>'+icon('store',20)+' '+esc(r.name)+'</h3><p class="p-info">/'+esc(r.slug)+' · <span class="iv-chip '+(r.status==='active'?'success':'danger')+'">'+(r.status==='active'?'Ativo':'Suspenso')+'</span> · '+esc(sub?.status??'Sem assinatura')+'</p><details class="iv-admin-expand"><summary>'+icon('settings',16)+' Equipe, permissões e módulos</summary><div class="p-modules">';
     for(const [id,label] of modules){
       const active=flags.some(m=>m.module===id&&m.enabled);
       out+='<button type="button" class="p-module '+(active?'on':'')+'" data-rest="'+esc(r.id)+'" data-module="'+id+'" data-enabled="'+(!active)+'">'+label+' · '+(active?'Ligado':'Desligado')+'</button>';
@@ -138,9 +151,10 @@ export async function renderPlatform({supabase,box,esc,link}){
     }
     out+='<div class="p-card" style="padding:12px;background:#f0fdfa"><h4>Criar usuário com senha provisória</h4><p class="p-info">Sem convite por e-mail. O acesso é autorizado administrativamente; isso não comprova a titularidade do endereço. Informe o e-mail correto e entregue a senha por canal seguro.</p><form data-issue-user="'+esc(r.id)+'" class="p-form"><label>E-mail de login<input type="email" name="email" autocomplete="off" maxlength="254" required placeholder="usuario@exemplo.com"></label><label>Função<select name="role" required><option value="master">Master (dono)</option><option value="manager">Gerente</option><option value="waiter">Garçom</option><option value="kitchen">Cozinha</option><option value="cashier">Caixa</option></select></label><button type="submit" class="p-btn">Criar usuário e definir senha</button></form></div>';
      out+='<p class="p-info">Para administrar este restaurante com sua própria conta, o Super Admin pode vincular-se explicitamente como Master (ação auditada).</p><button type="button" class="p-btn alt" data-join="'+esc(r.id)+'">Vincular minha conta como Master</button> ';
-    out+='<button type="button" class="p-btn '+(r.status==='active'?'danger':'alt')+'" data-status="'+esc(r.id)+'" data-value="'+(r.status==='active'?'suspended':'active')+'">'+(r.status==='active'?'Suspender restaurante':'Reativar restaurante')+'</button></article>';
+    out+='<button type="button" class="p-btn '+(r.status==='active'?'danger':'alt')+'" data-status="'+esc(r.id)+'" data-value="'+(r.status==='active'?'suspended':'active')+'">'+(r.status==='active'?'Suspender restaurante':'Reativar restaurante')+'</button></details></article>';
    }
-   out+='</section></div>';box(out);
+   out+='</section></div></div></div>';box(out);
+    const search=document.getElementById('platform-search');if(search)search.oninput=()=>{const q=search.value.trim().toLocaleLowerCase('pt-BR');document.querySelectorAll('[data-restaurant-card]').forEach(card=>{card.hidden=!card.dataset.name.includes(q)})};
    bindCreateForm();
    document.querySelectorAll('form[data-set-master]').forEach(form=>form.onsubmit=async e=>{
      e.preventDefault();const button=form.querySelector('button');button.disabled=true;
