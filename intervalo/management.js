@@ -1,10 +1,12 @@
 // Intervalo 0.7.0 — Gestao de restaurante e equipe; apenas UI, servidor decide permissões.
+import {icon} from './ui-icons.js?v=1.0.0-rc.1';
 export async function renderManagement({supabase,restaurant,role,box,esc,link}) {
  const modules=["gestao","garcom","cozinha","caixa","cardapio"];
  const labels={gestao:"Gestão",garcom:"Garçom",cozinha:"Cozinha",caixa:"Caixa",cardapio:"Cardápio"};
  const roles={master:"Master",manager:"Gerente",waiter:"Garçom",kitchen:"Cozinha",cashier:"Caixa"};
  const defaults={master:modules,manager:modules,waiter:["garcom","cardapio"],kitchen:["cozinha","cardapio"],cashier:["caixa","cardapio"]};
- let state={tab:"dados",data:null};
+ document.body.classList.add("iv-fullwidth","iv-master");
+ let state={tab:"visao",data:null,overview:null};
  const sty='<style>.mtabs{display:flex;gap:8px;overflow:auto;margin:23px 0}.mtabs button{border:1px solid #dbe2e8;background:white;padding:11px 16px;border-radius:10px;font-size:13px;font-weight:700;color:#334155;white-space:nowrap}.mtabs button.selected{color:white;background:#0f766e;border-color:#0f766e}.mg{display:grid;grid-template-columns:1fr 1fr;gap:14px}.mg .full{grid-column:1/-1}.mg label{display:block;font-size:12px;font-weight:700;color:#475569;margin-bottom:7px}.mg input,.mg select{padding:11px;width:100%;border:1px solid #cbd5e1;border-radius:9px;background:white;color:#0f172a}.mg input:focus,.mg select:focus{outline:2px solid #99f6e4}.team-card{background:#fff;border:1px solid #dce4ec;border-radius:13px;padding:17px;margin:12px 0}.team-top{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center}.team-actions{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin-top:13px}.team-actions select{border-radius:8px;padding:9px;border:1px solid #cbd5e1}.smallbtn{border:1px solid #cbd5e1;background:#fff;color:#334155;border-radius:8px;padding:9px 12px;font-weight:700;font-size:12px}.smallbtn.danger{color:#b91c1c;border-color:#fecaca}.status{font-size:11px;border-radius:50px;background:#f1f5f9;padding:6px 10px;font-weight:750;color:#475569}.pgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:10px}.pitem{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:13px}.pitem strong{display:block;margin:0 0 8px}.pitem span{font-size:12px;color:#64748b}.pitem button{margin-top:9px}.onboarding-note{font-size:13px;padding:12px;background:#ecfdf5;border:1px solid #ccfbf1;border-radius:10px;color:#115e59}.muted-sm{font-size:12px;color:#64748b;line-height:1.6}@media(max-width:650px){.mg{grid-template-columns:1fr}.mg .full{grid-column:auto}.team-actions{align-items:stretch}}</style>';
  function showTemporaryPassword(temp,email){
   const dlg=document.createElement('dialog');
@@ -25,20 +27,52 @@ export async function renderManagement({supabase,restaurant,role,box,esc,link}) 
    if(data?.error)throw Error(data.error);
    return data;
  }
- async function refresh(){state.data=await call("list");draw();}
+ async function refresh(){
+  state.data=await call("list");
+  if(state.tab==="visao"){
+   const fetchCore=async action=>{
+    try{const {data,error}=await supabase.functions.invoke("restaurant-core",{body:{restaurant_id:restaurant.id,action}});return error||data?.error?null:data}catch{return null}
+   };
+   const [orders,stock]=await Promise.all([fetchCore("orders"),fetchCore("stock_list")]);
+   state.overview={orders,stock};
+  }
+  draw();
+ }
  const value=(x)=>esc(x??"");
  const input=(label,name,val,more="")=>'<div><label for="m-'+name+'">'+label+'</label><input id="m-'+name+'" name="'+name+'" value="'+value(val)+'" '+more+'></div>';
  function draw(){
    const d=state.data;if(!d)return;
    const s=d.settings??{},isMaster=d.actor_role==="master",isManager=d.actor_role==="manager";
    const note=s.onboarding_completed_at?"Cadastro inicial concluído. Você pode atualizar os dados abaixo.":"Preencha telefone, cidade e UF para concluir o cadastro inicial do restaurante.";
-   const tabs=[["dados","Dados do restaurante"],["equipe","Equipe"],["acessos","Permissões"]];
+   const tabs=[["visao","Visão geral"],["dados","Dados do restaurante"],["equipe","Equipe"],["acessos","Permissões"]];
    const quickModules=[["catalogo","Cardápio","gestao"],["mesas","Mesas","gestao"],["garcom","Garçom","garcom"],["cozinha","Cozinha","cozinha"],["caixa","Caixa","caixa"],["estoque","Estoque","gestao"],["impressao","Impressão","gestao"],["relatorios","Relatórios","gestao"]];
    const accessible=quickModules.filter(([path,label,required])=>(d.enabled??[]).some(m=>m.module===required&&m.enabled));
-   const quickLinks='<style>.manage-modules{display:flex;gap:9px;flex-wrap:wrap;margin:8px 0 20px}.manage-modules a{padding:10px 13px;border-radius:9px;background:#f0fdfa;border:1px solid #ccfbf1;color:#0f766e;font-weight:700;font-size:12px}</style><h2>Operação</h2><div class="manage-modules">'+accessible.map(([path,label])=>'<a href="'+link("/"+d.restaurant.slug+"/"+path)+'">'+label+'</a>').join("")+'</div>';
-   const viewHead=sty+'<div class="eyebrow">PAINEL DO RESTAURANTE</div><h1 style="margin-bottom:4px">'+value(d.restaurant.name)+'</h1><p class="muted">/'+value(d.restaurant.slug)+' · '+value(roles[d.actor_role]??d.actor_role)+'</p><a class="smallbtn" style="display:inline-block" href="'+link("/inicio")+'">← Trocar restaurante</a><nav aria-label="Áreas de gestão" class="mtabs">'+tabs.filter(x=>x[0]!=="acessos"||isMaster).map(([tab,label])=>'<button type="button" data-tab="'+tab+'" class="'+(tab===state.tab?"selected":"")+'">'+label+'</button>').join("")+'</nav>'+quickLinks+'<div id="mg-message" role="status" aria-live="polite"></div>';
+   const modIcons={catalogo:"receipt",mesas:"table",garcom:"utensils",cozinha:"chef",caixa:"register",estoque:"package",impressao:"printer",relatorios:"chart"};
+   const quickLinks='<section class="iv-section"><h2 class="iv-section-title">Acesso rápido</h2><div class="iv-card-grid">'+accessible.map(([path,label])=>'<a class="iv-feature-tile" href="'+link("/"+d.restaurant.slug+"/"+path)+'"><span class="iv-feature-icon">'+icon(modIcons[path]??"layers",20)+'</span><span><strong>'+esc(label)+'</strong><small>Abrir módulo</small></span>'+icon("chevronRight",17)+'</a>').join("")+'</div></section>'
+   const viewHead=sty+'<div class="iv-shell"><aside class="iv-sidebar"><div class="iv-sidebar-brand">Intervalo</div><div class="iv-navlabel">Restaurante</div><p class="iv-muted" style="padding:0 12px">'+value(d.restaurant.name)+'</p><nav class="iv-sidenav" aria-label="Navegação da gestão">'
+     +tabs.filter(x=>x[0]!=="acessos"||isMaster).map(([tab,label])=>'<button class="iv-navitem '+(tab===state.tab?"active":"")+'" type="button" data-tab="'+tab+'">'+icon({visao:"dashboard",dados:"store",equipe:"users",acessos:"shield"}[tab],18)+label+'</button>').join("")+'</nav>'
+     +'<div class="iv-navlabel">Operação</div><nav class="iv-sidenav">'+accessible.map(([path,label])=>'<a class="iv-navitem" href="'+link("/"+d.restaurant.slug+"/"+path)+'">'+icon(modIcons[path]??"layers",18)+esc(label)+'</a>').join("")+'</nav>'
+     +'<div class="iv-sidebar-foot"><a href="'+link("/inicio")+'">'+icon("arrowLeft",16)+' Trocar restaurante</a></div></aside><div class="iv-workspace">'
+     +'<div class="iv-worktop"><span>Restaurante / '+value(d.restaurant.name)+'</span><span class="iv-chip orange">'+icon("shield",15)+' '+value(roles[d.actor_role]??d.actor_role)+'</span></div>'
+     +'<div class="iv-header"><div><span class="iv-section-caption">PAINEL DO RESTAURANTE</span><h1>'+(state.tab==="visao"?"Olá, gestor!":state.tab==="dados"?"Dados do restaurante":state.tab==="equipe"?"Equipe do restaurante":"Permissões da equipe")+'</h1><p>'+value(d.restaurant.name)+' · Gerencie sua operação em um só lugar.</p></div><a class="iv-btn secondary" href="'+link("/inicio")+'">'+icon("store",16)+' Restaurantes</a></div><div id="mg-message" role="status" aria-live="polite"></div>'
    let inner="";
-   if(state.tab==="dados"){
+   if(state.tab==="visao"){
+    const all=state.overview?.orders?.orders??[],active=all.filter(o=>!["closed","cancelled"].includes(o.status));
+    const activeTables=new Set(active.map(o=>o.table_id).filter(Boolean)).size;
+    const stock=state.overview?.stock?.items,low=Array.isArray(stock)?stock.filter(i=>i.active&&Number(i.quantity)<=Number(i.min_quantity)):[];
+    const team=(d.members??[]).filter(m=>m.status==="active").length;
+    const cards=[
+     ["clipboard","Pedidos em andamento",state.overview?.orders?active.length:"—","Comandas não encerradas"],
+     ["table","Mesas em uso",state.overview?.orders?activeTables:"—","Mesas com comanda ativa"],
+     ["users","Equipe ativa",team,"Vínculos habilitados"],
+     ["alert","Estoque em alerta",Array.isArray(stock)?low.length:"—","Insumos no mínimo ou abaixo"]
+    ];
+    inner='<div class="iv-stats">'+cards.map(([ic,label,value,note])=>'<article class="iv-stat"><div class="iv-stat-head">'+label+icon(ic,20)+'</div><div class="iv-stat-val">'+value+'</div><div class="iv-stat-foot">'+note+'</div></article>').join('')+'</div>'
+     +'<div class="iv-columns"><section class="iv-list-card"><h3>'+icon("clipboard",19)+' Pedidos em andamento</h3>'
+     +(active.length?active.slice(0,8).map(o=>'<div class="iv-feature-tile" style="margin-top:8px">'+icon("receipt",18)+'<span><strong>Comanda #'+value(String(o.id).replace(/-/g,"").slice(-5).toUpperCase())+'</strong><small>Status: '+value(o.status)+'</small></span></div>').join(''):'<div class="iv-empty">Sem pedidos ativos ou consulta indisponível</div>')
+     +'</section><section class="iv-list-card"><h3>'+icon("package",19)+' Estoque em alerta</h3>'
+     +(low.length?low.slice(0,8).map(i=>'<div class="iv-feature-tile" style="margin-top:8px">'+icon("alert",18)+'<span><strong>'+value(i.name)+'</strong><small>Saldo: '+value(i.quantity)+' '+value(i.unit)+' · Mínimo: '+value(i.min_quantity)+'</small></span></div>').join(''):'<div class="iv-empty">Sem alertas identificados ou consulta indisponível</div>')+'</section></div>'+quickLinks;
+   }else if(state.tab==="dados"){
      inner='<section class="panel"><h2>Informações do estabelecimento</h2><p class="onboarding-note">'+note+'</p><form id="restaurant-settings" class="mg">'+input("Telefone","phone",s.phone,'inputmode="tel" maxlength="30"')+input("CEP (somente números)","postal_code",s.postal_code,'inputmode="numeric" maxlength="8"')+input("Rua / Avenida","street",s.street,'maxlength="150"')+input("Número","address_number",s.address_number,'maxlength="30"')+input("Bairro","neighborhood",s.neighborhood,'maxlength="100"')+input("Cidade","city",s.city,'maxlength="120"')+input("UF","state",s.state,'maxlength="2" style="text-transform:uppercase"')+'<div><label for="m-timezone">Fuso horário</label><select id="m-timezone" name="timezone">'+["America/Sao_Paulo","America/Manaus","America/Cuiaba","America/Rio_Branco","America/Belem","America/Fortaleza","America/Recife","America/Noronha"].map(t=>'<option value="'+t+'" '+((s.timezone??"America/Sao_Paulo")===t?"selected":"")+'>'+t.replace("America/","")+'</option>').join("")+'</select></div><div class="full team-actions"><button class="btn" type="submit">Salvar dados</button>'+(!s.onboarding_completed_at?'<button class="btn alt" name="finish" type="button" id="mg-finish">Concluir cadastro</button>':'')+'</div></form><p class="muted-sm">Cadastros e alterações ficam vinculados ao estabelecimento e registrados para auditoria.</p></section>';
    }else if(state.tab==="equipe"){
      const options=(isMaster?["manager","waiter","kitchen","cashier"]:["waiter","kitchen","cashier"]);
@@ -74,7 +108,7 @@ export async function renderManagement({supabase,restaurant,role,box,esc,link}) 
        inner+='</div>';
      }
    }
-   box(viewHead+inner);
+   box(viewHead+inner+"</div></div>");
    document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{state.tab=b.dataset.tab;draw()});
    const settingForm=document.getElementById("restaurant-settings");
    if(settingForm){
