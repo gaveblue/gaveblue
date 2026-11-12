@@ -10,6 +10,8 @@ create table if not exists public.restaurant_master_setup (
  updated_at timestamptz not null default now()
 );
 alter table public.restaurant_master_setup enable row level security;
+drop policy if exists "deny_client_master_setup" on public.restaurant_master_setup;
+create policy "deny_client_master_setup" on public.restaurant_master_setup for all to anon,authenticated using(false) with check(false);
 revoke all on public.restaurant_master_setup from public,anon,authenticated;
 grant select,insert,update,delete on public.restaurant_master_setup to service_role;
 comment on table public.restaurant_master_setup is 'Configuração do Master pendente, sem depender do Auth SMTP; leitura e escrita somente backend.';
