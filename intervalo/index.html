@@ -151,12 +151,23 @@ async function choose(user){
        if(enabled&&permitted)out+='<a href="'+link('/'+r.slug+'/'+mod)+'">'+labels[mod]+'</a>';
      }
    }else if(m.status==='pending'){
-     if(m.role==='master')out+='<a href="'+link('/login')+'">Entrar novamente para ativar o Master</a>';
+     if(m.role==='master')out+='<form data-master-activate="'+esc(m.restaurant_id)+'" style="width:100%;margin:10px 0"><label style="display:block;font-size:12px;font-weight:700;margin:10px 0">Confirme a senha desta conta para ativar o vínculo Master</label><input type="password" name="password" autocomplete="current-password" required placeholder="Senha da conta"><button class="btn" style="margin-top:9px" type="submit">Ativar acesso Master</button><p class="hint" role="status"></p></form>';
      else out+='<button class="smallbtn" type="button" data-accept="'+esc(m.restaurant_id)+'">Aceitar convite</button>';
    }
    out+='</div></article>';
  }
  box(out);
+ document.querySelectorAll('form[data-master-activate]').forEach(form=>form.onsubmit=async e=>{
+    e.preventDefault();
+    const button=form.querySelector('button'),message=form.querySelector('p'),password=form.elements.namedItem('password').value;
+    button.disabled=true;message.textContent='Validando acesso...';
+    try{
+      const {data,error}=await supabase.functions.invoke('activate-master',{body:{password}});
+      if(error||!data?.activated){let reason=data?.error??error?.message??'Não foi possível ativar';try{const info=await error?.context?.json?.();reason=info?.error??reason}catch{}message.textContent=reason;return}
+      location.reload();
+    }catch{message.textContent='Falha de conexão. Tente novamente.'}
+    finally{button.disabled=false;form.elements.namedItem('password').value=''}
+ });
  document.querySelectorAll('[data-accept]').forEach(b=>b.onclick=async()=>{
     const {data,error}=await supabase.functions.invoke('restaurant-team',{body:{restaurant_id:b.dataset.accept,action:'accept'}});
     if(error||data?.error){alert(data?.error??error?.message??'Convite não pôde ser aceito.');return}
