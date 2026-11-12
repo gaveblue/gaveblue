@@ -12,7 +12,7 @@
 <script>
 (function(){try{var deep=sessionStorage.getItem('intervalo.deepLink');if(deep&&deep.startsWith('/intervalo/')&&deep.length<2100){sessionStorage.removeItem('intervalo.deepLink');history.replaceState(null,'',deep+window.location.hash)}}catch(e){}})()
 </script>
-</head><body><header><div class="inner"><a class="logo" href="/intervalo/">intervalo<span>.</span><small>UM PRODUTO GAVEBLUE</small></a><nav id="nav"><a href="/intervalo/login">Entrar</a></nav></div></header><main id="app"><div class="skeleton">Carregando Intervalo...</div></main><footer class="foot">Gaveblue © 2026 · Intervalo 0.7.0 · Prévia técnica do PWA</footer>
+</head><body><header><div class="inner"><a class="logo" href="/intervalo/">intervalo<span>.</span><small>UM PRODUTO GAVEBLUE</small></a><nav id="nav"><a href="/intervalo/login">Entrar</a></nav></div></header><main id="app"><div class="skeleton">Carregando Intervalo...</div></main><footer class="foot">Gaveblue © 2026 · Intervalo 0.8.0 · Prévia técnica do PWA</footer>
 <script type="module">
 import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.50.0/+esm';
 const supabase=createClient('https://fynaaiazebydorzllwip.supabase.co','sb_publishable_mGpfDRlZ0MSaa9MV_xMJsg_FT47wa_d',{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,flowType:'implicit',storageKey:'intervalo.auth.v1'}});
@@ -32,7 +32,7 @@ async function setupNav(user){
  nav.innerHTML='<a href="/intervalo/inicio">Restaurantes</a><a href="/intervalo/minha-conta">Minha Conta</a>'+(adminAccess?'<a href="/intervalo/admin">Admin</a>':'')+'<button class="btn alt" id="exit">Sair</button>';
  document.getElementById('exit').onclick=async()=>{await supabase.auth.signOut();location.assign(link('/login'))};
 }
-async function home(user){box('<section class="hero"><div><span class="eyebrow">GAVEBLUE APRESENTA</span><h1>Seu restaurante.<br><span>Um só ritmo.</span></h1><p>Gestão, atendimento, cozinha e caixa conectados em uma plataforma multiempresa, com acesso por restaurante e função.</p><div class="actions">'+btn(user?'Meus restaurantes':'Acessar o Intervalo',user?'/inicio':'/login')+'<a class="btn alt" href="/">Conhecer Gaveblue</a></div><p class="hint">Versão 0.7.0 · Ambiente piloto</p></div><div class="panel preview"><span class="eyebrow">SUA OPERAÇÃO EM UM SÓ LUGAR</span><h2>Seu estabelecimento</h2>'+modules.map(m=>'<div class="preview-row"><strong>'+labels[m]+'</strong><span>→</span></div>').join('')+'</div></section><h2 class="section-title">Módulos da plataforma</h2><section class="grid">'+modules.map(m=>'<article class="feature"><b>'+labels[m]+'</b><p>Estrutura do módulo preparada para desenvolvimento e homologação.</p><span class="tag">Em desenvolvimento</span></article>').join('')+'</section>')}
+async function home(user){box('<section class="hero"><div><span class="eyebrow">GAVEBLUE APRESENTA</span><h1>Seu restaurante.<br><span>Um só ritmo.</span></h1><p>Gestão, atendimento, cozinha e caixa conectados em uma plataforma multiempresa, com acesso por restaurante e função.</p><div class="actions">'+btn(user?'Meus restaurantes':'Acessar o Intervalo',user?'/inicio':'/login')+'<a class="btn alt" href="/">Conhecer Gaveblue</a></div><p class="hint">Versão 0.8.0 · Ambiente piloto</p></div><div class="panel preview"><span class="eyebrow">SUA OPERAÇÃO EM UM SÓ LUGAR</span><h2>Seu estabelecimento</h2>'+modules.map(m=>'<div class="preview-row"><strong>'+labels[m]+'</strong><span>→</span></div>').join('')+'</div></section><h2 class="section-title">Módulos da plataforma</h2><section class="grid">'+modules.map(m=>'<article class="feature"><b>'+labels[m]+'</b><p>Estrutura do módulo preparada para desenvolvimento e homologação.</p><span class="tag">Em desenvolvimento</span></article>').join('')+'</section>')}
 async function login(){
  box('<section class="formbox panel"><span class="eyebrow">ACESSO AO INTERVALO</span><h1>Bem-vindo de volta</h1><p class="muted">Entre com e-mail ou CPF e sua senha. O CPF fica disponível após ser vinculado à sua conta.</p><form id="loginForm"><label for="login-id">E-mail ou CPF</label><input id="login-id" type="text" name="identifier" required maxlength="254" autocomplete="username" placeholder="Seu e-mail ou CPF"><label for="login-pass">Senha</label><input id="login-pass" type="password" name="password" required autocomplete="current-password"><button class="btn formbtn" type="submit">Entrar</button><p id="feedback" role="status" aria-live="polite"></p></form><button class="btn alt" id="reset" style="margin-top:12px;width:100%">Esqueci minha senha</button><p class="hint">Primeiro acesso da Gaveblue? <a href="/intervalo/configurar-admin" style="color:#0f766e;font-weight:700">Ativar Super Admin</a></p></section>');
  document.getElementById('loginForm').onsubmit=async e=>{
@@ -61,10 +61,11 @@ async function login(){
      }
      if(response.error||!response.data?.user){feed.innerHTML='<span class="error">Não foi possível entrar. Verifique suas credenciais.</span>';return}
      const user=response.data.user;
+     if(user.app_metadata?.intervalo_password_change_required){location.assign(link('/trocar-senha'));return}
      const {data:pending}=await supabase.from('restaurant_members').select('restaurant_id').eq('user_id',user.id).eq('role','master').eq('status','pending').limit(1);
      if(pending?.length){
-       const {error:activationError}=await supabase.functions.invoke('activate-master',{body:{}});
-       if(activationError){feed.innerHTML='<span class="error">Login concluído. A ativação do Master não foi confirmada; verifique seu convite.</span>';return}
+       const {error:activationError}=await supabase.functions.invoke('activate-master',{body:{password}});
+       if(activationError){location.assign(link('/inicio'));return}
      }
      const {data:adminAccess}=await supabase.from('platform_admins').select('user_id').eq('user_id',user.id).eq('active',true).maybeSingle();
      location.assign(link(adminAccess?'/admin':'/inicio'));
@@ -72,11 +73,41 @@ async function login(){
      feed.innerHTML='<span class="error">Não foi possível entrar. Tente novamente.</span>';
    }finally{submit.disabled=false}
  };
- document.getElementById('reset').onclick=async()=>{
-   const email=document.getElementById('login-id').value.trim();
-   if(!email.includes('@')){document.getElementById('feedback').innerHTML='<span class="error">Para recuperar a senha, informe seu e-mail no campo acima.</span>';return}
+ document.getElementById('reset').onclick=()=>location.assign(link('/recuperar-senha'));
+}
+async function recovery(){
+ box('<section class="formbox panel"><span class="eyebrow">INTERVALO · RECUPERAÇÃO</span><h1>Recuperar senha</h1><p class="muted">Informe o e-mail cadastrado. Se a entrega de e-mails do projeto estiver configurada, você receberá um link para criar uma nova senha.</p><form id="recoveryForm"><label>E-mail da conta</label><input name="email" type="email" autocomplete="email" required><button class="btn formbtn" type="submit">Enviar link de recuperação</button><p id="feedback" role="status" aria-live="polite"></p></form><p class="hint">Não recebeu o e-mail? Confira spam. Se o envio ainda não estiver configurado, solicite ao Super Admin uma senha provisória. Ele não tem acesso à sua senha antiga.</p><a href="/intervalo/login">Voltar ao login</a></section>');
+ document.getElementById('recoveryForm').onsubmit=async e=>{
+  e.preventDefault();const f=e.currentTarget,feedback=document.getElementById('feedback'),btn=f.querySelector('button');
+  btn.disabled=true;
+  const email=f.elements.namedItem('email').value.trim();
+  try{
    const {error}=await supabase.auth.resetPasswordForEmail(email,{redirectTo:location.origin+link('/redefinir')});
-   document.getElementById('feedback').innerHTML=error?err(error):'<p class="notice">Se a conta existir, enviaremos um link de recuperação.</p>';
+   if(error){feedback.textContent='Não foi possível enviar o e-mail. O serviço de e-mails pode não estar configurado ou ter atingido o limite. Solicite senha provisória ao Super Admin.';feedback.className='error';return}
+   feedback.textContent='Se esse e-mail estiver cadastrado e o envio estiver habilitado, você receberá as instruções. Confira spam e lixo eletrônico.';
+   feedback.className='notice';
+  }catch{feedback.textContent='Serviço indisponível. Solicite uma senha provisória ao Super Admin.';feedback.className='error'}
+  finally{btn.disabled=false}
+ };
+}
+async function changePassword(user){
+ if(!user){location.assign(link('/login'));return}
+ const forced=!!user.app_metadata?.intervalo_password_change_required;
+ box('<section class="formbox panel"><span class="eyebrow">SEGURANÇA DA CONTA</span><h1>'+(forced?'Troca de senha obrigatória':'Alterar minha senha')+'</h1><p class="muted">'+(forced?'A senha provisória precisa ser substituída antes de acessar os dados do restaurante.':'Confirme sua senha atual e escolha uma nova.')+'</p><form id="changePassForm"><label>Senha atual'+(forced?' (provisória)':'')+'</label><input name="current_password" type="password" autocomplete="current-password" required><label>Nova senha (mínimo 12 caracteres)</label><input name="new_password" type="password" autocomplete="new-password" required minlength="12"><label>Confirmar nova senha</label><input name="confirm" type="password" autocomplete="new-password" required minlength="12"><button class="btn formbtn">Salvar nova senha</button><p id="feedback" role="status" aria-live="polite"></p></form><p class="hint">Após salvar, entre novamente com a nova senha.</p></section>');
+ document.getElementById('changePassForm').onsubmit=async e=>{
+  e.preventDefault();const f=e.currentTarget,feedback=document.getElementById('feedback'),btn=f.querySelector('button');
+  const current_password=f.elements.namedItem('current_password').value;
+  const new_password=f.elements.namedItem('new_password').value;
+  if(new_password!==f.elements.namedItem('confirm').value){feedback.className='error';feedback.textContent='As novas senhas não coincidem.';return}
+  if(new_password===current_password){feedback.className='error';feedback.textContent='Escolha uma senha diferente.';return}
+  btn.disabled=true;feedback.textContent='Alterando senha...';
+  try{
+   const {data,error}=await supabase.functions.invoke('account-password',{body:{current_password,new_password}});
+   if(error||!data?.changed){let msg=data?.error??error?.message??'Falha ao atualizar';try{const body=await error?.context?.json?.();if(body?.error)msg=body.error}catch{}feedback.className='error';feedback.textContent=msg;return}
+   await supabase.auth.signOut();
+   location.assign(link('/login'));
+  }catch{feedback.className='error';feedback.textContent='Erro de conexão. Tente novamente.'}
+  finally{btn.disabled=false}
  };
 }
 async function setupFirstAdmin(){
@@ -175,7 +206,7 @@ async function account(user){
  const {renderAccount}=await import('/intervalo/account.js?v=0.2.1');
  return renderAccount({supabase,box,esc,link,user});
 }
-async function start(){const user=await me();await setupNav(user);if(paths.length===0)return home(user);if(paths[0]==='login')return login();if(paths[0]==='minha-conta')return account(user);if(paths[0]==='configurar-admin')return setupFirstAdmin();if(paths[0]==='ativar')return setPassword('activation');if(paths[0]==='redefinir')return setPassword('recovery');if(paths[0]==='inicio')return user?choose(user):location.assign(link('/login'));if(paths[0]==='admin')return user?admin(user):location.assign(link('/login'));if(paths.length===2&&(modules.includes(paths[1])||internalModules.includes(paths[1]))&&/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(paths[0]))return tenant(user,paths[0],paths[1]);box('<h1>Página não encontrada</h1>'+btn('Início','/'))}
+async function start(){const user=await me();if(user?.app_metadata?.intervalo_password_change_required&&!['trocar-senha','login','redefinir','recuperar-senha'].includes(paths[0])){location.assign(link('/trocar-senha'));return}await setupNav(user);if(paths.length===0)return home(user);if(paths[0]==='login')return login();if(paths[0]==='recuperar-senha')return recovery();if(paths[0]==='trocar-senha')return changePassword(user);if(paths[0]==='minha-conta')return account(user);if(paths[0]==='configurar-admin')return setupFirstAdmin();if(paths[0]==='ativar')return setPassword('activation');if(paths[0]==='redefinir')return setPassword('recovery');if(paths[0]==='inicio')return user?choose(user):location.assign(link('/login'));if(paths[0]==='admin')return user?admin(user):location.assign(link('/login'));if(paths.length===2&&(modules.includes(paths[1])||internalModules.includes(paths[1]))&&/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(paths[0]))return tenant(user,paths[0],paths[1]);box('<h1>Página não encontrada</h1>'+btn('Início','/'))}
 start().catch(e=>{app.innerHTML='<div class="wrap"><section class="panel"><h1>Não foi possível iniciar o Intervalo</h1><p class="error">'+esc(e.message)+'</p><p>Verifique sua conexão e atualize a página.</p></section></div>'});
 if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('/intervalo/sw.js',{scope:'/intervalo/'}).catch(()=>{}));
 </script>
