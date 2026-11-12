@@ -66,6 +66,58 @@ Deno.serve(async(req:Request)=>{
    if(members.error||overrides.error||settings.error||enabled.error)return fail("Falha ao carregar informações",503);
    return json({restaurant,members:members.data??[],overrides:overrides.data??[],settings:settings.data??null,enabled:enabled.data??[],actor_role:mine.role});
  }
+ if(action==="create_staff_with_password"){
+   if(!owner)return fail("Somente o Master pode criar funcionários com senha provisória",403);
+   const email=clean(body.email,254).toLowerCase(),display_name=clean(body.display_name,100),role=clean(body.role,20);
+   const temp=body.temporary_password,adminPassword=body.current_password;
+   if(!emailRx.test(email)||email.length>254||!["manager","waiter","kitchen","cashier"].includes(role)
+      ||display_name.length<2||display_name.length>100)
+     return fail("Informe nome, e-mail e função válidos",400);
+   if(typeof temp!=="string"||temp.length<12||temp.length>128||temp.trim()!==temp)
+     return fail("A senha provisória deve ter de 12 a 128 caracteres e não ter espaços nas extremidades",400);
+   if(typeof adminPassword!=="string"||adminPassword.length<1||adminPassword.length>256)
+     return fail("Confirme sua senha de Master",403);
+   const publicKey=Deno.env.get("SUPABASE_ANON_KEY")??"";
+   if(!publicKey)return fail("Verificação de senha indisponível",503);
+   const publicAuth=createClient(url,publicKey,{auth:{persistSession:false,autoRefreshToken:false}});
+   const {data:verified,error:ve}=await publicAuth.auth.signInWithPassword({email:user.email,password:adminPassword});
+   if(ve||verified.user?.id!==user.id)return fail("Senha de Master incorreta",403);
+   const {count:recent,error:countErr}=await db.from("audit_logs")
+     .select("id",{count:"exact",head:true}).eq("restaurant_id",id)
+     .eq("event","staff_manual_provisioned")
+     .gte("created_at",new Date(Date.now()-3600000).toISOString());
+   if(countErr)return fail("Não foi possível validar limite de cadastros",503);
+   if((recent??0)>=20)return fail("Limite de 20 funcionários por hora atingido",429);
+   for(let page=1;page<=25;page++){
+     const {data,error:usersError}=await db.auth.admin.listUsers({page,perPage:200});
+     if(usersError)return fail("Não foi possível consultar contas existentes",503);
+     if(data.users.some(u=>u.email?.toLowerCase()===email))
+       return fail("Já existe conta com esse e-mail. Use Convidar funcionário para vincular a conta existente.",409);
+     if(data.users.length<200)break;
+     if(page===25)return fail("Limite da busca de usuários; solicite ajuda ao Super Admin",503);
+   }
+   const now=new Date().toISOString();
+   const {data:created,error:createError}=await db.auth.admin.createUser({
+     email,password:temp,email_confirm:true,
+     app_metadata:{intervalo_password_change_required:true,intervalo_password_reset_at:now,intervalo_manual_provisioning:true}
+   });
+   if(createError||!created.user?.id)return fail("Não foi possível criar a conta; verifique se o e-mail já existe",503);
+   const {error:linkedError}=await db.from("restaurant_members").insert({
+     restaurant_id:id,user_id:created.user.id,invited_email:email,display_name,
+     role,status:"active",activated_at:now,invite_expires_at:null
+   });
+   if(linkedError){
+     const {error:undoError}=await db.auth.admin.deleteUser(created.user.id);
+     return fail(undoError?"Conta criada, mas vínculo falhou; entre em contato com o Super Admin antes de tentar novamente":
+       "Vínculo falhou; cadastro revertido",503);
+   }
+   const {error:auditError}=await db.from("audit_logs").insert({
+     restaurant_id:id,actor_user_id:user.id,event:"staff_manual_provisioned",
+     details:{target_user_id:created.user.id,role,administrative_email_confirmation:true}
+   });
+   if(auditError)console.error("staff_manual_provision_audit_failed",{code:auditError.code});
+   return json({created:true,must_change:true},201);
+ }
  if(action==="invite"){
    const email=clean(body.email,254).toLowerCase(),role=clean(body.role,20),display_name=clean(body.display_name,100);
    if(!emailRx.test(email)||email.length>254||!roles.includes(role as typeof roles[number])||role==="master"||(manager&&!staff.includes(role))||(display_name&&display_name.length<2))return fail("E-mail, nome ou função inválidos");
