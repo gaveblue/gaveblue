@@ -182,3 +182,44 @@ body.intervalo-menu #app .wrap{max-width:1250px}
 .iv-pos .c-confirm{width:100%;margin-top:15px;padding:14px}
 @media(max-width:1230px){.iv-pos .c-pos-layout{grid-template-columns:260px minmax(0,1fr)}.iv-pos .c-payment{grid-column:2}.iv-pos .c-queue{grid-row:span 2}}
 @media(max-width:740px){.iv-pos .c-pos-layout{display:flex;flex-direction:column}.iv-pos .c-queue,.iv-pos .c-details,.iv-pos .c-payment{width:100%;min-height:0}.iv-pos .c-queue{order:1}.iv-pos .c-details{order:2}.iv-pos .c-payment{order:3}.iv-pos .c-session-form{width:100%}.iv-pos .c-session-form label{flex:1}.iv-pos .c-session-form input{width:100%}}
+
+/* Página inicial, navegação e identidade */
+.logo{position:relative;font-style:italic;font-size:25px;letter-spacing:-1.55px}
+.logo .iv-brand-tail{display:block!important;width:65px;height:4px;position:absolute;top:27px;left:21px;background:var(--iv-orange);border-radius:100%;transform:rotate(-5deg)}
+header nav a{display:inline-flex;align-items:center;gap:7px;font-weight:700;color:#415066}
+header nav a:hover{color:var(--iv-orange-deep)}
+header nav{display:flex;flex-wrap:wrap;gap:13px;justify-content:flex-end;align-items:center}
+.iv-home-hero{display:grid;grid-template-columns:1.08fr .92fr;gap:30px;align-items:center;min-height:440px;padding:45px 0}
+.iv-home-hero h1{font-size:clamp(40px,5.5vw,69px);letter-spacing:-2.3px;line-height:1.04;margin:18px 0}
+.iv-home-hero h1 span{color:var(--iv-orange)}
+.iv-home-hero p{max-width:550px;color:#6c7b90;font-size:16px;line-height:1.7}
+.iv-home-hero .iv-muted{margin-top:24px;font-size:11px}
+.iv-home-preview{background:linear-gradient(145deg,#fff7ef,#fff);border:1px solid #f9dcc1;border-radius:29px;min-height:350px;padding:40px;display:flex;flex-direction:column;justify-content:center;align-items:start;box-shadow:0 20px 65px #be590b11}
+.iv-home-preview>.iv-icon{color:var(--iv-orange)}
+.iv-home-preview h2{font-size:26px;letter-spacing:-.65px;margin:20px 0 7px}
+.iv-home-preview p{font-size:13px;margin:0 0 20px}
+.iv-home-tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;width:100%}
+.iv-home-tiles span{background:#fff;border:1px solid #f4dcc5;border-radius:13px;padding:13px;display:flex;align-items:center;gap:8px;font-size:12px;font-weight:800;color:#364459}
+.iv-home-tiles .iv-icon{color:var(--iv-orange)}
+.iv-feature-tile .iv-icon:last-child{margin-left:auto}
+.iv-admin-expand{margin:13px 0;border-top:1px solid #e9edf2;padding-top:11px}
+.iv-admin-expand>summary{cursor:pointer;color:#d55d00;font-size:12px;font-weight:850;display:flex;align-items:center;gap:8px;padding:9px 0;list-style:none}
+.iv-admin-expand>summary::-webkit-details-marker{display:none}
+.iv-admin-expand>summary:after{content:"⌄";margin-left:auto;color:#e16a00;font-size:19px}
+.iv-admin-expand[open]>summary:after{transform:rotate(180deg)}
+[data-restaurant-card][hidden]{display:none!important}
+.iv-platform .iv-workspace .p-grid{align-items:start}
+.iv-platform #platform-create{position:sticky;top:12px}
+.iv-platform .p-card>h3{display:flex;align-items:center;gap:8px;font-size:17px;margin:0 0 10px}
+.iv-platform .p-card>h3 .iv-icon{color:var(--iv-orange)}
+.iv-platform .iv-restaurant-list>.p-card{margin:11px 0}
+.iv-platform .iv-admin-expand>.p-card{background:#fafbfc}
+.iv-master .iv-sidebar nav{display:grid;gap:4px}
+.iv-master .iv-navitem{font-family:inherit}
+.iv-master .iv-workspace>.iv-header h1{font-size:29px}
+.iv-master .iv-list-card .iv-feature-tile{box-shadow:none}
+.iv-master .iv-stat-head .iv-icon{color:var(--iv-orange)}
+.iv-master .mtabs button{border-radius:12px}
+.iv-platform .iv-icon,.iv-master .iv-icon,.iv-kds .iv-icon,.iv-pos .iv-icon{vertical-align:middle}
+@media(max-width:900px){.iv-home-hero{grid-template-columns:1fr;min-height:auto;padding:35px 0}.iv-home-preview{min-height:260px}.iv-platform #platform-create{position:static}}
+@media(max-width:580px){.iv-home-preview{padding:25px}.iv-home-tiles{grid-template-columns:1fr 1fr}.iv-home-tiles span{font-size:11px;padding:10px}.iv-home-hero h1{font-size:42px}header .inner{padding:12px 14px}header nav{gap:7px}header nav a{font-size:11px}header nav .iv-icon{width:14px;height:14px}.logo{font-size:21px}.logo small{font-size:9px}.logo .iv-brand-tail{top:23px}}
