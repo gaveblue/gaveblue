@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Intervalo · Gestão de restaurantes | Gaveblue</title>
-<meta name="theme-color" content="#0f172a"><meta name="description" content="Intervalo, plataforma de gestão de restaurantes da Gaveblue.">
+<meta name="theme-color" content="#ff7600"><meta name="description" content="Intervalo, plataforma de gestão de restaurantes da Gaveblue.">
 <link rel="manifest" href="/intervalo/manifest.webmanifest">
 <script>
 /* Identidade distinta para o PWA Garçom; reavaliar depois do fallback da rota. */
@@ -13,7 +13,7 @@ function intervaloApplyManifest(){
   ||query.get('app')==='garcom'||query.get('destino')==='garcom';
  document.querySelector('link[rel="manifest"]').href=waiter
   ?'/intervalo/manifest-garcom.webmanifest':'/intervalo/manifest.webmanifest';
- document.querySelector('meta[name="theme-color"]').content=waiter?'#ff7900':'#0f172a';
+ document.querySelector('meta[name="theme-color"]').content=waiter?'#ff7900':'#ff7600';
 }
 intervaloApplyManifest();
 </script>
