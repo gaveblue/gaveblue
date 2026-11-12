@@ -104,6 +104,26 @@ Deno.serve(async(req:Request)=>{
   await db.from("audit_logs").insert({restaurant_id:tenant,actor_user_id:user.id,event:"catalog_product_saved",details:{action}});
   return reply({saved:true});
  }
+ if(action==="product_flags"){
+  if(!manage())return fail();
+  if(!isId(id))return error("Produto inválido",400);
+  const changes:Record<string,boolean>={};
+  if(Object.prototype.hasOwnProperty.call(body,"show_on_menu")){
+   if(typeof body.show_on_menu!=="boolean")return error("Exibição do cardápio inválida",400);
+   changes.show_on_menu=body.show_on_menu;
+  }
+  if(Object.prototype.hasOwnProperty.call(body,"available")){
+   if(typeof body.available!=="boolean")return error("Disponibilidade de venda inválida",400);
+   changes.available=body.available;
+  }
+  if(!Object.keys(changes).length)return error("Informe uma chave para atualizar",400);
+  const {data,error:e}=await db.from("menu_products").update({...changes,updated_at:new Date().toISOString()})
+   .eq("id",id).eq("restaurant_id",tenant).select("id").maybeSingle();
+  if(e||!data)return error("Não foi possível atualizar as chaves do produto",409);
+  await db.from("audit_logs").insert({restaurant_id:tenant,actor_user_id:user.id,
+   event:"product_flags_changed",details:{id,...changes}});
+  return reply({saved:true});
+ }
  if(action==="option_create"){
   if(!manage())return fail();
   const name=txt(body.name,120),price=integer(body.price_delta_cents,0,10000000);
