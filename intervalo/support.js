@@ -1,7 +1,7 @@
 // Intervalo — cadastros operacionais auxiliares (mesas, estoque, dispositivos, relatórios).
 export async function renderPage({supabase,restaurant,module,box,esc,link}){
  const css='<style>.x-panel{padding:19px;background:#fff;border:1px solid #e2e8f0;border-radius:14px;margin:13px 0}.x-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(235px,1fr));gap:14px}.x-form{display:flex;flex-wrap:wrap;gap:12px;align-items:end}.x-form label{flex:1 1 180px;font-size:12px;font-weight:700}.x-form input,.x-form select{display:block;width:100%;margin-top:7px;padding:10px 12px;border:1px solid #cbd5e1;border-radius:9px;background:#fff;color:#0f172a}.x-form button,.x-btn{padding:11px 14px;background:#0f766e;color:#fff;border:0;border-radius:9px;cursor:pointer;font-size:12px;font-weight:700}.x-muted{font-size:12px;color:#64748b}.x-note{font-size:12px;line-height:1.55;background:#fff7ed;border:1px solid #fdba74;border-radius:10px;color:#9a3412;padding:13px}.x-panel h3{margin:2px 0 11px}</style>';
- const names={mesas:'Mesas e salões',estoque:'Estoque',impressao:'Impressão térmica',relatorios:'Relatórios operacionais'};
+ const names={mesas:'Mesas e salões',estoque:'Estoque',impressao:'Impressão manual',relatorios:'Relatórios operacionais'};
  const title=css+'<h1>'+esc(names[module]??'Operação')+'</h1><p class="x-muted">'+esc(restaurant.name)+'</p><p><a href="'+link('/'+restaurant.slug+'/gestao')+'">Voltar à Gestão</a></p>';
  const fmt=n=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(n)/100);
  const call=async(action,params={})=>{const r=await supabase.functions.invoke('restaurant-core',{body:{restaurant_id:restaurant.id,action,...params}});if(r.error||r.data?.error){let message=r.data?.error??r.error?.message??'Falha';try{const x=await r.error?.context?.json?.();if(x?.error)message=x.error}catch{}throw Error(message)}return r.data};
@@ -54,11 +54,14 @@ export async function renderPage({supabase,restaurant,module,box,esc,link}){
     form('recipeset',v=>call('recipe_set',{product_id:v.product_id,stock_item_id:v.stock_item_id,quantity:Number(v.quantity)}));
     form('adjuststock',v=>call('stock_adjust',{stock_item_id:v.stock_item_id,reason:v.reason,delta:Number(v.delta)}));
   }else if(module==='impressao'){
-    const {devices=[],jobs=[]}=await call('printers');
-    let out=title+'<p class="x-note">A impressora B&G BG-06 depende do agente local no Windows e de teste físico com USB ou Bluetooth. Nenhum equipamento está enviando impressões e as filas não estão processadas automaticamente.</p><section class="x-panel"><h2>Cadastrar equipamento planejado</h2><form id="newprinter" class="x-form"><label>Nome<input name="display_name" value="B&G BG-06" required minlength="2" maxlength="100"></label><label>Estação<select name="station"><option value="cozinha">Cozinha</option><option value="caixa">Caixa</option><option value="balcao">Balcão</option></select></label><button type="submit">Cadastrar desativado</button></form></section><h2>Dispositivos ('+devices.length+')</h2><div class="x-grid">';
-    for(const d of devices)out+='<div class="x-panel"><h3>'+esc(d.display_name)+'</h3><p class="x-muted">'+esc(d.station)+' · '+(d.enabled?'Habilitado':'Desativado')+'</p></div>';
-    out+='</div><h2>Fila ('+jobs.length+')</h2><p class="x-muted">Fila de impressão apenas estruturada, sem agente habilitado.</p>';box(out);
-    form('newprinter',v=>call('printer_register',{display_name:v.display_name,station:v.station}));
+    const kitchen=link('/'+restaurant.slug+'/cozinha'),cash=link('/'+restaurant.slug+'/caixa');
+    let out=title
+      +'<p class="x-note"><b>Modo manual habilitado.</b> Não é necessário cadastrar impressora nem instalar agente. Abra a comanda ou o pedido, confira a prévia e escolha <b>Imprimir / Salvar PDF</b> na janela do navegador. A escolha da impressora e a impressão são feitas por quem está operando o aparelho.</p>'
+      +'<div class="x-grid">'
+      +'<section class="x-panel"><h2>Pedidos da cozinha</h2><p class="x-muted">Na fila da cozinha, clique em <b>Imprimir pedido (manual)</b> no pedido desejado. A prévia traz mesa, itens e observações.</p><p><a class="x-btn" href="'+kitchen+'">Abrir cozinha</a></p></section>'
+      +'<section class="x-panel"><h2>Comandas do caixa</h2><p class="x-muted">No caixa, localize a comanda, clique em <b>Visualizar / imprimir comanda</b> e imprima manualmente ou salve como PDF.</p><p><a class="x-btn" href="'+cash+'">Abrir caixa</a></p></section>'
+      +'</div><section class="x-panel"><h2>Equipamentos</h2><p class="x-muted">A integração automática, o agente Windows, a fila de impressão e os testes com impressora térmica foram adiados para uma versão futura. Nenhuma impressão é disparada automaticamente.</p></section>';
+    box(out);
   }else if(module==='relatorios'){
     const d=await call('report');
     let out=title+'<p class="x-note">Relatório gerencial preliminar. Não é relatório fiscal, nem conciliação bancária. O processamento está limitado às últimas movimentações consultadas.</p><h2>Comandas por status</h2><div class="x-grid">';
