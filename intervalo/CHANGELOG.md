@@ -1,5 +1,35 @@
 # Intervalo — CHANGELOG
 
+## 0.2.1 — 2026-11-12 · Login alternativo por CPF
+
+**Estado:** implementação aplicada; testes estruturais aprovados; homologação funcional pendente de CPF vinculado e login real.
+
+### Funcionalidade
+- Login aceita **e-mail ou CPF + senha** no mesmo campo e usa a mesma conta Auth.
+- CPF **opcional** vinculado depois do primeiro acesso com e-mail e senha, em "Minha Conta".
+- E-mail segue necessário para convite, recuperação de senha e confirmação; CPF não substitui senha nem comprova identidade civil.
+- CPF único por usuário global, sem duplicar contas nem vínculos com os vários restaurantes.
+- Cadastro/troca/desvinculação de CPF somente após reautenticação com a senha atual.
+- Validação de 11 dígitos e dos dois verificadores do CPF; não aceita sequências iguais.
+- Login por CPF faz correspondência **somente no servidor** e usa Supabase Auth por e-mail/senha para verificar credenciais.
+- Banco guarda HMAC-SHA256 do CPF com chave de serviço exclusiva do backend e somente quatro últimos dígitos; CPF em texto claro não é armazenado no banco ou devolvido à UI.
+- Proteção contra tentativas: limite de 5 tentativas/15 min por CPF e 25 por rede/15 min (quando origem de rede está disponível), com resposta genérica em caso de credencial incorreta.
+- Funções publicadas no Supabase: \`cpf-login\` v2 (JWT desligado exclusivamente para etapa pré-login, controles próprios), \`account-cpf\` v1 (JWT obrigatório).
+- Migrações de tabelas \`user_cpf_login\` e \`cpf_login_attempts\`, RLS habilitada e política negando totalmente acesso de clientes.
+- Publicação manual de interface \`/intervalo/login\`, \`/intervalo/minha-conta\` e fallback de rota na 404.
+
+### Ressalvas e homologação
+- Não foi possível realizar teste E2E de CPF com usuário real. Nenhuma conta recebeu CPF automaticamente.
+- Inicialmente, o funcionário precisa fazer seu primeiro login por e-mail para definir o CPF.
+- O HMAC é derivado da chave secreta de serviço do projeto: se a chave mudar, será necessário planejar migração ou revinculação dos CPFs; para operação comercial, preferir segredo de HMAC independente e processo de rotação.
+- O CPF informado é validado matematicamente, mas sua titularidade legal **não** é atestada sem verificação de identidade.
+- Login por e-mail e recuperação de senha preservados.
+- Security Advisor continua alertando que a proteção contra senhas vazadas do Supabase Auth está desativada.
+- Ainda não há verificação HTTP/browser de propagação e autenticação ponta a ponta; versão em QA parcial.
+
+---
+
+
 ## 0.2.0 — 2026-11-12 · Onboarding, equipes e permissões
 
 **Estado:** implementação e migrações aplicadas; QA estrutural/parcial aprovado. **Ainda NÃO homologada integralmente** (falta teste funcional autenticado e verificação pública do domínio).
