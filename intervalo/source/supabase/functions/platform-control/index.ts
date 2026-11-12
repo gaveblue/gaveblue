@@ -15,6 +15,7 @@ Deno.serve(async(req:Request)=>{
  const db=createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false}});
  const {data:{user},error:ue}=await db.auth.getUser(token);
  if(ue||!user||!user.email_confirmed_at)return err("Sessão inválida",401);
+ if(user.app_metadata?.intervalo_password_change_required)return err("Troque sua senha provisória primeiro",403);
  const {data:admin,error:ae}=await db.from("platform_admins").select("user_id").eq("user_id",user.id).eq("active",true).maybeSingle();
  if(ae)return err("Falha ao verificar autorização",503);
  if(!admin)return err("Acesso exclusivo da Gaveblue",403);
