@@ -31,19 +31,24 @@ Deno.serve(async(req:Request)=>{
    db.from("restaurant_members").select("restaurant_id,user_id,role,status,invite_expires_at,created_at").order("created_at",{ascending:true}),
    db.from("restaurant_master_setup").select("restaurant_id,master_email,status,linked_user_id,updated_at")
   ]);
-  if(restaurants.error||flags.error||subs.error||members.error||masterSetups.error)return err("Não foi possível carregar plataforma",503);
+  if(restaurants.error)return err("Não foi possível listar restaurantes",503);
+  const warnings=[];
+  if(flags.error)warnings.push("modules");
+  if(subs.error)warnings.push("subscriptions");
+  if(members.error)warnings.push("members");
+  if(masterSetups.error)warnings.push("master_setups");
   const {data:adminUsers,error:adminErr}=await db.from("platform_admins").select("user_id").eq("active",true);
-  if(adminErr)return err("Não foi possível conferir contas administrativas",503);
+  if(adminErr)warnings.push("platform_admins");
   const adminIds=new Set((adminUsers??[]).map(a=>a.user_id));
   const userIds=new Set((members.data??[]).map(m=>m.user_id));
   const accounts=[];
   for(let page=1;page<=12;page++){
     const {data,error:e}=await db.auth.admin.listUsers({page,perPage:200});
-    if(e)return err("Não foi possível carregar contas",503);
+    if(e){warnings.push("accounts");break;}
     for(const a of data.users)if(userIds.has(a.id))accounts.push({id:a.id,email:a.email??null,confirmed:!!a.email_confirmed_at,has_signed_in:!!a.last_sign_in_at,is_platform_admin:adminIds.has(a.id)});
     if(data.users.length<200)break;
   }
-  return out({restaurants:restaurants.data,modules:flags.data,subscriptions:subs.data,members:members.data,accounts,master_setups:masterSetups.data,has_billing_provider:false});
+  return out({restaurants:restaurants.data,modules:flags.data??[],subscriptions:subs.data??[],members:members.data??[],accounts,master_setups:masterSetups.data??[],warnings,has_billing_provider:false});
  }
  const restaurant_id=body.restaurant_id;
  if(typeof restaurant_id!=="string"||!uuid.test(restaurant_id))return err("Restaurante inválido",400);
