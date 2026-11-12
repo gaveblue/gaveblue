@@ -1,5 +1,24 @@
 # Intervalo — CHANGELOG
 
+## 0.9.2 — 2026-11-12 · Cadastro de restaurantes sem etapa de e-mail
+
+**Status:** interface alterada e enviada à branch main; o backend já permitia criar restaurante sem Master/e-mail desde 0.9.1. Verificação prática no domínio ainda pendente.
+
+### Alteração
+- Retirado o campo de e-mail do Master do formulário **Novo restaurante** do Super Admin.
+- A criação exige apenas nome e slug (sugerido automaticamente) e não solicita nem envia confirmação/convite por e-mail.
+- O restaurante criado aparece no painel, onde o responsável Master pode ser definido posteriormente.
+- Mensagem de sucesso esclarece que não foi exigido e-mail.
+- O backend existente `admin-provision` v5 mantém autorização Super Admin, criação atômica, RLS e a possibilidade de atribuir Master depois.
+- Atualizado o versionamento de interface e cache dos módulos para 0.9.2, sem GitHub Actions.
+- **Não alteramos** a configuração global de confirmação de e-mail do Supabase Auth: desativá-la marca automaticamente e-mails como confirmados, impedindo uma verificação real posterior. Contas novas e primeiro login seguem exigindo ativação segura por link/credenciais válidas e confirmação aplicável.
+
+### Homologação
+- Inspeção estática do fluxo de front-end e API em andamento; teste real no domínio e login de novos usuários não comprovados.
+- O envio de SMTP para recuperação de senhas continua pendente; não é requisito para criar o restaurante.
+
+---
+
 ## 0.9.1 — 2026-11-12 · Correção crítica: não conseguia cadastrar restaurante
 
 **Status:** correção do backend implantada no Supabase e código commitado no GitHub; testes SQL e simulações do formulário passaram. Teste E2E real e propagação no domínio **ainda não foram comprovados**.
