@@ -40,5 +40,6 @@ Deno.serve(async(req:Request)=>{
  const publicAuth=createClient(url,anonKey,{auth:{persistSession:false,autoRefreshToken:false}});
  const {data:login,error:loginError}=await publicAuth.auth.signInWithPassword({email:currentEmail,password});
  if(loginError||!login.user||login.user.id!==row.user_id||!login.session?.access_token||!login.session?.refresh_token)return bad();
+ await db.from("cpf_login_attempts").delete().eq("cpf_digest",digest);
  return json({access_token:login.session.access_token,refresh_token:login.session.refresh_token});
 });
