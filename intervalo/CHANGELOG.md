@@ -1,5 +1,24 @@
 # Intervalo — CHANGELOG
 
+## 1.0.0-rc.2 — 2026-11-12 · Separação de insumos e produtos com precificação central
+
+**Estado:** migração aditiva aplicada no Supabase; `restaurant-core` v9 e `public-menu` v3 ativos; frontend atualizado na `main`. Testes SQL e renderização simulada aprovados. **Ainda não homologada no domínio ou aparelhos reais.**
+
+- `Estoque` passa a se chamar **Estoque e Produtos** na gestão, com 4 abas: **Insumos**, **Produtos**, **Fichas técnicas** e **Movimentações**.
+- Os **Insumos** continuam controlando saldos, mínimos, entradas e perdas; **Produtos** concentram cadastro, nome, categoria, descrição, foto HTTPS e **preço de venda**.
+- Nova chave individual **Exibir no cardápio** (`menu_products.show_on_menu`): produto pode sair da vitrine pública sem ser apagado ou indisponibilizado para uso interno. A chave **Disponível para venda** (`menu_products.available`) permanece separada e controla a seleção pelo Garçom.
+- Produtos atuais preservados e marcados por padrão para exibição, sem alterações de preço nem de fichas técnicas. Publicação geral e categoria ativa continuam necessárias.
+- Produto com `show_on_menu=false` e `available=true` pode continuar disponível na operação interna do Garçom.
+- Categoria também pode ser criada dentro do novo cadastro central de Produtos.
+- A tela **Cardápio digital** mantém publicação, categorias, adicionais informativos, prévia, link e QR de consulta; remove formulário duplicado de cadastro e edição de produto, substituindo-o por atalho para `Estoque e Produtos → Produtos`.
+- Backend com ação `product_flags` atualiza apenas a chave escolhida, com autorização, isolamento por restaurante e auditoria; não sobrescreve o preço.
+- `public-menu` filtra `available=true` **e** `show_on_menu=true`, mantendo todos os demais filtros e requisitos de publicação.
+- O estoque **não** oculta o produto automaticamente quando falta insumo; a regra de bloqueio do envio da comanda por insuficiência permanece transacional, sem alterações.
+- Evidência SQL: `BEGIN/ROLLBACK` testou default, isolamento da flag, edição do preço e filtro da vitrine; nenhum dado de QA persistido. Testes simulados de 4 abas e Cardápio passaram.
+- Documentos: `PRODUTOS-INSUMOS-1.0.0-RC2.md`, `QA-1.0.0-RC2.md`. Pendente homologação E2E real.
+
+---
+
 ## 1.0.0-rc.1 — 2026-11-12 · Redesign integral do Intervalo (candidata à versão 1)
 
 **Status:** implementado na `main` do GitHub, com verificação estática e renderização simulada de módulos. **Liberado apenas para avaliação visual e piloto**; não há comprovação de publicação no domínio, fluxo completo com usuários reais ou homologação de produção. Não renomear para `1.0.0` final sem QA funcional.
