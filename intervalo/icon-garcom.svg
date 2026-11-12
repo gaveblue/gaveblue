@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Intervalo Garçom">
+<rect width="512" height="512" rx="115" fill="#ff7900"/>
+<rect x="88" y="70" width="336" height="372" rx="52" fill="#fff7ef"/>
+<g fill="none" stroke="#ff7900" stroke-width="19" stroke-linecap="round" stroke-linejoin="round">
+<path d="M166 224h180l-21-62H187zM197 231l-19 88M315 231l19 88M221 315v50M291 315v50"/>
+<path d="M174 150c16-28 148-28 164 0"/>
+</g><circle cx="256" cy="122" r="13" fill="#ff7900"/>
+<path d="M165 398h183" stroke="#ff7900" stroke-width="15" stroke-linecap="round"/>
+</svg>
