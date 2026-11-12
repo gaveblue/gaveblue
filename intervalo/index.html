@@ -12,7 +12,7 @@
 <script>
 (function(){try{var deep=sessionStorage.getItem('intervalo.deepLink');if(deep&&deep.startsWith('/intervalo/')&&deep.length<2100){sessionStorage.removeItem('intervalo.deepLink');history.replaceState(null,'',deep+window.location.hash)}}catch(e){}})()
 </script>
-</head><body><header><div class="inner"><a class="logo" href="/intervalo/">intervalo<span>.</span><small>UM PRODUTO GAVEBLUE</small></a><nav id="nav"><a href="/intervalo/login">Entrar</a></nav></div></header><main id="app"><div class="skeleton">Carregando Intervalo...</div></main><footer class="foot">Gaveblue © 2026 · Intervalo 0.9.0 · Prévia técnica do PWA</footer>
+</head><body><header><div class="inner"><a class="logo" href="/intervalo/">intervalo<span>.</span><small>UM PRODUTO GAVEBLUE</small></a><nav id="nav"><a href="/intervalo/login">Entrar</a></nav></div></header><main id="app"><div class="skeleton">Carregando Intervalo...</div></main><footer class="foot">Gaveblue © 2026 · Intervalo 0.9.1 · Prévia técnica do PWA</footer>
 <script type="module">
 import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.50.0/+esm';
 const supabase=createClient('https://fynaaiazebydorzllwip.supabase.co','sb_publishable_mGpfDRlZ0MSaa9MV_xMJsg_FT47wa_d',{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,flowType:'implicit',storageKey:'intervalo.auth.v1'}});
@@ -24,6 +24,19 @@ const err=e=>'<p class="error" role="alert">'+esc(e?.message??String(e))+'</p>';
 function box(content){app.innerHTML='<div class="wrap">'+content+'</div>'}
 const modules=['gestao','garcom','cozinha','caixa','cardapio'], labels={gestao:'Gestão',garcom:'Garçom',cozinha:'Cozinha',caixa:'Caixa',cardapio:'Cardápio'};
 const permissions={master:['gestao','garcom','cozinha','caixa','cardapio'],manager:['gestao','garcom','cozinha','caixa','cardapio'],waiter:['garcom','cardapio'],kitchen:['cozinha','cardapio'],cashier:['caixa','cardapio']};
+// Restaura URLs /intervalo/* quando GitHub Pages usa 404.html como fallback.
+try{
+ if(location.pathname==='/intervalo/'||location.pathname==='/intervalo'){
+   const requested=sessionStorage.getItem('intervalo.deepLink');
+   if(requested){
+     sessionStorage.removeItem('intervalo.deepLink');
+     const u=new URL(requested,location.origin);
+     if(u.origin===location.origin&&u.pathname.startsWith('/intervalo/')&&u.pathname!=='/intervalo/'&&u.pathname.length<230){
+       history.replaceState({},'',u.pathname+u.search+location.hash);
+     }
+   }
+ }
+}catch{/* Navegação normal permanece disponível sem sessionStorage */}
 const paths=location.pathname.replace(/^\/intervalo\/?/,'').split('/').filter(Boolean);
 async function me(){const {data}=await supabase.auth.getUser();return data?.user??null}
 async function setupNav(user){
@@ -32,7 +45,7 @@ async function setupNav(user){
  nav.innerHTML='<a href="/intervalo/inicio">Restaurantes</a><a href="/intervalo/minha-conta">Minha Conta</a>'+(adminAccess?'<a href="/intervalo/admin">Admin</a>':'')+'<button class="btn alt" id="exit">Sair</button>';
  document.getElementById('exit').onclick=async()=>{await supabase.auth.signOut();location.assign(link('/login'))};
 }
-async function home(user){box('<section class="hero"><div><span class="eyebrow">GAVEBLUE APRESENTA</span><h1>Seu restaurante.<br><span>Um só ritmo.</span></h1><p>Gestão, atendimento, cozinha e caixa conectados em uma plataforma multiempresa, com acesso por restaurante e função.</p><div class="actions">'+btn(user?'Meus restaurantes':'Acessar o Intervalo',user?'/inicio':'/login')+'<a class="btn alt" href="/">Conhecer Gaveblue</a></div><p class="hint">Versão 0.9.0 · Ambiente piloto</p></div><div class="panel preview"><span class="eyebrow">SUA OPERAÇÃO EM UM SÓ LUGAR</span><h2>Seu estabelecimento</h2>'+modules.map(m=>'<div class="preview-row"><strong>'+labels[m]+'</strong><span>→</span></div>').join('')+'</div></section><h2 class="section-title">Módulos da plataforma</h2><section class="grid">'+modules.map(m=>'<article class="feature"><b>'+labels[m]+'</b><p>Estrutura do módulo preparada para desenvolvimento e homologação.</p><span class="tag">Em desenvolvimento</span></article>').join('')+'</section>')}
+async function home(user){box('<section class="hero"><div><span class="eyebrow">GAVEBLUE APRESENTA</span><h1>Seu restaurante.<br><span>Um só ritmo.</span></h1><p>Gestão, atendimento, cozinha e caixa conectados em uma plataforma multiempresa, com acesso por restaurante e função.</p><div class="actions">'+btn(user?'Meus restaurantes':'Acessar o Intervalo',user?'/inicio':'/login')+'<a class="btn alt" href="/">Conhecer Gaveblue</a></div><p class="hint">Versão 0.9.1 · Correção de acesso</p></div><div class="panel preview"><span class="eyebrow">SUA OPERAÇÃO EM UM SÓ LUGAR</span><h2>Seu estabelecimento</h2>'+modules.map(m=>'<div class="preview-row"><strong>'+labels[m]+'</strong><span>→</span></div>').join('')+'</div></section><h2 class="section-title">Módulos da plataforma</h2><section class="grid">'+modules.map(m=>'<article class="feature"><b>'+labels[m]+'</b><p>Estrutura do módulo preparada para desenvolvimento e homologação.</p><span class="tag">Em desenvolvimento</span></article>').join('')+'</section>')}
 async function login(){
  box('<section class="formbox panel"><span class="eyebrow">ACESSO AO INTERVALO</span><h1>Bem-vindo de volta</h1><p class="muted">Entre com e-mail ou CPF e sua senha. O CPF fica disponível após ser vinculado à sua conta.</p><form id="loginForm"><label for="login-id">E-mail ou CPF</label><input id="login-id" type="text" name="identifier" required maxlength="254" autocomplete="username" placeholder="Seu e-mail ou CPF"><label for="login-pass">Senha</label><input id="login-pass" type="password" name="password" required autocomplete="current-password"><button class="btn formbtn" type="submit">Entrar</button><p id="feedback" role="status" aria-live="polite"></p></form><button class="btn alt" id="reset" style="margin-top:12px;width:100%">Esqueci minha senha</button><p class="hint">Primeiro acesso da Gaveblue? <a href="/intervalo/configurar-admin" style="color:#0f766e;font-weight:700">Ativar Super Admin</a></p></section>');
  document.getElementById('loginForm').onsubmit=async e=>{
@@ -177,13 +190,13 @@ async function choose(user){
 async function admin(user){
  const {data:allowed,error}=await supabase.from('platform_admins').select('user_id').eq('user_id',user.id).eq('active',true).maybeSingle();
  if(error||!allowed){box('<section class="panel"><h1>Área restrita</h1><p>Somente Super Admin Gaveblue pode gerenciar a plataforma.</p></section>');return}
- const {renderPlatform}=await import('/intervalo/platform.js?v=0.9.0');
+ const {renderPlatform}=await import('/intervalo/platform.js?v=0.9.1');
  return renderPlatform({supabase,box,esc,link});
 }
 const internalModules=['catalogo','mesas','estoque','impressao','relatorios'];
 async function tenant(user,slug,mod){
  if(mod==='cardapio'){
-  const {renderPublicMenu}=await import('/intervalo/public-menu.js?v=0.9.0');
+  const {renderPublicMenu}=await import('/intervalo/public-menu.js?v=0.9.1');
   return renderPublicMenu({supabase,slug,box,esc,link});
  }
  if(!user){location.assign(link('/login'));return}
@@ -204,17 +217,17 @@ async function tenant(user,slug,mod){
  if(!permitted){box('<section class="panel"><h1>Sem permissão</h1><p>Seu papel neste restaurante não permite abrir este módulo.</p></section>');return}
  if(!moduleRow?.enabled){box('<section class="panel"><h1>Módulo ainda não habilitado</h1><p>O Super Admin precisa habilitar este recurso para o estabelecimento.</p>'+btn('Meus restaurantes','/inicio')+'</section>');return}
  if(mod==='gestao'){
-  const {renderManagement}=await import('/intervalo/management.js?v=0.9.0');
+  const {renderManagement}=await import('/intervalo/management.js?v=0.9.1');
   return renderManagement({supabase,restaurant:m.restaurants,role:m.role,box,esc,link});
  }
  const asset={catalogo:'catalog.js',mesas:'support.js',estoque:'support.js',impressao:'support.js',relatorios:'support.js',garcom:'waiter.js',cozinha:'kitchen.js',caixa:'cash.js'}[mod];
  if(!asset){box('<h1>Módulo não encontrado</h1>');return}
- const {renderPage}=await import('/intervalo/'+asset+'?v=0.9.0');
+ const {renderPage}=await import('/intervalo/'+asset+'?v=0.9.1');
  return renderPage({supabase,restaurant:m.restaurants,module:mod,box,esc,link});
 }
 async function account(user){
  if(!user){location.assign(link('/login'));return}
- const {renderAccount}=await import('/intervalo/account.js?v=0.9.0');
+ const {renderAccount}=await import('/intervalo/account.js?v=0.9.1');
  return renderAccount({supabase,box,esc,link,user});
 }
 async function start(){const user=await me();if(user?.app_metadata?.intervalo_password_change_required&&!['trocar-senha','login','redefinir','recuperar-senha'].includes(paths[0])){location.assign(link('/trocar-senha'));return}await setupNav(user);if(paths.length===0)return home(user);if(paths[0]==='login')return login();if(paths[0]==='recuperar-senha')return recovery();if(paths[0]==='trocar-senha')return changePassword(user);if(paths[0]==='minha-conta')return account(user);if(paths[0]==='configurar-admin')return setupFirstAdmin();if(paths[0]==='ativar')return setPassword('activation');if(paths[0]==='redefinir')return setPassword('recovery');if(paths[0]==='inicio')return user?choose(user):location.assign(link('/login'));if(paths[0]==='admin')return user?admin(user):location.assign(link('/login'));if(paths.length===2&&(modules.includes(paths[1])||internalModules.includes(paths[1]))&&/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(paths[0]))return tenant(user,paths[0],paths[1]);box('<h1>Página não encontrada</h1>'+btn('Início','/'))}
