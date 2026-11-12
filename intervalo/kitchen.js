@@ -23,7 +23,7 @@ export async function renderPage({supabase,restaurant,box,esc,link}){
       if(o.status==='submitted')out+='<button data-progress="'+esc(o.id)+'" data-next="preparing">Iniciar preparo</button>';
       if(o.status==='preparing')out+='<button data-progress="'+esc(o.id)+'" data-next="ready">Marcar pronto</button>';
       if(o.status==='ready')out+='<p><small>Pronto para entrega à mesa</small></p>';
-      out+='<button type="button" class="k-ticket" data-ticket="'+esc(o.id)+'">Imprimir pedido (navegador)</button>';
+      out+='<button type="button" class="k-ticket" data-ticket="'+esc(o.id)+'">Imprimir pedido (manual)</button>';
       out+='</div>';
     }
     out+='</div>';if(!orders.length)out+='<div class="k-empty">Sem pedidos aguardando preparo.</div>';
