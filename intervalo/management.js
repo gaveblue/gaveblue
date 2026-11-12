@@ -50,7 +50,7 @@ export async function renderManagement({supabase,restaurant,role,box,esc,link}) 
       +'<div><label>Repita a senha provisória</label><input name="repeat_password" type="password" autocomplete="new-password" minlength="12" maxlength="128" required></div>'
       +'<div><label>Sua senha atual de Master</label><input name="current_password" type="password" autocomplete="current-password" required></div>'
       +'<div class="full"><button class="btn" type="submit">Cadastrar funcionário</button></div></form></section>':'')
-      +'<section class="panel"><h2>Convidar funcionário</h2><p class="muted-sm">O convite vincula uma conta ao restaurante, sem conceder acesso aos dados de outras empresas. Para quem já usa o Intervalo, basta entrar e aceitar o vínculo.</p><form id="invite-team" class="mg">'+input("Nome","display_name","",'required minlength="2" maxlength="100"')+input("E-mail","email","",'required type="email" autocomplete="email"')+'<div><label for="staff-role">Função</label><select name="role" id="staff-role">'+options.map(o=>'<option value="'+o+'">'+roles[o]+'</option>').join("")+'</select></div><div style="display:flex;align-items:end"><button class="btn" type="submit">Convidar funcionário</button></div></form></section><h2 style="margin-top:28px">Pessoas cadastradas ('+d.members.length+')</h2>';
+      +'<section class="panel"><h2>Vincular funcionário que já tem conta</h2><p class="muted-sm">Use esta opção somente para um e-mail que já tenha conta no Intervalo. Nenhum e-mail será enviado. Para pessoas novas, use o cadastro com senha provisória acima.</p><form id="invite-team" class="mg">'+input("Nome","display_name","",'required minlength="2" maxlength="100"')+input("E-mail","email","",'required type="email" autocomplete="email"')+'<div><label for="staff-role">Função</label><select name="role" id="staff-role">'+options.map(o=>'<option value="'+o+'">'+roles[o]+'</option>').join("")+'</select></div><div style="display:flex;align-items:end"><button class="btn" type="submit">Vincular conta existente</button></div></form></section><h2 style="margin-top:28px">Pessoas cadastradas ('+d.members.length+')</h2>';
      for(const m of d.members){
        const editable=m.user_id!==null&&m.role!=="master"&&(isMaster||isManager&&["waiter","kitchen","cashier"].includes(m.role));
        const selectable=isMaster?["manager","waiter","kitchen","cashier"]:["waiter","kitchen","cashier"];
@@ -106,7 +106,7 @@ export async function renderManagement({supabase,restaurant,role,box,esc,link}) 
    const inviteForm=document.getElementById("invite-team");
    if(inviteForm)inviteForm.onsubmit=async e=>{
      e.preventDefault();const values=Object.fromEntries(new FormData(inviteForm).entries());
-     try{const out=await call("invite",values);await refresh();state.tab="equipe";draw();message(out.emailed?"Convite enviado por e-mail.":"Vínculo criado. A pessoa pode entrar na conta existente e aceitar o convite.")}catch(err){message(err.message,"error")}
+     try{const out=await call("invite",values);await refresh();state.tab="equipe";draw();message("Vínculo criado sem envio de e-mail. A pessoa pode entrar na conta existente e aceitar o convite.")}catch(err){message(err.message,"error")}
    };
    document.querySelectorAll("[data-setrole]").forEach(b=>b.onclick=async()=>{
       const id=b.dataset.setrole,role=document.querySelector('[data-role="'+id+'"]')?.value;
