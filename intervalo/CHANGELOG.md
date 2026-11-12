@@ -1,5 +1,26 @@
 # Intervalo — CHANGELOG
 
+## 0.9.3 — 2026-11-12 · Criação e redefinição manual de senhas pelo Super Admin
+
+**Status:** função Supabase publicada (super-admin-credentials v2) e interface enviada à main do GitHub. QA de navegador no domínio e login real com novos usuários **não comprovados**.
+
+### Funcionalidades
+- Novo formulário por restaurante: Super Admin informa e-mail e papel (Master, gerente, garçom, cozinha ou caixa), define uma **senha provisória manualmente** (12 a 128 caracteres), confirma a própria senha e cria a conta sem convite SMTP.
+- Para contas existentes vinculadas ao restaurante (inclusive pendentes): botão **Definir senha provisória**, com senha manual e confirmação da própria senha do Super Admin.
+- O backend bloqueia redefinição de conta Super Admin, exige autenticação de sessão mais senha atual do administrador, valida vínculo do usuário ao restaurante e registra auditoria sem gravar segredo.
+- Usuários provisionados ficam com `intervalo_password_change_required=true` e precisam escolher nova senha antes de operar o restaurante; vínculo pendente passa a ativo depois de operação autorizada.
+- Para contas criadas pelo administrador, usa `email_confirm:true` por exigência do Supabase Auth para permitir entrada imediata por senha sem SMTP. **Isso é confirmação administrativa no Auth, não prova de posse do e-mail**; essa identidade deverá ser validada independentemente no futuro.
+- Contas Auth globais pré-existentes não podem ser recriadas com outro restaurante diretamente pelo formulário de novo usuário, evitando alteração surpresa de senhas compartilhadas. Para contas já vinculadas, a redefinição da senha impacta todos os restaurantes vinculados à mesma identidade.
+- Módulos GB+ e automações do GitHub não alterados.
+
+### Homologação
+- Edge Function nova implantada diretamente no Supabase, status ACTIVE, verify_jwt=true.
+- Inspeção estática do controle de acesso, da senha obrigatória e da apresentação em UI.
+- Pendente: simular autenticação real e fluxo completo pelo domínio; testar criação e redefinição com usuários fictícios e acesso autorizado, sem mudar senhas de pessoas reais na homologação.
+- Configuração SMTP de recuperação por e-mail continua pendente, sem bloquear o recurso manual.
+
+---
+
 ## 0.9.2 — 2026-11-12 · Cadastro de restaurantes sem etapa de e-mail
 
 **Status:** interface alterada e enviada à branch main; o backend já permitia criar restaurante sem Master/e-mail desde 0.9.1. Verificação prática no domínio ainda pendente.
