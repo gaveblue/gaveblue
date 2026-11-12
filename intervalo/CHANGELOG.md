@@ -1,5 +1,57 @@
 # Intervalo — CHANGELOG
 
+## 0.7.0 — 2026-11-12 · Estrutura operacional multiempresa (prévia técnica)
+
+**Situação:** esquema e APIs implantados, interfaces publicadas por commits na `main`; testes SQL e sintaxe aprovados. **Não homologada integralmente:** faltam browser/E2E, equipe ativa, hardware e validação no domínio.
+
+### 0.3.0 — Cardápio
+- Categorias, produtos, preço, disponibilidade e adicionais com restrição de tenant por FKs compostas.
+- Administração de catálogo no painel `/intervalo/{slug}/catalogo`.
+- `/intervalo/{slug}/cardapio` consulta apenas informações marcadas como publicadas, com módulo habilitado e restaurante ativo.
+- Pedido público direto **não habilitado**, evitando pedidos não verificados.
+
+### 0.4.0 — Mesas e comandas
+- Cadastro de mesas e salões, uma comanda ativa por mesa (índice único parcial).
+- Garçom abre comanda, adiciona itens com snapshot de preços, envia à cozinha e marca servido.
+- Transições e preços calculados no servidor em funções transacionais exclusivas do `service_role`.
+
+### 0.5.0 — Cozinha e impressão
+- Fila de cozinha por restaurante com estágios recebido/preparando/pronto, atualização manual.
+- Tabelas de impressoras e jobs, mas fila e agente de impressão **não estão ativados**.
+- Protótipo **offline** do agente Windows em `print-agent/`; hardware B&G BG-06 não testado. Realtime automático pendente.
+
+### 0.6.0 — Estoque e caixa
+- Insumos, fichas técnicas e movimentos estruturados; cadastro de saldo inicial.
+- **Baixa automática de estoque ainda não implementada**.
+- Caixa manual com sessão de abertura, recebimentos parciais, quitação da comanda e fechamento com conferência.
+- Registro de Pix/cartão é **somente declaratório**; não há transação com bancos, adquirentes nem emissão de documento fiscal.
+
+### 0.7.0 — Plataforma, planos e relatórios
+- Super Admin habilita módulos e suspende/reativa restaurantes por função protegida.
+- Estrutura para planos e assinaturas sem precificação ou provedor de cobrança operacional.
+- Relatórios gerenciais preliminares, limitados a recortes recentes; não fiscais.
+- Piloto `intervalo27`: cinco módulos centrais habilitados **somente para testes**, sem cobrança.
+- Frontend dividido em módulos JS independentes; rotas profundas suportadas pelo fallback condicional do GitHub Pages.
+
+### Segurança, QA e riscos remanescentes
+- 26/26 tabelas públicas com RLS; nenhum `SELECT` anônimo ou `INSERT/UPDATE` autenticado diretamente concedido às tabelas.
+- Funções de comanda e caixa sem privilégio EXECUTE de `anon` ou `authenticated`; somente `service_role`.
+- Teste SQL rollback: abertura de comanda, item, envio, preparação, pronto, servido, pagamento parcial e quitação, abertura e fechamento de caixa.
+- Teste SQL rollback: vínculos estrangeiros entre restaurantes rejeitados.
+- 10 módulos JS e frontend principal passaram por verificação sintática estática; não houve build React nem E2E.
+- Cardápio do piloto não publicado, sem produtos/mesas/pagamentos criados artificialmente.
+- Supabase Advisor alerta para proteção de senhas vazadas desabilitada.
+- Endereço real ainda não verificado por HTTP neste ambiente (erro DNS); commit GitHub não é prova de propagação no domínio.
+- Master do restaurante piloto continua pendente de ativação; nenhum fluxo real foi exercitado como Master/garçom/caixa.
+
+### Artefatos
+- `QA-0.7.0.md`: matriz técnica e limites de homologação.
+- `ROTEIRO-TESTES-PILOTO.md`: passos para o titular testar os módulos.
+- `DEPLOY-ROLLBACK-0.7.0.md`: estratégia de publicação manual e reversão sem remover dados.
+
+---
+
+
 ## 0.2.1 — 2026-11-12 · Login alternativo por CPF
 
 **Estado:** implementação aplicada; testes estruturais aprovados; homologação funcional pendente de CPF vinculado e login real.
