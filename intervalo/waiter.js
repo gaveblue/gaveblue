@@ -50,7 +50,7 @@ export async function renderPage({supabase,restaurant,box,esc,link}){
   +'<div class="wg-table-filters" role="group" aria-label="Filtro de mesas">'+[['all','Todas'],['busy','Ocupadas'],['free','Livres']].map(([k,l])=>'<button type="button" data-w-filter="'+k+'" aria-pressed="'+(tableFilter===k)+'">'+l+'</button>').join('')+'</div><div class="wg-tables">';
   for(const t of visibleTables){
     const busy=occupied(t);
-    html+='<button type="button" class="wg-table'+(t.id===selectedId?' selected':'')+'" data-w-table="'+esc(t.id)+'" aria-current="'+(t.id===selectedId)+'"><span class="wg-table-name"><span class="wg-table-icon" aria-hidden="true">▰</span>'+esc(t.label)+'</span><span class="wg-table-meta"><span><i class="wg-dot'+(busy?' busy':'')+'"></i>'+(busy?'Ocupada':'Livre')+'</span><span>'+esc(t.area??'Salão')+'</span></span></button>';
+    html+='<button type="button" class="wg-table'+(t.id===selectedId?' selected':'')+'" data-w-table="'+esc(t.id)+'" aria-current="'+(t.id===selectedId)+'"><span class="wg-table-name"><span class="wg-table-icon" aria-hidden="true">'+icon('table',20)+'</span>'+esc(t.label)+'</span><span class="wg-table-meta"><span><i class="wg-dot'+(busy?' busy':'')+'"></i>'+(busy?'Ocupada':'Livre')+'</span><span>'+esc(t.area??'Salão')+'</span></span></button>';
   }
   html+='</div></aside><section class="wg-panel" data-section="cardapio"><div class="wg-catalogue"><div class="wg-catalogue-heading"><div><h2>Cardápio</h2><p class="wg-hint">Escolha um produto para a '+esc(activeTable?.label??'mesa')+'</p></div><span class="wg-counter" id="wg-products-count">'+products.length+' produtos</span></div>'
    +'<input class="wg-search" id="wg-search" type="search" placeholder="Buscar produtos..." aria-label="Buscar produto" value="'+esc(search)+'" autocomplete="off">'
@@ -61,7 +61,7 @@ export async function renderPage({supabase,restaurant,box,esc,link}){
     html+='<article class="wg-product" data-w-product data-category="'+esc(p.category_id)+'" data-search="'+esc((p.name+' '+(p.description??'')+' '+(cat?.name??'')).toLocaleLowerCase('pt-BR'))+'">'
       +'<div class="wg-product-photo">'+(src?'<img src="'+esc(src)+'" alt="'+esc(p.name)+'" loading="lazy" decoding="async" referrerpolicy="no-referrer">':'<span aria-hidden="true">'+categoryIcon(cat?.name??'')+'</span>')+'</div>'
       +'<div class="wg-product-text"><b>'+esc(p.name)+'</b><p>'+esc(p.description??'')+'</p><div class="wg-product-foot"><span class="wg-price">'+money(p.price_cents)+'</span>'
-      +'<button type="button" class="wg-plus" data-w-add="'+esc(p.id)+'" aria-label="Adicionar '+esc(p.name)+'" '+(canAdd?'':'disabled title="Abra uma comanda nesta mesa antes de adicionar itens"')+'>+</button></div></div></article>';
+      +'<button type="button" class="wg-plus" data-w-add="'+esc(p.id)+'" aria-label="Adicionar '+esc(p.name)+'" '+(canAdd?'':'disabled title="Abra uma comanda nesta mesa antes de adicionar itens"')+'>'+icon("plus",22)+'</button></div></div></article>';
   }
   html+='</div>'+(!products.length?'<p class="wg-empty">O restaurante ainda não tem produtos disponíveis no cardápio.</p>':'')+'</div></section>'
    +'<aside class="wg-panel wg-order" data-section="comanda"><div class="wg-selected">Comanda</div><h2>'+(activeTable?esc(activeTable.label):'Selecione uma mesa')+'</h2>'
@@ -85,9 +85,10 @@ export async function renderPage({supabase,restaurant,box,esc,link}){
   }else if(activeTable){
     html+='<p class="wg-empty">Mesa livre. Abra uma comanda para começar o atendimento.</p><button type="button" class="wg-primary" id="wg-open">Abrir comanda</button>';
   }else html+='<p class="wg-empty">Selecione uma mesa primeiro.</p>';
-  html+='</aside></div><div class="wg-mobile-tabs" role="group" aria-label="Etapas do atendimento">'
+  html+='</aside></div><button type="button" class="wg-cart-shortcut" id="wg-cart-shortcut">'+icon('receipt',20)+' <span>Comanda · '+esc(activeTable?.label??'Selecionar mesa')+'</span><strong>'+money(total)+'</strong>'+icon('chevronRight',18)+'</button><div class="wg-mobile-tabs" role="group" aria-label="Etapas do atendimento">'
     +[['mesas',icon('table',21),'Mesas'],['cardapio',icon('burger',21),'Cardápio'],['comanda',icon('receipt',21),'Comanda']].map(([id,ico,label])=>'<button type="button" data-w-view="'+id+'" aria-pressed="'+(view===id)+'"><span>'+ico+'</span>'+label+'</button>').join('')+'</div>';
   box(html);
+  const shortcut=document.getElementById('wg-cart-shortcut');if(shortcut)shortcut.onclick=()=>showView('comanda');
   const conn=document.getElementById('wg-connection');if(conn)conn.textContent=navigator.onLine?'● Internet disponível':'● Sem internet';
   document.getElementById('wg-install').onclick=()=>{if(typeof window.intervaloInstallGarcom==='function')window.intervaloInstallGarcom();else alert('No Android: menu do navegador → Instalar app. No iPhone: Compartilhar → Adicionar à Tela de Início.');};
   document.querySelectorAll('[data-w-filter]').forEach(b=>b.onclick=()=>{tableFilter=b.dataset.wFilter;render()});
