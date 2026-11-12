@@ -24,15 +24,31 @@ Deno.serve(async(req:Request)=>{
  const {data:existing,error:ee}=await sb.from("restaurants").select("id").eq("slug",slug).maybeSingle();
  if(ee)return out({error:"Falha ao verificar identificador"},503);
  if(existing)return out({error:"Identificador já cadastrado"},409);
- const {data:invited,error:ie}=await sb.auth.admin.inviteUserByEmail(email,{redirectTo:origin+"/intervalo/ativar"});
- if(ie||!invited.user?.id)return out({error:"Convite não enviado. Revise email, usuário existente ou limites do Auth."},409);
+ let existingUserId:string|undefined;
+ let page=1;
+ while(page<=10&&!existingUserId){
+  const {data,error}=await sb.auth.admin.listUsers({page,perPage:200});
+  if(error)return out({error:"Não foi possível conferir contas existentes"},503);
+  existingUserId=data.users.find(u=>u.email?.trim().toLowerCase()===email)?.id;
+  if(data.users.length<200)break;
+  page++;
+ }
+ if(!existingUserId&&page>10)return out({error:"A busca de usuários atingiu o limite; tente novamente"},503);
+ let targetUserId=existingUserId;
+ let emailed=false;
+ if(!targetUserId){
+  const {data:invited,error:ie}=await sb.auth.admin.inviteUserByEmail(email,{redirectTo:origin+"/intervalo/ativar"});
+  if(ie||!invited.user?.id)return out({error:"Convite não enviado. Verifique email e limite de envio do Auth."},409);
+  targetUserId=invited.user.id;
+  emailed=true;
+ }
  const {data:restaurant,error:re}=await sb.from("restaurants").insert({name,slug,status:"active"}).select("id,name,slug,status").single();
  if(re||!restaurant){console.error("restaurant_create_failed",{code:re?.code});return out({error:"Erro ao cadastrar restaurante; convite poderá ter sido emitido"},500);}
  const expires=new Date(Date.now()+86400000).toISOString();
- const {error:me}=await sb.from("restaurant_members").insert({restaurant_id:restaurant.id,user_id:invited.user.id,role:"master",status:"pending",invite_expires_at:expires});
+ const {error:me}=await sb.from("restaurant_members").insert({restaurant_id:restaurant.id,user_id:targetUserId,invited_email:email,role:"master",status:"pending",invite_expires_at:expires});
  const {error:mo}=me?{error:me}:await sb.from("restaurant_modules").insert(["gestao","garcom","cozinha","caixa","cardapio"].map(module=>({restaurant_id:restaurant.id,module,enabled:module==="gestao"})));
  if(me||mo){await sb.from("restaurants").delete().eq("id",restaurant.id);console.error("provision_failure",{member:me?.code,modules:mo?.code});return out({error:"Cadastro revertido; verifique logs"},500);}
- const {error:au}=await sb.from("audit_logs").insert({restaurant_id:restaurant.id,actor_user_id:user.id,event:"restaurant_created_master_invited",details:{slug,master_user_id:invited.user.id}});
+ const {error:au}=await sb.from("audit_logs").insert({restaurant_id:restaurant.id,actor_user_id:user.id,event:"restaurant_created_master_invited",details:{slug,master_user_id:targetUserId}});
  if(au){await sb.from("restaurants").delete().eq("id",restaurant.id);return out({error:"Falha de auditoria, cadastro revertido"},500);}
- return out({restaurant,invited:true},201);
+ return out({restaurant,invited:emailed,existing_user:!emailed},201);
 });
