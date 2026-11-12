@@ -190,13 +190,14 @@ Deno.serve(async(req:Request)=>{
  }
  if(action==="stock_list"){
   if(!manage())return fail();
-  const [items,recipes,movements]=await Promise.all([
+  const [items,recipes,movements,products]=await Promise.all([
    db.from("stock_items").select("id,name,unit,quantity,min_quantity,active").eq("restaurant_id",tenant).order("name"),
    db.from("recipe_components").select("id,product_id,stock_item_id,quantity").eq("restaurant_id",tenant),
-   db.from("stock_movements").select("id,stock_item_id,quantity_delta,reason,created_at").eq("restaurant_id",tenant).order("created_at",{ascending:false}).limit(100)
+   db.from("stock_movements").select("id,stock_item_id,quantity_delta,reason,created_at").eq("restaurant_id",tenant).order("created_at",{ascending:false}).limit(100),
+   db.from("menu_products").select("id,name,available").eq("restaurant_id",tenant).order("name")
   ]);
-  if(items.error||recipes.error||movements.error)return error("Falha ao consultar estoque",503);
-  return reply({items:items.data,recipes:recipes.data,movements:movements.data,automatic_deduction:false});
+  if(items.error||recipes.error||movements.error||products.error)return error("Falha ao consultar estoque",503);
+  return reply({items:items.data,recipes:recipes.data,movements:movements.data,products:products.data,automatic_deduction:true});
  }
  if(action==="stock_create"){
   if(!manage())return fail();
@@ -206,6 +207,47 @@ Deno.serve(async(req:Request)=>{
   const {error:e}=await db.from("stock_items").insert({restaurant_id:tenant,name,unit,quantity:qty,min_quantity:minimum});
   if(e)return error("Não foi possível cadastrar insumo",409);
   return reply({saved:true});
+ }
+
+ if(action==="recipe_set"){
+  if(!manage())return fail();
+  const product_id=body.product_id,stock_item_id=body.stock_item_id,quantity=body.quantity;
+  if(!isId(product_id)||!isId(stock_item_id)||typeof quantity!=="number"||!Number.isFinite(quantity)
+    ||quantity<0||quantity>10000000||quantity!==Math.round(quantity*1000)/1000)
+    return error("Ficha técnica inválida; use até 3 casas decimais",400);
+  const [product,stock]=await Promise.all([
+   db.from("menu_products").select("id").eq("restaurant_id",tenant).eq("id",product_id).maybeSingle(),
+   db.from("stock_items").select("id,active").eq("restaurant_id",tenant).eq("id",stock_item_id).maybeSingle()
+  ]);
+  if(product.error||stock.error)return error("Falha ao verificar produto e insumo",503);
+  if(!product.data||!stock.data||!stock.data.active)return error("Produto ou insumo não disponível neste restaurante",404);
+  if(quantity===0){
+   const {error:e}=await db.from("recipe_components").delete().eq("restaurant_id",tenant).eq("product_id",product_id).eq("stock_item_id",stock_item_id);
+   if(e)return error("Não foi possível excluir ingrediente da ficha",503);
+  }else{
+   const {error:e}=await db.from("recipe_components").upsert({restaurant_id:tenant,product_id,stock_item_id,quantity},
+     {onConflict:"restaurant_id,product_id,stock_item_id"});
+   if(e)return error("Não foi possível salvar a ficha técnica",503);
+  }
+  await db.from("audit_logs").insert({restaurant_id:tenant,actor_user_id:user.id,event:"stock_recipe_changed",
+   details:{product_id,stock_item_id,quantity}});
+  return reply({saved:true});
+ }
+ if(action==="stock_adjust"){
+  if(!manage())return fail();
+  const stock_item_id=body.stock_item_id,delta=body.delta,reason=body.reason;
+  if(!isId(stock_item_id)||typeof delta!=="number"||!Number.isFinite(delta)||delta===0
+    ||Math.abs(delta)>10000000||delta!==Math.round(delta*1000)/1000
+    ||!["receive","waste","adjustment"].includes(String(reason)))
+    return error("Movimentação inválida",400);
+  const {data,e}=await (async()=>{
+   const result=await db.rpc("intervalo_stock_adjust",{p_restaurant:tenant,p_item:stock_item_id,p_actor:user.id,p_delta:delta,p_reason:reason});
+   return {data:result.data,e:result.error};
+  })();
+  if(e)return error("Não foi possível movimentar estoque: "+e.message,409);
+  await db.from("audit_logs").insert({restaurant_id:tenant,actor_user_id:user.id,
+    event:"stock_adjusted",details:{stock_item_id,delta,reason}});
+  return reply({saved:true,remaining:data});
  }
  if(action==="printers"){
   if(!manage())return fail();
