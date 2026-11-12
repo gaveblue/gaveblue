@@ -1,5 +1,22 @@
 # Intervalo — CHANGELOG
 
+## 1.0.0-rc.3 — 2026-11-12 · Correção de chaves e melhoria mobile em Estoque e Produtos
+
+**Status:** versão candidata ao piloto visual na `main`; verificação estática, renderização simulada e fixture de layout em Chromium aprovadas. **Sem homologação de uso real em dispositivos ou comprovação de propagação no domínio.**
+
+- Resolvida a causa dos interruptores deformados nas flags **Exibir no cardápio** e **Disponível para venda**: `.x-form input` aplicava largura de 100% e padding às caixas de seleção, superando o CSS da chave.
+- Interruptores compactos de **46 × 26 px**, com polegar de 20 px, laranja para ligado e cinza para desligado; sem esticamento ou flex-shrink, com foco de teclado visível e estado de carregamento.
+- As opções agora aparecem em **linhas de ajustes com título e subtítulo**, área de toque maior, inspiradas nas interfaces mobile de configuração.
+- O cadastro de novo produto virou um formulário **recolhível** por padrão; expansão via `details/summary`. A tela de produtos prioriza a lista comercial, seus preços e chaves.
+- **Insumos, Produtos, Fichas técnicas e Movimentações** ficam acessíveis por navegação inferior fixa em dispositivos com tela de até 700 px, sem encobrir o conteúdo.
+- Cartões, formulários e indicadores compactados e reorganizados para uso com uma mão. No desktop, abas permanecem no conteúdo.
+- Atualização silenciosa após alternar flags, preservando a rolagem em vez de mostrar uma tela temporária de carregamento.
+- Sem alterações de backend, acesso, precificação, disponibilidade, regras de estoque ou cadastro persistente. Versão exibida e cache de assets atualizados para `1.0.0-rc.3`.
+- Testes: renderização simulada de produtos e seis chaves, especificidade CSS, protótipo visual equivalente no Chromium em 320/360/390/412/768/1280 px, sem overflow horizontal e com chaves 46 × 26 px. Não equivalem a testes reais no site.
+- Documentação: `QA-1.0.0-RC3.md`.
+
+---
+
 ## 1.0.0-rc.2 — 2026-11-12 · Separação de insumos e produtos com precificação central
 
 **Estado:** migração aditiva aplicada no Supabase; `restaurant-core` v9 e `public-menu` v3 ativos; frontend atualizado na `main`. Testes SQL e renderização simulada aprovados. **Ainda não homologada no domínio ou aparelhos reais.**
