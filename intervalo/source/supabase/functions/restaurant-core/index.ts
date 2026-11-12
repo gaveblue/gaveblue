@@ -153,6 +153,7 @@ Deno.serve(async(req:Request)=>{
   order_open:{fn:"intervalo_open_order",fields:["p_table"],module:"garcom"},
   item_add:{fn:"intervalo_add_order_item",fields:["p_order","p_product","p_quantity","p_note"],module:"garcom"},
   order_submit:{fn:"intervalo_submit_order",fields:["p_order"],module:"garcom"},
+  order_cancel:{fn:"intervalo_cancel_open_order",fields:["p_order","p_reason"],module:"garcom"},
   order_progress:{fn:"intervalo_advance_order",fields:["p_order","p_next"],module:"cozinha"},
   cash_open:{fn:"intervalo_open_cash",fields:["p_start"],module:"caixa"},
   pay_manual:{fn:"intervalo_record_manual_payment",fields:["p_order","p_amount","p_method"],module:"caixa"},
@@ -168,6 +169,7 @@ Deno.serve(async(req:Request)=>{
   if(op.fields.includes("p_product")){if(!isId(body.product_id))return error("Produto inválido");args.p_product=body.product_id}
   if(op.fields.includes("p_quantity")){const qty=integer(body.quantity,1,99);if(qty===null)return error("Quantidade inválida");args.p_quantity=qty}
   if(op.fields.includes("p_note")){const note=txt(body.note??"",350);if(note.length>350)return error("Observação inválida");args.p_note=note}
+  if(op.fields.includes("p_reason")){const reason=txt(body.reason??"",180);if(reason.length<3||reason.length>180)return error("Informe uma justificativa de 3 a 180 caracteres");args.p_reason=reason}
   if(op.fields.includes("p_next")){if(!["preparing","ready","served"].includes(String(next)))return error("Status inválido");args.p_next=next}
   if(op.fields.includes("p_start")){const n=integer(body.starting_cash_cents,0,10000000000);if(n===null)return error("Troco inicial inválido");args.p_start=n}
   if(op.fields.includes("p_amount")){const n=integer(body.amount_cents,1,10000000000);if(n===null)return error("Valor inválido");args.p_amount=n}
