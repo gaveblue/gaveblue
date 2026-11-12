@@ -204,9 +204,12 @@ Deno.serve(async(req:Request)=>{
   const name=txt(body.name,120),unit=txt(body.unit,3);
   const qty=body.quantity,minimum=body.min_quantity;
   if(name.length<2||name.length>120||!["un","kg","g","l","ml"].includes(unit)||typeof qty!=="number"||typeof minimum!=="number"||!Number.isFinite(qty)||!Number.isFinite(minimum)||qty<0||minimum<0||qty>10000000||minimum>10000000)return error("Insumo inválido");
-  const {error:e}=await db.from("stock_items").insert({restaurant_id:tenant,name,unit,quantity:qty,min_quantity:minimum});
-  if(e)return error("Não foi possível cadastrar insumo",409);
-  return reply({saved:true});
+  const {data,e}=await (async()=>{
+   const r=await db.rpc("intervalo_create_stock",{p_restaurant:tenant,p_name:name,p_unit:unit,p_quantity:qty,p_min:minimum,p_actor:user.id});
+   return {data:r.data,e:r.error};
+  })();
+  if(e)return error("Não foi possível cadastrar insumo: "+e.message,409);
+  return reply({saved:true,stock_item_id:data});
  }
 
  if(action==="recipe_set"){
