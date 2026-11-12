@@ -5,6 +5,13 @@
 <title>Intervalo · Gestão de restaurantes | Gaveblue</title>
 <meta name="theme-color" content="#0f172a"><meta name="description" content="Intervalo, plataforma de gestão de restaurantes da Gaveblue.">
 <link rel="manifest" href="/intervalo/manifest.webmanifest">
+<script>
+/* Manifest distinto somente no contexto do garçom; o portal e demais perfis mantêm o próprio PWA. */
+if(location.pathname==='/intervalo/garcom'||/\/intervalo\/[a-z0-9-]+\/garcom\/?$/.test(location.pathname)||location.search.includes('destino=garcom')){
+ document.querySelector('link[rel="manifest"]').href='/intervalo/manifest-garcom.webmanifest';
+ document.querySelector('meta[name="theme-color"]').content='#ff7900';
+}
+</script>
 <style>
 :root{font-family:Inter,"Segoe UI",Arial,sans-serif;color:#15212b;background:#f8fafc}*{box-sizing:border-box}body{margin:0}a{color:inherit;text-decoration:none}button,input{font:inherit}button{cursor:pointer}.smallbtn{border:1px solid #cbd5e1;background:white;color:#0f766e;border-radius:9px;padding:8px 11px;font-size:12px;font-weight:700;cursor:pointer}header{background:#fff;border-bottom:1px solid #e6eaed;position:sticky;top:0;z-index:5}header .inner{max-width:1140px;margin:auto;min-height:72px;padding:12px 22px;display:flex;justify-content:space-between;align-items:center;gap:14px}.logo{font-weight:800;font-size:24px;letter-spacing:-1.5px}.logo span{color:#0c9e85}.logo small{font-size:10px;display:block;letter-spacing:.4px;font-weight:600;color:#64748b;margin-top:-3px}nav{display:flex;gap:12px;align-items:center}nav a{font-size:14px}.btn{border:0;border-radius:11px;background:#0d9488;color:white;font-weight:700;padding:12px 17px;display:inline-flex;align-items:center;justify-content:center;gap:8px}.btn:hover{background:#0f766e}.btn.alt{color:#334155;background:#f1f5f9}.wrap{max-width:1140px;margin:auto;padding:42px 22px}.hero{display:grid;grid-template-columns:1.1fr .9fr;gap:56px;align-items:center;min-height:440px}.eyebrow{text-transform:uppercase;letter-spacing:2px;color:#0d9488;font-size:11px;font-weight:800}.hero h1{font-size:clamp(36px,5.4vw,66px);line-height:1.04;letter-spacing:-2.7px;margin:20px 0}.hero h1 span{color:#0d9488}.hero p{font-size:18px;color:#64748b;max-width:570px;line-height:1.65}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:26px}.panel{border:1px solid #e2e8f0;background:#fff;border-radius:19px;padding:26px;box-shadow:0 12px 40px #0f172a0a}.panel h2{margin-top:0;letter-spacing:-.6px}.preview-row{display:flex;align-items:center;justify-content:space-between;padding:15px;border:1px solid #edf2f6;border-radius:12px;margin-top:10px}.preview-row strong{font-size:14px}.preview-row span{color:#64748b;font-size:12px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:15px}.feature{border:1px solid #e2e8f0;border-radius:15px;background:#fff;padding:20px}.feature b{display:block;margin-bottom:8px}.feature p{color:#64748b;font-size:13px;line-height:1.5}.section-title{font-size:30px;letter-spacing:-1.1px;margin-bottom:24px}.formbox{max-width:440px;margin:54px auto}.formbox h1{font-size:30px;letter-spacing:-1px}.muted{color:#64748b;line-height:1.65}form label{font-weight:650;color:#334155;font-size:13px;display:block;margin:18px 0 7px}input{width:100%;padding:13px 14px;border:1px solid #cbd5e1;border-radius:10px;outline:none}input:focus{border-color:#0d9488;box-shadow:0 0 0 3px #0d948820}.formbtn{width:100%;margin-top:22px}.error{color:#b42318;font-size:13px;margin-top:14px}.notice{color:#0f766e;background:#ecfdf5;padding:12px;border-radius:9px;font-size:13px}.cols{display:grid;grid-template-columns:1fr 1.2fr;gap:20px}.item{border:1px solid #e2e8f0;border-radius:13px;padding:17px;background:#fff;margin:12px 0}.item h3{margin:0 0 6px}.item p{margin:0;color:#64748b;font-size:13px}.links{display:flex;flex-wrap:wrap;gap:9px;margin-top:13px}.links a{font-size:12px;color:#0f766e;padding:8px 11px;background:#f0fdfa;border-radius:8px;font-weight:700}.tag{background:#eff6ff;color:#2563eb;border-radius:20px;padding:5px 9px;font-size:11px;font-weight:700}.foot{border-top:1px solid #e2e8f0;padding:24px;text-align:center;color:#94a3b8;font-size:12px;margin-top:40px}.skeleton{padding:70px;text-align:center;color:#64748b}.wait{color:#0f766e}.admin-list{margin-top:20px}.hidden{display:none}.hint{font-size:11px;color:#94a3b8;padding-top:10px}
 @media(max-width:760px){.hero,.cols{grid-template-columns:1fr;gap:22px}.hero{min-height:0}.wrap{padding:32px 18px}.grid{grid-template-columns:1fr 1fr}.hero h1{letter-spacing:-1.8px}.hero p{font-size:16px}.panel{padding:19px}nav a{font-size:12px}}@media(max-width:410px){.grid{grid-template-columns:1fr}.preview{display:none}}
@@ -12,11 +19,21 @@
 <script>
 (function(){try{var deep=sessionStorage.getItem('intervalo.deepLink');if(deep&&deep.startsWith('/intervalo/')&&deep.length<2100){sessionStorage.removeItem('intervalo.deepLink');history.replaceState(null,'',deep+window.location.hash)}}catch(e){}})()
 </script>
-</head><body><header><div class="inner"><a class="logo" href="/intervalo/">intervalo<span>.</span><small>UM PRODUTO GAVEBLUE</small></a><nav id="nav"><a href="/intervalo/login">Entrar</a></nav></div></header><main id="app"><div class="skeleton">Carregando Intervalo...</div></main><footer class="foot">Gaveblue © 2026 · Intervalo 0.9.6 · Prévia técnica do PWA</footer>
+</head><body><header><div class="inner"><a class="logo" href="/intervalo/">intervalo<span>.</span><small>UM PRODUTO GAVEBLUE</small></a><nav id="nav"><a href="/intervalo/login">Entrar</a></nav></div></header><main id="app"><div class="skeleton">Carregando Intervalo...</div></main><footer class="foot">Gaveblue © 2026 · Intervalo 0.9.7 · Prévia técnica do PWA</footer>
 <script type="module">
 import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.50.0/+esm';
 const supabase=createClient('https://fynaaiazebydorzllwip.supabase.co','sb_publishable_mGpfDRlZ0MSaa9MV_xMJsg_FT47wa_d',{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,flowType:'implicit',storageKey:'intervalo.auth.v1'}});
 const app=document.getElementById('app'),nav=document.getElementById('nav');
+let intervaloInstallEvent=null;
+window.addEventListener('beforeinstallprompt',event=>{event.preventDefault();intervaloInstallEvent=event});
+window.intervaloInstallGarcom=async()=>{
+ if(intervaloInstallEvent){
+  try{await intervaloInstallEvent.prompt();await intervaloInstallEvent.userChoice}finally{intervaloInstallEvent=null}
+ }else{
+  alert('Para instalar o PWA do garçom: no Android, abra o menu do Chrome e escolha Instalar app ou Adicionar à tela inicial. No iPhone, abra no Safari, toque Compartilhar e escolha Adicionar à Tela de Início. A instalação depende das opções disponíveis no navegador.');
+ }
+};
+
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const link=(s)=>'/intervalo'+s;
 const btn=(label,target)=>'<a class="btn" href="'+link(target)+'">'+label+'</a>';
@@ -45,7 +62,7 @@ async function setupNav(user){
  nav.innerHTML='<a href="/intervalo/inicio">Restaurantes</a><a href="/intervalo/minha-conta">Minha Conta</a>'+(adminAccess?'<a href="/intervalo/admin">Admin</a>':'')+'<button class="btn alt" id="exit">Sair</button>';
  document.getElementById('exit').onclick=async()=>{await supabase.auth.signOut();location.assign(link('/login'))};
 }
-async function home(user){box('<section class="hero"><div><span class="eyebrow">GAVEBLUE APRESENTA</span><h1>Seu restaurante.<br><span>Um só ritmo.</span></h1><p>Gestão, atendimento, cozinha e caixa conectados em uma plataforma multiempresa, com acesso por restaurante e função.</p><div class="actions">'+btn(user?'Meus restaurantes':'Acessar o Intervalo',user?'/inicio':'/login')+'<a class="btn alt" href="/">Conhecer Gaveblue</a></div><p class="hint">Versão 0.9.6 · Acesso e impressão manual</p></div><div class="panel preview"><span class="eyebrow">SUA OPERAÇÃO EM UM SÓ LUGAR</span><h2>Seu estabelecimento</h2>'+modules.map(m=>'<div class="preview-row"><strong>'+labels[m]+'</strong><span>→</span></div>').join('')+'</div></section><h2 class="section-title">Módulos da plataforma</h2><section class="grid">'+modules.map(m=>'<article class="feature"><b>'+labels[m]+'</b><p>Estrutura do módulo preparada para desenvolvimento e homologação.</p><span class="tag">Em desenvolvimento</span></article>').join('')+'</section>')}
+async function home(user){box('<section class="hero"><div><span class="eyebrow">GAVEBLUE APRESENTA</span><h1>Seu restaurante.<br><span>Um só ritmo.</span></h1><p>Gestão, atendimento, cozinha e caixa conectados em uma plataforma multiempresa, com acesso por restaurante e função.</p><div class="actions">'+btn(user?'Meus restaurantes':'Acessar o Intervalo',user?'/inicio':'/login')+'<a class="btn alt" href="/">Conhecer Gaveblue</a></div><p class="hint">Versão 0.9.7 · PWA do Garçom e Cardápio Digital</p></div><div class="panel preview"><span class="eyebrow">SUA OPERAÇÃO EM UM SÓ LUGAR</span><h2>Seu estabelecimento</h2>'+modules.map(m=>'<div class="preview-row"><strong>'+labels[m]+'</strong><span>→</span></div>').join('')+'</div></section><h2 class="section-title">Módulos da plataforma</h2><section class="grid">'+modules.map(m=>'<article class="feature"><b>'+labels[m]+'</b><p>Estrutura do módulo preparada para desenvolvimento e homologação.</p><span class="tag">Em desenvolvimento</span></article>').join('')+'</section>')}
 async function login(){
  box('<section class="formbox panel"><span class="eyebrow">ACESSO AO INTERVALO</span><h1>Bem-vindo de volta</h1><p class="muted">Entre com e-mail ou CPF e sua senha. O CPF fica disponível após ser vinculado à sua conta.</p><form id="loginForm"><label for="login-id">E-mail ou CPF</label><input id="login-id" type="text" name="identifier" required maxlength="254" autocomplete="username" placeholder="Seu e-mail ou CPF"><label for="login-pass">Senha</label><input id="login-pass" type="password" name="password" required autocomplete="current-password"><button class="btn formbtn" type="submit">Entrar</button><p id="feedback" role="status" aria-live="polite"></p></form><button class="btn alt" id="reset" style="margin-top:12px;width:100%">Esqueci minha senha</button><p class="hint">Novos funcionários recebem acesso diretamente do Master ou Super Admin, com senha provisória.</p></section>');
  document.getElementById('loginForm').onsubmit=async e=>{
@@ -81,7 +98,7 @@ async function login(){
        if(activationError){location.assign(link('/inicio'));return}
      }
      const {data:adminAccess}=await supabase.from('platform_admins').select('user_id').eq('user_id',user.id).eq('active',true).maybeSingle();
-     location.assign(link(adminAccess?'/admin':'/inicio'));
+     location.assign(link(new URLSearchParams(location.search).get('destino')==='garcom'?'/garcom':adminAccess?'/admin':'/inicio'));
    }catch{
      feed.innerHTML='<span class="error">Não foi possível entrar. Tente novamente.</span>';
    }finally{submit.disabled=false}
@@ -166,13 +183,38 @@ async function choose(user){
 async function admin(user){
  const {data:allowed,error}=await supabase.from('platform_admins').select('user_id').eq('user_id',user.id).eq('active',true).maybeSingle();
  if(error||!allowed){box('<section class="panel"><h1>Área restrita</h1><p>Somente Super Admin Gaveblue pode gerenciar a plataforma.</p></section>');return}
- const {renderPlatform}=await import('/intervalo/platform.js?v=0.9.6');
+ const {renderPlatform}=await import('/intervalo/platform.js?v=0.9.7');
  return renderPlatform({supabase,box,esc,link});
 }
+async function waiterHome(user){
+ const style='<style>.wg-launch{max-width:840px;margin:0 auto}.wg-launch-hero{background:linear-gradient(120deg,#ff860a,#ef5b00);color:#fff;padding:30px;border-radius:20px;margin:20px 0}.wg-launch-hero h1{font-size:32px;margin:5px 0;letter-spacing:-1px}.wg-launch-hero p{font-size:13px;color:#fff3e7}.wg-launch-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}.wg-launch-card{padding:20px;border:1px solid #f4e0cd;border-radius:17px;background:#fff}.wg-launch-card h2{font-size:19px;margin:6px 0}.wg-launch-card a{display:inline-block;margin-top:14px;padding:12px 16px;background:#ff7400;color:#fff;border-radius:10px;font-size:13px;font-weight:850}.wg-launch-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px}.wg-launch-actions button{border:1px solid #ffdfbc;background:#fff7ed;border-radius:11px;padding:11px 15px;color:#b74f00;font-weight:800;cursor:pointer}</style>';
+ box(style+'<section class="wg-launch"><div class="wg-launch-hero"><span>INTERVALO · PWA</span><h1>Atendimento do Garçom</h1><p>Escolha seu restaurante para acessar mesas, cardápio e comandas.</p></div><p>Carregando seus restaurantes...</p></section>');
+ const [{data:members,error:me},{data:flags,error:fe},{data:overrides,error:oe}]=await Promise.all([
+   supabase.from('restaurant_members').select('restaurant_id,role,status,restaurants(id,name,slug,status)').eq('user_id',user.id),
+   supabase.from('restaurant_modules').select('restaurant_id,module,enabled').eq('module','garcom'),
+   supabase.from('restaurant_member_module_access').select('restaurant_id,module,allowed').eq('user_id',user.id).eq('module','garcom')
+ ]);
+ if(me||fe||oe){box(style+'<section class="panel">Não foi possível carregar seus restaurantes. Verifique a conexão e atualize a página.</section>');return}
+ const available=(members??[]).filter(m=>{
+   if(m.status!=='active'||m.restaurants?.status!=='active')return false;
+   if(!(flags??[]).some(f=>f.restaurant_id===m.restaurant_id&&f.enabled))return false;
+   const override=(overrides??[]).find(f=>f.restaurant_id===m.restaurant_id);
+   return m.role==='master'||(override?override.allowed:(permissions[m.role]??[]).includes('garcom'));
+ });
+ if(available.length===1){location.replace(link('/'+available[0].restaurants.slug+'/garcom'));return}
+ let html=style+'<section class="wg-launch"><div class="wg-launch-hero"><span>INTERVALO · PWA</span><h1>Atendimento do Garçom</h1><p>Selecione um restaurante. Cada estabelecimento mantém suas comandas separadas.</p></div><div class="wg-launch-grid">';
+ for(const m of available)html+='<article class="wg-launch-card"><small>'+esc(m.role)+'</small><h2>'+esc(m.restaurants.name)+'</h2><p class="muted">Acesso liberado</p><a href="'+link('/'+m.restaurants.slug+'/garcom')+'">Abrir mesas e comandas</a></article>';
+ html+='</div>';
+ if(!available.length)html+='<div class="panel"><h2>Sem acesso ao atendimento</h2><p>Peça ao Master ou Super Admin para habilitar o módulo Garçom e vincular sua conta ao restaurante.</p><a href="'+link('/inicio')+'">Meus restaurantes</a></div>';
+ html+='<div class="wg-launch-actions"><button id="wg-launch-install" type="button">Instalar app do garçom</button><a href="'+link('/inicio')+'" class="btn alt">Todos os módulos</a></div></section>';
+ box(html);
+ document.getElementById('wg-launch-install').onclick=()=>window.intervaloInstallGarcom();
+}
+
 const internalModules=['catalogo','mesas','estoque','impressao','relatorios'];
 async function tenant(user,slug,mod){
  if(mod==='cardapio'){
-  const {renderPublicMenu}=await import('/intervalo/public-menu.js?v=0.9.6');
+  const {renderPublicMenu}=await import('/intervalo/public-menu.js?v=0.9.7');
   return renderPublicMenu({supabase,slug,box,esc,link});
  }
  if(!user){location.assign(link('/login'));return}
@@ -193,20 +235,20 @@ async function tenant(user,slug,mod){
  if(!permitted){box('<section class="panel"><h1>Sem permissão</h1><p>Seu papel neste restaurante não permite abrir este módulo.</p></section>');return}
  if(!moduleRow?.enabled){box('<section class="panel"><h1>Módulo ainda não habilitado</h1><p>O Super Admin precisa habilitar este recurso para o estabelecimento.</p>'+btn('Meus restaurantes','/inicio')+'</section>');return}
  if(mod==='gestao'){
-  const {renderManagement}=await import('/intervalo/management.js?v=0.9.6');
+  const {renderManagement}=await import('/intervalo/management.js?v=0.9.7');
   return renderManagement({supabase,restaurant:m.restaurants,role:m.role,box,esc,link});
  }
  const asset={catalogo:'catalog.js',mesas:'support.js',estoque:'support.js',impressao:'support.js',relatorios:'support.js',garcom:'waiter.js',cozinha:'kitchen.js',caixa:'cash.js'}[mod];
  if(!asset){box('<h1>Módulo não encontrado</h1>');return}
- const {renderPage}=await import('/intervalo/'+asset+'?v=0.9.6');
+ const {renderPage}=await import('/intervalo/'+asset+'?v=0.9.7');
  return renderPage({supabase,restaurant:m.restaurants,module:mod,box,esc,link});
 }
 async function account(user){
  if(!user){location.assign(link('/login'));return}
- const {renderAccount}=await import('/intervalo/account.js?v=0.9.6');
+ const {renderAccount}=await import('/intervalo/account.js?v=0.9.7');
  return renderAccount({supabase,box,esc,link,user});
 }
-async function start(){const user=await me();if(user?.app_metadata?.intervalo_password_change_required&&!['trocar-senha','login','redefinir','recuperar-senha'].includes(paths[0])){location.assign(link('/trocar-senha'));return}await setupNav(user);if(paths.length===0)return home(user);if(paths[0]==='login')return login();if(paths[0]==='recuperar-senha')return recovery();if(paths[0]==='trocar-senha')return changePassword(user);if(paths[0]==='minha-conta')return account(user);if(paths[0]==='configurar-admin')return setupFirstAdmin();if(paths[0]==='ativar')return setPassword('activation');if(paths[0]==='redefinir')return setPassword('recovery');if(paths[0]==='inicio')return user?choose(user):location.assign(link('/login'));if(paths[0]==='admin')return user?admin(user):location.assign(link('/login'));if(paths.length===2&&(modules.includes(paths[1])||internalModules.includes(paths[1]))&&/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(paths[0]))return tenant(user,paths[0],paths[1]);box('<h1>Página não encontrada</h1>'+btn('Início','/'))}
+async function start(){const user=await me();if(user?.app_metadata?.intervalo_password_change_required&&!['trocar-senha','login','redefinir','recuperar-senha'].includes(paths[0])){location.assign(link('/trocar-senha'));return}await setupNav(user);if(paths.length===0)return home(user);if(paths[0]==='login')return login();if(paths[0]==='recuperar-senha')return recovery();if(paths[0]==='trocar-senha')return changePassword(user);if(paths[0]==='minha-conta')return account(user);if(paths[0]==='configurar-admin')return setupFirstAdmin();if(paths[0]==='ativar')return setPassword('activation');if(paths[0]==='redefinir')return setPassword('recovery');if(paths[0]==='garcom'&&paths.length===1)return user?waiterHome(user):location.assign(link('/login?destino=garcom'));if(paths[0]==='inicio')return user?choose(user):location.assign(link('/login'));if(paths[0]==='admin')return user?admin(user):location.assign(link('/login'));if(paths.length===2&&(modules.includes(paths[1])||internalModules.includes(paths[1]))&&/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(paths[0]))return tenant(user,paths[0],paths[1]);box('<h1>Página não encontrada</h1>'+btn('Início','/'))}
 start().catch(e=>{app.innerHTML='<div class="wrap"><section class="panel"><h1>Não foi possível iniciar o Intervalo</h1><p class="error">'+esc(e.message)+'</p><p>Verifique sua conexão e atualize a página.</p></section></div>'});
 if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('/intervalo/sw.js',{scope:'/intervalo/'}).catch(()=>{}));
 </script>
