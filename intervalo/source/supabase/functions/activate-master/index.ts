@@ -1,0 +1,28 @@
+import {createClient} from "npm:@supabase/supabase-js@2.50.0";
+const url=Deno.env.get("SUPABASE_URL")??"",key=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")??"";
+const origin="https://gaveblue.com.br";
+const headers={"Access-Control-Allow-Origin":origin,"Access-Control-Allow-Headers":"authorization, x-client-info, apikey, content-type","Access-Control-Allow-Methods":"POST, OPTIONS","Content-Type":"application/json","Cache-Control":"no-store","Vary":"Origin"};
+const out=(obj:unknown,status=200)=>new Response(JSON.stringify(obj),{status,headers});
+const sb=createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false}});
+Deno.serve(async(req:Request)=>{
+ if(req.method==="OPTIONS")return new Response(null,{status:204,headers});
+ if(req.method!=="POST")return out({error:"Método não permitido"},405);
+ if(req.headers.get("Origin")&&req.headers.get("Origin")!==origin)return out({error:"Origem não autorizada"},403);
+ const token=req.headers.get("Authorization")?.match(/^Bearer (.+)$/i)?.[1];
+ if(!token)return out({error:"Autenticação obrigatória"},401);
+ const {data:{user},error:ue}=await sb.auth.getUser(token);
+ if(ue||!user)return out({error:"Sessão inválida"},401);
+ const {data:verified,error:ce}=await sb.auth.getClaims(token);
+ if(ce||!verified?.claims)return out({error:"Não foi possível validar o método de autenticação"},401);
+ const claims=verified.claims as Record<string,unknown>;
+ const amr=Array.isArray(claims.amr)?claims.amr:[];
+ const authenticatedWithPassword=amr.some(item=>typeof item==="object"&&item!==null&&(item as {method?:string}).method==="password");
+ if(!authenticatedWithPassword)return out({error:"Faça login usando a senha cadastrada para ativar seu acesso"},403);
+ const {data:pending,error:pe}=await sb.from("restaurant_members").select("restaurant_id,invite_expires_at,role").eq("user_id",user.id).eq("role","master").eq("status","pending");
+ if(pe)return out({error:"Falha ao validar convites"},503);
+ const now=new Date().toISOString(),ids=(pending??[]).filter(m=>m.invite_expires_at&&m.invite_expires_at>now).map(m=>m.restaurant_id);
+ if(ids.length===0)return out({error:"Nenhum convite Master válido"},403);
+ const {data:active,error:ae}=await sb.from("restaurant_members").update({status:"active",activated_at:now}).eq("user_id",user.id).eq("role","master").eq("status","pending").in("restaurant_id",ids).gt("invite_expires_at",now).select("restaurant_id");
+ if(ae||!active?.length)return out({error:"Não foi possível ativar o acesso"},503);
+ return out({activated:active.length},200);
+});
