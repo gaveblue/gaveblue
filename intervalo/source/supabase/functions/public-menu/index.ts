@@ -21,7 +21,7 @@ Deno.serve(async(req:Request)=>{
  if(se||me||!state?.is_published||!mod?.enabled)return reply({published:false},404);
  const [categories,products,options]=await Promise.all([
  db.from("menu_categories").select("id,name,sort_order").eq("restaurant_id",r.id).eq("active",true).order("sort_order"),
- db.from("menu_products").select("id,category_id,name,description,price_cents,sort_order").eq("restaurant_id",r.id).eq("available",true).order("sort_order"),
+ db.from("menu_products").select("id,category_id,name,description,price_cents,image_url,sort_order").eq("restaurant_id",r.id).eq("available",true).order("sort_order"),
  db.from("menu_product_options").select("product_id,name,price_delta_cents").eq("restaurant_id",r.id).eq("available",true).order("sort_order")
  ]);
  if(categories.error||products.error||options.error)return reply({error:"Não foi possível carregar cardápio"},503);
