@@ -3,7 +3,7 @@ const url=Deno.env.get("SUPABASE_URL")??"", key=Deno.env.get("SUPABASE_SERVICE_R
 const origin="https://gaveblue.com.br";
 const headers={"Access-Control-Allow-Origin":origin,"Access-Control-Allow-Headers":"authorization, x-client-info, apikey, content-type","Access-Control-Allow-Methods":"POST, OPTIONS","Content-Type":"application/json","Cache-Control":"no-store","Vary":"Origin"};
 const out=(obj:unknown,status=200)=>new Response(JSON.stringify(obj),{status,headers});
-const reserved=new Set(["admin","login","api","auth","assets","static","app","ativar","redefinir","manifest","suporte","cadastro","entrar","sair","inicio","configuracoes","www"]);
+const reserved=new Set(["admin","login","api","auth","assets","static","app","ativar","redefinir","manifest","suporte","cadastro","entrar","sair","inicio","configuracoes","www","recuperar-senha","trocar-senha","minha-conta"]);
 const sb=createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false}});
 Deno.serve(async(req:Request)=>{
  if(req.method==="OPTIONS")return new Response(null,{status:204,headers});
