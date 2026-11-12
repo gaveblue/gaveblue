@@ -1,5 +1,45 @@
 # Intervalo — CHANGELOG
 
+## 0.9.0 — 2026-11-12 · Recuperação de acesso, Master e comandas
+
+**Situação:** código enviado ao GitHub e funções Supabase ativas; QA estrutural/SQL aprovado. **E2E e entrega HTTP ainda não comprovados**.
+
+### v0.8.0 — Acesso, credenciais e Super Admin
+- Super Admin ganhou seção **Usuários do restaurante**, identificando vínculos e convites.
+- Botão **Redefinir senha** para membro confirmado e não-administrador; exige reautenticação do próprio Super Admin por senha, gera senha provisória criptograficamente aleatória, mostra somente uma vez e não registra o segredo em logs ou banco em texto claro. A senha antiga deixa de valer.
+- O backend define `app_metadata.intervalo_password_change_required` e os recursos privados negam acesso até o próprio usuário trocar a senha.
+- Nova rota `/intervalo/trocar-senha` e botão em Minha Conta; troca valida senha atual no Supabase Auth e atualiza a senha com serviço do servidor, depois exige novo login.
+- Botão **Renovar acesso Master** aumenta convite pendente em sete dias após confirmação da senha do Super Admin.
+- Botão **Vincular minha conta como Master** associa explicitamente a própria conta Super Admin ao restaurante ativo (não remove outro Master), com auditoria e confirmação de senha.
+- Ativação de Master no login ou em **Meus restaurantes** valida senha novamente no servidor e não depende de claims AMR potencialmente ausentes.
+- Convite pendente do piloto Intervalo 27 prorrogado por sete dias, **sem ativar artificialmente a conta**.
+- Nova página `/intervalo/recuperar-senha` com envio de link de recuperação e mensagem correta para erro/falta de SMTP; `404.html` reconhece as novas rotas.
+- **Limitação:** envio real de e-mails de recuperação ainda depende da configuração de SMTP e URLs de redirecionamento no painel Supabase, que não pode ser concluída pelas integrações atuais sem configuração do titular. Não afirmar que um e-mail foi entregue.
+
+### v0.9.0 — Atendimento e cozinha
+- Nova operação transacional `intervalo_cancel_open_order`: apenas comanda ainda não enviada; cancela itens rascunho, libera a mesa e registra justificativa e autor.
+- Proíbe cancelamento após envio à cozinha, e de comandas com pagamentos.
+- Garçom ganhou botão **Cancelar comanda não enviada** e confirmação de motivo.
+- Cozinha consulta novos pedidos automaticamente a cada 15 segundos com aba visível, sem WebSocket/Realtime e sem alegar impressão ativa.
+- Imports dos módulos estáticos receberam `?v=0.9.0` para evitar cache de scripts anteriores.
+
+### Evidências
+- Edge Functions: `platform-control` v3, `activate-master` v3, `account-password` v1, `restaurant-core` v3, `restaurant-team` v4, `admin-provision` v3 e `account-cpf` v2.
+- Teste transacional SQL com rollback: cancelar comanda aberta, cancelar itens de rascunho, liberar mesa, reabrir e bloquear cancelamento de comanda enviada.
+- RPC de cancelamento: `anon` e `authenticated` sem EXECUTE; apenas service_role.
+- Sintaxe JS do frontend, painel, conta, garçom e cozinha revisada.
+- Master do Intervalo 27 continua pendente de ativação e convite foi prorrogado; nenhuma senha ou usuário foi alterado nesta implantação.
+- Security Advisor mantém aviso de proteção contra senhas vazadas do Auth desabilitada.
+- O endereço gaveblue.com.br/intervalo/ **não ficou acessível aos verificadores externos**, portanto os fluxos públicos e novos botões permanecem sem homologação de navegador.
+
+### Documentos
+- `QA-0.9.0.md`
+- `ACESSO-RECUPERACAO-0.9.0.md`
+- `DEPLOY-ROLLBACK-0.9.0.md`
+
+---
+
+
 ## 0.7.0 — 2026-11-12 · Estrutura operacional multiempresa (prévia técnica)
 
 **Situação:** esquema e APIs implantados, interfaces publicadas por commits na `main`; testes SQL e sintaxe aprovados. **Não homologada integralmente:** faltam browser/E2E, equipe ativa, hardware e validação no domínio.
