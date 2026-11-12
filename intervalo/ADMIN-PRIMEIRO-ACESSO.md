@@ -18,3 +18,6 @@ O e-mail autorizado está cadastrado apenas no **schema privado** do Supabase, n
 - Não compartilhar senha por chat, issues ou email.
 - Após uso, nenhum outro e-mail pode ser promovido automaticamente por este processo.
 - Revogar/corrigir o primeiro acesso exige alteração administrativa explícita no banco.
+
+## Alternativa sem SMTP (somente pelo titular do Supabase)
+Se o e-mail de confirmação for bloqueado pelo serviço SMTP padrão, o titular pode abrir o projeto Intervalo em **Supabase Dashboard → Authentication → Users → Add user → Create new user**. Informar o e-mail previamente autorizado, criar uma senha forte diretamente no painel e usar **Auto Confirm User**. Esse procedimento privilegia quem já tem acesso administrativo ao Supabase e dispensa o envio de um e-mail. O trigger privado reconhece a conta confirmada, consume o bootstrap único e concede o papel Super Admin. Após isso, entrar em `/intervalo/login` com a senha criada. Nunca divulgar essa senha no chat. Verificar no painel se a opção está disponível antes de utilizar.
