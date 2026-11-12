@@ -1,5 +1,42 @@
 # Intervalo — CHANGELOG
 
+## 0.9.1 — 2026-11-12 · Correção crítica: não conseguia cadastrar restaurante
+
+**Status:** correção do backend implantada no Supabase e código commitado no GitHub; testes SQL e simulações do formulário passaram. Teste E2E real e propagação no domínio **ainda não foram comprovados**.
+
+### Causa-raiz demonstrada pelos logs
+- 12/11/2026 às 15:08:19, 15:08:26 e 15:09:52 UTC: `POST /functions/v1/admin-provision` retornou **409** nas tentativas de cadastro.
+- As chamadas anteriores `POST /auth/v1/invite` retornaram **429 (rate limit)**. O projeto não permitiu mais envios de convites pelo SMTP padrão.
+- Em 12/11/2026 às 14:43:34 UTC: recuperação `POST /auth/v1/recover` também retornou 429.
+- A função anterior condicionava o cadastro ao envio de convite, transformando indisponibilidade de e-mail em bloqueio de criação.
+
+### Correção
+- Cadastro do restaurante agora é **uma única transação SQL** (`intervalo_create_restaurant`) que cria estabelecimento, cinco módulos, configurações, publicação desativada, assinatura de teste, auditoria e estado opcional do Master.
+- E-mail Master tornou-se **opcional**. Sem e-mail, restaurante é criado normalmente, e Master pode ser definido depois.
+- Com e-mail de um usuário já cadastrado, backend tenta criar vínculo pendente em operação SQL transacional independente de SMTP (`intervalo_assign_master`).
+- Com e-mail novo, registra o responsável pendente em `restaurant_master_setup` (RLS habilitada, somente service_role); o restaurante continua cadastrado.
+- Super Admin tem o botão **Preparar link de acesso (sem enviar e-mail)** que chama `auth.admin.generateLink` protegido por confirmação da senha do próprio administrador. O link sensível aparece uma vez para entrega manual ao destinatário.
+- Se a preparação do convite falhar, o restaurante permanece cadastrado e o usuário pode tentar novamente.
+- Criador de restaurante no Super Admin não depende mais do sucesso de consultas secundárias de membros, autenticação, módulos ou assinaturas. O formulário continua visível mesmo se a lista de restaurantes falhar.
+- Slug passa a ser sugerido automaticamente a partir do nome com tratamento de acentos e caracteres especiais.
+- Corrigido fallback de deep links do GitHub Pages: `404.html` já armazenava o caminho solicitado, mas o aplicativo não o restaurava. `intervalo/index.html` agora recupera o endereço com `history.replaceState` antes do roteamento.
+- URLs de imports receberam `v=0.9.1` para evitar scripts de gestão antigos em cache.
+- Projeto GB+ e arquivos da página inicial não alterados; sem GitHub Actions.
+
+### Testes realizados
+- SQL como `service_role`: criação sem e-mail com cinco módulos e demais tabelas esperadas: **PASS**.
+- SQL com usuário Auth existente, vinculado como Master: **PASS**.
+- SQL com e-mail de Master novo, sem criar usuário Auth, deixando registro pendente: **PASS**.
+- SQL slug duplicado: **rejeitado sem deixar segundo restaurante**.
+- SQL criação por UUID não-administrador: **bloqueada**.
+- Todos os testes de gravação acima ocorreram sob transação **ROLLBACK**, sem registros de QA persistentes.
+- Interface Super Admin simulada em runtime JS: submissão do formulário e criação acionadas com listagem OK e listagem indisponível; autogeração de slug: **PASS**.
+- JS de `intervalo/index.html` e `platform.js` válido sintaticamente.
+- **Pendente:** teste real de clique, SMTP, links de convite e carregamento HTTP do domínio.
+
+---
+
+
 ## 0.9.0 — 2026-11-12 · Recuperação de acesso, Master e comandas
 
 **Situação:** código enviado ao GitHub e funções Supabase ativas; QA estrutural/SQL aprovado. **E2E e entrega HTTP ainda não comprovados**.
