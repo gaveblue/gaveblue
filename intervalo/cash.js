@@ -25,7 +25,7 @@ export async function renderPage({supabase,restaurant,box,esc,link}){
       const paid=pay.filter(x=>x.order_id===order.id).reduce((sum,x)=>sum+Number(x.amount_cents),0);
       const outstanding=total-paid;
       const table=tables.find(t=>t.id===order.table_id);
-      out+='<div class="c-card"><h3>'+esc(table?.label??'Mesa')+'</h3><p>Total '+money(total)+' · Já pago '+money(paid)+'</p><p class="c-money">Em aberto: '+money(Math.max(0,outstanding))+'</p><button type="button" class="c-preview" data-receipt="'+esc(order.id)+'">Visualizar comanda</button><form class="c-form" data-payment="'+esc(order.id)+'"><label>Valor recebido<input name="amount" required value="'+(Math.max(0,outstanding)/100).toFixed(2).replace('.',',')+'"></label><label>Forma<select name="method"><option value="cash">Dinheiro</option><option value="debit_recorded">Débito recebido externamente</option><option value="credit_recorded">Crédito recebido externamente</option><option value="pix_recorded">Pix recebido externamente</option><option value="other_recorded">Outro recebido externamente</option></select></label><button type="submit" '+(open?'':'disabled title="Abra uma sessão de caixa"')+'>Registrar recebimento</button></form></div>';
+      out+='<div class="c-card"><h3>'+esc(table?.label??'Mesa')+'</h3><p>Total '+money(total)+' · Já pago '+money(paid)+'</p><p class="c-money">Em aberto: '+money(Math.max(0,outstanding))+'</p><button type="button" class="c-preview" data-receipt="'+esc(order.id)+'">Visualizar / imprimir comanda</button><form class="c-form" data-payment="'+esc(order.id)+'"><label>Valor recebido<input name="amount" required value="'+(Math.max(0,outstanding)/100).toFixed(2).replace('.',',')+'"></label><label>Forma<select name="method"><option value="cash">Dinheiro</option><option value="debit_recorded">Débito recebido externamente</option><option value="credit_recorded">Crédito recebido externamente</option><option value="pix_recorded">Pix recebido externamente</option><option value="other_recorded">Outro recebido externamente</option></select></label><button type="submit" '+(open?'':'disabled title="Abra uma sessão de caixa"')+'>Registrar recebimento</button></form></div>';
     }
     out+='</div>';
     if(!orders.length)out+='<div class="c-card"><p>Não há contas servidas aguardando pagamento.</p></div>';
@@ -33,7 +33,7 @@ export async function renderPage({supabase,restaurant,box,esc,link}){
     for(const order of recentClosed){
       const table=tables.find(t=>t.id===order.table_id);
       const total=items.filter(i=>i.order_id===order.id&&i.status!=='cancelled').reduce((n,i)=>n+Number(i.unit_price_cents)*i.quantity,0);
-      out+='<div class="c-card"><h3>'+esc(table?.label??'Mesa')+'</h3><p class="c-muted">Quitada · Total '+money(total)+'</p><button class="c-preview" type="button" data-receipt="'+esc(order.id)+'">Visualizar comanda</button></div>';
+      out+='<div class="c-card"><h3>'+esc(table?.label??'Mesa')+'</h3><p class="c-muted">Quitada · Total '+money(total)+'</p><button class="c-preview" type="button" data-receipt="'+esc(order.id)+'">Visualizar / imprimir comanda</button></div>';
     }
     out+='</div>';
     if(!recentClosed.length)out+='<p class="c-muted">Ainda não há comandas quitadas neste recorte.</p>';
