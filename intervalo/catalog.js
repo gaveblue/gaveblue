@@ -26,7 +26,7 @@ export async function renderPage({supabase,restaurant,box,esc,link}){
       const visible=!!p.show_on_menu,available=!!p.available;
       out+='<article class="op-card">'+(photo?'<img class="op-photo" src="'+esc(photo)+'" alt="Foto de '+esc(p.name)+'" loading="lazy" referrerpolicy="no-referrer">':'<div class="op-photo-placeholder">'+icon('store',43)+'</div>')
         +'<h3>'+esc(p.name)+'</h3><b>'+money(p.price_cents)+'</b><p class="op-muted">'+esc(p.description??'')+'</p>'
-        +'<div class="iv-actions"><span class="iv-chip '+(visible?'orange':'')+'">'+(visible?'Na vitrine':'Oculto no cardápio')+'</span>'
+        +'<div class="iv-actions"><span class="iv-chip '+(visible?'orange':'')+'">'+(visible?'Marcado para cardápio':'Oculto no cardápio')+'</span>'
         +'<span class="iv-chip '+(available?'success':'danger')+'">'+(available?'Disponível':'Venda pausada')+'</span></div></article>';
     }
     if(!products.length)out+='<div class="iv-empty">Nenhum produto cadastrado. Cadastre em Estoque e Produtos.</div>';
