@@ -53,11 +53,31 @@ export async function renderPlatform({supabase,box,esc,link}){
   document.body.append(dialog);dialog.showModal();
  }
  const base=css+'<h1>Super Admin Gaveblue</h1><p class="muted">Gestão central dos restaurantes e módulos do Intervalo.</p><p class="p-info">As habilitações são de teste e não geram cobranças. Planos comerciais e pagamentos de assinaturas permanecem desativados.</p>';
+ const createPanel='<section class="p-card"><h2>Novo restaurante</h2><form id="platform-new" class="p-form"><label>Nome do restaurante<input name="name" minlength="2" maxlength="120" required></label><label>Slug<input name="slug" minlength="3" maxlength="60" pattern="[a-z0-9]+(-[a-z0-9]+)*" required placeholder="meu-restaurante"></label><label>E-mail do Master<input name="master_email" type="email" placeholder="Pode definir depois"></label><button class="p-btn" type="submit">Criar restaurante</button></form><p class="p-info">A criação não depende do e-mail. Defina o responsável agora ou posteriormente. O convite será preparado separadamente para não bloquear o cadastro.</p></section>';
+ function bindCreateForm(){
+   const form=document.getElementById('platform-new');
+   if(!form)return;
+   form.onsubmit=async e=>{e.preventDefault();const b=form.querySelector('button');b.disabled=true;try{const v=Object.fromEntries(new FormData(form).entries());const r=await call('admin-provision',{action:'create',...v});alert('Restaurante criado com sucesso! '+(r.master_status==='linked'?'Master existente associado; ele pode entrar para ativar o vínculo.':r.master_status==='awaiting_account'?'O e-mail do Master ficou registrado. Clique em Preparar link de acesso no novo restaurante.':'Você pode definir o Master depois.'));await reload()}catch(ex){alert(ex.message);b.disabled=false}};
+   const newForm=document.getElementById('platform-new');
+   if(newForm){
+    const nameField=newForm.elements.namedItem('name'),slugField=newForm.elements.namedItem('slug');
+    let slugEdited=false;
+    slugField.oninput=()=>{slugEdited=!!slugField.value.trim()};
+    nameField.oninput=()=>{
+     if(slugEdited)return;
+     slugField.value=nameField.value.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase()
+       .replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,60);
+    };
+   }
+
+ }
+
  async function reload(){
-  box(base+'<p>Carregando restaurantes...</p>');
+  box(base+createPanel+'<p class="p-info">Carregando a lista de restaurantes...</p>');
+  bindCreateForm();
   try{
    const data=await call('platform-control',{action:'list'});
-   let out=base+'<div class="p-grid"><section class="p-card"><h2>Novo restaurante</h2><form id="platform-new" class="p-form"><label>Nome do restaurante<input name="name" minlength="2" maxlength="120" required></label><label>Slug<input name="slug" minlength="3" maxlength="60" pattern="[a-z0-9]+(-[a-z0-9]+)*" required placeholder="meu-restaurante"></label><label>E-mail do Master<input name="master_email" type="email" placeholder="Pode definir depois"></label><button class="p-btn" type="submit">Criar restaurante</button></form><p class="p-info">A criação não depende do e-mail. Defina o responsável agora ou posteriormente. O convite será preparado separadamente para não bloquear o cadastro.</p></section><section><h2>Restaurantes ('+(data.restaurants??[]).length+')</h2>';
+   let out=base+(data.warnings?.length?'<p class="p-info">Alguns dados secundários estão indisponíveis; o cadastro de restaurantes continua ativo.</p>':'')+'<div class="p-grid">'+createPanel+'<section><h2>Restaurantes ('+(data.restaurants??[]).length+')</h2>';
    for(const r of data.restaurants??[]){
     const flags=(data.modules??[]).filter(m=>m.restaurant_id===r.id);
     const sub=(data.subscriptions??[]).find(s=>s.restaurant_id===r.id);
@@ -92,19 +112,7 @@ export async function renderPlatform({supabase,box,esc,link}){
     out+='<button type="button" class="p-btn '+(r.status==='active'?'danger':'alt')+'" data-status="'+esc(r.id)+'" data-value="'+(r.status==='active'?'suspended':'active')+'">'+(r.status==='active'?'Suspender restaurante':'Reativar restaurante')+'</button></article>';
    }
    out+='</section></div>';box(out);
-   const form=document.getElementById('platform-new');
-   form.onsubmit=async e=>{e.preventDefault();const b=form.querySelector('button');b.disabled=true;try{const v=Object.fromEntries(new FormData(form).entries());const r=await call('admin-provision',{action:'create',...v});alert('Restaurante criado com sucesso! '+(r.master_status==='linked'?'Master existente associado; ele pode entrar para ativar o vínculo.':r.master_status==='awaiting_account'?'O e-mail do Master ficou registrado. Clique em Preparar link de acesso no novo restaurante.':'Você pode definir o Master depois.'));await reload()}catch(ex){alert(ex.message);b.disabled=false}};
-   const newForm=document.getElementById('platform-new');
-   if(newForm){
-    const nameField=newForm.elements.namedItem('name'),slugField=newForm.elements.namedItem('slug');
-    let slugEdited=false;
-    slugField.oninput=()=>{slugEdited=!!slugField.value.trim()};
-    nameField.oninput=()=>{
-     if(slugEdited)return;
-     slugField.value=nameField.value.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase()
-       .replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,60);
-    };
-   }
+   bindCreateForm();
    document.querySelectorAll('form[data-set-master]').forEach(form=>form.onsubmit=async e=>{
      e.preventDefault();const button=form.querySelector('button');button.disabled=true;
      try{
@@ -163,7 +171,7 @@ export async function renderPlatform({supabase,box,esc,link}){
     if(!confirm('Confirma a mudança de status? Um restaurante suspenso não pode operar nem publicar cardápio.'))return;
     button.disabled=true;try{await call('platform-control',{action:'restaurant_status',restaurant_id:button.dataset.status,status:button.dataset.value});await reload()}catch(ex){alert(ex.message);button.disabled=false}
    });
-  }catch(e){box(base+'<section class="p-card"><p class="error">'+esc(e.message)+'</p></section>')}
+  }catch(e){box(base+createPanel+'<section class="p-card"><p class="error">A lista não carregou: '+esc(e.message)+'</p><p class="p-info">Você ainda pode criar um restaurante usando o formulário acima.</p></section>');bindCreateForm()}
  }
  return reload();
 }
