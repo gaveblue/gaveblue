@@ -79,10 +79,17 @@ Deno.serve(async req=>{
     };
     const {error:changeError}=await db.auth.admin.updateUserById(targetId,updates);
     if(changeError)return fail("Não foi possível definir a senha provisória",503);
+    // A autorização explícita do Super Admin também ativa o vínculo pendente neste restaurante.
+    if(membership.status!=="active"){
+      const {error:activateError}=await db.from("restaurant_members").update({
+        status:"active",activated_at:now,invite_expires_at:null
+      }).eq("restaurant_id",body.restaurant_id).eq("user_id",targetId);
+      if(activateError)return fail("Senha atualizada, mas não foi possível ativar o vínculo. Verifique a equipe antes de repetir.",503);
+    }
     const {error:auditError}=await db.from("audit_logs").insert({
       restaurant_id:body.restaurant_id,actor_user_id:user.id,
       event:"platform_manual_temporary_password",
-      details:{target_user_id:targetId,operation:"reset",administrative_email_confirmation:!target.user.email_confirmed_at}
+      details:{target_user_id:targetId,operation:"reset",administrative_email_confirmation:!target.user.email_confirmed_at,activated_membership:membership.status!=="active"}
     });
     if(auditError)console.error("manual_password_audit_failed",{code:auditError.code});
     return respond({updated:true,must_change:true});
