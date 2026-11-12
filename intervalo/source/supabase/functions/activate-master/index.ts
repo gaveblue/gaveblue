@@ -13,21 +13,14 @@ Deno.serve(async(req:Request)=>{
  const {data:{user},error:ue}=await sb.auth.getUser(token);
  if(ue||!user)return out({error:"Sessão inválida"},401);
  if(user.app_metadata?.intervalo_password_change_required)return out({error:"Troque sua senha provisória antes de ativar o restaurante"},403);
- const {data:verified,error:ce}=await sb.auth.getClaims(token);
- if(ce||!verified?.claims)return out({error:"Não foi possível validar o método de autenticação"},401);
- const claims=verified.claims as Record<string,unknown>;
- const amr=Array.isArray(claims.amr)?claims.amr:[];
- const authenticatedWithPassword=amr.some(item=>typeof item==="object"&&item!==null&&(item as {method?:string}).method==="password");
- if(!authenticatedWithPassword){
-  let password:string|undefined;
-  try{const body=await req.json();password=typeof body?.password==="string"?body.password:undefined;}catch{}
-  if(!password||password.length>256||!user.email)return out({error:"Confirme sua senha para ativar o Master"},403);
-  const publicKey=Deno.env.get("SUPABASE_ANON_KEY")??"";
-  if(!publicKey)return out({error:"Configuração de Auth indisponível"},503);
-  const client=createClient(url,publicKey,{auth:{persistSession:false,autoRefreshToken:false}});
-  const {data:confirm,error:passError}=await client.auth.signInWithPassword({email:user.email,password});
-  if(passError||confirm.user?.id!==user.id)return out({error:"Senha incorreta para ativação"},403);
- }
+ let password:string|undefined;
+ try{const s=await req.text();if(s.length>1024)throw Error("oversize");const body=JSON.parse(s);password=typeof body?.password==="string"?body.password:undefined;}catch{}
+ if(!password||password.length>256||!user.email||!user.email_confirmed_at)return out({error:"Confirme a senha para ativar o Master"},403);
+ const anonKey=Deno.env.get("SUPABASE_ANON_KEY")??"";
+ if(!anonKey)return out({error:"Auth indisponível"},503);
+ const publicClient=createClient(url,anonKey,{auth:{persistSession:false,autoRefreshToken:false}});
+ const {data:confirmation,error:passError}=await publicClient.auth.signInWithPassword({email:user.email,password});
+ if(passError||confirmation.user?.id!==user.id)return out({error:"Senha incorreta; acesso não ativado"},403);
  const {data:pending,error:pe}=await sb.from("restaurant_members").select("restaurant_id,invite_expires_at,role").eq("user_id",user.id).eq("role","master").eq("status","pending");
  if(pe)return out({error:"Falha ao validar convites"},503);
  const now=new Date().toISOString(),ids=(pending??[]).filter(m=>m.invite_expires_at&&m.invite_expires_at>now).map(m=>m.restaurant_id);
