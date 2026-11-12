@@ -85,7 +85,7 @@ Deno.serve(async(req:Request)=>{
   const hasImage=Object.prototype.hasOwnProperty.call(body,"image_url");
   const imageInput=body.image_url;
   if(hasImage&&(typeof imageInput!=="string"||imageInput.trim().length>1200||
-      (imageInput.trim().length>0&&!/^https:\/\/[^\\s<>"']+$/.test(imageInput.trim()))))
+      (imageInput.trim().length>0&&!/^https:\/\/[^\s<>"']+$/.test(imageInput.trim()))))
     return error("Foto inválida: informe um endereço HTTPS com até 1200 caracteres",400);
   const row={category_id,name,description,price_cents,sort_order,available:body.available,
     ...(hasImage?{image_url:(imageInput as string).trim()||null}:{}),
