@@ -19,6 +19,7 @@ Deno.serve(async(req:Request)=>{
  const db=createClient(apiUrl,key,{auth:{persistSession:false,autoRefreshToken:false}});
  const {data:{user},error:authErr}=await db.auth.getUser(token);
  if(authErr||!user||user.is_anonymous||!user.email_confirmed_at)return error("Sessão inválida ou não confirmada",401);
+ if(user.app_metadata?.intervalo_password_change_required)return error("Troque sua senha provisória primeiro",403);
  let body:Record<string,unknown>;
  try{const s=await req.text();if(s.length>12000)throw Error("invalid");body=JSON.parse(s);if(!body||Array.isArray(body)||typeof body!=="object")throw Error("invalid")}
  catch{return error("Dados inválidos",400)}
