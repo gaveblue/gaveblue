@@ -1,3 +1,4 @@
+import {icon} from './ui-icons.js?v=1.0.0-rc.1';
 // Intervalo: cadastro de categorias, produtos e publicação de cardápio.
 export async function renderPage({supabase,restaurant,box,esc,link}){
  const style='<style>.op-card{padding:19px;border:1px solid #e2e8f0;border-radius:14px;background:#fff;margin:12px 0}.op-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}.op-cards .op-card{margin:0}.op-form{display:flex;gap:11px;flex-wrap:wrap;align-items:end}.op-form label{font-size:12px;font-weight:700;flex:1 1 175px}.op-form input,.op-form select{display:block;width:100%;padding:11px;border:1px solid #cbd5e1;border-radius:9px;margin-top:7px;background:white;color:#0f172a}.op-btn{background:#ff7600;color:#fff;border:0;padding:11px 14px;border-radius:9px;cursor:pointer;font-weight:700}.op-btn.alt{background:#e2e8f0;color:#334155}.op-photo{width:100%;height:130px;background:#ffede0;border-radius:11px;object-fit:cover;display:block;margin-bottom:10px}.op-photo-placeholder{height:130px;display:grid;place-items:center;background:linear-gradient(135deg,#fff3e7,#ffddbb);border-radius:11px;font-size:55px;margin-bottom:10px}.op-warn{padding:14px;background:#fffbeb;border:1px solid #fcd34d;border-radius:11px;font-size:12px}.op-muted{color:#64748b;font-size:13px}</style>';
@@ -19,7 +20,7 @@ export async function renderPage({supabase,restaurant,box,esc,link}){
   out+='</div><h2>Produtos ('+products.length+')</h2><div class="op-cards">';
   for(const p of products){
     const photo=typeof p.image_url==='string'&&/^https:\/\/[^\s<>"']+$/.test(p.image_url)?p.image_url:null;
-    out+='<article class="op-card">'+(photo?'<img class="op-photo" src="'+esc(photo)+'" alt="Foto de '+esc(p.name)+'" loading="lazy" referrerpolicy="no-referrer">':'<div class="op-photo-placeholder">🍔</div>')
+    out+='<article class="op-card">'+(photo?'<img class="op-photo" src="'+esc(photo)+'" alt="Foto de '+esc(p.name)+'" loading="lazy" referrerpolicy="no-referrer">':'<div class="op-photo-placeholder">'+icon('burger',52)+'</div>')
       +'<h3>'+esc(p.name)+'</h3><b>'+money(p.price_cents)+'</b><p class="op-muted">'+esc(p.description??'')+'</p>'
       +'<p class="op-muted">'+(p.available?'Disponível':'Indisponível')+'</p>'
       +'<button class="op-btn alt" data-product="'+esc(p.id)+'">'+(p.available?'Pausar':'Disponibilizar')+'</button>'
