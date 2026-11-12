@@ -143,3 +143,42 @@ body.intervalo-menu #app .wrap{max-width:1250px}
 .iv-kds-board .iv-empty{margin:11px 0 0}
 @media(max-width:1000px){.iv-kds-board{grid-template-columns:repeat(2,minmax(0,1fr))}.iv-kds-lane.ready{grid-column:1/-1}.iv-kds-lane.ready .iv-kds-stack{grid-template-columns:repeat(auto-fill,minmax(270px,1fr))}}
 @media(max-width:650px){.iv-kds-board{display:block}.iv-kds-lane{margin-bottom:13px}.iv-kds-lane.ready .iv-kds-stack{grid-template-columns:1fr}}
+
+/* Frente de Caixa POS — fila > comanda > recebimento */
+.iv-pos .c-session{margin:16px 0 20px;background:#fff;border:1px solid var(--iv-border);border-radius:17px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.iv-pos .c-session h3{font-size:15px;display:flex;gap:8px;align-items:center;margin:0 0 7px}
+.iv-pos .c-session p{margin:0}.iv-pos .c-session-form{display:flex;align-items:end;gap:10px;flex-wrap:wrap}.iv-pos .c-session-form label{font-size:11px;font-weight:750}
+.iv-pos .c-session-form input{display:block;width:150px;padding:10px;margin-top:4px}
+.iv-pos .c-pos-layout{display:grid;grid-template-columns:minmax(230px,.76fr) minmax(300px,1.12fr) minmax(285px,.94fr);gap:14px;align-items:start;margin-top:17px}
+.iv-pos .c-queue,.iv-pos .c-details,.iv-pos .c-payment{min-width:0;background:#fff;border:1px solid var(--iv-border);border-radius:18px;padding:18px;min-height:450px;box-shadow:var(--iv-shadow)}
+.iv-pos .c-pane-title{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.iv-pos .c-pane-title h2{display:flex;align-items:center;gap:9px;font-size:18px;letter-spacing:-.5px;margin:0}
+.iv-pos .c-pane-title h2 .iv-icon{color:var(--iv-orange)}
+.iv-pos .c-queue-list{margin-top:14px;display:grid;gap:8px}
+.iv-pos .c-queue-item{background:#fff;border:1px solid var(--iv-border);border-radius:13px;width:100%;padding:14px 13px;display:flex;align-items:center;justify-content:space-between;gap:7px;text-align:left;color:var(--iv-ink);font-size:12px;cursor:pointer}
+.iv-pos .c-queue-item>span{display:flex;gap:7px;align-items:center}
+.iv-pos .c-queue-item.selected{background:#fff4e9;border-color:#ffb57b;box-shadow:0 0 0 1px #ffb57b}
+.iv-pos .c-queue-item.selected .iv-icon{color:#e86d00}
+.iv-pos .c-closed-heading{font-size:13px;display:flex;align-items:center;gap:8px;margin:29px 0 2px}
+.iv-pos .c-closed-row{display:flex;align-items:center;justify-content:space-between;gap:8px;border-bottom:1px solid #edf0f4;padding:9px 0;font-size:12px}
+.iv-pos .c-closed-row small{display:block;font-size:11px;color:var(--iv-muted);margin-top:4px}
+.iv-pos .c-line-head{display:flex;justify-content:space-between;gap:8px;color:#69778a;font-size:11px;font-weight:850;background:#f8fafb;border-radius:9px;padding:11px;margin-top:20px}
+.iv-pos .c-line{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:14px 6px;border-bottom:1px solid #edf0f3;font-size:12px}
+.iv-pos .c-line small{display:block;color:var(--iv-muted);font-size:11px;margin-top:5px}
+.iv-pos .c-totals{margin:28px 0 16px;display:grid;gap:12px}
+.iv-pos .c-totals>div{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12px}
+.iv-pos .c-total-main{background:#fff2e6;padding:15px;border-radius:12px;font-weight:900;font-size:15px!important}
+.iv-pos .c-total-main strong{font-size:24px;color:var(--iv-orange-deep);letter-spacing:-.8px}
+.iv-pos .c-payment-form{display:block}.iv-pos .c-payment-form h3{font-size:13px;margin:24px 0 12px}
+.iv-pos .c-methods{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-bottom:20px}
+.iv-pos .c-method{position:relative;display:block;cursor:pointer;margin:0}
+.iv-pos .c-method input{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}
+.iv-pos .c-method span{min-height:92px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;color:#35445a;background:#fff;border:1px solid #e0e6ed;border-radius:12px;padding:12px;text-align:center}
+.iv-pos .c-method span b{font-size:12px}
+.iv-pos .c-method:has(input:checked) span{border-color:#ff7600;background:#ff7600;color:#fff;box-shadow:0 6px 17px #ff760027}
+.iv-pos .c-method:has(input:focus-visible) span{outline:3px solid #ffad67;outline-offset:2px}
+.iv-pos .c-payment-form>label{display:block;font-size:12px;font-weight:750;margin-top:10px}
+.iv-pos .c-payment-form>label input{display:block;width:100%;margin-top:7px}
+.iv-pos .c-confirm{width:100%;margin-top:15px;padding:14px}
+@media(max-width:1230px){.iv-pos .c-pos-layout{grid-template-columns:260px minmax(0,1fr)}.iv-pos .c-payment{grid-column:2}.iv-pos .c-queue{grid-row:span 2}}
+@media(max-width:740px){.iv-pos .c-pos-layout{display:flex;flex-direction:column}.iv-pos .c-queue,.iv-pos .c-details,.iv-pos .c-payment{width:100%;min-height:0}.iv-pos .c-queue{order:1}.iv-pos .c-details{order:2}.iv-pos .c-payment{order:3}.iv-pos .c-session-form{width:100%}.iv-pos .c-session-form label{flex:1}.iv-pos .c-session-form input{width:100%}}
