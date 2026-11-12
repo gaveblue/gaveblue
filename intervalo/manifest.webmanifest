@@ -1,0 +1,19 @@
+{
+  "name": "Intervalo — Gestão de Restaurantes",
+  "short_name": "Intervalo",
+  "description": "SaaS para gestão de restaurantes, um produto Gaveblue.",
+  "start_url": "/intervalo/",
+  "scope": "/intervalo/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#0f172a",
+  "lang": "pt-BR",
+  "icons": [
+    {
+      "src": "/intervalo/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
