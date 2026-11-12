@@ -5,8 +5,8 @@
   "start_url": "/intervalo/",
   "scope": "/intervalo/",
   "display": "standalone",
-  "background_color": "#f8fafc",
-  "theme_color": "#0f172a",
+  "background_color": "#fff8f3",
+  "theme_color": "#ff7600",
   "lang": "pt-BR",
   "icons": [
     {
