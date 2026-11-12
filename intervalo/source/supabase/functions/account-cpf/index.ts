@@ -15,6 +15,7 @@ Deno.serve(async(req:Request)=>{
  const db=createClient(url,serviceKey,{auth:{persistSession:false,autoRefreshToken:false}});
  const {data:{user},error:authError}=await db.auth.getUser(bearer);
  if(authError||!user||user.is_anonymous||!user.email_confirmed_at||!user.email)return json({error:"Conta não confirmada."},401);
+ if(user.app_metadata?.intervalo_password_change_required)return json({error:"Troque sua senha provisória primeiro"},403);
  let body:Record<string,unknown>;
  try{const raw=await req.text();if(raw.length>2048)throw Error("Payload");body=JSON.parse(raw);if(!body||Array.isArray(body)||typeof body!=="object")throw Error("Payload");}
  catch{return json({error:"Dados inválidos."},400)}
