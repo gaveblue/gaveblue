@@ -24,13 +24,14 @@ Deno.serve(async(req:Request)=>{
  catch{return err("Dados inválidos",400)}
  const action=body.action;
  if(action==="list"){
-  const [restaurants,flags,subs,members]=await Promise.all([
+  const [restaurants,flags,subs,members,masterSetups]=await Promise.all([
    db.from("restaurants").select("id,name,slug,status,created_at").order("created_at",{ascending:false}),
    db.from("restaurant_modules").select("restaurant_id,module,enabled"),
    db.from("restaurant_subscriptions").select("restaurant_id,plan_id,status,starts_at,ends_at"),
-   db.from("restaurant_members").select("restaurant_id,user_id,role,status,invite_expires_at,created_at").order("created_at",{ascending:true})
+   db.from("restaurant_members").select("restaurant_id,user_id,role,status,invite_expires_at,created_at").order("created_at",{ascending:true}),
+   db.from("restaurant_master_setup").select("restaurant_id,master_email,status,linked_user_id,updated_at")
   ]);
-  if(restaurants.error||flags.error||subs.error||members.error)return err("Não foi possível carregar plataforma",503);
+  if(restaurants.error||flags.error||subs.error||members.error||masterSetups.error)return err("Não foi possível carregar plataforma",503);
   const {data:adminUsers,error:adminErr}=await db.from("platform_admins").select("user_id").eq("active",true);
   if(adminErr)return err("Não foi possível conferir contas administrativas",503);
   const adminIds=new Set((adminUsers??[]).map(a=>a.user_id));
@@ -42,7 +43,7 @@ Deno.serve(async(req:Request)=>{
     for(const a of data.users)if(userIds.has(a.id))accounts.push({id:a.id,email:a.email??null,confirmed:!!a.email_confirmed_at,has_signed_in:!!a.last_sign_in_at,is_platform_admin:adminIds.has(a.id)});
     if(data.users.length<200)break;
   }
-  return out({restaurants:restaurants.data,modules:flags.data,subscriptions:subs.data,members:members.data,accounts,has_billing_provider:false});
+  return out({restaurants:restaurants.data,modules:flags.data,subscriptions:subs.data,members:members.data,accounts,master_setups:masterSetups.data,has_billing_provider:false});
  }
  const restaurant_id=body.restaurant_id;
  if(typeof restaurant_id!=="string"||!uuid.test(restaurant_id))return err("Restaurante inválido",400);
