@@ -1,0 +1,33 @@
+// Intervalo: cadastro de categorias, produtos e publicação de cardápio.
+export async function renderPage({supabase,restaurant,box,esc,link}){
+ const style='<style>.op-card{padding:19px;border:1px solid #e2e8f0;border-radius:14px;background:#fff;margin:12px 0}.op-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}.op-cards .op-card{margin:0}.op-form{display:flex;gap:11px;flex-wrap:wrap;align-items:end}.op-form label{font-size:12px;font-weight:700;flex:1 1 175px}.op-form input,.op-form select{display:block;width:100%;padding:11px;border:1px solid #cbd5e1;border-radius:9px;margin-top:7px;background:white;color:#0f172a}.op-btn{background:#0f766e;color:#fff;border:0;padding:11px 14px;border-radius:9px;cursor:pointer;font-weight:700}.op-btn.alt{background:#e2e8f0;color:#334155}.op-warn{padding:14px;background:#fffbeb;border:1px solid #fcd34d;border-radius:11px;font-size:12px}.op-muted{color:#64748b;font-size:13px}</style>';
+ const money=n=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(n)/100);
+ const cents=t=>{const v=String(t).replace(/\s/g,'').replace(',','.');if(!/^\d{1,7}(?:\.\d{1,2})?$/.test(v))throw Error('Informe valor no formato 18,50');const [i,f='']=v.split('.');return Number(i)*100+Number((f+'00').slice(0,2))};
+ const call=async(action,params={})=>{const {data,error}=await supabase.functions.invoke('restaurant-core',{body:{restaurant_id:restaurant.id,action,...params}});if(error){let msg=error.message;try{const d=await error.context?.json?.();msg=d?.error??msg}catch{}throw Error(msg)}if(data?.error)throw Error(data.error);return data};
+ const field=(name,label,value='',extra='')=>'<label>'+label+'<input name="'+name+'" value="'+esc(value)+'" '+extra+'></label>';
+ const form=(id,cb)=>{const f=document.getElementById(id);if(f)f.onsubmit=async e=>{e.preventDefault();const b=f.querySelector('button');b.disabled=true;try{await cb(Object.fromEntries(new FormData(f).entries()));await load()}catch(err){alert(err.message);b.disabled=false}}};
+ const binding=(sel,cb)=>document.querySelectorAll(sel).forEach(b=>b.onclick=async()=>{b.disabled=true;try{await cb(b);await load()}catch(err){alert(err.message);b.disabled=false}});
+ const start=style+'<h1>Cardápio e produtos</h1><p class="op-muted">'+esc(restaurant.name)+' · Configure categorias, preços e disponibilidade.</p><a href="'+link('/'+restaurant.slug+'/gestao')+'">Voltar à Gestão</a>';
+ async function load(){
+  box(start+'<section class="op-card">Carregando cardápio...</section>');
+  try{
+  const d=await call('catalog'),cats=d.categories??[],products=d.products??[],options=d.options??[],published=!!d.publication?.is_published;
+  let out=start+'<section class="op-card"><h2>Publicação</h2><p>'+ (published?'Visível para os clientes':'Oculto até a publicação') +'</p><p><a href="'+link('/'+restaurant.slug+'/cardapio')+'">Visualizar cardápio público</a></p><button id="publish" class="op-btn">'+(published?'Despublicar':'Publicar cardápio')+'</button><p class="op-warn">Nesta fase o cardápio é somente consulta; não recebe pedidos diretos de clientes.</p></section>';
+  out+='<div class="op-cards"><section class="op-card"><h2>Categoria</h2><form id="newcat" class="op-form">'+field('name','Nome','','required minlength="2" maxlength="90"')+'<button class="op-btn">Cadastrar categoria</button></form></section><section class="op-card"><h2>Produto</h2><form id="newprod" class="op-form">'+field('name','Nome','','required minlength="2" maxlength="150"')+'<label>Categoria<select name="category_id" required>'+cats.filter(c=>c.active).map(c=>'<option value="'+esc(c.id)+'">'+esc(c.name)+'</option>').join('')+'</select></label>'+field('price','Preço em R$','','required placeholder="18,50"')+field('description','Descrição','','maxlength="1000"')+'<button class="op-btn">Cadastrar produto</button></form></section></div>';
+  out+='<h2>Categorias ('+cats.length+')</h2><div class="op-cards">';
+  for(const c of cats)out+='<article class="op-card"><strong>'+esc(c.name)+'</strong><p class="op-muted">'+(c.active?'Ativa':'Oculta')+' · '+products.filter(p=>p.category_id===c.id).length+' produto(s)</p><button class="op-btn alt" data-cat="'+esc(c.id)+'">'+(c.active?'Ocultar':'Exibir')+'</button></article>';
+  out+='</div><h2>Produtos ('+products.length+')</h2><div class="op-cards">';
+  for(const p of products)out+='<article class="op-card"><h3>'+esc(p.name)+'</h3><b>'+money(p.price_cents)+'</b><p class="op-muted">'+esc(p.description??'')+'</p><p class="op-muted">'+(p.available?'Disponível':'Indisponível')+'</p><button class="op-btn alt" data-product="'+esc(p.id)+'">'+(p.available?'Pausar':'Disponibilizar')+'</button><p class="op-muted">'+options.filter(o=>o.product_id===p.id).map(o=>esc(o.name)+' +'+money(o.price_delta_cents)).join(' · ')+'</p></article>';
+  out+='</div>';
+  out+='<section class="op-card"><h2>Adicionais</h2><p class="op-warn">Os adicionais podem aparecer no cardápio, mas a composição de adicionais em comandas ainda depende da próxima implementação.</p><form class="op-form" id="newopt"><label>Produto<select name="product_id" required>'+products.map(p=>'<option value="'+esc(p.id)+'">'+esc(p.name)+'</option>').join('')+'</select></label>'+field('name','Nome do adicional','','required minlength="2" maxlength="120"')+field('price','Valor adicional em R$','0,00','required')+'<button class="op-btn">Adicionar</button></form></section>';
+  box(out);
+  form('newcat',v=>call('category_create',{name:v.name,sort_order:0}));
+  form('newprod',v=>call('product_create',{name:v.name,description:v.description,price_cents:cents(v.price),category_id:v.category_id,available:true,sort_order:0}));
+  form('newopt',v=>call('option_create',{name:v.name,price_delta_cents:cents(v.price),product_id:v.product_id}));
+  binding('[data-cat]',b=>{const c=cats.find(c=>c.id===b.dataset.cat);return call('category_update',{id:c.id,name:c.name,sort_order:c.sort_order,active:!c.active})});
+  binding('[data-product]',b=>{const p=products.find(p=>p.id===b.dataset.product);return call('product_update',{id:p.id,name:p.name,description:p.description,category_id:p.category_id,sort_order:p.sort_order,price_cents:Number(p.price_cents),available:!p.available})});
+  binding('#publish',()=>call('menu_publish',{published:!published}));
+  }catch(e){box(start+'<section class="op-card"><p class="error">'+esc(e.message)+'</p></section>')}
+ }
+ return load();
+}
