@@ -12,7 +12,7 @@
 <script>
 (function(){try{var deep=sessionStorage.getItem('intervalo.deepLink');if(deep&&deep.startsWith('/intervalo/')&&deep.length<2100){sessionStorage.removeItem('intervalo.deepLink');history.replaceState(null,'',deep+window.location.hash)}}catch(e){}})()
 </script>
-</head><body><header><div class="inner"><a class="logo" href="/intervalo/">intervalo<span>.</span><small>UM PRODUTO GAVEBLUE</small></a><nav id="nav"><a href="/intervalo/login">Entrar</a></nav></div></header><main id="app"><div class="skeleton">Carregando Intervalo...</div></main><footer class="foot">Gaveblue © 2026 · Intervalo 0.2.1 · Prévia técnica do PWA</footer>
+</head><body><header><div class="inner"><a class="logo" href="/intervalo/">intervalo<span>.</span><small>UM PRODUTO GAVEBLUE</small></a><nav id="nav"><a href="/intervalo/login">Entrar</a></nav></div></header><main id="app"><div class="skeleton">Carregando Intervalo...</div></main><footer class="foot">Gaveblue © 2026 · Intervalo 0.7.0 · Prévia técnica do PWA</footer>
 <script type="module">
 import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.50.0/+esm';
 const supabase=createClient('https://fynaaiazebydorzllwip.supabase.co','sb_publishable_mGpfDRlZ0MSaa9MV_xMJsg_FT47wa_d',{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,flowType:'implicit',storageKey:'intervalo.auth.v1'}});
@@ -32,7 +32,7 @@ async function setupNav(user){
  nav.innerHTML='<a href="/intervalo/inicio">Restaurantes</a><a href="/intervalo/minha-conta">Minha Conta</a>'+(adminAccess?'<a href="/intervalo/admin">Admin</a>':'')+'<button class="btn alt" id="exit">Sair</button>';
  document.getElementById('exit').onclick=async()=>{await supabase.auth.signOut();location.assign(link('/login'))};
 }
-async function home(user){box('<section class="hero"><div><span class="eyebrow">GAVEBLUE APRESENTA</span><h1>Seu restaurante.<br><span>Um só ritmo.</span></h1><p>Gestão, atendimento, cozinha e caixa conectados em uma plataforma multiempresa, com acesso por restaurante e função.</p><div class="actions">'+btn(user?'Meus restaurantes':'Acessar o Intervalo',user?'/inicio':'/login')+'<a class="btn alt" href="/">Conhecer Gaveblue</a></div><p class="hint">Versão 0.2.1 · Ambiente piloto</p></div><div class="panel preview"><span class="eyebrow">SUA OPERAÇÃO EM UM SÓ LUGAR</span><h2>Seu estabelecimento</h2>'+modules.map(m=>'<div class="preview-row"><strong>'+labels[m]+'</strong><span>→</span></div>').join('')+'</div></section><h2 class="section-title">Módulos da plataforma</h2><section class="grid">'+modules.map(m=>'<article class="feature"><b>'+labels[m]+'</b><p>Estrutura do módulo preparada para desenvolvimento e homologação.</p><span class="tag">Em desenvolvimento</span></article>').join('')+'</section>')}
+async function home(user){box('<section class="hero"><div><span class="eyebrow">GAVEBLUE APRESENTA</span><h1>Seu restaurante.<br><span>Um só ritmo.</span></h1><p>Gestão, atendimento, cozinha e caixa conectados em uma plataforma multiempresa, com acesso por restaurante e função.</p><div class="actions">'+btn(user?'Meus restaurantes':'Acessar o Intervalo',user?'/inicio':'/login')+'<a class="btn alt" href="/">Conhecer Gaveblue</a></div><p class="hint">Versão 0.7.0 · Ambiente piloto</p></div><div class="panel preview"><span class="eyebrow">SUA OPERAÇÃO EM UM SÓ LUGAR</span><h2>Seu estabelecimento</h2>'+modules.map(m=>'<div class="preview-row"><strong>'+labels[m]+'</strong><span>→</span></div>').join('')+'</div></section><h2 class="section-title">Módulos da plataforma</h2><section class="grid">'+modules.map(m=>'<article class="feature"><b>'+labels[m]+'</b><p>Estrutura do módulo preparada para desenvolvimento e homologação.</p><span class="tag">Em desenvolvimento</span></article>').join('')+'</section>')}
 async function login(){
  box('<section class="formbox panel"><span class="eyebrow">ACESSO AO INTERVALO</span><h1>Bem-vindo de volta</h1><p class="muted">Entre com e-mail ou CPF e sua senha. O CPF fica disponível após ser vinculado à sua conta.</p><form id="loginForm"><label for="login-id">E-mail ou CPF</label><input id="login-id" type="text" name="identifier" required maxlength="254" autocomplete="username" placeholder="Seu e-mail ou CPF"><label for="login-pass">Senha</label><input id="login-pass" type="password" name="password" required autocomplete="current-password"><button class="btn formbtn" type="submit">Entrar</button><p id="feedback" role="status" aria-live="polite"></p></form><button class="btn alt" id="reset" style="margin-top:12px;width:100%">Esqueci minha senha</button><p class="hint">Primeiro acesso da Gaveblue? <a href="/intervalo/configurar-admin" style="color:#0f766e;font-weight:700">Ativar Super Admin</a></p></section>');
  document.getElementById('loginForm').onsubmit=async e=>{
@@ -133,33 +133,44 @@ async function choose(user){
  });
 }
 async function admin(user){const {data:allowed}=await supabase.from('platform_admins').select('user_id').eq('user_id',user.id).eq('active',true).maybeSingle();if(!allowed){box('<section class="panel"><h1>Super Admin restrito</h1><p>Sua conta não tem permissão de administrador Gaveblue.</p></section>');return}const {data:list,error}=await supabase.from('restaurants').select('id,name,slug,status').order('created_at',{ascending:false});box('<h1>Super Admin Gaveblue</h1><p class="muted">Cadastre restaurantes e convide o responsável Master.</p><div class="cols"><section class="panel"><h2>Novo restaurante</h2><form id="newRestaurant"><label>Nome do estabelecimento</label><input required name="name" minlength="2" maxlength="120"><label>Slug da URL</label><input required name="slug" minlength="3" maxlength="60" pattern="[a-z0-9]+(-[a-z0-9]+)*"><label>E-mail do Master</label><input required name="master_email" type="email"><button class="btn formbtn">Cadastrar e convidar</button><p id="feedback"></p></form></section><section class="panel"><h2>Restaurantes cadastrados</h2>'+(error?err(error):list?.length?list.map(r=>'<div class="preview-row"><div><strong>'+esc(r.name)+'</strong><p class="muted">/'+esc(r.slug)+'</p></div><span>'+esc(r.status)+'</span></div>').join(''):'<p class="muted">Nenhum restaurante cadastrado.</p>')+'</section></div>');document.getElementById('newRestaurant').onsubmit=async e=>{e.preventDefault();const f=e.target,feedback=document.getElementById('feedback');feedback.innerHTML='<p class="wait">Cadastrando...</p>';const {data,error}=await supabase.functions.invoke('admin-provision',{body:{name:f.elements.namedItem('name').value.trim(),slug:f.elements.namedItem('slug').value.trim(),master_email:f.elements.namedItem('master_email').value.trim().toLowerCase()}});if(error||!data?.restaurant){feedback.innerHTML=err(error??new Error(data?.error??'Falha no cadastro'));return}feedback.innerHTML='<p class="notice">'+(data.existing_user?'Restaurante criado. O Master já possui login e pode entrar novamente para ativar o novo vínculo.':'Restaurante criado e convite enviado ao Master.')+'</p>';f.reset()}}
+const internalModules=['catalogo','mesas','estoque','impressao','relatorios'];
 async function tenant(user,slug,mod){
- if(mod==='cardapio'){box('<section class="panel formbox"><span class="eyebrow">CARDÁPIO DIGITAL</span><h1>Em preparação</h1><p>O cardápio público ainda não está publicado para este estabelecimento.</p>'+btn('Voltar','/')+'</section>');return}
- if(!user){location.assign(link('/login'));return}
- const {data:membership,error}=await supabase.from('restaurant_members').select('restaurant_id,role,status,restaurants(id,name,slug,status)').eq('user_id',user.id);
- if(error){box(err(error));return}
- const m=membership?.find(x=>x.restaurants?.slug===slug&&x.status==='active'&&x.restaurants.status==='active');
- if(!m){box('<section class="panel"><h1>Acesso não autorizado</h1><p>Sua conta não possui vínculo ativo com este restaurante.</p></section>');return}
- const [{data:flag,error:fe},{data:override,error:oe}]=await Promise.all([
-  supabase.from('restaurant_modules').select('enabled').eq('restaurant_id',m.restaurant_id).eq('module',mod).maybeSingle(),
-  supabase.from('restaurant_member_module_access').select('allowed').eq('restaurant_id',m.restaurant_id).eq('user_id',user.id).eq('module',mod).maybeSingle()
- ]);
- if(fe||oe){box(err(fe??oe));return}
- const allowed=m.role==='master'||(override?override.allowed:(permissions[m.role]??[]).includes(mod));
- if(!allowed){box('<section class="panel"><h1>Sem permissão</h1><p>Seu papel neste restaurante não permite abrir este módulo.</p></section>');return}
- if(!flag?.enabled){box('<section class="panel"><h1>Módulo ainda não habilitado</h1><p>Este recurso não está ativo para este estabelecimento.</p>'+btn('Meus restaurantes','/inicio')+'</section>');return}
- if(mod==='gestao'){
-   const {renderManagement}=await import('/intervalo/management.js?v=0.2.0');
-   return renderManagement({supabase,restaurant:m.restaurants,role:m.role,box,esc,link});
+ if(mod==='cardapio'){
+  const {renderPublicMenu}=await import('/intervalo/public-menu.js?v=0.7.0');
+  return renderPublicMenu({supabase,slug,box,esc,link});
  }
- box('<span class="eyebrow">AMBIENTE DO RESTAURANTE</span><h1>'+labels[mod]+'</h1><p class="muted">'+esc(m.restaurants.name)+' · '+esc(m.role)+'</p><section class="panel"><h2>Estrutura preparada</h2><p>As operações serão disponibilizadas nas próximas versões. Seus dados estão segregados por estabelecimento.</p>'+btn('Trocar restaurante','/inicio')+'</section>');
+ if(!user){location.assign(link('/login'));return}
+ const {data:members,error}=await supabase.from('restaurant_members').select('restaurant_id,role,status,restaurants(id,name,slug,status)').eq('user_id',user.id);
+ if(error){box(err(error));return}
+ const m=members?.find(x=>x.restaurants?.slug===slug&&x.status==='active'&&x.restaurants.status==='active');
+ if(!m){box('<section class="panel"><h1>Acesso não autorizado</h1><p>Sua conta não possui vínculo ativo com este restaurante.</p></section>');return}
+ const requiredModule=internalModules.includes(mod)?'gestao':mod;
+ if(internalModules.includes(mod)&&!['master','manager'].includes(m.role)){
+  box('<section class="panel"><h1>Sem permissão</h1><p>Somente Master e gerente com acesso à Gestão podem utilizar esta área.</p></section>');return
+ }
+ const [{data:moduleRow,error:modErr},{data:override,error:overrideErr}]=await Promise.all([
+  supabase.from('restaurant_modules').select('enabled').eq('restaurant_id',m.restaurant_id).eq('module',requiredModule).maybeSingle(),
+  supabase.from('restaurant_member_module_access').select('allowed').eq('restaurant_id',m.restaurant_id).eq('user_id',user.id).eq('module',requiredModule).maybeSingle()
+ ]);
+ if(modErr||overrideErr){box(err(modErr??overrideErr));return}
+ const permitted=m.role==='master'||(override?override.allowed:(permissions[m.role]??[]).includes(requiredModule));
+ if(!permitted){box('<section class="panel"><h1>Sem permissão</h1><p>Seu papel neste restaurante não permite abrir este módulo.</p></section>');return}
+ if(!moduleRow?.enabled){box('<section class="panel"><h1>Módulo ainda não habilitado</h1><p>O Super Admin precisa habilitar este recurso para o estabelecimento.</p>'+btn('Meus restaurantes','/inicio')+'</section>');return}
+ if(mod==='gestao'){
+  const {renderManagement}=await import('/intervalo/management.js?v=0.7.0');
+  return renderManagement({supabase,restaurant:m.restaurants,role:m.role,box,esc,link});
+ }
+ const asset={catalogo:'catalog.js',mesas:'support.js',estoque:'support.js',impressao:'support.js',relatorios:'support.js',garcom:'waiter.js',cozinha:'kitchen.js',caixa:'cash.js'}[mod];
+ if(!asset){box('<h1>Módulo não encontrado</h1>');return}
+ const {renderPage}=await import('/intervalo/'+asset+'?v=0.7.0');
+ return renderPage({supabase,restaurant:m.restaurants,module:mod,box,esc,link});
 }
 async function account(user){
  if(!user){location.assign(link('/login'));return}
  const {renderAccount}=await import('/intervalo/account.js?v=0.2.1');
  return renderAccount({supabase,box,esc,link,user});
 }
-async function start(){const user=await me();await setupNav(user);if(paths.length===0)return home(user);if(paths[0]==='login')return login();if(paths[0]==='minha-conta')return account(user);if(paths[0]==='configurar-admin')return setupFirstAdmin();if(paths[0]==='ativar')return setPassword('activation');if(paths[0]==='redefinir')return setPassword('recovery');if(paths[0]==='inicio')return user?choose(user):location.assign(link('/login'));if(paths[0]==='admin')return user?admin(user):location.assign(link('/login'));if(paths.length===2&&modules.includes(paths[1])&&/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(paths[0]))return tenant(user,paths[0],paths[1]);box('<h1>Página não encontrada</h1>'+btn('Início','/'))}
+async function start(){const user=await me();await setupNav(user);if(paths.length===0)return home(user);if(paths[0]==='login')return login();if(paths[0]==='minha-conta')return account(user);if(paths[0]==='configurar-admin')return setupFirstAdmin();if(paths[0]==='ativar')return setPassword('activation');if(paths[0]==='redefinir')return setPassword('recovery');if(paths[0]==='inicio')return user?choose(user):location.assign(link('/login'));if(paths[0]==='admin')return user?admin(user):location.assign(link('/login'));if(paths.length===2&&(modules.includes(paths[1])||internalModules.includes(paths[1]))&&/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(paths[0]))return tenant(user,paths[0],paths[1]);box('<h1>Página não encontrada</h1>'+btn('Início','/'))}
 start().catch(e=>{app.innerHTML='<div class="wrap"><section class="panel"><h1>Não foi possível iniciar o Intervalo</h1><p class="error">'+esc(e.message)+'</p><p>Verifique sua conexão e atualize a página.</p></section></div>'});
 if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('/intervalo/sw.js',{scope:'/intervalo/'}).catch(()=>{}));
 </script>
