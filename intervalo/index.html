@@ -144,7 +144,7 @@ async function choose(user){
    supabase.from('restaurant_member_module_access').select('restaurant_id,module,allowed').eq('user_id',user.id)
  ]);
  if(error||fe||oe){box(err(error??fe??oe));return}
- let out='<h1>Meus restaurantes</h1><p class="muted">Escolha um estabelecimento. Você pode trabalhar em vários restaurantes usando o mesmo login, com permissões diferentes.</p>';
+ let out='<h1>Meus restaurantes</h1><p class="muted">Escolha um estabelecimento. Você pode trabalhar em vários restaurantes usando o mesmo login, com permissões diferentes.</p><p><a class="btn alt" href="'+link('/garcom')+'">Abrir PWA do Garçom</a></p>';
  if(!data?.length)out+='<section class="panel"><h2>Nenhum restaurante vinculado</h2><p>Aguarde o convite do responsável ou abra o painel Super Admin, se sua conta tiver autorização.</p><a class="btn" href="'+link('/admin')+'">Painel administrativo</a></section>';
  for(const m of data??[]){
    const r=m.restaurants;if(!r)continue;
