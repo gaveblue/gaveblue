@@ -10,7 +10,7 @@
 @media(max-width:760px){.hero,.cols{grid-template-columns:1fr;gap:22px}.hero{min-height:0}.wrap{padding:32px 18px}.grid{grid-template-columns:1fr 1fr}.hero h1{letter-spacing:-1.8px}.hero p{font-size:16px}.panel{padding:19px}nav a{font-size:12px}}@media(max-width:410px){.grid{grid-template-columns:1fr}.preview{display:none}}
 </style>
 <script>
-(function(){try{var deep=sessionStorage.getItem('intervalo.deepLink');if(deep&&deep.startsWith('/intervalo/')&&deep.length<2100){sessionStorage.removeItem('intervalo.deepLink');history.replaceState(null,'',deep)}}catch(e){}})()
+(function(){try{var deep=sessionStorage.getItem('intervalo.deepLink');if(deep&&deep.startsWith('/intervalo/')&&deep.length<2100){sessionStorage.removeItem('intervalo.deepLink');history.replaceState(null,'',deep+window.location.hash)}}catch(e){}})()
 </script>
 </head><body><header><div class="inner"><a class="logo" href="/intervalo/">intervalo<span>.</span><small>UM PRODUTO GAVEBLUE</small></a><nav id="nav"><a href="/intervalo/login">Entrar</a></nav></div></header><main id="app"><div class="skeleton">Carregando Intervalo...</div></main><footer class="foot">Gaveblue © 2026 · Intervalo 0.1.0 · Prévia técnica do PWA</footer>
 <script type="module">
