@@ -40,7 +40,7 @@ export async function renderPage({supabase,restaurant,module,box,esc,link}){
       +'@media(max-width:650px){.x-mini-stats{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.x-mini-stats .x-panel{padding:10px}.x-mini-stats b{font-size:22px}.x-tabs button{padding:10px 12px}.x-product-head strong{font-size:16px}}'
       +'</style>';
     let out=title+style
-     +'<div class="x-mini-stats"><div class="x-panel"><b>'+items.length+'</b><span>Insumos cadastrados</span></div><div class="x-panel"><b>'+products.length+'</b><span>Produtos cadastrados</span></div><div class="x-panel"><b>'+exposed.length+'</b><span>Na vitrine pública*</span></div></div>'
+     +'<div class="x-mini-stats"><div class="x-panel"><b>'+items.length+'</b><span>Insumos cadastrados</span></div><div class="x-panel"><b>'+products.length+'</b><span>Produtos cadastrados</span></div><div class="x-panel"><b>'+exposed.length+'</b><span>Prontos para cardápio*</span></div></div>'
      +'<nav class="x-tabs" aria-label="Seções de estoque e produtos">'
      +[['insumos','package','Insumos'],['produtos','store','Produtos'],['fichas','clipboard','Fichas técnicas'],['historico','clock','Movimentações']].map(([id,ic,label])=>
        '<button type="button" data-stock-tab="'+id+'" aria-pressed="'+(validTab===id)+'">'+icon(ic,17)+label+'</button>').join('')
@@ -71,6 +71,9 @@ export async function renderPage({supabase,restaurant,module,box,esc,link}){
     if(validTab==='produtos'){
       out+='<p class="x-note"><b>Cadastro central de produtos e preços.</b> A chave <b>Exibir no cardápio</b> controla a vitrine pública. A chave <b>Disponível para venda</b> controla o que o garçom consegue vender. São controles independentes.</p>'
        +'<div class="iv-toolbar"><h2>'+icon('store',20)+' Produtos e precificação</h2><a class="iv-btn secondary" href="'+link('/'+restaurant.slug+'/catalogo')+'">'+icon('layers',16)+' Categorias e publicação</a></div>';
+      out+='<section class="x-panel"><details><summary>'+icon('layers',17)+' Categorias de produtos</summary><p class="x-muted">Cadastre aqui a categoria e depois selecione-a no produto. Ativar ou ocultar categorias continua disponível na tela de Cardápio.</p>'
+        +'<form id="newcatstock" class="x-form"><label>Nome da nova categoria<input name="name" minlength="2" maxlength="90" required placeholder="Ex.: Lanches"></label>'
+        +'<button type="submit">'+icon('plus',16)+' Criar categoria</button></form></details></section>';
       if(!activeCats.length)out+='<section class="x-panel"><p class="x-note">Antes de criar um produto, cadastre uma categoria ativa no módulo Cardápio.</p>'
         +'<a href="'+link('/'+restaurant.slug+'/catalogo')+'" class="iv-btn">'+icon('plus',16)+' Criar categoria</a></section>';
       else out+='<section class="x-panel"><h2>'+icon('plus',19)+' Cadastrar produto</h2>'
@@ -82,7 +85,7 @@ export async function renderPage({supabase,restaurant,module,box,esc,link}){
        +'<label class="x-switch-row"><span>'+icon('store',16)+' Exibir no cardápio</span><input class="x-toggle" type="checkbox" name="show_on_menu" checked></label>'
        +'<label class="x-switch-row"><span>'+icon('checkCircle',16)+' Disponível para venda</span><input class="x-toggle" type="checkbox" name="available" checked></label>'
        +'<button type="submit">'+icon('plus',16)+' Cadastrar produto</button></form></section>';
-      out+='<div class="iv-toolbar"><h2>Produtos ('+products.length+')</h2><span class="iv-chip orange">'+exposed.length+' na vitrine*</span></div><div class="x-grid">';
+      out+='<div class="iv-toolbar"><h2>Produtos ('+products.length+')</h2><span class="iv-chip orange">'+exposed.length+' prontos para cardápio*</span></div><div class="x-grid">';
       for(const p of products){
         const cat=categories.find(c=>c.id===p.category_id),visible=!!p.show_on_menu,selling=!!p.available;
         const photo=typeof p.image_url==='string'&&/^https:\/\/[^\s<>"']+$/.test(p.image_url)?p.image_url:null;
@@ -140,6 +143,7 @@ export async function renderPage({supabase,restaurant,module,box,esc,link}){
     form('newstock',v=>call('stock_create',{name:v.name,unit:v.unit,quantity:Number(v.quantity),min_quantity:Number(v.min_quantity)}));
     form('adjuststock',v=>call('stock_adjust',{stock_item_id:v.stock_item_id,reason:v.reason,delta:Number(v.delta)}));
     form('recipeset',v=>call('recipe_set',{product_id:v.product_id,stock_item_id:v.stock_item_id,quantity:Number(v.quantity)}));
+    form('newcatstock',v=>call('category_create',{name:v.name,sort_order:0}));
     form('newprodstock',v=>call('product_create',{
       name:v.name,category_id:v.category_id,price_cents:cents(v.price),description:v.description??'',
       image_url:v.image_url??'',sort_order:0,available:v.available==='on',show_on_menu:v.show_on_menu==='on'
