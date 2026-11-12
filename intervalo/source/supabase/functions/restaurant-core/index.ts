@@ -51,7 +51,7 @@ Deno.serve(async(req:Request)=>{
   if(!manage()&&!allowed("garcom"))return fail();
   const [cs,ps,os,pub]=await Promise.all([
    db.from("menu_categories").select("id,name,sort_order,active").eq("restaurant_id",tenant).order("sort_order"),
-   db.from("menu_products").select("id,category_id,name,description,price_cents,available,sort_order").eq("restaurant_id",tenant).order("sort_order"),
+   db.from("menu_products").select("id,category_id,name,description,price_cents,image_url,available,sort_order").eq("restaurant_id",tenant).order("sort_order"),
    db.from("menu_product_options").select("id,product_id,name,price_delta_cents,available").eq("restaurant_id",tenant),
    db.from("restaurant_publication").select("is_published,accepts_customer_orders").eq("restaurant_id",tenant).maybeSingle()
   ]);
@@ -82,7 +82,14 @@ Deno.serve(async(req:Request)=>{
   const name=txt(body.name,150),description=txt(body.description??"",1000),category_id=body.category_id;
   const price_cents=integer(body.price_cents,0,100000000),sort_order=integer(body.sort_order??0,0,99999);
   if(!isId(category_id)||name.length<2||name.length>150||description.length>1000||price_cents===null||sort_order===null||typeof body.available!=="boolean")return error("Dados do produto inválidos");
-  const row={category_id,name,description,price_cents,sort_order,available:body.available,updated_at:new Date().toISOString()};
+  const hasImage=Object.prototype.hasOwnProperty.call(body,"image_url");
+  const imageInput=body.image_url;
+  if(hasImage&&(typeof imageInput!=="string"||imageInput.trim().length>1200||
+      (imageInput.trim().length>0&&!/^https:\/\/[^\\s<>"']+$/.test(imageInput.trim()))))
+    return error("Foto inválida: informe um endereço HTTPS com até 1200 caracteres",400);
+  const row={category_id,name,description,price_cents,sort_order,available:body.available,
+    ...(hasImage?{image_url:(imageInput as string).trim()||null}:{}),
+    updated_at:new Date().toISOString()};
   if(action==="product_update"){
    if(!isId(id))return error("Produto inválido");
    const {data,error:e}=await db.from("menu_products").update(row).eq("id",id).eq("restaurant_id",tenant).select("id").maybeSingle();
