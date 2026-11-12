@@ -1,5 +1,34 @@
 # Intervalo — CHANGELOG
 
+## 0.9.5 — 2026-11-12 · Gestão de equipe, atendimento e impressão manual
+
+**Status:** backend e interface no GitHub; funções no Supabase ativas; testes estáticos/simulados passaram. **Homologação real no domínio pendente.**
+
+- Master do restaurante pode cadastrar novos funcionários com senha provisória manual (gerente, garçom, cozinha ou caixa), sem esperar SMTP. Confirma sua própria senha; tem limite de 20 novos usuários/hora.
+- O usuário provisionado deve trocar a senha antes de acessar recursos. Contas Auth já existentes não são recriadas e devem ser vinculadas pelo fluxo existente.
+- A confirmação de e-mail usada no provisionamento é apenas administrativa no Auth, não comprova o domínio do endereço: responsável deve validar a identidade fora do sistema.
+- Garçom consulta alterações de mesas e comandas a cada 10 segundos com aba visível; não sobrepõe edição ativa do formulário.
+- Prévia de pedido para cozinha e de comanda para caixa, com impressão pelo navegador ou PDF. Não representa integração com impressora térmica nem documento fiscal.
+- Atualizado cache de módulos do site para 0.9.5.
+
+**QA:** ver `QA-0.9.5.md` (sem E2E de browser/hardware/pagamento real).
+
+---
+
+## 0.9.4 — 2026-11-12 · Estoque e fichas técnicas transacionais
+
+**Status:** migrações aplicadas no banco; Edge Function `restaurant-core` v5 publicada; painel atualizado e verificado em simulação, sem validação HTTP do domínio.
+
+- `intervalo_submit_order`: venda desconta estoque por ficha técnica em transação única, com agregação por insumo, lock e validação de saldo; impede duplicidade e consumo parcial em erro.
+- `intervalo_stock_adjust`: entradas, perdas e ajustes rastreados em `stock_movements`; saldo negativo é bloqueado.
+- `intervalo_create_stock`: insumo criado com saldo inicial gera entrada no extrato na mesma transação.
+- Cadastro e remoção de ingredientes por produto no painel de Estoque; mostra saldos, estoque mínimo, últimas movimentações e produtos ainda sem ficha.
+- Produtos sem ficha não baixam estoque automaticamente, com alerta explícito no painel.
+- RPCs de estoque com execução restrita ao `service_role`, sem exposição direta a `anon`/`authenticated`.
+- Testes SQL em transações com `ROLLBACK`: baixa correta, envio repetido recusado, falta de estoque sem efeito parcial, entrada/perda e saldo inicial; sem registros de QA persistentes.
+
+---
+
 ## 0.9.3 — 2026-11-12 · Criação e redefinição manual de senhas pelo Super Admin
 
 **Status:** função Supabase publicada (super-admin-credentials v2) e interface enviada à main do GitHub. QA de navegador no domínio e login real com novos usuários **não comprovados**.
