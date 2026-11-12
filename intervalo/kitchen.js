@@ -23,6 +23,7 @@ export async function renderPage({supabase,restaurant,box,esc,link}){
       if(o.status==='submitted')out+='<button data-progress="'+esc(o.id)+'" data-next="preparing">Iniciar preparo</button>';
       if(o.status==='preparing')out+='<button data-progress="'+esc(o.id)+'" data-next="ready">Marcar pronto</button>';
       if(o.status==='ready')out+='<p><small>Pronto para entrega à mesa</small></p>';
+      out+='<button type="button" class="k-ticket" data-ticket="'+esc(o.id)+'">Imprimir pedido (navegador)</button>';
       out+='</div>';
     }
     out+='</div>';if(!orders.length)out+='<div class="k-empty">Sem pedidos aguardando preparo.</div>';
@@ -32,6 +33,23 @@ export async function renderPage({supabase,restaurant,box,esc,link}){
       b.disabled=true;
       try{await call('order_progress',{order_id:b.dataset.progress,p_next:b.dataset.next});await refresh()}
       catch(e){alert(e.message);b.disabled=false}
+    });
+    document.querySelectorAll('[data-ticket]').forEach(button=>button.onclick=()=>{
+      const order=orders.find(o=>o.id===button.dataset.ticket);
+      if(!order)return;
+      const table=(data.tables??[]).find(t=>t.id===order.table_id);
+      const orderItems=(data.items??[]).filter(i=>i.order_id===order.id&&i.status!=='cancelled');
+      const ticket='<!doctype html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Pedido cozinha · Intervalo</title>'
+       +'<style>body{max-width:460px;margin:25px auto;padding:12px;font:14px Arial,sans-serif;color:#111}h1{text-align:center;font-size:20px}hr{border:0;border-top:1px dashed #777;margin:13px 0}.item{margin:10px 0;font-weight:bold}.note{margin-left:16px;font-weight:normal}.toolbar{margin-bottom:20px}@media print{body{max-width:76mm;margin:0;padding:0;font-size:11px}.toolbar{display:none}}</style></head><body>'
+       +'<div class="toolbar"><button onclick="window.print()">Imprimir / Salvar PDF</button></div>'
+       +'<h1>PEDIDO · COZINHA</h1><p style="text-align:center">'+esc(restaurant.name)+'</p><hr>'
+       +'<p><b>Mesa: '+esc(table?.label??'Mesa')+'</b><br>Comanda: '+esc(order.id)+'<br>Status: '+esc(order.status)+'</p><hr>'
+       +orderItems.map(i=>'<p class="item">'+esc(i.quantity)+' × '+esc(i.product_name)
+         +(i.note?'<span class="note"><br>Obs: '+esc(i.note)+'</span>':'')+'</p>').join('')
+       +'<hr><small>Prévia manual do pedido; não indica envio para impressora térmica ou confirmação de impressão.</small></body></html>';
+      const win=window.open('','_blank');
+      if(!win){alert('Autorize janelas pop-up para abrir a prévia de impressão.');return}
+      win.document.open();win.document.write(ticket);win.document.close();win.focus();
     });
   }catch(e){if(!silent)box(base+'<section class="k-card"><p class="error">'+esc(e.message)+'</p></section>')}
   finally{fetching=false}
