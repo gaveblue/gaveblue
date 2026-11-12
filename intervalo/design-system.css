@@ -223,3 +223,27 @@ header nav{display:flex;flex-wrap:wrap;gap:13px;justify-content:flex-end;align-i
 .iv-platform .iv-icon,.iv-master .iv-icon,.iv-kds .iv-icon,.iv-pos .iv-icon{vertical-align:middle}
 @media(max-width:900px){.iv-home-hero{grid-template-columns:1fr;min-height:auto;padding:35px 0}.iv-home-preview{min-height:260px}.iv-platform #platform-create{position:static}}
 @media(max-width:580px){.iv-home-preview{padding:25px}.iv-home-tiles{grid-template-columns:1fr 1fr}.iv-home-tiles span{font-size:11px;padding:10px}.iv-home-hero h1{font-size:42px}header .inner{padding:12px 14px}header nav{gap:7px}header nav a{font-size:11px}header nav .iv-icon{width:14px;height:14px}.logo{font-size:21px}.logo small{font-size:9px}.logo .iv-brand-tail{top:23px}}
+
+/* Garçom: comanda sempre acessível no celular sem comprimir formulários */
+body.intervalo-garcom .wg-logo{position:relative;font-style:italic;color:var(--iv-ink);letter-spacing:-1.5px}
+body.intervalo-garcom .wg-logo:after{content:"";display:block;position:absolute;left:18px;top:28px;height:4px;width:68px;background:var(--iv-orange);transform:rotate(-5deg);border-radius:100%}
+body.intervalo-garcom .wg-table-icon{display:inline-flex;color:var(--iv-orange)}
+body.intervalo-garcom .wg-plus{display:grid;place-items:center}
+body.intervalo-garcom .wg-cart-shortcut{display:none}
+body.intervalo-garcom .wg-cart-shortcut .iv-icon{flex:none}
+body.intervalo-garcom .wg-cart-shortcut strong{color:#fff;font-size:17px;white-space:nowrap}
+body.intervalo-garcom .wg-product-photo{background:linear-gradient(135deg,#fff2e4,#ffe1c1)}
+body.intervalo-garcom .wg-panel{border-color:var(--iv-border)}
+body.intervalo-garcom .wg-order h2{letter-spacing:-.65px}
+body.intervalo-menu .dm-logo{position:relative}
+body.intervalo-menu .dm-photo span{color:var(--iv-orange-deep)}
+body.iv-fullwidth .op-cards .op-card,body.iv-fullwidth .x-grid .x-panel{box-shadow:var(--iv-shadow)}
+body.iv-fullwidth .op-card h2,body.iv-fullwidth .x-panel h2{letter-spacing:-.4px;font-size:18px}
+@media(max-width:780px){body.iv-master .iv-sidebar nav{display:flex;overflow-x:auto;gap:5px}body.iv-master .iv-sidebar .iv-navitem{white-space:nowrap;width:auto;flex:none}body.iv-master .iv-sidebar .iv-navlabel{display:none}}
+@media(max-width:690px){
+ body.intervalo-garcom .wg-cart-shortcut{display:flex;align-items:center;justify-content:space-between;gap:9px;position:fixed;bottom:74px;left:12px;right:12px;z-index:14;border:0;border-radius:14px;padding:14px 16px;background:linear-gradient(110deg,#ff8609,#f46a00);color:#fff;font-size:12px;font-weight:850;box-shadow:0 9px 24px #c65c1738;cursor:pointer}
+ body.intervalo-garcom .wg-cart-shortcut span{flex:1;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ body.intervalo-garcom .wg-app[data-view=comanda] + .wg-cart-shortcut{display:none}
+ body.intervalo-garcom .wg-mobile-tabs{padding-bottom:max(10px,env(safe-area-inset-bottom))}
+ body.intervalo-garcom .wg-app[data-view=cardapio] ~ .wg-mobile-tabs{box-shadow:0 -8px 35px #14233908}
+}
