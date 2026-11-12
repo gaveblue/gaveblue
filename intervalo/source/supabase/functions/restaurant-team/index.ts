@@ -134,12 +134,10 @@ Deno.serve(async(req:Request)=>{
      page++;
    }
    if(!target&&page>10)return fail("Limite de busca atingido; tente novamente",503);
-   let emailed=false;
-   if(!target){
-     const {data,error}=await db.auth.admin.inviteUserByEmail(email,{redirectTo:origin+"/intervalo/ativar"});
-     if(error||!data.user)return fail("Não foi possível enviar convite; verifique as restrições de e-mail do Supabase",503);
-     target=data.user.id;emailed=true;
-   }
+   // Modo 1.0: sem envio de e-mails. Vínculos somente para contas já existentes.
+   // Novo funcionário: usar create_staff_with_password com confirmação do Master.
+   const emailed=false;
+   if(!target)return fail("E-mail não cadastrado. Use Criar funcionário com senha provisória. Nenhum e-mail foi enviado.",404);
    const current=(members??[]).find(m=>m.user_id===target);
    if(current&&current.status!=="revoked")return fail("Usuário já pertence ao restaurante",409);
    const row={restaurant_id:id,user_id:target,invited_email:email,display_name:display_name||null,role,status:"pending",activated_at:null,invite_expires_at:new Date(Date.now()+7*86400000).toISOString()};
