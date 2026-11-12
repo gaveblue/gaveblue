@@ -1,10 +1,13 @@
 // Intervalo — caixa: apenas registros de recebimentos externos, sem integração com adquirentes.
+import {icon} from './ui-icons.js?v=1.0.0-rc.1';
 export async function renderPage({supabase,restaurant,box,esc,link}){
+ document.body.classList.add('iv-fullwidth','iv-pos');
  const css='<style>.c-card{padding:20px;background:white;border:1px solid #e2e8f0;border-radius:14px;margin:14px 0}.c-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:13px}.c-form{display:flex;gap:10px;flex-wrap:wrap;align-items:end}.c-form label{flex:1 1 185px;font-size:12px;font-weight:700}.c-form input,.c-form select{display:block;width:100%;padding:11px;border:1px solid #cbd5e1;border-radius:9px;margin-top:6px;background:white}.c-form button{border:0;background:#0f766e;color:white;border-radius:9px;padding:12px 13px;font-weight:700;cursor:pointer}.c-form button:disabled{opacity:.45}.c-warning{background:#fff7ed;border:1px solid #fdba74;padding:12px;border-radius:10px;color:#9a3412;font-size:13px}.c-muted{font-size:12px;color:#64748b}.c-money{color:#0f766e;font-weight:800}.c-preview{padding:9px 12px;margin-bottom:13px;border:1px solid #0f766e;background:#f0fdfa;color:#0f766e;border-radius:9px;font-size:12px;font-weight:700}</style>';
  const money=n=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(n)/100);
  const toCents=s=>{const t=String(s??'').trim().replace(',','.');if(!/^\d{1,8}(?:\.\d{1,2})?$/.test(t))throw Error('Valor inválido. Exemplo: 15,50');let [i,f='']=t.split('.');return Number(i)*100+Number((f+'00').slice(0,2))};
  const call=async(action,data={})=>{const r=await supabase.functions.invoke('restaurant-core',{body:{restaurant_id:restaurant.id,action,...data}});if(r.error||r.data?.error){let message=r.data?.error??r.error?.message??'Falha';try{const v=await r.error?.context?.json?.();if(v?.error)message=v.error}catch{}throw Error(message)}return r.data};
- const main=css+'<h1>Caixa e recebimentos</h1><p class="c-muted">'+esc(restaurant.name)+' · Controle de movimentações registradas.</p><p><a href="'+link('/'+restaurant.slug+'/gestao')+'">Voltar à Gestão</a></p><p class="c-warning"><b>Importante:</b> este sistema não cobra cartões, não gera Pix e não confirma transações junto a bancos. Registre somente valores já recebidos, conferidos fora do Intervalo.</p>';
+ const main=css+'<div class="iv-header"><div><span class="iv-section-caption">FRENTE DE CAIXA</span><h1>'+icon('register',26)+' Caixa · Recebimentos</h1><p>'+esc(restaurant.name)+' · Pagamentos registrados manualmente após confirmação externa</p></div><div class="iv-actions"><a class="iv-btn secondary" href="'+link('/inicio')+'">'+icon('arrowLeft',16)+' Restaurantes</a></div></div><div class="iv-note">'+icon('info',16)+' Pix e cartões não são processados aqui. Confirme o recebimento fora do Intervalo antes de registrá-lo no caixa.</div>'
+ let selectedOrderId=null;
  async function reload(){
   box(main+'<p>Carregando caixa...</p>');
   try{
@@ -13,31 +16,46 @@ export async function renderPage({supabase,restaurant,box,esc,link}){
     const orders=(ordersData.orders??[]).filter(o=>o.status==='served');
     const recentClosed=(ordersData.orders??[]).filter(o=>o.status==='closed').slice(0,20);
     const items=ordersData.items??[],pay=ordersData.payments??[],tables=ordersData.tables??[];
-    let out=main+'<div class="c-card"><h2>Sessão de caixa</h2>';
-    if(!open)out+='<form id="cash-open" class="c-form"><label>Troco inicial (R$)<input required name="amount" placeholder="0,00" value="0,00"></label><button type="submit">Abrir caixa</button></form>';
-    else{
-      out+='<p class="c-muted">Iniciado: '+esc(open.opened_at)+' · Troco: '+money(open.starting_cash_cents)+'</p>';
-      out+='<form id="cash-close" class="c-form"><label>Dinheiro físico contado (R$)<input required name="amount" placeholder="0,00"></label><button type="submit">Fechar caixa</button></form>';
+    if(!orders.some(o=>o.id===selectedOrderId))selectedOrderId=orders[0]?.id??null;
+    const selected=orders.find(o=>o.id===selectedOrderId);
+    const calc=o=>{const rows=items.filter(i=>i.order_id===o.id&&i.status!=="cancelled"),total=rows.reduce((n,i)=>n+Number(i.unit_price_cents)*Number(i.quantity),0),paid=pay.filter(x=>x.order_id===o.id).reduce((n,x)=>n+Number(x.amount_cents),0);return {rows,total,paid,outstanding:Math.max(0,total-paid)}};
+    let out=main+'<section class="c-session"><div><h3>'+icon("wallet",19)+' Sessão de caixa</h3><p class="c-muted">'+(open?'Aberta · Início: '+esc(open.opened_at)+' · Troco inicial: '+money(open.starting_cash_cents):'Abra o caixa antes de registrar recebimentos.')+'</p></div>';
+    if(!open)out+='<form id="cash-open" class="c-session-form"><label>Troco inicial (R$)<input required name="amount" placeholder="0,00" value="0,00"></label><button class="iv-btn" type="submit">'+icon("plus",16)+' Abrir caixa</button></form>';
+    else out+='<form id="cash-close" class="c-session-form"><label>Dinheiro contado (R$)<input required name="amount" placeholder="0,00"></label><button class="iv-btn secondary" type="submit">'+icon("checkCircle",16)+' Fechar caixa</button></form>';
+    out+='</section><div class="c-pos-layout"><aside class="c-queue"><div class="c-pane-title"><h2>'+icon('clipboard',20)+' Fila de pagamento</h2><span class="iv-chip orange">'+orders.length+'</span></div><p class="c-muted">Comandas servidas aguardando quitação.</p><div class="c-queue-list">';
+    for(const o of orders){
+      const table=tables.find(t=>t.id===o.table_id),d=calc(o);
+      out+='<button type="button" class="c-queue-item'+(o.id===selectedOrderId?' selected':'')+'" data-cash-select="'+esc(o.id)+'"><span>'+icon("table",19)+' <b>'+esc(table?.label??'Comanda')+'</b></span><span>'+money(d.outstanding)+' '+icon("chevronRight",17)+'</span></button>';
     }
-    out+='</div><h2>Comandas aguardando quitação</h2><div class="c-grid">';
-    for(const order of orders){
-      const total=items.filter(i=>i.order_id===order.id&&i.status!=='cancelled').reduce((sum,i)=>sum+Number(i.unit_price_cents)*i.quantity,0);
-      const paid=pay.filter(x=>x.order_id===order.id).reduce((sum,x)=>sum+Number(x.amount_cents),0);
-      const outstanding=total-paid;
-      const table=tables.find(t=>t.id===order.table_id);
-      out+='<div class="c-card"><h3>'+esc(table?.label??'Mesa')+'</h3><p>Total '+money(total)+' · Já pago '+money(paid)+'</p><p class="c-money">Em aberto: '+money(Math.max(0,outstanding))+'</p><button type="button" class="c-preview" data-receipt="'+esc(order.id)+'">Visualizar / imprimir comanda</button><form class="c-form" data-payment="'+esc(order.id)+'"><label>Valor recebido<input name="amount" required value="'+(Math.max(0,outstanding)/100).toFixed(2).replace('.',',')+'"></label><label>Forma<select name="method"><option value="cash">Dinheiro</option><option value="debit_recorded">Débito recebido externamente</option><option value="credit_recorded">Crédito recebido externamente</option><option value="pix_recorded">Pix recebido externamente</option><option value="other_recorded">Outro recebido externamente</option></select></label><button type="submit" '+(open?'':'disabled title="Abra uma sessão de caixa"')+'>Registrar recebimento</button></form></div>';
+    if(!orders.length)out+='<div class="iv-empty">Nenhuma comanda aguardando pagamento</div>';
+    out+='</div><h3 class="c-closed-heading">'+icon('checkCircle',17)+' Quitadas recentemente</h3><div class="c-queue-list">';
+    for(const o of recentClosed){
+      const table=tables.find(t=>t.id===o.table_id),d=calc(o);
+      out+='<div class="c-closed-row"><b>'+esc(table?.label??'Comanda')+'<small>'+money(d.total)+'</small></b><button class="c-preview" data-receipt="'+esc(o.id)+'" type="button">'+icon("printer",16)+' Imprimir</button></div>';
     }
-    out+='</div>';
-    if(!orders.length)out+='<div class="c-card"><p>Não há contas servidas aguardando pagamento.</p></div>';
-    out+='<h2>Comandas quitadas recentemente</h2><div class="c-grid">';
-    for(const order of recentClosed){
-      const table=tables.find(t=>t.id===order.table_id);
-      const total=items.filter(i=>i.order_id===order.id&&i.status!=='cancelled').reduce((n,i)=>n+Number(i.unit_price_cents)*i.quantity,0);
-      out+='<div class="c-card"><h3>'+esc(table?.label??'Mesa')+'</h3><p class="c-muted">Quitada · Total '+money(total)+'</p><button class="c-preview" type="button" data-receipt="'+esc(order.id)+'">Visualizar / imprimir comanda</button></div>';
-    }
-    out+='</div>';
-    if(!recentClosed.length)out+='<p class="c-muted">Ainda não há comandas quitadas neste recorte.</p>';
+    if(!recentClosed.length)out+='<p class="c-muted">Nenhuma comanda quitada neste recorte.</p>';
+    out+='</div></aside><section class="c-details">';
+    if(selected){
+      const table=tables.find(t=>t.id===selected.table_id),d=calc(selected);
+      out+='<div class="c-pane-title"><h2>'+icon("table",21)+' '+esc(table?.label??'Comanda')+'</h2><span class="iv-chip orange">Aguardando pagamento</span></div><p class="c-muted">Confira os itens antes de registrar o pagamento.</p><div class="c-line-head"><span>Itens consumidos</span><span>Valor</span></div>';
+      for(const item of d.rows)out+='<div class="c-line"><div><b>'+Number(item.quantity)+'× '+esc(item.product_name)+'</b>'+(item.note?'<small>'+esc(item.note)+'</small>':'')+'</div><strong>'+money(Number(item.unit_price_cents)*Number(item.quantity))+'</strong></div>';
+      out+='<div class="c-totals"><div><span>Total da comanda</span><b>'+money(d.total)+'</b></div><div><span>Já recebido</span><b>'+money(d.paid)+'</b></div><div class="c-total-main"><span>Saldo a receber</span><strong>'+money(d.outstanding)+'</strong></div></div>'
+       +'<button type="button" class="c-preview" data-receipt="'+esc(selected.id)+'">'+icon("printer",16)+' Visualizar / imprimir comanda</button>';
+    }else out+='<div class="iv-empty">Selecione uma comanda para conferir o pagamento.</div>';
+    out+='</section><aside class="c-payment"><div class="c-pane-title"><h2>'+icon('wallet',20)+' Pagamento</h2></div>';
+    if(selected){
+      const d=calc(selected);
+      out+='<p class="c-muted">Selecione a forma de recebimento já confirmada. Para dividir a conta, registre valores parciais.</p><form class="c-form c-payment-form" data-payment="'+esc(selected.id)+'"><h3>Forma de pagamento</h3><div class="c-methods">';
+      for(const [method,label,ico] of [["pix_recorded","Pix","card"],["credit_recorded","Crédito","card"],["debit_recorded","Débito","card"],["cash","Dinheiro","banknote"],["other_recorded","Outro","wallet"]]){
+        out+='<label class="c-method"><input type="radio" name="method" value="'+method+'" '+(method==='pix_recorded'?'checked':'')+'><span>'+icon(ico,22)+'<b>'+label+'</b></span></label>';
+      }
+      out+='</div><label>Valor recebido (R$)<input name="amount" required inputmode="decimal" value="'+(d.outstanding/100).toFixed(2).replace('.',',')+'"></label><div class="iv-note">Para pagamentos parciais, informe o valor de cada recebimento separadamente.</div>'
+       +'<button type="submit" class="iv-btn c-confirm" '+(!open||d.outstanding<=0?'disabled':'')+'>'+icon("checkCircle",18)+' Registrar recebimento</button></form>';
+      if(!open)out+='<p class="c-muted">Abra uma sessão de caixa para registrar pagamentos.</p>';
+    }else out+='<div class="iv-empty">Aguardando uma comanda servida.</div>';
+    out+='</aside></div>';
     box(out);
+    document.querySelectorAll('[data-cash-select]').forEach(button=>button.onclick=()=>{selectedOrderId=button.dataset.cashSelect;reload()});
     document.querySelectorAll('[data-receipt]').forEach(button=>button.onclick=()=>{
       const order=(ordersData.orders??[]).find(o=>o.id===button.dataset.receipt);
       if(!order)return;
