@@ -47,6 +47,9 @@ Deno.serve(async(req:Request)=>{
  const owner=mine?.status==="active"&&mine.role==="master";
  const manager=mine?.status==="active"&&mine.role==="manager";
  if(!owner&&!manager)return fail("Sem permissão para administrar equipe",403);
+ const {data:managementEnabled,error:moduleErr}=await db.from("restaurant_modules").select("enabled").eq("restaurant_id",id).eq("module","gestao").maybeSingle();
+ if(moduleErr)return fail("Falha ao conferir módulo contratado",503);
+ if(!managementEnabled?.enabled)return fail("Módulo de gestão não habilitado",403);
  if(action==="list"){
    const [members,overrides,settings,enabled]=await Promise.all([
      db.from("restaurant_members").select("restaurant_id,user_id,display_name,invited_email,role,status,invite_expires_at,created_at").eq("restaurant_id",id).order("created_at",{ascending:true}),
