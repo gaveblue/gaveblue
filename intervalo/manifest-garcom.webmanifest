@@ -1,0 +1,39 @@
+{
+  "id": "/intervalo/garcom-pwa",
+  "name": "Intervalo · Garçom",
+  "short_name": "Intervalo Garçom",
+  "description": "Atendimento por mesas, cardápio e comandas do restaurante.",
+  "start_url": "/intervalo/garcom",
+  "scope": "/intervalo/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "lang": "pt-BR",
+  "background_color": "#fff8f3",
+  "theme_color": "#ff7900",
+  "categories": [
+    "business",
+    "food"
+  ],
+  "icons": [
+    {
+      "src": "/intervalo/icon-garcom.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Mesas e comandas",
+      "short_name": "Garçom",
+      "url": "/intervalo/garcom",
+      "icons": [
+        {
+          "src": "/intervalo/icon-garcom.svg",
+          "sizes": "any",
+          "type": "image/svg+xml"
+        }
+      ]
+    }
+  ]
+}
