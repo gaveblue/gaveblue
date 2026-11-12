@@ -23,6 +23,20 @@ export async function renderPlatform({supabase,box,esc,link}){
    dialog.append(form);document.body.append(dialog);dialog.showModal();input.focus();
   });
  }
+ function displayManualInvite(link,email){
+   const dialog=document.createElement('dialog');
+   dialog.style.cssText='border:1px solid #cbd5e1;border-radius:16px;padding:25px;max-width:580px;width:calc(100% - 30px);box-shadow:0 20px 80px #0003';
+   const heading=document.createElement('h2');heading.textContent='Link de acesso do Master';
+   const p=document.createElement('p');p.className='p-info';
+   p.textContent='Convite preparado para '+email+'. O Supabase não enviou e-mail: entregue este link somente ao destinatário, por um canal privado confiável. O link é de uso único.';
+   const inp=document.createElement('textarea');inp.readOnly=true;inp.value=link;inp.rows=5;inp.style.cssText='display:block;width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:9px;overflow-wrap:anywhere';
+   const copy=document.createElement('button');copy.className='p-btn';copy.type='button';copy.textContent='Copiar link de convite';
+   copy.onclick=async()=>{try{await navigator.clipboard.writeText(inp.value);copy.textContent='Link copiado'}catch{inp.select();copy.textContent='Selecione e copie o link'}};
+   const close=document.createElement('button');close.className='p-btn alt';close.type='button';close.textContent='Fechar';close.style.marginLeft='10px';close.onclick=()=>dialog.close();
+   dialog.onclose=()=>{inp.value='';dialog.remove()};
+   dialog.append(heading,p,inp,copy,close);
+   document.body.append(dialog);dialog.showModal();
+ }
  function displayTemporaryPassword(temp,email){
   const dialog=document.createElement('dialog');
   dialog.style.cssText='border:1px solid #cbd5e1;border-radius:16px;padding:25px;max-width:470px;width:calc(100% - 30px);box-shadow:0 20px 80px #0003';
@@ -43,7 +57,7 @@ export async function renderPlatform({supabase,box,esc,link}){
   box(base+'<p>Carregando restaurantes...</p>');
   try{
    const data=await call('platform-control',{action:'list'});
-   let out=base+'<div class="p-grid"><section class="p-card"><h2>Novo restaurante</h2><form id="platform-new" class="p-form"><label>Nome do restaurante<input name="name" minlength="2" maxlength="120" required></label><label>Slug<input name="slug" minlength="3" maxlength="60" pattern="[a-z0-9]+(-[a-z0-9]+)*" required placeholder="meu-restaurante"></label><label>E-mail do Master<input name="master_email" type="email" required></label><button class="p-btn" type="submit">Cadastrar e convidar</button></form><p class="p-info">Se o e-mail já tiver conta no Intervalo, será criado outro vínculo para o mesmo usuário.</p></section><section><h2>Restaurantes ('+(data.restaurants??[]).length+')</h2>';
+   let out=base+'<div class="p-grid"><section class="p-card"><h2>Novo restaurante</h2><form id="platform-new" class="p-form"><label>Nome do restaurante<input name="name" minlength="2" maxlength="120" required></label><label>Slug<input name="slug" minlength="3" maxlength="60" pattern="[a-z0-9]+(-[a-z0-9]+)*" required placeholder="meu-restaurante"></label><label>E-mail do Master<input name="master_email" type="email" placeholder="Pode definir depois"></label><button class="p-btn" type="submit">Criar restaurante</button></form><p class="p-info">A criação não depende do e-mail. Defina o responsável agora ou posteriormente. O convite será preparado separadamente para não bloquear o cadastro.</p></section><section><h2>Restaurantes ('+(data.restaurants??[]).length+')</h2>';
    for(const r of data.restaurants??[]){
     const flags=(data.modules??[]).filter(m=>m.restaurant_id===r.id);
     const sub=(data.subscriptions??[]).find(s=>s.restaurant_id===r.id);
@@ -52,6 +66,16 @@ export async function renderPlatform({supabase,box,esc,link}){
       const active=flags.some(m=>m.module===id&&m.enabled);
       out+='<button type="button" class="p-module '+(active?'on':'')+'" data-rest="'+esc(r.id)+'" data-module="'+id+'" data-enabled="'+(!active)+'">'+label+' · '+(active?'Ligado':'Desligado')+'</button>';
     }
+    out+='</div>';
+    const setup=(data.master_setups??[]).find(m=>m.restaurant_id===r.id);
+    const existingMaster=(data.members??[]).some(m=>m.restaurant_id===r.id&&m.role==='master'&&m.status!=='revoked');
+    out+='<div class="p-card" style="padding:12px;background:#f0fdfa"><h4>Responsável Master</h4>';
+    if(setup){
+      out+='<p class="p-info">'+esc(setup.master_email)+' · '+(setup.status==='linked'?'Conta vinculada':'Aguardando preparar acesso')+'</p>';
+      out+='<button type="button" class="p-btn alt" data-invite="'+esc(r.id)+'" data-masteremail="'+esc(setup.master_email)+'">Preparar link de acesso (sem enviar e-mail)</button>';
+    }else if(!existingMaster){
+      out+='<p class="p-info">Ainda não definiu um Master. O restaurante já pode ser configurado depois que você vincular sua própria conta.</p><form data-set-master="'+esc(r.id)+'" class="p-form"><label>E-mail do Master<input type="email" name="master_email" required placeholder="responsavel@exemplo.com"></label><button type="submit" class="p-btn">Definir Master</button></form>';
+    }else out+='<p class="p-info">O Master já está cadastrado na equipe abaixo.</p>';
     out+='</div><h4>Usuários do restaurante</h4>';
     const members=(data.members??[]).filter(m=>m.restaurant_id===r.id);
     if(!members.length)out+='<p class="p-info">Nenhum usuário vinculado.</p>';
@@ -69,7 +93,38 @@ export async function renderPlatform({supabase,box,esc,link}){
    }
    out+='</section></div>';box(out);
    const form=document.getElementById('platform-new');
-   form.onsubmit=async e=>{e.preventDefault();const b=form.querySelector('button');b.disabled=true;try{const v=Object.fromEntries(new FormData(form).entries());const r=await call('admin-provision',{...v});alert(r.existing_user?'Restaurante criado. Master já possui login.':'Restaurante criado e convite do Master solicitado.');await reload()}catch(ex){alert(ex.message);b.disabled=false}};
+   form.onsubmit=async e=>{e.preventDefault();const b=form.querySelector('button');b.disabled=true;try{const v=Object.fromEntries(new FormData(form).entries());const r=await call('admin-provision',{action:'create',...v});alert('Restaurante criado com sucesso! '+(r.master_status==='linked'?'Master existente associado; ele pode entrar para ativar o vínculo.':r.master_status==='awaiting_account'?'O e-mail do Master ficou registrado. Clique em Preparar link de acesso no novo restaurante.':'Você pode definir o Master depois.'));await reload()}catch(ex){alert(ex.message);b.disabled=false}};
+   const newForm=document.getElementById('platform-new');
+   if(newForm){
+    const nameField=newForm.elements.namedItem('name'),slugField=newForm.elements.namedItem('slug');
+    let slugEdited=false;
+    slugField.oninput=()=>{slugEdited=!!slugField.value.trim()};
+    nameField.oninput=()=>{
+     if(slugEdited)return;
+     slugField.value=nameField.value.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase()
+       .replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,60);
+    };
+   }
+   document.querySelectorAll('form[data-set-master]').forEach(form=>form.onsubmit=async e=>{
+     e.preventDefault();const button=form.querySelector('button');button.disabled=true;
+     try{
+       const master_email=form.elements.namedItem('master_email').value.trim();
+       await call('admin-provision',{action:'set_master_email',restaurant_id:form.dataset.setMaster,master_email});
+       alert('E-mail do Master definido. Agora use Preparar link de acesso.');await reload();
+     }catch(error){alert(error.message);button.disabled=false}
+   });
+   document.querySelectorAll('[data-invite]').forEach(button=>button.onclick=async()=>{
+     const password=await askAdminPassword('Preparar convite do Master',
+       'O link será preparado sem enviar e-mail pelo Supabase. Só copie para a pessoa correta, em mensagem privada. A confirmação exige sua senha de administrador.');
+     if(!password)return;
+     button.disabled=true;
+     try{
+       const result=await call('admin-provision',{action:'prepare_master_invite',restaurant_id:button.dataset.invite,admin_password:password});
+       if(result.manual_link)displayManualInvite(result.manual_link,button.dataset.masteremail);
+       else alert(result.linked?'Conta Master vinculada. Entre no login com a senha existente para ativar o vínculo.':'Acesso preparado.');
+       await reload();
+     }catch(error){alert(error.message);button.disabled=false}
+   });
    document.querySelectorAll('[data-reset]').forEach(button=>button.onclick=async()=>{
      const email=button.dataset.email;
      if(!confirm('Criar uma nova senha provisória para '+email+'? A senha antiga deixará de funcionar.'))return;
