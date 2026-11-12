@@ -6,6 +6,18 @@ export async function renderManagement({supabase,restaurant,role,box,esc,link}) 
  const defaults={master:modules,manager:modules,waiter:["garcom","cardapio"],kitchen:["cozinha","cardapio"],cashier:["caixa","cardapio"]};
  let state={tab:"dados",data:null};
  const sty='<style>.mtabs{display:flex;gap:8px;overflow:auto;margin:23px 0}.mtabs button{border:1px solid #dbe2e8;background:white;padding:11px 16px;border-radius:10px;font-size:13px;font-weight:700;color:#334155;white-space:nowrap}.mtabs button.selected{color:white;background:#0f766e;border-color:#0f766e}.mg{display:grid;grid-template-columns:1fr 1fr;gap:14px}.mg .full{grid-column:1/-1}.mg label{display:block;font-size:12px;font-weight:700;color:#475569;margin-bottom:7px}.mg input,.mg select{padding:11px;width:100%;border:1px solid #cbd5e1;border-radius:9px;background:white;color:#0f172a}.mg input:focus,.mg select:focus{outline:2px solid #99f6e4}.team-card{background:#fff;border:1px solid #dce4ec;border-radius:13px;padding:17px;margin:12px 0}.team-top{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center}.team-actions{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin-top:13px}.team-actions select{border-radius:8px;padding:9px;border:1px solid #cbd5e1}.smallbtn{border:1px solid #cbd5e1;background:#fff;color:#334155;border-radius:8px;padding:9px 12px;font-weight:700;font-size:12px}.smallbtn.danger{color:#b91c1c;border-color:#fecaca}.status{font-size:11px;border-radius:50px;background:#f1f5f9;padding:6px 10px;font-weight:750;color:#475569}.pgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:10px}.pitem{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:13px}.pitem strong{display:block;margin:0 0 8px}.pitem span{font-size:12px;color:#64748b}.pitem button{margin-top:9px}.onboarding-note{font-size:13px;padding:12px;background:#ecfdf5;border:1px solid #ccfbf1;border-radius:10px;color:#115e59}.muted-sm{font-size:12px;color:#64748b;line-height:1.6}@media(max-width:650px){.mg{grid-template-columns:1fr}.mg .full{grid-column:auto}.team-actions{align-items:stretch}}</style>';
+ function showTemporaryPassword(temp,email){
+  const dlg=document.createElement('dialog');
+  dlg.style.cssText='border:1px solid #cbd5e1;border-radius:14px;padding:23px;max-width:460px;width:calc(100% - 30px)';
+  const heading=document.createElement('h2');heading.textContent='Funcionário cadastrado';
+  const info=document.createElement('p');info.className='muted-sm';info.textContent='Conta '+email+'. Entregue esta senha provisória pessoalmente ou por canal privado. Ela não ficará disponível após fechar.';
+  const value=document.createElement('input');value.readOnly=true;value.value=temp;value.style.cssText='padding:12px;width:100%;border:1px solid #cbd5e1;border-radius:8px';
+  const copy=document.createElement('button');copy.className='smallbtn';copy.type='button';copy.textContent='Copiar senha';
+  copy.onclick=async()=>{try{await navigator.clipboard.writeText(value.value);copy.textContent='Senha copiada'}catch{value.select();copy.textContent='Selecione e copie'}};
+  const close=document.createElement('button');close.className='smallbtn';close.type='button';close.style.marginLeft='8px';close.textContent='Fechar';close.onclick=()=>dlg.close();
+  dlg.onclose=()=>{value.value='';dlg.remove()};
+  dlg.append(heading,info,value,copy,close);document.body.append(dlg);dlg.showModal();
+ }
  function message(text,type="success"){const el=document.getElementById("mg-message");if(el){el.className=type==="error"?"error":"notice";el.textContent=text;el.scrollIntoView({block:"nearest"});}}
  async function call(action,values={}){
    const {data,error}=await supabase.functions.invoke("restaurant-team",{body:{restaurant_id:restaurant.id,action,...values}});
@@ -30,7 +42,15 @@ export async function renderManagement({supabase,restaurant,role,box,esc,link}) 
      inner='<section class="panel"><h2>Informações do estabelecimento</h2><p class="onboarding-note">'+note+'</p><form id="restaurant-settings" class="mg">'+input("Telefone","phone",s.phone,'inputmode="tel" maxlength="30"')+input("CEP (somente números)","postal_code",s.postal_code,'inputmode="numeric" maxlength="8"')+input("Rua / Avenida","street",s.street,'maxlength="150"')+input("Número","address_number",s.address_number,'maxlength="30"')+input("Bairro","neighborhood",s.neighborhood,'maxlength="100"')+input("Cidade","city",s.city,'maxlength="120"')+input("UF","state",s.state,'maxlength="2" style="text-transform:uppercase"')+'<div><label for="m-timezone">Fuso horário</label><select id="m-timezone" name="timezone">'+["America/Sao_Paulo","America/Manaus","America/Cuiaba","America/Rio_Branco","America/Belem","America/Fortaleza","America/Recife","America/Noronha"].map(t=>'<option value="'+t+'" '+((s.timezone??"America/Sao_Paulo")===t?"selected":"")+'>'+t.replace("America/","")+'</option>').join("")+'</select></div><div class="full team-actions"><button class="btn" type="submit">Salvar dados</button>'+(!s.onboarding_completed_at?'<button class="btn alt" name="finish" type="button" id="mg-finish">Concluir cadastro</button>':'')+'</div></form><p class="muted-sm">Cadastros e alterações ficam vinculados ao estabelecimento e registrados para auditoria.</p></section>';
    }else if(state.tab==="equipe"){
      const options=(isMaster?["manager","waiter","kitchen","cashier"]:["waiter","kitchen","cashier"]);
-     inner='<section class="panel"><h2>Convidar funcionário</h2><p class="muted-sm">O convite vincula uma conta ao restaurante, sem conceder acesso aos dados de outras empresas. Para quem já usa o Intervalo, basta entrar e aceitar o vínculo.</p><form id="invite-team" class="mg">'+input("Nome","display_name","",'required minlength="2" maxlength="100"')+input("E-mail","email","",'required type="email" autocomplete="email"')+'<div><label for="staff-role">Função</label><select name="role" id="staff-role">'+options.map(o=>'<option value="'+o+'">'+roles[o]+'</option>').join("")+'</select></div><div style="display:flex;align-items:end"><button class="btn" type="submit">Convidar funcionário</button></div></form></section><h2 style="margin-top:28px">Pessoas cadastradas ('+d.members.length+')</h2>';
+     inner=(isMaster?'<section class="panel"><h2>Criar funcionário com senha provisória</h2><p class="muted-sm">O Master cadastra sua equipe sem depender de confirmação de e-mail. A senha precisa ser trocada no primeiro acesso. O endereço informado é liberado administrativamente, mas a titularidade do e-mail não é verificada.</p><form id="manual-staff" class="mg">'
+      +input("Nome","display_name","",'required minlength="2" maxlength="100"')
+      +input("E-mail de login","email","",'required type="email" autocomplete="off"')
+      +'<div><label>Função</label><select name="role"><option value="manager">Gerente</option><option value="waiter">Garçom</option><option value="kitchen">Cozinha</option><option value="cashier">Caixa</option></select></div>'
+      +'<div><label>Senha provisória</label><input name="temporary_password" type="password" autocomplete="new-password" minlength="12" maxlength="128" required></div>'
+      +'<div><label>Repita a senha provisória</label><input name="repeat_password" type="password" autocomplete="new-password" minlength="12" maxlength="128" required></div>'
+      +'<div><label>Sua senha atual de Master</label><input name="current_password" type="password" autocomplete="current-password" required></div>'
+      +'<div class="full"><button class="btn" type="submit">Cadastrar funcionário</button></div></form></section>':'')
+      +'<section class="panel"><h2>Convidar funcionário</h2><p class="muted-sm">O convite vincula uma conta ao restaurante, sem conceder acesso aos dados de outras empresas. Para quem já usa o Intervalo, basta entrar e aceitar o vínculo.</p><form id="invite-team" class="mg">'+input("Nome","display_name","",'required minlength="2" maxlength="100"')+input("E-mail","email","",'required type="email" autocomplete="email"')+'<div><label for="staff-role">Função</label><select name="role" id="staff-role">'+options.map(o=>'<option value="'+o+'">'+roles[o]+'</option>').join("")+'</select></div><div style="display:flex;align-items:end"><button class="btn" type="submit">Convidar funcionário</button></div></form></section><h2 style="margin-top:28px">Pessoas cadastradas ('+d.members.length+')</h2>';
      for(const m of d.members){
        const editable=m.user_id!==null&&m.role!=="master"&&(isMaster||isManager&&["waiter","kitchen","cashier"].includes(m.role));
        const selectable=isMaster?["manager","waiter","kitchen","cashier"]:["waiter","kitchen","cashier"];
@@ -67,6 +87,22 @@ export async function renderManagement({supabase,restaurant,role,box,esc,link}) 
      settingForm.onsubmit=async e=>{e.preventDefault();await save(false)};
      const finish=document.getElementById("mg-finish");if(finish)finish.onclick=()=>save(true);
    }
+   const manualStaffForm=document.getElementById("manual-staff");
+   if(manualStaffForm)manualStaffForm.onsubmit=async e=>{
+     e.preventDefault();
+     const raw=Object.fromEntries(new FormData(manualStaffForm).entries());
+     if(raw.temporary_password!==raw.repeat_password){message("As senhas provisórias não coincidem.","error");return}
+     const button=manualStaffForm.querySelector('button[type="submit"]');button.disabled=true;
+     const temp=raw.temporary_password,email=raw.email.trim().toLowerCase();
+     try{
+       await call("create_staff_with_password",{
+         email,role:raw.role,display_name:raw.display_name,
+         temporary_password:temp,current_password:raw.current_password
+       });
+       state.tab="equipe";await refresh();message("Funcionário criado. A senha será exigida para o primeiro acesso.");
+       showTemporaryPassword(temp,email);
+     }catch(err){message(err.message,"error");button.disabled=false}
+   };
    const inviteForm=document.getElementById("invite-team");
    if(inviteForm)inviteForm.onsubmit=async e=>{
      e.preventDefault();const values=Object.fromEntries(new FormData(inviteForm).entries());
