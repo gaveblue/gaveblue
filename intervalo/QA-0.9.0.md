@@ -7,7 +7,7 @@ Data: 12/11/2026. Projeto fynaaiazebydorzllwip.
 |---|---|---|
 | Cadastro e convite do Master | Confirmado no banco | Conta com e-mail confirmado e last_sign_in_at, mas vínculo ainda pendente; prazo prorrogado 7 dias |
 | Master por senha | Backend implantado | Função `activate-master` v3 valida a senha via Supabase Auth, não apenas o JWT; teste com senha real ainda pendente |
-| Reset administrado | Backend implantado | `platform-control` v3 exige JWT + papel admin + confirmação da senha do próprio admin; só gera senha nova para membros confirmados não-admin |
+| Reset administrado | Backend implantado | `platform-control` v4 exige JWT + papel admin + confirmação da senha do próprio admin; só gera senha nova para membros confirmados não-admin |
 | Troca obrigatória | Backend implantado | app_metadata protegida e bloqueio nas APIs de negócio; função `account-password` v1 valida senha atual e substitui |
 | Interface de reset | PASS sintaxe | platform.js inclui geração, confirmação em diálogo e visualização uma vez; não testado em navegador real |
 | Recuperação por e-mail | Interface corrigida, ENTREGA NÃO COMPROVADA | Supabase Auth chama resetPasswordForEmail; SMTP e redirects precisam configuração externa |
