@@ -22,6 +22,7 @@ export async function renderPage({supabase,restaurant,box,esc,link}){
         if(open.status==='open'){
           html+='<form data-item="'+esc(open.id)+'"><label>Produto<select name="product_id" required>'+products.map(p=>'<option value="'+esc(p.id)+'">'+esc(p.name)+' · '+money(p.price_cents)+'</option>').join('')+'</select></label><label>Quantidade<input name="quantity" type="number" min="1" max="99" value="1" required></label><label>Observação<input name="note" maxlength="350" placeholder="Sem cebola, por exemplo"></label><button type="submit" '+(products.length?'':'disabled')+'>Adicionar item</button></form>';
           if(ordered.length)html+='<p><button type="button" data-submit="'+esc(open.id)+'">Enviar pedido à cozinha</button></p>';
+          html+='<p><button type="button" style="background:#fff1f2;color:#9f1239" data-cancel="'+esc(open.id)+'">Cancelar comanda não enviada</button></p>';
         }else if(open.status==='ready')html+='<button type="button" data-served="'+esc(open.id)+'">Marcar como servido</button>';
         else html+='<p class="w-status">Pedido encaminhado · '+esc(open.status)+'</p>';
       }
@@ -32,6 +33,13 @@ export async function renderPage({supabase,restaurant,box,esc,link}){
     async function invoke(button,action,extra){button.disabled=true;try{await call(action,extra);await reload()}catch(e){alert(e.message);button.disabled=false}}
     document.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>invoke(b,'order_open',{table_id:b.dataset.open}));
     document.querySelectorAll('[data-submit]').forEach(b=>b.onclick=()=>invoke(b,'order_submit',{order_id:b.dataset.submit}));
+    document.querySelectorAll('[data-cancel]').forEach(b=>b.onclick=async()=>{
+      const reason=prompt('Informe o motivo do cancelamento (mínimo 3 caracteres):','Erro na abertura');
+      if(reason===null)return;
+      if(reason.trim().length<3||reason.length>180){alert('Informe uma justificativa entre 3 e 180 caracteres');return}
+      if(!confirm('Cancelar esta comanda e liberar a mesa? Itens ainda não enviados serão cancelados.'))return;
+      await invoke(b,'order_cancel',{order_id:b.dataset.cancel,reason:reason.trim()});
+    });
     document.querySelectorAll('[data-served]').forEach(b=>b.onclick=()=>invoke(b,'order_progress',{order_id:b.dataset.served,p_next:'served'}));
     document.querySelectorAll('form[data-item]').forEach(f=>f.onsubmit=async e=>{e.preventDefault();const v=Object.fromEntries(new FormData(f).entries());await invoke(f.querySelector('button'),'item_add',{order_id:f.dataset.item,product_id:v.product_id,quantity:Number(v.quantity),note:v.note})});
   }catch(e){box(top+'<div class="w-empty"><p class="error">'+esc(e.message)+'</p></div>')}
