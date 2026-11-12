@@ -45,7 +45,7 @@ export async function renderManagement({supabase,restaurant,role,box,esc,link}) 
    const s=d.settings??{},isMaster=d.actor_role==="master",isManager=d.actor_role==="manager";
    const note=s.onboarding_completed_at?"Cadastro inicial concluído. Você pode atualizar os dados abaixo.":"Preencha telefone, cidade e UF para concluir o cadastro inicial do restaurante.";
    const tabs=[["visao","Visão geral"],["dados","Dados do restaurante"],["equipe","Equipe"],["acessos","Permissões"]];
-   const quickModules=[["catalogo","Cardápio","gestao"],["mesas","Mesas","gestao"],["garcom","Garçom","garcom"],["cozinha","Cozinha","cozinha"],["caixa","Caixa","caixa"],["estoque","Estoque","gestao"],["impressao","Impressão","gestao"],["relatorios","Relatórios","gestao"]];
+   const quickModules=[["catalogo","Cardápio","gestao"],["mesas","Mesas","gestao"],["garcom","Garçom","garcom"],["cozinha","Cozinha","cozinha"],["caixa","Caixa","caixa"],["estoque","Estoque e Produtos","gestao"],["impressao","Impressão","gestao"],["relatorios","Relatórios","gestao"]];
    const accessible=quickModules.filter(([path,label,required])=>(d.enabled??[]).some(m=>m.module===required&&m.enabled));
    const modIcons={catalogo:"receipt",mesas:"table",garcom:"utensils",cozinha:"chef",caixa:"register",estoque:"package",impressao:"printer",relatorios:"chart"};
    const quickLinks='<section class="iv-section"><h2 class="iv-section-title">Acesso rápido</h2><div class="iv-card-grid">'+accessible.map(([path,label])=>'<a class="iv-feature-tile" href="'+link("/"+d.restaurant.slug+"/"+path)+'"><span class="iv-feature-icon">'+icon(modIcons[path]??"layers",20)+'</span><span><strong>'+esc(label)+'</strong><small>Abrir módulo</small></span>'+icon("chevronRight",17)+'</a>').join("")+'</div></section>'
