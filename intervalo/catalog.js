@@ -1,6 +1,7 @@
 import {icon} from './ui-icons.js?v=1.0.0-rc.1';
 // Intervalo: cadastro de categorias, produtos e publicação de cardápio.
 export async function renderPage({supabase,restaurant,box,esc,link}){
+ document.body.classList.add('iv-fullwidth','iv-catalog');
  const style='<style>.op-card{padding:19px;border:1px solid #e2e8f0;border-radius:14px;background:#fff;margin:12px 0}.op-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}.op-cards .op-card{margin:0}.op-form{display:flex;gap:11px;flex-wrap:wrap;align-items:end}.op-form label{font-size:12px;font-weight:700;flex:1 1 175px}.op-form input,.op-form select{display:block;width:100%;padding:11px;border:1px solid #cbd5e1;border-radius:9px;margin-top:7px;background:white;color:#0f172a}.op-btn{background:#ff7600;color:#fff;border:0;padding:11px 14px;border-radius:9px;cursor:pointer;font-weight:700}.op-btn.alt{background:#e2e8f0;color:#334155}.op-photo{width:100%;height:130px;background:#ffede0;border-radius:11px;object-fit:cover;display:block;margin-bottom:10px}.op-photo-placeholder{height:130px;display:grid;place-items:center;background:linear-gradient(135deg,#fff3e7,#ffddbb);border-radius:11px;font-size:55px;margin-bottom:10px}.op-warn{padding:14px;background:#fffbeb;border:1px solid #fcd34d;border-radius:11px;font-size:12px}.op-muted{color:#64748b;font-size:13px}</style>';
  const money=n=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(n)/100);
  const cents=t=>{const v=String(t).replace(/\s/g,'').replace(',','.');if(!/^\d{1,7}(?:\.\d{1,2})?$/.test(v))throw Error('Informe valor no formato 18,50');const [i,f='']=v.split('.');return Number(i)*100+Number((f+'00').slice(0,2))};
@@ -8,7 +9,7 @@ export async function renderPage({supabase,restaurant,box,esc,link}){
  const field=(name,label,value='',extra='')=>'<label>'+label+'<input name="'+name+'" value="'+esc(value)+'" '+extra+'></label>';
  const form=(id,cb)=>{const f=document.getElementById(id);if(f)f.onsubmit=async e=>{e.preventDefault();const b=f.querySelector('button');b.disabled=true;try{await cb(Object.fromEntries(new FormData(f).entries()));await load()}catch(err){alert(err.message);b.disabled=false}}};
  const binding=(sel,cb)=>document.querySelectorAll(sel).forEach(b=>b.onclick=async()=>{b.disabled=true;try{await cb(b);await load()}catch(err){alert(err.message);b.disabled=false}});
- const start=style+'<h1>Cardápio e produtos</h1><p class="op-muted">'+esc(restaurant.name)+' · Configure categorias, preços e disponibilidade.</p><a href="'+link('/'+restaurant.slug+'/gestao')+'">Voltar à Gestão</a>';
+ const start=style+'<div class="iv-header"><div><span class="iv-section-caption">CARDÁPIO DO RESTAURANTE</span><h1>'+icon('receipt',25)+' Cardápio e produtos</h1><p>'+esc(restaurant.name)+' · Categorias, preços, fotos e disponibilidade.</p></div><a class="iv-btn secondary" href="'+link('/'+restaurant.slug+'/gestao')+'">'+icon('arrowLeft',16)+' Voltar à gestão</a></div>';
  async function load(){
   box(start+'<section class="op-card">Carregando cardápio...</section>');
   try{
