@@ -1,0 +1,16 @@
+{
+  "restaurant": "Restaurante de teste",
+  "table": "Mesa 01",
+  "order_id": "SIMULACAO-SEM-PEDIDO-REAL",
+  "items": [
+    {
+      "quantity": 2,
+      "name": "Lanche de teste",
+      "note": "Sem cebola"
+    },
+    {
+      "quantity": 1,
+      "name": "Água mineral"
+    }
+  ]
+}
