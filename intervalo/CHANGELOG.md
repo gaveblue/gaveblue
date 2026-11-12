@@ -1,5 +1,34 @@
 # Intervalo — CHANGELOG
 
+## 0.9.7 — 2026-11-12 · PWA Garçom e Cardápio Digital
+
+**Status:** UI e APIs implantadas no GitHub/Supabase; testes de sintaxe, renderização simulada e transação SQL aprovados. **Sem homologação E2E no domínio nem teste de instalação em aparelhos.** Arquitetura e QA documentados.
+
+### PWA do Garçom
+- Novo painel responsivo baseado nas referências: **Mesas / Cardápio / Comanda**, navegação por abas no celular, painel em três áreas no desktop, cores branco/laranja.
+- Tabelas livres/ocupadas, seleção de mesa, busca e categorias com cartões de foto/emoji; pedido mostra itens e total a partir de valores reais.
+- Quantidade e observação em diálogo acessível; ligações reais a `restaurant-core` para abrir comanda, adicionar item, enviar à cozinha, cancelar antes de envio e marcar servido. Sem alterar saldos ou status somente no front-end.
+- Leitura periódica a cada 10 segundos sem substituir a busca ou diálogo em andamento.
+- `/intervalo/garcom`: launcher com controle de restaurantes e permissões; primeira sessão sem login volta ao launcher após autenticação.
+- Identidade PWA independente em `manifest-garcom.webmanifest` com `id`, `start_url`, ícone SVG e PNG 192/512, instalação nativa quando disponível e instruções iOS/Android. Service Worker não guarda dados privados nem confirma pedidos offline.
+
+### Cardápio Digital
+- Novo visual público responsivo com nome do restaurante, categorias, busca, fotos, preços, descrição, opcionais informativos e compartilhamento do link.
+- Coluna `menu_products.image_url` opcional com restrição HTTPS por migração.
+- Gestão agora cadastra e altera foto do produto por URL HTTPS, oferece link de cardápio e botão QR Code (biblioteca client-side carregada sob demanda com fallback de copiar link).
+- `public-menu` v2 mantém exclusão de cardápios não publicados, estabelecimentos inativos e módulos desabilitados.
+- `restaurant-core` v7 permite salvar/consultar a URL da foto com autorização; mantenha validação no servidor.
+- Cardápio segue **consulta pública apenas**: sem carrinho, Pix online, pedidos automáticos e sem cobrança de adicionais em comandas.
+
+### Qualidade e documentação
+- Renderização simulada de Garçom, Cardápio Público e Gestão, sem erros de sintaxe.
+- Foto HTTPS aceita; protocolo de imagem inseguro rejeitado em teste transacional SQL com ROLLBACK. Zero registros artificiais permanentes.
+- Artefatos: `ARQUITETURA-PWA-GARCOM-CARDAPIO-0.9.7.md`, `QA-0.9.7.md`.
+- Pendente: testar ícones/instalação no Android/iPhone, visual responsivo, QR em navegador real, fluxos E2E, isolamento entre restaurantes e propagação em gaveblue.com.br.
+- Sem mudanças no escopo fiscal, SMTP e impressão manual definida em `ESCOPO-1.0.0.md`.
+
+---
+
 ## 0.9.6 — 2026-11-12 · Escopo 1.0.0 sem fiscal, SMTP ou impressora térmica
 
 **Status:** código da interface atualizado na `main`; `restaurant-team` v6 publicado no Supabase. Teste real de navegador e propagação do site ainda não comprovados; 1.0.0 não homologada.
