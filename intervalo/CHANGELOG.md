@@ -24,7 +24,7 @@
 - Imports dos módulos estáticos receberam `?v=0.9.0` para evitar cache de scripts anteriores.
 
 ### Evidências
-- Edge Functions: `platform-control` v3, `activate-master` v3, `account-password` v1, `restaurant-core` v3, `restaurant-team` v4, `admin-provision` v3 e `account-cpf` v2.
+- Edge Functions: `platform-control` v4, `activate-master` v3, `account-password` v1, `restaurant-core` v3, `restaurant-team` v4, `admin-provision` v3 e `account-cpf` v2.
 - Teste transacional SQL com rollback: cancelar comanda aberta, cancelar itens de rascunho, liberar mesa, reabrir e bloquear cancelamento de comanda enviada.
 - RPC de cancelamento: `anon` e `authenticated` sem EXECUTE; apenas service_role.
 - Sintaxe JS do frontend, painel, conta, garçom e cozinha revisada.
