@@ -1,5 +1,27 @@
 # Intervalo — CHANGELOG
 
+## 0.9.6 — 2026-11-12 · Escopo 1.0.0 sem fiscal, SMTP ou impressora térmica
+
+**Status:** código da interface atualizado na `main`; `restaurant-team` v6 publicado no Supabase. Teste real de navegador e propagação do site ainda não comprovados; 1.0.0 não homologada.
+
+- Decisão explícita do produto: a 1.0.0 será lançada sem emissão fiscal, sem entrega de e-mails e sem integração/testes de impressora física. Equipamentos e automação ficam para etapa futura, sem apagar a estrutura existente.
+- A área **Impressão** foi convertida em **Impressão manual** com instruções e atalhos para pedidos da Cozinha e comandas do Caixa. Não há formulário para cadastrar ou ativar impressora nessa tela.
+- Cozinha: botão `Imprimir pedido (manual)`; Caixa: `Visualizar / imprimir comanda`. Prévia do navegador permite imprimir em dispositivo disponível ou salvar PDF. Sem envio automático nem comprovação de impressão.
+- Gestão de equipe: novo funcionário por senha provisória, e vínculo entre contas já existentes sem SMTP. `restaurant-team` agora rejeita convite a e-mail não cadastrado, sem chamar `inviteUserByEmail`.
+- Recuperação de senha: página instrui obtenção de senha provisória pelo Super Admin, sem `resetPasswordForEmail`; bootstrap público do Super Admin encerrado no aplicativo, sem `signUp`.
+- A conta do próprio Super Admin requer recuperação legítima pelo painel Supabase; credenciais não são expostas.
+- A emissão fiscal continua inexistente na aplicação; recibos/comandas são documentos internos não fiscais.
+- Os pagamentos de Pix e cartões permanecem registros declaratórios de recebimentos externos; integração de gateway não é anunciada como funcional.
+- Atualizada a chave de cache dos módulos para 0.9.6.
+- Referências: `ESCOPO-1.0.0.md`, `QA-0.9.6.md`, `ROTEIRO-TESTES-PILOTO.md`.
+
+### Evidência e pendências
+- Teste estático de sintaxe e fluxo de navegação; Edge Function `restaurant-team` implantada com JWT obrigatório.
+- Pendente: homologação E2E real com todos os papéis, dois restaurantes, comanda, cozinha, caixa, estoque, impressão manual/PDF e segurança, além da comprovação de publicação no domínio.
+- **SMTP, fiscal e impressão térmica não bloqueiam a 1.0.0 por decisão de escopo.**
+
+---
+
 ## 0.9.5 — 2026-11-12 · Gestão de equipe, atendimento e impressão manual
 
 **Status:** backend e interface no GitHub; funções no Supabase ativas; testes estáticos/simulados passaram. **Homologação real no domínio pendente.**
