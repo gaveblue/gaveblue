@@ -16,15 +16,15 @@
   ],
   "icons": [
     {
-      "src": "/intervalo/icon-garcom.svg",
+      "src": "/intervalo/icon-garcom-192.png",
       "sizes": "192x192",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/intervalo/icon-garcom.svg",
+      "src": "/intervalo/icon-garcom-512.png",
       "sizes": "512x512",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "purpose": "any maskable"
     },
     {
@@ -41,9 +41,9 @@
       "url": "/intervalo/garcom",
       "icons": [
         {
-          "src": "/intervalo/icon-garcom.svg",
-          "sizes": "any",
-          "type": "image/svg+xml"
+          "src": "/intervalo/icon-garcom-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
         }
       ]
     }
