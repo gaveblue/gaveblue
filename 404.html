@@ -8,7 +8,7 @@
     var p = window.location.pathname;
     if (!p.startsWith('/intervalo/')) return;
     var parts = p.slice('/intervalo/'.length).split('/').filter(Boolean);
-    var one = ['login', 'admin', 'inicio', 'ativar', 'redefinir', 'configurar-admin', 'minha-conta', 'trocar-senha', 'recuperar-senha'];
+    var one = ['login', 'admin', 'inicio', 'garcom', 'ativar', 'redefinir', 'configurar-admin', 'minha-conta', 'trocar-senha', 'recuperar-senha'];
     var two = ['gestao', 'garcom', 'cozinha', 'caixa', 'cardapio', 'catalogo', 'mesas', 'estoque', 'impressao', 'relatorios'];
     var isRoute = (parts.length === 1 && one.includes(parts[0]))
       || (parts.length === 2 && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(parts[0]) && two.includes(parts[1]));
