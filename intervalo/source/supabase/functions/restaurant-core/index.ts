@@ -51,7 +51,7 @@ Deno.serve(async(req:Request)=>{
   if(!manage()&&!allowed("garcom"))return fail();
   const [cs,ps,os,pub]=await Promise.all([
    db.from("menu_categories").select("id,name,sort_order,active").eq("restaurant_id",tenant).order("sort_order"),
-   db.from("menu_products").select("id,category_id,name,description,price_cents,image_url,available,sort_order").eq("restaurant_id",tenant).order("sort_order"),
+   db.from("menu_products").select("id,category_id,name,description,price_cents,image_url,available,show_on_menu,sort_order").eq("restaurant_id",tenant).order("sort_order"),
    db.from("menu_product_options").select("id,product_id,name,price_delta_cents,available").eq("restaurant_id",tenant),
    db.from("restaurant_publication").select("is_published,accepts_customer_orders").eq("restaurant_id",tenant).maybeSingle()
   ]);
@@ -87,7 +87,11 @@ Deno.serve(async(req:Request)=>{
   if(hasImage&&(typeof imageInput!=="string"||imageInput.trim().length>1200||
       (imageInput.trim().length>0&&!/^https:\/\/[^\s<>"']+$/.test(imageInput.trim()))))
     return error("Foto inválida: informe um endereço HTTPS com até 1200 caracteres",400);
+  const hasMenuFlag=Object.prototype.hasOwnProperty.call(body,"show_on_menu");
+  if(hasMenuFlag&&typeof body.show_on_menu!=="boolean")
+    return error("Exibição no cardápio inválida",400);
   const row={category_id,name,description,price_cents,sort_order,available:body.available,
+    ...(hasMenuFlag?{show_on_menu:body.show_on_menu as boolean}:{}),
     ...(hasImage?{image_url:(imageInput as string).trim()||null}:{}),
     updated_at:new Date().toISOString()};
   if(action==="product_update"){
@@ -112,11 +116,11 @@ Deno.serve(async(req:Request)=>{
   if(!manage()||!allowed("cardapio"))return fail();
   if(typeof body.published!=="boolean")return error("Publicação inválida");
   if(body.published){
-   const {data:ps,error:e}=await db.from("menu_products").select("id,category_id").eq("restaurant_id",tenant).eq("available",true);
+   const {data:ps,error:e}=await db.from("menu_products").select("id,category_id").eq("restaurant_id",tenant).eq("available",true).eq("show_on_menu",true);
    const {data:cs,error:ce}=await db.from("menu_categories").select("id").eq("restaurant_id",tenant).eq("active",true);
    if(e||ce)return error("Não foi possível verificar cardápio",503);
    const ids=new Set((cs??[]).map(c=>c.id));
-   if(!(ps??[]).some(pr=>ids.has(pr.category_id)))return error("Adicione uma categoria e um produto disponíveis antes de publicar",400);
+   if(!(ps??[]).some(pr=>ids.has(pr.category_id)))return error("Cadastre um produto disponível com a chave Exibir no cardápio ativada antes de publicar",400);
   }
   const {error:e}=await db.from("restaurant_publication").upsert({restaurant_id:tenant,is_published:body.published,accepts_customer_orders:false,updated_at:new Date().toISOString()});
   if(e)return error("Falha ao publicar cardápio",503);
@@ -201,7 +205,7 @@ Deno.serve(async(req:Request)=>{
    db.from("stock_items").select("id,name,unit,quantity,min_quantity,active").eq("restaurant_id",tenant).order("name"),
    db.from("recipe_components").select("id,product_id,stock_item_id,quantity").eq("restaurant_id",tenant),
    db.from("stock_movements").select("id,stock_item_id,quantity_delta,reason,created_at").eq("restaurant_id",tenant).order("created_at",{ascending:false}).limit(100),
-   db.from("menu_products").select("id,name,available").eq("restaurant_id",tenant).order("name")
+   db.from("menu_products").select("id,name,available,show_on_menu,price_cents,category_id").eq("restaurant_id",tenant).order("name")
   ]);
   if(items.error||recipes.error||movements.error||products.error)return error("Falha ao consultar estoque",503);
   return reply({items:items.data,recipes:recipes.data,movements:movements.data,products:products.data,automatic_deduction:true});
