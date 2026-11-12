@@ -50,6 +50,11 @@ Deno.serve(async(req:Request)=>{
  const {data:managementEnabled,error:moduleErr}=await db.from("restaurant_modules").select("enabled").eq("restaurant_id",id).eq("module","gestao").maybeSingle();
  if(moduleErr)return fail("Falha ao conferir módulo contratado",503);
  if(!managementEnabled?.enabled)return fail("Módulo de gestão não habilitado",403);
+ if(manager){
+   const {data:restriction,error:restrictionError}=await db.from("restaurant_member_module_access").select("allowed").eq("restaurant_id",id).eq("user_id",user.id).eq("module","gestao").maybeSingle();
+   if(restrictionError)return fail("Não foi possível validar sua permissão",503);
+   if(restriction?.allowed===false)return fail("Sua permissão de gestão foi desativada",403);
+ }
  if(action==="list"){
    const [members,overrides,settings,enabled]=await Promise.all([
      db.from("restaurant_members").select("restaurant_id,user_id,display_name,invited_email,role,status,invite_expires_at,created_at").eq("restaurant_id",id).order("created_at",{ascending:true}),
@@ -116,6 +121,7 @@ Deno.serve(async(req:Request)=>{
    if(!owner||member.status!=="active")return fail("Somente o Master pode alterar permissões",403);
    const module=clean(body.module,25);
    if(!modules.includes(module)||typeof body.allowed!=="boolean")return fail("Permissão inválida",400);
+   if(module==="gestao"&&member.role!=="manager"&&body.allowed===true)return fail("Somente gerentes podem receber acesso à gestão",403);
    const {error}=await db.from("restaurant_member_module_access").upsert({restaurant_id:id,user_id:target,module,allowed:body.allowed,updated_at:new Date().toISOString()},{onConflict:"restaurant_id,user_id,module"});
    if(error)return fail("Não foi possível ajustar permissão",503);
    await db.from("audit_logs").insert({restaurant_id:id,actor_user_id:user.id,event:"staff_access_changed",details:{target_user_id:target,module,allowed:body.allowed}});
