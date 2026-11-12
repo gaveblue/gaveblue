@@ -1,5 +1,33 @@
 # Intervalo — CHANGELOG
 
+## 1.0.0-rc.1 — 2026-11-12 · Redesign integral do Intervalo (candidata à versão 1)
+
+**Status:** implementado na `main` do GitHub, com verificação estática e renderização simulada de módulos. **Liberado apenas para avaliação visual e piloto**; não há comprovação de publicação no domínio, fluxo completo com usuários reais ou homologação de produção. Não renomear para `1.0.0` final sem QA funcional.
+
+### Novo padrão visual
+- Direção aprovada: visual minimalista laranja/branco/carvão, cartões organizados, responsividade, tipografia consistente e **ícones SVG locais no lugar de emojis**.
+- Design compartilhado `design-system.css` e biblioteca `ui-icons.js`, sem dependência de biblioteca externa de ícones.
+- Atualizados logo da aplicação e cor do manifesto PWA geral para laranja.
+- Página inicial e seletor de restaurantes com botões, módulos e navegação no mesmo padrão.
+
+### Redesign de painéis
+- **Super Admin:** sidebar, indicadores operacionais reais, busca de restaurantes, ações sensíveis recolhidas por estabelecimento; mantidas criação, gestão de módulos, senhas provisórias e permissões.
+- **Master/Gestão:** dashboard inicial com resumo obtido das consultas autorizadas de pedidos e estoque, equipe ativa (vínculos), menu lateral e atalhos para os módulos.
+- **KDS/Cozinha:** três colunas `Novos pedidos`, `Em preparo`, `Prontos`, cartões de pedido com observações, tempo desde envio quando disponível, ações existentes e impressão manual.
+- **Caixa/POS:** três áreas na mesma tela: fila de comandas servidas, detalhes da comanda selecionada e registro manual de pagamentos; sessão de caixa e impressão manual preservadas.
+- **Garçom/PWA:** ícones SVG nos produtos e nas abas, fallback para fotos ausentes e atalho fixo à comanda no celular; regras de pedido do backend preservadas.
+- **Cardápio Público e Gestão do Cardápio:** produtos, categorias, busca e fotos com símbolos vetoriais no lugar de emojis; QR permanece somente link de consulta.
+- **Mesas, Estoque, Relatórios e Minha Conta:** cabeçalhos, navegação, cartões e botões padronizados.
+
+### QA
+- Sintaxe JS verificada nos arquivos modificados; renderização simulada de Super Admin, Master, KDS, Caixa, Garçom, Cardápio e módulos auxiliares aprovada, sem inserção de dados fictícios no banco.
+- Ainda pendente: testes reais em navegador e dispositivos, isolamento multi-restaurante, responsividade, todas as rotas e ciclo comanda → cozinha → garçom → caixa → estoque.
+- Limites da versão preservados: sem fiscal, sem SMTP, sem impressão automática; pagamentos Pix/cartão são **registros manuais de recebimentos externos**.
+- Evidências e documentação: `QA-1.0.0-RC1.md` e `DESIGN-SYSTEM-1.0.0.md`.
+- GitHub Actions continua indisponível por cobrança; commits não comprovam propagação no domínio.
+
+---
+
 ## 0.9.8 — 2026-11-12 · Correção de instalação do PWA Garçom e liberação para piloto
 
 **Status:** homologação técnica aprovada para TESTE PILOTO assistido. **Ainda sem validação funcional no domínio real, Android/iPhone ou fluxo operacional completo; não é homologação comercial da 1.0.0.**
