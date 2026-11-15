@@ -16,12 +16,134 @@ export async function renderPage({supabase,restaurant,module,box,esc,link}){
   if(!quiet)box(title+'<div class="iv-loading-inline" role="status" aria-live="polite" aria-busy="true"><div class="iv-loading-inline-label"><span class="iv-load-dot" aria-hidden="true"></span><span>Buscando as informações...</span></div><div class="iv-loading-inline-lines" aria-hidden="true"><span class="iv-load-skeleton"></span><span class="iv-load-skeleton"></span></div></div>');
   try{
   if(module==='mesas'){
+    document.body.classList.add('iv-tables');
     const {tables=[]}=await call('tables');
-    let out=title+'<section class="x-panel"><h2>Nova mesa</h2><form class="x-form" id="newtable"><label>Nome<input name="label" required maxlength="45" placeholder="Mesa 1"></label><label>Salão<input name="area" value="Salão" maxlength="60" required></label><label>Capacidade<input name="seats" type="number" value="4" min="1" max="50" required></label><button type="submit">Cadastrar</button></form></section><h2>Mesas ('+tables.length+')</h2><div class="x-grid">';
-    for(const t of tables){out+='<div class="x-panel"><h3>'+esc(t.label)+'</h3><p class="x-muted">'+esc(t.area)+' · '+t.seats+' lugar(es) · '+(t.active?'Ativa':'Inativa')+'</p><button class="x-btn" data-switch="'+esc(t.id)+'">'+(t.active?'Desativar':'Ativar')+'</button></div>';}
-    out+='</div>';box(out);
-    form('newtable',v=>call('table_create',{label:v.label,area:v.area,seats:Number(v.seats),active:true}));
-    document.querySelectorAll('[data-switch]').forEach(b=>b.onclick=async()=>{b.disabled=true;try{const t=tables.find(t=>t.id===b.dataset.switch);await call('table_update',{id:t.id,label:t.label,area:t.area,seats:t.seats,active:!t.active});await load()}catch(e){alert(e.message);b.disabled=false}});
+    const tableStyle='<link rel="stylesheet" href="/intervalo/tables-design-rc14.css?v=1.0.0-rc.14">';
+    const activeCount=tables.filter(t=>t.active).length;
+    let tableFilter='all';
+    const tableIcon=icon('table',20);
+    const filters=[['all','Todas'],['active','Ativas'],['inactive','Inativas']];
+    function openTableSheet(table){
+      const editing=!!table;
+      const dialog=document.createElement('dialog');dialog.className='iv-table-sheet';
+      dialog.setAttribute('aria-label',editing?'Editar mesa '+table.label:'Cadastrar nova mesa');
+      const form=document.createElement('form');form.noValidate=true;form.autocomplete='off';
+      const safe=(v)=>esc(String(v??''));
+      form.innerHTML='<div class="iv-table-sheet-top"><button type="button" class="iv-table-sheet-grip" aria-label="Arraste para expandir ou fechar o painel"></button>'
+       +'<div class="iv-table-sheet-heading"><div><h2 id="iv-table-sheet-title">'+(editing?'Editar mesa':'Nova mesa')+'</h2><p>'+(editing?'Altere os dados e a disponibilidade da mesa.':'Preencha as informações para adicionar a mesa ao salão.')+'</p></div>'
+       +'<button type="button" class="iv-table-sheet-close" aria-label="Fechar painel">'+icon('x',20)+'</button></div></div>'
+       +'<div class="iv-table-sheet-body">'
+       +'<div class="iv-table-field"><label for="iv-table-name">Nome da mesa</label><input id="iv-table-name" name="label" type="text" maxlength="45" placeholder="Ex.: Mesa 4" value="'+safe(table?.label??'')+'" aria-describedby="iv-table-err-name"><p id="iv-table-err-name" class="iv-table-error" aria-live="polite"></p></div>'
+       +'<div class="iv-table-field"><label for="iv-table-area">Salão / ambiente</label><input id="iv-table-area" name="area" type="text" maxlength="60" placeholder="Ex.: Salão principal" value="'+safe(table?.area??'Salão')+'" aria-describedby="iv-table-err-area"><p id="iv-table-err-area" class="iv-table-error" aria-live="polite"></p></div>'
+       +'<div class="iv-table-field"><label for="iv-table-seats">Capacidade (pessoas)</label><input id="iv-table-seats" name="seats" type="text" inputmode="numeric" maxlength="2" placeholder="4" value="'+safe(table?.seats??4)+'" aria-describedby="iv-table-err-seats"><p id="iv-table-err-seats" class="iv-table-error" aria-live="polite"></p></div>'
+       +(editing?'<label class="iv-table-toggle"><span>Mesa ativa<small>Desative se não quiser disponibilizá-la para novos atendimentos.</small></span><input type="checkbox" name="active" '+(table.active?'checked':'')+' aria-label="Mesa ativa"></label>'
+        +'<p class="iv-table-sheet-note">Se houver comanda em andamento, o sistema poderá impedir a desativação até o atendimento terminar.</p>':'')
+       +'<p class="iv-table-sheet-feedback" id="iv-table-sheet-error" role="alert" aria-live="assertive"></p></div>'
+       +'<div class="iv-table-sheet-actions"><button type="button" class="iv-table-sheet-cancel">Cancelar</button><button type="submit" class="iv-table-sheet-save">'+(editing?'Salvar alterações':'Cadastrar mesa')+'</button></div>';
+      dialog.append(form);document.body.append(dialog);
+      const close=dialog.querySelector('.iv-table-sheet-close'),cancel=dialog.querySelector('.iv-table-sheet-cancel'),grip=dialog.querySelector('.iv-table-sheet-grip');
+      const submit=form.querySelector('.iv-table-sheet-save'),error=form.querySelector('#iv-table-sheet-error');
+      const fields={label:form.elements.namedItem('label'),area:form.elements.namedItem('area'),seats:form.elements.namedItem('seats')};
+      let saving=false,dragStart=null,dragMove=0;
+      const clearErrors=()=>{
+        error.textContent='';
+        for(const [key,field] of Object.entries(fields)){
+          field.removeAttribute('aria-invalid');
+          const errorLabel=form.querySelector('#iv-table-err-'+({label:'name',area:'area',seats:'seats'}[key]));
+          if(errorLabel)errorLabel.textContent='';
+        }
+      };
+      const fieldError=(fieldKey,message)=>{
+        const field=fields[fieldKey];field?.setAttribute('aria-invalid','true');
+        const key=fieldKey==='label'?'name':fieldKey;
+        const target=form.querySelector('#iv-table-err-'+key);
+        if(target)target.textContent=message;
+      };
+      const setSaving=(busy)=>{
+        saving=busy;submit.disabled=busy;cancel.disabled=busy;close.disabled=busy;
+        submit.textContent=busy?'Salvando...':editing?'Salvar alterações':'Cadastrar mesa';
+        form.setAttribute('aria-busy',String(busy));
+      };
+      form.addEventListener('input',()=>{clearErrors()});
+      form.onsubmit=async event=>{
+        event.preventDefault();if(saving)return;
+        clearErrors();
+        const label=fields.label.value.trim(),area=fields.area.value.trim(),seatText=fields.seats.value.trim(),seats=Number(seatText);
+        let invalid=false;
+        if(!label||label.length>45){fieldError('label','Informe o nome da mesa (até 45 caracteres).');invalid=true}
+        if(!area||area.length>60){fieldError('area','Informe o salão ou ambiente (até 60 caracteres).');invalid=true}
+        if(!/^[0-9]{1,2}$/.test(seatText)||!Number.isInteger(seats)||seats<1||seats>50){fieldError('seats','Informe uma capacidade entre 1 e 50 pessoas.');invalid=true}
+        if(invalid)return;
+        const payload={label,area,seats,active:editing?!!form.elements.namedItem('active').checked:true};
+        setSaving(true);
+        try{
+          await call(editing?'table_update':'table_create',editing?{id:table.id,...payload}:payload);
+          await load({quiet:true});
+          dialog.close();
+        }catch(e){
+          error.textContent=e.message??'Não foi possível salvar. Tente novamente.';
+          setSaving(false);
+        }
+      };
+      const requestClose=()=>{if(!saving)dialog.close()};
+      close.onclick=requestClose;cancel.onclick=requestClose;
+      dialog.addEventListener('cancel',e=>{if(saving)e.preventDefault()});
+      dialog.addEventListener('close',()=>{window.visualViewport?.removeEventListener('resize',alignKeyboard);window.visualViewport?.removeEventListener('scroll',alignKeyboard);window.removeEventListener('resize',alignKeyboard);dialog.remove()},{once:true});
+      dialog.addEventListener('click',e=>{if(e.target===dialog)requestClose()});
+      grip.addEventListener('pointerdown',e=>{if(saving)return;dragStart=e.clientY;dragMove=0;grip.setPointerCapture?.(e.pointerId)});
+      grip.addEventListener('pointermove',e=>{if(dragStart===null)return;dragMove=e.clientY-dragStart;if(dragMove>0)dialog.style.transform='translateY('+Math.min(dragMove,200)+'px)'});
+      const finishDrag=()=>{
+        if(dragStart===null)return;
+        const delta=dragMove;dragStart=null;dragMove=0;dialog.style.transform='';
+        if(delta>85)requestClose();else if(delta< -45)dialog.classList.add('is-expanded');
+      };
+      grip.addEventListener('pointerup',finishDrag);grip.addEventListener('pointercancel',finishDrag);
+      function alignKeyboard(){
+        if(!dialog.isConnected)return;
+        const viewport=window.visualViewport,viewHeight=viewport?.height??window.innerHeight;
+        const keyboard=Math.max(0,window.innerHeight-(viewHeight+(viewport?.offsetTop??0)));
+        dialog.style.bottom=keyboard?Math.round(keyboard)+'px':(window.matchMedia('(min-width:701px)').matches?'12px':'0px');
+        dialog.style.setProperty('--table-vh',Math.max(210,Math.round(viewHeight-8))+'px');
+      }
+      window.visualViewport?.addEventListener('resize',alignKeyboard);
+      window.visualViewport?.addEventListener('scroll',alignKeyboard);
+      window.addEventListener('resize',alignKeyboard);
+      dialog.showModal();alignKeyboard();
+      // O foco começa no botão Fechar: o teclado só abre após um toque intencional no campo.
+      close.focus({preventScroll:true});
+    }
+    function paintTables(){
+      const visible=tables.filter(t=>tableFilter==='all'||(tableFilter==='active'?!!t.active:!t.active));
+      let out=title+tableStyle
+       +'<section class="iv-tables-toolbar"><div><h2>Mesas e salões</h2><p>Gerencie os espaços de atendimento sem sair desta tela.</p></div>'
+       +'<button type="button" class="iv-tables-create" id="iv-tables-create">'+icon('plus',18)+' Nova mesa</button></section>'
+       +'<div class="iv-tables-summary"><span class="iv-tables-stat">'+icon('table',15)+' <b>'+tables.length+'</b> mesas</span>'
+       +'<span class="iv-tables-stat"><b>'+activeCount+'</b> ativas</span>'
+       +'<span class="iv-tables-stat"><b>'+(tables.length-activeCount)+'</b> inativas</span></div>'
+       +'<div class="iv-tables-filters" role="group" aria-label="Filtro de mesas">'
+       +filters.map(([key,label])=>'<button type="button" data-table-filter="'+key+'" aria-pressed="'+(tableFilter===key)+'">'+label+'</button>').join('')+'</div>'
+       +'<div class="iv-tables-list">';
+      for(const t of visible){
+        out+='<button type="button" class="iv-table-card '+(t.active?'':'inactive')+'" data-table-edit="'+esc(t.id)+'" aria-label="Editar mesa '+esc(t.label)+'">'
+          +'<span class="iv-table-card-head"><span class="iv-table-card-symbol">'+tableIcon+'</span>'+icon('chevronRight',16)+'</span>'
+          +'<span class="iv-table-card-name">'+esc(t.label)+'</span>'
+          +'<span class="iv-table-card-meta">'+esc(t.area)+' · '+esc(t.seats)+' lugar(es)</span>'
+          +'<span class="iv-table-card-foot"><span class="iv-table-status">'+(t.active?'Ativa':'Inativa')+'</span><span class="iv-table-card-edit">Editar '+icon('chevronRight',12)+'</span></span></button>';
+      }
+      if(!visible.length)out+='<div class="iv-table-empty">'+icon('table',24)+'<strong>'+(tables.length?'Nenhuma mesa neste filtro':'Nenhuma mesa cadastrada')+'</strong>'
+       +(tables.length?'Selecione outro filtro para visualizar suas mesas.':'Toque em Nova mesa para cadastrar o primeiro espaço.')+'</div>';
+      out+='</div>';
+      box(out);
+      document.getElementById('iv-tables-create')?.addEventListener('click',()=>openTableSheet(null));
+      document.querySelectorAll('[data-table-edit]').forEach(button=>button.addEventListener('click',()=>{
+        const table=tables.find(t=>String(t.id)===button.dataset.tableEdit);
+        if(table)openTableSheet(table);
+      }));
+      document.querySelectorAll('[data-table-filter]').forEach(button=>button.addEventListener('click',()=>{
+        tableFilter=button.dataset.tableFilter;paintTables();
+      }));
+    }
+    paintTables();
   }else if(module==='estoque'){
     document.body.classList.add('iv-inventory');
     const [stocks,commercial]=await Promise.all([call('stock_list'),call('catalog')]);
