@@ -1,5 +1,21 @@
 # Intervalo — CHANGELOG
 
+## 1.0.0-rc.14 — 2026-11-15 · Mesas em Bottom Sheet e auditoria de telas
+
+**Status:** interface enviada à branch `main`; QA de sintaxe e comportamento com DOM/API simulados passou. **Homologação parcial** até validar PWA autenticado e propagação do site.
+
+- **Mesas e salões:** removido o formulário fixo **Nova mesa** do topo da tela e substituído por botão **+ Nova mesa**, que abre um Bottom Sheet ancorado na parte inferior.
+- **Edição contextual:** toque no card da mesa abre o mesmo Bottom Sheet preenchido com nome, salão, capacidade e chave de mesa ativa/inativa. Ações de exclusão não foram criadas; permanecem `table_create` e `table_update` do backend original.
+- **Validação sem popup nativo:** `form.noValidate=true`, mensagens por campo para nome (até 45 caracteres), salão (até 60), capacidade (1–50) e mensagens de erro da API no próprio painel.
+- **Acessibilidade/mobile:** foco inicial no botão Fechar, sem teclado automático; alça de arrasto para expandir ou fechar, fechamento pelo botão/Cancelamento, layout responsivo e `visualViewport` para ajustar o sheet ao teclado.
+- **Listagem:** cards menores, indicadores de total/ativas/inativas, filtros locais e ações de edição. Ícones SVG e paleta branco/laranja conforme o visual aprovado.
+- **Proteção de salvamento:** botão mostra `Salvando...` e bloqueia envio repetido; fecha o painel após confirmação da API e atualiza a listagem.
+- **Cache:** `support.js` para rota `/mesas` atualizado para `1.0.0-rc.14` no `index.html`; CSS próprio em `tables-design-rc14.css`. Outras rotas do suporte mantidas sem mudança funcional.
+- **Auditoria estática:** criado `RELATORIO-PADRAO-VISUAL-RC14.md`, classificando telas alinhadas, parcialmente alinhadas, fora do padrão e partes congeladas por decisão de projeto, com priorização de próximos ajustes.
+- **QA:** `QA-1.0.0-RC14.md` registra smoke test com 3 mesas, cadastro válido, validação inválida, edição, desativação e filtro. Não houve teste autenticado no navegador real.
+- **Sem alterações em funcionários, permissões, banco, Edge Functions ou GitHub Actions.**
+- **Rollback:** restaurar `support.js` e `index.html` anteriores, mantendo `tables-design-rc14.css` inativo ou removendo-o. Nenhuma migração.
+
 ## 1.0.0-rc.13 — 2026-11-15 · Carregamento unificado em todo o Intervalo
 
 **Status:** alterações enviadas à `main`; QA estático e simulado aprovado. Propagação no domínio e teste autenticado/PWA **não verificados**.
