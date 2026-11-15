@@ -1,4 +1,5 @@
 import {icon} from './ui-icons.js?v=1.0.0-rc.1';
+import {sheetifyForms} from './operational-sheets-rc15.js?v=1.0.0-rc.15';
 // Intervalo: cadastro de categorias, produtos e publicação de cardápio.
 export async function renderPage({supabase,restaurant,box,esc,link}){
  document.body.classList.add('iv-fullwidth','iv-catalog');
@@ -35,6 +36,7 @@ export async function renderPage({supabase,restaurant,box,esc,link}){
   box(out);
   form('newcat',v=>call('category_create',{name:v.name,sort_order:0}));
   form('newopt',v=>call('option_create',{name:v.name,price_delta_cents:cents(v.price),product_id:v.product_id}));
+  sheetifyForms([{id:'newcat',label:'Nova categoria',title:'Cadastrar categoria'},{id:'newopt',label:'Novo adicional',title:'Cadastrar adicional'}]);
   binding('[data-cat]',b=>{const c=cats.find(c=>c.id===b.dataset.cat);return call('category_update',{id:c.id,name:c.name,sort_order:c.sort_order,active:!c.active})});
   binding('#publish',()=>call('menu_publish',{published:!published}));
   const menuUrl=new URL(link('/'+restaurant.slug+'/cardapio'),location.origin).href;
