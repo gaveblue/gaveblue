@@ -183,6 +183,7 @@ Deno.serve(async(req:Request)=>{
  const rpc:Record<string,{fn:string,fields:string[],module:string}> = {
   order_open:{fn:"intervalo_open_order",fields:["p_table"],module:"garcom"},
   item_add:{fn:"intervalo_add_order_item",fields:["p_order","p_product","p_quantity","p_note"],module:"garcom"},
+  item_add_auto:{fn:"intervalo_add_item_auto",fields:["p_table","p_product","p_quantity","p_note"],module:"garcom"},
   order_submit:{fn:"intervalo_submit_order",fields:["p_order"],module:"garcom"},
   order_cancel:{fn:"intervalo_cancel_open_order",fields:["p_order","p_reason"],module:"garcom"},
   order_progress:{fn:"intervalo_advance_order",fields:["p_order","p_next"],module:"cozinha"},
