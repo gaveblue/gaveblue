@@ -1,5 +1,18 @@
 # Intervalo — CHANGELOG
 
+## 1.0.0-rc.6 — 2026-11-15 · Simplificação da tela inicial do Garçom
+
+**Status:** alteração registrada na branch `main`; QA estático e simulação do fluxo aprovados. Publicação/propagação no domínio e PWA instalado **não verificadas**.
+
+- Tela de entrada após login em `/?app=garcom` e `/garcom`: título **“Seja bem-vindo Garçom!”** e subtítulo **“Para começar seu atendimento clique em Iniciar.”** tanto no carregamento como na renderização final.
+- Cartão de restaurante mantém função/estabelecimento e regra de permissões, mas a ação vira **Iniciar**, apontando para `/{slug}/garcom`.
+- Removidos da tela de entrada os controles **Instalar app do garçom** e **Todos os módulos**; sem remover funcionalidades de outras telas.
+- Submarca **UM PRODUTO GAVEBLUE** e rodapé de versão ocultados apenas nessa entrada, preservando-os nas demais áreas.
+- Ajustados espaçamentos e tipografia do banner e cartões, sem interferir na lógica de login, comandas, módulos, dados ou Supabase.
+- **Smoke test:** duas renderizações (carregamento e final), rota de um restaurante autorizado, ausência dos controles removidos, estado sem acesso e sintaxe JavaScript verificados por simulação. Browser autenticado/PWA real pendentes.
+- **Arquivo alterado:** `intervalo/index.html`. **Commit:** `519225f860867b8937f3c90034b558af6ed6c308`.
+- **Rollback:** reverter `519225f` ou restaurar o `index.html` anterior, sem alterar tabelas ou Edge Functions. Sem GitHub Actions.
+
 ## 1.0.0-rc.5 — 2026-11-15 · Garçom: primeiro produto abre comanda automaticamente
 
 **Status:** código na `main`, função SQL implantada no Supabase INTERVALO e Edge Function `restaurant-core` versão 10 ativa. **Homologação parcial:** testes transacionais reais com rollback passaram; navegador autenticado e propagação no domínio/PWA não comprovados.
