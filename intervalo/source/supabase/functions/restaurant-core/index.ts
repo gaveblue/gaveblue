@@ -179,7 +179,7 @@ Deno.serve(async(req:Request)=>{
   ]);
   if(orders.error||items.error||tables.error||payments.error||rounds.error)return error("Não foi possível carregar comandas",503);
   const idSet=new Set((orders.data??[]).map(o=>o.id));
-  return reply({orders:orders.data,items:(items.data??[]).filter(i=>idSet.has(i.order_id)),rounds:(rounds.data??[]).filter(x=>idSet.has(x.order_id)),tables:tables.data,payments:allowed("caixa")?(payments.data??[]).filter(x=>idSet.has(x.order_id)):[]});
+  return reply({orders:(orders.data??[]).map(o=>({...o,payment_started:(payments.data??[]).some(p=>p.order_id===o.id)})),items:(items.data??[]).filter(i=>idSet.has(i.order_id)),rounds:(rounds.data??[]).filter(x=>idSet.has(x.order_id)),tables:tables.data,payments:allowed("caixa")?(payments.data??[]).filter(x=>idSet.has(x.order_id)):[]});
  }
  const rpc:Record<string,{fn:string,fields:string[],module:string}> = {
   order_open:{fn:"intervalo_open_order",fields:["p_table"],module:"garcom"},
