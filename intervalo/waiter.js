@@ -153,36 +153,100 @@ export async function renderPage({supabase,restaurant,box,esc,link}){
  }
  function openProduct(product,activeOrder){
   if(!product||!selectedId||(activeOrder&&activeOrder.status!=='open'))return;
-   const tableId=selectedId;
-  const dlg=document.createElement('dialog');dlg.className='wg-modal';
+  const tableId=selectedId,previousFocus=document.activeElement;
+  // Remove busca focada para evitar teclado aberto junto com o novo painel.
+  if(previousFocus?.tagName==='INPUT'||previousFocus?.tagName==='TEXTAREA')previousFocus.blur();
   const extras=(snapshot.options??[]).filter(o=>o.product_id===product.id);
-  const form=document.createElement('form');form.method='dialog';
-  const title=document.createElement('h3');title.textContent=product.name+' · '+money(product.price_cents);
-  const description=document.createElement('p');description.className='wg-hint';description.textContent=activeOrder?'Adicione a quantidade e observações para a cozinha.':'Ao confirmar, a comanda será criada automaticamente.';
-  const qLabel=document.createElement('label');qLabel.textContent='Quantidade';
-  const qty=document.createElement('input');qty.type='number';qty.name='quantity';qty.required=true;qty.min=1;qty.max=99;qty.value='1';qLabel.append(qty);
-  const nLabel=document.createElement('label');nLabel.textContent='Observação (opcional)';
-  const note=document.createElement('textarea');note.name='note';note.maxLength=350;note.placeholder='Ex.: sem cebola, ponto bem passado...';nLabel.append(note);
-  const warning=document.createElement('p');warning.className='wg-note';
-  if(extras.length)warning.textContent='Adicionais do catálogo ainda não alteram o preço da comanda. Informe pedidos especiais na observação; valores extras precisam ser tratados separadamente.';
-  const feedback=document.createElement('p');feedback.className='error';feedback.setAttribute('role','alert');
-  const buttons=document.createElement('div');buttons.className='wg-modal-btns';
-  const no=document.createElement('button');no.type='button';no.textContent='Cancelar';no.onclick=()=>dlg.close();
-  const yes=document.createElement('button');yes.type='submit';yes.textContent='Adicionar à comanda';
-  buttons.append(no,yes);form.append(title,description,qLabel,nLabel);
-  if(extras.length)form.append(warning);
-  form.append(feedback,buttons);dlg.append(form);document.body.append(dlg);
-  dlg.onclose=()=>dlg.remove();
-  form.onsubmit=async e=>{
-    e.preventDefault();const quantity=Number(qty.value);
-    if(!Number.isInteger(quantity)||quantity<1||quantity>99){feedback.textContent='Quantidade entre 1 e 99.';return}
-    yes.disabled=true;
-    try{
-      await call('item_add_auto',{table_id:tableId,product_id:product.id,quantity,note:note.value});
-      dlg.close();view='cardapio';await reload();
-    }catch(err){feedback.textContent=err.message;yes.disabled=false}
+  const dlg=document.createElement('dialog');dlg.className='wg-product-sheet';
+  dlg.setAttribute('aria-label','Adicionar '+product.name+' à comanda');
+  const form=document.createElement('form');form.noValidate=true;
+  const top=document.createElement('div');top.className='wg-product-top';
+  const grip=document.createElement('button');grip.className='wg-product-grip';grip.type='button';grip.setAttribute('aria-label','Arraste para expandir ou fechar o painel');
+  const heading=document.createElement('div');heading.className='wg-product-heading';
+  const productTitle=document.createElement('div');
+  const title=document.createElement('h3');title.textContent=product.name;
+  const unit=document.createElement('span');unit.className='wg-product-unit';unit.textContent=money(product.price_cents)+' cada';
+  productTitle.append(title,unit);
+  const close=document.createElement('button');close.type='button';close.className='wg-product-close';close.setAttribute('aria-label','Fechar');close.innerHTML=icon('x',20);
+  heading.append(productTitle,close);top.append(grip,heading);
+  const content=document.createElement('div');content.className='wg-product-content';
+  const hint=document.createElement('p');hint.className='wg-product-help';hint.textContent=activeOrder?'Adicione quantidade e observações, se necessário.':'A comanda será aberta automaticamente quando você confirmar.';
+  const qtyLabel=document.createElement('label');qtyLabel.className='wg-product-label';qtyLabel.textContent='Quantidade';
+  const row=document.createElement('div');row.className='wg-qty-row';
+  const minus=document.createElement('button');minus.type='button';minus.className='wg-qty-step';minus.setAttribute('aria-label','Diminuir quantidade');minus.innerHTML=icon('minus',22);
+  const qty=document.createElement('input');qty.type='text';qty.inputMode='numeric';qty.autocomplete='off';qty.maxLength=2;qty.pattern='[0-9]*';qty.name='quantity';qty.value='1';qty.className='wg-qty-input';qty.setAttribute('aria-label','Quantidade, toque para digitar');
+  const plus=document.createElement('button');plus.type='button';plus.className='wg-qty-step';plus.setAttribute('aria-label','Aumentar quantidade');plus.innerHTML=icon('plus',22);
+  row.append(minus,qty,plus);
+  const noteLabel=document.createElement('label');noteLabel.className='wg-product-label';noteLabel.textContent='Observação (opcional)';
+  const note=document.createElement('textarea');note.className='wg-product-note';note.name='note';note.rows=3;note.maxLength=350;note.placeholder='Ex.: sem cebola, sem gelo, molho à parte...';
+  note.id='wg-sheet-note';noteLabel.htmlFor=note.id;
+  const feedback=document.createElement('p');feedback.className='wg-product-feedback error';feedback.setAttribute('role','alert');
+  content.append(hint,qtyLabel,row,noteLabel,note);
+  if(extras.length){const warning=document.createElement('p');warning.className='wg-note wg-product-warning';warning.textContent='Adicionais ainda não alteram o preço da comanda. Informe pedidos especiais na observação.';content.append(warning)}
+  content.append(feedback);
+  const footer=document.createElement('div');footer.className='wg-product-footer';
+  const total=document.createElement('div');total.className='wg-product-total';
+  const totalLabel=document.createElement('span');totalLabel.textContent='Total do produto';
+  const amount=document.createElement('strong');total.append(totalLabel,amount);
+  const actions=document.createElement('div');actions.className='wg-product-actions';
+  const cancel=document.createElement('button');cancel.type='button';cancel.className='wg-product-cancel';cancel.textContent='Cancelar';
+  const confirm=document.createElement('button');confirm.type='submit';confirm.className='wg-product-confirm';confirm.textContent='Adicionar à comanda';
+  actions.append(cancel,confirm);footer.append(total,actions);
+  form.append(top,content,footer);dlg.append(form);document.body.append(dlg);
+  let saving=false;
+  const quantity=()=>Number(qty.value);
+  const update=()=>{
+   const n=quantity(),valid=qty.value!==''&&Number.isInteger(n)&&n>=1&&n<=99;
+   minus.disabled=saving||!valid||n<=1;plus.disabled=saving||!valid||n>=99;
+   confirm.disabled=saving||!valid;
+   amount.textContent=valid?money(product.price_cents*n):'—';
   };
-  dlg.showModal();qty.focus();
+  qty.addEventListener('input',()=>{qty.value=qty.value.replace(/[^0-9]/g,'').slice(0,2);feedback.textContent='';update()});
+  qty.addEventListener('blur',()=>{if(!qty.value||quantity()<1)qty.value='1';update()});
+  minus.onclick=()=>{qty.value=String(Math.max(1,quantity()-1));update()};
+  plus.onclick=()=>{qty.value=String(Math.min(99,quantity()+1));update()};
+  cancel.onclick=()=>{if(!saving)dlg.close()};
+  close.onclick=()=>{if(!saving)dlg.close()};
+  dlg.addEventListener('cancel',e=>{if(saving)e.preventDefault()});
+  // Arrastar a alça para cima expande o sheet; para baixo fecha.
+  let dragY=null,dragDelta=0;
+  grip.addEventListener('pointerdown',e=>{if(saving)return;dragY=e.clientY;dragDelta=0;grip.setPointerCapture?.(e.pointerId)});
+  grip.addEventListener('pointermove',e=>{if(dragY===null)return;dragDelta=e.clientY-dragY;if(dragDelta>0)dlg.style.transform='translateY('+Math.min(dragDelta,220)+'px)'});
+  const finishDrag=()=>{if(dragY===null)return;const dy=dragDelta;dragY=null;dragDelta=0;dlg.style.transform='';if(dy>85&&!saving)dlg.close();else if(dy < -45)dlg.classList.add('is-expanded')};
+  grip.addEventListener('pointerup',finishDrag);
+  grip.addEventListener('pointercancel',finishDrag);
+  const viewport=window.visualViewport;
+  const alignKeyboard=()=>{
+   if(!dlg.isConnected)return;
+   const viewHeight=viewport?.height??window.innerHeight;
+   const keyboard=Math.max(0,window.innerHeight-(viewHeight+(viewport?.offsetTop??0)));
+   dlg.style.bottom=keyboard?Math.round(keyboard)+'px':(window.matchMedia('(min-width:691px)').matches?'16px':'0px');
+   dlg.style.setProperty('--wg-sheet-vh',Math.max(200,Math.round(viewHeight-8))+'px');
+  };
+  viewport?.addEventListener('resize',alignKeyboard);
+  viewport?.addEventListener('scroll',alignKeyboard);
+  window.addEventListener('resize',alignKeyboard);
+  dlg.addEventListener('close',()=>{
+   viewport?.removeEventListener('resize',alignKeyboard);
+   viewport?.removeEventListener('scroll',alignKeyboard);
+   window.removeEventListener('resize',alignKeyboard);
+   dlg.remove();
+   if(previousFocus?.isConnected&&previousFocus.tagName==='BUTTON')previousFocus.focus({preventScroll:true});
+  },{once:true});
+  form.onsubmit=async e=>{
+   e.preventDefault();if(saving)return;
+   const n=quantity();
+   if(!Number.isInteger(n)||n<1||n>99){feedback.textContent='Informe uma quantidade entre 1 e 99.';return}
+   saving=true;confirm.textContent='Adicionando...';cancel.disabled=true;close.disabled=true;update();
+   try{
+    await call('item_add_auto',{table_id:tableId,product_id:product.id,quantity:n,note:note.value});
+    dlg.close();view='cardapio';await reload();
+   }catch(err){saving=false;confirm.textContent='Adicionar à comanda';cancel.disabled=false;close.disabled=false;feedback.textContent=err.message;update()}
+  };
+  update();
+  dlg.showModal();alignKeyboard();
+  // Sem autofocus em campos editáveis: teclado apenas quando usuário tocar neles.
+  close.focus({preventScroll:true});
  }
  async function reload(silent=false){
   if(!alive||fetching)return;
