@@ -147,8 +147,52 @@ export async function renderManagement({supabase,restaurant,role,box,esc,link}) 
        inner+='</div>';
      }
    }
-   box(viewHead+inner+"</div></div>");
-   document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{state.tab=b.dataset.tab;draw()});
+   box(viewHead+inner+"</div></main>"+bottom+"</div></div>");
+   const shell=document.getElementById("mg-v2-root");
+   const switchTab=tab=>{
+     if(!["visao","dados","equipe","acessos"].includes(tab)||tab==="acessos"&&!isMaster)return;
+     state.tab=tab;
+     draw();
+   };
+   document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));
+   shell?.querySelector("[data-mg-open-nav]")?.addEventListener("click",()=>shell.classList.add("menu-open"));
+   shell?.querySelector("[data-mg-close-nav]")?.addEventListener("click",()=>shell.classList.remove("menu-open"));
+   function openSheet(kind){
+     document.querySelector("dialog.mg-v2-sheet[open]")?.close();
+     const choices=kind==="quick"
+       ?[["route","mesas","Mesas","Consultar as mesas do restaurante","table"],
+         ["route","garcom","Garçom","Iniciar atendimento e lançar produtos","utensils"],
+         ["route","catalogo","Cardápio","Consultar produtos e categorias","receipt"],
+         ["route","estoque","Estoque","Produtos, insumos e saldos","package"]]
+       :[["tab","dados","Dados do restaurante","Endereço, telefone e cadastro","store"],
+         ["route","relatorios","Relatórios","Indicadores gerenciais","chart"],
+         ["tab","equipe","Equipe","Configurações existentes, sem alterações","users"],
+         ["tab","acessos","Permissões","Apenas para o Master","shield"],
+         ["route","impressao","Impressão","Prévia manual e documentos internos","printer"],
+         ["route","inicio","Trocar restaurante","Voltar aos meus restaurantes","arrowLeft"]];
+     const available=choices.filter(([type,path])=>type==="tab"?(path!=="acessos"||isMaster):(path==="inicio"||accessible.some(([p])=>p===path)));
+     const dialog=document.createElement("dialog");dialog.className="mg-v2-sheet";
+     dialog.setAttribute("aria-label",kind==="quick"?"Ações rápidas":"Mais opções");
+     const rows=available.map(([type,path,label,note,symbol])=>{
+       const inner='<span>'+icon(symbol,19)+'</span><span>'+esc(label)+'<small>'+esc(note)+'</small></span><span class="mg-right-icon">'+icon("chevronRight",16)+'</span>';
+       return type==="tab"?
+         '<button type="button" class="mg-v2-sheet-item" data-mg-sheet-tab="'+path+'">'+inner+'</button>':
+         '<a class="mg-v2-sheet-item" href="'+(path==="inicio"?mainLink:link("/"+d.restaurant.slug+"/"+path))+'">'+inner+'</a>';
+     }).join("");
+     dialog.innerHTML='<div class="mg-v2-sheet-handle"></div><div class="mg-v2-sheet-head"><h2>'+(kind==="quick"?"Ações rápidas":"Mais opções")+'</h2><button type="button" class="mg-v2-iconbtn" data-mg-sheet-close aria-label="Fechar">'+icon("x",19)+'</button></div>'
+       +(rows||'<p>Não há módulos habilitados para esta ação.</p>');
+     document.body.append(dialog);
+     dialog.addEventListener("close",()=>dialog.remove(),{once:true});
+     dialog.addEventListener("click",e=>{
+       if(e.target===dialog){dialog.close();return}
+       if(e.target.closest("[data-mg-sheet-close]")){dialog.close();return}
+       const tab=e.target.closest("[data-mg-sheet-tab]");
+       if(tab){const next=tab.dataset.mgSheetTab;dialog.close();switchTab(next)}
+     });
+     dialog.showModal();
+   }
+   shell?.querySelectorAll("[data-mg-sheet]").forEach(b=>b.addEventListener("click",()=>openSheet(b.dataset.mgSheet)));
+
    const settingForm=document.getElementById("restaurant-settings");
    if(settingForm){
      async function save(complete){
