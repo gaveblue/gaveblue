@@ -1,0 +1,123 @@
+/* Intervalo · Design System operacional RC15 · branco/laranja, mobile-first */
+body.iv-unified{background:#f8f9fb;color:#1d293d}
+body.iv-unified #app .wrap{max-width:1190px;padding:clamp(14px,2vw,25px) clamp(13px,2.5vw,25px) 105px}
+body.iv-unified .iv-header{gap:13px;align-items:center;margin-bottom:19px}
+body.iv-unified .iv-header h1{font-size:clamp(23px,3vw,31px);letter-spacing:-.6px;line-height:1.18}
+body.iv-unified .iv-header .iv-section-caption{color:#e76a00}
+body.iv-unified .iv-btn:not(.secondary):not(.danger),
+body.iv-unified .x-btn:not(.secondary):not(.danger),
+body.iv-unified .op-btn:not(.alt),
+body.iv-unified .p-btn:not(.alt):not(.danger),
+body.iv-unified .k-reload,
+body.iv-unified .k-card button:not(.secondary),
+body.iv-unified .c-confirm{background:linear-gradient(112deg,#ff920b,#ff6900);color:#fff;border:0;border-radius:12px;box-shadow:none}
+body.iv-unified .iv-btn.secondary,
+body.iv-unified .op-btn.alt,
+body.iv-unified .p-btn.alt{background:#fff;color:#39495d;border:1px solid #e3e8ee;border-radius:12px}
+body.iv-unified .x-panel,
+body.iv-unified .op-card,
+body.iv-unified .p-card,
+body.iv-unified .c-card,
+body.iv-unified .k-card,
+body.iv-unified .account-layout .panel{background:#fff;border:1px solid #e8edf2;border-radius:17px;box-shadow:0 3px 16px #21324908}
+body.iv-unified h2{letter-spacing:-.35px}
+body.iv-unified input:not([type="checkbox"]):not([type="radio"]),body.iv-unified select,body.iv-unified textarea{border-radius:11px;border:1px solid #dce3eb;background:#fff;color:#1e2a3d}
+body.iv-unified input:focus-visible,body.iv-unified select:focus-visible,body.iv-unified textarea:focus-visible{outline:2px solid #ffb067;outline-offset:1px}
+body.iv-unified .iv-toolbar{display:flex;align-items:center;gap:10px;justify-content:space-between;flex-wrap:wrap}
+body.iv-unified .iv-toolbar h2{font-size:17px}
+body.iv-unified .op-card,body.iv-unified .x-panel{padding:16px}
+body.iv-unified .p-module.on{border-color:#ffd4aa;background:#fff1e5;color:#d76a00}
+body.iv-unified .iv-stat{border-color:#e8edf3;background:#fff;border-radius:16px}
+body.iv-unified .iv-chip.orange{color:#dc6b00;background:#fff1e5;border-color:#ffdcc0}
+body.iv-unified .iv-note,body.iv-unified .x-note{border-radius:13px}
+body.iv-unified .iv-sidenav .iv-navitem.active{color:#d96a00;background:#fff1e5}
+/* Cartões compactos e lista operacional */
+body.iv-unified .op-cards{grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:11px}
+body.iv-unified .op-cards>.op-card{padding:15px}
+body.iv-unified .op-cards .op-photo,
+body.iv-unified .op-cards .op-photo-placeholder{height:102px}
+body.iv-unified .x-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:11px}
+body.iv-unified .x-grid>.x-panel{margin:0;padding:15px}
+body.iv-unified .x-grid>.x-panel h3{font-size:14px;margin:0 0 7px}
+body.iv-unified .p-grid{gap:12px}
+body.iv-unified .c-session,body.iv-unified .c-details,body.iv-unified .c-payment,body.iv-unified .c-queue{border-color:#e8edf3;border-radius:16px}
+body.iv-unified .c-queue-item{border-radius:11px}
+body.iv-unified .c-total-main strong{color:#ed7100}
+body.iv-unified .iv-kds-ticket{border-radius:15px;border-color:#e8edf3}
+body.iv-unified .iv-kds-next{background:linear-gradient(110deg,#ff920b,#ff7100);color:#fff;border-radius:10px}
+body.iv-unified .iv-kds-lanehead{border-radius:12px}
+body.iv-unified .iv-kds-item{border-color:#edf0f5}
+/* Relatórios: indicadores reais, mantendo valores vindos da API */
+body.iv-unified.iv-support:not(.iv-inventory):not(.iv-tables) .x-grid .x-panel b{font-size:20px;font-weight:820;color:#243247;line-height:1.3;font-variant-numeric:tabular-nums}
+body.iv-unified .iv-report-controls{display:flex;gap:10px;align-items:center;margin:10px 0 19px;flex-wrap:wrap}
+body.iv-unified .iv-report-controls .iv-report-status{font-size:11px;color:#8390a2}
+/* Links e acesso à seleção de restaurantes */
+body.iv-unified .iv-restaurants{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,265px),1fr));gap:12px}
+body.iv-unified .iv-restaurants>.item{margin:0;border:1px solid #e8edf3;border-radius:17px;padding:16px;box-shadow:0 4px 18px #2634460a;background:#fff}
+body.iv-unified .iv-restaurants .links{display:flex;gap:7px;flex-wrap:wrap}
+body.iv-unified .iv-restaurants .links>a{border:1px solid #e6eaf0;border-radius:10px;padding:9px 11px;font-size:11px;font-weight:760;color:#56657b;background:#fff}
+body.iv-unified .iv-restaurants .links>a:first-child{background:#fff0e4;border-color:#ffd5b1;color:#de6d00}
+/* Perfis e formulários de entrada */
+body.iv-unified .formbox.panel{border-radius:19px;box-shadow:0 9px 28px #26364a0b;max-width:480px;margin:5vh auto 30px;padding:clamp(20px,3vw,31px)}
+body.iv-unified .formbox h1{letter-spacing:-.7px}
+body.iv-unified .formbox .formbtn{background:linear-gradient(110deg,#ff920b,#ff6900);border-radius:12px}
+body.iv-unified .account-layout{max-width:680px;margin:auto}
+body.iv-unified .account-layout .securehint{background:#fff5e9;border-color:#ffe0bd;color:#91531b}
+body.iv-unified .account-layout .actionrow{gap:8px}
+body.iv-unified .account-layout .actionrow button{border-radius:11px}
+/* Botões que abrem painel */
+.iv-op-open{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;min-height:49px;background:#fff7ef;border:1px solid #ffd8b5;border-radius:13px;color:#d56700;padding:11px 14px;font-size:12px;font-weight:800;cursor:pointer;margin:10px 0}
+.iv-op-open:hover{background:#fff0e0}
+.iv-op-open>span:first-child{flex:none;height:28px;width:28px;background:#ffe6d0;border-radius:9px;display:grid;place-items:center;font-size:19px}
+.iv-op-open>span:nth-child(2){flex:1;text-align:left}
+.iv-op-open .iv-op-arrow{font-size:21px;color:#d88a4b}
+.iv-op-open:focus-visible{outline:3px solid #ffbc82;outline-offset:2px}
+dialog.iv-op-sheet{position:fixed;inset:auto 0 0;max-width:min(100%,560px);width:100%;max-height:min(94dvh,var(--iv-op-viewheight,94dvh));margin:0 auto;padding:0;border:0;border-radius:24px 24px 0 0;box-shadow:0 -19px 75px #1b29433a;background:#fff;color:#1c2b40;overflow:hidden}
+dialog.iv-op-sheet.iv-op-expanded{max-height:min(98dvh,var(--iv-op-viewheight,98dvh))}
+dialog.iv-op-sheet::backdrop{background:#14243c88}
+.iv-op-content{display:flex;flex-direction:column;min-height:0;max-height:inherit}
+.iv-op-head{flex:none;padding:8px 18px 13px;border-bottom:1px solid #edf0f5;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.iv-op-grip{display:block;flex:0 0 100%;height:23px;border:0;background:transparent;cursor:grab;touch-action:none}
+.iv-op-grip:after{content:"";display:block;width:43px;height:5px;border-radius:9px;background:#d9dfe7;margin:auto}
+.iv-op-heading{flex:1;min-width:0}
+.iv-op-heading h2{font-size:19px;font-weight:830;margin:0 0 5px;color:#1e2c41}
+.iv-op-heading p{font-size:11px;line-height:1.45;color:#8392a5;margin:0}
+.iv-op-close{width:37px;height:37px;flex:none;border:0;border-radius:50%;background:#f2f4f7;color:#566579;font-size:23px;cursor:pointer}
+.iv-op-body{flex:1;min-height:0;overflow-y:auto;padding:18px;overscroll-behavior:contain}
+.iv-op-body form{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;margin:0!important;padding:0!important;background:transparent!important;border:0!important}
+.iv-op-body form label{display:block;min-width:0;margin:0!important;font-size:12px;font-weight:770;color:#394a5f}
+.iv-op-body form label input:not([type=checkbox]):not([type=radio]),.iv-op-body form label select,.iv-op-body form label textarea{display:block;width:100%;margin:7px 0 0;min-height:46px;padding:11px 12px;border:1px solid #dce3ec;border-radius:11px;background:#fff;color:#202f42}
+.iv-op-body form .x-switch-row{display:flex;align-items:center}
+.iv-op-body form .x-switch-row input[type=checkbox]{margin-left:auto}
+.iv-op-body form input:focus-visible,.iv-op-body form select:focus-visible{outline:2px solid #ffb066;outline-offset:1px}
+.iv-op-body form button[type=submit],.iv-op-body form .iv-op-submit{width:100%;min-height:48px;border:0!important;border-radius:12px!important;color:#fff!important;background:linear-gradient(110deg,#ff9005,#ff6e00)!important;font-size:13px;font-weight:850;cursor:pointer}
+.iv-op-footer{padding:0 18px max(17px,env(safe-area-inset-bottom));background:#fff}
+.iv-op-cancel{display:block;width:100%;border:1px solid #e5eaf1;border-radius:11px;background:#f3f5f8;color:#405166;font-size:12px;font-weight:800;padding:12px;cursor:pointer}
+.iv-op-error,.iv-op-inline-error{color:#bd3c3c;font-size:11px;line-height:1.45;margin:7px 0}
+.iv-op-error:empty{display:none}
+dialog.iv-op-sheet input[aria-invalid="true"],dialog.iv-op-sheet select[aria-invalid="true"]{border-color:#d95252!important}
+dialog.iv-op-sheet .c-methods{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+dialog.iv-op-sheet .c-method input[type=radio]{width:auto}
+dialog.iv-op-sheet .iv-note{font-size:11px}
+dialog.iv-op-sheet .c-payment-form h3{font-size:12px}
+dialog.iv-op-sheet.iv-inventory .x-form{display:grid;grid-template-columns:minmax(0,1fr)}
+dialog.iv-op-sheet.iv-inventory .x-form>button{width:100%}
+dialog.iv-op-sheet .x-form input[type=checkbox].x-toggle{appearance:none}
+body.iv-unified .iv-platform .p-card{border-radius:16px}
+@media(max-width:700px){
+ body.iv-unified #app .wrap{padding:16px 14px calc(94px + env(safe-area-inset-bottom))}
+ body.iv-unified .iv-header{align-items:flex-start}
+ body.iv-unified .iv-header h1{font-size:23px}
+ body.iv-unified .iv-header .iv-btn{padding:9px 11px;font-size:11px}
+ body.iv-unified .op-cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ body.iv-unified .op-cards>.op-card{padding:12px}
+ body.iv-unified .x-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ body.iv-unified .x-grid>.x-panel{padding:12px}
+ body.iv-unified .iv-kds-board{display:block}
+ body.iv-unified .iv-kds-lane{margin-bottom:14px}
+ body.iv-unified .c-pos-layout{grid-template-columns:1fr}
+ body.iv-unified .iv-restaurants{grid-template-columns:1fr}
+ dialog.iv-op-sheet{max-width:100%;border-radius:22px 22px 0 0}
+}
+@media(max-width:375px){body.iv-unified .op-cards,body.iv-unified .x-grid{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){dialog.iv-op-sheet,.iv-op-open{animation:none;transition:none}}
