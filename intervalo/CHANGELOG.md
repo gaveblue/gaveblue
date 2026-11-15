@@ -1,5 +1,21 @@
 # Intervalo — CHANGELOG
 
+## 1.0.0-rc.12 — 2026-11-15 · Carregamento visual da Gestão
+
+**Status:** código enviado à `main`; homologação técnica parcial, sem confirmação de propagação no domínio ou uso real no PWA.
+
+- **Skeleton responsivo** enquanto a Gestão consulta dados: espaços reservados para cabeçalho, quatro indicadores, atalhos e painéis, no visual branco e laranja aprovado.
+- Animação shimmer suave, com estado textual **“Preparando sua visão geral...”**; respeita `prefers-reduced-motion`.
+- Ao atualizar dados, uma linha de progresso discreta no cabeçalho sinaliza atividade sem substituir a tela por completo.
+- Em falha de carregamento, o skeleton é substituído pela mensagem de erro. Indicadores de progresso são removidos em `finally`, evitando tela presa em carregamento.
+- No formulário **Dados do restaurante**, botões exibem **Salvando... / Concluindo...** e ficam bloqueados até a resposta, prevenindo toques duplicados.
+- Nenhuma mudança em cadastro de funcionários, funções de servidor, senhas, equipe, permissões, Supabase ou banco.
+- Arquivos: `management.js`, `management-design-rc11.css` (com cache `rc.12`), `index.html` (carregamento de `management.js?v=1.0.0-rc.12`).
+- Testes simulados: skeleton antes de uma resposta adiada; renderização real posterior; sinalização `aria-busy`; limpeza após sucesso ou falha. **Pendente:** teste em celular/PWA autenticado e propagação no domínio.
+- **Rollback:** restaurar `management.js`, CSS e `index.html` da rc.11. Não usar GitHub Actions.
+
+**Relatório:** `QA-1.0.0-RC12.md`.
+
 ## 1.0.0-rc.11 — 2026-11-15 · Redesign aprovado da Gestão (mobile first)
 
 **Status:** código enviado à branch `main`, homologação técnica parcial. Testes de renderização e navegação com DOM/backend simulado passaram; publicação no domínio e uso em PWA autenticado não confirmados.
