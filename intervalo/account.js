@@ -37,7 +37,7 @@ export async function renderAccount({supabase,box,esc,link,user}){
      catch(err){show(err.message,true);unlink.disabled=false;form.elements.namedItem("current_password").value="";}
    };
  };
- box(style+'<section class="account-layout"><h1>Minha Conta</h1><p class="muted">Carregando identificação...</p></section>');
+ box(style+'<section class="account-layout"><h1>Minha Conta</h1><div class="iv-loading-inline" role="status" aria-live="polite" aria-busy="true"><div class="iv-loading-inline-label"><span class="iv-load-dot" aria-hidden="true"></span><span>Consultando a conta...</span></div><div class="iv-loading-inline-lines" aria-hidden="true"><span class="iv-load-skeleton"></span><span class="iv-load-skeleton"></span></div></div></section>');
  try{const status=await invoke({action:"status"});render(status);}
  catch(err){box(style+'<section class="account-layout"><h1>Minha Conta</h1><p class="error">'+esc(err.message)+'</p><a href="'+link("/inicio")+'">Voltar</a></section>');}
 }
