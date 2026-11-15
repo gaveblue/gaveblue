@@ -31,8 +31,9 @@
 - Comanda mostra rodadas numeradas com estados, subtotais e total consolidado; Garçom marca a entrega de cada rodada pronta separadamente.
 - Novo lançamento proibido depois de iniciado qualquer pagamento; pagamento só permitido quando **todas** as rodadas estão servidas.
 - Regras de papel/restaurante continuam verificadas pela Edge Function, com RLS e funções SQL restritas ao `service_role`.
+- Política explícita `deny_clients_order_rounds` bloqueia consultas e gravações diretas por `anon`/`authenticated`; Advisor RLS sem política resolvido. Nenhuma permissão de funcionário alterada.
 - Compatibilidade mantida para operações antigas `item_add` e `order_progress` de clientes legados, sem permitir atualizar todas as rodadas por engano.
-- Testes no banco fizeram duas rodadas, progresso por rodada e pagamentos parciais com `ROLLBACK`, preservando dados reais. Teste de receita com insumos e concorrência real ainda pendentes.
+- Testes no banco fizeram duas rodadas, progresso, pagamentos parciais e **baixa de estoque por rodada com ficha técnica temporária**, todos com `ROLLBACK`. Concorrência real simultânea permanece pendente.
 - **Sem alterações em login, CPF, senhas, permissões ou módulo de funcionários.**
 
 **QA integrado e procedimentos de rollback:** `QA-1.0.0-RC8-RC10.md`. Não remover a estrutura de rodadas depois que houver dados reais com múltiplas rodadas.
