@@ -1,5 +1,22 @@
 # Intervalo — CHANGELOG
 
+## 1.0.0-rc.5 — 2026-11-15 · Garçom: primeiro produto abre comanda automaticamente
+
+**Status:** código na `main`, função SQL implantada no Supabase INTERVALO e Edge Function `restaurant-core` versão 10 ativa. **Homologação parcial:** testes transacionais reais com rollback passaram; navegador autenticado e propagação no domínio/PWA não comprovados.
+
+- Clicar em uma mesa continua abrindo o **Cardápio**. A inclusão pelo `+` do produto é permitida mesmo quando não há comanda aberta.
+- Ao confirmar quantidade e observações, `item_add_auto` cria uma comanda **somente se necessário** e registra o primeiro produto na mesma transação do Postgres. Se já existe comanda aberta, a reutiliza.
+- Selecionar mesa, visualizar produto ou cancelar o formulário **não abre comanda**. Produto inválido não deixa comanda vazia.
+- Pedido já enviado/preparando/pronto/servido **não recebe novos itens** nessa primeira etapa; novas rodadas ficam para implementação futura.
+- Após a inclusão, a interface permanece no Cardápio, permitindo continuar o lançamento. A Comanda e seu botão **Enviar para cozinha** continuam acessíveis no fluxo.
+- Retirado o passo obrigatório **Abrir comanda** e sua opção de atalho na tela Mais/Ações rápidas.
+- Backend: função `public.intervalo_add_item_auto` com bloqueio por mesa e reaproveitamento de comanda, execução restrita ao `service_role`, identidade e permissões de Garçom validadas na Edge Function. Nenhuma chave privilegiada foi enviada ao cliente.
+- Implementação: migration `20261115_waiter_auto_item_1_0_0_rc5.sql`, `restaurant-core/index.ts`, `waiter.js` e `index.html`, com cache-busting para `1.0.0-rc.5` apenas no Garçom.
+- **QA de banco:** testada criação em mesa livre (result.created=true), reutilização de comanda aberta (false), rejeição de produto inexistente sem criação de comanda e verificados grants de execução. Testes positivos foram revertidos com `ROLLBACK`; 1 comanda ativa permaneceu ativa, sem alteração da contagem.
+- **QA de frontend:** sintaxe JS válida e verificação de integração dos pontos de entrada. **Pendentes:** clique real no celular, autenticação, atualização de PWA, conectividade em produção, smoke test de pedido completo com cozinha e corrida simultânea entre dois garçons.
+- **Publicação:** commits feitos na `main`, sem GitHub Actions. Verificação externa de `gaveblue.com.br` não foi possível por falha de resolução de DNS nas ferramentas; não afirmar propagação.
+- **Rollback:** reverter commits `index.html` / `waiter.js`, restaurar `restaurant-core` v9 em Supabase e revogar/remover a função `intervalo_add_item_auto` quando a Edge Function antiga já não a utilizar. Somente executar rollback após conferir usos em produção.
+
 ## 1.0.0-rc.4 — 2026-11-15 · Garçom: mesas em grade, cabeçalho limpo e navegação rápida
 
 **Status:** alterações de interface publicadas como commits na `main`. **Homologação técnica parcial:** sintaxe JavaScript compilada sem erros e inspeção dos arquivos na branch; teste real autenticado e propagação HTTP/PWA no domínio não comprovados.
