@@ -158,7 +158,7 @@ export async function renderPage({supabase,restaurant,box,esc,link}){
   dlg.addEventListener('click',e=>{if(e.target===dlg)dlg.close()});dlg.showModal();
  }
  function openProduct(product,activeOrder){
-  if(!product||!selectedId||(activeOrder&&activeOrder.status!=='open'))return;
+  if(!product||!selectedId)return;
   const tableId=selectedId,previousFocus=document.activeElement;
   // Remove busca focada para evitar teclado aberto junto com o novo painel.
   if(previousFocus?.tagName==='INPUT'||previousFocus?.tagName==='TEXTAREA')previousFocus.blur();
@@ -176,7 +176,7 @@ export async function renderPage({supabase,restaurant,box,esc,link}){
   const close=document.createElement('button');close.type='button';close.className='wg-product-close';close.setAttribute('aria-label','Fechar');close.innerHTML=icon('x',20);
   heading.append(productTitle,close);top.append(grip,heading);
   const content=document.createElement('div');content.className='wg-product-content';
-  const hint=document.createElement('p');hint.className='wg-product-help';hint.textContent=activeOrder?'Adicione quantidade e observações, se necessário.':'A comanda será aberta automaticamente quando você confirmar.';
+  const hint=document.createElement('p');hint.className='wg-product-help';hint.textContent=activeOrder?'Adicione os produtos nesta comanda. Uma nova rodada será criada quando necessário.':'A comanda será aberta automaticamente quando você confirmar.';
   const qtyLabel=document.createElement('label');qtyLabel.className='wg-product-label';qtyLabel.textContent='Quantidade';
   const row=document.createElement('div');row.className='wg-qty-row';
   const minus=document.createElement('button');minus.type='button';minus.className='wg-qty-step';minus.setAttribute('aria-label','Diminuir quantidade');minus.innerHTML=icon('minus',22);
