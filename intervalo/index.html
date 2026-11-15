@@ -26,7 +26,7 @@ intervaloApplyManifest();
 (function(){try{var deep=sessionStorage.getItem('intervalo.deepLink');if(deep&&deep.startsWith('/intervalo/')&&deep.length<2100){sessionStorage.removeItem('intervalo.deepLink');history.replaceState(null,'',deep+window.location.hash)}}catch(e){}})();
 intervaloApplyManifest();
 </script>
-</head><body><header><div class="inner"><a class="logo" href="/intervalo/" aria-label="Intervalo, página inicial">Intervalo<span class="iv-brand-tail" aria-hidden="true"></span><small>UM PRODUTO GAVEBLUE</small></a><nav id="nav"><a href="/intervalo/login">Entrar</a></nav></div></header><main id="app"><div class="skeleton">Carregando Intervalo...</div></main><footer class="foot">Gaveblue © 2026 · Intervalo 1.0.0-rc.5 · Lançamento direto pelo Garçom</footer>
+</head><body><header><div class="inner"><a class="logo" href="/intervalo/" aria-label="Intervalo, página inicial">Intervalo<span class="iv-brand-tail" aria-hidden="true"></span><small>UM PRODUTO GAVEBLUE</small></a><nav id="nav"><a href="/intervalo/login">Entrar</a></nav></div></header><main id="app"><div class="skeleton">Carregando Intervalo...</div></main><footer class="foot">Gaveblue © 2026 · Intervalo 1.0.0-rc.6 · Entrada do Garçom</footer>
 <script type="module">
 import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.50.0/+esm';
 import {icon} from '/intervalo/ui-icons.js?v=1.0.0-rc.3';
@@ -208,8 +208,9 @@ async function admin(user){
  return renderPlatform({supabase,box,esc,link});
 }
 async function waiterHome(user){
- const style='<style>.wg-launch{max-width:840px;margin:0 auto}.wg-launch-hero{background:linear-gradient(120deg,#ff860a,#ef5b00);color:#fff;padding:30px;border-radius:20px;margin:20px 0}.wg-launch-hero h1{font-size:32px;margin:5px 0;letter-spacing:-1px}.wg-launch-hero p{font-size:13px;color:#fff3e7}.wg-launch-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}.wg-launch-card{padding:20px;border:1px solid #f4e0cd;border-radius:17px;background:#fff}.wg-launch-card h2{font-size:19px;margin:6px 0}.wg-launch-card a{display:inline-block;margin-top:14px;padding:12px 16px;background:#ff7400;color:#fff;border-radius:10px;font-size:13px;font-weight:850}.wg-launch-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px}.wg-launch-actions button{border:1px solid #ffdfbc;background:#fff7ed;border-radius:11px;padding:11px 15px;color:#b74f00;font-weight:800;cursor:pointer}</style>';
- box(style+'<section class="wg-launch"><div class="wg-launch-hero"><span>INTERVALO · PWA</span><h1>Atendimento do Garçom</h1><p>Escolha seu restaurante para acessar mesas, cardápio e comandas.</p></div><p>Carregando seus restaurantes...</p></section>');
+ document.body.classList.add('intervalo-waiter-home');
+ const style='<style>.wg-launch{max-width:840px;margin:0 auto}.wg-launch-hero{background:linear-gradient(120deg,#ff860a,#ef5b00);color:#fff;padding:30px;border-radius:20px;margin:20px 0}.wg-launch-hero h1{font-size:32px;margin:5px 0;letter-spacing:-1px}.wg-launch-hero p{font-size:13px;color:#fff3e7}.wg-launch-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}.wg-launch-card{padding:20px;border:1px solid #f4e0cd;border-radius:17px;background:#fff}.wg-launch-card h2{font-size:19px;margin:6px 0}.wg-launch-card a{display:inline-block;margin-top:14px;padding:12px 16px;background:#ff7400;color:#fff;border-radius:10px;font-size:13px;font-weight:850}.wg-launch-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px}body.intervalo-waiter-home .foot{display:none!important}body.intervalo-waiter-home header .logo small{display:none!important}body.intervalo-waiter-home header .logo .iv-brand-tail{top:calc(100% - 4px);left:16px;width:66px}body.intervalo-waiter-home #app .wrap{max-width:840px;padding-top:clamp(20px,4vw,36px);padding-bottom:28px}body.intervalo-waiter-home .wg-launch-hero{margin:0 0 18px;border-radius:22px;padding:clamp(24px,5vw,38px)}body.intervalo-waiter-home .wg-launch-hero h1{font-size:clamp(30px,6vw,42px);line-height:1.13;letter-spacing:-1.2px;margin:12px 0}body.intervalo-waiter-home .wg-launch-hero p{font-size:clamp(13px,3vw,16px);line-height:1.5;max-width:490px;margin:12px 0 0}body.intervalo-waiter-home .wg-launch-card{padding:clamp(20px,4vw,28px)}body.intervalo-waiter-home .wg-launch-card a{min-width:145px;text-align:center;font-size:14px}</style>';
+ box(style+'<section class="wg-launch"><div class="wg-launch-hero"><span>INTERVALO · PWA</span><h1>Seja bem-vindo Garçom!</h1><p>Para começar seu atendimento clique em Iniciar.</p></div><p>Carregando seus restaurantes...</p></section>');
  const [{data:members,error:me},{data:flags,error:fe},{data:overrides,error:oe}]=await Promise.all([
    supabase.from('restaurant_members').select('restaurant_id,role,status,restaurants(id,name,slug,status)').eq('user_id',user.id),
    supabase.from('restaurant_modules').select('restaurant_id,module,enabled').eq('module','garcom'),
@@ -223,13 +224,12 @@ async function waiterHome(user){
    return m.role==='master'||(override?override.allowed:(permissions[m.role]??[]).includes('garcom'));
  });
  // Permanecer no launcher para permitir instalação com URL 200; abrir restaurante por escolha explícita.
- let html=style+'<section class="wg-launch"><div class="wg-launch-hero"><span>INTERVALO · PWA</span><h1>Atendimento do Garçom</h1><p>Selecione um restaurante. Cada estabelecimento mantém suas comandas separadas.</p></div><div class="wg-launch-grid">';
- for(const m of available)html+='<article class="wg-launch-card"><small>'+esc(m.role)+'</small><h2>'+esc(m.restaurants.name)+'</h2><p class="muted">Acesso liberado</p><a href="'+link('/'+m.restaurants.slug+'/garcom')+'">Abrir mesas e comandas</a></article>';
+ let html=style+'<section class="wg-launch"><div class="wg-launch-hero"><span>INTERVALO · PWA</span><h1>Seja bem-vindo Garçom!</h1><p>Para começar seu atendimento clique em Iniciar.</p></div><div class="wg-launch-grid">';
+ for(const m of available)html+='<article class="wg-launch-card"><small>'+esc(m.role)+'</small><h2>'+esc(m.restaurants.name)+'</h2><p class="muted">Acesso liberado</p><a href="'+link('/'+m.restaurants.slug+'/garcom')+'">Iniciar</a></article>';
  html+='</div>';
  if(!available.length)html+='<div class="panel"><h2>Sem acesso ao atendimento</h2><p>Peça ao Master ou Super Admin para habilitar o módulo Garçom e vincular sua conta ao restaurante.</p><a href="'+link('/inicio')+'">Meus restaurantes</a></div>';
- html+='<div class="wg-launch-actions"><button id="wg-launch-install" type="button">Instalar app do garçom</button><a href="'+link('/inicio')+'" class="btn alt">Todos os módulos</a></div></section>';
+ html+='</section>';
  box(html);
- document.getElementById('wg-launch-install').onclick=()=>window.intervaloInstallGarcom();
 }
 
 const internalModules=['catalogo','mesas','estoque','impressao','relatorios'];
