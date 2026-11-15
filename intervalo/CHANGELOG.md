@@ -1,5 +1,21 @@
 # Intervalo — CHANGELOG
 
+## 1.0.0-rc.4 — 2026-11-15 · Garçom: mesas em grade, cabeçalho limpo e navegação rápida
+
+**Status:** alterações de interface publicadas como commits na `main`. **Homologação técnica parcial:** sintaxe JavaScript compilada sem erros e inspeção dos arquivos na branch; teste real autenticado e propagação HTTP/PWA no domínio não comprovados.
+
+- Removidas do cabeçalho do Garçom as pílulas de conexão, instalação e restaurantes. **Aviso de modo offline permanece** quando necessário.
+- Corrigido o sublinhado do logotipo, que sobrepunha o subtítulo do restaurante.
+- Mesas renderizadas em grade responsiva de **3 colunas de cartões quadrados**, preservando seleção, área, situação e filtros Todas/Ocupadas/Livres.
+- Barra inferior: **Mesas, Cardápio, + central laranja, Comanda e Mais**.
+- O **+** abre folha de ações rápidas (seleção de mesa, cardápio e comanda; abrir comanda apenas quando a mesa selecionada não possui pedido ativo).
+- **Mais** abre Minha conta, Trocar restaurante, Atualizar informações e Instalar aplicativo (somente se a experiência não está em modo instalado/standalone).
+- Ações de pedido continuam usando as chamadas reais ao backend `restaurant-core`. Sem mudanças de esquema, autorização, pedidos ou estoque.
+- Cache-buster do `waiter.js` atualizado para `1.0.0-rc.4` no carregador e rodapé atualizado. Outros módulos mantidos na versão anterior.
+- **Verificações:** sintaxe JS validada com `new Function` após retirar as declarações ESM; inspeção na `main` confirmou os elementos e a condição para instalação. Testes de clique, visual em dispositivo, PWA instalado, permissões, pedidos e rollback ainda pendentes.
+- **Commits de código:** `c0678fb` (grade), `10523df` (navegação), `41354a6` (cache), `ff2ced8` (proporção), `94c8705` (versão).
+- **Rollback:** reverter esses commits em ordem inversa ou restaurar os blobs anteriores de `intervalo/waiter.js` e `intervalo/index.html`. Não depende de GitHub Actions.
+
 ## 1.0.0-rc.3 — 2026-11-12 · Correção de chaves e melhoria mobile em Estoque e Produtos
 
 **Status:** versão candidata ao piloto visual na `main`; verificação estática, renderização simulada e fixture de layout em Chromium aprovadas. **Sem homologação de uso real em dispositivos ou comprovação de propagação no domínio.**
