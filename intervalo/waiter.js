@@ -83,11 +83,12 @@ export async function renderPage({supabase,restaurant,box,esc,link}){
    }
    if(!lines.length)html+='<p class="wg-empty">Nenhum produto lançado. Abra o Cardápio para começar.</p>';
    html+='<div class="wg-total"><span>Total da comanda</span><span>'+money(total)+'</span></div>';
-   html+='<button type="button" class="wg-primary" data-w-view="cardapio">'+icon('plus',16)+' '+(draftRound?'Adicionar à rodada '+draftRound.round_no:'Novo pedido nesta mesa')+'</button>';
+   if(!activeOrder.payment_started)html+='<button type="button" class="wg-primary" data-w-view="cardapio">'+icon('plus',16)+' '+(draftRound?'Adicionar à rodada '+draftRound.round_no:'Novo pedido nesta mesa')+'</button>';
    if(draftRound)html+='<button type="button" class="wg-primary" id="wg-submit">Enviar rodada '+esc(draftRound.round_no)+' à cozinha</button>';
    if(status==='open'&&draftRound)html+='<button type="button" class="wg-danger" id="wg-cancel">Cancelar comanda não enviada</button>';
    for(const round of readyRounds)html+='<button type="button" class="wg-outline" data-w-serve-round="'+esc(round.round_no)+'">Marcar rodada '+esc(round.round_no)+' como servida</button>';
-   if(status==='served'&&!draftRound)html+='<p class="wg-note">Tudo servido. É possível lançar nova rodada antes de iniciar o pagamento.</p>';
+   if(activeOrder.payment_started)html+='<p class="wg-note">Pagamento iniciado. Não é possível lançar novas rodadas nesta comanda.</p>';
+   else if(status==='served'&&!draftRound)html+='<p class="wg-note">Tudo servido. É possível lançar nova rodada antes de iniciar o pagamento.</p>';
    else if(!draftRound)html+='<p class="wg-note">Novos produtos criam outra rodada, sem alterar pedidos já enviados.</p>';
   }else if(activeTable){
     html+='<p class="wg-empty">Mesa livre. Escolha um produto no cardápio: a comanda será criada automaticamente.</p><button type="button" class="wg-primary" data-w-view="cardapio">Ver cardápio</button>';
