@@ -1,4 +1,5 @@
 import {icon} from './ui-icons.js?v=1.0.0-rc.1';
+import {sheetifyForms} from './operational-sheets-rc15.js?v=1.0.0-rc.15';
 // Intervalo — cadastros operacionais auxiliares (mesas, estoque, dispositivos, relatórios).
 export async function renderPage({supabase,restaurant,module,box,esc,link}){
  document.body.classList.add('iv-fullwidth','iv-support');
@@ -282,6 +283,20 @@ export async function renderPage({supabase,restaurant,module,box,esc,link}){
         await load();
       }catch(err){alert(err.message);button.disabled=false}
     });
+     const productEditForms=[...document.querySelectorAll('[data-edit-product]')];
+     const editSpecs=productEditForms.map((form,index)=>{
+       form.id='iv-edit-product-'+index;
+       const p=products.find(p=>p.id===form.dataset.editProduct);
+       return {id:form.id,label:'Editar produto',title:'Editar '+(p?.name??'produto'),context:'iv-inventory',replaceDetails:true};
+     });
+     sheetifyForms([
+       {id:'newstock',label:'Novo insumo',title:'Cadastrar insumo',description:'Dados, unidade e saldos iniciais.',context:'iv-inventory'},
+       {id:'adjuststock',label:'Registrar movimentação',title:'Movimentar estoque',description:'Registre entrada, perda ou ajuste.',context:'iv-inventory'},
+       {id:'recipeset',label:'Vincular ingrediente',title:'Ficha técnica',description:'Defina a quantidade usada por produto.',context:'iv-inventory'},
+       {id:'newcatstock',label:'Nova categoria',title:'Cadastrar categoria',context:'iv-inventory',replaceDetails:true},
+       {id:'newprodstock',label:'Novo produto',title:'Cadastrar produto',description:'Dados, preço, foto e disponibilidade.',context:'iv-inventory',replaceDetails:true},
+       ...editSpecs
+     ]);
   }else if(module==='impressao'){
     const kitchen=link('/'+restaurant.slug+'/cozinha'),cash=link('/'+restaurant.slug+'/caixa');
     let out=title
@@ -293,7 +308,7 @@ export async function renderPage({supabase,restaurant,module,box,esc,link}){
     box(out);
   }else if(module==='relatorios'){
     const d=await call('report');
-    let out=title+'<p class="x-note">Relatório gerencial preliminar. Não é relatório fiscal, nem conciliação bancária. O processamento está limitado às últimas movimentações consultadas.</p><h2>Comandas por status</h2><div class="x-grid">';
+    let out=title+'<div class="iv-report-controls"><span class="iv-chip orange">'+icon('chart',15)+' Indicadores reais</span><span class="iv-report-status">Últimas movimentações consultadas. Filtro por período ainda não disponível na API.</span></div><p class="x-note">Relatório gerencial preliminar. Não é relatório fiscal, nem conciliação bancária. O processamento está limitado às últimas movimentações consultadas.</p><h2>Comandas por status</h2><div class="x-grid">';
     for(const [status,count] of Object.entries(d.orders_by_status??{}))out+='<div class="x-panel"><h3>'+esc(status)+'</h3><b>'+esc(count)+'</b></div>';
     out+='</div><h2>Valores registrados por método</h2><div class="x-grid">';
     for(const [method,value] of Object.entries(d.recorded_receipts_cents??{}))out+='<div class="x-panel"><h3>'+esc(method)+'</h3><b>'+fmt(value)+'</b></div>';
