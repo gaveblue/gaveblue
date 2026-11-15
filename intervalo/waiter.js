@@ -37,13 +37,17 @@ export async function renderPage({supabase,restaurant,box,esc,link}){
  }
  function render(){
   if(!snapshot)return;
-  const {tables,orders,items,products,categories}=snapshot;
+  const {tables,orders,items,products,categories,rounds=[]}=snapshot;
   const activeTable=selected(),activeOrder=order(),lines=activeOrder?listFor(activeOrder):[];
   const total=lines.reduce((sum,i)=>sum+Number(i.unit_price_cents)*Number(i.quantity),0);
   const occupied=t=>orders.some(o=>o.table_id===t.id&&!['closed','cancelled'].includes(o.status));
   const visibleTables=tables.filter(t=>tableFilter==='all'||(tableFilter==='busy'?occupied(t):!occupied(t)));
   const filteredCats=categories.filter(c=>c.active&&products.some(p=>p.category_id===c.id));
-  const status=activeOrder?.status,canAdd=!!selectedId&&(!activeOrder||status==='open'),title='Mesa '+(activeTable?.label??'');
+  const status=activeOrder?.status,canAdd=!!selectedId,title='Mesa '+(activeTable?.label??'');
+   const activeRounds=activeOrder?rounds.filter(r=>r.order_id===activeOrder.id).sort((a,b)=>a.round_no-b.round_no):[];
+   const draftRound=activeRounds.find(r=>r.status==='draft');
+   const readyRounds=activeRounds.filter(r=>r.status==='ready');
+   const roundNames={draft:'Em lançamento',submitted:'Enviado',preparing:'Em preparo',ready:'Pronto',served:'Servido',cancelled:'Cancelado'};
   let html=header+(navigator.onLine===false?'<div class="wg-offline">Sem internet. Não é possível enviar comandas até a conexão voltar.</div>':'')
   +'<div id="wg-root" class="wg-app" data-view="'+esc(view)+'">'
   +'<aside class="wg-panel" data-section="mesas"><div class="wg-panel-head"><div><h2>Mesas</h2><p class="wg-hint">Selecione para atender</p></div><span class="wg-counter">'+tables.filter(occupied).length+' ocupadas</span></div>'
@@ -112,7 +116,7 @@ export async function renderPage({supabase,restaurant,box,esc,link}){
 
 
   const submit=document.getElementById('wg-submit');
-  if(submit)submit.onclick=()=>{if(confirm('Enviar esta comanda para a cozinha? Após o envio, o pedido passa para produção e o estoque é descontado.'))action(submit,'order_submit',{order_id:activeOrder.id})};
+  if(submit)submit.onclick=()=>{if(confirm('Enviar apenas esta rodada à cozinha? O estoque será descontado somente pelos itens desta rodada.'))action(submit,'order_submit',{order_id:activeOrder.id})};
   const cancel=document.getElementById('wg-cancel');
   if(cancel)cancel.onclick=()=>{
     const reason=prompt('Motivo do cancelamento (mínimo 3 caracteres):','Erro na abertura');
@@ -120,8 +124,7 @@ export async function renderPage({supabase,restaurant,box,esc,link}){
     if(reason.trim().length<3||reason.length>180){alert('Informe um motivo válido entre 3 e 180 caracteres.');return}
     if(confirm('Cancelar esta comanda ainda não enviada e liberar a mesa?'))action(cancel,'order_cancel',{order_id:activeOrder.id,reason:reason.trim()});
   };
-  const served=document.getElementById('wg-served');
-  if(served)served.onclick=()=>action(served,'order_progress',{order_id:activeOrder.id,p_next:'served'});
+  document.querySelectorAll('[data-w-serve-round]').forEach(b=>b.onclick=()=>action(b,'round_progress',{order_id:activeOrder.id,round_no:Number(b.dataset.wServeRound),p_next:'served'}));
   document.querySelectorAll('[data-w-add]').forEach(b=>b.onclick=()=>openProduct(products.find(p=>p.id===b.dataset.wAdd),activeOrder));
  }
 
@@ -281,10 +284,10 @@ export async function renderPage({supabase,restaurant,box,esc,link}){
     const categories=(c.categories??[]).filter(x=>x.active);
     const ids=new Set(categories.map(x=>x.id));
     const products=(c.products??[]).filter(x=>x.available&&ids.has(x.category_id));
-    const tables=(t.tables??[]).filter(x=>x.active!==false),orders=o.orders??[],items=o.items??[],options=c.options??[];
-    const sig=JSON.stringify({tables,orders,items,products,categories,options});
+    const tables=(t.tables??[]).filter(x=>x.active!==false),orders=o.orders??[],items=o.items??[],rounds=o.rounds??[],options=c.options??[];
+    const sig=JSON.stringify({tables,orders,items,products,categories,options,rounds});
     if(silent&&sig===lastSignature)return;
-    snapshot={tables,orders,items,products,categories,options};lastSignature=sig;
+    snapshot={tables,orders,items,products,categories,options,rounds};lastSignature=sig;
     if(!tables.some(t=>t.id===selectedId))selectedId=tables[0]?.id??null;
     render();
   }catch(err){if(!silent)box(header+'<section class="wg-panel wg-empty"><h2>Não foi possível carregar o atendimento</h2><p>'+esc(err.message)+'</p><button class="wg-action" id="wg-retry">Tentar novamente</button></section>');
