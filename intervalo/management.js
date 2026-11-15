@@ -220,10 +220,19 @@ export async function renderManagement({supabase,restaurant,role,box,esc,link}) 
    const settingForm=document.getElementById("restaurant-settings");
    if(settingForm){
      async function save(complete){
-       const settings=Object.fromEntries(new FormData(settingForm).entries());
-       settings.state=(settings.state??"").trim().toUpperCase();
-       settings.postal_code=(settings.postal_code??"").replace(/\D/g,"");
-       try{await call("save_settings",{settings,complete});await refresh();message(complete?"Cadastro concluído.":"Dados salvos.")}catch(e){message(e.message,"error")}
+       const button=complete?document.getElementById("mg-finish"):settingForm.querySelector('button[type="submit"]');
+       if(button?.disabled)return;
+       const previous=button?.textContent;
+       if(button){button.disabled=true;button.textContent=complete?"Concluindo...":"Salvando...";button.setAttribute("aria-busy","true")}
+       try{
+         const settings=Object.fromEntries(new FormData(settingForm).entries());
+         settings.state=(settings.state??"").trim().toUpperCase();
+         settings.postal_code=(settings.postal_code??"").replace(/\D/g,"");
+         await call("save_settings",{settings,complete});await refresh();message(complete?"Cadastro concluído.":"Dados salvos.");
+       }catch(e){message(e.message,"error")}
+       finally{
+         if(button?.isConnected){button.disabled=false;button.textContent=previous;button.removeAttribute("aria-busy")}
+       }
      }
      settingForm.onsubmit=async e=>{e.preventDefault();await save(false)};
      const finish=document.getElementById("mg-finish");if(finish)finish.onclick=()=>save(true);
