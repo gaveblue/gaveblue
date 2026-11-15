@@ -1,5 +1,22 @@
 # Intervalo — CHANGELOG
 
+## 1.0.0-rc.13 — 2026-11-15 · Carregamento unificado em todo o Intervalo
+
+**Status:** alterações enviadas à `main`; QA estático e simulado aprovado. Propagação no domínio e teste autenticado/PWA **não verificados**.
+
+- Substituído o **“Carregando Intervalo...”** fixo do `index.html` por uma abertura minimalista com marca Intervalo, indicação de espera e skeleton de KPIs. CSS crítico inline garante exibição antes da inicialização da aplicação.
+- Evitado o flash do cabeçalho/rodapé antigos no início via `body.iv-initializing`. A função `box()` encerra o estado de inicialização, inclusive na mensagem de erro.
+- Se o aplicativo permanecer apenas na abertura por 18 segundos (por exemplo, import externo não iniciado), a tela oferece **Tentar novamente**, em vez de manter o usuário preso ao loading.
+- Estados de espera padronizados por componente `iv-loading-inline` em Garçom, Cozinha, Caixa, Cardápio, Mesas/Estoque/Relatórios, Conta, Cardápio público, Super Admin e seletor inicial do Garçom.
+- Respeitado `prefers-reduced-motion`, sem pulso nem shimmer animados no modo de movimento reduzido.
+- URLs de importação de `platform.js`, `public-menu.js`, `account.js` e demais módulos atualizadas para `rc.13` a fim de evitar carregar scripts antigos em cache. O skeleton próprio da Gestão (rc.12) permanece.
+- Testes: remoção da frase antiga e dos textos avulsos de carregamento nos módulos alterados, JavaScript compilável, simulação de `box()` encerrando inicialização, classes CSS presentes e rotas de módulos preservadas.
+- **Nenhuma alteração** na lógica de funcionários, senhas, permissões, banco ou backend. Sem GitHub Actions.
+- **Pendências:** teste real em Android/PWA, internet lenta, import CDN indisponível e propagação no domínio. A URL pública não pôde ser acessada pelo verificador.
+- **Rollback:** restaurar `index.html` e os scripts de interface alterados para a rc.12; nenhum rollback de dados necessário.
+
+**QA:** `QA-1.0.0-RC13.md`.
+
 ## 1.0.0-rc.12 — 2026-11-15 · Carregamento visual da Gestão
 
 **Status:** código enviado à `main`; homologação técnica parcial, sem confirmação de propagação no domínio ou uso real no PWA.
