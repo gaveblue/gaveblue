@@ -26,7 +26,7 @@ intervaloApplyManifest();
 (function(){try{var deep=sessionStorage.getItem('intervalo.deepLink');if(deep&&deep.startsWith('/intervalo/')&&deep.length<2100){sessionStorage.removeItem('intervalo.deepLink');history.replaceState(null,'',deep+window.location.hash)}}catch(e){}})();
 intervaloApplyManifest();
 </script>
-</head><body><header><div class="inner"><a class="logo" href="/intervalo/" aria-label="Intervalo, página inicial">Intervalo<span class="iv-brand-tail" aria-hidden="true"></span><small>UM PRODUTO GAVEBLUE</small></a><nav id="nav"><a href="/intervalo/login">Entrar</a></nav></div></header><main id="app"><div class="skeleton">Carregando Intervalo...</div></main><footer class="foot">Gaveblue © 2026 · Intervalo 1.0.0-rc.11 · Novo visual da Gestão</footer>
+</head><body><header><div class="inner"><a class="logo" href="/intervalo/" aria-label="Intervalo, página inicial">Intervalo<span class="iv-brand-tail" aria-hidden="true"></span><small>UM PRODUTO GAVEBLUE</small></a><nav id="nav"><a href="/intervalo/login">Entrar</a></nav></div></header><main id="app"><div class="skeleton">Carregando Intervalo...</div></main><footer class="foot">Gaveblue © 2026 · Intervalo 1.0.0-rc.12 · Carregamento da Gestão</footer>
 <script type="module">
 import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.50.0/+esm';
 import {icon} from '/intervalo/ui-icons.js?v=1.0.0-rc.3';
@@ -256,7 +256,7 @@ async function tenant(user,slug,mod){
  if(!permitted){box('<section class="panel"><h1>Sem permissão</h1><p>Seu papel neste restaurante não permite abrir este módulo.</p></section>');return}
  if(!moduleRow?.enabled){box('<section class="panel"><h1>Módulo ainda não habilitado</h1><p>O Super Admin precisa habilitar este recurso para o estabelecimento.</p>'+btn('Meus restaurantes','/inicio')+'</section>');return}
  if(mod==='gestao'){
-  const {renderManagement}=await import('/intervalo/management.js?v=1.0.0-rc.11');
+  const {renderManagement}=await import('/intervalo/management.js?v=1.0.0-rc.12');
   return renderManagement({supabase,restaurant:m.restaurants,role:m.role,box,esc,link});
  }
  const asset={catalogo:'catalog.js',mesas:'support.js',estoque:'support.js',impressao:'support.js',relatorios:'support.js',garcom:'waiter.js',cozinha:'kitchen.js',caixa:'cash.js'}[mod];
