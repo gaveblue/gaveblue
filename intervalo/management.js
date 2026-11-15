@@ -86,7 +86,7 @@ export async function renderManagement({supabase,restaurant,role,box,esc,link}) 
      +'<span class="mg-v2-avatar" aria-label="'+value(roleText)+'">'+value((d.restaurant.name??"R").slice(0,2).toUpperCase())+'</span></div></header>'
      +'<main class="mg-v2-main"><div class="mg-v2-hero"><div><span class="mg-v2-overline">GESTÃO DO RESTAURANTE</span><h1>'+value(topTitle)+'</h1><p>'+value(topSubtitle)+'</p></div>'
      +(state.tab==="visao"?'<button type="button" class="mg-v2-primary" data-mg-sheet="quick">'+icon("plus",16)+' Ações</button>':"")+'</div>'
-     +'<div id="mg-message" role="status" aria-live="polite"></div><div class="mg-v2-content">';
+     +'<div id="mg-message" role="status" aria-live="polite"></div><div class="mg-v2-content" data-mg-current-tab="'+state.tab+'">';
    let inner="";
    if(state.tab==="visao"){
     const all=state.overview?.orders?.orders??[],active=all.filter(o=>!["closed","cancelled"].includes(o.status));
