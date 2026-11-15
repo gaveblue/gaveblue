@@ -1,5 +1,22 @@
 # Intervalo — CHANGELOG
 
+## 1.0.0-rc.11 — 2026-11-15 · Redesign aprovado da Gestão (mobile first)
+
+**Status:** código enviado à branch `main`, homologação técnica parcial. Testes de renderização e navegação com DOM/backend simulado passaram; publicação no domínio e uso em PWA autenticado não confirmados.
+
+- Novo visual da Gestão do restaurante com fundo claro, laranja como cor principal, tipografia compacta, cartões de KPIs, ícones SVG da biblioteca interna e grades responsivas.
+- Desktop: menu lateral permanente com restaurante selecionado, módulos de operação, dados do estabelecimento e acesso aos menus existentes, mantendo checagens de disponibilidade e papel do backend.
+- Celular: menu lateral recolhível, barra inferior com **Início / Mesas / + / Relatórios / Mais**, e Bottom Sheets nativos para atalhos e mais opções.
+- Acesso rápido aos módulos existentes: Garçom, Cozinha, Caixa, Cardápio, Mesas, Estoque, Relatórios e Impressão; links só aparecem se o módulo estiver habilitado, sem simular operação inexistente.
+- Indicadores reais continuam vindo de `restaurant-team.list` e `restaurant-core.orders`/`stock_list`; estados indisponíveis não são inventados. Painéis de fluxo operacional e estoque em alerta reorganizados.
+- Abas Dados, Equipe e Permissões preservam os respectivos formulários, funções de salvamento, regras de papel e exceções de acesso. **Nenhuma alteração na lógica, cadastro ou segurança dos funcionários.**
+- Arquivos modificados/criados: `management.js`, `management-design-rc11.css` e `index.html` (cache de import `rc.11`).
+- QA: sintaxe JS, renderização de duas comandas, alerta de estoque, atalhos condicionais, navegação para Dados/Equipe/Permissões, bloqueio de Permissões ao gerente e abertura dos Bottom Sheets passaram em simulação.
+- Pendências: validar CSS em navegador real (Android/PWA/desktop), conferir atualizações de cache, teste autenticado e propagação no domínio. Não houve GitHub Actions.
+- Rollback: restaurar versões anteriores de `management.js` e `index.html`, mantendo o arquivo CSS novo inativo; nenhuma migração no banco foi feita nesta versão.
+
+**Relatório:** `QA-1.0.0-RC11.md`.
+
 ## 1.0.0-rc.10 — 2026-11-15 · Caixa: cobrança consolidada e fechamento por mesa
 
 **Status:** frontend enviado à `main`, backend das rodadas ativo no Supabase. Testes SQL transacionais e renderização simulada aprovados. **Homologação parcial**, sem confirmação de PWA/domínio.
