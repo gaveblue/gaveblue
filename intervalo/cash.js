@@ -2,7 +2,7 @@
 import {icon} from './ui-icons.js?v=1.0.0-rc.1';
 export async function renderPage({supabase,restaurant,box,esc,link}){
  document.body.classList.add('iv-fullwidth','iv-pos');
- const css='<style>.c-card{padding:20px;background:white;border:1px solid #e2e8f0;border-radius:14px;margin:14px 0}.c-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:13px}.c-form{display:flex;gap:10px;flex-wrap:wrap;align-items:end}.c-form label{flex:1 1 185px;font-size:12px;font-weight:700}.c-form input,.c-form select{display:block;width:100%;padding:11px;border:1px solid #cbd5e1;border-radius:9px;margin-top:6px;background:white}.c-form button{border:0;background:#0f766e;color:white;border-radius:9px;padding:12px 13px;font-weight:700;cursor:pointer}.c-form button:disabled{opacity:.45}.c-warning{background:#fff7ed;border:1px solid #fdba74;padding:12px;border-radius:10px;color:#9a3412;font-size:13px}.c-muted{font-size:12px;color:#64748b}.c-money{color:#0f766e;font-weight:800}.c-preview{padding:9px 12px;margin-bottom:13px;border:1px solid #0f766e;background:#f0fdfa;color:#0f766e;border-radius:9px;font-size:12px;font-weight:700}</style>';
+ const css='<style>.c-card{padding:20px;background:white;border:1px solid #e2e8f0;border-radius:14px;margin:14px 0}.c-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:13px}.c-form{display:flex;gap:10px;flex-wrap:wrap;align-items:end}.c-form label{flex:1 1 185px;font-size:12px;font-weight:700}.c-form input,.c-form select{display:block;width:100%;padding:11px;border:1px solid #cbd5e1;border-radius:9px;margin-top:6px;background:white}.c-form button{border:0;background:#0f766e;color:white;border-radius:9px;padding:12px 13px;font-weight:700;cursor:pointer}.c-form button:disabled{opacity:.45}.c-warning{background:#fff7ed;border:1px solid #fdba74;padding:12px;border-radius:10px;color:#9a3412;font-size:13px}.c-muted{font-size:12px;color:#64748b}.c-money{color:#0f766e;font-weight:800}.c-preview{padding:9px 12px;margin-bottom:13px;border:1px solid #0f766e;background:#f0fdfa;color:#0f766e;border-radius:9px;font-size:12px;font-weight:700} .c-round-head{display:flex;justify-content:space-between;align-items:center;gap:10px;background:#fff4e7;color:#99500a;border-radius:10px;padding:9px 10px;margin:12px 0 7px;font-size:12px}.c-paid-note{font-size:12px;color:#0c8d55;display:flex;align-items:center;gap:6px;margin-top:8px}</style>';
  const money=n=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(n)/100);
  const toCents=s=>{const t=String(s??'').trim().replace(',','.');if(!/^\d{1,8}(?:\.\d{1,2})?$/.test(t))throw Error('Valor inválido. Exemplo: 15,50');let [i,f='']=t.split('.');return Number(i)*100+Number((f+'00').slice(0,2))};
  const call=async(action,data={})=>{const r=await supabase.functions.invoke('restaurant-core',{body:{restaurant_id:restaurant.id,action,...data}});if(r.error||r.data?.error){let message=r.data?.error??r.error?.message??'Falha';try{const v=await r.error?.context?.json?.();if(v?.error)message=v.error}catch{}throw Error(message)}return r.data};
@@ -13,19 +13,20 @@ export async function renderPage({supabase,restaurant,box,esc,link}){
   try{
     const [ordersData,cashData]=await Promise.all([call('orders'),call('cash_summary')]);
     const open=(cashData.sessions??[]).find(s=>s.status==='open');
+    const sessionCash=open?(cashData.payments??[]).filter(p=>p.cash_session_id===open.id&&p.method==='cash').reduce((n,p)=>n+Number(p.amount_cents),0):0;
     const orders=(ordersData.orders??[]).filter(o=>o.status==='served');
     const recentClosed=(ordersData.orders??[]).filter(o=>o.status==='closed').slice(0,20);
-    const items=ordersData.items??[],pay=ordersData.payments??[],tables=ordersData.tables??[];
+    const items=ordersData.items??[],pay=ordersData.payments??[],tables=ordersData.tables??[],rounds=ordersData.rounds??[];
     if(!orders.some(o=>o.id===selectedOrderId))selectedOrderId=orders[0]?.id??null;
     const selected=orders.find(o=>o.id===selectedOrderId);
     const calc=o=>{const rows=items.filter(i=>i.order_id===o.id&&i.status!=="cancelled"),total=rows.reduce((n,i)=>n+Number(i.unit_price_cents)*Number(i.quantity),0),paid=pay.filter(x=>x.order_id===o.id).reduce((n,x)=>n+Number(x.amount_cents),0);return {rows,total,paid,outstanding:Math.max(0,total-paid)}};
-    let out=main+'<section class="c-session"><div><h3>'+icon("wallet",19)+' Sessão de caixa</h3><p class="c-muted">'+(open?'Aberta · Início: '+esc(open.opened_at)+' · Troco inicial: '+money(open.starting_cash_cents):'Abra o caixa antes de registrar recebimentos.')+'</p></div>';
+    let out=main+'<section class="c-session"><div><h3>'+icon("wallet",19)+' Sessão de caixa</h3><p class="c-muted">'+(open?'Aberta · Início: '+esc(open.opened_at)+' · Troco inicial: '+money(open.starting_cash_cents)+' · Dinheiro esperado: '+money(Number(open.starting_cash_cents)+sessionCash):'Abra o caixa antes de registrar recebimentos.')+'</p></div>';
     if(!open)out+='<form id="cash-open" class="c-session-form"><label>Troco inicial (R$)<input required name="amount" placeholder="0,00" value="0,00"></label><button class="iv-btn" type="submit">'+icon("plus",16)+' Abrir caixa</button></form>';
     else out+='<form id="cash-close" class="c-session-form"><label>Dinheiro contado (R$)<input required name="amount" placeholder="0,00"></label><button class="iv-btn secondary" type="submit">'+icon("checkCircle",16)+' Fechar caixa</button></form>';
-    out+='</section><div class="c-pos-layout"><aside class="c-queue"><div class="c-pane-title"><h2>'+icon('clipboard',20)+' Fila de pagamento</h2><span class="iv-chip orange">'+orders.length+'</span></div><p class="c-muted">Comandas servidas aguardando quitação.</p><div class="c-queue-list">';
+    out+='</section><div class="c-pos-layout"><aside class="c-queue"><div class="c-pane-title"><h2>'+icon('clipboard',20)+' Fila de pagamento</h2><span class="iv-chip orange">'+orders.length+'</span></div><p class="c-muted">Somente mesas com todas as rodadas servidas aparecem para pagamento.</p><div class="c-queue-list">';
     for(const o of orders){
       const table=tables.find(t=>t.id===o.table_id),d=calc(o);
-      out+='<button type="button" class="c-queue-item'+(o.id===selectedOrderId?' selected':'')+'" data-cash-select="'+esc(o.id)+'"><span>'+icon("table",19)+' <b>'+esc(table?.label??'Comanda')+'</b></span><span>'+money(d.outstanding)+' '+icon("chevronRight",17)+'</span></button>';
+      out+='<button type="button" class="c-queue-item'+(o.id===selectedOrderId?' selected':'')+'" data-cash-select="'+esc(o.id)+'"><span>'+icon("table",19)+' <b>'+esc(table?.label??'Comanda')+'</b><small>'+rounds.filter(r=>r.order_id===o.id&&r.status!=='cancelled').length+' rodadas</small></span><span>'+money(d.outstanding)+' '+icon("chevronRight",17)+'</span></button>';
     }
     if(!orders.length)out+='<div class="iv-empty">Nenhuma comanda aguardando pagamento</div>';
     out+='</div><h3 class="c-closed-heading">'+icon('checkCircle',17)+' Quitadas recentemente</h3><div class="c-queue-list">';
@@ -38,7 +39,14 @@ export async function renderPage({supabase,restaurant,box,esc,link}){
     if(selected){
       const table=tables.find(t=>t.id===selected.table_id),d=calc(selected);
       out+='<div class="c-pane-title"><h2>'+icon("table",21)+' '+esc(table?.label??'Comanda')+'</h2><span class="iv-chip orange">Aguardando pagamento</span></div><p class="c-muted">Confira os itens antes de registrar o pagamento.</p><div class="c-line-head"><span>Itens consumidos</span><span>Valor</span></div>';
-      for(const item of d.rows)out+='<div class="c-line"><div><b>'+Number(item.quantity)+'× '+esc(item.product_name)+'</b>'+(item.note?'<small>'+esc(item.note)+'</small>':'')+'</div><strong>'+money(Number(item.unit_price_cents)*Number(item.quantity))+'</strong></div>';
+      const orderRounds=rounds.filter(r=>r.order_id===selected.id&&r.status!=='cancelled').sort((a,b)=>a.round_no-b.round_no);
+      for(const round of orderRounds){
+        const group=d.rows.filter(i=>Number(i.round_no||1)===Number(round.round_no));
+        const subtotal=group.reduce((v,i)=>v+Number(i.unit_price_cents)*Number(i.quantity),0);
+        out+='<div class="c-round-head"><strong>Rodada '+esc(round.round_no)+'</strong><span>'+money(subtotal)+'</span></div>';
+        for(const item of group)out+='<div class="c-line"><div><b>'+Number(item.quantity)+'× '+esc(item.product_name)+'</b>'+(item.note?'<small>'+esc(item.note)+'</small>':'')+'</div><strong>'+money(Number(item.unit_price_cents)*Number(item.quantity))+'</strong></div>';
+      }
+      if(d.paid>0)out+='<div class="c-paid-note">'+icon('checkCircle',15)+' '+pay.filter(p=>p.order_id===selected.id).length+' recebimento(s) parcial(is) registrado(s).</div>';
       out+='<div class="c-totals"><div><span>Total da comanda</span><b>'+money(d.total)+'</b></div><div><span>Já recebido</span><b>'+money(d.paid)+'</b></div><div class="c-total-main"><span>Saldo a receber</span><strong>'+money(d.outstanding)+'</strong></div></div>'
        +'<button type="button" class="c-preview" data-receipt="'+esc(selected.id)+'">'+icon("printer",16)+' Visualizar / imprimir comanda</button>';
     }else out+='<div class="iv-empty">Selecione uma comanda para conferir o pagamento.</div>';
@@ -61,6 +69,7 @@ export async function renderPage({supabase,restaurant,box,esc,link}){
       if(!order)return;
       const table=tables.find(t=>t.id===order.table_id);
       const rows=items.filter(i=>i.order_id===order.id&&i.status!=='cancelled');
+      const printRounds=rounds.filter(r=>r.order_id===order.id&&r.status!=='cancelled').sort((a,b)=>a.round_no-b.round_no);
       const total=rows.reduce((n,i)=>n+Number(i.unit_price_cents)*i.quantity,0);
       const receipts=pay.filter(p=>p.order_id===order.id);
       const received=receipts.reduce((n,p)=>n+Number(p.amount_cents),0);
@@ -70,7 +79,8 @@ export async function renderPage({supabase,restaurant,box,esc,link}){
         +'<h1>'+esc(restaurant.name)+'</h1><p style="text-align:center">PRÉVIA DE COMANDA · NÃO FISCAL</p><hr>'
         +'<p><b>'+esc(table?.label??'Mesa')+'</b> · '+esc(order.status)+'</p>'
         +'<p><small>Pedido: '+esc(order.id)+'<br>Aberto: '+esc(order.opened_at)+'</small></p><hr><table>'
-        +rows.map(i=>'<tr><td>'+esc(i.quantity)+' × '+esc(i.product_name)+(i.note?'<br><small>'+esc(i.note)+'</small>':'')+'</td><td>'+money(Number(i.unit_price_cents)*i.quantity)+'</td></tr>').join('')
+        +printRounds.map(round=>'<tr><td colspan="2" style="font-weight:bold;background:#f3f5f7">Rodada '+esc(round.round_no)+'</td></tr>'
+          +rows.filter(i=>Number(i.round_no||1)===Number(round.round_no)).map(i=>'<tr><td>'+esc(i.quantity)+' × '+esc(i.product_name)+(i.note?'<br><small>'+esc(i.note)+'</small>':'')+'</td><td>'+money(Number(i.unit_price_cents)*i.quantity)+'</td></tr>').join('')).join('')
         +'</table><div class="totals"><p>Total: <b>'+money(total)+'</b></p><p>Recebimentos registrados: '+money(received)+'</p><p>Saldo: '+money(Math.max(0,total-received))+'</p></div><hr>'
         +'<p><small>Documento interno, não substitui nota fiscal nem comprova recebimento bancário.</small></p></body></html>';
       const win=window.open('','_blank');
