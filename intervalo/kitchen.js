@@ -9,7 +9,7 @@ export async function renderPage({supabase,restaurant,box,esc,link}){
  async function refresh(silent=false){
   if(fetching)return;
   fetching=true;
-  if(!silent)box(base+'<p>Carregando pedidos...</p>');
+  if(!silent)box(base+'<div class="iv-loading-inline" role="status" aria-live="polite" aria-busy="true"><div class="iv-loading-inline-label"><span class="iv-load-dot" aria-hidden="true"></span><span>Organizando as rodadas...</span></div><div class="iv-loading-inline-lines" aria-hidden="true"><span class="iv-load-skeleton"></span><span class="iv-load-skeleton"></span></div></div>');
   try{
     const data=await call('orders'),orders=data.orders??[],rounds=(data.rounds??[]).filter(r=>['submitted','preparing','ready'].includes(r.status));
     const signature=JSON.stringify({orders,rounds,items:data.items??[],tables:data.tables??[]});
