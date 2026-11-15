@@ -5,9 +5,9 @@ export async function renderManagement({supabase,restaurant,role,box,esc,link}) 
  const labels={gestao:"Gestão",garcom:"Garçom",cozinha:"Cozinha",caixa:"Caixa",cardapio:"Cardápio"};
  const roles={master:"Master",manager:"Gerente",waiter:"Garçom",kitchen:"Cozinha",cashier:"Caixa"};
  const defaults={master:modules,manager:modules,waiter:["garcom","cardapio"],kitchen:["cozinha","cardapio"],cashier:["caixa","cardapio"]};
- document.body.classList.add("iv-fullwidth","iv-master");
+ document.body.classList.add("iv-fullwidth","iv-master","iv-management-v2");
  let state={tab:"visao",data:null,overview:null};
- const sty='<style>.mtabs{display:flex;gap:8px;overflow:auto;margin:23px 0}.mtabs button{border:1px solid #dbe2e8;background:white;padding:11px 16px;border-radius:10px;font-size:13px;font-weight:700;color:#334155;white-space:nowrap}.mtabs button.selected{color:white;background:#0f766e;border-color:#0f766e}.mg{display:grid;grid-template-columns:1fr 1fr;gap:14px}.mg .full{grid-column:1/-1}.mg label{display:block;font-size:12px;font-weight:700;color:#475569;margin-bottom:7px}.mg input,.mg select{padding:11px;width:100%;border:1px solid #cbd5e1;border-radius:9px;background:white;color:#0f172a}.mg input:focus,.mg select:focus{outline:2px solid #99f6e4}.team-card{background:#fff;border:1px solid #dce4ec;border-radius:13px;padding:17px;margin:12px 0}.team-top{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center}.team-actions{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin-top:13px}.team-actions select{border-radius:8px;padding:9px;border:1px solid #cbd5e1}.smallbtn{border:1px solid #cbd5e1;background:#fff;color:#334155;border-radius:8px;padding:9px 12px;font-weight:700;font-size:12px}.smallbtn.danger{color:#b91c1c;border-color:#fecaca}.status{font-size:11px;border-radius:50px;background:#f1f5f9;padding:6px 10px;font-weight:750;color:#475569}.pgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:10px}.pitem{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:13px}.pitem strong{display:block;margin:0 0 8px}.pitem span{font-size:12px;color:#64748b}.pitem button{margin-top:9px}.onboarding-note{font-size:13px;padding:12px;background:#ecfdf5;border:1px solid #ccfbf1;border-radius:10px;color:#115e59}.muted-sm{font-size:12px;color:#64748b;line-height:1.6}@media(max-width:650px){.mg{grid-template-columns:1fr}.mg .full{grid-column:auto}.team-actions{align-items:stretch}}</style>';
+ const sty='<link rel="stylesheet" href="/intervalo/management-design-rc11.css?v=1.0.0-rc.11"><style>.mtabs{display:flex;gap:8px;overflow:auto;margin:23px 0}.mtabs button{border:1px solid #dbe2e8;background:white;padding:11px 16px;border-radius:10px;font-size:13px;font-weight:700;color:#334155;white-space:nowrap}.mtabs button.selected{color:white;background:#0f766e;border-color:#0f766e}.mg{display:grid;grid-template-columns:1fr 1fr;gap:14px}.mg .full{grid-column:1/-1}.mg label{display:block;font-size:12px;font-weight:700;color:#475569;margin-bottom:7px}.mg input,.mg select{padding:11px;width:100%;border:1px solid #cbd5e1;border-radius:9px;background:white;color:#0f172a}.mg input:focus,.mg select:focus{outline:2px solid #99f6e4}.team-card{background:#fff;border:1px solid #dce4ec;border-radius:13px;padding:17px;margin:12px 0}.team-top{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center}.team-actions{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin-top:13px}.team-actions select{border-radius:8px;padding:9px;border:1px solid #cbd5e1}.smallbtn{border:1px solid #cbd5e1;background:#fff;color:#334155;border-radius:8px;padding:9px 12px;font-weight:700;font-size:12px}.smallbtn.danger{color:#b91c1c;border-color:#fecaca}.status{font-size:11px;border-radius:50px;background:#f1f5f9;padding:6px 10px;font-weight:750;color:#475569}.pgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:10px}.pitem{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:13px}.pitem strong{display:block;margin:0 0 8px}.pitem span{font-size:12px;color:#64748b}.pitem button{margin-top:9px}.onboarding-note{font-size:13px;padding:12px;background:#ecfdf5;border:1px solid #ccfbf1;border-radius:10px;color:#115e59}.muted-sm{font-size:12px;color:#64748b;line-height:1.6}@media(max-width:650px){.mg{grid-template-columns:1fr}.mg .full{grid-column:auto}.team-actions{align-items:stretch}}</style>';
  function showTemporaryPassword(temp,email){
   const dlg=document.createElement('dialog');
   dlg.style.cssText='border:1px solid #cbd5e1;border-radius:14px;padding:23px;max-width:460px;width:calc(100% - 30px)';
@@ -48,13 +48,45 @@ export async function renderManagement({supabase,restaurant,role,box,esc,link}) 
    const quickModules=[["catalogo","Cardápio","gestao"],["mesas","Mesas","gestao"],["garcom","Garçom","garcom"],["cozinha","Cozinha","cozinha"],["caixa","Caixa","caixa"],["estoque","Estoque e Produtos","gestao"],["impressao","Impressão","gestao"],["relatorios","Relatórios","gestao"]];
    const accessible=quickModules.filter(([path,label,required])=>(d.enabled??[]).some(m=>m.module===required&&m.enabled));
    const modIcons={catalogo:"receipt",mesas:"table",garcom:"utensils",cozinha:"chef",caixa:"register",estoque:"package",impressao:"printer",relatorios:"chart"};
-   const quickLinks='<section class="iv-section"><h2 class="iv-section-title">Acesso rápido</h2><div class="iv-card-grid">'+accessible.map(([path,label])=>'<a class="iv-feature-tile" href="'+link("/"+d.restaurant.slug+"/"+path)+'"><span class="iv-feature-icon">'+icon(modIcons[path]??"layers",20)+'</span><span><strong>'+esc(label)+'</strong><small>Abrir módulo</small></span>'+icon("chevronRight",17)+'</a>').join("")+'</div></section>'
-   const viewHead=sty+'<div class="iv-shell"><aside class="iv-sidebar"><div class="iv-sidebar-brand">Intervalo</div><div class="iv-navlabel">Restaurante</div><p class="iv-muted" style="padding:0 12px">'+value(d.restaurant.name)+'</p><nav class="iv-sidenav" aria-label="Navegação da gestão">'
-     +tabs.filter(x=>x[0]!=="acessos"||isMaster).map(([tab,label])=>'<button class="iv-navitem '+(tab===state.tab?"active":"")+'" type="button" data-tab="'+tab+'">'+icon({visao:"dashboard",dados:"store",equipe:"users",acessos:"shield"}[tab],18)+label+'</button>').join("")+'</nav>'
-     +'<div class="iv-navlabel">Operação</div><nav class="iv-sidenav">'+accessible.map(([path,label])=>'<a class="iv-navitem" href="'+link("/"+d.restaurant.slug+"/"+path)+'">'+icon(modIcons[path]??"layers",18)+esc(label)+'</a>').join("")+'</nav>'
-     +'<div class="iv-sidebar-foot"><a href="'+link("/inicio")+'">'+icon("arrowLeft",16)+' Trocar restaurante</a></div></aside><div class="iv-workspace">'
-     +'<div class="iv-worktop"><span>Restaurante / '+value(d.restaurant.name)+'</span><span class="iv-chip orange">'+icon("shield",15)+' '+value(roles[d.actor_role]??d.actor_role)+'</span></div>'
-     +'<div class="iv-header"><div><span class="iv-section-caption">PAINEL DO RESTAURANTE</span><h1>'+(state.tab==="visao"?"Olá, gestor!":state.tab==="dados"?"Dados do restaurante":state.tab==="equipe"?"Equipe do restaurante":"Permissões da equipe")+'</h1><p>'+value(d.restaurant.name)+' · Gerencie sua operação em um só lugar.</p></div><a class="iv-btn secondary" href="'+link("/inicio")+'">'+icon("store",16)+' Restaurantes</a></div><div id="mg-message" role="status" aria-live="polite"></div>'
+   const moduleLinks=accessible.map(([path,label])=>'<a class="mg-v2-module" href="'+link("/"+d.restaurant.slug+"/"+path)+'"><span class="mg-v2-module-icon">'+icon(modIcons[path]??"layers",20)+'</span>'+esc(label)+'</a>').join("");
+   const menuModule=(path)=>{
+     const entry=accessible.find(([p])=>p===path);
+     return entry?'<a class="mg-v2-navlink" href="'+link("/"+d.restaurant.slug+"/"+path)+'">'+icon(modIcons[path]??"layers",18)+esc(entry[1])+'</a>':'';
+   };
+   const menuTab=(tab,label,symbol)=>'<button class="mg-v2-navlink '+(state.tab===tab?"active":"")+'" type="button" data-tab="'+tab+'">'+icon(symbol,18)+esc(label)+'</button>';
+   const pageTitle={visao:"Visão geral",dados:"Dados do restaurante",equipe:"Equipe do restaurante",acessos:"Permissões da equipe"}[state.tab]??"Gestão";
+   const topTitle=state.tab==="visao"?"Olá, gestor!":pageTitle;
+   const topSubtitle=state.tab==="visao"?"Tudo o que importa para sua operação.":state.tab==="dados"?"Informações e configurações do estabelecimento.":"Gerencie esta área com as regras de acesso existentes.";
+   const roleText=roles[d.actor_role]??d.actor_role;
+   const mainLink=link("/inicio");
+   const quickLinks='<section class="mg-v2-section"><div class="mg-v2-section-head"><h2>Acessar módulos</h2><button type="button" class="mg-link" data-mg-sheet="more">Ver todos '+icon("chevronRight",13)+'</button></div><div class="mg-v2-modules">'+moduleLinks+'</div></section>';
+   const bottom='<nav class="mg-v2-bottom" aria-label="Navegação móvel da Gestão">'
+    +'<button type="button" class="'+(state.tab==="visao"?"mg-v2-active":"")+'" data-tab="visao">'+icon("home",21)+'Início</button>'
+    +(accessible.some(([p])=>p==="mesas")?'<a href="'+link("/"+d.restaurant.slug+"/mesas")+'">'+icon("table",21)+'Mesas</a>':'<button type="button" data-mg-sheet="more">'+icon("table",21)+'Módulos</button>')
+    +'<button type="button" class="mg-v2-plus" data-mg-sheet="quick" aria-label="Ações rápidas">'+icon("plus",26)+'</button>'
+    +(accessible.some(([p])=>p==="relatorios")?'<a href="'+link("/"+d.restaurant.slug+"/relatorios")+'">'+icon("chart",21)+'Relatórios</a>':'<button type="button" data-mg-sheet="more">'+icon("chart",21)+'Módulos</button>')
+    +'<button type="button" data-mg-sheet="more">'+icon("more",21)+'Mais</button></nav>';
+   const viewHead=sty+'<div class="mg-v2-shell" id="mg-v2-root">'
+     +'<button type="button" class="mg-v2-side-overlay" data-mg-close-nav aria-label="Fechar menu"></button>'
+     +'<aside class="mg-v2-side" aria-label="Menu da Gestão"><div class="mg-v2-brand">Intervalo</div>'
+     +'<div class="mg-v2-restaurant"><span class="mg-rest-icon">'+icon("store",19)+'</span><span class="mg-rest-text">'+value(d.restaurant.name)+'<small>Restaurante selecionado</small></span>'+icon("chevronRight",14)+'</div>'
+     +'<div class="mg-v2-nav-title">Principal</div><nav class="mg-v2-nav" aria-label="Módulos principais">'
+     +menuTab("visao","Visão geral","dashboard")+menuModule("mesas")+menuModule("catalogo")+menuModule("estoque")+menuModule("relatorios")+'</nav>'
+     +'<div class="mg-v2-nav-title">Operação</div><nav class="mg-v2-nav" aria-label="Módulos operacionais">'
+     +menuModule("garcom")+menuModule("cozinha")+menuModule("caixa")+menuModule("impressao")+'</nav>'
+     +'<div class="mg-v2-nav-title">Restaurante</div><nav class="mg-v2-nav" aria-label="Configurações do restaurante">'
+     +menuTab("dados","Dados do restaurante","store")+menuTab("equipe","Equipe","users")
+     +(isMaster?menuTab("acessos","Permissões","shield"):"")+'</nav>'
+     +'<div class="mg-v2-side-spacer"></div><a class="mg-v2-navlink" href="'+mainLink+'">'+icon("arrowLeft",18)+'Trocar restaurante</a>'
+     +'<div class="mg-v2-side-user"><span class="mg-v2-avatar">'+value((d.restaurant.name??"R").slice(0,2).toUpperCase())+'</span><span><strong>'+value(d.restaurant.name)+'</strong><small>'+value(roleText)+'</small></span></div></aside>'
+     +'<div class="mg-v2-workspace"><header class="mg-v2-topbar">'
+     +'<div class="mg-v2-top-left"><button type="button" class="mg-v2-iconbtn mg-v2-menuopen" data-mg-open-nav aria-label="Abrir menu">'+icon("menu",19)+'</button>'
+     +'<div class="mg-v2-crumb">Intervalo / <b>'+value(pageTitle)+'</b></div></div>'
+     +'<div class="mg-v2-top-right"><button type="button" class="mg-v2-top-store" data-tab="dados">'+icon("store",16)+'<span>'+value(d.restaurant.name)+'</span></button>'
+     +'<span class="mg-v2-avatar" aria-label="'+value(roleText)+'">'+value((d.restaurant.name??"R").slice(0,2).toUpperCase())+'</span></div></header>'
+     +'<main class="mg-v2-main"><div class="mg-v2-hero"><div><span class="mg-v2-overline">GESTÃO DO RESTAURANTE</span><h1>'+value(topTitle)+'</h1><p>'+value(topSubtitle)+'</p></div>'
+     +(state.tab==="visao"?'<button type="button" class="mg-v2-primary" data-mg-sheet="quick">'+icon("plus",16)+' Ações</button>':"")+'</div>'
+     +'<div id="mg-message" role="status" aria-live="polite"></div><div class="mg-v2-content">';
    let inner="";
    if(state.tab==="visao"){
     const all=state.overview?.orders?.orders??[],active=all.filter(o=>!["closed","cancelled"].includes(o.status));
