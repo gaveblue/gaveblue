@@ -43,7 +43,7 @@ export async function renderPage({supabase,restaurant,box,esc,link}){
   const occupied=t=>orders.some(o=>o.table_id===t.id&&!['closed','cancelled'].includes(o.status));
   const visibleTables=tables.filter(t=>tableFilter==='all'||(tableFilter==='busy'?occupied(t):!occupied(t)));
   const filteredCats=categories.filter(c=>c.active&&products.some(p=>p.category_id===c.id));
-  const status=activeOrder?.status,canAdd=!!selectedId,title='Mesa '+(activeTable?.label??'');
+  const status=activeOrder?.status,canAdd=!!selectedId&&!activeOrder?.payment_started,title='Mesa '+(activeTable?.label??'');
    const activeRounds=activeOrder?rounds.filter(r=>r.order_id===activeOrder.id).sort((a,b)=>a.round_no-b.round_no):[];
    const draftRound=activeRounds.find(r=>r.status==='draft');
    const readyRounds=activeRounds.filter(r=>r.status==='ready');
@@ -158,7 +158,7 @@ export async function renderPage({supabase,restaurant,box,esc,link}){
   dlg.addEventListener('click',e=>{if(e.target===dlg)dlg.close()});dlg.showModal();
  }
  function openProduct(product,activeOrder){
-  if(!product||!selectedId)return;
+  if(!product||!selectedId||activeOrder?.payment_started)return;
   const tableId=selectedId,previousFocus=document.activeElement;
   // Remove busca focada para evitar teclado aberto junto com o novo painel.
   if(previousFocus?.tagName==='INPUT'||previousFocus?.tagName==='TEXTAREA')previousFocus.blur();
