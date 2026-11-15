@@ -11,28 +11,30 @@ export async function renderPage({supabase,restaurant,box,esc,link}){
   fetching=true;
   if(!silent)box(base+'<p>Carregando pedidos...</p>');
   try{
-    const data=await call('orders'),orders=(data.orders??[]).filter(o=>['submitted','preparing','ready'].includes(o.status));
-    const signature=JSON.stringify({orders,items:data.items??[],tables:data.tables??[]});
+    const data=await call('orders'),orders=data.orders??[],rounds=(data.rounds??[]).filter(r=>['submitted','preparing','ready'].includes(r.status));
+    const signature=JSON.stringify({orders,rounds,items:data.items??[],tables:data.tables??[]});
     if(silent&&signature===lastSignature)return;
     lastSignature=signature;
     const lanes=[['submitted','Novos pedidos','Aguardando início','receipt'],['preparing','Em preparo','Pedidos em produção','chef'],['ready','Prontos','Aguardando entrega','checkCircle']];
-    const minutes=o=>{const t=new Date(o.submitted_at??o.opened_at??'').getTime();return Number.isFinite(t)?Math.max(0,Math.floor((Date.now()-t)/60000)):null};
+    const minutes=r=>{const t=new Date(r.submitted_at??r.created_at??'').getTime();return Number.isFinite(t)?Math.max(0,Math.floor((Date.now()-t)/60000)):null};
     let out=base+'<div class="iv-kds-board">';
     for(const [stage,name,caption,ico] of lanes){
-      const queue=orders.filter(o=>o.status===stage);
+      const queue=rounds.filter(r=>r.status===stage).sort((a,b)=>new Date(a.submitted_at??a.created_at)-new Date(b.submitted_at??b.created_at));
       out+='<section class="iv-kds-lane '+stage+'"><div class="iv-kds-lanehead"><div><b>'+icon(ico,21)+esc(name)+'</b><small>'+caption+'</small></div><strong>'+queue.length+'</strong></div><div class="iv-kds-stack">';
-      for(const o of queue){
-        const t=(data.tables??[]).find(t=>t.id===o.table_id),age=minutes(o),late=age!==null&&age>=20&&stage!=='ready';
+      for(const round of queue){
+        const o=orders.find(x=>x.id===round.order_id);
+        if(!o)continue;
+        const t=(data.tables??[]).find(t=>t.id===o.table_id),age=minutes(round),late=age!==null&&age>=20&&stage!=='ready';
         out+='<article class="iv-kds-ticket"><div class="iv-kds-head"><h3>#'+esc(String(o.id).replace(/-/g,'').slice(-5).toUpperCase())+'</h3><span class="iv-chip '+(stage==='ready'?'success':late?'danger':'orange')+'">'+icon(stage==='ready'?'checkCircle':late?'alert':'clock',14)+esc(stage==='ready'?'Pronto':age===null?'Sem horário':age+' min')+'</span></div>'
-          +'<div class="iv-kds-table">'+icon('table',17)+esc(t?.label??'Sem mesa')+'</div>';
-        for(const item of (data.items??[]).filter(i=>i.order_id===o.id&&i.status!=='cancelled')){
+          +'<div class="iv-kds-table">'+icon('table',17)+esc(t?.label??'Sem mesa')+' · Rodada '+esc(round.round_no)+'</div>';
+        for(const item of (data.items??[]).filter(i=>i.order_id===o.id&&Number(i.round_no||1)===Number(round.round_no)&&i.status!=='cancelled')){
           out+='<div class="iv-kds-item"><span>'+Number(item.quantity)+'×</span><div><b>'+esc(item.product_name)+'</b>'+(item.note?'<p>'+icon('info',13)+esc(item.note)+'</p>':'')+'</div></div>';
         }
         if(stage==='ready')out+='<div class="iv-chip success">'+icon('checkCircle',14)+' Pronto para servir</div>';
         out+='<div class="iv-kds-actions">';
-        if(stage==='submitted')out+='<button class="iv-kds-next" data-progress="'+esc(o.id)+'" data-next="preparing">'+icon('chef',17)+' Iniciar preparo</button>';
-        if(stage==='preparing')out+='<button class="iv-kds-next" data-progress="'+esc(o.id)+'" data-next="ready">'+icon('checkCircle',17)+' Marcar como pronto</button>';
-        out+='<button type="button" class="iv-kds-print" data-ticket="'+esc(o.id)+'" title="Imprimir pedido manualmente" aria-label="Prévia do pedido para impressão">'+icon('printer',18)+'</button></div></article>';
+        if(stage==='submitted')out+='<button class="iv-kds-next" data-progress="'+esc(o.id)+'" data-round="'+esc(round.round_no)+'" data-next="preparing">'+icon('chef',17)+' Iniciar preparo</button>';
+        if(stage==='preparing')out+='<button class="iv-kds-next" data-progress="'+esc(o.id)+'" data-round="'+esc(round.round_no)+'" data-next="ready">'+icon('checkCircle',17)+' Marcar como pronto</button>';
+        out+='<button type="button" class="iv-kds-print" data-ticket="'+esc(o.id)+'" data-ticket-round="'+esc(round.round_no)+'" title="Imprimir pedido manualmente" aria-label="Prévia do pedido para impressão">'+icon('printer',18)+'</button></div></article>';
       }
       if(!queue.length)out+='<div class="iv-empty">Nenhum pedido nesta etapa</div>';
       out+='</div></section>';
@@ -43,7 +45,7 @@ export async function renderPage({supabase,restaurant,box,esc,link}){
     document.getElementById('k-reload').onclick=()=>refresh();
     document.querySelectorAll('[data-progress]').forEach(b=>b.onclick=async()=>{
       b.disabled=true;
-      try{await call('order_progress',{order_id:b.dataset.progress,p_next:b.dataset.next});await refresh()}
+      try{await call('round_progress',{order_id:b.dataset.progress,round_no:Number(b.dataset.round),p_next:b.dataset.next});await refresh()}
       catch(e){alert(e.message);b.disabled=false}
     });
     document.querySelectorAll('[data-ticket]').forEach(button=>button.onclick=()=>{
