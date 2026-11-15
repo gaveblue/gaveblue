@@ -103,7 +103,7 @@ export async function renderPlatform({supabase,box,esc,link}){
  }
 
  async function reload(){
-  box(base+createPanel+'<p class="p-info">Carregando a lista de restaurantes...</p>');
+  box(base+createPanel+'<div class="iv-loading-inline" role="status" aria-live="polite" aria-busy="true"><div class="iv-loading-inline-label"><span class="iv-load-dot" aria-hidden="true"></span><span>Organizando os restaurantes...</span></div><div class="iv-loading-inline-lines" aria-hidden="true"><span class="iv-load-skeleton"></span><span class="iv-load-skeleton"></span></div></div>');
   bindCreateForm();
   try{
    const data=await call('platform-control',{action:'list'});
