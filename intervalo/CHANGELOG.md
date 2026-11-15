@@ -1,5 +1,20 @@
 # Intervalo — CHANGELOG
 
+## 1.0.0-rc.7 — 2026-11-15 · Bottom Sheet para inclusão de produtos no Garçom
+
+**Status:** interface implementada na `main`; sintaxe JS e testes de interação com DOM simulado passaram. **Homologação parcial** até validação em celular autenticado e propagação no domínio.
+
+- Formulário de adição de produto substituído por **Bottom Sheet** ancorado na parte inferior, com alça para expandir (arrastar para cima) ou fechar (arrastar para baixo), botão Fechar, toque no fundo, ESC e layout com rolagem interna.
+- Nome e preço unitário no topo; quantidade controlada por botões **− / +** ou por **teclado numérico interno** ao tocar no número. O teclado do sistema não abre ao mostrar o painel nem ao alterar a quantidade.
+- **Observações opcionais:** teclado do aparelho aberto somente quando o usuário toca no campo de texto; layout ajusta altura/posição via `visualViewport` para evitar que o teclado encubra a área de ações.
+- Total do produto atualizado conforme a quantidade, limitado de 1 a 99 unidades. Botões Cancelar / Adicionar à comanda mantidos no rodapé do sheet, com bloqueio contra confirmação repetida durante salvamento.
+- Mantida a operação transacional `item_add_auto` da rc.5: primeiro produto cria comanda automaticamente, e o fluxo permanece no Cardápio para adicionar outros.
+- **Escopo:** apenas `intervalo/waiter.js` e cache-buster/rodapé em `intervalo/index.html`. Sem SQL, novas permissões ou alterações em outras telas.
+- **QA:** compilação JS com `new Function` após remover ESM e simulação de elementos DOM: sheet abre sem focar entrada, teclado interno oculto inicialmente, `+`/`−`, digitação 23, confirmação de 5 unidades com observação e chamada única a `item_add_auto`, atualização de totais, retorno ao Cardápio — todos passaram.
+- **Pendentes:** abertura e gestos em Android/iOS reais, exibição sobre teclado nativo, comportamento PWA instalado, teste ponta a ponta autenticado e propagação no site.
+- **Commits:** `f85f9e3` (CSS), `ab55c94` (Bottom Sheet), `b923324` (teclado numérico interno), `af203bd` (cache rc.7).
+- **Rollback:** reverter os commits citados em ordem inversa, preservando a rc.6; não requer GitHub Actions. Nenhuma migração nesta versão.
+
 ## 1.0.0-rc.6 — 2026-11-15 · Simplificação da tela inicial do Garçom
 
 **Status:** alteração registrada na branch `main`; QA estático e simulação do fluxo aprovados. Publicação/propagação no domínio e PWA instalado **não verificadas**.
