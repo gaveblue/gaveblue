@@ -1,5 +1,42 @@
 # Intervalo — CHANGELOG
 
+## 1.0.0-rc.10 — 2026-11-15 · Caixa: cobrança consolidada e fechamento por mesa
+
+**Status:** frontend enviado à `main`, backend das rodadas ativo no Supabase. Testes SQL transacionais e renderização simulada aprovados. **Homologação parcial**, sem confirmação de PWA/domínio.
+
+- Caixa reúne todas as rodadas da comanda, exibe subtotais agrupados e o total único da mesa.
+- Fila de pagamento mantém somente comandas completamente servidas; saldo recebido/pendente e pagamentos parciais seguem os registros reais do backend.
+- Sessão de caixa passa a informar o **dinheiro esperado** (troco inicial + recebimentos registrados em dinheiro).
+- Prévia não fiscal da comanda agrupa todos os itens por rodada, sem perder o total acumulado.
+- Testes SQL com `ROLLBACK`: pagamento bloqueado enquanto existem rodadas pendentes; recebimento parcial não fecha a comanda; quitação integral encerra a comanda e libera a mesa.
+- Sem alteração no processamento financeiro externo: Pix/cartão seguem como **recebimentos registrados manualmente após confirmação fora do app**.
+
+## 1.0.0-rc.9 — 2026-11-15 · Cozinha: produção independente por rodada
+
+**Status:** frontend enviado à `main`; teste de renderização JS/DOM aprovou dois tickets distintos. Homologação real em dispositivo pendente.
+
+- KDS passa a consultar `order_rounds` e organizar cada rodada da mesa por estado: **Novo pedido → Em preparo → Pronto**.
+- Cada ticket mostra identificação da comanda e número da rodada, seus próprios itens/observações e tempo desde o envio.
+- Ações de progresso atuam somente na rodada selecionada, via `round_progress`.
+- Impressão manual/HTML inclui apenas os itens da respectiva rodada, sem misturar pedidos anteriores.
+- Atualização automática por consulta a cada 15s preservada; não é Realtime nem impressão térmica automática.
+
+## 1.0.0-rc.8 — 2026-11-15 · Garçom: múltiplas rodadas na mesma comanda
+
+**Status:** migração aplicada ao Supabase INTERVALO, Edge Function `restaurant-core` v12 ativa e frontend enviado à `main`. QA transacional com rollback e renderização simulada aprovados; **homologação real pendente**.
+
+- Adicionada tabela `order_rounds` e campo `order_items.round_no`. Dados legados preservados: 7 comandas, 7 rodadas e 8 itens vinculados, sem órfãos.
+- A função `item_add_auto` continua criando a comanda ao confirmar o primeiro produto, mas permite novos produtos e novas rodadas sem abrir uma segunda comanda.
+- Ao enviar à cozinha, somente os itens da **rodada em lançamento** mudam de estado e descontam estoque; rodadas anteriores permanecem intactas.
+- Comanda mostra rodadas numeradas com estados, subtotais e total consolidado; Garçom marca a entrega de cada rodada pronta separadamente.
+- Novo lançamento proibido depois de iniciado qualquer pagamento; pagamento só permitido quando **todas** as rodadas estão servidas.
+- Regras de papel/restaurante continuam verificadas pela Edge Function, com RLS e funções SQL restritas ao `service_role`.
+- Compatibilidade mantida para operações antigas `item_add` e `order_progress` de clientes legados, sem permitir atualizar todas as rodadas por engano.
+- Testes no banco fizeram duas rodadas, progresso por rodada e pagamentos parciais com `ROLLBACK`, preservando dados reais. Teste de receita com insumos e concorrência real ainda pendentes.
+- **Sem alterações em login, CPF, senhas, permissões ou módulo de funcionários.**
+
+**QA integrado e procedimentos de rollback:** `QA-1.0.0-RC8-RC10.md`. Não remover a estrutura de rodadas depois que houver dados reais com múltiplas rodadas.
+
 ## 1.0.0-rc.7 — 2026-11-15 · Bottom Sheet para inclusão de produtos no Garçom
 
 **Status:** interface implementada na `main`; sintaxe JS e testes de interação com DOM simulado passaram. **Homologação parcial** até validação em celular autenticado e propagação no domínio.
