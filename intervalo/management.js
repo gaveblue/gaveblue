@@ -7,7 +7,22 @@ export async function renderManagement({supabase,restaurant,role,box,esc,link}) 
  const defaults={master:modules,manager:modules,waiter:["garcom","cardapio"],kitchen:["cozinha","cardapio"],cashier:["caixa","cardapio"]};
  document.body.classList.add("iv-fullwidth","iv-master","iv-management-v2");
  let state={tab:"visao",data:null,overview:null};
- const sty='<link rel="stylesheet" href="/intervalo/management-design-rc11.css?v=1.0.0-rc.11"><style>.mtabs{display:flex;gap:8px;overflow:auto;margin:23px 0}.mtabs button{border:1px solid #dbe2e8;background:white;padding:11px 16px;border-radius:10px;font-size:13px;font-weight:700;color:#334155;white-space:nowrap}.mtabs button.selected{color:white;background:#0f766e;border-color:#0f766e}.mg{display:grid;grid-template-columns:1fr 1fr;gap:14px}.mg .full{grid-column:1/-1}.mg label{display:block;font-size:12px;font-weight:700;color:#475569;margin-bottom:7px}.mg input,.mg select{padding:11px;width:100%;border:1px solid #cbd5e1;border-radius:9px;background:white;color:#0f172a}.mg input:focus,.mg select:focus{outline:2px solid #99f6e4}.team-card{background:#fff;border:1px solid #dce4ec;border-radius:13px;padding:17px;margin:12px 0}.team-top{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center}.team-actions{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin-top:13px}.team-actions select{border-radius:8px;padding:9px;border:1px solid #cbd5e1}.smallbtn{border:1px solid #cbd5e1;background:#fff;color:#334155;border-radius:8px;padding:9px 12px;font-weight:700;font-size:12px}.smallbtn.danger{color:#b91c1c;border-color:#fecaca}.status{font-size:11px;border-radius:50px;background:#f1f5f9;padding:6px 10px;font-weight:750;color:#475569}.pgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:10px}.pitem{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:13px}.pitem strong{display:block;margin:0 0 8px}.pitem span{font-size:12px;color:#64748b}.pitem button{margin-top:9px}.onboarding-note{font-size:13px;padding:12px;background:#ecfdf5;border:1px solid #ccfbf1;border-radius:10px;color:#115e59}.muted-sm{font-size:12px;color:#64748b;line-height:1.6}@media(max-width:650px){.mg{grid-template-columns:1fr}.mg .full{grid-column:auto}.team-actions{align-items:stretch}}</style>';
+ const sty='<link rel="stylesheet" href="/intervalo/management-design-rc11.css?v=1.0.0-rc.12"><style>.mtabs{display:flex;gap:8px;overflow:auto;margin:23px 0}.mtabs button{border:1px solid #dbe2e8;background:white;padding:11px 16px;border-radius:10px;font-size:13px;font-weight:700;color:#334155;white-space:nowrap}.mtabs button.selected{color:white;background:#0f766e;border-color:#0f766e}.mg{display:grid;grid-template-columns:1fr 1fr;gap:14px}.mg .full{grid-column:1/-1}.mg label{display:block;font-size:12px;font-weight:700;color:#475569;margin-bottom:7px}.mg input,.mg select{padding:11px;width:100%;border:1px solid #cbd5e1;border-radius:9px;background:white;color:#0f172a}.mg input:focus,.mg select:focus{outline:2px solid #99f6e4}.team-card{background:#fff;border:1px solid #dce4ec;border-radius:13px;padding:17px;margin:12px 0}.team-top{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center}.team-actions{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin-top:13px}.team-actions select{border-radius:8px;padding:9px;border:1px solid #cbd5e1}.smallbtn{border:1px solid #cbd5e1;background:#fff;color:#334155;border-radius:8px;padding:9px 12px;font-weight:700;font-size:12px}.smallbtn.danger{color:#b91c1c;border-color:#fecaca}.status{font-size:11px;border-radius:50px;background:#f1f5f9;padding:6px 10px;font-weight:750;color:#475569}.pgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:10px}.pitem{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:13px}.pitem strong{display:block;margin:0 0 8px}.pitem span{font-size:12px;color:#64748b}.pitem button{margin-top:9px}.onboarding-note{font-size:13px;padding:12px;background:#ecfdf5;border:1px solid #ccfbf1;border-radius:10px;color:#115e59}.muted-sm{font-size:12px;color:#64748b;line-height:1.6}@media(max-width:650px){.mg{grid-template-columns:1fr}.mg .full{grid-column:auto}.team-actions{align-items:stretch}}</style>';
+ function renderLoading(){
+  const line=(size="")=>'<span class="mg-v2-skel mg-v2-skel-line '+size+'"></span>';
+  const kp=Array.from({length:4},()=>'<div class="mg-v2-skel-card">'+line("long")+'<span class="mg-v2-skel mg-v2-skel-num"></span>'+line("tiny")+'</div>').join("");
+  const mod=Array.from({length:8},()=>'<div class="mg-v2-skel-module"><span class="mg-v2-skel"></span>'+line("short")+'</div>').join("");
+  const sideLinks=Array.from({length:7},()=>'<div class="mg-v2-skel mg-v2-skel-nav"></div>').join("");
+  box(sty+'<div class="mg-v2-shell mg-v2-loading" id="mg-v2-root" role="status" aria-busy="true" aria-label="Carregando gestão do restaurante">'
+   +'<aside class="mg-v2-side" aria-hidden="true"><span class="mg-v2-skel mg-v2-skel-brand"></span><div class="mg-v2-restaurant">'+icon("store",18)+'<span>'+esc(restaurant.name)+'</span></div>'+sideLinks+'</aside>'
+   +'<div class="mg-v2-workspace"><header class="mg-v2-topbar"><div class="mg-v2-top-left">'+icon("store",17)+'<strong style="font-size:12px;color:#657487">Intervalo / Gestão</strong></div><span class="mg-v2-skel mg-v2-skel-line short" style="max-width:116px"></span></header>'
+   +'<main class="mg-v2-main"><div class="mg-v2-overline">GESTÃO DO RESTAURANTE</div><div class="mg-v2-skel mg-v2-skel-hero"></div>'+line("long")
+   +'<div class="mg-v2-loading-note"><span class="mg-v2-loading-dot"></span>Preparando sua visão geral...</div>'
+   +'<div class="mg-v2-kpis mg-v2-skel-kpis" aria-hidden="true">'+kp+'</div>'
+   +'<div class="mg-v2-section-head"><h2>Acessar módulos</h2></div><div class="mg-v2-modules mg-v2-skel-modules" aria-hidden="true">'+mod+'</div>'
+   +'<div class="mg-v2-dual" aria-hidden="true"><div class="mg-v2-skel-panel">'+line("short")+line("long")+line("long")+'</div><div class="mg-v2-skel-panel">'+line("short")+line("long")+line("long")+'</div></div></main>'
+   +'</div></div>');
+ }
  function showTemporaryPassword(temp,email){
   const dlg=document.createElement('dialog');
   dlg.style.cssText='border:1px solid #cbd5e1;border-radius:14px;padding:23px;max-width:460px;width:calc(100% - 30px)';
@@ -28,15 +43,24 @@ export async function renderManagement({supabase,restaurant,role,box,esc,link}) 
    return data;
  }
  async function refresh(){
-  state.data=await call("list");
-  if(state.tab==="visao"){
-   const fetchCore=async action=>{
-    try{const {data,error}=await supabase.functions.invoke("restaurant-core",{body:{restaurant_id:restaurant.id,action}});return error||data?.error?null:data}catch{return null}
-   };
-   const [orders,stock]=await Promise.all([fetchCore("orders"),fetchCore("stock_list")]);
-   state.overview={orders,stock};
+  const existing=document.getElementById("mg-v2-root");
+  existing?.classList?.add("is-refreshing");
+  existing?.setAttribute?.("aria-busy","true");
+  try{
+   state.data=await call("list");
+   if(state.tab==="visao"){
+    const fetchCore=async action=>{
+     try{const {data,error}=await supabase.functions.invoke("restaurant-core",{body:{restaurant_id:restaurant.id,action}});return error||data?.error?null:data}catch{return null}
+    };
+    const [orders,stock]=await Promise.all([fetchCore("orders"),fetchCore("stock_list")]);
+    state.overview={orders,stock};
+   }
+   draw();
+  }finally{
+   const active=document.getElementById("mg-v2-root");
+   active?.classList?.remove("is-refreshing");
+   active?.setAttribute?.("aria-busy","false");
   }
-  draw();
  }
  const value=(x)=>esc(x??"");
  const input=(label,name,val,more="")=>'<div><label for="m-'+name+'">'+label+'</label><input id="m-'+name+'" name="'+name+'" value="'+value(val)+'" '+more+'></div>';
@@ -237,6 +261,6 @@ export async function renderManagement({supabase,restaurant,role,box,esc,link}) 
       try{await call("set_access",{user_id:b.dataset.perm,module:b.dataset.mod,allowed:b.dataset.allowed==="true"});await refresh();state.tab="acessos";draw();message("Permissão atualizada.")}catch(err){message(err.message,"error")}
    });
  }
- box(sty+'<h1>Gestão do restaurante</h1><p class="muted">Carregando permissões e equipe...</p>');
+ renderLoading();
  try{await refresh();}catch(e){box(sty+'<section class="panel"><h1>Não foi possível carregar a gestão</h1><p class="error">'+esc(e.message)+'</p><a href="'+link("/inicio")+'">Voltar aos restaurantes</a></section>')}
 }
