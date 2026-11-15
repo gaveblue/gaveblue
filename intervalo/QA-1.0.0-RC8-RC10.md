@@ -32,7 +32,7 @@
 | Garçom exibe rodadas, envio da rodada pendente e bloqueio após pagamento | PASSOU em simulação JS/DOM | Duas rodadas, botão 'Enviar rodada 2', + ativo sem pagamento e desabilitado após pagamento |
 | Cozinha gera um ticket por rodada | PASSOU em simulação JS/DOM | Dois tickets separados, produtos de cada rodada e ações específicas |
 | Caixa agrupa as rodadas e calcula total único | PASSOU em simulação JS/DOM | Duas rodadas, total R$ 15,00 de fixture e fila somente de comanda servida |
-| Desconto de ficha técnica com insumos reais | PENDENTE | Fixture disponível não continha receita cadastrada; algoritmo original foi preservado, mas o debit não foi ensaiado com insumos |
+| Desconto de ficha técnica por rodada | PASSOU com rollback | Criada ficha técnica temporária com insumo real: a Rodada 1 retirou 1 unidade e a Rodada 2 retirou mais 1; 2 movimentos de estoque para a mesma comanda, sem duplicar |
 | Concorrência real de garçons em duas sessões | PENDENTE | Bloqueio de linhas / índice mantidos, sem teste simultâneo em dispositivos |
 | Impressão real em impressora térmica | PENDENTE | Prévia HTML implementada, impressão manual ainda precisa de dispositivo |
 | Teste de ponta a ponta autenticado no domínio/PWA | PENDENTE | Sem sessão real de navegador; verificador HTTP externo não conseguiu abrir o domínio |
@@ -56,6 +56,7 @@
 - Sem uso do GitHub Actions. Login, cadastro e permissões de funcionários **não foram alterados**.
 - A baixa de estoque ocorre no envio de cada rodada; nunca na inclusão ou no fechamento.
 - Rollback de UI e Edge é possível antes do uso de múltiplas rodadas. **Depois que existirem comandas com duas ou mais rodadas reais, NÃO remover `order_rounds` nem a coluna `round_no`: isso causaria perda de rastreabilidade.** Nessa hipótese, corrigir para frente mantendo os dados; se necessário, suspender temporariamente novas inclusões enquanto corrige.
-- Alerta pré-existente de segurança fora do escopo: proteção de senha vazada no Supabase Auth ainda precisa ser avaliada na etapa de autenticação, sem ser alterada aqui.
+- Migração adicional `20261115_rounds_deny_clients_rc10.sql` criou política explícita de bloqueio para clientes. O aviso RLS sem política desapareceu dos Advisors; permanecendo somente o alerta pré-existente de proteção de senha vazada no Supabase Auth, fora do escopo e sem mudanças agora.
+- Teste de ficha técnica temporária executado em transação com rollback; o banco terminou com **7 comandas, 7 rodadas, 8 itens, 0 receitas persistidas e zero órfãos**.
 
 **Conclusão:** QA técnico e transacional passou, com homologação **parcial** até testes reais em PWA e fluxo completo no domínio.
