@@ -170,15 +170,16 @@ Deno.serve(async(req:Request)=>{
  }
  if(action==="orders"){
   if(!allowed("garcom")&&!allowed("cozinha")&&!allowed("caixa")&&!manage())return fail();
-  const [orders,items,tables,payments]=await Promise.all([
+  const [orders,items,tables,payments,rounds]=await Promise.all([
    db.from("orders").select("id,table_id,status,note,opened_at,submitted_at,closed_at").eq("restaurant_id",tenant).order("opened_at",{ascending:false}).limit(120),
-   db.from("order_items").select("id,order_id,product_name,unit_price_cents,quantity,note,status").eq("restaurant_id",tenant).order("created_at",{ascending:true}).limit(1200),
+   db.from("order_items").select("id,order_id,round_no,product_name,unit_price_cents,quantity,note,status").eq("restaurant_id",tenant).order("created_at",{ascending:true}).limit(1200),
    db.from("restaurant_tables").select("id,label,area").eq("restaurant_id",tenant),
-   db.from("payments").select("id,order_id,method,amount_cents,at").eq("restaurant_id",tenant).order("at",{ascending:false}).limit(1200)
+   db.from("payments").select("id,order_id,method,amount_cents,at").eq("restaurant_id",tenant).order("at",{ascending:false}).limit(1200),
+   db.from("order_rounds").select("order_id,round_no,status,created_at,submitted_at,started_at,ready_at,served_at").eq("restaurant_id",tenant).order("round_no",{ascending:true}).limit(800)
   ]);
-  if(orders.error||items.error||tables.error||payments.error)return error("Não foi possível carregar comandas",503);
+  if(orders.error||items.error||tables.error||payments.error||rounds.error)return error("Não foi possível carregar comandas",503);
   const idSet=new Set((orders.data??[]).map(o=>o.id));
-  return reply({orders:orders.data,items:(items.data??[]).filter(i=>idSet.has(i.order_id)),tables:tables.data,payments:allowed("caixa")?(payments.data??[]).filter(x=>idSet.has(x.order_id)):[]});
+  return reply({orders:orders.data,items:(items.data??[]).filter(i=>idSet.has(i.order_id)),rounds:(rounds.data??[]).filter(x=>idSet.has(x.order_id)),tables:tables.data,payments:allowed("caixa")?(payments.data??[]).filter(x=>idSet.has(x.order_id)):[]});
  }
  const rpc:Record<string,{fn:string,fields:string[],module:string}> = {
   order_open:{fn:"intervalo_open_order",fields:["p_table"],module:"garcom"},
@@ -187,17 +188,19 @@ Deno.serve(async(req:Request)=>{
   order_submit:{fn:"intervalo_submit_order",fields:["p_order"],module:"garcom"},
   order_cancel:{fn:"intervalo_cancel_open_order",fields:["p_order","p_reason"],module:"garcom"},
   order_progress:{fn:"intervalo_advance_order",fields:["p_order","p_next"],module:"cozinha"},
+  round_progress:{fn:"intervalo_advance_round",fields:["p_order","p_round","p_next"],module:"cozinha"},
   cash_open:{fn:"intervalo_open_cash",fields:["p_start"],module:"caixa"},
   pay_manual:{fn:"intervalo_record_manual_payment",fields:["p_order","p_amount","p_method"],module:"caixa"},
   cash_close:{fn:"intervalo_close_cash",fields:["p_counted"],module:"caixa"}
  };
  if(rpc[action]){
   const op=rpc[action],next=body.p_next;
-  const module=action==="order_progress"&&next==="served"?"garcom":op.module;
+  const module=(action==="order_progress"||action==="round_progress")&&next==="served"?"garcom":op.module;
   if(!allowed(module))return fail();
   const args:Record<string,unknown>={p_restaurant:tenant,p_actor:user.id};
   if(op.fields.includes("p_table")){if(!isId(body.table_id))return error("Mesa inválida");args.p_table=body.table_id}
   if(op.fields.includes("p_order")){if(!isId(body.order_id))return error("Comanda inválida");args.p_order=body.order_id}
+  if(op.fields.includes("p_round")){const n=integer(body.round_no,1,9999);if(n===null)return error("Rodada inválida");args.p_round=n}
   if(op.fields.includes("p_product")){if(!isId(body.product_id))return error("Produto inválido");args.p_product=body.product_id}
   if(op.fields.includes("p_quantity")){const qty=integer(body.quantity,1,99);if(qty===null)return error("Quantidade inválida");args.p_quantity=qty}
   if(op.fields.includes("p_note")){const note=txt(body.note??"",350);if(note.length>350)return error("Observação inválida");args.p_note=note}
