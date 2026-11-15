@@ -249,7 +249,7 @@ async function choose(user){
 async function admin(user){
  const {data:allowed,error}=await supabase.from('platform_admins').select('user_id').eq('user_id',user.id).eq('active',true).maybeSingle();
  if(error||!allowed){box('<section class="panel"><h1>Área restrita</h1><p>Somente Super Admin Gaveblue pode gerenciar a plataforma.</p></section>');return}
- const {renderPlatform}=await import('/intervalo/platform.js?v=1.0.0-rc.3');
+ const {renderPlatform}=await import('/intervalo/platform.js?v=1.0.0-rc.13');
  return renderPlatform({supabase,box,esc,link});
 }
 async function waiterHome(user){
@@ -280,7 +280,7 @@ async function waiterHome(user){
 const internalModules=['catalogo','mesas','estoque','impressao','relatorios'];
 async function tenant(user,slug,mod){
  if(mod==='cardapio'){
-  const {renderPublicMenu}=await import('/intervalo/public-menu.js?v=1.0.0-rc.3');
+  const {renderPublicMenu}=await import('/intervalo/public-menu.js?v=1.0.0-rc.13');
   return renderPublicMenu({supabase,slug,box,esc,link});
  }
  if(!user){location.assign(link('/login'));return}
@@ -306,12 +306,12 @@ async function tenant(user,slug,mod){
  }
  const asset={catalogo:'catalog.js',mesas:'support.js',estoque:'support.js',impressao:'support.js',relatorios:'support.js',garcom:'waiter.js',cozinha:'kitchen.js',caixa:'cash.js'}[mod];
  if(!asset){box('<h1>Módulo não encontrado</h1>');return}
- const {renderPage}=await import('/intervalo/'+asset+'?v='+(mod==='garcom'?'1.0.0-rc.8':mod==='cozinha'?'1.0.0-rc.9':mod==='caixa'?'1.0.0-rc.10':'1.0.0-rc.3'));
+ const {renderPage}=await import('/intervalo/'+asset+'?v=1.0.0-rc.13');
  return renderPage({supabase,restaurant:m.restaurants,module:mod,box,esc,link});
 }
 async function account(user){
  if(!user){location.assign(link('/login'));return}
- const {renderAccount}=await import('/intervalo/account.js?v=1.0.0-rc.3');
+ const {renderAccount}=await import('/intervalo/account.js?v=1.0.0-rc.13');
  return renderAccount({supabase,box,esc,link,user});
 }
 async function start(){const user=await me();if(user?.app_metadata?.intervalo_password_change_required&&!['trocar-senha','login','redefinir','recuperar-senha'].includes(paths[0])){location.assign(link('/trocar-senha'));return}await setupNav(user);if(paths.length===0)return new URLSearchParams(location.search).get('app')==='garcom'
