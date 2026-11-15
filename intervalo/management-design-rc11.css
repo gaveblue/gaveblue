@@ -136,3 +136,36 @@ body.iv-master.iv-management-v2 #app{min-height:100dvh}
  .mg-v2-hero{align-items:flex-start}
 }
 @media(prefers-reduced-motion:reduce){.mg-v2-side{transition:none!important}}
+
+
+/* RC12 · Estado de carregamento e atualização, sem bloquear a navegação depois que carregar */
+.mg-v2-loading[aria-busy="true"]{user-select:none}
+.mg-v2-loading .mg-v2-side{pointer-events:none}
+.mg-v2-skel{display:block;position:relative;overflow:hidden;border-radius:8px;background:#edf0f4;color:transparent!important}
+.mg-v2-skel:after{content:"";position:absolute;inset:0;transform:translateX(-100%);background:linear-gradient(90deg,transparent 0%,#ffffffb5 48%,transparent 100%);animation:mg-v2-shimmer 1.4s ease-in-out infinite}
+.mg-v2-skel-brand{width:125px;height:27px;margin:3px 0 3px}
+.mg-v2-skel-line{height:12px;width:74%;margin:7px 0}
+.mg-v2-skel-line.short{width:40%}
+.mg-v2-skel-line.long{width:90%}
+.mg-v2-skel-line.tiny{width:58%;height:9px}
+.mg-v2-skel-nav{height:38px;margin:5px 1px;border-radius:10px}
+.mg-v2-skel-nav:nth-of-type(2){width:83%}
+.mg-v2-skel-hero{width:min(100%,255px);height:30px;margin:8px 0 12px}
+.mg-v2-skel-kpis{margin-top:22px}
+.mg-v2-skel-card{background:#fff;border:1px solid #e9edf2;border-radius:16px;padding:16px;min-height:122px;display:flex;flex-direction:column;gap:15px}
+.mg-v2-skel-card .mg-v2-skel-line{margin:0}
+.mg-v2-skel-num{height:29px;width:43%;margin:0}
+.mg-v2-skel-modules{margin-top:13px}
+.mg-v2-skel-module{min-height:102px;background:#fff;border:1px solid #e9edf2;border-radius:15px;display:flex;flex-direction:column;gap:10px;align-items:center;justify-content:center}
+.mg-v2-skel-module .mg-v2-skel{height:34px;width:34px;border-radius:11px}
+.mg-v2-skel-module .mg-v2-skel-line{height:9px;width:60%;margin:0}
+.mg-v2-skel-panel{min-height:150px;background:#fff;border:1px solid #e9edf2;border-radius:16px;padding:16px}
+.mg-v2-loading-note{display:flex;align-items:center;gap:9px;font-size:12px;font-weight:700;color:#8190a2;margin:15px 0 7px}
+.mg-v2-loading-dot{height:8px;width:8px;border-radius:50%;background:#ff7900;box-shadow:0 0 0 4px #ff79001a;animation:mg-v2-pulse 1.2s ease-in-out infinite}
+.mg-v2-shell.is-refreshing .mg-v2-topbar{position:relative}
+.mg-v2-shell.is-refreshing .mg-v2-topbar:after{content:"";position:absolute;bottom:-1px;left:0;width:35%;height:3px;background:linear-gradient(90deg,#ffb35c,#ff7500,#ff5e00);border-radius:99px;animation:mg-v2-progress 1.2s ease-in-out infinite;pointer-events:none}
+.mg-v2-shell.is-refreshing .mg-v2-main{cursor:progress}
+@keyframes mg-v2-shimmer{to{transform:translateX(100%)}}
+@keyframes mg-v2-pulse{50%{opacity:.28;transform:scale(.72)}}
+@keyframes mg-v2-progress{0%{left:0;width:8%}55%{left:35%;width:45%}100%{left:100%;width:0}}
+@media(prefers-reduced-motion:reduce){.mg-v2-skel:after,.mg-v2-loading-dot,.mg-v2-shell.is-refreshing .mg-v2-topbar:after{animation:none!important}.mg-v2-skel:after{display:none}}
