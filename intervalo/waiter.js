@@ -72,20 +72,23 @@ export async function renderPage({supabase,restaurant,box,esc,link}){
    +'<span class="wg-state'+(activeOrder?' busy':'')+'">'+(activeOrder?esc(statuses[status]??status):'Livre')+'</span>'
    +'<p class="wg-order-label">'+(activeTable?esc(activeTable.area??'Salão')+' · '+(activeOrder?'Pedido em andamento':'Sem comanda aberta'):'Escolha uma mesa no painel de mesas')+'</p>';
   if(activeOrder){
-    for(const item of lines){
-      html+='<div class="wg-line"><div><b>'+esc(item.quantity)+' × '+esc(item.product_name)+'</b>'+(item.note?'<small>Obs.: '+esc(item.note)+'</small>':'')+'</div><strong>'+money(Number(item.unit_price_cents)*Number(item.quantity))+'</strong></div>';
+   for(const round of activeRounds){
+    const entries=lines.filter(i=>Number(i.round_no||1)===Number(round.round_no));
+    const subtotal=entries.reduce((n,i)=>n+Number(i.unit_price_cents)*Number(i.quantity),0);
+    html+='<section class="wg-round"><div class="wg-round-head"><b>Rodada '+esc(round.round_no)+'</b><span class="wg-round-status '+esc(round.status)+'">'+esc(roundNames[round.status]??round.status)+'</span></div>';
+    for(const item of entries){
+     html+='<div class="wg-line"><div><b>'+esc(item.quantity)+' × '+esc(item.product_name)+'</b>'+(item.note?'<small>Obs.: '+esc(item.note)+'</small>':'')+'</div><strong>'+money(Number(item.unit_price_cents)*Number(item.quantity))+'</strong></div>';
     }
-    if(!lines.length)html+='<p class="wg-empty">Nenhum item adicionado. Abra o cardápio e escolha seus produtos.</p>';
-    html+='<div class="wg-total"><span>Total</span><span>'+money(total)+'</span></div>';
-    if(status==='open'){
-      html+='<button type="button" class="wg-primary" data-w-view="cardapio">+ Adicionar produtos</button>'
-        +'<button type="button" class="wg-primary" id="wg-submit" '+(lines.length?'':'disabled')+'>Enviar para cozinha</button>'
-        +'<button type="button" class="wg-danger" id="wg-cancel">Cancelar comanda não enviada</button>';
-    }else if(status==='ready'){
-      html+='<button type="button" class="wg-outline" id="wg-served">Marcar como servido</button>';
-    }else{
-      html+='<p class="wg-note">'+(status==='served'?'Pedido servido. O caixa registra o recebimento e encerra a comanda.':'Pedido encaminhado à cozinha. Acompanhe a atualização dos estados por aqui.')+'</p>';
-    }
+    html+='<div class="wg-round-subtotal"><span>Subtotal</span><b>'+money(subtotal)+'</b></div></section>';
+   }
+   if(!lines.length)html+='<p class="wg-empty">Nenhum produto lançado. Abra o Cardápio para começar.</p>';
+   html+='<div class="wg-total"><span>Total da comanda</span><span>'+money(total)+'</span></div>';
+   html+='<button type="button" class="wg-primary" data-w-view="cardapio">'+icon('plus',16)+' '+(draftRound?'Adicionar à rodada '+draftRound.round_no:'Novo pedido nesta mesa')+'</button>';
+   if(draftRound)html+='<button type="button" class="wg-primary" id="wg-submit">Enviar rodada '+esc(draftRound.round_no)+' à cozinha</button>';
+   if(status==='open'&&draftRound)html+='<button type="button" class="wg-danger" id="wg-cancel">Cancelar comanda não enviada</button>';
+   for(const round of readyRounds)html+='<button type="button" class="wg-outline" data-w-serve-round="'+esc(round.round_no)+'">Marcar rodada '+esc(round.round_no)+' como servida</button>';
+   if(status==='served'&&!draftRound)html+='<p class="wg-note">Tudo servido. É possível lançar nova rodada antes de iniciar o pagamento.</p>';
+   else if(!draftRound)html+='<p class="wg-note">Novos produtos criam outra rodada, sem alterar pedidos já enviados.</p>';
   }else if(activeTable){
     html+='<p class="wg-empty">Mesa livre. Escolha um produto no cardápio: a comanda será criada automaticamente.</p><button type="button" class="wg-primary" data-w-view="cardapio">Ver cardápio</button>';
   }else html+='<p class="wg-empty">Selecione uma mesa primeiro.</p>';
