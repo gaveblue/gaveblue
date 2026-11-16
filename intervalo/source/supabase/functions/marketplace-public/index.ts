@@ -86,7 +86,7 @@ Deno.serve(async(req:Request)=>{
    db.from("restaurant_online_settings").select("enabled,paused,delivery_enabled,pickup_enabled,minimum_order_cents,estimated_prep_minutes").eq("restaurant_id",r.id).maybeSingle(),
    db.from("restaurant_settings").select("city,state").eq("restaurant_id",r.id).maybeSingle(),
    db.from("restaurant_business_hours").select("weekday,opens_at,closes_at,active,delivery_enabled,pickup_enabled").eq("restaurant_id",r.id).eq("active",true),
-   db.from("restaurant_delivery_zones").select("name,city,state,fee_cents,minimum_order_cents,estimated_delivery_minutes").eq("restaurant_id",r.id).eq("active",true),
+   db.from("restaurant_delivery_zones").select("id,name,city,state,postal_code_from,postal_code_to,neighborhoods,fee_cents,minimum_order_cents,estimated_delivery_minutes").eq("restaurant_id",r.id).eq("active",true),
    db.from("menu_categories").select("id,name,sort_order").eq("restaurant_id",r.id).eq("active",true).order("sort_order"),
    db.from("menu_products").select("id,category_id,name,description,price_cents,image_url,sort_order").eq("restaurant_id",r.id).eq("available",true).eq("show_on_menu",true).order("sort_order"),
    db.from("menu_product_options").select("id,product_id,name,price_delta_cents,sort_order").eq("restaurant_id",r.id).eq("available",true).order("sort_order")
@@ -97,10 +97,23 @@ Deno.serve(async(req:Request)=>{
   const products=(ps.data??[]).filter(x=>allowed.has(x.category_id));
   const productIDs=new Set(products.map(x=>x.id));
   const onlineReady=!!(pub.data.accepts_customer_orders&&settings.data?.enabled&&!settings.data?.paused&&(settings.data.delivery_enabled||settings.data.pickup_enabled));
+  const activeZones=zones.data??[];
+  const [deliveryCheck,pickupCheck]=await Promise.all([
+   onlineReady&&settings.data?.delivery_enabled&&activeZones.length
+     ?db.rpc("marketplace_store_is_open",{p_restaurant:r.id,p_kind:"delivery"})
+     :Promise.resolve({data:false,error:null}),
+   onlineReady&&settings.data?.pickup_enabled
+     ?db.rpc("marketplace_store_is_open",{p_restaurant:r.id,p_kind:"pickup"})
+     :Promise.resolve({data:false,error:null})
+  ]);
+  const canDeliver=!!(onlineReady&&settings.data?.delivery_enabled&&activeZones.length&&deliveryCheck.data&&!deliveryCheck.error);
+  const canPickup=!!(onlineReady&&settings.data?.pickup_enabled&&pickupCheck.data&&!pickupCheck.error);
   return respond({
-   published:true,marketplace_stage:"preview",checkout_available:false,customer_orders_enabled:onlineReady&&false,
+   published:true,marketplace_stage:onlineReady?"active":"preview",checkout_available:canDeliver||canPickup,customer_orders_enabled:onlineReady,
    restaurant:{name:store.data?.display_name||r.name,slug:r.slug,description:store.data?.description??"",cuisine_tags:store.data?.cuisine_tags??[],logo_url:store.data?.logo_url??null,banner_url:store.data?.banner_url??null,city:place.data?.city??null,state:place.data?.state??null},
-   online_settings:{delivery_available:false,pickup_available:false,minimum_order_cents:settings.data?.minimum_order_cents??0,estimated_prep_minutes:settings.data?.estimated_prep_minutes??30},
+   online_settings:{delivery_available:canDeliver,pickup_available:canPickup,
+     delivery_configured:!!settings.data?.delivery_enabled,pickup_configured:!!settings.data?.pickup_enabled,
+     minimum_order_cents:settings.data?.minimum_order_cents??0,estimated_prep_minutes:settings.data?.estimated_prep_minutes??30},
    hours:hrs.data??[],delivery_zones:zones.data??[],
    categories:cs.data??[],products,options:(os.data??[]).filter(x=>productIDs.has(x.product_id))
   });
