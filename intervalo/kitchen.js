@@ -1,6 +1,6 @@
 // Intervalo — cozinha com consulta automática em intervalos de 15s, sem alegar Realtime ou impressão.
 import {icon} from './ui-icons.js?v=1.0.0-rc.1';
-import {openThermalReceipt} from './thermal-receipt-58mm-rc15.js?v=1.1.0-rc.15';
+import {openThermalReceipt} from './thermal-receipt-rc16.js?v=1.1.0-rc.16';
 export async function renderPage({supabase,restaurant,box,esc,link}){
  document.body.classList.add('iv-fullwidth','iv-kds');
  const css='<style>.k-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}.k-card{background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:22px}.k-card h3{margin:0}.k-card button,.k-reload{margin-top:11px;border:0;border-radius:9px;padding:12px 15px;background:#0f766e;color:#fff;cursor:pointer;font-weight:700}.k-state{font-size:11px;border-radius:20px;background:#e2e8f0;padding:6px 10px;font-weight:700}.k-top{display:flex;justify-content:space-between;align-items:center;gap:10px}.k-card p{font-size:14px}.k-card small{color:#64748b}.k-empty{padding:36px;border:1px dashed #cbd5e1;border-radius:13px;color:#64748b}.iv-kds-table{font-weight:750}.iv-kds-online{border-color:#ffb766;border-left:4px solid #ff7900}.iv-kds-online .iv-kds-source{font-size:11px;font-weight:850;letter-spacing:.3px;color:#c56100}.iv-kds-alert{background:#fff7ed;border:1px solid #fed7aa;border-radius:13px;padding:13px 15px;color:#9a3412;font-size:13px;margin:12px 0}.iv-kds-online-status{font-size:12px;color:#64748b;margin:7px 0 11px}.iv-kds-online .iv-kds-head h3{font-size:15px}</style>';
