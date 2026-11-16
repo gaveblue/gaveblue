@@ -1,10 +1,11 @@
 import {icon} from './ui-icons.js?v=1.0.0-rc.1';
 import {sheetifyForms,showFormSheetError} from './operational-sheets-rc15.js?v=1.0.0-rc.15';
+import {initInfinitePaySettings} from './marketplace-infinitepay-settings-rc8.js?v=1.1.0-rc.8';
 
 // Gestão > Loja Online. Painel rc6; estado e permissões decididos no backend.
 export async function renderPage({supabase,restaurant,role,box,esc,link}){
  document.body.classList.add('iv-fullwidth','iv-online-admin');
- const css='<link rel="stylesheet" href="/intervalo/online-management-rc1.css?v=1.1.0-rc.6">';
+ const css='<link rel="stylesheet" href="/intervalo/online-management-rc1.css?v=1.1.0-rc.8">';
  const money=n=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(n||0)/100);
  const realToCents=str=>{
   const s=String(str).trim().replace(',','.');
@@ -110,6 +111,7 @@ export async function renderPage({supabase,restaurant,role,box,esc,link}){
    +icon(salesActive?'x':'checkCircle',16)+(salesActive?' Desativar pedidos':' Ativar recebimento')+'</button>'
    +'<p class="iv-on-hint">A ativação exige confirmação do Master e configurações válidas.</p>'
    +'</section>'
+   +'<section class="iv-on-card" id="iv-on-infinitepay"></section>'
    +'<section class="iv-on-card"><div class="iv-on-card-heading"><span class="iv-on-card-icon">'+icon('bag',19)+'</span>'
    +'<div><h2>Pedidos recebidos</h2><p>Acompanhe os pedidos de delivery e retirada.</p></div>'
    +'<button type="button" class="iv-on-icon-action" id="iv-on-orders-refresh" aria-label="Atualizar pedidos" title="Atualizar pedidos">'+icon('refresh',17)+'</button></div>'
@@ -143,6 +145,7 @@ export async function renderPage({supabase,restaurant,role,box,esc,link}){
    +'</div></main></div>';
   box(out);
   initialized=true;
+  void initInfinitePaySettings({supabase,restaurant,role,esc});
   const form=document.getElementById('iv-online-draft');
   form.onsubmit=async e=>{
    e.preventDefault();
