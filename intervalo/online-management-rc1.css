@@ -134,3 +134,17 @@ body.iv-online-admin .iv-op-body form .iv-on-field{margin:0!important}
 }
 @media(max-width:380px){.iv-on-stat-symbol{display:none}.iv-on-card-actions{grid-template-columns:1fr}.iv-on-option{align-items:flex-start}.iv-on-option .iv-on-button{min-width:90px}}
 @media(prefers-reduced-motion:reduce){.iv-on-skeleton{animation:none}.iv-on-refreshing .iv-on-main{transition:none}}
+
+/* InfinitePay rc8 · integração por restaurante, sem ativação automática */
+.iv-on-infinite-state{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;background:#fafbfd;border:1px solid #edf0f4;border-radius:13px;padding:14px;margin-bottom:8px}
+.iv-on-infinite-state>div{flex:1;min-width:0}
+.iv-on-infinite-state strong{display:block;color:#32445c;font-size:13px;font-weight:820}
+.iv-on-infinite-state p{color:#8695a7;font-size:11px;line-height:1.55;margin:5px 0 0}
+.iv-on-infinite-state .iv-on-status{flex:none}
+.iv-on-infinite-skeleton{display:grid;gap:10px;padding:9px 0 12px}
+.iv-on-infinite-state+.iv-on-detail{border-top:1px solid #edf0f4}
+body.iv-online-admin .iv-op-body #iv-infinite-form{display:grid;gap:15px}
+body.iv-online-admin #iv-infinite-form .iv-on-field input{width:100%;margin-top:8px;min-height:46px;border-radius:11px;border:1px solid #dfe5ed;padding:12px;font-size:13px}
+body.iv-online-admin #iv-infinite-form .iv-on-hint{font-size:11px;line-height:1.6;color:#718198;margin:0}
+body.iv-online-admin #iv-infinite-form code{display:inline-block;background:#f2f5f9;color:#405268;padding:3px 6px;border-radius:5px;font-size:10px;overflow-wrap:anywhere}
+@media(max-width:430px){.iv-on-infinite-state{flex-direction:column}.iv-on-infinite-state .iv-on-status{align-self:flex-start}}
