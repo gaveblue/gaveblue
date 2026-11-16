@@ -12,7 +12,7 @@ export async function renderPage({supabase,restaurant,box,esc,link}){
  async function reload(){
   box(main+'<div class="iv-loading-inline" role="status" aria-live="polite" aria-busy="true"><div class="iv-loading-inline-label"><span class="iv-load-dot" aria-hidden="true"></span><span>Preparando o caixa...</span></div><div class="iv-loading-inline-lines" aria-hidden="true"><span class="iv-load-skeleton"></span><span class="iv-load-skeleton"></span></div></div>');
   try{
-    const [ordersData,cashData]=await Promise.all([call('orders'),call('cash_summary')]);
+    const [ordersData,cashData,onlineReply]=await Promise.all([call('orders'),call('cash_summary'),supabase.functions.invoke('marketplace-operations',{body:{restaurant_id:restaurant.id,action:'cash_list'}}).catch(()=>({data:null}))]);const onlineOrders=onlineReply?.data?.orders??[],onlinePayments=onlineReply?.data?.payments??[];
     const open=(cashData.sessions??[]).find(s=>s.status==='open');
     const sessionCash=open?(cashData.payments??[]).filter(p=>p.cash_session_id===open.id&&p.method==='cash').reduce((n,p)=>n+Number(p.amount_cents),0):0;
     const orders=(ordersData.orders??[]).filter(o=>o.status==='served');
