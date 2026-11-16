@@ -8,7 +8,7 @@ Em Android, utilizando o serviço Thermal Printer, com tamanho de papel 2-inch (
 
 ## Correção
 - Criado `thermal-receipt-58mm-rc15.js`, gerador compartilhado de prévia para tickets térmicos (sem exigir instalação de driver no aparelho).
-- A página, corpo e o conteúdo imprimível utilizam largura de **58 mm**, com área interna aproximada de **51 mm** e margens de 3,5 mm. Tipografia adaptada a cupons pequenos.
+- A página, corpo e o conteúdo imprimível utilizam largura de **58 mm**, com área útil interna de **49 mm** e margens de 4,5 mm. Tipografia adaptada a cupons pequenos.
 - No momento de impressão, `@page` recebe `size:58mm {altura}mm; margin:0`, com altura calculada a partir de `scrollHeight` do conteúdo e 5 mm de tolerância (mínimo 40 mm).
 - No modo tela, o usuário continua tendo botão **Imprimir / PDF**; o botão é ocultado da impressão.
 - Id longo da comanda abreviado visualmente (últimos 8 caracteres hexadecimais), sem mudar o identificador original no banco de dados.
