@@ -137,6 +137,7 @@ export function initIntervaloFormUX(){
   }
  }
  function refreshKeyboard(){
+  if(focused&&!focused.isConnected)focused=null;
   const occlusion=Math.max(0,baseHeight-visibleHeight()-(viewport?.offsetTop??0));
   const opened=!!focused&&window.matchMedia('(max-width:900px)').matches&&occlusion>=110;
   document.body.classList.toggle('iv-ux-keyboard',opened);
