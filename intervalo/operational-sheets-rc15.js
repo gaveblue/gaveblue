@@ -98,3 +98,12 @@ export function sheetifyForms(specs=[],root=document){
  return installed;
 }
 function escapeHTML(value){return String(value??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
+
+/** Exibe o erro na própria folha sem perder os valores preenchidos. */
+export function showFormSheetError(form,message){
+ const dialog=form?.closest?.('dialog.iv-op-sheet');
+ const target=dialog?.querySelector?.('.iv-op-error');
+ if(!target)return false;
+ target.textContent=String(message??'Não foi possível concluir. Tente novamente.');
+ return true;
+}
