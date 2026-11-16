@@ -1,4 +1,5 @@
 import {icon} from './ui-icons.js?v=1.0.0-rc.1';
+import {sheetifyForms} from './operational-sheets-rc15.js?v=1.0.0-rc.15';
 // Intervalo 0.2.1 — CPF opcional vinculado à conta, nunca usado como senha.
 export async function renderAccount({supabase,box,esc,link,user}){
  const style='<style>.account-layout{max-width:620px}.account-layout .panel{margin:18px 0}.account-layout label{display:block;margin:15px 0 7px;font-size:13px;font-weight:700}.account-layout input{width:100%}.account-layout .actionrow{display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin-top:18px}.account-layout .danger{background:white;color:#be123c;border:1px solid #fecdd3}.account-layout .securehint{background:#f0fdfa;border:1px solid #ccfbf1;padding:13px;border-radius:10px;color:#115e59;font-size:13px;line-height:1.55}.account-layout .status{font-size:13px;color:#64748b}</style>';
@@ -36,6 +37,7 @@ export async function renderAccount({supabase,box,esc,link,user}){
      try{await invoke({action:"unlink",current_password:pass});render({linked:false},"Login por CPF desativado.");}
      catch(err){show(err.message,true);unlink.disabled=false;form.elements.namedItem("current_password").value="";}
    };
+  sheetifyForms([{id:'link-cpf',label:linked?'Atualizar login por CPF':'Ativar login por CPF',title:linked?'Atualizar identificação':'Vincular CPF',description:'Confirme os dados e sua senha atual.'}]);
  };
  box(style+'<section class="account-layout"><h1>Minha Conta</h1><div class="iv-loading-inline" role="status" aria-live="polite" aria-busy="true"><div class="iv-loading-inline-label"><span class="iv-load-dot" aria-hidden="true"></span><span>Consultando a conta...</span></div><div class="iv-loading-inline-lines" aria-hidden="true"><span class="iv-load-skeleton"></span><span class="iv-load-skeleton"></span></div></div></section>');
  try{const status=await invoke({action:"status"});render(status);}
