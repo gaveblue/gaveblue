@@ -1,5 +1,19 @@
 # Intervalo — CHANGELOG
 
+## 1.1.0-rc.7 — 2026-11-16 · Checkout mobile-first com bottom sheets
+
+**Status:** arquivos publicados no GitHub `main`; simulação de renderização e de cotação/confirmar pedido aprovadas. **Testes reais no site, com teclado e toque em Android, pendentes.**
+
+- Substituído o checkout de formulário longo por cards organizados e resumo de valores, mantendo botão principal fixo no rodapé e carregamento com skeleton próprio desde a rota inicial.
+- Incorporados **bottom sheets arrastáveis** para endereço, contato e pagamento; abrem parcialmente e expandem ao arrastar para cima, mantendo os dados associados ao formulário único.
+- Mantida a compra como visitante, endereços salvos de clientes cadastrados, modalidade entrega/retirada, autorização de marketing opcional, termos obrigatórios, frete e valor calculados no servidor.
+- Validação de endereço e contato abre o painel pertinente e indica o campo a corrigir, em vez de deixar um erro apenas no rodapé.
+- A cotação `marketplace-online/quote` e confirmação `marketplace-online/place` preservam contrato e idempotência anteriores.
+- Alterado import de rota do checkout para `marketplace-checkout-rc7.js?v=1.1.0-rc.7` e estilos isolados em `marketplace-checkout-rc7.css`.
+- **Sem alterações no backend ou em restaurantes, estoque, caixa, funcionários e pedidos existentes.** Sem GitHub Actions.
+- **QA:** `QA-MARKETPLACE-1.1.0-RC7-CHECKOUT.md`.
+
+
 ## 1.1.0-rc.6 — 2026-11-16 · Loja Online redesenhada e carregamento unificado
 
 **Status:** alterações de frontend na `main`; validação sintática e renderização simulada aprovadas. **Propagação no domínio e homologação em navegador ainda pendentes.**
