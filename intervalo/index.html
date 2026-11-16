@@ -95,19 +95,34 @@ const err=e=>'<p class="error" role="alert">'+esc(e?.message??String(e))+'</p>';
 function box(content){app.innerHTML='<div class="wrap">'+content+'</div>';finishBoot()}
 const modules=['gestao','garcom','cozinha','caixa','cardapio'], labels={gestao:'Gestão',garcom:'Garçom',cozinha:'Cozinha',caixa:'Caixa',cardapio:'Cardápio'};
 const permissions={master:['gestao','garcom','cozinha','caixa','cardapio'],manager:['gestao','garcom','cozinha','caixa','cardapio'],waiter:['garcom','cardapio'],kitchen:['cozinha','cardapio'],cashier:['caixa','cardapio']};
-// Restaura URLs /intervalo/* quando GitHub Pages usa 404.html como fallback.
+// Recupera a rota original quando o hosting estático redireciona o 404 à aplicação.
+// O parâmetro sobrevive a navegadores que bloqueiam sessionStorage (Instagram/PWA).
 try{
  if(location.pathname==='/intervalo/'||location.pathname==='/intervalo'){
-   const requested=sessionStorage.getItem('intervalo.deepLink');
-   if(requested){
-     sessionStorage.removeItem('intervalo.deepLink');
-     const u=new URL(requested,location.origin);
-     if(u.origin===location.origin&&u.pathname.startsWith('/intervalo/')&&u.pathname!=='/intervalo/'&&u.pathname.length<230){
-       history.replaceState({},'',u.pathname+u.search+location.hash);
-     }
+  const query=new URLSearchParams(location.search);
+  let requested=query.get('intervalo_route');
+  if(!requested){
+   try{requested=sessionStorage.getItem('intervalo.deepLink')}catch{}
+  }
+  if(requested&&requested.length<850&&requested.startsWith('/intervalo/')){
+   const u=new URL(requested,location.origin);
+   const parts=u.pathname.slice('/intervalo/'.length).split('/').filter(Boolean);
+   const slug=/^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+   const single=['login','admin','inicio','garcom','ativar','redefinir','configurar-admin',
+    'minha-conta','trocar-senha','recuperar-senha','explorar','checkout','pedido','cliente'];
+   const modules=['gestao','garcom','cozinha','caixa','cardapio','catalogo','mesas','estoque',
+    'impressao','relatorios','vendas-online'];
+   const valid=(parts.length===1&&single.includes(parts[0]))||
+    (parts.length===2&&((parts[0]==='loja'&&slug.test(parts[1]))||
+     (parts[0]==='pedido'&&/^[A-Za-z0-9_-]{12,220}$/.test(parts[1]))||
+     (slug.test(parts[0])&&modules.includes(parts[1]))));
+   if(valid&&u.origin===location.origin){
+    try{sessionStorage.removeItem('intervalo.deepLink')}catch{}
+    history.replaceState({},'',u.pathname+u.search+u.hash);
    }
+  }
  }
-}catch{/* Navegação normal permanece disponível sem sessionStorage */}
+}catch{/* Se não for possível recuperar a rota, abrir a home com segurança. */}
 const paths=location.pathname.replace(/^\/intervalo\/?/,'').split('/').filter(Boolean);
 async function me(){const {data}=await supabase.auth.getUser();return data?.user??null}
 async function setupNav(user){
