@@ -42,6 +42,6 @@ export async function renderTracking({supabase,route,box,esc,link}){
   }
  };
  await refresh();
- if(!timer)timer=setInterval(()=>{if(document.visibilityState==='visible')refresh()},18000);
+ if(!timer&&document.getElementById('iv-com-refresh'))timer=setInterval(()=>{if(document.visibilityState==='visible')refresh()},18000);
  window.addEventListener('pagehide',()=>{if(timer)clearInterval(timer)},{once:true});
 }
