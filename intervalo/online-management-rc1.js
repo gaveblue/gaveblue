@@ -2,7 +2,7 @@ import {icon} from './ui-icons.js?v=1.0.0-rc.1';
 import {sheetifyForms,showFormSheetError} from './operational-sheets-rc15.js?v=1.0.0-rc.15';
 
 // Gestão > Loja Online. Configurações em rascunho. NÃO aceita pedidos.
-export async function renderPage({supabase,restaurant,box,esc,link}){
+export async function renderPage({supabase,restaurant,role,box,esc,link}){
  document.body.classList.add('iv-fullwidth','iv-online-admin');
  const css='<link rel="stylesheet" href="/intervalo/online-management-rc1.css?v=1.1.0-rc.1">';
  const money=n=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(n||0)/100);
@@ -120,6 +120,57 @@ export async function renderPage({supabase,restaurant,box,esc,link}){
    catch(e){if(!showFormSheetError(hoursForm,e.message))alert(e.message);button.disabled=false;button.textContent='Salvar horários'}
   };
   sheetifyForms([{id:'iv-on-hours',label:'Configurar horários',title:'Horários de pedidos'}]);
+  const zoneForm=document.getElementById('iv-on-zone-form');
+  let editingZone=null;
+  const fillZone=zone=>{
+   editingZone=zone?.id??null;
+   ['name','city','state','postal_code_from','postal_code_to'].forEach(k=>{
+    zoneForm.elements.namedItem(k).value=zone?.[k]??'';
+   });
+   zoneForm.elements.namedItem('neighborhoods').value=(zone?.neighborhoods??[]).join(', ');
+   zoneForm.elements.namedItem('fee').value=toDisplay(zone?.fee_cents);
+   zoneForm.elements.namedItem('minimum').value=toDisplay(zone?.minimum_order_cents);
+   zoneForm.elements.namedItem('eta').value=zone?.estimated_delivery_minutes??40;
+   zoneForm.elements.namedItem('active').checked=zone?.active??true;
+  };
+  zoneForm.onsubmit=async e=>{
+   e.preventDefault();const button=zoneForm.querySelector('[type="submit"]');if(button.disabled)return;
+   const v=Object.fromEntries(new FormData(zoneForm).entries());
+   button.disabled=true;button.textContent='Salvando...';
+   try{
+    await request('zone_save',{
+     id:editingZone,name:v.name,city:v.city,state:String(v.state??'').toUpperCase(),
+     neighborhoods:String(v.neighborhoods??'').split(',').map(x=>x.trim()).filter(Boolean),
+     postal_code_from:String(v.postal_code_from??'').replace(/\D/g,''),
+     postal_code_to:String(v.postal_code_to??'').replace(/\D/g,''),
+     fee_cents:realToCents(v.fee),minimum_order_cents:realToCents(v.minimum),
+     estimated_delivery_minutes:Number(v.eta),active:zoneForm.elements.namedItem('active').checked
+    });
+    await load();
+   }catch(e){if(!showFormSheetError(zoneForm,e.message))alert(e.message);button.disabled=false;button.textContent='Salvar região'}
+  };
+  const [zoneSheet]=sheetifyForms([{id:'iv-on-zone-form',label:'Editar região',title:'Região de entrega',description:'Defina bairros, CEPs e frete.'}]);
+  if(zoneSheet){
+   zoneSheet.trigger.hidden=true;zoneSheet.trigger.style.display='none';
+   document.getElementById('iv-on-new-zone').onclick=()=>{fillZone(null);zoneSheet.trigger.click()};
+   document.querySelectorAll('[data-zone-edit]').forEach(btn=>btn.onclick=()=>{
+    const zone=(data.delivery_zones??[]).find(z=>z.id===btn.dataset.zoneEdit);
+    if(zone){fillZone(zone);zoneSheet.trigger.click()}
+   });
+  }
+  const toggle=document.getElementById('iv-on-toggle');
+  if(toggle){
+   if(role!=='master'){toggle.disabled=true;toggle.title='Somente o Master pode ativar pedidos'}
+   else toggle.onclick=async()=>{
+    const enabled=!(online.enabled===true&&pub.accepts_customer_orders===true);
+    if(!confirm(enabled?'Ativar o recebimento de pedidos REAIS?':'Desativar novos pedidos?'))return;
+    const confirmation=enabled?(prompt('Digite HABILITAR PEDIDOS para confirmar')??''):'';
+    if(enabled&&confirmation!=='HABILITAR PEDIDOS')return;
+    toggle.disabled=true;
+    try{await request('set_sales_active',{enabled,confirmation});await load()}
+    catch(e){alert(e.message);toggle.disabled=false}
+   };
+  }
   const visibility=document.getElementById('iv-online-visibility');
   if(visibility)visibility.onclick=async()=>{
    const next=!visible;
