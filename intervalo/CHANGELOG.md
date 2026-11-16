@@ -1,5 +1,17 @@
 # Intervalo — CHANGELOG
 
+## 1.1.0-rc.16 — 2026-11-16 · Impressão configurável e cupom compacto para Android
+
+**Status:** atualizado no GitHub `main`; testes técnicos e Canvas aprovados. **Impressão real na GAO MPT-II e disponibilidade em gaveblue.com.br ainda pendentes de validação no celular.**
+
+- Problema confirmado no fluxo anterior: a prévia nativa do serviço de impressão Android pode apresentar página longa, mesmo quando `@page` solicita um cupom curto. O sistema web não controla o tamanho da janela do spooler.
+- Criado `thermal-receipt-rc16.js`: prévia própria com comprovante recortado e ação principal **Compartilhar cupom compacto**. O conteúdo é convertido em PNG com largura de 384 px (58 mm) ou 576 px (80 mm) e altura proporcional aos itens, evitando enviar uma folha gigante como imagem.
+- A opção de compartilhamento abre o menu nativo Android para enviar a PNG ao aplicativo térmico compatível; se o navegador não suportar `navigator.share({files})`, há alternativa **Salvar imagem**. Mantida **Impressão do Android**, com aviso de que o serviço ainda pode incluir branco.
+- Ajustes configuráveis e salvos no próprio aparelho: largura 58/80 mm, tamanho de fonte, margens laterais e avanço final de papel.
+- Cozinha, Caixa e módulo **Impressão** carregam a nova versão. Criado botão **Configurar e imprimir teste** na área de Impressão, sem operação de banco de dados nem cobranças.
+- QA técnico: sintaxe JS válida nos módulos, importações conferidas, canvas 58 mm com 1 pedido `384×388 px` e com vários itens `384×2152 px`; Canvas 80 mm também cresceu corretamente. Registro: `QA-1.1.0-RC16-IMPRESSAO-CONFIGURAVEL.md`.
+- Não habilita impressão automática nem modifica permissões, lançamentos ou pedidos. Sem GitHub Actions.
+
 ## 1.1.0-rc.15 — 2026-11-16 · Cupom térmico 58 mm com altura conforme conteúdo
 
 **Status:** atualizado no GitHub `main`, QA sintático e simulado aprovado; **impressão Android real e publicação final no domínio ainda pendentes de conferência**.
