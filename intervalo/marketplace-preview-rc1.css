@@ -1,0 +1,71 @@
+/* Marketplace Intervalo — vitrine prévia, sem carrinho/checkout */
+body.iv-marketplace{background:#f8f9fb;color:#1d293b;font-family:Inter,system-ui,sans-serif}
+body.iv-marketplace>header,body.iv-marketplace>.foot{display:none!important}
+body.iv-marketplace #app .wrap{padding:0;max-width:none;margin:0}
+.iv-mkt-shell{min-height:100dvh;max-width:1280px;margin:0 auto;padding:0 clamp(14px,3vw,27px) 95px}
+.iv-mkt-nav{background:#fff;min-height:67px;display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid #e9edf2;padding:0 clamp(14px,2vw,25px);margin:0 calc(-1 * clamp(14px,3vw,27px))}
+.iv-mkt-brand{color:#172239;font-size:23px;font-weight:900;letter-spacing:-1.3px;font-style:italic;white-space:nowrap}
+.iv-mkt-brand:after{content:"";display:block;width:70%;height:3px;background:#ff7900;border-radius:6px;margin-left:24px;margin-top:-2px}
+.iv-mkt-links{display:flex;align-items:center;gap:9px}
+.iv-mkt-links a{border:1px solid #e9edf2;border-radius:10px;padding:9px 12px;font-size:11px;font-weight:790;color:#5b6c80;background:#fff;text-decoration:none;display:flex;align-items:center;gap:6px}
+.iv-mkt-preview{background:#fff4e8;color:#bf650a;border:1px solid #ffe4c5;border-radius:999px;font-size:10px;font-weight:800;padding:7px 10px;white-space:nowrap}
+.iv-mkt-hero{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,.75fr);gap:23px;align-items:center;margin:30px 0 27px;background:linear-gradient(115deg,#ff910b,#ff6c00);color:#fff;border-radius:24px;padding:clamp(23px,4vw,50px);overflow:hidden;position:relative}
+.iv-mkt-hero:after{content:"";width:255px;height:255px;border:45px solid #ffffff21;border-radius:50%;position:absolute;right:-85px;top:-100px}
+.iv-mkt-hero>*{position:relative;z-index:1}
+.iv-mkt-hero h1{font-size:clamp(25px,4vw,42px);letter-spacing:-1.2px;margin:9px 0}
+.iv-mkt-hero p{font-size:13px;line-height:1.65;color:#fff6ec;max-width:480px}
+.iv-mkt-hero .iv-mkt-icon-large{justify-self:center;width:110px;height:110px;background:#ffffff30;border:1px solid #ffffff50;border-radius:30px;display:grid;place-items:center;transform:rotate(-9deg)}
+.iv-mkt-icon-large .iv-icon{width:58px;height:58px}
+.iv-mkt-eyebrow{font-size:10px;letter-spacing:1.5px;font-weight:850;color:#e66e00;text-transform:uppercase}
+.iv-mkt-hero .iv-mkt-eyebrow{color:#fff1d9}
+.iv-mkt-title{font-size:clamp(23px,3.2vw,32px);font-weight:850;letter-spacing:-.8px;margin:7px 0}
+.iv-mkt-description{font-size:12px;color:#8391a3;margin:0 0 20px;line-height:1.6}
+.iv-mkt-filter{display:flex;gap:10px;margin:0 0 20px;flex-wrap:wrap}
+.iv-mkt-input{flex:1 1 220px;display:flex;align-items:center;gap:9px;background:#fff;border:1px solid #e1e6ed;border-radius:13px;padding:0 13px;min-height:48px;color:#8794a5}
+.iv-mkt-input input{min-width:0;flex:1;border:0!important;outline:0!important;background:transparent!important;padding:8px 0;font-size:13px;box-shadow:none!important}
+.iv-mkt-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}
+.iv-mkt-store{display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit;background:#fff;border:1px solid #e9edf2;border-radius:16px;padding:14px;min-width:0;min-height:113px}
+.iv-mkt-store:hover{border-color:#ffc18a;background:#fffaf6}
+.iv-mkt-store-icon{width:58px;height:58px;flex:none;display:grid;place-items:center;background:#fff0e3;color:#eb7500;border-radius:13px;overflow:hidden}
+.iv-mkt-store-icon img{width:100%;height:100%;object-fit:cover}
+.iv-mkt-store-copy{flex:1;min-width:0}
+.iv-mkt-store strong{font-size:13px;color:#27354a;display:block;margin-bottom:5px}
+.iv-mkt-store small{font-size:11px;color:#8d9aaa;line-height:1.45;display:block;overflow-wrap:anywhere}
+.iv-mkt-store .iv-icon{flex:none;color:#adb6c4}
+.iv-mkt-empty{background:#fff;border:1px dashed #dfe5ee;border-radius:17px;padding:28px;text-align:center;color:#7b899d;line-height:1.6;font-size:12px}
+.iv-mkt-empty .iv-icon{color:#ef7a00;width:30px;height:30px}
+.iv-mkt-empty h2{font-size:17px;letter-spacing:-.3px;margin:12px 0 8px;color:#27384c}
+.iv-mkt-action{display:inline-flex;gap:6px;align-items:center;justify-content:center;margin-top:12px;background:#fff0e3;border:1px solid #ffd0a9;color:#d86d00!important;border-radius:11px;padding:10px 13px;text-decoration:none;font-size:11px;font-weight:800;cursor:pointer}
+.iv-mkt-store-head{margin:26px 0 20px;display:flex;align-items:flex-start;gap:16px}
+.iv-mkt-store-avatar{width:78px;height:78px;border-radius:19px;overflow:hidden;flex:none;display:grid;place-items:center;color:#e97600;background:#fff0e5}
+.iv-mkt-store-avatar img{width:100%;height:100%;object-fit:cover}
+.iv-mkt-store-head h1{margin:3px 0 6px;font-size:clamp(22px,4vw,34px);letter-spacing:-.8px}
+.iv-mkt-store-head p{margin:0;color:#8090a3;font-size:12px;line-height:1.5}
+.iv-mkt-pill{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:780;color:#ca6600;background:#fff1e5;border-radius:999px;padding:7px 11px;margin:8px 8px 0 0}
+.iv-mkt-pills{display:flex;gap:7px;overflow-x:auto;padding:4px 0 15px;scrollbar-width:none}
+.iv-mkt-pills::-webkit-scrollbar{display:none}
+.iv-mkt-pills button{flex:none;border:1px solid #e6ebf1;border-radius:999px;background:#fff;color:#6d7f91;font-size:11px;font-weight:780;padding:10px 14px;cursor:pointer}
+.iv-mkt-pills button[aria-pressed="true"]{background:#fff0e3;color:#d76b00;border-color:#ffcba0}
+.iv-mkt-product-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.iv-mkt-product{border:1px solid #e9edf2;background:#fff;border-radius:16px;padding:0;text-align:left;overflow:hidden;min-width:0;cursor:pointer;display:flex;flex-direction:column}
+.iv-mkt-product:hover{border-color:#ffd0a7}
+.iv-mkt-photo{height:145px;background:linear-gradient(135deg,#fff4e8,#ffe0c4);color:#f27600;display:grid;place-items:center;overflow:hidden}
+.iv-mkt-photo img{width:100%;height:100%;object-fit:cover}
+.iv-mkt-photo .iv-icon{height:51px;width:51px}
+.iv-mkt-body{padding:13px;display:flex;flex:1;flex-direction:column;gap:7px}
+.iv-mkt-product strong{font-size:13px;color:#2b394b}
+.iv-mkt-product p{font-size:11px;line-height:1.5;color:#8190a4;overflow-wrap:anywhere;flex:1;margin:0}
+.iv-mkt-price{font-weight:850;font-size:16px;color:#ee7000}
+.iv-mkt-bottom{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #e9edf2;padding:10px 15px max(11px,env(safe-area-inset-bottom));display:flex;justify-content:center;gap:28px;z-index:10}
+.iv-mkt-bottom a{display:flex;flex-direction:column;align-items:center;gap:4px;text-decoration:none;color:#7e8fa1;font-size:10px;font-weight:780;min-width:60px}
+.iv-mkt-bottom a.active{color:#f27800}
+dialog.iv-mkt-sheet{position:fixed;inset:auto 0 0;margin:0 auto;padding:0;max-width:min(100%,500px);width:100%;max-height:84dvh;overflow-y:auto;border:0;border-radius:24px 24px 0 0;background:#fff;color:#263549;box-shadow:0 -20px 60px #25314935}
+dialog.iv-mkt-sheet::backdrop{background:#1b2b4199}
+.iv-mkt-sheet-handle{width:44px;height:5px;border-radius:99px;background:#d7dde4;margin:10px auto 20px}
+.iv-mkt-sheet-content{padding:0 20px 22px}
+.iv-mkt-sheet-content h2{font-size:20px;margin:0 0 10px}
+.iv-mkt-sheet-content p{font-size:12px;color:#8493a4;line-height:1.6}
+.iv-mkt-sheet-close{width:100%;border:0;background:#ff7800;color:#fff;border-radius:12px;padding:13px;font-size:12px;font-weight:800;margin-top:15px}
+@media(max-width:900px){.iv-mkt-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.iv-mkt-product-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:640px){.iv-mkt-nav{min-height:61px}.iv-mkt-links a{padding:8px}.iv-mkt-hero{grid-template-columns:1fr;gap:0;margin:15px 0 23px;padding:24px;border-radius:17px}.iv-mkt-hero .iv-mkt-icon-large{display:none}.iv-mkt-grid{grid-template-columns:1fr}.iv-mkt-product-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.iv-mkt-photo{height:117px}.iv-mkt-body{padding:11px}.iv-mkt-description{font-size:11px}.iv-mkt-store-head{align-items:center}.iv-mkt-store-avatar{width:63px;height:63px}}
+@media(max-width:350px){.iv-mkt-product-grid{grid-template-columns:1fr}.iv-mkt-nav .iv-mkt-preview{display:none}}
