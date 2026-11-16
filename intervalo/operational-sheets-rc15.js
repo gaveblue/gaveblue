@@ -1,5 +1,20 @@
 // Intervalo · Bottom Sheet de formulários operacionais · RC15
 // Reutiliza o formulário e seus listeners originais; não faz alterações de negócio.
+// Um único observador para todos os formulários evita custo por produto.
+const activeSheets=new Set();
+let cleanupObserver=null;
+function watchSheet(entry){
+ activeSheets.add(entry);
+ if(cleanupObserver||typeof MutationObserver==='undefined')return;
+ cleanupObserver=new MutationObserver(()=>{
+   for(const sheet of [...activeSheets])if(!sheet.trigger.isConnected)sheet.dispose();
+ });
+ cleanupObserver.observe(document.getElementById('app')||document.body,{childList:true,subtree:true});
+}
+function unwatchSheet(entry){
+ activeSheets.delete(entry);
+ if(!activeSheets.size){cleanupObserver?.disconnect();cleanupObserver=null}
+}
 export function sheetifyForms(specs=[],root=document){
  const installed=[];
  for(const spec of specs){
@@ -86,14 +101,14 @@ export function sheetifyForms(specs=[],root=document){
   const detach=()=>{
    if(dialog.open)dialog.close();
    dialog.remove();
-   observer?.disconnect();
+   unwatchSheet(entry);
    window.visualViewport?.removeEventListener('resize',align);
    window.visualViewport?.removeEventListener('scroll',align);
    window.removeEventListener('resize',align);
   };
-  const observer=typeof MutationObserver!=='undefined'?new MutationObserver(()=>{if(!trigger.isConnected)detach()}):null;
-  observer?.observe(document.getElementById('app')||document.body,{childList:true,subtree:true});
-  installed.push({trigger,dialog,form,close:closeSheet,dispose:detach});
+  const entry={trigger,dialog,form,close:closeSheet,dispose:detach};
+  watchSheet(entry);
+  installed.push(entry);
  }
  return installed;
 }
