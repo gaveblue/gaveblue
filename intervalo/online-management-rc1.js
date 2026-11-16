@@ -306,6 +306,10 @@ export async function renderPage({supabase,restaurant,role,box,esc,link}){
   }
   document.getElementById('iv-on-orders-refresh').onclick=refreshOrders;
   refreshOrders();
+  const orderPoll=setInterval(()=>{
+   if(!ordersArea.isConnected){clearInterval(orderPoll);return}
+   if(document.visibilityState==='visible')void refreshOrders();
+  },15000);
   const visibility=document.getElementById('iv-online-visibility');
   if(visibility)visibility.onclick=async()=>{
    const next=!visible;
