@@ -86,8 +86,15 @@ function formatValue(type,value,el){
  if(type==='phone')return formatPhone(value);
  if(type==='identity'){
   if(/[a-z@]/i.test(value)){
-   // Caso um login iniciado como CPF vire e-mail, retire apenas a pontuação da máscara.
-   return el.dataset.ivIdentityNumeric==='yes'?value.replace(/[.-]/g,''):value;
+   // O login pode começar com dígitos e terminar sendo e-mail.
+   // Retire a máscara de CPF uma única vez, sem apagar pontos do domínio.
+   const wasNumeric=el.dataset.ivIdentityNumeric==='yes';
+   delete el.dataset.ivIdentityNumeric;
+   if(!wasNumeric)return value;
+   const at=value.indexOf('@');
+   const prefix=at>=0?value.slice(0,at):value;
+   const suffix=at>=0?value.slice(at):'';
+   return prefix.replace(/[.-]/g,'')+suffix;
   }
   if(/^[\d\s.-]+$/.test(value)&&digits(value).length>0){
    el.dataset.ivIdentityNumeric='yes';
