@@ -9,8 +9,9 @@ export async function renderPage({supabase,restaurant,role,box,esc,link}){
  const css='<link rel="stylesheet" href="/intervalo/online-management-rc1.css?v=1.1.0-rc.8">';
  const money=n=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(n||0)/100);
  const realToCents=str=>{
-  const s=String(str).trim().replace(',','.');
-  if(!/^\d{1,7}(?:\.\d{1,2})?$/.test(s))throw Error('Informe um valor válido, como 20,00.');
+  const raw=String(str).trim().replace(/\s/g,'');
+  const s=raw.includes(',')?raw.replace(/\./g,'').replace(',','.'):raw;
+  if(!/^\d{1,8}(?:\.\d{1,2})?$/.test(s))throw Error('Informe um valor válido, como 20,00.');
   const [a,b='']=s.split('.');
   return Number(a)*100+Number((b+'00').slice(0,2));
  };
