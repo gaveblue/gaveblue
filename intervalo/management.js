@@ -99,7 +99,9 @@ export async function renderManagement({supabase,restaurant,role,box,esc,link}) 
      +'<div class="mg-v2-nav-title">Operação</div><nav class="mg-v2-nav" aria-label="Módulos operacionais">'
      +menuModule("garcom")+menuModule("cozinha")+menuModule("caixa")+menuModule("impressao")+'</nav>'
      +'<div class="mg-v2-nav-title">Restaurante</div><nav class="mg-v2-nav" aria-label="Configurações do restaurante">'
-     +menuTab("dados","Dados do restaurante","store")+menuTab("equipe","Equipe","users")
+     +menuTab("dados","Dados do restaurante","store")
+     +'<a class="mg-v2-navlink" href="'+link("/"+d.restaurant.slug+"/vendas-online")+'">'+icon("store",18)+'Loja Online</a>'
+     +menuTab("equipe","Equipe","users")
      +(isMaster?menuTab("acessos","Permissões","shield"):"")+'</nav>'
      +'<div class="mg-v2-side-spacer"></div><a class="mg-v2-navlink" href="'+mainLink+'">'+icon("arrowLeft",18)+'Trocar restaurante</a>'
      +'<div class="mg-v2-side-user"><span class="mg-v2-avatar">'+value((d.restaurant.name??"R").slice(0,2).toUpperCase())+'</span><span><strong>'+value(d.restaurant.name)+'</strong><small>'+value(roleText)+'</small></span></div></aside>'
@@ -192,9 +194,10 @@ export async function renderManagement({supabase,restaurant,role,box,esc,link}) 
          ["route","relatorios","Relatórios","Indicadores gerenciais","chart"],
          ["tab","equipe","Equipe","Configurações existentes, sem alterações","users"],
          ["tab","acessos","Permissões","Apenas para o Master","shield"],
+         ["route","vendas-online","Loja Online","Configurar vitrine e entrega própria","store"],
          ["route","impressao","Impressão","Prévia manual e documentos internos","printer"],
          ["route","inicio","Trocar restaurante","Voltar aos meus restaurantes","arrowLeft"]];
-     const available=choices.filter(([type,path])=>type==="tab"?(path!=="acessos"||isMaster):(path==="inicio"||accessible.some(([p])=>p===path)));
+     const available=choices.filter(([type,path])=>type==="tab"?(path!=="acessos"||isMaster):(path==="inicio"||path==="vendas-online"||accessible.some(([p])=>p===path)));
      const dialog=document.createElement("dialog");dialog.className="mg-v2-sheet";
      dialog.setAttribute("aria-label",kind==="quick"?"Ações rápidas":"Mais opções");
      const rows=available.map(([type,path,label,note,symbol])=>{
