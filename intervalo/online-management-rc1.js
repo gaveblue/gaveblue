@@ -1,6 +1,6 @@
 import {icon} from './ui-icons.js?v=1.0.0-rc.1';
 import {sheetifyForms,showFormSheetError} from './operational-sheets-rc15.js?v=1.0.0-rc.15';
-import {initInfinitePaySettings} from './marketplace-infinitepay-settings-rc8.js?v=1.1.0-rc.8';
+import {initInfinitePaySettings} from './marketplace-infinitepay-settings-rc8.js?v=1.1.0-rc.9';
 
 // Gestão > Loja Online. Painel rc6; estado e permissões decididos no backend.
 export async function renderPage({supabase,restaurant,role,box,esc,link}){
