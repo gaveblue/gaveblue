@@ -1,21 +1,30 @@
 <!doctype html>
 <html lang="pt-BR" class="h-full">
 <head>
-<script id="INTERVALO_ROUTING_FALLBACK_0_1_0">
+<script id="INTERVALO_ROUTING_FALLBACK_1_1_0">
 (function () {
-  // Exclusivo das rotas da aplicação Intervalo; demais páginas 404 ficam intactas.
+  // Corrige links diretos do Intervalo no hosting estático sem interferir em outras páginas.
   try {
     var p = window.location.pathname;
-    if (!p.startsWith('/intervalo/')) return;
+    if (!p.startsWith('/intervalo/') || p === '/intervalo/' || p === '/intervalo/index.html') return;
     var parts = p.slice('/intervalo/'.length).split('/').filter(Boolean);
-    var one = ['login', 'admin', 'inicio', 'garcom', 'ativar', 'redefinir', 'configurar-admin', 'minha-conta', 'trocar-senha', 'recuperar-senha'];
-    var two = ['gestao', 'garcom', 'cozinha', 'caixa', 'cardapio', 'catalogo', 'mesas', 'estoque', 'impressao', 'relatorios'];
-    var isRoute = (parts.length === 1 && one.includes(parts[0]))
-      || (parts.length === 2 && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(parts[0]) && two.includes(parts[1]));
+    var one = ['login','admin','inicio','garcom','ativar','redefinir','configurar-admin','minha-conta',
+      'trocar-senha','recuperar-senha','explorar','checkout','pedido','cliente'];
+    var modules = ['gestao','garcom','cozinha','caixa','cardapio','catalogo','mesas','estoque',
+      'impressao','relatorios','vendas-online'];
+    var slug = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+    var isRoute = parts.length === 1 && one.includes(parts[0])
+      || parts.length === 2 && (
+        (parts[0] === 'loja' && slug.test(parts[1])) ||
+        (parts[0] === 'pedido' && /^[A-Za-z0-9_-]{12,220}$/.test(parts[1])) ||
+        (slug.test(parts[0]) && modules.includes(parts[1]))
+      );
     if (!isRoute) return;
-    sessionStorage.setItem('intervalo.deepLink', p + window.location.search);
-    window.location.replace('/intervalo/' + window.location.hash);
-  } catch (e) { /* Sem acesso ao storage: mantém a página 404 padrão. */ }
+    var original = p + window.location.search + window.location.hash;
+    // Inclui a rota no URL: funciona mesmo com sessionStorage bloqueado (navegação externa/PWA).
+    var destination = '/intervalo/?intervalo_route=' + encodeURIComponent(original);
+    window.location.replace(destination);
+  } catch (e) { /* Não interferir no 404 de outras páginas. */ }
 })();
 </script>
   <meta charset="UTF-8">
