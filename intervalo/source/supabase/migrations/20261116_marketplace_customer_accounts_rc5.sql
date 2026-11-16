@@ -4,8 +4,8 @@
 begin;
 alter table public.customer_profiles enable row level security;
 alter table public.customer_addresses enable row level security;
-revoke all on table public.customer_profiles from anon,authenticated;
-revoke all on table public.customer_addresses from anon,authenticated;
+revoke all on table public.customer_profiles from public,anon,authenticated;
+revoke all on table public.customer_addresses from public,anon,authenticated;
 grant select on table public.customer_profiles to authenticated;
 grant insert (id,display_name,phone) on public.customer_profiles to authenticated;
 grant update (display_name,phone,updated_at) on public.customer_profiles to authenticated;
