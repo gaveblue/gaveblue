@@ -1,5 +1,24 @@
 # Intervalo — CHANGELOG
 
+## 1.1.0-rc.1 — 2026-11-15 · Fundação do marketplace (pedidos desligados)
+
+**Status:** migração aplicada no Supabase, duas Edge Functions novas ativas, frontend de prévia enviado à `main`. Homologação técnica parcial: deploy do frontend no domínio e testes reais em dispositivos **não confirmados**.
+
+- Implantadas **11 tabelas novas** para consumidor, endereços, loja, regiões/horários, pedidos online, itens, eventos, pagamentos e tokens de acompanhamento. Estrutura independente de `orders.table_id` presencial.
+- Aplicada migração `intervalo_marketplace_foundation_rc1`; RLS habilitado e grants de leitura negados a `anon` e `authenticated` em todas as novas tabelas. Acesso apenas por serviço privilegiado, mediado por APIs que validam cada operação.
+- Criados registros iniciais seguros para `novo-mundo` e `intervalo27` com `restaurant_online_settings.enabled=false`, `restaurant_storefront.marketplace_visible=false`. Ambas as flags existentes `restaurant_publication.accepts_customer_orders` permanecem `false`.
+- Implantada `marketplace-public` v1 com consultas públicas **apenas de leitura** `discover` e `store`, exigindo cardápio publicado e, na busca, opt-in de visibilidade. Sem checkout ou exposição de dados do comprador.
+- Implantada `marketplace-management` v2, com autenticação via JWT de usuário, vínculo de Master/gerente e módulo Gestão ativo. Salva rascunho da loja e condições de entrega/retirada sem habilitar recebimento de pedidos, preservando mídia, visibilidade e pausa ao salvar.
+- Novas telas: `/intervalo/explorar`, `/intervalo/loja/:slug`, `/intervalo/:slug/vendas-online`; prévias explícitas de `/checkout`, `/pedido` e `/cliente`, todas sem ações de compra.
+- Loja pública com catálogo real e detalhes de produto em Bottom Sheet, sem carrinho funcional; Gestão com formulário de rascunho em Bottom Sheet, visibilidade em marketplace opcional e atalho na navegação.
+- O arquivo `index.html` diferencia rotas públicas antes do login; rotas privadas seguem checagens existentes de Gestão. Sem alterar os arquivos de funcionário e permissão.
+- **QA:** 11 tabelas verificadas, grants de leitura negados a papéis comuns, flags de compra verificadas `false`, Edge Functions recuperadas como ativas, código JS compilável e testes simulados de páginas pública e privada. Teste HTTP/browser autenticado e propagação do frontend permanecem pendentes.
+- **Proteções:** não houve alteração em `orders`, `order_items`, `payments`, `restaurant_members`, Equipe, Permissões, Cozinha, Caixa ou estoque.
+- **Rollback:** remover os links de frontend da `rc.1` e desativar as duas funções de marketplace. As tabelas podem permanecer vazias/isoladas, sem destruir dados. Não utilizar GitHub Actions.
+
+**QA:** `QA-MARKETPLACE-1.1.0-RC1.md`.  
+**Projeto:** `ARQUITETURA-MARKETPLACE-1.1.0.md`.
+
 ## 1.0.0-rc.16 — 2026-11-15 · Corrigir cardápio online indisponível
 
 **Status:** backend corrigido e **Edge Function pública `public-menu` v4 ativa no Supabase**, código frontend enviado à `main`. Testes estáticos e simulados aprovados; acesso HTTP real ao domínio ainda não foi confirmado.
