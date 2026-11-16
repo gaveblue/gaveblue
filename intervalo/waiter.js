@@ -1,4 +1,5 @@
 import {icon} from './ui-icons.js?v=1.0.0-rc.1';
+import {openWaiterDelivery} from './waiter-delivery-rc17.js?v=1.1.0-rc.17';
 // Intervalo 0.9.7 — painel responsivo do garçom; operações reais via restaurant-core.
 export async function renderPage({supabase,restaurant,box,esc,link}){
  document.body.classList.add('intervalo-garcom');
@@ -20,7 +21,8 @@ export async function renderPage({supabase,restaurant,box,esc,link}){
  let catalogLayout=(()=>{try{return localStorage.getItem('intervalo.waiter.catalog.layout.v1')==='grid'?'grid':'list'}catch{return 'list'}})();
  let fetching=false,lastSignature='',snapshot=null,alive=true;
  const viewCss="<style>\n.wg-catalogue-heading{gap:8px}.wg-catalogue-heading>div{min-width:0}\n.wg-catalogue-tools{display:flex;align-items:center;gap:8px;flex:none}\n.wg-catalogue-layout{display:flex;align-items:center;gap:2px;padding:3px;border:1px solid #e7eaf0;border-radius:12px;background:#f5f7fa}\n.wg-catalogue-layout button{width:34px;height:33px;border:0;border-radius:9px;background:transparent;color:#7f8a9c;cursor:pointer;display:grid;place-items:center}\n.wg-catalogue-layout button[aria-pressed=true]{background:#fff;color:#ef7000;box-shadow:0 1px 5px #0b253016}\n.wg-catalogue-layout button:focus-visible{outline:2px solid #fb923c;outline-offset:1px}\n.wg-products.wg-products--list{display:flex!important;flex-direction:column;gap:9px}\n.wg-products.wg-products--list .wg-product{display:flex;align-items:stretch;min-height:102px;border-radius:14px}\n.wg-products.wg-products--list .wg-product-photo{flex:0 0 96px;width:96px;height:auto!important;min-height:96px;border-radius:0;align-self:stretch}\n.wg-products.wg-products--list .wg-product-photo img{height:100%;width:100%;object-fit:cover}\n.wg-products.wg-products--list .wg-product-photo span{display:grid;place-items:center;height:100%}\n.wg-products.wg-products--list .wg-product-photo .iv-icon{width:31px;height:31px}\n.wg-products.wg-products--list .wg-product-text{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;padding:11px 11px 9px}\n.wg-products.wg-products--list .wg-product-text>b{min-height:0!important;margin:0;font-size:13px;line-height:1.25}\n.wg-products.wg-products--list .wg-product-text>p{min-height:0!important;margin:4px 0 6px;font-size:11px;line-height:1.3;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}\n.wg-products.wg-products--list .wg-product-foot{margin-top:auto;gap:10px}\n.wg-products.wg-products--list .wg-plus{flex:0 0 37px;width:37px;height:37px}\n@media(max-width:390px){.wg-catalogue-tools .wg-counter{display:none}.wg-products.wg-products--list .wg-product-photo{width:82px;flex-basis:82px;min-height:90px}.wg-products.wg-products--list .wg-product-text{padding:9px 10px}.wg-products.wg-products--list .wg-product-text>b{font-size:12px}}\n</style>";
- const header=css+viewCss+'<div class="wg-top"><div class="wg-brand"><div><div class="wg-logo">Intervalo</div><div class="wg-sub">'+esc(restaurant.name)+'</div></div><span class="wg-role">Garçom</span></div><button type="button" id="wg-desktop-more" class="wg-desktop-more" aria-label="Abrir mais opções">'+icon('more',22)+'</button></div>';
+ const deliveryCss='<style>.wg-delivery-shortcut{display:flex;align-items:center;justify-content:space-between;gap:10px;width:calc(100% - 24px);margin:7px 12px 13px;border:1px solid #ffcf9f;background:#fff2e7;border-radius:12px;min-height:46px;padding:10px 12px;font-size:12px;font-weight:850;color:#c65b00;cursor:pointer}.wg-delivery-shortcut .iv-icon:first-child{flex:none}.wg-delivery-shortcut span{flex:1;text-align:left}@media(max-width:700px){.wg-delivery-shortcut{margin-top:10px}}</style>';
+ const header=css+viewCss+deliveryCss+'<div class="wg-top"><div class="wg-brand"><div><div class="wg-logo">Intervalo</div><div class="wg-sub">'+esc(restaurant.name)+'</div></div><span class="wg-role">Garçom</span></div><button type="button" id="wg-desktop-more" class="wg-desktop-more" aria-label="Abrir mais opções">'+icon('more',22)+'</button></div>';
  const selected=()=>snapshot?.tables?.find(t=>t.id===selectedId);
  const order=()=>snapshot?.orders?.find(o=>o.table_id===selectedId&&!['closed','cancelled'].includes(o.status));
  const listFor=o=>snapshot?.items?.filter(i=>i.order_id===o.id&&i.status!=='cancelled')??[];
@@ -53,7 +55,7 @@ export async function renderPage({supabase,restaurant,box,esc,link}){
   let html=header+(navigator.onLine===false?'<div class="wg-offline">Sem internet. Não é possível enviar comandas até a conexão voltar.</div>':'')
   +'<div id="wg-root" class="wg-app" data-view="'+esc(view)+'">'
   +'<aside class="wg-panel" data-section="mesas"><div class="wg-panel-head"><div><h2>Mesas</h2><p class="wg-hint">Selecione para atender</p></div><span class="wg-counter">'+tables.filter(occupied).length+' ocupadas</span></div>'
-  +'<div class="wg-table-filters" role="group" aria-label="Filtro de mesas">'+[['all','Todas'],['busy','Ocupadas'],['free','Livres']].map(([k,l])=>'<button type="button" data-w-filter="'+k+'" aria-pressed="'+(tableFilter===k)+'">'+l+'</button>').join('')+'</div><div class="wg-tables">';
+  +'<div class="wg-table-filters" role="group" aria-label="Filtro de mesas">'+[['all','Todas'],['busy','Ocupadas'],['free','Livres']].map(([k,l])=>'<button type="button" data-w-filter="'+k+'" aria-pressed="'+(tableFilter===k)+'">'+l+'</button>').join('')+'</div><button type="button" class="wg-delivery-shortcut" id="wg-delivery-shortcut">'+icon('bike',20)+'<span>Novo delivery ou retirada</span>'+icon('chevronRight',16)+'</button><div class="wg-tables">';
   for(const t of visibleTables){
     const busy=occupied(t);
     html+='<button type="button" class="wg-table'+(t.id===selectedId?' selected':'')+'" data-w-table="'+esc(t.id)+'" aria-current="'+(t.id===selectedId)+'" aria-label="Mesa '+esc(t.label)+', '+(busy?'ocupada':'livre')+'"><span class="wg-table-name"><span class="wg-table-icon" aria-hidden="true">'+icon('table',24)+'</span><span class="wg-table-label">'+esc(t.label)+'</span></span><span class="wg-table-meta"><span><i class="wg-dot'+(busy?' busy':'')+'"></i>'+(busy?'Ocupada':'Livre')+'</span><span>'+esc(t.area??'Salão')+'</span></span></button>';
@@ -103,6 +105,7 @@ export async function renderPage({supabase,restaurant,box,esc,link}){
   box(html);
   const shortcut=document.getElementById('wg-cart-shortcut');if(shortcut)shortcut.onclick=()=>showView('comanda');
   document.getElementById('wg-add-menu')?.addEventListener('click',()=>openMenu('quick'));
+  document.getElementById('wg-delivery-shortcut')?.addEventListener('click',startDelivery);
   document.getElementById('wg-more-menu')?.addEventListener('click',()=>openMenu('more'));
   document.getElementById('wg-desktop-more')?.addEventListener('click',()=>openMenu('more'));
   document.querySelectorAll('[data-w-filter]').forEach(b=>b.onclick=()=>{tableFilter=b.dataset.wFilter;render()});
@@ -140,6 +143,9 @@ export async function renderPage({supabase,restaurant,box,esc,link}){
   document.querySelectorAll('[data-w-add]').forEach(b=>b.onclick=()=>openProduct(products.find(p=>p.id===b.dataset.wAdd),activeOrder));
  }
 
+ function startDelivery(){
+  openWaiterDelivery({supabase,restaurant,products:snapshot?.products??[],afterCreated:()=>reload(true)});
+ }
  function isInstalled(){return window.matchMedia?.('(display-mode: standalone)')?.matches===true||window.navigator.standalone===true}
  function openMenu(kind){
   document.querySelector('dialog.wg-action-sheet[open]')?.close();
@@ -152,6 +158,7 @@ export async function renderPage({supabase,restaurant,box,esc,link}){
   top.append(h,close);wrap.append(top);
   const actions=kind==='quick'
    ?[{ico:'table',name:'Selecionar mesa',note:'Ver as mesas do restaurante',run:()=>showView('mesas')},
+     {ico:'bike',name:'Novo delivery / retirada',note:'Pedido externo, sem mesa',run:startDelivery},
      {ico:'burger',name:'Abrir cardápio',note:'Consultar e adicionar produtos',run:()=>showView('cardapio')},
      {ico:'receipt',name:'Ver comanda',note:'Acompanhar o pedido selecionado',run:()=>showView('comanda')}]
    :[{ico:'user',name:'Minha conta',note:'Informações e segurança',run:()=>location.assign(link('/minha-conta'))},
