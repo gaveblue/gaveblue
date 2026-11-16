@@ -12,7 +12,7 @@ export function openThermalReceipt({title,content}){
   .iv-print-toolbar{max-width:360px;margin:16px auto;padding:0 12px;display:flex;justify-content:space-between;align-items:center;gap:9px}
   .iv-print-toolbar span{font:600 12px Arial,sans-serif;color:#556070}
   .iv-print-toolbar button{background:#ff7600;color:white;border:0;border-radius:10px;padding:12px 16px;font:700 13px Arial,sans-serif;cursor:pointer}
-  #iv-receipt-paper{display:block;width:58mm;margin:0 auto 20px;padding:3mm 3.5mm 3mm;background:white;color:#111;overflow-wrap:anywhere;box-shadow:0 6px 22px #1220331f}
+  #iv-receipt-paper{display:block;width:58mm;margin:0 auto 20px;padding:3mm 4.5mm 3mm;background:white;color:#111;overflow-wrap:anywhere;box-shadow:0 6px 22px #1220331f}
   h1{font-size:16px;font-weight:800;text-align:center;line-height:1.18;margin:1mm 0}
   p{margin:1.5mm 0}
   hr{border:0;border-top:1px dashed #555;margin:2.5mm 0}
@@ -28,7 +28,7 @@ export function openThermalReceipt({title,content}){
   @media print{
    html,body{width:58mm!important;height:auto!important;background:white!important;overflow:visible!important}
    .iv-print-toolbar{display:none!important}
-   #iv-receipt-paper{width:58mm!important;max-width:58mm!important;margin:0!important;padding:3mm 3.5mm 3mm!important;box-shadow:none!important;min-height:0!important;height:auto!important}
+   #iv-receipt-paper{width:58mm!important;max-width:58mm!important;margin:0!important;padding:3mm 4.5mm 3mm!important;box-shadow:none!important;min-height:0!important;height:auto!important}
    *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   }
  `;
