@@ -89,6 +89,7 @@ begin
  if v_order.id is null then raise exception 'Pedido não encontrado';end if;
  if v_order.status in ('rejected','cancelled','expired') then
   raise exception 'Não é possível registrar pagamento de pedido cancelado';end if;
+ if v_order.status='pending_acceptance' then raise exception 'O restaurante precisa aceitar o pedido antes de confirmar pagamento';end if;
  if v_order.payment_status='paid' then
   return jsonb_build_object('paid',true,'already_paid',true,'amount_cents',v_order.total_cents);
  end if;
