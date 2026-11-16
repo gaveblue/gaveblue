@@ -3,9 +3,9 @@
 **Especificação de planejamento — 15/11/2026**  
 **Projeto:** `gaveblue/gaveblue` → `intervalo/`  
 **Base conhecida:** 1.0.0-rc.16  
-**Próximo ciclo sugerido:** 1.1.0 (a numeração é uma proposta, não uma versão lançada)
+**Ciclo em execução:** 1.1.0-rc.1 (fundação técnica), com etapas posteriores planejadas.
 
-> **Status:** DOCUMENTAÇÃO, NÃO IMPLEMENTAÇÃO. Nenhum pedido online, checkout, tabela ou API nova está em produção por causa deste documento. Não habilitar recebimento de pedidos até completar homologação real.
+> **Status atualizado em 15/11/2026:** fundação 1.1.0-rc.1 implantada (11 tabelas, RLS, funções de consulta/configuração e vitrines de prévia). **Pedidos e checkout continuam DESLIGADOS.** Esta especificação também descreve fases futuras que ainda não existem.
 
 ## 1. Visão e decisões fechadas
 
@@ -171,6 +171,19 @@ Configuração de cobrança da plataforma a decidir: mensalidade SaaS, comissão
 
 ## 10. Limites desta especificação
 
-Baseado em inspeção do repositório e do schema real em 15/11/2026; as definições de novas tabelas e endpoints são **propostas**, não interfaces existentes. Não houve migração, deploy, ativação de pedidos, mudança em auth, funcionários ou permissões. As versões 1.1.0-rc.* acima são marcos propostos que só devem constar como entregues após código, testes e homologação verificável.
+Baseado em inspeção do repositório e do schema real em 15/11/2026. O modelo base foi implementado em 11 tabelas isoladas, mas o fluxo de compra, integração com Cozinha/Estoque/Caixa, tracking e cadastro funcional de consumidores continuam **propostas**, não serviços concluídos. Não houve ativação de pedidos, alteração de funcionários, permissões ou dos lançamentos presenciais.
 
-**Próxima tarefa de engenharia:** criar o pacote `rc.1` (migrations + políticas + contratos/API + testes de isolamento), **com feature flag de pedidos online desligada** e sem interferir em operações atuais.
+**Próxima tarefa de engenharia:** concluir homologação real de `rc.1` e evoluir `rc.2` (vitrine pública, horários e regiões editáveis), mantendo checkout bloqueado; depois avançar para `rc.3` e seguintes, somente com critérios de segurança e aceite.
+
+
+## 11. Registro de execução — fundação 1.1.0-rc.1
+
+**Aplicado no Supabase:** migração `intervalo_marketplace_foundation_rc1` com 11 tabelas, RLS ligado e nenhuma permissão de leitura direta para `anon` ou `authenticated`; seeds com configurações e visibilidade inicialmente `false`.
+
+**APIs implantadas:** `marketplace-public` v1 (leitura pública de vitrines e lojas) e `marketplace-management` v2 (configuração de rascunho restrita a Master/gerente autorizado). Nenhuma API permite checkout ou pedidos.
+
+**Interface no código:** `/intervalo/explorar`, `/intervalo/loja/:slug` (consulta real), `/intervalo/:slug/vendas-online` (configurações), além de páginas inativas de checkout, pedidos e perfil do consumidor. `novo-mundo` pode ser usado para prévia direta da loja; a busca pública só lista lojas que optaram por exibição, portanto a lista começa vazia.
+
+**Homologação:** verificação de permissões, migração e renderização simulada passou; funcionamento autenticado no PWA e propagação no domínio dependem de testes reais. Ver `QA-MARKETPLACE-1.1.0-RC1.md`.
+
+**Pendente:** checkout guest, prevenção de fraude/rate limit, cálculo transacional de frete/preço, aceite de pedido, integração com Cozinha/Estoque/Caixa, pagamento, acompanhamento, edição de zonas e horários, CPF opcional do cliente, privacidade/LGPD. **Não é uma plataforma de pedidos online pronta para o público.**
