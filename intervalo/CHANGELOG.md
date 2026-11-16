@@ -1,5 +1,17 @@
 # Intervalo — CHANGELOG
 
+## 1.1.0-rc.13 — 2026-11-16 · Correção do bottom sheet Ações rápidas na Gestão
+
+**Status:** código atualizado no GitHub `main`, com verificação sintática do JavaScript e conferência de estilos, rotas e cache. **Teste visual no Android e propagação no domínio ainda pendentes.**
+
+- Corrigido o bug de alinhamento mostrado no celular: o CSS antigo dava `flex:1` aos três `span` de cada opção, deslocando o título e a seta para o meio do bottom sheet e deixando uma área vazia à direita.
+- Cada ação passa a ter **ícone com largura fixa, título/descrição flexível e seta alinhada à direita**, sem colunas artificiais.
+- Bottom sheet responsivo com altura máxima limitada, lista rolável, tamanho de toque adequado e respeito à área segura do Android.
+- Ações rápidas passam a exibir Garçom, **Cozinha**, **Caixa**, Mesas, Cardápio e Estoque de acordo com permissões já existentes; `Mais` conserva as opções administrativas.
+- A alça superior permite fechar deslizando para baixo; fechamento por X, toque no fundo e Escape permanece.
+- Atualizado cache do módulo Gestão em `index.html` (`management.js?v=1.1.0-rc.13`) e CSS isolado (`management-design-rc11.css?v=1.0.0-rc.13`).
+- Não há mudanças na autenticação, pedidos, Pix, caixa, estoque ou políticas Supabase. Sem GitHub Actions.
+
 ## 1.1.0-rc.11 — 2026-11-16 · Pedidos da Loja Online integrados à Cozinha
 
 **Status:** correção no código publicada na `main`; validação sintática, simulação visual e teste transacional SQL concluídos. **Publicação no domínio e teste visual em celular ainda não confirmados.**
