@@ -55,6 +55,7 @@ body.iv-initializing #app{min-height:100dvh;display:block}
 </style>
 <link rel="stylesheet" href="/intervalo/design-system.css?v=1.0.0-rc.15">
 <link rel="stylesheet" href="/intervalo/visual-unified-rc15.css?v=1.0.0-rc.15">
+<link rel="stylesheet" href="/intervalo/form-enhancements-rc14.css?v=1.1.0-rc.14">
 <script>
 /* O checkout já inicia com skeleton, sem alternar para a abertura genérica. */
 (function(){
@@ -137,6 +138,8 @@ window.setTimeout(function(){
 <script type="module">
 import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.50.0/+esm';
 import {icon} from '/intervalo/ui-icons.js?v=1.0.0-rc.3';
+import {initIntervaloFormUX} from '/intervalo/form-enhancements-rc14.js?v=1.1.0-rc.14';
+initIntervaloFormUX();
 const supabase=createClient('https://fynaaiazebydorzllwip.supabase.co','sb_publishable_mGpfDRlZ0MSaa9MV_xMJsg_FT47wa_d',{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:!(location.pathname.startsWith('/intervalo/cliente')||(new URLSearchParams(location.search).get('intervalo_route')||'').startsWith('/intervalo/cliente')),flowType:'implicit',storageKey:'intervalo.auth.v1'}});
 const app=document.getElementById('app'),nav=document.getElementById('nav');
 function finishBoot(){document.body.classList.remove('iv-initializing')}
