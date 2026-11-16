@@ -201,6 +201,7 @@ export async function renderCheckout({supabase,box,esc,link}){
  const openSheet=key=>{
   const dialog=document.getElementById('iv-ck-sheet-'+key);if(!dialog)return;
   if(!dialog.open)dialog.showModal();
+  dialog.__ckAlign?.();
   dialog.classList.remove('iv-ck-expanded');
   dialog.querySelector('.iv-ck-sheet-scroll')?.scrollTo?.(0,0);
   dialog.querySelector('[data-ck-close]')?.focus?.({preventScroll:true});
@@ -232,11 +233,18 @@ export async function renderCheckout({supabase,box,esc,link}){
    dialog.style.bottom=keyboard+'px';
    dialog.style.setProperty('--iv-ck-visible-height',Math.max(260,Math.floor(height-8))+'px');
   };
-  dialog.addEventListener('close',()=>{dialog.style.bottom='';dialog.style.removeProperty('--iv-ck-visible-height')});
+  const detachViewport=()=>{
+   window.visualViewport?.removeEventListener('resize',align);
+   window.visualViewport?.removeEventListener('scroll',align);
+   dialog.style.bottom='';dialog.style.removeProperty('--iv-ck-visible-height');
+  };
+  dialog.__ckAlign=()=>{
+   window.visualViewport?.addEventListener('resize',align);
+   window.visualViewport?.addEventListener('scroll',align);
+   align();
+  };
+  dialog.addEventListener('close',detachViewport);
   dialog.addEventListener('focusin',align);dialog.addEventListener('click',align);
-  window.visualViewport?.addEventListener('resize',align,{signal:undefined});
-  window.visualViewport?.addEventListener('scroll',align,{signal:undefined});
-  dialog.addEventListener('toggle',align);
  }
  form.querySelectorAll('[data-ck-open]').forEach(button=>button.onclick=()=>openSheet(button.dataset.ckOpen));
  form.addEventListener('submit',event=>event.preventDefault());
