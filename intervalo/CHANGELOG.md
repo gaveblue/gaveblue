@@ -1,5 +1,19 @@
 # Intervalo — CHANGELOG
 
+## 1.1.0-rc.6 — 2026-11-16 · Loja Online redesenhada e carregamento unificado
+
+**Status:** alterações de frontend na `main`; validação sintática e renderização simulada aprovadas. **Propagação no domínio e homologação em navegador ainda pendentes.**
+
+- Reorganizada a Loja Online em vitrine, operação e regiões, recebimento e pedidos, com indicadores reais e ações compactas.
+- Removido o antigo aviso fixo de "marketplace em preparação" e os rótulos estáticos de pedidos desligados; os estados são exibidos conforme retorno de `marketplace-management`.
+- Formulários e ações originais preservados em bottom sheets já padronizados no Intervalo.
+- Substituído o loader interno `iv-loading-inline` por skeletons que imitam o layout final; a abertura inicial da rota `vendas-online` também adota o mesmo esqueleto.
+- CSS mobile-first, hierarquia visual da Gestão, ícones locais e estados vazios padronizados.
+- Cache dos imports de Loja Online, CSS e primeira tela renovado com `?v=1.1.0-rc.6`.
+- **Sem alteração de banco, roles, funcionários, cardápio, pedidos, estoque ou flags de vendas.** GitHub Actions não usado.
+- **QA:** `QA-1.1.0-RC6-LOJA-ONLINE.md`.
+
+
 ## 1.1.0-rc.5 — 2026-11-16 · Conta opcional do consumidor
 
 **Status:** banco e código enviados à `main`; RLS e sintaxe verificados. **Acesso real por navegador, propagação HTTP e homologação comercial pendentes.**
