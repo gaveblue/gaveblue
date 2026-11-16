@@ -70,6 +70,7 @@ export async function renderCheckout({supabase,box,esc,link}){
   +'<span aria-hidden="true"></span></div><header class="iv-ck-sheet-header"><div>'
   +'<h2 id="iv-ck-title-'+key+'">'+title+'</h2><p>'+description+'</p></div>'
   +'<button type="button" class="iv-ck-icon-btn" data-ck-close aria-label="Fechar">'+icon('x',19)+'</button></header>'
+  +'<p class="iv-ck-sheet-error" id="iv-ck-error-'+key+'" role="alert" hidden></p>'
   +'<div class="iv-ck-sheet-scroll">'+content+'</div>'
   +'<footer class="iv-ck-sheet-footer"><button type="button" class="iv-ck-button" data-ck-done>Concluir '+icon('check',16)+'</button></footer></div></dialog>';
  const details=(iconName,title,description,key)=>'<button type="button" class="iv-ck-edit-card" data-ck-open="'+key+'">'
@@ -159,6 +160,10 @@ export async function renderCheckout({supabase,box,esc,link}){
  const quoteBtn=document.getElementById('iv-quote'),placeBtn=document.getElementById('iv-place'),errorEl=document.getElementById('iv-checkout-error');
  let quote=null,fingerprint='',busy=false;
  const warn=message=>{errorEl.textContent=message;errorEl.hidden=!message;if(message)errorEl.scrollIntoView?.({block:'nearest',behavior:'smooth'})};
+ const sheetError=(key,message)=>{
+  const el=document.getElementById('iv-ck-error-'+key);
+  if(el){el.textContent=message;el.hidden=!message}
+ };
  const getData=()=>{
   const fd=new FormData(form),kind=fd.get('kind')??defaultKind,needsAddress=kind==='delivery';
   const address=needsAddress?{
@@ -182,6 +187,7 @@ export async function renderCheckout({supabase,box,esc,link}){
  const reset=()=>{
   quote=null;fingerprint='';placeBtn.hidden=true;quoteBtn.hidden=false;
   fee.textContent='A calcular';total.textContent='—';stickyTotal.textContent='A calcular';warn('');
+  for(const key of ['address','contact','payment'])sheetError(key,'');
  };
  const syncPreviews=()=>{
   const fd=new FormData(form),kind=fd.get('kind')??defaultKind,hasDelivery=kind==='delivery';
@@ -276,9 +282,11 @@ export async function renderCheckout({supabase,box,esc,link}){
   if(!req.items.length)throw Error('Seu carrinho está vazio.');
   if(req.fulfillment_type==='delivery'&&(!req.zone_id||!req.address.street||!req.address.number||
    !req.address.neighborhood||!req.address.city||req.address.postal_code.length!==8)){
+   sheetError('address','Informe região, CEP e endereço de entrega completo.');
    openSheet('address');throw Error('Informe região, CEP e endereço de entrega completo.');
   }
   if(req.customer_name.length<2||req.customer_phone.replace(/\D/g,'').length<10){
+   sheetError('contact','Informe nome e celular válidos.');
    openSheet('contact');throw Error('Informe nome e celular válidos.');
   }
  };
