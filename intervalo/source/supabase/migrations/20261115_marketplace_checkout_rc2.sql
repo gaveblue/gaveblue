@@ -168,8 +168,9 @@ begin
  end loop;
  if v_subtotal<v_settings.minimum_order_cents
  then raise exception 'Pedido abaixo do mínimo do restaurante';end if;
- if p_kind='delivery' and v_subtotal<v_zone.minimum_order_cents
- then raise exception 'Pedido abaixo do mínimo da região de entrega';end if;
+ if p_kind='delivery' then
+  if v_subtotal<v_zone.minimum_order_cents then raise exception 'Pedido abaixo do mínimo da região de entrega';end if;
+ end if;
  return jsonb_build_object('restaurant_id',p_restaurant,'fulfillment_type',p_kind,
   'subtotal_cents',v_subtotal,'delivery_fee_cents',v_fee,'discount_cents',0,
   'total_cents',v_subtotal+v_fee,'items',v_rows,'expires_in_seconds',180,
