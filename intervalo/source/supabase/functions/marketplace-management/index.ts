@@ -72,11 +72,27 @@ Deno.serve(async(req:Request)=>{
   const estimated_prep_minutes=integer(body.estimated_prep_minutes,5,240);
   const notes=text(body.notes,500);
   if(minimum_order_cents===null||estimated_prep_minutes===null||notes.length>500)return error("Valores ou instruções inválidos");
-  const [storeSave,onlineSave]=await Promise.all([
-   db.from("restaurant_storefront").upsert({restaurant_id,display_name:name,description,cuisine_tags,updated_at:new Date().toISOString()},{onConflict:"restaurant_id"}),
-   db.from("restaurant_online_settings").upsert({restaurant_id,enabled:false,delivery_enabled,pickup_enabled,minimum_order_cents,estimated_prep_minutes,notes,updated_at:new Date().toISOString()},{onConflict:"restaurant_id"})
+  // Preservar visibilidade, mídia, pausa e prazo ao salvar somente campos de rascunho.
+  const [priorStore,priorOnline]=await Promise.all([
+   db.from("restaurant_storefront").select("marketplace_visible,logo_url,banner_url").eq("restaurant_id",restaurant_id).maybeSingle(),
+   db.from("restaurant_online_settings").select("paused,acceptance_timeout_minutes").eq("restaurant_id",restaurant_id).maybeSingle()
   ]);
-  if(storeSave.error||onlineSave.error)return error("Não foi possível salvar a loja",503);
+  if(priorStore.error||priorOnline.error)return error("Não foi possível conferir as configurações atuais",503);
+  const now=new Date().toISOString();
+  const storeSave=await db.from("restaurant_storefront").upsert({
+   restaurant_id,display_name:name,description,cuisine_tags,
+   marketplace_visible:priorStore.data?.marketplace_visible??false,
+   logo_url:priorStore.data?.logo_url??null,banner_url:priorStore.data?.banner_url??null,
+   updated_at:now
+  },{onConflict:"restaurant_id"});
+  if(storeSave.error)return error("Não foi possível salvar a vitrine",503);
+  const onlineSave=await db.from("restaurant_online_settings").upsert({
+   restaurant_id,enabled:false,delivery_enabled,pickup_enabled,minimum_order_cents,estimated_prep_minutes,notes,
+   paused:priorOnline.data?.paused??false,
+   acceptance_timeout_minutes:priorOnline.data?.acceptance_timeout_minutes??10,
+   updated_at:now
+  },{onConflict:"restaurant_id"});
+  if(onlineSave.error)return error("Não foi possível salvar as condições de venda",503);
   return reply({saved:true,checkout_available:false,customer_orders_enabled:false});
  }
  if(action==="set_visible"){
