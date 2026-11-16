@@ -1,6 +1,7 @@
 import {icon} from './ui-icons.js?v=1.0.0-rc.1';
 import {sheetifyForms,showFormSheetError} from './operational-sheets-rc15.js?v=1.0.0-rc.15';
 import {initInfinitePaySettings} from './marketplace-infinitepay-settings-rc8.js?v=1.1.0-rc.9';
+import {initManualPixSettings} from './marketplace-manual-pix-settings-rc10.js?v=1.1.0-rc.10';
 
 // Gestão > Loja Online. Painel rc6; estado e permissões decididos no backend.
 export async function renderPage({supabase,restaurant,role,box,esc,link}){
@@ -111,6 +112,7 @@ export async function renderPage({supabase,restaurant,role,box,esc,link}){
    +icon(salesActive?'x':'checkCircle',16)+(salesActive?' Desativar pedidos':' Ativar recebimento')+'</button>'
    +'<p class="iv-on-hint">A ativação exige confirmação do Master e configurações válidas.</p>'
    +'</section>'
+   +'<section class="iv-on-card" id="iv-on-manual-pix"></section>'
    +'<section class="iv-on-card" id="iv-on-infinitepay"></section>'
    +'<section class="iv-on-card"><div class="iv-on-card-heading"><span class="iv-on-card-icon">'+icon('bag',19)+'</span>'
    +'<div><h2>Pedidos recebidos</h2><p>Acompanhe os pedidos de delivery e retirada.</p></div>'
@@ -146,6 +148,7 @@ export async function renderPage({supabase,restaurant,role,box,esc,link}){
   box(out);
   initialized=true;
   void initInfinitePaySettings({supabase,restaurant,role,esc});
+  void initManualPixSettings({supabase,restaurant,role,esc});
   const form=document.getElementById('iv-online-draft');
   form.onsubmit=async e=>{
    e.preventDefault();
@@ -251,21 +254,28 @@ export async function renderPage({supabase,restaurant,role,box,esc,link}){
    if(error||data?.error)throw Error(data?.error??error?.message??'Falha ao consultar pedidos');
    return data;
   };
-  const statuses={pending_acceptance:'Aguardando aceite',accepted:'Aceito',preparing:'Em preparo',ready:'Pronto',ready_for_pickup:'Pronto para retirada',out_for_delivery:'Saiu para entrega',delivered:'Entregue',picked_up:'Retirado',rejected:'Recusado',cancelled:'Cancelado'};
-  const availableActions=o=>o.status==='pending_acceptance'?['accepted','rejected']:o.status==='accepted'?['preparing','cancelled']:o.status==='preparing'?[o.fulfillment_type==='pickup'?'ready_for_pickup':'ready']:o.status==='ready'?['out_for_delivery']:o.status==='out_for_delivery'?['delivered']:o.status==='ready_for_pickup'?['picked_up']:[];
+  const statuses={pending_acceptance:'Aguardando aceite',accepted:'Aceito',preparing:'Em preparo',ready:'Pronto',ready_for_pickup:'Pronto para retirada',out_for_delivery:'Saiu para entrega',delivered:'Entregue',picked_up:'Retirado',rejected:'Recusado',cancelled:'Cancelado',expired:'Expirado'};
+  const availableActions=o=>o.status==='pending_acceptance'?(o.payment_method==='manual_pix'?['rejected']:['accepted','rejected']):o.status==='accepted'?['preparing','cancelled']:o.status==='preparing'?[o.fulfillment_type==='pickup'?'ready_for_pickup':'ready']:o.status==='ready'?['out_for_delivery']:o.status==='out_for_delivery'?['delivered']:o.status==='ready_for_pickup'?['picked_up']:[];
   async function refreshOrders(){
    const refreshButton=document.getElementById('iv-on-orders-refresh');
    if(refreshButton){refreshButton.disabled=true;refreshButton.setAttribute('aria-busy','true')}
    try{
     const result=await ops('list'),orders=result.orders??[],items=result.items??[];
+    const charges=new Map((result.manual_pix_charges??[]).map(x=>[x.order_id,x]));
     let html='';
     for(const o of orders){
      const rows=items.filter(i=>i.order_id===o.id);
      html+='<div class="iv-on-order"><div class="iv-on-row"><strong>'+esc(o.public_code)+'</strong><span class="iv-on-status">'+esc(statuses[o.status]??o.status)+'</span></div>';
      html+='<p>'+esc(o.customer_name)+' · '+esc(o.customer_phone)+' · '+(o.fulfillment_type==='delivery'?'DELIVERY':'RETIRADA')+'</p>';
      html+=rows.map(i=>'<p>'+esc(i.quantity)+'× '+esc(i.product_name)+(i.note?' · '+esc(i.note):'')+'</p>').join('');
-     html+='<div class="iv-on-row"><strong>'+money(o.total_cents)+'</strong><span>'+(o.payment_status==='paid'?'Pago':'Pagamento pendente')+'</span></div>';
-     html+='<div class="iv-on-order-actions">'+availableActions(o).map(state=>'<button type="button" class="iv-on-button" data-order-id="'+esc(o.id)+'" data-status="'+state+'">'+esc(statuses[state]??state)+'</button>').join('');
+     const manualCharge=charges.get(o.id);
+     html+='<div class="iv-on-row"><strong>'+money(o.total_cents)+'</strong><span>'+(o.payment_status==='paid'?'Pago':o.payment_method==='manual_pix'?(manualCharge?.reported_at?'Pix informado · conferir no banco':'Aguardando Pix · 10 min'):'Pagamento pendente')+'</span></div>';
+     html+='<div class="iv-on-order-actions">';
+     if(o.payment_method==='manual_pix'&&o.status==='pending_acceptance'){
+      if(manualCharge?.reported_at)html+='<button type="button" class="iv-on-button" data-manual-pix-accept="'+esc(o.id)+'" data-amount="'+esc(money(o.total_cents))+'">Conferi o Pix · aceitar pedido</button>';
+      else html+='<span class="iv-on-hint">Aguardando cliente informar pagamento (limite 10 minutos)</span>';
+     }
+     html+=availableActions(o).map(state=>'<button type="button" class="iv-on-button" data-order-id="'+esc(o.id)+'" data-status="'+state+'">'+esc(statuses[state]??state)+'</button>').join('');
      if(o.payment_status!=='paid'&&!['rejected','cancelled','expired','pending_acceptance'].includes(o.status))
       html+='<button type="button" class="iv-on-button secondary" data-online-pay="'+esc(o.id)+'">Registrar recebimento</button>';
      html+='</div></div>';
@@ -275,6 +285,12 @@ export async function renderPage({supabase,restaurant,role,box,esc,link}){
      if(['rejected','cancelled','delivered','picked_up'].includes(b.dataset.status)&&!confirm('Confirma esta alteração?'))return;
      b.disabled=true;
      try{await ops('transition',{order_id:b.dataset.orderId,target:b.dataset.status});await refreshOrders()}
+     catch(e){alert(e.message);b.disabled=false}
+    });
+    ordersArea.querySelectorAll('[data-manual-pix-accept]').forEach(b=>b.onclick=async()=>{
+     if(!confirm('Você conferiu no EXTRATO da conta que recebeu exatamente '+b.dataset.amount+'? O comprovante ou botão Já paguei não bastam. Ao confirmar, o pedido será ACEITO.'))return;
+     b.disabled=true;
+     try{await ops('accept_manual_pix',{order_id:b.dataset.manualPixAccept});await refreshOrders()}
      catch(e){alert(e.message);b.disabled=false}
     });
     ordersArea.querySelectorAll('[data-online-pay]').forEach(b=>b.onclick=async()=>{
