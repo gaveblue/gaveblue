@@ -7,7 +7,8 @@ export async function renderCheckout({supabase,box,esc,link}){
  const css='<link rel="stylesheet" href="/intervalo/marketplace-preview-rc1.css?v=1.1.0-rc.4"><link rel="stylesheet" href="/intervalo/marketplace-commerce-rc4.css?v=1.1.0-rc.4">';
  const slug=new URLSearchParams(location.search).get('loja');
  const safe=/^[a-z0-9]+(?:-[a-z0-9]+)*$/;
- const page=x=>box('<div class="iv-mkt-shell">'+css+'<nav class="iv-mkt-nav"><a class="iv-mkt-brand" href="'+link('/explorar')+'">intervalo</a><div class="iv-mkt-links"><a href="'+link('/loja/'+slug)+'">'+icon('arrowLeft',17)+' Loja</a></div></nav>'+x+'</div>');
+ const storeHref=slug&&safe.test(slug)?link('/loja/'+slug):link('/explorar');
+ const page=x=>box('<div class="iv-mkt-shell">'+css+'<nav class="iv-mkt-nav"><a class="iv-mkt-brand" href="'+link('/explorar')+'">intervalo</a><div class="iv-mkt-links"><a href="'+storeHref+'">'+icon('arrowLeft',17)+' Loja</a></div></nav>'+x+'</div>');
  const issue=(msg,back)=>page('<section class="iv-mkt-empty" style="margin:35px 0"><h2>'+esc(msg)+'</h2><a class="iv-mkt-action" href="'+link(back??'/explorar')+'">Voltar</a></section>');
  if(!slug||!safe.test(slug))return issue('Loja não encontrada');
  let cart=loadCart(slug);
