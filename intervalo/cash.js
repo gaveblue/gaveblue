@@ -63,7 +63,27 @@ export async function renderPage({supabase,restaurant,box,esc,link}){
       if(!open)out+='<p class="c-muted">Abra uma sessão de caixa para registrar pagamentos.</p>';
     }else out+='<div class="iv-empty">Aguardando uma comanda servida.</div>';
     out+='</aside></div>';
+    const onlinePaid=onlinePayments.reduce((n,x)=>n+Number(x.amount_cents),0);
+    out+='<section class="c-card" style="margin-top:15px"><div class="c-pane-title"><h2>Delivery e retirada · Caixa</h2><span class="iv-chip orange">'+onlineOrders.length+'</span></div>';
+    out+='<p class="c-muted">Recebimentos confirmados nesta sessão: '+money(onlinePaid)+'. Não misturados às comandas presenciais.</p>';
+    for(const o of onlineOrders){
+      out+='<div class="c-queue-item"><div><b>'+esc(o.public_code)+'</b><small>'+(o.fulfillment_type==='delivery'?'Delivery':'Retirada')+' · '+esc(o.status)+'</small></div><div><b>'+money(o.total_cents)+'</b><small>'+(o.payment_status==='paid'?'Pago':'Pendente')+'</small></div>';
+      if(o.payment_status!=='paid'&&!['pending_acceptance','rejected','cancelled','expired'].includes(o.status))out+='<button type="button" class="iv-btn" data-online-payment="'+esc(o.id)+'">Confirmar recebimento</button>';
+      out+='</div>';
+    }
+    if(!onlineOrders.length)out+='<div class="iv-empty">Ainda não há vendas online para este restaurante.</div>';
+    out+='</section>';
     box(out);
+    document.querySelectorAll('[data-online-payment]').forEach(b=>b.onclick=async()=>{
+      const method=prompt('Pagamento recebido: pix, card ou cash (dinheiro)');
+      if(!['pix','card','cash'].includes(method??''))return;
+      if(!confirm('Confirma o recebimento real deste pagamento?'))return;
+      b.disabled=true;
+      try{const res=await supabase.functions.invoke('marketplace-operations',{body:{restaurant_id:restaurant.id,action:'pay',order_id:b.dataset.onlinePayment,method}});
+        if(res.error||res.data?.error)throw Error(res.data?.error??res.error?.message??'Pagamento não registrado');
+        await reload();
+      }catch(e){alert(e.message);b.disabled=false}
+    });
     document.querySelectorAll('[data-cash-select]').forEach(button=>button.onclick=()=>{selectedOrderId=button.dataset.cashSelect;reload()});
     document.querySelectorAll('[data-receipt]').forEach(button=>button.onclick=()=>{
       const order=(ordersData.orders??[]).find(o=>o.id===button.dataset.receipt);
