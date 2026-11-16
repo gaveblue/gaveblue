@@ -21,7 +21,7 @@ export function saveThermalProfile(value){
   margin:clamp(Number(value.margin)||0,0,4),
   feed:clamp(Number(value.feed)||0,0,12)
  };
- localStorage.setItem(PROFILE_KEY,JSON.stringify(p));
+ try{localStorage.setItem(PROFILE_KEY,JSON.stringify(p))}catch{}
  return p;
 }
 const escapeText=s=>String(s??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
