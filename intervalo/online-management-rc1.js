@@ -73,6 +73,7 @@ export async function renderPage({supabase,restaurant,role,box,esc,link}){
    +'<div class="iv-on-row"><span class="iv-on-status '+(online.enabled?'ready':'')+'">'+(online.enabled?'Pedidos ativos':'Pedidos desligados')+'</span>'
    +'<button type="button" class="iv-on-button" id="iv-on-toggle">'+(online.enabled?'Desativar pedidos':'Ativar pedidos online')+'</button></div></section>';
 
+  out+='<section class="iv-on-panel"><div class="iv-on-row"><div><h2>Pedidos recebidos</h2><p>Aceite, acompanhe e confirme as entregas do restaurante.</p></div><button type="button" class="iv-on-button secondary" id="iv-on-orders-refresh">Atualizar</button></div><div id="iv-on-orders-list"><p>Consultando pedidos online...</p></div></section>';
   box(out);
   const form=document.getElementById('iv-online-draft');
   form.onsubmit=async e=>{
