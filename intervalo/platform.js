@@ -1,6 +1,6 @@
 // Intervalo — painel da Gaveblue: restaurantes, convites Master e módulos.
 import {icon} from './ui-icons.js?v=1.0.0-rc.1';
-import {sheetifyForms} from './operational-sheets-rc15.js?v=1.0.0-rc.15';
+import {sheetifyForms,showFormSheetError} from './operational-sheets-rc15.js?v=1.0.0-rc.15';
 export async function renderPlatform({supabase,box,esc,link}){
  document.body.classList.add('iv-fullwidth','iv-platform');
  const css='<style>.p-grid{display:grid;grid-template-columns:1fr 1.2fr;gap:16px}.p-card{border:1px solid #e2e8f0;border-radius:14px;padding:20px;background:#fff;margin:13px 0}.p-form label{display:block;margin:12px 0;font-weight:700;font-size:12px}.p-form input,.p-form select{display:block;width:100%;margin-top:7px;padding:11px;border:1px solid #cbd5e1;border-radius:9px}.p-btn{padding:11px 14px;background:#0f766e;color:white;border:0;border-radius:9px;cursor:pointer;font-size:12px;font-weight:700}.p-btn.alt{background:#e2e8f0;color:#334155}.p-btn.danger{background:#fff1f2;color:#9f1239}.p-modules{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}.p-module{border:1px solid #cbd5e1;border-radius:8px;background:#fff;color:#334155;padding:9px 10px;font-size:12px;cursor:pointer}.p-module.on{border-color:#99f6e4;background:#f0fdfa;color:#115e59;font-weight:750}.p-info{color:#64748b;font-size:12px}@media(max-width:800px){.p-grid{grid-template-columns:1fr}}</style>';
@@ -88,7 +88,7 @@ export async function renderPlatform({supabase,box,esc,link}){
  function bindCreateForm(){
    const form=document.getElementById('platform-new');
    if(!form)return;
-   form.onsubmit=async e=>{e.preventDefault();const b=form.querySelector('button');b.disabled=true;try{const v=Object.fromEntries(new FormData(form).entries());const r=await call('admin-provision',{action:'create',...v});alert('Restaurante criado com sucesso! O cadastro não exigiu e-mail ou confirmação. Defina o responsável depois, no card do restaurante.');await reload()}catch(ex){alert(ex.message);b.disabled=false}};
+   form.onsubmit=async e=>{e.preventDefault();const b=form.querySelector('button');b.disabled=true;try{const v=Object.fromEntries(new FormData(form).entries());const r=await call('admin-provision',{action:'create',...v});alert('Restaurante criado com sucesso! O cadastro não exigiu e-mail ou confirmação. Defina o responsável depois, no card do restaurante.');await reload()}catch(ex){if(!showFormSheetError(form,ex.message))alert(ex.message);b.disabled=false}};
    const newForm=document.getElementById('platform-new');
    if(newForm){
     const nameField=newForm.elements.namedItem('name'),slugField=newForm.elements.namedItem('slug');
