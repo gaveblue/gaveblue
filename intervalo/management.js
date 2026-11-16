@@ -7,7 +7,7 @@ export async function renderManagement({supabase,restaurant,role,box,esc,link}) 
  const defaults={master:modules,manager:modules,waiter:["garcom","cardapio"],kitchen:["cozinha","cardapio"],cashier:["caixa","cardapio"]};
  document.body.classList.add("iv-fullwidth","iv-master","iv-management-v2");
  let state={tab:"visao",data:null,overview:null};
- const sty='<link rel="stylesheet" href="/intervalo/management-design-rc11.css?v=1.0.0-rc.12"><style>.mtabs{display:flex;gap:8px;overflow:auto;margin:23px 0}.mtabs button{border:1px solid #dbe2e8;background:white;padding:11px 16px;border-radius:10px;font-size:13px;font-weight:700;color:#334155;white-space:nowrap}.mtabs button.selected{color:white;background:#0f766e;border-color:#0f766e}.mg{display:grid;grid-template-columns:1fr 1fr;gap:14px}.mg .full{grid-column:1/-1}.mg label{display:block;font-size:12px;font-weight:700;color:#475569;margin-bottom:7px}.mg input,.mg select{padding:11px;width:100%;border:1px solid #cbd5e1;border-radius:9px;background:white;color:#0f172a}.mg input:focus,.mg select:focus{outline:2px solid #99f6e4}.team-card{background:#fff;border:1px solid #dce4ec;border-radius:13px;padding:17px;margin:12px 0}.team-top{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center}.team-actions{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin-top:13px}.team-actions select{border-radius:8px;padding:9px;border:1px solid #cbd5e1}.smallbtn{border:1px solid #cbd5e1;background:#fff;color:#334155;border-radius:8px;padding:9px 12px;font-weight:700;font-size:12px}.smallbtn.danger{color:#b91c1c;border-color:#fecaca}.status{font-size:11px;border-radius:50px;background:#f1f5f9;padding:6px 10px;font-weight:750;color:#475569}.pgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:10px}.pitem{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:13px}.pitem strong{display:block;margin:0 0 8px}.pitem span{font-size:12px;color:#64748b}.pitem button{margin-top:9px}.onboarding-note{font-size:13px;padding:12px;background:#ecfdf5;border:1px solid #ccfbf1;border-radius:10px;color:#115e59}.muted-sm{font-size:12px;color:#64748b;line-height:1.6}@media(max-width:650px){.mg{grid-template-columns:1fr}.mg .full{grid-column:auto}.team-actions{align-items:stretch}}</style>';
+ const sty='<link rel="stylesheet" href="/intervalo/management-design-rc11.css?v=1.0.0-rc.13"><style>.mtabs{display:flex;gap:8px;overflow:auto;margin:23px 0}.mtabs button{border:1px solid #dbe2e8;background:white;padding:11px 16px;border-radius:10px;font-size:13px;font-weight:700;color:#334155;white-space:nowrap}.mtabs button.selected{color:white;background:#0f766e;border-color:#0f766e}.mg{display:grid;grid-template-columns:1fr 1fr;gap:14px}.mg .full{grid-column:1/-1}.mg label{display:block;font-size:12px;font-weight:700;color:#475569;margin-bottom:7px}.mg input,.mg select{padding:11px;width:100%;border:1px solid #cbd5e1;border-radius:9px;background:white;color:#0f172a}.mg input:focus,.mg select:focus{outline:2px solid #99f6e4}.team-card{background:#fff;border:1px solid #dce4ec;border-radius:13px;padding:17px;margin:12px 0}.team-top{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center}.team-actions{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin-top:13px}.team-actions select{border-radius:8px;padding:9px;border:1px solid #cbd5e1}.smallbtn{border:1px solid #cbd5e1;background:#fff;color:#334155;border-radius:8px;padding:9px 12px;font-weight:700;font-size:12px}.smallbtn.danger{color:#b91c1c;border-color:#fecaca}.status{font-size:11px;border-radius:50px;background:#f1f5f9;padding:6px 10px;font-weight:750;color:#475569}.pgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:10px}.pitem{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:13px}.pitem strong{display:block;margin:0 0 8px}.pitem span{font-size:12px;color:#64748b}.pitem button{margin-top:9px}.onboarding-note{font-size:13px;padding:12px;background:#ecfdf5;border:1px solid #ccfbf1;border-radius:10px;color:#115e59}.muted-sm{font-size:12px;color:#64748b;line-height:1.6}@media(max-width:650px){.mg{grid-template-columns:1fr}.mg .full{grid-column:auto}.team-actions{align-items:stretch}}</style>';
  function renderLoading(){
   const line=(size="")=>'<span class="mg-v2-skel mg-v2-skel-line '+size+'"></span>';
   const kp=Array.from({length:4},()=>'<div class="mg-v2-skel-card">'+line("long")+'<span class="mg-v2-skel mg-v2-skel-num"></span>'+line("tiny")+'</div>').join("");
@@ -186,10 +186,12 @@ export async function renderManagement({supabase,restaurant,role,box,esc,link}) 
    function openSheet(kind){
      document.querySelector("dialog.mg-v2-sheet[open]")?.close();
      const choices=kind==="quick"
-       ?[["route","mesas","Mesas","Consultar as mesas do restaurante","table"],
-         ["route","garcom","Garçom","Iniciar atendimento e lançar produtos","utensils"],
-         ["route","catalogo","Cardápio","Consultar produtos e categorias","receipt"],
-         ["route","estoque","Estoque","Produtos, insumos e saldos","package"]]
+       ?[["route","garcom","Garçom","Atendimento e pedidos","utensils"],
+         ["route","cozinha","Cozinha","Preparação dos pedidos","chef"],
+         ["route","caixa","Caixa","Recebimentos e fechamento","register"],
+         ["route","mesas","Mesas","Consultar ocupação","table"],
+         ["route","catalogo","Cardápio","Produtos e categorias","receipt"],
+         ["route","estoque","Estoque","Insumos e saldos","package"]]
        :[["tab","dados","Dados do restaurante","Endereço, telefone e cadastro","store"],
          ["route","relatorios","Relatórios","Indicadores gerenciais","chart"],
          ["tab","equipe","Equipe","Configurações existentes, sem alterações","users"],
@@ -201,13 +203,13 @@ export async function renderManagement({supabase,restaurant,role,box,esc,link}) 
      const dialog=document.createElement("dialog");dialog.className="mg-v2-sheet";
      dialog.setAttribute("aria-label",kind==="quick"?"Ações rápidas":"Mais opções");
      const rows=available.map(([type,path,label,note,symbol])=>{
-       const inner='<span>'+icon(symbol,19)+'</span><span>'+esc(label)+'<small>'+esc(note)+'</small></span><span class="mg-right-icon">'+icon("chevronRight",16)+'</span>';
+       const inner='<span class="mg-v2-sheet-symbol" aria-hidden="true">'+icon(symbol,19)+'</span><span class="mg-v2-sheet-text"><strong>'+esc(label)+'</strong><small>'+esc(note)+'</small></span><span class="mg-right-icon" aria-hidden="true">'+icon("chevronRight",16)+'</span>';
        return type==="tab"?
          '<button type="button" class="mg-v2-sheet-item" data-mg-sheet-tab="'+path+'">'+inner+'</button>':
          '<a class="mg-v2-sheet-item" href="'+(path==="inicio"?mainLink:link("/"+d.restaurant.slug+"/"+path))+'">'+inner+'</a>';
      }).join("");
-     dialog.innerHTML='<div class="mg-v2-sheet-handle"></div><div class="mg-v2-sheet-head"><h2>'+(kind==="quick"?"Ações rápidas":"Mais opções")+'</h2><button type="button" class="mg-v2-iconbtn" data-mg-sheet-close aria-label="Fechar">'+icon("x",19)+'</button></div>'
-       +(rows||'<p>Não há módulos habilitados para esta ação.</p>');
+     dialog.innerHTML='<div class="mg-v2-sheet-handle-area" aria-hidden="true"><span class="mg-v2-sheet-handle"></span></div><div class="mg-v2-sheet-head"><h2>'+(kind==="quick"?"Ações rápidas":"Mais opções")+'</h2><button type="button" class="mg-v2-iconbtn" data-mg-sheet-close aria-label="Fechar">'+icon("x",19)+'</button></div>'
+       +'<div class="mg-v2-sheet-list">'+(rows||'<p>Não há módulos habilitados para esta ação.</p>')+'</div>';
      document.body.append(dialog);
      dialog.addEventListener("close",()=>dialog.remove(),{once:true});
      dialog.addEventListener("click",e=>{
@@ -217,6 +219,11 @@ export async function renderManagement({supabase,restaurant,role,box,esc,link}) 
        if(tab){const next=tab.dataset.mgSheetTab;dialog.close();switchTab(next)}
      });
      dialog.showModal();
+     const grip=dialog.querySelector(".mg-v2-sheet-handle-area");
+     let dragY=null;
+     grip?.addEventListener("pointerdown",e=>{if(e.button!==0)return;dragY=e.clientY;grip.setPointerCapture?.(e.pointerId)});
+     grip?.addEventListener("pointerup",e=>{if(dragY!==null&&e.clientY-dragY>64&&dialog.open)dialog.close();dragY=null});
+     grip?.addEventListener("pointercancel",()=>{dragY=null});
    }
    shell?.querySelectorAll("[data-mg-sheet]").forEach(b=>b.addEventListener("click",()=>openSheet(b.dataset.mgSheet)));
 
