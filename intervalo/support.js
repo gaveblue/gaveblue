@@ -12,7 +12,7 @@ export async function renderPage({supabase,restaurant,module,box,esc,link}){
  const stockTabsAllowed=["insumos","produtos","fichas","historico"];
  let stockTab=stockTabsAllowed.includes(new URLSearchParams(location.search).get("aba"))?new URLSearchParams(location.search).get("aba"):"insumos";
  const moneyInput=n=>(Number(n??0)/100).toFixed(2).replace(".",",");
- const cents=value=>{const text=String(value??"").trim().replace(/\s/g,"").replace(",",".");if(!/^\d{1,7}(?:\.\d{1,2})?$/.test(text))throw Error("Informe um preço válido, como 24,90");const [a,b=""]=text.split(".");return Number(a)*100+Number((b+"00").slice(0,2))};
+ const cents=value=>{const raw=String(value??"").trim().replace(/\s/g,"");const text=raw.includes(",")?raw.replace(/\./g,"").replace(",","."):raw;if(!/^\d{1,8}(?:\.\d{1,2})?$/.test(text))throw Error("Informe um preço válido, como 24,90");const [a,b=""]=text.split(".");return Number(a)*100+Number((b+"00").slice(0,2))};
  async function load({quiet=false}={}){
   if(!quiet)box(title+'<div class="iv-loading-inline" role="status" aria-live="polite" aria-busy="true"><div class="iv-loading-inline-label"><span class="iv-load-dot" aria-hidden="true"></span><span>Buscando as informações...</span></div><div class="iv-loading-inline-lines" aria-hidden="true"><span class="iv-load-skeleton"></span><span class="iv-load-skeleton"></span></div></div>');
   try{
