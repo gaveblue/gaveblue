@@ -2,10 +2,11 @@
 // Formatação no próprio input: as APIs existentes continuam recebendo "24,90" (sem R$ e sem milhar).
 const digits=(value)=>String(value??'').replace(/\D/g,'');
 export function formatMoneyInput(value){
- const raw=digits(value).slice(0,9); // 7 inteiros + 2 centavos, compatível com parsers do Cardápio.
+ const raw=digits(value).slice(0,10); // Oito inteiros e dois centavos; limite de segurança.
  if(!raw)return '';
  const adjusted=raw.replace(/^0+(?=\d)/,'')||'0';
- return (adjusted.length>2?adjusted.slice(0,-2):'0')+','+adjusted.slice(-2).padStart(2,'0');
+ const whole=(adjusted.length>2?adjusted.slice(0,-2):'0').replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+ return whole+','+adjusted.slice(-2).padStart(2,'0');
 }
 export function formatCPF(value){
  const d=digits(value).slice(0,11);
