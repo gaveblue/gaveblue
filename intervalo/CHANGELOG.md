@@ -1,5 +1,28 @@
 # Intervalo — CHANGELOG
 
+## 1.0.0-rc.15 — 2026-11-15 · Padronização visual de todos os módulos operacionais
+
+**Status:** interface enviada à `main`; testes de sintaxe, inspeção de integrações e simulação DOM do Bottom Sheet aprovados. **Homologação técnica parcial**: teste real no PWA e propagação do host ainda não confirmados.
+
+- Criado `visual-unified-rc15.css` como estilo comum branco/laranja, com cards compactos, ícones, botões, responsividade, formulários, seleção de restaurantes, Login, Minha Conta, Cozinha, Impressão, Relatórios e Super Admin.
+- Criado `operational-sheets-rc15.js`, componente reutilizável de **Bottom Sheet**: ações compactas, alça arrastável, botão Fechar e Cancelar, viewport ajustado ao teclado, sem foco automático em campos editáveis, formulário original movido para `dialog` sem alterar a função de submit.
+- Validadores HTML (`required`, valores, `pattern`, tipo) passam a mostrar mensagens inline nos formulários convertidos; falhas de API nesses formulários exibidas no próprio painel, com campos preservados.
+- **Cardápio administrativo:** criar categoria e cadastrar adicional em Bottom Sheets, sem mudar operações de publicação.
+- **Estoque:** novo insumo, movimentações, nova categoria, cadastro/edição de produto e ficha técnica em Bottom Sheets; chaves de disponibilidade e cardápio permanecem independentes e com chamadas existentes.
+- **Caixa:** abertura e fechamento de caixa, além do recebimento confirmado manualmente, apresentados em Bottom Sheets. Nenhuma integração nova com Pix/adquirentes.
+- **Super Admin:** cadastro de restaurante em Bottom Sheet, sem modificar criação de funcionários, vínculos Master, senhas, convites ou permissões.
+- **Minha Conta:** formulário de vinculação/atualização de CPF movido a Bottom Sheet, mantendo `account-cpf` e exigências existentes de senha.
+- **Meus restaurantes:** cartões responsivos, mantendo as mesmas restrições de acesso, módulos habilitados e estados de convite.
+- **Login, Cozinha, Relatórios e Impressão:** acabamento visual aplicado com espaçamento, tipografia, cards e botões consistentes, preservando regras de operação. Relatórios mantêm dados reais do backend, **sem filtros de período fictícios**. Impressão permanece manual.
+- **Equipe e Permissões:** intocadas funcionalmente; CSS da plataforma restringido para não redesenhar cartões de funcionários.
+- Mantidos os aprimoramentos de **Gestão (rc.11/rc.12)** e **Mesas (rc.14)**.
+- `index.html` importa o design comum com cache `rc.15` e importa módulos alterados na mesma versão. Não exige migração nem Edge Function.
+- **QA:** compilação JS dos módulos, verificação de imports/cache, teste DOM do componente compartilhado com foco no Fechar, validação, reaproveitamento de `onsubmit`, erro inline e descarte do diálogo. Testes reais por tela permanecem pendentes.
+- **Rollback:** restaurar `index.html` e módulos frontend às revisões anteriores e deixar CSS/JS novos inativos. Nenhum rollback de dados.
+- **Sem GitHub Actions**, conforme restrição da infraestrutura.
+
+**Registro detalhado:** `QA-1.0.0-RC15.md`.
+
 ## 1.0.0-rc.14 — 2026-11-15 · Mesas em Bottom Sheet e auditoria de telas
 
 **Status:** interface enviada à branch `main`; QA de sintaxe e comportamento com DOM/API simulados passou. **Homologação parcial** até validar PWA autenticado e propagação do site.
