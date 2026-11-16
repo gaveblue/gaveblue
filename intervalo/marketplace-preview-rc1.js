@@ -8,7 +8,7 @@ export async function renderMarketplace({supabase,route,box,esc,link}){
  const nav=css+'<nav class="iv-mkt-nav" aria-label="Navegação do marketplace"><a class="iv-mkt-brand" href="'+link('/explorar')+'">intervalo</a>'
   +'<div class="iv-mkt-links"><span class="iv-mkt-preview">PRÉVIA</span><a href="'+link('/inicio')+'">'+icon('store',15)+' Gestão</a></div></nav>';
  const bottom=(active='inicio')=>'<nav class="iv-mkt-bottom" aria-label="Navegação do consumidor">'
-  +[['inicio','house','Início','/explorar'],['buscar','search','Buscar','/explorar'],['pedidos','receipt','Pedidos','/pedido'],['perfil','user','Perfil','/cliente']].map(([id,sym,label,to])=>'<a href="'+link(to)+'" class="'+(id===active?'active':'')+'">'+icon(sym,20)+esc(label)+'</a>').join('')+'</nav>';
+  +[['inicio','home','Início','/explorar'],['buscar','search','Buscar','/explorar'],['pedidos','receipt','Pedidos','/pedido'],['perfil','user','Perfil','/cliente']].map(([id,sym,label,to])=>'<a href="'+link(to)+'" class="'+(id===active?'active':'')+'">'+icon(sym,20)+esc(label)+'</a>').join('')+'</nav>';
  const page=(inner,active='inicio')=>box('<div class="iv-mkt-shell">'+nav+inner+bottom(active)+'</div>');
  const loading=()=>page('<div class="iv-mkt-hero"><div><span class="iv-mkt-eyebrow">INTERVALO MARKETPLACE</span><h1>Seu próximo pedido começa aqui</h1><p>Estamos preparando uma nova experiência de delivery.</p></div><div class="iv-mkt-icon-large">'+icon('store',54)+'</div></div><div class="iv-loading-inline" role="status" aria-busy="true"><span class="iv-load-dot" aria-hidden="true"></span> Preparando os restaurantes...</div>');
  const safePhoto=url=>typeof url==='string'&&/^https:\/\/[^\s<>"']+$/.test(url)?url:null;
