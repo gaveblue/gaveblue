@@ -382,7 +382,7 @@ async function tenant(user,slug,mod){
  if(!permitted){box('<section class="panel"><h1>Sem permissão</h1><p>Seu papel neste restaurante não permite abrir este módulo.</p></section>');return}
  if(!moduleRow?.enabled){box('<section class="panel"><h1>Módulo ainda não habilitado</h1><p>O Super Admin precisa habilitar este recurso para o estabelecimento.</p>'+btn('Meus restaurantes','/inicio')+'</section>');return}
  if(mod==='gestao'){
-  const {renderManagement}=await import('/intervalo/management.js?v=1.1.0-rc.4');
+  const {renderManagement}=await import('/intervalo/management.js?v=1.1.0-rc.13');
   return renderManagement({supabase,restaurant:m.restaurants,role:m.role,box,esc,link});
  }
  if(mod==='vendas-online'){
