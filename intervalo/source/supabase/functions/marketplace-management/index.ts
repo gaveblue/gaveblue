@@ -49,16 +49,16 @@ Deno.serve(async(req:Request)=>{
    db.from("restaurant_online_settings").select("enabled,delivery_enabled,pickup_enabled,paused,minimum_order_cents,estimated_prep_minutes,acceptance_timeout_minutes,notes").eq("restaurant_id",restaurant_id).maybeSingle(),
    db.from("restaurant_publication").select("is_published,accepts_customer_orders").eq("restaurant_id",restaurant_id).maybeSingle(),
    db.from("restaurant_modules").select("enabled").eq("restaurant_id",restaurant_id).eq("module","cardapio").maybeSingle(),
-   db.from("restaurant_business_hours").select("weekday,opens_at,closes_at,active").eq("restaurant_id",restaurant_id).order("weekday"),
-   db.from("restaurant_delivery_zones").select("id,name,city,state,fee_cents,minimum_order_cents,estimated_delivery_minutes,active").eq("restaurant_id",restaurant_id).order("name"),
+   db.from("restaurant_business_hours").select("weekday,opens_at,closes_at,active,delivery_enabled,pickup_enabled").eq("restaurant_id",restaurant_id).order("weekday"),
+   db.from("restaurant_delivery_zones").select("id,name,city,state,postal_code_from,postal_code_to,neighborhoods,fee_cents,minimum_order_cents,estimated_delivery_minutes,active").eq("restaurant_id",restaurant_id).order("name"),
    db.from("restaurant_settings").select("city,state").eq("restaurant_id",restaurant_id).maybeSingle()
   ]);
   if([store,online,pub,modules,hours,zones,place].some(x=>x.error))return error("Falha ao consultar configurações",503);
   return reply({restaurant:{id:r.id,name:r.name,slug:r.slug,city:place.data?.city??null,state:place.data?.state??null},
    storefront:store.data??null,online_settings:online.data??null,
-   publication:{is_published:pub.data?.is_published===true,cardapio_enabled:modules.data?.enabled===true,accepts_customer_orders:false},
+   publication:{is_published:pub.data?.is_published===true,cardapio_enabled:modules.data?.enabled===true,accepts_customer_orders:pub.data?.accepts_customer_orders===true},
    business_hours:hours.data??[],delivery_zones:zones.data??[],
-   checkout_available:false,marketplace_stage:"preview"});
+   checkout_available:online.data?.enabled===true&&pub.data?.accepts_customer_orders===true,marketplace_stage:online.data?.enabled?"active":"preview"});
  }
  if(action==="save_draft"){
   const name=text(body.display_name,120),description=text(body.description,1000);
@@ -75,7 +75,7 @@ Deno.serve(async(req:Request)=>{
   // Preservar visibilidade, mídia, pausa e prazo ao salvar somente campos de rascunho.
   const [priorStore,priorOnline]=await Promise.all([
    db.from("restaurant_storefront").select("marketplace_visible,logo_url,banner_url").eq("restaurant_id",restaurant_id).maybeSingle(),
-   db.from("restaurant_online_settings").select("paused,acceptance_timeout_minutes").eq("restaurant_id",restaurant_id).maybeSingle()
+   db.from("restaurant_online_settings").select("enabled,paused,acceptance_timeout_minutes").eq("restaurant_id",restaurant_id).maybeSingle()
   ]);
   if(priorStore.error||priorOnline.error)return error("Não foi possível conferir as configurações atuais",503);
   const now=new Date().toISOString();
@@ -87,7 +87,7 @@ Deno.serve(async(req:Request)=>{
   },{onConflict:"restaurant_id"});
   if(storeSave.error)return error("Não foi possível salvar a vitrine",503);
   const onlineSave=await db.from("restaurant_online_settings").upsert({
-   restaurant_id,enabled:false,delivery_enabled,pickup_enabled,minimum_order_cents,estimated_prep_minutes,notes,
+   restaurant_id,enabled:priorOnline.data?.enabled??false,delivery_enabled,pickup_enabled,minimum_order_cents,estimated_prep_minutes,notes,
    paused:priorOnline.data?.paused??false,
    acceptance_timeout_minutes:priorOnline.data?.acceptance_timeout_minutes??10,
    updated_at:now
@@ -108,6 +108,62 @@ Deno.serve(async(req:Request)=>{
   const result=await db.from("restaurant_storefront").upsert({restaurant_id,marketplace_visible:body.marketplace_visible,updated_at:new Date().toISOString()},{onConflict:"restaurant_id"});
   if(result.error)return error("Não foi possível atualizar a vitrine",503);
   return reply({marketplace_visible:body.marketplace_visible,checkout_available:false,customer_orders_enabled:false});
+ }
+ if(action==="save_hours"){
+  if(!Array.isArray(body.hours)||body.hours.length>28)return error("Informe até 28 faixas de horário");
+  const hours=body.hours.map((h:any)=>({
+   weekday:h.weekday,opens_at:h.opens_at,closes_at:h.closes_at,
+   delivery_enabled:h.delivery_enabled===true,pickup_enabled:h.pickup_enabled===true
+  }));
+  const {data,error:he}=await db.rpc("marketplace_replace_hours",{p_restaurant:restaurant_id,p_hours:hours});
+  if(he)return error(he.code==="P0001"?he.message:"Não foi possível atualizar horários",he.code==="P0001"?422:503);
+  return reply(data);
+ }
+ if(action==="zone_save"){
+  const name=text(body.name,90),city=text(body.city,100),state=text(body.state,2).toUpperCase();
+  const min=integer(body.minimum_order_cents,0,100000000);
+  const fee=integer(body.fee_cents,0,10000000);
+  const eta=integer(body.estimated_delivery_minutes,5,240);
+  if(name.length<2||name.length>90||city.length<2||city.length>100||!/^[A-Z]{2}$/.test(state)||
+     min===null||fee===null||eta===null)return error("Dados da região inválidos");
+  const from=text(body.postal_code_from,8).replace(/[^0-9]/g,"");
+  const to=text(body.postal_code_to,8).replace(/[^0-9]/g,"");
+  if((from||to)&&(!/^[0-9]{8}$/.test(from)||!/^[0-9]{8}$/.test(to)||from>to))
+   return error("Intervalo de CEP inválido");
+  if(!Array.isArray(body.neighborhoods)||body.neighborhoods.length>80)return error("Limite de bairros excedido");
+  const neighborhoods=body.neighborhoods.map(x=>text(x,100)).filter(x=>x.length>=2&&x.length<=100);
+  if(neighborhoods.length!==body.neighborhoods.length)return error("Bairros inválidos");
+  const values={restaurant_id,name,city,state,postal_code_from:from||null,postal_code_to:to||null,
+   neighborhoods,fee_cents:fee,minimum_order_cents:min,estimated_delivery_minutes:eta,
+   active:body.active===true,updated_at:new Date().toISOString()};
+  const id=body.id;
+  if(id!==null&&id!==undefined&&typeof id==="string"&&uuid.test(id)){
+   const {data,error:ze}=await db.from("restaurant_delivery_zones").update(values)
+    .eq("restaurant_id",restaurant_id).eq("id",id).select("id").maybeSingle();
+   if(ze)return error("Não foi possível atualizar a região",503);
+   if(!data)return error("Região não encontrada",404);
+   return reply({saved:true,id:data.id});
+  }
+  const {data,error:ze}=await db.from("restaurant_delivery_zones").insert(values).select("id").single();
+  if(ze)return error("Não foi possível cadastrar a região",503);
+  return reply({saved:true,id:data.id});
+ }
+ if(action==="zone_disable"){
+  if(typeof body.id!=="string"||!uuid.test(body.id))return error("Região inválida");
+  const {error:ze}=await db.from("restaurant_delivery_zones").update({active:false,updated_at:new Date().toISOString()})
+   .eq("restaurant_id",restaurant_id).eq("id",body.id);
+  if(ze)return error("Não foi possível desativar a região",503);
+  return reply({saved:true});
+ }
+ if(action==="set_sales_active"){
+  if(member.role!=="master")return error("Somente o Master pode ativar vendas online",403);
+  if(typeof body.enabled!=="boolean")return error("Ativação inválida");
+  if(body.enabled&&body.confirmation!=="HABILITAR PEDIDOS")return error("Confirmação de ativação obrigatória");
+  const {data,error:se}=await db.rpc("marketplace_set_sales_enabled",{
+   p_restaurant:restaurant_id,p_actor:user.id,p_enabled:body.enabled
+  });
+  if(se)return error(se.code==="P0001"?se.message:"Não foi possível alterar a recepção de pedidos",se.code==="P0001"?422:503);
+  return reply(data);
  }
  return error("Operação inválida",400);
 });
