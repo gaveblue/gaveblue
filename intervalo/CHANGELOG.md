@@ -1,5 +1,18 @@
 # Intervalo — CHANGELOG
 
+## 1.1.0-rc.8 — 2026-11-16 · Estrutura InfinitePay para Novo Mundo
+
+**Status:** migração aplicada, API administrativa ACTIVE, arquivos na branch main. **Não há cobranças nem links gerados. Publicação no domínio e teste de cadastro ainda pendentes.**
+
+- Criadas 3 tabelas para configuração por restaurante, tentativas de pagamento e eventos, com RLS e sem acesso direto ao navegador.
+- Preparado apenas novo-mundo com referência ao segredo INFINITEPAY_NOVO_MUNDO_API_KEY; gateway enabled=false e nenhuma InfiniteTag cadastrada.
+- Implantada a Edge Function marketplace-payments-admin com JWT, validação de vínculo por restaurante e mutações Master-only.
+- Inserido card de status e conexão InfinitePay na Loja Online com bottom sheet; cache do módulo e estilos versionado em rc.8.
+- A chave API deve ser cadastrada em Supabase Edge Functions Secrets e jamais aparece no navegador ou banco.
+- **Não alterou o checkout, pedidos, estoque, comandas ou permissões existentes.** Não gera links nem valida pagamentos até etapa futura.
+- Sem GitHub Actions. Guias: INFINITEPAY-NOVO-MUNDO-CONEXAO-RC8.md e QA-MARKETPLACE-1.1.0-RC8-INFINITEPAY.md.
+
+
 ## 1.1.0-rc.7 — 2026-11-16 · Checkout mobile-first com bottom sheets
 
 **Status:** arquivos publicados no GitHub `main`; simulação de renderização e de cotação/confirmar pedido aprovadas. **Testes reais no site, com teclado e toque em Android, pendentes.**
