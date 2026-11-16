@@ -56,6 +56,19 @@ body.iv-initializing #app{min-height:100dvh;display:block}
 <link rel="stylesheet" href="/intervalo/design-system.css?v=1.0.0-rc.15">
 <link rel="stylesheet" href="/intervalo/visual-unified-rc15.css?v=1.0.0-rc.15">
 <script>
+/* O checkout já inicia com skeleton, sem alternar para a abertura genérica. */
+(function(){
+ try{
+  var q=new URLSearchParams(location.search),deep=q.get('intervalo_route');
+  var target=deep&&deep.startsWith('/intervalo/')?deep.split(/[?#]/)[0]:location.pathname;
+  if(!/^\/intervalo\/checkout\/?$/.test(target))return;
+  var style=document.createElement('link');style.rel='stylesheet';
+  style.href='/intervalo/marketplace-checkout-rc7.css?v=1.1.0-rc.7';
+  document.head.appendChild(style);
+ }catch(e){}
+})();
+</script>
+<script>
 /* Pré-carrega o visual correto antes da autenticação da rota Loja Online. */
 (function(){
  try{
@@ -100,6 +113,24 @@ window.setTimeout(function(){
    +'<div class="iv-on-stat"><span class="iv-on-skeleton iv-on-skel-label"></span><span class="iv-on-skeleton iv-on-skel-value"></span></div></div>'
    +'<div class="iv-on-columns" aria-hidden="true"><section class="iv-on-card iv-on-skel-card"><span class="iv-on-skeleton iv-on-skel-title"></span><span class="iv-on-skeleton iv-on-skel-sub"></span></section>'
    +'<section class="iv-on-card iv-on-skel-card"><span class="iv-on-skeleton iv-on-skel-title"></span><span class="iv-on-skeleton iv-on-skel-sub"></span></section></div></main>';
+ }catch(e){}
+})();
+</script>
+<script>
+/* Skeleton da finalização de compra desde o primeiro frame da rota. */
+(function(){
+ try{
+  var query=new URLSearchParams(location.search),deep=query.get('intervalo_route');
+  var target=deep&&deep.startsWith('/intervalo/')?deep.split(/[?#]/)[0]:location.pathname;
+  if(!/^\/intervalo\/checkout\/?$/.test(target))return;
+  var root=document.getElementById('intervalo-boot-loader');if(!root)return;
+  root.className='iv-ck-shell iv-mkt-shell';root.setAttribute('aria-label','Preparando finalização da compra');
+  root.innerHTML='<header class="iv-ck-head"><span class="iv-mkt-eyebrow">SEU PEDIDO</span><h1>Finalizar compra</h1></header>'
+   +'<div class="iv-ck-grid"><main class="iv-ck-column">'
+   +'<section class="iv-ck-card iv-ck-skeleton-card"><span class="iv-ck-skeleton iv-ck-skel-head"></span><span class="iv-ck-skeleton iv-ck-skel-line"></span></section>'
+   +'<section class="iv-ck-card iv-ck-skeleton-card"><span class="iv-ck-skeleton iv-ck-skel-head"></span><span class="iv-ck-skeleton iv-ck-skel-line"></span></section>'
+   +'<section class="iv-ck-card iv-ck-skeleton-card"><span class="iv-ck-skeleton iv-ck-skel-head"></span><span class="iv-ck-skeleton iv-ck-skel-line"></span></section></main>'
+   +'<aside class="iv-ck-card iv-ck-skeleton-card"><span class="iv-ck-skeleton iv-ck-skel-head"></span><span class="iv-ck-skeleton iv-ck-skel-line"></span></aside></div>';
  }catch(e){}
 })();
 </script>
@@ -370,7 +401,7 @@ async function account(user){
 }
 async function start(){
  if(paths[0]==='checkout'){
-  const {renderCheckout}=await import('/intervalo/marketplace-checkout-rc4.js?v=1.1.0-rc.5');
+  const {renderCheckout}=await import('/intervalo/marketplace-checkout-rc7.js?v=1.1.0-rc.7');
   return renderCheckout({supabase,box,esc,link});
  }
  if(paths[0]==='pedido'){
