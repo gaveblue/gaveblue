@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Acompanhamento de pedidos | Intervalo</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#ff7900">
+<style>
+html,body{min-height:100%;margin:0;background:#f8f9fb;color:#263249;font-family:Inter,system-ui,sans-serif}
+main{min-height:80dvh;display:grid;place-items:center;padding:20px}
+section{text-align:center;width:min(100%,400px)}
+mark{display:inline-grid;place-items:center;width:60px;height:60px;border-radius:19px;background:#ff7900;color:white;font-weight:900;font-size:30px;font-style:italic}
+h1{font-size:24px;letter-spacing:-.8px}
+p{font-size:13px;line-height:1.6;color:#7c8ba0}
+a{color:#de6d00}
+</style>
+<script>
+(function(){
+  // Entrada estática HTTP 200 para o GitHub Pages; restaura a rota original no app.
+  var path=window.location.pathname.replace(/\/+$/,'');
+  if (!path.startsWith('/intervalo/')) return;
+  var destination='/intervalo/?intervalo_route='+encodeURIComponent(path+window.location.search+window.location.hash);
+  window.location.replace(destination);
+})();
+</script>
+</head>
+<body>
+<main><section><mark>I</mark><h1>Abrindo Acompanhamento de pedidos</h1><p>Redirecionando para o Intervalo...</p><p><a href="/intervalo/">Abrir Intervalo</a></p></section></main>
+</body>
+</html>
