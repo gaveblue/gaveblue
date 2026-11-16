@@ -1,5 +1,17 @@
 # Intervalo — CHANGELOG
 
+## 1.1.0-rc.15 — 2026-11-16 · Cupom térmico 58 mm com altura conforme conteúdo
+
+**Status:** atualizado no GitHub `main`, QA sintático e simulado aprovado; **impressão Android real e publicação final no domínio ainda pendentes de conferência**.
+
+- Corrigido o cupom de pedidos da Cozinha que estava sendo visualizado com texto pequeno e uma enorme faixa em branco na prévia do Android.
+- Criado `thermal-receipt-58mm-rc15.js`, gerador de cupom manual compartilhado entre Cozinha e Caixa. Padrão físico de **58 mm**, conteúdo interno de cerca de 51 mm e fontes dimensionadas para impressora térmica.
+- A `@page` da impressão recebe altura dinâmica calculada a partir do conteúdo efetivo, com mínima folga de corte. Isso evita predefinir uma página longa mesmo para um pedido com um único item, na medida do suporte pelo navegador/serviço de impressão.
+- Identificador de comanda mostrado abreviado no cupom, sem modificar UUID ou dados de pedidos. Produtos, observações, rodadas, valores e avisos de documento interno preservados.
+- Botão **Imprimir / PDF** permanece manual e não aparece no papel. Cache de `kitchen.js` e `cash.js` atualizado para rc.15.
+- QA: sintaxe JS dos três módulos aprovada; teste simulado de `scrollHeight=314px` produziu página de **58 × 89 mm**. `QA-1.1.0-RC15-IMPRESSAO-58MM.md` contém checklist.
+- Impressão no dispositivo real ainda depende do Android e do serviço escolhido respeitarem o tamanho de página solicitado. Não ativada impressão automática; sem GitHub Actions.
+
 ## 1.1.0-rc.14 — 2026-11-16 · Máscaras automáticas e teclado móvel
 
 **Status:** atualização aplicada no GitHub `main`. QA de funções e conversores aprovado. **Pendente teste real no navegador/Android e confirmação da propagação em gaveblue.com.br.**
