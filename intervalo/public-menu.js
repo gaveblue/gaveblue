@@ -8,10 +8,18 @@ export async function renderPublicMenu({supabase,slug,box,esc,link}){
  let data;
  try{
   const result=await supabase.functions.invoke('public-menu',{body:{slug}});
-  if(result.error||!result.data?.published)throw Error('Não publicado');
+  if(result.error){
+   let details=null;
+   try{details=await result.error.context?.json?.()}catch{}
+   if(details?.published===false)throw Error('Este restaurante ainda não publicou seu cardápio.');
+   throw Error('Não foi possível consultar o cardápio agora. Verifique a conexão e tente novamente.');
+  }
+  if(result.data?.published===false)throw Error('Este restaurante ainda não publicou seu cardápio.');
+  if(result.data?.published!==true)throw Error('O serviço de cardápio está temporariamente indisponível.');
   data=result.data;
- }catch{
-  box(css+bar+'<section class="dm-empty"><h1>Cardápio indisponível</h1><p>O restaurante não publicou o cardápio ou está temporariamente indisponível.</p><a href="'+link('/')+'">Voltar</a></section>');
+ }catch(e){
+  const message=e instanceof Error?e.message:'Não foi possível consultar o cardápio.';
+  box(css+bar+'<section class="dm-empty" role="alert"><h1>Cardápio indisponível</h1><p>'+esc(message)+'</p><a href="'+link('/'+slug+'/cardapio')+'">Tentar novamente</a></section>');
   return;
  }
  const cats=data.categories??[],catIds=new Set(cats.map(c=>c.id));
