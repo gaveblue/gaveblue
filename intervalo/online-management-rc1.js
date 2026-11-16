@@ -31,6 +31,8 @@ export async function renderPage({supabase,restaurant,box,esc,link}){
   const tags=(store.cuisine_tags??[]).join(', ');
   const activeZones=(data.delivery_zones??[]).filter(z=>z.active).length;
   const shopLink=link('/loja/'+restaurant.slug);
+  const dayNames=['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
+  const schedule=(data.business_hours??[]).map(h=>'<div class="iv-on-time-row"><select name="day">'+dayNames.map((d,i)=>'<option value="'+i+'" '+(i===h.weekday?'selected':'')+'>'+d+'</option>').join('')+'</select><input type="time" name="opens" value="'+esc(String(h.opens_at).slice(0,5))+'"><input type="time" name="closes" value="'+esc(String(h.closes_at).slice(0,5))+'"><label><input type="checkbox" name="delivery" '+(h.delivery_enabled?'checked':'')+'> Entrega</label><label><input type="checkbox" name="pickup" '+(h.pickup_enabled?'checked':'')+'> Retirada</label><button type="button" data-remove-time>×</button></div>').join('');
   let out=base
    +'<div class="iv-on-banner"><strong>Marketplace em preparação.</strong> Você pode configurar os dados da loja e visualizar o cardápio. O checkout e o recebimento de pedidos ainda estão bloqueados por segurança.</div>'
    +'<div class="iv-on-stat-grid"><article class="iv-on-stat">'+icon('store',22)+'<span>Cardápio público</span><strong>'+(published?'Publicado':'Não publicado')+'</strong></article>'
@@ -50,9 +52,27 @@ export async function renderPage({supabase,restaurant,box,esc,link}){
    +'<div class="iv-on-panel"><div class="iv-on-row"><div><h2>Participação no marketplace</h2><p>Listar a loja na busca pública, sem habilitar compras.</p></div><span class="iv-on-status '+(visible?'ready':'')+'">'+(visible?'Exibida':'Não exibida')+'</span></div>'
    +'<p>O restaurante precisa ter o cardápio público publicado para aparecer na vitrine.</p>'
    +'<button type="button" class="iv-on-button secondary" id="iv-online-visibility" '+(!published?'disabled':'')+'>'+icon(visible?'x':'checkCircle',16)+(visible?' Ocultar do marketplace':' Exibir no marketplace')+'</button></div>'
-   +'<div class="iv-on-panel"><h2>Horários e regiões de entrega</h2><p>Estrutura de banco criada e pronta para receber seus horários e taxas. A edição desses cadastros será disponibilizada nas próximas etapas.</p>'
-   +'<div class="iv-on-row"><span class="iv-on-closed">'+icon('clock',16)+' '+(data.business_hours??[]).length+' faixas de horário cadastradas</span>'
-   +'<span class="iv-on-closed">'+icon('package',16)+' '+activeZones+' regiões ativas</span></div></div>';
+   +'<section class="iv-on-panel"><h2>Horários de atendimento</h2><p>Defina as faixas em que os pedidos podem entrar. Cada dia pode ter mais de uma faixa.</p>'
+   +'<form id="iv-on-hours"><div id="iv-on-hour-list">'+schedule+'</div><button type="button" class="iv-on-button secondary" id="iv-on-add-hour">+ Faixa de horário</button><button class="iv-on-button" type="submit">Salvar horários</button></form></section>'
+   +'<section class="iv-on-panel"><div class="iv-on-row"><div><h2>Regiões de entrega</h2><p>Os endereços são validados contra cidade, bairro e CEP.</p></div><button type="button" class="iv-on-button" id="iv-on-new-zone">+ Região</button></div>'
+   +(data.delivery_zones??[]).map(z=>'<div class="iv-on-zone-row"><div><strong>'+esc(z.name)+'</strong><small>'+esc(z.city)+' / '+esc(z.state)+' · R$ '+toDisplay(z.fee_cents)+' · '+(z.active?'Ativa':'Inativa')+'</small></div><button type="button" class="iv-on-button secondary" data-zone-edit="'+esc(z.id)+'">Editar</button></div>').join('')
+   +'</section>'
+   +'<div id="iv-on-zone-holder"><form id="iv-on-zone-form">'
+   +'<label class="iv-on-field">Nome da região<input name="name" maxlength="90"></label>'
+   +'<label class="iv-on-field">Cidade<input name="city" maxlength="100"></label>'
+   +'<label class="iv-on-field">Estado (UF)<input name="state" maxlength="2"></label>'
+   +'<label class="iv-on-field">Bairros, separados por vírgula<textarea name="neighborhoods" rows="2"></textarea></label>'
+   +'<label class="iv-on-field">CEP inicial<input name="postal_code_from" maxlength="8"></label>'
+   +'<label class="iv-on-field">CEP final<input name="postal_code_to" maxlength="8"></label>'
+   +'<label class="iv-on-field">Taxa de entrega (R$)<input name="fee" value="0,00"></label>'
+   +'<label class="iv-on-field">Pedido mínimo da região (R$)<input name="minimum" value="0,00"></label>'
+   +'<label class="iv-on-field">Tempo de entrega (minutos)<input name="eta" type="number" min="5" max="240" value="40"></label>'
+   +'<label class="iv-on-field"><input name="active" type="checkbox" checked> Região ativa</label>'
+   +'<button class="iv-on-button" type="submit">Salvar região</button></form></div>'
+   +'<section class="iv-on-panel"><h2>Recebimento de pedidos</h2><p>Somente o Master pode liberar o checkout. A entrega será realizada pelo próprio restaurante.</p>'
+   +'<div class="iv-on-row"><span class="iv-on-status '+(online.enabled?'ready':'')+'">'+(online.enabled?'Pedidos ativos':'Pedidos desligados')+'</span>'
+   +'<button type="button" class="iv-on-button" id="iv-on-toggle">'+(online.enabled?'Desativar pedidos':'Ativar pedidos online')+'</button></div></section>';
+
   box(out);
   const form=document.getElementById('iv-online-draft');
   form.onsubmit=async e=>{
