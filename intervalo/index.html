@@ -53,12 +53,13 @@ body.iv-initializing #app{min-height:100dvh;display:block}
 @media(max-width:620px){.iv-boot{padding-top:clamp(44px,11vh,88px)}.iv-boot-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.iv-boot-card{min-height:104px;padding:13px}.iv-boot-row{margin-top:10px}}
 @media(prefers-reduced-motion:reduce){.iv-load-dot,.iv-load-skeleton:after{animation:none!important}.iv-load-skeleton:after{display:none}}
 </style>
-<link rel="stylesheet" href="/intervalo/design-system.css?v=1.0.0-rc.13">
+<link rel="stylesheet" href="/intervalo/design-system.css?v=1.0.0-rc.15">
+<link rel="stylesheet" href="/intervalo/visual-unified-rc15.css?v=1.0.0-rc.15">
 <script>
 (function(){try{var deep=sessionStorage.getItem('intervalo.deepLink');if(deep&&deep.startsWith('/intervalo/')&&deep.length<2100){sessionStorage.removeItem('intervalo.deepLink');history.replaceState(null,'',deep+window.location.hash)}}catch(e){}})();
 intervaloApplyManifest();
 </script>
-</head><body class="iv-initializing"><header><div class="inner"><a class="logo" href="/intervalo/" aria-label="Intervalo, página inicial">Intervalo<span class="iv-brand-tail" aria-hidden="true"></span><small>UM PRODUTO GAVEBLUE</small></a><nav id="nav"><a href="/intervalo/login">Entrar</a></nav></div></header><main id="app"><section id="intervalo-boot-loader" class="iv-boot" role="status" aria-live="polite" aria-busy="true" aria-label="Preparando aplicativo"><div class="iv-boot-brand"><span class="iv-boot-mark" aria-hidden="true">I</span><strong>Intervalo</strong></div><div class="iv-boot-status"><span class="iv-load-dot" aria-hidden="true"></span><span>Preparando sua experiência...</span></div><div class="iv-boot-grid" aria-hidden="true"><div class="iv-boot-card"><span class="iv-load-skeleton"></span><span class="iv-load-skeleton"></span><span class="iv-load-skeleton"></span></div><div class="iv-boot-card"><span class="iv-load-skeleton"></span><span class="iv-load-skeleton"></span><span class="iv-load-skeleton"></span></div><div class="iv-boot-card"><span class="iv-load-skeleton"></span><span class="iv-load-skeleton"></span><span class="iv-load-skeleton"></span></div><div class="iv-boot-card"><span class="iv-load-skeleton"></span><span class="iv-load-skeleton"></span><span class="iv-load-skeleton"></span></div></div><div class="iv-boot-row" aria-hidden="true"><span class="iv-load-skeleton"></span><span class="iv-load-skeleton"></span></div><div class="iv-boot-retry" id="iv-boot-retry"><p>Está demorando mais que o esperado. Confira a conexão e tente novamente.</p><button id="iv-boot-retry-action" type="button">Tentar novamente</button></div></section></main><footer class="foot">Gaveblue © 2026 · Intervalo 1.0.0-rc.14 · Mesas com Bottom Sheet</footer>
+</head><body class="iv-initializing iv-unified"><header><div class="inner"><a class="logo" href="/intervalo/" aria-label="Intervalo, página inicial">Intervalo<span class="iv-brand-tail" aria-hidden="true"></span><small>UM PRODUTO GAVEBLUE</small></a><nav id="nav"><a href="/intervalo/login">Entrar</a></nav></div></header><main id="app"><section id="intervalo-boot-loader" class="iv-boot" role="status" aria-live="polite" aria-busy="true" aria-label="Preparando aplicativo"><div class="iv-boot-brand"><span class="iv-boot-mark" aria-hidden="true">I</span><strong>Intervalo</strong></div><div class="iv-boot-status"><span class="iv-load-dot" aria-hidden="true"></span><span>Preparando sua experiência...</span></div><div class="iv-boot-grid" aria-hidden="true"><div class="iv-boot-card"><span class="iv-load-skeleton"></span><span class="iv-load-skeleton"></span><span class="iv-load-skeleton"></span></div><div class="iv-boot-card"><span class="iv-load-skeleton"></span><span class="iv-load-skeleton"></span><span class="iv-load-skeleton"></span></div><div class="iv-boot-card"><span class="iv-load-skeleton"></span><span class="iv-load-skeleton"></span><span class="iv-load-skeleton"></span></div><div class="iv-boot-card"><span class="iv-load-skeleton"></span><span class="iv-load-skeleton"></span><span class="iv-load-skeleton"></span></div></div><div class="iv-boot-row" aria-hidden="true"><span class="iv-load-skeleton"></span><span class="iv-load-skeleton"></span></div><div class="iv-boot-retry" id="iv-boot-retry"><p>Está demorando mais que o esperado. Confira a conexão e tente novamente.</p><button id="iv-boot-retry-action" type="button">Tentar novamente</button></div></section></main><footer class="foot">Gaveblue © 2026 · Intervalo 1.0.0-rc.15 · Padronização visual</footer>
 <script>
 /* Se um import externo impedir o módulo de iniciar, não deixar o usuário preso na tela de abertura. */
 window.setTimeout(function(){
@@ -212,6 +213,7 @@ async function choose(user){
  if(error||fe||oe){box(err(error??fe??oe));return}
  let out='<div class="iv-header"><div><span class="iv-section-caption">SEU ESPAÇO</span><h1>Meus restaurantes</h1><p>Selecione um estabelecimento para continuar.</p></div><a class="iv-btn secondary" href="'+link('/?app=garcom')+'">'+icon('phone',17)+' PWA do Garçom</a></div>';
  if(!data?.length)out+='<section class="panel"><h2>Nenhum restaurante vinculado</h2><p>Aguarde o convite do responsável ou abra o painel Super Admin, se sua conta tiver autorização.</p><a class="btn" href="'+link('/admin')+'">Painel administrativo</a></section>';
+ if(data?.length)out+='<div class="iv-restaurants" aria-label="Restaurantes disponíveis">';
  for(const m of data??[]){
    const r=m.restaurants;if(!r)continue;
    out+='<article class="item"><span class="iv-chip orange">'+icon('shield',14)+esc(m.role)+'</span><h3>'+icon('store',20)+' '+esc(r.name)+'</h3><p>/'+esc(r.slug)+' · '+(m.status==='active'?'Ativo':m.status==='pending'?'Convite pendente':'Acesso revogado')+'</p><div class="links">';
@@ -228,6 +230,7 @@ async function choose(user){
    }
    out+='</div></article>';
  }
+ if(data?.length)out+='</div>';
  box(out);
  document.querySelectorAll('form[data-master-activate]').forEach(form=>form.onsubmit=async e=>{
     e.preventDefault();
@@ -249,7 +252,7 @@ async function choose(user){
 async function admin(user){
  const {data:allowed,error}=await supabase.from('platform_admins').select('user_id').eq('user_id',user.id).eq('active',true).maybeSingle();
  if(error||!allowed){box('<section class="panel"><h1>Área restrita</h1><p>Somente Super Admin Gaveblue pode gerenciar a plataforma.</p></section>');return}
- const {renderPlatform}=await import('/intervalo/platform.js?v=1.0.0-rc.13');
+ const {renderPlatform}=await import('/intervalo/platform.js?v=1.0.0-rc.15');
  return renderPlatform({supabase,box,esc,link});
 }
 async function waiterHome(user){
@@ -306,12 +309,12 @@ async function tenant(user,slug,mod){
  }
  const asset={catalogo:'catalog.js',mesas:'support.js',estoque:'support.js',impressao:'support.js',relatorios:'support.js',garcom:'waiter.js',cozinha:'kitchen.js',caixa:'cash.js'}[mod];
  if(!asset){box('<h1>Módulo não encontrado</h1>');return}
- const {renderPage}=await import('/intervalo/'+asset+'?v='+(mod==='mesas'?'1.0.0-rc.14':'1.0.0-rc.13'));
+ const {renderPage}=await import('/intervalo/'+asset+'?v='+(mod==='mesas'?'1.0.0-rc.14':'1.0.0-rc.15'));
  return renderPage({supabase,restaurant:m.restaurants,module:mod,box,esc,link});
 }
 async function account(user){
  if(!user){location.assign(link('/login'));return}
- const {renderAccount}=await import('/intervalo/account.js?v=1.0.0-rc.13');
+ const {renderAccount}=await import('/intervalo/account.js?v=1.0.0-rc.15');
  return renderAccount({supabase,box,esc,link,user});
 }
 async function start(){const user=await me();if(user?.app_metadata?.intervalo_password_change_required&&!['trocar-senha','login','redefinir','recuperar-senha'].includes(paths[0])){location.assign(link('/trocar-senha'));return}await setupNav(user);if(paths.length===0)return new URLSearchParams(location.search).get('app')==='garcom'
