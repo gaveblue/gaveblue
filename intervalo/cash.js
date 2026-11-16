@@ -1,6 +1,7 @@
 // Intervalo — caixa: apenas registros de recebimentos externos, sem integração com adquirentes.
 import {icon} from './ui-icons.js?v=1.0.0-rc.1';
 import {sheetifyForms,showFormSheetError} from './operational-sheets-rc15.js?v=1.0.0-rc.15';
+import {openThermalReceipt} from './thermal-receipt-58mm-rc15.js?v=1.1.0-rc.15';
 export async function renderPage({supabase,restaurant,box,esc,link}){
  document.body.classList.add('iv-fullwidth','iv-pos');
  const css='<style>.c-card{padding:20px;background:white;border:1px solid #e2e8f0;border-radius:14px;margin:14px 0}.c-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:13px}.c-form{display:flex;gap:10px;flex-wrap:wrap;align-items:end}.c-form label{flex:1 1 185px;font-size:12px;font-weight:700}.c-form input,.c-form select{display:block;width:100%;padding:11px;border:1px solid #cbd5e1;border-radius:9px;margin-top:6px;background:white}.c-form button{border:0;background:#0f766e;color:white;border-radius:9px;padding:12px 13px;font-weight:700;cursor:pointer}.c-form button:disabled{opacity:.45}.c-warning{background:#fff7ed;border:1px solid #fdba74;padding:12px;border-radius:10px;color:#9a3412;font-size:13px}.c-muted{font-size:12px;color:#64748b}.c-money{color:#0f766e;font-weight:800}.c-preview{padding:9px 12px;margin-bottom:13px;border:1px solid #0f766e;background:#f0fdfa;color:#0f766e;border-radius:9px;font-size:12px;font-weight:700} .c-round-head{display:flex;justify-content:space-between;align-items:center;gap:10px;background:#fff4e7;color:#99500a;border-radius:10px;padding:9px 10px;margin:12px 0 7px;font-size:12px}.c-paid-note{font-size:12px;color:#0c8d55;display:flex;align-items:center;gap:6px;margin-top:8px}</style>';
@@ -94,19 +95,15 @@ export async function renderPage({supabase,restaurant,box,esc,link}){
       const total=rows.reduce((n,i)=>n+Number(i.unit_price_cents)*i.quantity,0);
       const receipts=pay.filter(p=>p.order_id===order.id);
       const received=receipts.reduce((n,p)=>n+Number(p.amount_cents),0);
-      const content='<!doctype html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Comanda · Intervalo</title>'
-        +'<style>body{font:14px Arial,sans-serif;max-width:460px;margin:28px auto;padding:12px;color:#111}h1{text-align:center;font-size:21px}hr{border:0;border-top:1px dashed #777;margin:14px 0}table{width:100%;border-collapse:collapse}td{padding:6px 3px;border-bottom:1px solid #eee}td:last-child{text-align:right}small{color:#555}.totals{text-align:right;margin:12px 0}.toolbar{margin-bottom:20px}.toolbar button{padding:9px 14px}@media print{.toolbar{display:none}body{max-width:76mm;margin:0;padding:0;font-size:11px}}</style></head><body>'
-        +'<div class="toolbar"><button onclick="window.print()">Imprimir / Salvar PDF</button></div>'
-        +'<h1>'+esc(restaurant.name)+'</h1><p style="text-align:center">PRÉVIA DE COMANDA · NÃO FISCAL</p><hr>'
-        +'<p><b>'+esc(table?.label??'Mesa')+'</b> · '+esc(order.status)+'</p>'
-        +'<p><small>Pedido: '+esc(order.id)+'<br>Aberto: '+esc(order.opened_at)+'</small></p><hr><table>'
-        +printRounds.map(round=>'<tr><td colspan="2" style="font-weight:bold;background:#f3f5f7">Rodada '+esc(round.round_no)+'</td></tr>'
-          +rows.filter(i=>Number(i.round_no||1)===Number(round.round_no)).map(i=>'<tr><td>'+esc(i.quantity)+' × '+esc(i.product_name)+(i.note?'<br><small>'+esc(i.note)+'</small>':'')+'</td><td>'+money(Number(i.unit_price_cents)*i.quantity)+'</td></tr>').join('')).join('')
-        +'</table><div class="totals"><p>Total: <b>'+money(total)+'</b></p><p>Recebimentos registrados: '+money(received)+'</p><p>Saldo: '+money(Math.max(0,total-received))+'</p></div><hr>'
-        +'<p><small>Documento interno, não substitui nota fiscal nem comprova recebimento bancário.</small></p></body></html>';
-      const win=window.open('','_blank');
-      if(!win){alert('O navegador bloqueou a prévia. Autorize a abertura de janelas para este site.');return}
-      win.document.open();win.document.write(content);win.document.close();win.focus();
+      const shortId=String(order.id||'').replace(/-/g,'').slice(-8).toUpperCase();
+      const content='<h1>'+esc(restaurant.name)+'</h1><p style="text-align:center">COMANDA · NÃO FISCAL</p><hr>'
+       +'<p><b>'+esc(table?.label??'Mesa')+'</b> · '+esc(order.status)+'</p>'
+       +'<p><small>Pedido #'+esc(shortId)+'<br>Aberto: '+esc(order.opened_at)+'</small></p><hr><table>'
+       +printRounds.map(round=>'<tr><td colspan="2" style="font-weight:bold;background:#f3f5f7">Rodada '+esc(round.round_no)+'</td></tr>'
+         +rows.filter(i=>Number(i.round_no||1)===Number(round.round_no)).map(i=>'<tr><td>'+esc(i.quantity)+' × '+esc(i.product_name)+(i.note?'<br><small>'+esc(i.note)+'</small>':'')+'</td><td>'+money(Number(i.unit_price_cents)*i.quantity)+'</td></tr>').join('')).join('')
+       +'</table><div class="totals"><p>Total: <b>'+money(total)+'</b></p><p>Recebido: '+money(received)+'</p><p>Saldo: '+money(Math.max(0,total-received))+'</p></div><hr>'
+       +'<p><small>Documento interno, não substitui nota fiscal ou comprovante bancário.</small></p>';
+      openThermalReceipt({title:'Comanda · Intervalo',content});
     });
     const bind=(selector,callback)=>{const f=document.querySelector(selector);if(f)f.onsubmit=async e=>{e.preventDefault();const b=f.querySelector('button[type=submit]');b.disabled=true;try{await callback(Object.fromEntries(new FormData(f).entries()));await reload()}catch(err){if(!showFormSheetError(f,err.message))alert(err.message);b.disabled=false}}};
     bind('#cash-open',v=>call('cash_open',{starting_cash_cents:toCents(v.amount)}));
