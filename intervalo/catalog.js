@@ -1,5 +1,5 @@
 import {icon} from './ui-icons.js?v=1.0.0-rc.1';
-import {sheetifyForms} from './operational-sheets-rc15.js?v=1.0.0-rc.15';
+import {sheetifyForms,showFormSheetError} from './operational-sheets-rc15.js?v=1.0.0-rc.15';
 // Intervalo: cadastro de categorias, produtos e publicação de cardápio.
 export async function renderPage({supabase,restaurant,box,esc,link}){
  document.body.classList.add('iv-fullwidth','iv-catalog');
@@ -8,7 +8,7 @@ export async function renderPage({supabase,restaurant,box,esc,link}){
  const cents=t=>{const v=String(t).replace(/\s/g,'').replace(',','.');if(!/^\d{1,7}(?:\.\d{1,2})?$/.test(v))throw Error('Informe valor no formato 18,50');const [i,f='']=v.split('.');return Number(i)*100+Number((f+'00').slice(0,2))};
  const call=async(action,params={})=>{const {data,error}=await supabase.functions.invoke('restaurant-core',{body:{restaurant_id:restaurant.id,action,...params}});if(error){let msg=error.message;try{const d=await error.context?.json?.();msg=d?.error??msg}catch{}throw Error(msg)}if(data?.error)throw Error(data.error);return data};
  const field=(name,label,value='',extra='')=>'<label>'+label+'<input name="'+name+'" value="'+esc(value)+'" '+extra+'></label>';
- const form=(id,cb)=>{const f=document.getElementById(id);if(f)f.onsubmit=async e=>{e.preventDefault();const b=f.querySelector('button');b.disabled=true;try{await cb(Object.fromEntries(new FormData(f).entries()));await load()}catch(err){alert(err.message);b.disabled=false}}};
+ const form=(id,cb)=>{const f=document.getElementById(id);if(f)f.onsubmit=async e=>{e.preventDefault();const b=f.querySelector('button');b.disabled=true;try{await cb(Object.fromEntries(new FormData(f).entries()));await load()}catch(err){if(!showFormSheetError(f,err.message))alert(err.message);b.disabled=false}}};
  const binding=(sel,cb)=>document.querySelectorAll(sel).forEach(b=>b.onclick=async()=>{b.disabled=true;try{await cb(b);await load()}catch(err){alert(err.message);b.disabled=false}});
  const start=style+'<div class="iv-header"><div><span class="iv-section-caption">CARDÁPIO DO RESTAURANTE</span><h1>'+icon('receipt',25)+' Cardápio digital</h1><p>'+esc(restaurant.name)+' · Publicação, categorias e visualização da vitrine.</p></div><a class="iv-btn secondary" href="'+link('/'+restaurant.slug+'/gestao')+'">'+icon('arrowLeft',16)+' Voltar à gestão</a></div>';
  async function load(){
