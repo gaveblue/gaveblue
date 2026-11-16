@@ -1,5 +1,24 @@
 # Intervalo — CHANGELOG
 
+## 1.1.0-rc.4 — 2026-11-15 · Marketplace: checkout guest, delivery próprio e operações
+
+**Status:** banco e Edge Functions implantados; frontend enviado à `main`; testes estáticos e verificações de acesso aprovados. **Homologação técnica parcial**, sem pedido real finalizado e sem confirmação de propagação HTTP.
+
+- Implementado carrinho de um único restaurante com produtos, quantidades, adicionais e observações, sem armazenar dados pessoais no carrinho.
+- Criado checkout de visitante sem CPF ou conta obrigatória: entrega/retirada, regiões e CEPs, forma de pagamento na entrega/retirada, aceite de termos e revalidação de preço, taxa, produto, categoria, opção, disponibilidade e horário no servidor.
+- Criada API `marketplace-online` para cotação, pedido transacional idempotente e acompanhamento privado com token assinado e armazenado apenas como hash, limites básicos por IP/telefone.
+- Banco ampliado com migrações `checkout_rc2`, `operations_rc3`, `settings_rc4`, além dos hotfixes `quote_pickup_hotfix` e `payment_acceptance_hotfix`. RPCs restritas a `service_role`; todas as funções atuais verificadas sem EXECUTE direto por `anon`/`authenticated`.
+- Operação do restaurante em `marketplace-operations` autenticada: aceite, recusa, preparação, saída/retirada, entrega e confirmação de pagamento em sessão aberta do Caixa. Status de pedido independente do pagamento.
+- Entrega própria: Gestão permite cadastrar dias/faixas de horário, bairros, CEPs, fretes, mínimos e prazo, além de ativação explícita pelo Master, após configurar cardápio/horários/zonas. Todos os restaurantes permanecem com pedidos **desligados**.
+- Cozinha exibe cartões identificados DELIVERY/RETIRADA junto aos tickets presenciais sem mesa fictícia. Baixa de ficha técnica ocorre no aceite e há compensação ao cancelar antes do início do preparo. Caixa apresenta recebimentos online separados.
+- Criadas páginas iniciais de <code>/intervalo/termos/</code> e <code>/intervalo/privacidade/</code> com links no aceite do checkout; **pendentes de validação jurídica**.
+- Corrigido fallback `404.html` e restaurador de `index.html` para aceitar tokens no formato UUID.assinatura nos links diretos `/intervalo/pedido/:token`. Testes de rota, inclusive com armazenamento bloqueado, passaram.
+- **QA:** código JS compilável; carrinho e links testados em simulação; funções Supabase ativas; dados finais confirmados com 0 pedidos/pagamentos/lojas habilitadas. O teste de compra SQL inicialmente identificou erro de região na retirada, corrigido por hotfix; o reteste transacional foi bloqueado pelo ambiente. Portanto **não declarar checkout homologado em produção**.
+- Pendências: pedido real controlado de ponta a ponta, testes autenticados em celular/PWA, antifraude mais forte, login opcional de clientes com endereços salvos, revisão legal e comprovação de deploy do frontend.
+- Gestão presencial, Equipe e Permissões preservadas. Sem GitHub Actions.
+
+**QA:** `QA-MARKETPLACE-1.1.0-RC4.md`.
+
 ### Hotfix de rotas do marketplace — 2026-11-15 (base 1.1.0-rc.1)
 
 **Status:** commitado na `main`; testes simulados do redirecionamento aprovados, propagação no domínio ainda **não confirmada**.
