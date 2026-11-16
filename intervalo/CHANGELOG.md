@@ -1,5 +1,18 @@
 # Intervalo — CHANGELOG
 
+## 1.1.0-rc.11 — 2026-11-16 · Pedidos da Loja Online integrados à Cozinha
+
+**Status:** correção no código publicada na `main`; validação sintática, simulação visual e teste transacional SQL concluídos. **Publicação no domínio e teste visual em celular ainda não confirmados.**
+
+- O KDS passa a exibir pedidos online aceitos diretamente em **Novos pedidos**, seguindo para **Em preparo** e **Prontos**, nas mesmas colunas dos pedidos presenciais, sem criar mesa fictícia.
+- Tickets online exibem código do pedido, itens/quantidades/observações e marcador **DELIVERY** ou **RETIRADA**. Ações **Iniciar preparo** e **Marcar pronto** mantêm a atualização de status na API `marketplace-operations`.
+- A consulta da Loja Online e das comandas presenciais deixou de ser dependente da mesma falha. Se uma API falhar, os pedidos da outra permanecem visíveis.
+- Erros da API de pedidos online, antes silenciados, agora aparecem com aviso na Cozinha e opção de atualizar; não é mais exibido `Nenhum pedido` como se a consulta tivesse funcionado.
+- Cache da rota Cozinha atualizado para `kitchen.js?v=1.1.0-rc.11`. Atualização automática mantida a cada 15 segundos.
+- QA: parse JS OK; simulação com pedidos `accepted`, `preparing`, `ready_for_pickup` passa, e `pending_acceptance` não aparece na produção; erro de API gera aviso; transação de banco percorreu aceite, preparo e pronto com item disponível na fila, revertida por `ROLLBACK`.
+- Diagnóstico: o histórico do Novo Mundo mostra um pedido aceito em 16/11/2026 que foi cancelado posteriormente; nenhum pedido online aceito ativo estava disponível na inspeção para teste visual real. Não houve alteração do status de pedidos reais.
+- Pix manual/InfinitePay, caixa, gestão de funcionários, estoque e mesas não alterados nesta revisão. Sem GitHub Actions.
+
 ## 1.1.0-rc.10 — 2026-11-16 · Pix direto do restaurante (10 minutos)
 
 **Status:** funções e agendamento ativos no Supabase; interface e gestão atualizadas no GitHub `main`; **não homologado com chave Pix e pagamento real**.
