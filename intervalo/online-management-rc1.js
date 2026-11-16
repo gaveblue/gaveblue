@@ -1,7 +1,7 @@
 import {icon} from './ui-icons.js?v=1.0.0-rc.1';
 import {sheetifyForms,showFormSheetError} from './operational-sheets-rc15.js?v=1.0.0-rc.15';
 
-// Gestão > Loja Online. Configurações em rascunho. NÃO aceita pedidos.
+// Gestão > Loja Online. Painel rc6; estado e permissões decididos no backend.
 export async function renderPage({supabase,restaurant,role,box,esc,link}){
  document.body.classList.add('iv-fullwidth','iv-online-admin');
  const css='<link rel="stylesheet" href="/intervalo/online-management-rc1.css?v=1.1.0-rc.6">';
