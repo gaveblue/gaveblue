@@ -63,7 +63,7 @@ export async function renderCustomer({box,esc,link}){
      if(error)throw error;
      if(!data?.session){setMsg('iv-client-auth-status','Verifique seu e-mail para confirmar o cadastro e depois faça login.',false);return}
      const {error:pe}=await customerAuth.from('customer_profiles')
-      .upsert({id:data.user.id,display_name:name},{onConflict:'id'});
+      .insert({id:data.user.id,display_name:name});
      if(pe)throw pe;
     }else{
      const {error}=await customerAuth.auth.signInWithPassword({email,password});
@@ -124,9 +124,11 @@ export async function renderCustomer({box,esc,link}){
   const name=profileForm.elements.name.value.trim(),phone=cleanPhone(profileForm.elements.phone.value);
   if(name.length<2||name.length>120||phone&&phone.length<10){setMsg('iv-client-profile-status','Confira nome e celular.',true);return}
   const b=profileForm.querySelector('button[type=submit]');b.disabled=true;
-  const {error}=await customerAuth.from('customer_profiles').upsert({
-   id:user.id,display_name:name,phone:phone||null,updated_at:new Date().toISOString()
-  },{onConflict:'id'});
+  const payload={display_name:name,phone:phone||null};
+  const {error}=profile
+   ?await customerAuth.from('customer_profiles').update({...payload,updated_at:new Date().toISOString()}).eq('id',user.id)
+   :await customerAuth.from('customer_profiles').insert({...payload,id:user.id});
+  if(!error)profile={id:user.id,...payload};
   b.disabled=false;
   setMsg('iv-client-profile-status',error?error.message:'Perfil atualizado.',Boolean(error));
  };
