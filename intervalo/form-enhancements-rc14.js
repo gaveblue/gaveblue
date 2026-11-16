@@ -160,6 +160,15 @@ export function initIntervaloFormUX(){
   if(!type||event.isComposing||el.dataset.ivComposing==='true')return;
   setupField(el,type);apply(el,type);
  },true);
+ document.addEventListener('beforeinput',event=>{
+  const el=event.target;
+  if(typeFor(el)!=='money')return;
+  // Permite apagar o valor zero completo; sem isso, o backspace recria "0,00" indefinidamente.
+  if(event.inputType==='deleteContentBackward'&&el.value==='0,00'&&el.selectionStart===el.selectionEnd){
+   event.preventDefault();el.value='';
+   el.dispatchEvent(new Event('input',{bubbles:true}));
+  }
+ },true);
  document.addEventListener('compositionstart',event=>{
   if(event.target?.tagName==='INPUT')event.target.dataset.ivComposing='true';
  },true);
