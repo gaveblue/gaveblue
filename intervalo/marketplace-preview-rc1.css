@@ -69,3 +69,6 @@ dialog.iv-mkt-sheet::backdrop{background:#1b2b4199}
 @media(max-width:900px){.iv-mkt-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.iv-mkt-product-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:640px){.iv-mkt-nav{min-height:61px}.iv-mkt-links a{padding:8px}.iv-mkt-hero{grid-template-columns:1fr;gap:0;margin:15px 0 23px;padding:24px;border-radius:17px}.iv-mkt-hero .iv-mkt-icon-large{display:none}.iv-mkt-grid{grid-template-columns:1fr}.iv-mkt-product-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.iv-mkt-photo{height:117px}.iv-mkt-body{padding:11px}.iv-mkt-description{font-size:11px}.iv-mkt-store-head{align-items:center}.iv-mkt-store-avatar{width:63px;height:63px}}
 @media(max-width:350px){.iv-mkt-product-grid{grid-template-columns:1fr}.iv-mkt-nav .iv-mkt-preview{display:none}}
+
+/* Respeitar atributo hidden nos filtros de cards */
+.iv-mkt-product[hidden],.iv-mkt-store[hidden],#iv-mkt-not-found[hidden],#iv-mkt-empty[hidden]{display:none!important}
