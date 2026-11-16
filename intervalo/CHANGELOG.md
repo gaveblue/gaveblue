@@ -5,7 +5,7 @@
 **Status:** atualizado no GitHub `main`, QA sintático e simulado aprovado; **impressão Android real e publicação final no domínio ainda pendentes de conferência**.
 
 - Corrigido o cupom de pedidos da Cozinha que estava sendo visualizado com texto pequeno e uma enorme faixa em branco na prévia do Android.
-- Criado `thermal-receipt-58mm-rc15.js`, gerador de cupom manual compartilhado entre Cozinha e Caixa. Padrão físico de **58 mm**, conteúdo interno de cerca de 51 mm e fontes dimensionadas para impressora térmica.
+- Criado `thermal-receipt-58mm-rc15.js`, gerador de cupom manual compartilhado entre Cozinha e Caixa. Padrão físico de **58 mm**, conteúdo interno de 49 mm e fontes dimensionadas para impressora térmica.
 - A `@page` da impressão recebe altura dinâmica calculada a partir do conteúdo efetivo, com mínima folga de corte. Isso evita predefinir uma página longa mesmo para um pedido com um único item, na medida do suporte pelo navegador/serviço de impressão.
 - Identificador de comanda mostrado abreviado no cupom, sem modificar UUID ou dados de pedidos. Produtos, observações, rodadas, valores e avisos de documento interno preservados.
 - Botão **Imprimir / PDF** permanece manual e não aparece no papel. Cache de `kitchen.js` e `cash.js` atualizado para rc.15.
