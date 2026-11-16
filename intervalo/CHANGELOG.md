@@ -1,5 +1,19 @@
 # Intervalo — CHANGELOG
 
+## 1.1.0-rc.14 — 2026-11-16 · Máscaras automáticas e teclado móvel
+
+**Status:** atualização aplicada no GitHub `main`. QA de funções e conversores aprovado. **Pendente teste real no navegador/Android e confirmação da propagação em gaveblue.com.br.**
+
+- Criado o componente global `form-enhancements-rc14.js`, carregado no `index.html` e aplicado por delegação de eventos a formulários comuns e dinâmicos, incluindo bottom sheets.
+- Valores monetários formatados durante a digitação no padrão brasileiro: `0,01`, `24,90`, `1.234,56`. Máscara preserva centavos e grupo de milhar, aceita colagem e permite apagar o campo.
+- CPF, CNPJ, CEP e celular/fixo com formatação automática. O login misto e-mail/CPF identifica o formato sem tratar e-mails como números.
+- Mantidas exceções importantes: chave Pix genérica, quantidades de estoque, medidas fracionárias, assentos, minutos e campos de senha não recebem máscaras inadequadas.
+- Conversores de valores em `support.js`, `catalog.js`, `cash.js` e `online-management-rc1.js` passaram a aceitar o separador de milhar e a devolver o valor original em centavos.
+- Criado `form-enhancements-rc14.css` com melhor visualização ao abrir o teclado virtual: rolagem ao campo focado, espaço de viewport, tamanho de texto adequado, navegação entre campos e ocultação temporária de barras fixas que poderiam sobrepor conteúdo.
+- Cache atualizado para módulos modificados; Gestão/Conta/Garçom/Checkout/Cliente também recebem máscara global no `index.html`.
+- QA: 14/14 formatações, 19/19 detecções de campos, quatro conversores `1.234,56 → 123456` e análise sintática do código. Registro: `QA-1.1.0-RC14-FORMULARIOS.md`.
+- Nenhum pagamento, alteração de permissões, banco de dados ou Edge Function nesta revisão. GitHub Actions não utilizado.
+
 ## 1.1.0-rc.13 — 2026-11-16 · Correção do bottom sheet Ações rápidas na Gestão
 
 **Status:** código atualizado no GitHub `main`, com verificação sintática do JavaScript e conferência de estilos, rotas e cache. **Teste visual no Android e propagação no domínio ainda pendentes.**
