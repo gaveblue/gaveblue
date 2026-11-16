@@ -172,6 +172,48 @@ export async function renderPage({supabase,restaurant,role,box,esc,link}){
     catch(e){alert(e.message);toggle.disabled=false}
    };
   }
+  const ordersArea=document.getElementById('iv-on-orders-list');
+  const ops=async(action,extra={})=>{
+   const {data,error}=await supabase.functions.invoke('marketplace-operations',{body:{restaurant_id:restaurant.id,action,...extra}});
+   if(error||data?.error)throw Error(data?.error??error?.message??'Falha ao consultar pedidos');
+   return data;
+  };
+  const statuses={pending_acceptance:'Aguardando aceite',accepted:'Aceito',preparing:'Em preparo',ready:'Pronto',ready_for_pickup:'Pronto para retirada',out_for_delivery:'Saiu para entrega',delivered:'Entregue',picked_up:'Retirado',rejected:'Recusado',cancelled:'Cancelado'};
+  const availableActions=o=>o.status==='pending_acceptance'?['accepted','rejected']:o.status==='accepted'?['preparing','cancelled']:o.status==='preparing'?[o.fulfillment_type==='pickup'?'ready_for_pickup':'ready']:o.status==='ready'?['out_for_delivery']:o.status==='out_for_delivery'?['delivered']:o.status==='ready_for_pickup'?['picked_up']:[];
+  async function refreshOrders(){
+   try{
+    const result=await ops('list'),orders=result.orders??[],items=result.items??[];
+    let html='';
+    for(const o of orders){
+     const rows=items.filter(i=>i.order_id===o.id);
+     html+='<div class="iv-on-order"><div class="iv-on-row"><strong>'+esc(o.public_code)+'</strong><span class="iv-on-status">'+esc(statuses[o.status]??o.status)+'</span></div>';
+     html+='<p>'+esc(o.customer_name)+' · '+esc(o.customer_phone)+' · '+(o.fulfillment_type==='delivery'?'DELIVERY':'RETIRADA')+'</p>';
+     html+=rows.map(i=>'<p>'+esc(i.quantity)+'× '+esc(i.product_name)+(i.note?' · '+esc(i.note):'')+'</p>').join('');
+     html+='<div class="iv-on-row"><strong>'+money(o.total_cents)+'</strong><span>'+(o.payment_status==='paid'?'Pago':'Pagamento pendente')+'</span></div>';
+     html+='<div class="iv-on-order-actions">'+availableActions(o).map(state=>'<button type="button" class="iv-on-button" data-order-id="'+esc(o.id)+'" data-status="'+state+'">'+esc(statuses[state]??state)+'</button>').join('');
+     if(o.payment_status!=='paid'&&!['rejected','cancelled','expired','pending_acceptance'].includes(o.status))
+      html+='<button type="button" class="iv-on-button secondary" data-online-pay="'+esc(o.id)+'">Registrar recebimento</button>';
+     html+='</div></div>';
+    }
+    ordersArea.innerHTML=html||'<p>Nenhum pedido online recebido.</p>';
+    ordersArea.querySelectorAll('[data-status]').forEach(b=>b.onclick=async()=>{
+     if(['rejected','cancelled','delivered','picked_up'].includes(b.dataset.status)&&!confirm('Confirma esta alteração?'))return;
+     b.disabled=true;
+     try{await ops('transition',{order_id:b.dataset.orderId,target:b.dataset.status});await refreshOrders()}
+     catch(e){alert(e.message);b.disabled=false}
+    });
+    ordersArea.querySelectorAll('[data-online-pay]').forEach(b=>b.onclick=async()=>{
+     const method=prompt('Pagamento recebido: digite pix, cash (dinheiro) ou card (cartão)');
+     if(!['pix','cash','card'].includes(method??''))return;
+     if(!confirm('Confirma que recebeu este pagamento?'))return;
+     b.disabled=true;
+     try{await ops('pay',{order_id:b.dataset.onlinePay,method});await refreshOrders()}
+     catch(e){alert(e.message);b.disabled=false}
+    });
+   }catch(e){ordersArea.textContent='Não foi possível consultar os pedidos: '+e.message}
+  }
+  document.getElementById('iv-on-orders-refresh').onclick=refreshOrders;
+  refreshOrders();
   const visibility=document.getElementById('iv-online-visibility');
   if(visibility)visibility.onclick=async()=>{
    const next=!visible;
