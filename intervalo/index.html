@@ -323,7 +323,7 @@ async function tenant(user,slug,mod){
   return renderManagement({supabase,restaurant:m.restaurants,role:m.role,box,esc,link});
  }
  if(mod==='vendas-online'){
-  const {renderPage}=await import('/intervalo/online-management-rc1.js?v=1.1.0-rc.4');
+  const {renderPage}=await import('/intervalo/online-management-rc1.js?v=1.1.0-rc.6');
   return renderPage({supabase,restaurant:m.restaurants,role:m.role,box,esc,link});
  }
  const asset={catalogo:'catalog.js',mesas:'support.js',estoque:'support.js',impressao:'support.js',relatorios:'support.js',garcom:'waiter.js',cozinha:'kitchen.js',caixa:'cash.js'}[mod];
