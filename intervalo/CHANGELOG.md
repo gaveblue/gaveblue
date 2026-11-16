@@ -1,5 +1,18 @@
 # Intervalo — CHANGELOG
 
+### Hotfix de rotas do marketplace — 2026-11-15 (base 1.1.0-rc.1)
+
+**Status:** commitado na `main`; testes simulados do redirecionamento aprovados, propagação no domínio ainda **não confirmada**.
+
+- Corrigido o **404 do site principal** ao abrir links diretos do Intervalo: o script em `/404.html` só reconhecia rotas antigas e ignorava `/intervalo/explorar`, `/intervalo/loja/:slug`, `/intervalo/:slug/vendas-online`, `/checkout`, `/pedido` e `/cliente`.
+- Ampliada a lista de rotas válidas do fallback, incluindo proteção para deixar o 404 original de outras páginas corporativas intacto.
+- `intervalo/index.html` agora recupera a URL por parâmetro seguro `intervalo_route`, sem exigir `sessionStorage` (importante para navegadores do Instagram/WhatsApp e PWA), preservando parâmetros e fragmentos.
+- Criados seis arquivos `index.html` específicos para entrada estática dos endereços já divulgados (explorar, loja Novo Mundo, vendas online Novo Mundo, checkout, pedido e cliente), diminuindo dependência de resposta 404 do host.
+- Simulações automatizadas: **12 cenários** do roteamento raiz, **6 redirecionamentos estáticos**, incluindo query e hash, aprovados.
+- **Sem alteração no banco, funções Supabase, funcionários, permissões ou pedidos presenciais. Checkout continua bloqueado e compras online não foram liberadas.**
+- **QA:** `QA-MARKETPLACE-ROUTAS-404-20261115.md`.
+- GitHub Actions não executado. Hosting/HTTPS e deploy em produção precisam ser conferidos separadamente.
+
 ## 1.1.0-rc.1 — 2026-11-15 · Fundação do marketplace (pedidos desligados)
 
 **Status:** migração aplicada no Supabase, duas Edge Functions novas ativas, frontend de prévia enviado à `main`. Homologação técnica parcial: deploy do frontend no domínio e testes reais em dispositivos **não confirmados**.
