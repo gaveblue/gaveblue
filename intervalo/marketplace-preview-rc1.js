@@ -1,9 +1,10 @@
 import {icon} from './ui-icons.js?v=1.0.0-rc.1';
+import {addCartItem,loadCart,cartCount} from './marketplace-cart-rc4.js?v=1.1.0-rc.4';
 
 // Vitrine prévia real. NÃO cria pedidos e não envia dados pessoais.
 export async function renderMarketplace({supabase,route,box,esc,link}){
  document.body.classList.add('iv-marketplace');
- const css='<link rel="stylesheet" href="/intervalo/marketplace-preview-rc1.css?v=1.1.0-rc.1">';
+ const css='<link rel="stylesheet" href="/intervalo/marketplace-preview-rc1.css?v=1.1.0-rc.4"><link rel="stylesheet" href="/intervalo/marketplace-commerce-rc4.css?v=1.1.0-rc.4">';
  const money=n=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(n??0)/100);
  const nav=css+'<nav class="iv-mkt-nav" aria-label="Navegação do marketplace"><a class="iv-mkt-brand" href="'+link('/explorar')+'">intervalo</a>'
   +'<div class="iv-mkt-links"><span class="iv-mkt-preview">PRÉVIA</span><a href="'+link('/inicio')+'">'+icon('store',15)+' Gestão</a></div></nav>';
@@ -64,8 +65,8 @@ export async function renderMarketplace({supabase,route,box,esc,link}){
    const photo=logo(r.logo_url,r.name);
    let out='<div class="iv-mkt-store-head"><div class="iv-mkt-store-avatar">'+photo+'</div><div><span class="iv-mkt-eyebrow">LOJA DO RESTAURANTE</span><h1>'+storeTitle+'</h1><p>'+esc(r.description||'Conheça o cardápio deste restaurante.')+'</p>'
       +'<span class="iv-mkt-pill">'+icon('store',14)+' '+esc([r.city,r.state].filter(Boolean).join(' · ')||'Cardápio público')+'</span>'
-      +'<span class="iv-mkt-pill">'+icon('info',14)+' Pedidos online em preparação</span></div></div>'
-      +'<div class="iv-mkt-empty" style="padding:14px;text-align:left;margin-bottom:21px">'+icon('info',20)+' <strong>Vitrine de prévia.</strong> Os preços e produtos são reais do cardápio, mas a compra online ainda não está liberada.</div>'
+      +'<span class="iv-mkt-pill">'+icon('info',14)+' '+(data.customer_orders_enabled?'Pedidos '+(data.checkout_available?'abertos agora':'temporariamente fechados'):'Pedidos online ainda não ativados')+'</span></div></div>'
+      +'<div class="iv-mkt-empty" style="padding:14px;text-align:left;margin-bottom:21px">'+icon('info',20)+' <strong>'+(data.checkout_available?'Pedidos online disponíveis':'Pedidos temporariamente indisponíveis')+'.</strong> Monte seu carrinho. A finalização depende do restaurante estar recebendo pedidos.</div>'
       +'<div class="iv-mkt-filter"><label class="iv-mkt-input">'+icon('search',17)+'<input id="iv-mkt-product-search" type="search" aria-label="Buscar produto" placeholder="Buscar no cardápio"></label></div>'
       +'<div class="iv-mkt-pills" role="group" aria-label="Categorias"><button type="button" data-mkt-cat="all" aria-pressed="true">Todos</button>'
       +cats.map(c=>'<button type="button" data-mkt-cat="'+esc(c.id)+'" aria-pressed="false">'+esc(c.name)+'</button>').join('')+'</div>'
@@ -78,8 +79,23 @@ export async function renderMarketplace({supabase,route,box,esc,link}){
      +'<span class="iv-mkt-body"><strong>'+esc(p.name)+'</strong><p>'+esc(p.description??'')+'</p><span class="iv-mkt-price">'+money(p.price_cents)+'</span></span></button>';
    }
    if(!products.length)out+=placeholder('Cardápio sem produtos','O restaurante ainda não cadastrou itens disponíveis.');
-   out+='</div><div id="iv-mkt-empty" class="iv-mkt-empty" hidden>Nenhum produto encontrado.</div>';
+   out+='</div><div id="iv-mkt-empty" class="iv-mkt-empty" hidden>Nenhum produto encontrado.</div><div id="iv-com-cartbar" class="iv-com-cartbar" hidden></div>';
    page(out,'buscar');
+   const cartBar=document.getElementById('iv-com-cartbar');
+   const refreshCart=()=>{
+     const current=loadCart(route[1]),qty=cartCount(current);
+     cartBar.hidden=qty===0;
+     if(qty){
+       const subtotal=current.items.reduce((sum,i)=>{
+         const p=products.find(x=>x.id===i.product_id);
+         const extra=(data.options??[]).filter(x=>i.option_ids.includes(x.id)).reduce((n,x)=>n+Number(x.price_delta_cents),0);
+         return sum+(Number(p?.price_cents??0)+extra)*i.quantity;
+       },0);
+       cartBar.innerHTML='<span><strong>'+qty+' item(ns)</strong><small>Subtotal estimado: '+money(subtotal)+'</small></span>'
+         +'<a href="'+link('/checkout?loja='+encodeURIComponent(route[1]))+'">Ver carrinho '+icon('arrowRight',16)+'</a>';
+     }
+   };
+   refreshCart();
    const inputs=[...document.querySelectorAll('[data-mkt-product]')];
    const search=document.getElementById('iv-mkt-product-search');
    let activeCat='all';
@@ -99,12 +115,30 @@ export async function renderMarketplace({supabase,route,box,esc,link}){
     const extras=(data.options??[]).filter(x=>x.product_id===p.id);
     const dialog=document.createElement('dialog');dialog.className='iv-mkt-sheet';dialog.setAttribute('aria-label','Detalhes de '+p.name);
     dialog.innerHTML='<div class="iv-mkt-sheet-handle"></div><div class="iv-mkt-sheet-content"><h2>'+esc(p.name)+'</h2><p>'+esc(p.description??'')+'</p><strong class="iv-mkt-price">'+money(p.price_cents)+'</strong>'
-      +(extras.length?'<h3 style="font-size:13px">Adicionais</h3><p>'+extras.map(x=>esc(x.name)+' (+ '+money(x.price_delta_cents)+')').join(' · ')+'</p>':'')
-      +'<p>Os pedidos online estarão disponíveis após a conclusão dos testes.</p><button class="iv-mkt-sheet-close" type="button">Fechar</button></div>';
+      +(extras.length?'<h3>Adicionais</h3><div class="iv-com-options">'+extras.map(x=>'<label class="iv-com-option"><input type="checkbox" name="option" value="'+esc(x.id)+'"><span>'+esc(x.name)+'</span><strong>+ '+money(x.price_delta_cents)+'</strong></label>').join('')+'</div>':'')
+      +'<label class="iv-com-field">Observações<textarea id="iv-com-note" maxlength="350" rows="2" placeholder="Ex.: sem cebola"></textarea></label>'
+      +'<div class="iv-com-quantity"><span>Quantidade</span><button type="button" data-qty="-1">−</button><strong id="iv-com-qty">1</strong><button type="button" data-qty="1">+</button></div>'
+      +'<p class="iv-com-error" id="iv-com-error" hidden></p>'
+      +'<div class="iv-com-actions"><button type="button" class="iv-com-secondary" data-close>Cancelar</button><button type="button" class="iv-com-primary" data-add>Adicionar ao carrinho</button></div></div>';
+    let qty=1;
+    dialog.querySelectorAll('[data-qty]').forEach(btn=>btn.onclick=()=>{
+      qty=Math.max(1,Math.min(20,qty+Number(btn.dataset.qty)));
+      dialog.querySelector('#iv-com-qty').textContent=qty;
+    });
+    dialog.querySelector('[data-close]').onclick=()=>dialog.close();
+    dialog.querySelector('[data-add]').onclick=()=>{
+      try{
+        const option_ids=[...dialog.querySelectorAll('input[name="option"]:checked')].map(x=>x.value);
+        addCartItem(route[1],{product_id:p.id,option_ids,quantity:qty,note:dialog.querySelector('#iv-com-note').value});
+        dialog.close();refreshCart();
+      }catch(e){
+        const err=dialog.querySelector('#iv-com-error');err.textContent=e.message;err.hidden=false;
+      }
+    };
     document.body.append(dialog);
     dialog.addEventListener('close',()=>dialog.remove(),{once:true});
-    dialog.addEventListener('click',e=>{if(e.target===dialog||e.target.closest('.iv-mkt-sheet-close'))dialog.close()});
-    dialog.showModal();dialog.querySelector('.iv-mkt-sheet-close')?.focus({preventScroll:true});
+    dialog.addEventListener('click',e=>{if(e.target===dialog)dialog.close()});
+    dialog.showModal();dialog.querySelector('[data-close]')?.focus({preventScroll:true});
    });
   }catch{
    page(placeholder('Não foi possível abrir a loja','Tente novamente. Se continuar acontecendo, confira se o cardápio está publicado.','/loja/'+route[1],'Tentar novamente'));
