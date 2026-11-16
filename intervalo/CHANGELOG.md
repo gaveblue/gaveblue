@@ -1,5 +1,18 @@
 # Intervalo — CHANGELOG
 
+## 1.1.0-rc.5 — 2026-11-16 · Conta opcional do consumidor
+
+**Status:** banco e código enviados à `main`; RLS e sintaxe verificados. **Acesso real por navegador, propagação HTTP e homologação comercial pendentes.**
+
+- Criada área do cliente em `/intervalo/cliente`, com registro/login de consumidor por e-mail, sessão independente da equipe, perfil e gestão de até 20 endereços (editar/excluir).
+- Implementado preenchimento de nome/celular/endereço salvo no checkout, sem retirar a possibilidade de comprar como visitante. Região e frete continuam calculados por loja.
+- Migração `marketplace_customer_accounts_rc5` aplicada no Supabase com políticas de RLS por `auth.uid()` para perfis e endereços; visitantes não acessam dados pessoais e IDs de propriedade não são editáveis.
+- Corrigido o retorno do checkout para não usar um slug inválido em `href`.
+- Preservados os acessos dos funcionários, Gestão, Garçom, Cozinha, Caixa e comandas presenciais; sem GitHub Actions e sem ativar lojas para pedidos.
+- **Limites:** histórico de compras da conta e vínculo `customer_id` ainda não implementados. Testes de confirmação de e-mail, dispositivos reais, isolamento entre dois usuários e compra completa continuam pendentes.
+- **QA:** `QA-MARKETPLACE-1.1.0-RC5.md`.
+
+
 ## 1.1.0-rc.4 — 2026-11-15 · Marketplace: checkout guest, delivery próprio e operações
 
 **Status:** banco e Edge Functions implantados; frontend enviado à `main`; testes estáticos e verificações de acesso aprovados. **Homologação técnica parcial**, sem pedido real finalizado e sem confirmação de propagação HTTP.
