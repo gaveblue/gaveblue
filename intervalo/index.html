@@ -56,10 +56,23 @@ body.iv-initializing #app{min-height:100dvh;display:block}
 <link rel="stylesheet" href="/intervalo/design-system.css?v=1.0.0-rc.15">
 <link rel="stylesheet" href="/intervalo/visual-unified-rc15.css?v=1.0.0-rc.15">
 <script>
+/* Pré-carrega o visual correto antes da autenticação da rota Loja Online. */
+(function(){
+ try{
+  var query=new URLSearchParams(location.search),deep=query.get('intervalo_route');
+  var target=deep&&deep.startsWith('/intervalo/')?deep.split(/[?#]/)[0]:location.pathname;
+  if(!/^\/intervalo\/[a-z0-9]+(?:-[a-z0-9]+)*\/vendas-online\/?$/.test(target))return;
+  var stylesheet=document.createElement('link');stylesheet.rel='stylesheet';
+  stylesheet.href='/intervalo/online-management-rc1.css?v=1.1.0-rc.6';
+  document.head.appendChild(stylesheet);
+ }catch(e){}
+})();
+</script>
+<script>
 (function(){try{var deep=sessionStorage.getItem('intervalo.deepLink');if(deep&&deep.startsWith('/intervalo/')&&deep.length<2100){sessionStorage.removeItem('intervalo.deepLink');history.replaceState(null,'',deep+window.location.hash)}}catch(e){}})();
 intervaloApplyManifest();
 </script>
-</head><body class="iv-initializing iv-unified"><header><div class="inner"><a class="logo" href="/intervalo/" aria-label="Intervalo, página inicial">Intervalo<span class="iv-brand-tail" aria-hidden="true"></span><small>UM PRODUTO GAVEBLUE</small></a><nav id="nav"><a href="/intervalo/login">Entrar</a></nav></div></header><main id="app"><section id="intervalo-boot-loader" class="iv-boot" role="status" aria-live="polite" aria-busy="true" aria-label="Preparando aplicativo"><div class="iv-boot-brand"><span class="iv-boot-mark" aria-hidden="true">I</span><strong>Intervalo</strong></div><div class="iv-boot-status"><span class="iv-load-dot" aria-hidden="true"></span><span>Preparando sua experiência...</span></div><div class="iv-boot-grid" aria-hidden="true"><div class="iv-boot-card"><span class="iv-load-skeleton"></span><span class="iv-load-skeleton"></span><span class="iv-load-skeleton"></span></div><div class="iv-boot-card"><span class="iv-load-skeleton"></span><span class="iv-load-skeleton"></span><span class="iv-load-skeleton"></span></div><div class="iv-boot-card"><span class="iv-load-skeleton"></span><span class="iv-load-skeleton"></span><span class="iv-load-skeleton"></span></div><div class="iv-boot-card"><span class="iv-load-skeleton"></span><span class="iv-load-skeleton"></span><span class="iv-load-skeleton"></span></div></div><div class="iv-boot-row" aria-hidden="true"><span class="iv-load-skeleton"></span><span class="iv-load-skeleton"></span></div><div class="iv-boot-retry" id="iv-boot-retry"><p>Está demorando mais que o esperado. Confira a conexão e tente novamente.</p><button id="iv-boot-retry-action" type="button">Tentar novamente</button></div></section></main><footer class="foot">Gaveblue © 2026 · Intervalo 1.1.0-rc.4 · Marketplace, delivery e retirada</footer>
+</head><body class="iv-initializing iv-unified"><header><div class="inner"><a class="logo" href="/intervalo/" aria-label="Intervalo, página inicial">Intervalo<span class="iv-brand-tail" aria-hidden="true"></span><small>UM PRODUTO GAVEBLUE</small></a><nav id="nav"><a href="/intervalo/login">Entrar</a></nav></div></header><main id="app"><section id="intervalo-boot-loader" class="iv-boot" role="status" aria-live="polite" aria-busy="true" aria-label="Preparando aplicativo"><div class="iv-boot-brand"><span class="iv-boot-mark" aria-hidden="true">I</span><strong>Intervalo</strong></div><div class="iv-boot-status"><span class="iv-load-dot" aria-hidden="true"></span><span>Preparando sua experiência...</span></div><div class="iv-boot-grid" aria-hidden="true"><div class="iv-boot-card"><span class="iv-load-skeleton"></span><span class="iv-load-skeleton"></span><span class="iv-load-skeleton"></span></div><div class="iv-boot-card"><span class="iv-load-skeleton"></span><span class="iv-load-skeleton"></span><span class="iv-load-skeleton"></span></div><div class="iv-boot-card"><span class="iv-load-skeleton"></span><span class="iv-load-skeleton"></span><span class="iv-load-skeleton"></span></div><div class="iv-boot-card"><span class="iv-load-skeleton"></span><span class="iv-load-skeleton"></span><span class="iv-load-skeleton"></span></div></div><div class="iv-boot-row" aria-hidden="true"><span class="iv-load-skeleton"></span><span class="iv-load-skeleton"></span></div><div class="iv-boot-retry" id="iv-boot-retry"><p>Está demorando mais que o esperado. Confira a conexão e tente novamente.</p><button id="iv-boot-retry-action" type="button">Tentar novamente</button></div></section></main><footer class="foot">Gaveblue © 2026 · Intervalo 1.1.0-rc.6 · Marketplace, delivery e retirada</footer>
 <script>
 /* Se um import externo impedir o módulo de iniciar, não deixar o usuário preso na tela de abertura. */
 window.setTimeout(function(){
@@ -70,6 +83,25 @@ window.setTimeout(function(){
  var button=document.getElementById('iv-boot-retry-action');
  if(button)button.addEventListener('click',function(){window.location.reload()},{once:true});
 },18000);
+</script>
+<script>
+/* A Loja Online usa o mesmo esqueleto desde a primeira renderização, sem loader legado. */
+(function(){
+ try{
+  var q=new URLSearchParams(location.search),deep=q.get('intervalo_route');
+  var target=deep&&deep.startsWith('/intervalo/')?deep.split(/[?#]/)[0]:location.pathname;
+  if(!/^\/intervalo\/[a-z0-9]+(?:-[a-z0-9]+)*\/vendas-online\/?$/.test(target))return;
+  var boot=document.getElementById('intervalo-boot-loader');if(!boot)return;
+  boot.className='iv-on-shell';boot.setAttribute('aria-label','Carregando Loja Online');
+  boot.innerHTML='<header class="iv-on-header"><div class="iv-on-heading"><span class="iv-on-eyebrow">INTERVALO / GESTÃO</span><h1>Loja Online</h1><p>Marketplace</p></div></header>'
+   +'<main class="iv-on-main iv-on-loading"><div class="iv-on-loading-head"><span class="iv-on-skeleton iv-on-skel-title"></span><span class="iv-on-skeleton iv-on-skel-sub"></span></div>'
+   +'<div class="iv-on-stats" aria-hidden="true"><div class="iv-on-stat"><span class="iv-on-skeleton iv-on-skel-label"></span><span class="iv-on-skeleton iv-on-skel-value"></span></div>'
+   +'<div class="iv-on-stat"><span class="iv-on-skeleton iv-on-skel-label"></span><span class="iv-on-skeleton iv-on-skel-value"></span></div>'
+   +'<div class="iv-on-stat"><span class="iv-on-skeleton iv-on-skel-label"></span><span class="iv-on-skeleton iv-on-skel-value"></span></div></div>'
+   +'<div class="iv-on-columns" aria-hidden="true"><section class="iv-on-card iv-on-skel-card"><span class="iv-on-skeleton iv-on-skel-title"></span><span class="iv-on-skeleton iv-on-skel-sub"></span></section>'
+   +'<section class="iv-on-card iv-on-skel-card"><span class="iv-on-skeleton iv-on-skel-title"></span><span class="iv-on-skeleton iv-on-skel-sub"></span></section></div></main>';
+ }catch(e){}
+})();
 </script>
 <script type="module">
 import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.50.0/+esm';
