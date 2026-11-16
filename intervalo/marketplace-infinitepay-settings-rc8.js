@@ -1,7 +1,7 @@
 import {icon} from './ui-icons.js?v=1.0.0-rc.1';
 import {sheetifyForms,showFormSheetError} from './operational-sheets-rc15.js?v=1.0.0-rc.15';
 
-// Configuração de pagamento por restaurante. Nenhuma chamada de cobrança é feita aqui.
+// Configuração por restaurante; cobrança Pix em marketplace-infinitepay.
 export async function initInfinitePaySettings({supabase,restaurant,role,esc}){
  const target=document.getElementById('iv-on-infinitepay');
  if(!target)return;
@@ -24,16 +24,17 @@ export async function initInfinitePaySettings({supabase,restaurant,role,esc}){
   const keyReady=info.key_configured===true;
   const named=!!info.handle;
   const complete=named&&keyReady;
-  const status=complete?'Credenciais preparadas':named?'InfiniteTag salva':'Não conectado';
-  const label=complete?'As credenciais estão preparadas no servidor. O pagamento online ainda não foi ativado.':
+  const active=info.payments_available===true;
+  const status=active?'Checkout habilitado':complete?'Credenciais preparadas':named?'InfiniteTag salva':'Não conectado';
+  const label=active?'O pagamento online está habilitado para esta loja. Confira a primeira compra real antes de usar em produção.':complete?'As credenciais estão preparadas no servidor. O pagamento online ainda não foi ativado.':
    named?'Falta registrar a API Key nas configurações seguras do Supabase.':
    'Vincule a conta InfinitePay deste restaurante para preparar os pagamentos.';
   const stateHTML='<div class="iv-on-infinite-state"><div><strong>'+status+'</strong>'
    +'<p>'+label+'</p></div><span class="iv-on-status '+(complete?'ready':'')+'">'
-   +(complete?'Preparado':'Desativado')+'</span></div>'
+   +(active?'Ativo':complete?'Preparado':'Desativado')+'</span></div>'
    +(named?'<div class="iv-on-detail"><span>InfiniteTag</span><strong>$'+esc(info.handle)+'</strong></div>':'')
    +'<div class="iv-on-detail"><span>Chave no servidor</span><strong>'+(keyReady?'Presente':'Não cadastrada')+'</strong></div>'
-   +'<p class="iv-on-hint">Os pagamentos continuam com as modalidades atuais. Não há geração automática de cobranças nesta versão.</p>'
+   +'<p class="iv-on-hint">'+(active?'Pix online disponível no checkout do restaurante. QR Code e Pix Copia e Cola aparecem na página segura da InfinitePay.':'O pagamento online permanece indisponível até a configuração completa.')+'</p>'
    +'<div class="iv-on-card-actions">'
    +(info.can_edit?'<button type="button" class="iv-on-button" id="iv-infinite-edit">'+icon('settings',16)+' '
     +(named?'Alterar InfiniteTag':'Configurar InfinitePay')+'</button>':'<span class="iv-on-hint">Somente o Master pode configurar.</span>')
