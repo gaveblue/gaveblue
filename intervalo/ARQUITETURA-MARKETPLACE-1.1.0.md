@@ -3,9 +3,9 @@
 **Especificação de planejamento — 15/11/2026**  
 **Projeto:** `gaveblue/gaveblue` → `intervalo/`  
 **Base conhecida:** 1.0.0-rc.16  
-**Ciclo em execução:** 1.1.0-rc.1 (fundação técnica), com etapas posteriores planejadas.
+**Ciclo em execução:** 1.1.0-rc.4 (checkout guest e integração operacional implementados no código e backend; homologação comercial pendente).
 
-> **Status atualizado em 15/11/2026:** fundação 1.1.0-rc.1 implantada (11 tabelas, RLS, funções de consulta/configuração e vitrines de prévia). **Pedidos e checkout continuam DESLIGADOS.** Esta especificação também descreve fases futuras que ainda não existem.
+> **Status atualizado em 15/11/2026:** estrutura, checkout guest, acompanhamento, gestão de horários/zonas e integrações de Cozinha/Estoque/Caixa implementadas. **Nenhum restaurante aceita pedidos reais por padrão; 0 pedidos registrados e homologação comercial pendente.** Os serviços estão ativos, mas o fluxo de ponta a ponta com compra real ainda não foi validado. Login opcional de consumidores não foi implementado.
 
 ## 1. Visão e decisões fechadas
 
@@ -173,7 +173,7 @@ Configuração de cobrança da plataforma a decidir: mensalidade SaaS, comissão
 
 Baseado em inspeção do repositório e do schema real em 15/11/2026. O modelo base foi implementado em 11 tabelas isoladas, mas o fluxo de compra, integração com Cozinha/Estoque/Caixa, tracking e cadastro funcional de consumidores continuam **propostas**, não serviços concluídos. Não houve ativação de pedidos, alteração de funcionários, permissões ou dos lançamentos presenciais.
 
-**Próxima tarefa de engenharia:** concluir homologação real de `rc.1` e evoluir `rc.2` (vitrine pública, horários e regiões editáveis), mantendo checkout bloqueado; depois avançar para `rc.3` e seguintes, somente com critérios de segurança e aceite.
+**Próxima tarefa de engenharia:** homologar o MVP `rc.4` com uma compra controlada em restaurante de testes, validar segurança/estoque/Caixa na prática, concluir revisão jurídica e controle antifraude; somente depois planejar abertura comercial e cadastro opcional do consumidor.
 
 
 ## 11. Registro de execução — fundação 1.1.0-rc.1
@@ -187,3 +187,14 @@ Baseado em inspeção do repositório e do schema real em 15/11/2026. O modelo b
 **Homologação:** verificação de permissões, migração e renderização simulada passou; funcionamento autenticado no PWA e propagação no domínio dependem de testes reais. Ver `QA-MARKETPLACE-1.1.0-RC1.md`.
 
 **Pendente:** checkout guest, prevenção de fraude/rate limit, cálculo transacional de frete/preço, aceite de pedido, integração com Cozinha/Estoque/Caixa, pagamento, acompanhamento, edição de zonas e horários, CPF opcional do cliente, privacidade/LGPD. **Não é uma plataforma de pedidos online pronta para o público.**
+
+
+## 12. Registro de execução — MVP de compras 1.1.0-rc.4
+
+**Banco e APIs:** adicionados `marketplace_checkout_rc2`, `marketplace_operations_rc3`, `marketplace_settings_rc4` e hotfixes de retirada sem região e bloqueio de pagamento antes do aceite. Funções `marketplace-public` v2, `marketplace-online` v1, `marketplace-operations` v1 e `marketplace-management` v3 verificadas como ativas. RPCs de preço, pedido, estoque, horários, ativação e conciliação do Caixa restritas a `service_role`.
+
+**Frontends implementados no código:** loja com carrinho por restaurante e adicionais, checkout sem cadastro, acompanhamento por link privado, configurações de horários/regiões/frete, fila de pedidos na Gestão, tickets DELIVERY/RETIRADA na Cozinha, pagamentos online no Caixa sem misturar somas do atendimento presencial, termos e privacidade iniciais. Roteamento direto do link privado de acompanhamento com token `UUID.assinatura` corrigido.
+
+**Homologação:** o primeiro teste SQL transacional identificou bug de cotação na retirada e foi revertido. Bug corrigido e migração implantada; o reteste completo com pedido/gravação foi bloqueado pelo ambiente de segurança. Compilação JS, cart e rotas passaram em simulação; banco confirmou que **0 lojas estão ativadas, 0 pedidos online, 0 pagamentos online**, sem dados de teste persistidos. Ver `QA-MARKETPLACE-1.1.0-RC4.md`.
+
+**Pendente para considerar lançamento:** testar pedido real controlado, validação/atualização da implantação web no domínio e PWA, endurecimento do antifraude (verificação de celular quando necessário), contas opcionais de consumidores, políticas de cancelamento/privacidade revisadas juridicamente e implantação gradual com indicadores. Não misturar esta pendência com uma declaração de que o MVP foi homologado.
