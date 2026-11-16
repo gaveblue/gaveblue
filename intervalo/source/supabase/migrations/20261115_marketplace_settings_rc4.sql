@@ -25,8 +25,8 @@ begin
   v_weekday:=(v_item->>'weekday')::integer;
   v_from:=(v_item->>'opens_at')::time;v_until:=(v_item->>'closes_at')::time;
   if v_from=v_until then raise exception 'Abertura e fechamento não podem ser iguais';end if;
-  if jsonb_typeof(v_item->'delivery_enabled') not in ('true','false') or
-     jsonb_typeof(v_item->'pickup_enabled') not in ('true','false') then
+  if jsonb_typeof(v_item->'delivery_enabled') <> 'boolean' or
+     jsonb_typeof(v_item->'pickup_enabled') <> 'boolean' then
    raise exception 'Modalidade de horário inválida';end if;
  end loop;
  delete from public.restaurant_business_hours where restaurant_id=p_restaurant;
