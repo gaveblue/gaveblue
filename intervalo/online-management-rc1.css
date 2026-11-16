@@ -1,53 +1,136 @@
-/* Gestão > Loja Online · prévia segura 1.1.0-rc.1 */
-body.iv-online-admin{background:#f8f9fb;color:#223148}
-body.iv-online-admin #app .wrap{max-width:1100px;margin:0 auto;padding:clamp(16px,3vw,30px) clamp(14px,3vw,25px) 92px}
-.iv-on-header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:13px;margin:3px 0 20px}
-.iv-on-header h1{margin:7px 0;font-size:clamp(24px,3vw,31px);letter-spacing:-.7px}
-.iv-on-header p{margin:0;color:#8391a3;font-size:12px}
-.iv-on-eyebrow{color:#e97800;font-size:10px;font-weight:850;letter-spacing:1.3px}
-.iv-on-back{display:inline-flex;gap:7px;align-items:center;color:#52647a!important;font-size:11px;font-weight:760;text-decoration:none;border:1px solid #e5eaf0;border-radius:11px;background:#fff;padding:11px 13px}
-.iv-on-stat-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:0 0 22px}
-.iv-on-stat{border:1px solid #e9edf2;background:#fff;border-radius:16px;padding:16px;min-width:0}
-.iv-on-stat .iv-icon{color:#ef7600;margin-bottom:11px}
-.iv-on-stat span{display:block;color:#8b99a8;font-size:11px;margin-bottom:7px}
-.iv-on-stat strong{font-size:16px;line-height:1.35;overflow-wrap:anywhere}
-.iv-on-banner{background:#fff4e8;border:1px solid #ffe1bf;color:#a75d19;padding:15px;border-radius:15px;font-size:12px;line-height:1.65;margin:0 0 18px}
-.iv-on-panel{background:#fff;border:1px solid #e9edf2;border-radius:17px;padding:19px;margin:13px 0}
-.iv-on-panel h2{margin:0 0 6px;font-size:17px}
-.iv-on-panel p{font-size:11px;color:#8795a6;line-height:1.6;margin:4px 0 14px}
-.iv-on-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:10px 0}
-.iv-on-label{display:inline-flex;align-items:center;gap:7px;font-weight:770;font-size:12px;color:#3f5065}
-.iv-on-button{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:11px;color:#fff;background:linear-gradient(120deg,#ff920b,#ff7000);padding:12px 15px;font-size:12px;font-weight:790;cursor:pointer}
-.iv-on-button.secondary{background:#fff0e5;color:#dd7100;border:1px solid #ffd4b0}
-.iv-on-button:disabled{opacity:.55;cursor:wait}
-.iv-on-link{color:#ec7800;font-size:11px;font-weight:780;overflow-wrap:anywhere}
-.iv-on-status{border-radius:99px;padding:6px 9px;background:#f0f3f6;color:#708092;font-size:10px;font-weight:830}
-.iv-on-status.ready{background:#eaf9f0;color:#18804f}
-.iv-on-field{display:block;font-size:12px;font-weight:730;color:#3a4a5f}
-.iv-on-field input,.iv-on-field textarea{width:100%;margin-top:7px;border:1px solid #dce3eb;border-radius:11px;min-height:46px;padding:11px 12px;font-size:13px;color:#20314a;background:#fff}
-.iv-on-field textarea{min-height:92px;resize:vertical}
-.iv-on-field .iv-on-help{font-size:10px;color:#8f9bab;line-height:1.45;font-weight:400;margin:6px 0 0}
-.iv-on-checks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-.iv-on-checks label{display:flex;gap:8px;align-items:center;justify-content:center;background:#f7f9fb;border:1px solid #e6ebf2;border-radius:11px;padding:13px;color:#46576c;font-size:12px;font-weight:720}
-.iv-on-checks input{min-height:auto!important;width:17px!important;accent-color:#ff7b00}
-.iv-on-closed{font-size:11px;color:#8b98a9;display:flex;align-items:center;gap:8px}
+/* Intervalo · Loja Online rc6 — identidade da Gestão, responsivo e loading único. */
+body.iv-online-admin{background:#f8f9fb;color:#1b293e}
+body.iv-online-admin #app .wrap{max-width:none!important;padding:0!important;margin:0!important}
+.iv-on-shell{--iv-orange:#ff7900;--iv-border:#e8edf2;--iv-muted:#8290a2;max-width:1250px;min-height:100dvh;margin:0 auto;padding:22px clamp(15px,2.6vw,32px) 105px;font-family:Inter,"Segoe UI",Arial,sans-serif;color:#1b293e}
+.iv-on-shell *{box-sizing:border-box}
+.iv-on-shell button,.iv-on-shell input,.iv-on-shell select,.iv-on-shell textarea{font:inherit}
+.iv-on-shell a{text-decoration:none!important}
+.iv-on-header{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:5px 0 21px;border-bottom:1px solid var(--iv-border)}
+.iv-on-heading{min-width:0}
+.iv-on-eyebrow{display:block;color:#ed7700;font-size:10px;font-weight:850;letter-spacing:1.1px;text-transform:uppercase}
+.iv-on-heading h1{display:flex;align-items:center;gap:9px;margin:6px 0;font-size:clamp(23px,2.8vw,29px);font-weight:850;letter-spacing:-.9px;line-height:1.18}
+.iv-on-heading h1 .iv-icon{color:#f47b00}
+.iv-on-heading p{margin:0;color:var(--iv-muted);font-size:12px;font-weight:600}
+.iv-on-back{display:inline-flex;align-items:center;justify-content:center;gap:7px;flex:none;color:#516175!important;font-size:11px;font-weight:760;background:#fff;border:1px solid var(--iv-border);border-radius:11px;padding:11px 13px;min-height:42px}
+.iv-on-back:hover,.iv-on-button.secondary:hover,.iv-on-text-action:hover{border-color:#ffcca7;color:#d56a00!important}
+.iv-on-main{padding-top:25px;min-width:0}
+.iv-on-intro{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:18px}
+.iv-on-intro h2{margin:7px 0 5px;font-weight:850;font-size:clamp(19px,2.3vw,24px);letter-spacing:-.5px}
+.iv-on-intro p{font-size:12px;color:var(--iv-muted);line-height:1.5;margin:0}
+.iv-on-status{display:inline-flex;gap:4px;align-items:center;justify-content:center;padding:7px 10px;border-radius:100px;background:#f1f3f6;border:1px solid #e9edf2;color:#67788c;font-size:10px;font-weight:800;line-height:1.15;white-space:nowrap}
+.iv-on-status.ready{color:#13825e;background:#eaf8f1;border-color:#d5f0e2}
+.iv-on-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px;margin-bottom:16px}
+.iv-on-stat{background:#fff;border:1px solid var(--iv-border);border-radius:16px;min-width:0;min-height:116px;padding:15px;display:flex;flex-direction:column;gap:8px}
+.iv-on-stat-top{display:flex;justify-content:space-between;align-items:center;gap:6px;color:#7c8a9e;font-size:11px;font-weight:760}
+.iv-on-stat-symbol{width:34px;height:34px;border-radius:11px;flex:none;background:#f4f6f9;color:#718197;display:grid;place-items:center}
+.iv-on-stat:first-child .iv-on-stat-symbol{background:#fff0e4;color:#f27800}
+.iv-on-stat strong{display:block;font-size:21px;font-weight:850;letter-spacing:-.6px;line-height:1.1;overflow-wrap:anywhere;color:#243348}
+.iv-on-stat small{font-size:10px;line-height:1.35;color:#98a4b2}
+.iv-on-columns{display:grid;grid-template-columns:minmax(0,1.07fr) minmax(0,.93fr);align-items:start;gap:14px}
+.iv-on-column{min-width:0;display:grid;align-content:start;gap:14px}
+.iv-on-card{border:1px solid var(--iv-border);background:#fff;border-radius:18px;padding:19px;min-width:0}
+.iv-on-card-heading{display:flex;align-items:flex-start;gap:11px;margin-bottom:17px}
+.iv-on-card-heading>div{min-width:0;flex:1}
+.iv-on-card-heading h2{font-size:15px;font-weight:850;letter-spacing:-.25px;margin:2px 0 5px}
+.iv-on-card-heading p{font-size:11px;color:#8b99a9;line-height:1.5;margin:0}
+.iv-on-card-icon{width:37px;height:37px;border-radius:12px;display:grid;place-items:center;flex:none;background:#fff1e5;color:#ef7700}
+.iv-on-store-preview{display:flex;align-items:center;gap:12px;background:#fafbfd;border:1px solid #f0f2f5;border-radius:13px;padding:13px;margin-bottom:6px}
+.iv-on-store-avatar{width:43px;height:43px;border-radius:13px;display:grid;place-items:center;background:#fff0e5;color:#ee7900;flex:none}
+.iv-on-store-preview>div:last-child{min-width:0}
+.iv-on-store-preview strong{display:block;font-size:13px;line-height:1.4;overflow-wrap:anywhere}
+.iv-on-store-preview small{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;color:#8b98aa;font-size:11px;line-height:1.5;margin-top:3px}
+.iv-on-detail{display:flex;justify-content:space-between;align-items:center;gap:13px;padding:12px 0;border-bottom:1px solid #f0f2f5;min-width:0}
+.iv-on-detail>span:first-child{font-size:11px;color:#8290a2}
+.iv-on-detail>strong{color:#394a5e;font-size:11px;line-height:1.5;text-align:right;max-width:60%;font-weight:780;overflow-wrap:anywhere}
+.iv-on-card-actions{display:flex;gap:8px;flex-wrap:wrap;margin:17px 0 15px}
+.iv-on-button{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:1px solid #f67900;border-radius:11px;min-height:40px;color:#fff!important;background:linear-gradient(110deg,#ff8c08,#ff7000);padding:10px 13px;font-size:11px!important;font-weight:800;cursor:pointer;white-space:normal;text-align:center;line-height:1.25}
+.iv-on-button.secondary{background:#fff;color:#495b70!important;border:1px solid #e3e8ee}
+.iv-on-button .iv-icon{flex:none}
+.iv-on-button:disabled,.iv-on-icon-action:disabled{opacity:.48;cursor:not-allowed}
+.iv-on-separator{height:1px;background:var(--iv-border);margin:16px 0}
+.iv-on-line,.iv-on-option{display:flex;justify-content:space-between;align-items:center;gap:12px;min-width:0}
+.iv-on-line>div,.iv-on-option>div{min-width:0;flex:1}
+.iv-on-line h3,.iv-on-option strong{font-size:12px;color:#35455a;font-weight:800;margin:0 0 3px;display:block}
+.iv-on-line p,.iv-on-option p{font-size:11px;line-height:1.5;color:#8997a7;margin:0}
+.iv-on-option{padding:13px 0;border-top:1px solid #edf0f4}
+.iv-on-option:first-of-type{border-top:none}
+.iv-on-option .iv-on-button{min-width:102px}
+.iv-on-hint{font-size:11px;color:#93a0b0;line-height:1.5;margin:11px 0 0}
+.iv-on-zone-list{padding:0}
+.iv-on-zone-row{display:flex;align-items:center;justify-content:space-between;gap:9px;border-top:1px solid #edf0f4;padding:13px 0}
+.iv-on-zone-row>div{min-width:0}
+.iv-on-zone-row strong{display:block;font-size:12px;color:#35475c}
+.iv-on-zone-row small{display:block;font-size:10px;line-height:1.5;color:#8897a8;margin-top:3px;overflow-wrap:anywhere}
+.iv-on-text-action{background:#fff;border:1px solid #e8edf2;border-radius:10px;color:#637489;padding:9px 11px;font-size:11px;font-weight:800;cursor:pointer;flex:none}
+.iv-on-sales-state{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;border:1px solid #edf0f4;background:#fafbfd;padding:14px;border-radius:13px;margin-bottom:6px}
+.iv-on-sales-state small{font-size:10px;color:#93a0b0}
+.iv-on-sales-state strong{display:block;margin:5px 0 4px;font-size:13px}
+.iv-on-sales-state p{font-size:11px;color:#8c9aaa;line-height:1.45;margin:0}
+.iv-on-wide{width:100%;margin-top:15px}
+.iv-on-icon-action{margin-left:auto;flex:none;width:35px;height:35px;display:grid;place-items:center;border:1px solid #e5eaf0;background:#fff;border-radius:10px;color:#6b7b8e;cursor:pointer}
+.iv-on-orders{min-height:96px}
+.iv-on-empty{text-align:center;padding:18px 12px 12px;color:#8594a6;display:flex;align-items:center;flex-direction:column;gap:8px}
+.iv-on-empty>.iv-icon{color:#ed7d0b}
+.iv-on-empty strong{font-size:12px;color:#43556c}
+.iv-on-empty p{margin:0;font-size:11px;line-height:1.5}
+.iv-on-order{background:#fafbfd;border:1px solid #eef1f5;border-radius:13px;padding:14px;margin:11px 0;min-width:0}
+.iv-on-order .iv-on-row{display:flex;align-items:center;justify-content:space-between;gap:7px;flex-wrap:wrap;margin-bottom:8px}
+.iv-on-order p{font-size:11px;color:#738298;line-height:1.5;margin:6px 0}
+.iv-on-order strong{font-size:12px;color:#354459}
+.iv-on-order-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.iv-on-order-actions button{font-size:11px}
+.iv-on-notice{font-size:12px;padding:12px 15px;border:1px solid #ffd0ca;border-radius:12px;background:#fff8f7;color:#a92f23;margin:0 0 15px}
+.iv-on-error h2{font-size:17px;margin:0 0 9px}
+.iv-on-error p{font-size:12px;color:#8b4f48}
+.iv-on-form-host{position:absolute;width:0;height:0;overflow:hidden;opacity:0;pointer-events:none}
 body.iv-online-admin .iv-op-body form{display:flex;flex-direction:column;gap:14px}
 body.iv-online-admin .iv-op-body form .iv-on-field{margin:0!important}
-body.iv-online-admin .iv-op-body form .iv-on-field input,
-body.iv-online-admin .iv-op-body form .iv-on-field textarea{display:block}
-@media(max-width:660px){.iv-on-stat-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.iv-on-stat:last-child{grid-column:1/-1}.iv-on-panel{padding:15px}.iv-on-stat{padding:13px}.iv-on-checks{grid-template-columns:1fr}}
-
-
-.iv-on-time-row{display:grid;grid-template-columns:1.1fr 1fr 1fr auto auto auto;align-items:center;gap:8px;border:1px solid #e9edf2;border-radius:12px;padding:10px;margin:9px 0}
-.iv-on-time-row select,.iv-on-time-row input[type=time]{height:40px;min-width:0;width:100%;border:1px solid #e0e5ed;border-radius:9px;background:white;padding:7px;font-size:11px;color:#314057}
+.iv-on-field{display:block;font-size:12px;font-weight:760;color:#3a4a5f}
+.iv-on-field input,.iv-on-field textarea{width:100%;margin-top:7px;border:1px solid #dce3eb;border-radius:11px;min-height:46px;padding:11px 12px;font-size:13px;color:#20314a;background:#fff}
+.iv-on-field textarea{min-height:85px;resize:vertical}
+.iv-on-field .iv-on-help{font-size:10px;color:#8f9bab;line-height:1.45;font-weight:400;margin:6px 0 0}
+.iv-on-checks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.iv-on-checks label{display:flex;gap:8px;align-items:center;justify-content:center;background:#f7f9fb;border:1px solid #e6ebf2;border-radius:11px;padding:12px;color:#46576c;font-size:12px;font-weight:720}
+.iv-on-checks input{min-height:auto!important;width:17px!important;accent-color:#ff7b00}
+.iv-on-time-row{display:grid;grid-template-columns:minmax(100px,1.1fr) minmax(70px,.8fr) minmax(70px,.8fr) auto auto auto;align-items:center;gap:8px;border:1px solid #e9edf2;border-radius:12px;padding:10px;margin:7px 0}
+.iv-on-time-row select,.iv-on-time-row input[type=time]{height:40px;min-width:0;width:100%;border:1px solid #e0e5ed;border-radius:9px;background:#fff;padding:7px;font-size:11px;color:#314057}
 .iv-on-time-row label{display:flex;align-items:center;gap:4px;font-size:10px;color:#6a7685}
 .iv-on-time-row input[type=checkbox]{accent-color:#ff7900}
 .iv-on-time-row button[data-remove-time]{height:35px;width:35px;border:0;background:#f3f5f8;color:#77869a;border-radius:9px;font-size:19px}
-.iv-on-zone-row{display:flex;justify-content:space-between;align-items:center;gap:12px;border-top:1px solid #edf0f4;padding:13px 0}
-.iv-on-zone-row strong{display:block;font-size:12px;color:#25364a}
-.iv-on-zone-row small{display:block;color:#8492a2;font-size:10px;margin-top:5px}
-.iv-on-order{background:#fff;border:1px solid #e9edf2;border-radius:14px;padding:15px;margin:12px 0}
-.iv-on-order p{font-size:11px;color:#8190a2;line-height:1.5}
-.iv-on-order-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-.iv-on-order-actions button{font-size:11px;padding:10px}
-@media(max-width:700px){.iv-on-time-row{grid-template-columns:repeat(2,minmax(0,1fr))}.iv-on-time-row select{grid-column:1/-1}.iv-on-time-row button[data-remove-time]{justify-self:end}}
+.iv-on-loading{min-height:65dvh}
+.iv-on-loading-head{display:grid;gap:13px;margin-bottom:25px}
+.iv-on-skel-card{min-height:210px}
+.iv-on-skeleton{display:block;background:linear-gradient(90deg,#edf1f5 20%,#f7f9fb 47%,#edf1f5 75%);background-size:220% 100%;border-radius:9px;min-height:15px;animation:iv-on-pulse 1.5s ease-in-out infinite}
+.iv-on-skel-title{height:24px;width:54%;min-height:24px}
+.iv-on-skel-sub{height:12px;width:69%;min-height:12px}
+.iv-on-skel-label{width:55%;height:12px;min-height:12px}
+.iv-on-skel-value{width:65%;height:29px;min-height:29px}
+.iv-on-skel-button{height:38px;width:42%;min-height:38px;margin-top:28px}
+.iv-on-orders-loading{padding:15px 0;display:grid;gap:12px}
+.iv-on-refreshing .iv-on-main{opacity:.65;pointer-events:none;transition:opacity .15s ease}
+@keyframes iv-on-pulse{to{background-position-x:-220%}}
+@media(max-width:850px){.iv-on-columns{grid-template-columns:1fr}.iv-on-column{gap:12px}}
+@media(max-width:650px){
+ .iv-on-shell{padding:15px 14px max(93px,env(safe-area-inset-bottom))}
+ .iv-on-header{align-items:flex-start;flex-direction:column-reverse;gap:15px;padding-bottom:16px}
+ .iv-on-back{padding:9px 11px;min-height:37px}
+ .iv-on-main{padding-top:18px}
+ .iv-on-intro{align-items:flex-start;flex-direction:column;gap:10px}
+ .iv-on-intro h2{font-size:21px}
+ .iv-on-intro p{font-size:11px}
+ .iv-on-stats{gap:7px;margin-bottom:12px}
+ .iv-on-stat{padding:11px 9px;min-height:105px;gap:7px;border-radius:13px}
+ .iv-on-stat-top{font-size:10px}
+ .iv-on-stat-symbol{width:27px;height:27px;border-radius:9px}
+ .iv-on-stat-symbol .iv-icon{width:15px;height:15px}
+ .iv-on-stat strong{font-size:clamp(13px,3.8vw,18px);letter-spacing:-.3px}
+ .iv-on-stat small{font-size:9px}
+ .iv-on-card{padding:16px;border-radius:16px}
+ .iv-on-card-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+ .iv-on-card-actions .iv-on-button{min-width:0}
+ .iv-on-time-row{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .iv-on-time-row select{grid-column:1/-1}
+ .iv-on-time-row button[data-remove-time]{justify-self:end}
+}
+@media(max-width:380px){.iv-on-stat-symbol{display:none}.iv-on-card-actions{grid-template-columns:1fr}.iv-on-option{align-items:flex-start}.iv-on-option .iv-on-button{min-width:90px}}
+@media(prefers-reduced-motion:reduce){.iv-on-skeleton{animation:none}.iv-on-refreshing .iv-on-main{transition:none}}
