@@ -77,10 +77,10 @@ body.iv-checkout-rc7{background:#f8f9fb;color:#203048}
 .iv-ck-skeleton-card{min-height:135px;display:grid;align-content:start;gap:19px}
 @keyframes iv-ck-shimmer{to{background-position-x:-210%}}
 /* Bottom sheets unificados: handle arrastável, formulário e rodapé fixo. */
-dialog.iv-ck-sheet{position:fixed;inset:auto 0 0;z-index:50;margin:0 auto;padding:0;box-sizing:border-box;border:0;outline:0;width:min(100%,540px);max-width:100%;max-height:var(--iv-ck-visible-height,92dvh);overflow:visible;border-radius:23px 23px 0 0;background:#fff;color:#26364b;box-shadow:0 -18px 65px #19283b36}
+dialog.iv-ck-sheet{position:fixed;inset:auto 0 0;z-index:50;margin:0 auto;padding:0;box-sizing:border-box;border:0;outline:0;width:min(100%,540px);max-width:100%;max-height:var(--iv-ck-visible-height,76dvh);overflow:visible;border-radius:23px 23px 0 0;background:#fff;color:#26364b;box-shadow:0 -18px 65px #19283b36}
 dialog.iv-ck-sheet:not([open]){display:none!important}
 dialog.iv-ck-sheet::backdrop{background:#1724369c}
-.iv-ck-sheet-frame{display:flex;flex-direction:column;max-height:var(--iv-ck-visible-height,92dvh);min-height:220px;overflow:hidden;border-radius:23px 23px 0 0;background:#fff}
+.iv-ck-sheet-frame{display:flex;flex-direction:column;max-height:var(--iv-ck-visible-height,76dvh);min-height:220px;overflow:hidden;border-radius:23px 23px 0 0;background:#fff}
 .iv-ck-sheet-drag{height:30px;flex:none;cursor:ns-resize;touch-action:none;display:flex;align-items:center;justify-content:center}
 .iv-ck-sheet-drag>span{display:block;width:42px;height:5px;border-radius:99px;background:#d8dee7}
 .iv-ck-sheet-header{position:static!important;z-index:auto!important;background:#fff!important;display:flex;gap:10px;align-items:flex-start;justify-content:space-between;border:0!important;padding:0 21px 16px;flex:none}
@@ -101,7 +101,7 @@ dialog.iv-ck-sheet::backdrop{background:#1724369c}
 .iv-ck-payment-list label>span .iv-icon{color:#f17c00}
 .iv-ck-payment-list input:checked+span{border-color:#ffba82;background:#fff5eb}
 .iv-ck-payment-list input:focus-visible+span{outline:3px solid #ffb978;outline-offset:2px}
-dialog.iv-ck-sheet.iv-ck-expanded,dialog.iv-ck-sheet.iv-ck-expanded .iv-ck-sheet-frame{max-height:var(--iv-ck-visible-height,99dvh)}
+dialog.iv-ck-sheet.iv-ck-expanded,dialog.iv-ck-sheet.iv-ck-expanded .iv-ck-sheet-frame{max-height:var(--iv-ck-visible-height,98dvh)}
 @media(max-width:740px){
  .iv-ck-shell{padding-bottom:165px}
  .iv-ck-head{margin:19px 0 17px}
