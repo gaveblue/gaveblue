@@ -70,7 +70,7 @@ export async function renderCheckout({supabase,box,esc,link}){
    +'<label><input type="radio" name="payment" value="pix" checked> Pix</label>'
    +'<label><input type="radio" name="payment" value="card"> Cartão</label>'
    +'<label><input type="radio" name="payment" value="cash"> Dinheiro</label></div></section>'
-   +'<section class="iv-com-panel"><label class="iv-com-consent"><input type="checkbox" name="terms"> Li e concordo com os termos da compra e o uso dos meus dados para processar este pedido.</label>'
+   +'<section class="iv-com-panel"><label class="iv-com-consent"><input type="checkbox" name="terms"> Li e concordo com os <a href="/intervalo/termos/" target="_blank" rel="noopener noreferrer">Termos de Compra</a> e a <a href="/intervalo/privacidade/" target="_blank" rel="noopener noreferrer">Política de Privacidade</a>.</label>'
    +'<label class="iv-com-consent"><input type="checkbox" name="marketing"> Autorizo mensagens promocionais (opcional).</label></section></form></div>'
    +'<aside class="iv-com-panel iv-com-summary"><h2>Resumo</h2>'
    +'<div class="iv-com-line"><span>Subtotal estimado</span><b>'+formatBRL(amount)+'</b></div>'
