@@ -1,5 +1,19 @@
 # Intervalo — CHANGELOG
 
+## 1.1.0-rc.10 — 2026-11-16 · Pix direto do restaurante (10 minutos)
+
+**Status:** funções e agendamento ativos no Supabase; interface e gestão atualizadas no GitHub `main`; **não homologado com chave Pix e pagamento real**.
+
+- Pix estático gerado no servidor conforme BR Code do Banco Central, com valor exato do pedido, txid único, QR Code renderizado no navegador e Pix Copia e Cola.
+- O checkout passa a usar Pix direto como primeira opção **quando o Master cadastrar e habilitar** chave Pix + nome/cidade do recebedor. InfinitePay continua como alternativa, sem desativação nem alteração da chave previamente configurada.
+- No acompanhamento, o cliente vê contador de 10 minutos e botão **Já paguei**. O aviso antes do vencimento suspende o cancelamento até a conferência; o aviso por si só nunca marca a compra como paga.
+- Gestão → Loja Online ganhou card **Pix direto do restaurante** (chave armazenada em tabela privada com RLS, não no bundle). Apenas Master pode configurar; card não retorna a chave completa após o cadastro.
+- O responsável vê **Conferi o Pix · aceitar pedido** para pedidos sinalizados como pagos, após confirmar o crédito no extrato; a confirmação financeira e o aceite são gravados atomicamente no banco. A fila atualiza a cada 15 s.
+- Sem sinalização de pagamento até 10 minutos, o pedido fica **expirado**, com evento de cancelamento, por `pg_cron` a cada minuto. Operações de aceite impedem confirmação indevida sem pagamento.
+- **Limitação fundamental:** QR Pix estático não expira no banco do pagador: apenas o pedido expira no Intervalo. Pix pago após cancelamento exige conciliação/reembolso manual. Não há consulta bancária automática.
+- QA: validação sintática JS; simulação SQL transacional de expiração, sinalização e aceite com `ROLLBACK`; cron ativo; 0 pedidos fictícios persistidos; 0 restaurantes com chave Pix manual cadastrada. Teste em banco real ainda não realizado.
+- **Sem GitHub Actions**. Migração reprodutível: `source/supabase/migrations/20261116_marketplace_manual_pix_rc10.sql`. Interface web precisa da propagação e teste em celular.
+
 ## 1.1.0-rc.9 — 2026-11-16 · Checkout Pix InfinitePay — Novo Mundo
 
 **Status:** estrutura ativa no Supabase e código publicado no GitHub `main`. **Compra real, confirmação de webhook e propagação do domínio ainda não homologadas.**
