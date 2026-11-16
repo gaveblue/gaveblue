@@ -1,6 +1,6 @@
 import {createClient} from "npm:@supabase/supabase-js@2.50.0";
 const url=Deno.env.get("SUPABASE_URL")??"",key=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")??"";
-const headers={"Access-Control-Allow-Origin":"https://gaveblue.com.br","Access-Control-Allow-Headers":"apikey,content-type,x-client-info","Access-Control-Allow-Methods":"POST,OPTIONS","Content-Type":"application/json","Cache-Control":"public, max-age=30","Vary":"Origin"};
+const headers={"Access-Control-Allow-Origin":"https://gaveblue.com.br","Access-Control-Allow-Headers":"authorization,apikey,content-type,x-client-info,x-retry-count,traceparent,tracestate,baggage","Access-Control-Allow-Methods":"POST,OPTIONS","Content-Type":"application/json","Cache-Control":"public, max-age=30","Vary":"Origin"};
 const reply=(value:unknown,status=200)=>new Response(JSON.stringify(value),{status,headers});
 Deno.serve(async(req:Request)=>{
  if(req.method==="OPTIONS")return new Response(null,{status:204,headers});
