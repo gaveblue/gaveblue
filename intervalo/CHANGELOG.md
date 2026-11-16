@@ -1,5 +1,18 @@
 # Intervalo — CHANGELOG
 
+## 1.0.0-rc.16 — 2026-11-15 · Corrigir cardápio online indisponível
+
+**Status:** backend corrigido e **Edge Function pública `public-menu` v4 ativa no Supabase**, código frontend enviado à `main`. Testes estáticos e simulados aprovados; acesso HTTP real ao domínio ainda não foi confirmado.
+
+- **Causa:** a função pública respondia ao preflight CORS sem permitir o cabeçalho `authorization`, enviado pelo SDK ao chamar `functions.invoke`; o navegador podia bloquear a consulta antes da leitura do cardápio. O frontend exibia a mensagem genérica de cardápio não publicado para qualquer falha.
+- **Correção backend:** `Access-Control-Allow-Headers` agora inclui `authorization, apikey, content-type, x-client-info, x-retry-count, traceparent, tracestate, baggage`. Mantidas origem restrita, `POST/OPTIONS`, verificação de publicação e `verify_jwt=false` para consulta sem login.
+- **Correção frontend:** tela `public-menu.js` distingue cardápio efetivamente não publicado de falhas de rede ou serviço, com mensagem e opção **Tentar novamente**. Cache atualizado para `rc.16` no `index.html`.
+- **Estado real do `novo-mundo`:** ativo, publicação habilitada e módulo ativo, 3 categorias e 3 produtos visíveis. **Estado do `intervalo27`:** cardápio despublicado e 0 produtos; não foram alterados.
+- **QA:** Edge Function implantada v4 confirmada, cabeçalho publicado conferido, respostas frontend simuladas de sucesso, indisponibilidade de rede e não publicação aprovadas. Validação real no navegador/PWA e propagação do host permanecem pendentes.
+- Sem alterações em funcionários, permissões, autenticação, preço, estoque ou tabelas. Sem GitHub Actions.
+
+**QA detalhado:** `QA-1.0.0-RC16.md`.
+
 ## 1.0.0-rc.15 — 2026-11-15 · Padronização visual de todos os módulos operacionais
 
 **Status:** interface enviada à `main`; testes de sintaxe, inspeção de integrações e simulação DOM do Bottom Sheet aprovados. **Homologação técnica parcial**: teste real no PWA e propagação do host ainda não confirmados.
