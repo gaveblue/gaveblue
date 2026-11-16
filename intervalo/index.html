@@ -345,7 +345,11 @@ async function start(){
   const {renderTracking}=await import('/intervalo/marketplace-tracking-rc4.js?v=1.1.0-rc.4');
   return renderTracking({supabase,route:paths,box,esc,link});
  }
- if(['explorar','loja','cliente'].includes(paths[0])){
+ if(paths[0]==='cliente'){
+  const {renderCustomer}=await import('/intervalo/marketplace-customer-rc5.js?v=1.1.0-rc.5');
+  return renderCustomer({box,esc,link});
+ }
+ if(['explorar','loja'].includes(paths[0])){
   const {renderMarketplace}=await import('/intervalo/marketplace-preview-rc1.js?v=1.1.0-rc.4');
   return renderMarketplace({supabase,route:paths,box,esc,link});
  }
