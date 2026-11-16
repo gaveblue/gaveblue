@@ -1,0 +1,37 @@
+/* Intervalo 1.1.0-rc.14 · Campo em foco sempre visível no celular.
+   Mantém os bottom sheets existentes com seus próprios gestores de viewport. */
+:root{--iv-ux-keyboard-height:0px}
+html{scroll-padding-top:76px;scroll-padding-bottom:88px}
+#app input[data-iv-mask-prepared],dialog input[data-iv-mask-prepared]{
+  font-variant-numeric:tabular-nums;
+}
+#app input[data-iv-mask-prepared="money"],dialog input[data-iv-mask-prepared="money"]{
+  letter-spacing:.12px;
+}
+@media(max-width:900px){
+  #app :is(input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="range"]),textarea,select),
+  dialog :is(input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="range"]),textarea,select){
+    font-size:max(16px,1em);
+    scroll-margin-top:82px;
+    scroll-margin-bottom:110px;
+  }
+  body.iv-ux-keyboard #app{padding-bottom:calc(var(--iv-ux-keyboard-height) + 48px)}
+  /* Não deixar controles fixos cobrirem campos quando o teclado está aberto. */
+  body.iv-ux-keyboard .mg-v2-bottom,
+  body.iv-ux-keyboard .wg-mobile-tabs,
+  body.iv-ux-keyboard .wg-cart-shortcut,
+  body.iv-ux-keyboard .iv-inventory .x-tabs,
+  body.iv-ux-keyboard .iv-ck-sticky{
+    visibility:hidden!important;
+    pointer-events:none!important;
+  }
+  dialog.iv-op-sheet .iv-op-body,
+  dialog.iv-ck-sheet .iv-ck-sheet-scroll,
+  dialog.iv-table-sheet .iv-table-sheet-body{
+    scroll-padding-bottom:72px;
+    overscroll-behavior:contain;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  #app input,dialog input{scroll-behavior:auto}
+}
