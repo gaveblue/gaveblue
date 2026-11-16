@@ -99,6 +99,27 @@ export async function renderPage({supabase,restaurant,box,esc,link}){
    }catch(err){if(!showFormSheetError(form,err.message))alert(err.message);button.disabled=false;button.textContent='Salvar configurações'}
   };
   sheetifyForms([{id:'iv-online-draft',label:'Configurar loja',title:'Dados da loja online',description:'Os dados serão salvos como rascunho. Pedidos permanecerão desativados.'}]);
+  const hoursForm=document.getElementById('iv-on-hours'),hourList=document.getElementById('iv-on-hour-list');
+  hourList.onclick=e=>{if(e.target.closest('[data-remove-time]'))e.target.closest('.iv-on-time-row')?.remove()};
+  document.getElementById('iv-on-add-hour').onclick=()=>{
+   if(hourList.children.length>=28){alert('Limite de 28 faixas.');return}
+   hourList.insertAdjacentHTML('beforeend','<div class="iv-on-time-row"><select name="day">'+dayNames.map((d,i)=>'<option value="'+i+'" '+(i===1?'selected':'')+'>'+d+'</option>').join('')+'</select><input type="time" name="opens" value="11:00"><input type="time" name="closes" value="22:00"><label><input type="checkbox" name="delivery" checked> Entrega</label><label><input type="checkbox" name="pickup" checked> Retirada</label><button type="button" data-remove-time>×</button></div>');
+  };
+  hoursForm.onsubmit=async e=>{
+   e.preventDefault();const button=hoursForm.querySelector('[type="submit"]');if(button.disabled)return;
+   const hours=[...hourList.querySelectorAll('.iv-on-time-row')].map(row=>({
+    weekday:Number(row.querySelector('[name="day"]').value),
+    opens_at:row.querySelector('[name="opens"]').value,
+    closes_at:row.querySelector('[name="closes"]').value,
+    delivery_enabled:row.querySelector('[name="delivery"]').checked,
+    pickup_enabled:row.querySelector('[name="pickup"]').checked
+   }));
+   if(hours.some(h=>!h.opens_at||!h.closes_at||h.opens_at===h.closes_at)){alert('Revise os horários.');return}
+   button.disabled=true;button.textContent='Salvando...';
+   try{await request('save_hours',{hours});await load()}
+   catch(e){if(!showFormSheetError(hoursForm,e.message))alert(e.message);button.disabled=false;button.textContent='Salvar horários'}
+  };
+  sheetifyForms([{id:'iv-on-hours',label:'Configurar horários',title:'Horários de pedidos'}]);
   const visibility=document.getElementById('iv-online-visibility');
   if(visibility)visibility.onclick=async()=>{
    const next=!visible;
