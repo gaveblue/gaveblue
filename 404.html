@@ -16,7 +16,7 @@
     var isRoute = parts.length === 1 && one.includes(parts[0])
       || parts.length === 2 && (
         (parts[0] === 'loja' && slug.test(parts[1])) ||
-        (parts[0] === 'pedido' && /^[A-Za-z0-9_-]{12,220}$/.test(parts[1])) ||
+        (parts[0] === 'pedido' && /^[0-9a-f-]{36}\.[a-f0-9]{64}$/i.test(parts[1])) ||
         (slug.test(parts[0]) && modules.includes(parts[1]))
       );
     if (!isRoute) return;
