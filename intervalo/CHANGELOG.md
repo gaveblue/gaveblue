@@ -1,5 +1,17 @@
 # Intervalo — CHANGELOG
 
+## 1.1.0-rc.9 — 2026-11-16 · Checkout Pix InfinitePay — Novo Mundo
+
+**Status:** estrutura ativa no Supabase e código publicado no GitHub `main`. **Compra real, confirmação de webhook e propagação do domínio ainda não homologadas.**
+
+- Loja `novo-mundo`: gateway InfinitePay habilitado com `secret_env_name=INFINITEPAY_NOVO_MUNDO_API_KEY`, sem registrar a credencial em SQL, repositório ou navegador; InfiniteTag salva no cadastro do restaurante.
+- Edge Function `marketplace-infinitepay` criada: gera links via `/links`, controla idempotência, expiração em 30 minutos e valida pagamentos com `/payment_check` antes de registrar o pedido como pago. Webhook público sem assinatura é conferido exclusivamente no provedor.
+- Inclusão de `infinitepay` como meio de pagamento antecipado; permanece separado de Pix/cartão/dinheiro na entrega ou retirada. Pedidos antecipados não podem ser aceitos sem pagamento `paid` verificado.
+- Checkout mobile mantém bottom sheet e botão inferior fixo; para Novo Mundo oferece pagar agora, redireciona ao checkout seguro InfinitePay e traz o cliente ao acompanhamento. Tela de acompanhamento mostra status e opção de retomar cobrança.
+- O valor cobrado é calculado dos itens persistidos no banco e frete do pedido; cliente não informa o valor. Pagamento confirmado é registrado uma vez, com referência de transação e evento auditável.
+- Limitação documentada da InfinitePay: não fornece QR Code/Pix Copia e Cola via API e não permite checkout embutido. Também não permite desabilitar cartão no checkout hospedado.
+- Sem GitHub Actions. Precisa comprovar atualização em `gaveblue.com.br`, testar link real de pelo menos R$ 1,00, retorno, webhook, reenvio, valor e aceite na Gestão/Cozinha, antes de declarar homologação.
+
 ## 1.1.0-rc.8 — 2026-11-16 · Estrutura InfinitePay para Novo Mundo
 
 **Status:** migração aplicada, API administrativa ACTIVE, arquivos na branch main. **Não há cobranças nem links gerados. Publicação no domínio e teste de cadastro ainda pendentes.**
