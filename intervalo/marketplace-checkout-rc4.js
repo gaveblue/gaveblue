@@ -1,4 +1,5 @@
 import {icon} from './ui-icons.js?v=1.0.0-rc.1';
+import {customerAuth} from './marketplace-customer-rc5.js?v=1.1.0-rc.5';
 import {loadCart,setCartItemQuantity,clearCart,formatBRL} from './marketplace-cart-rc4.js?v=1.1.0-rc.4';
 
 export async function renderCheckout({supabase,box,esc,link}){
@@ -27,6 +28,18 @@ export async function renderCheckout({supabase,box,esc,link}){
  const products=data.products??[],options=data.options??[];
  const configured=data.online_settings??{},zones=data.delivery_zones??[];
  const canOrder=data.checkout_available===true;
+ let customerProfile=null,savedAddresses=[];
+ try{
+  const {data:auth}=await customerAuth.auth.getUser();
+  if(auth?.user){
+   const [p,a]=await Promise.all([
+    customerAuth.from('customer_profiles').select('display_name,phone').eq('id',auth.user.id).maybeSingle(),
+    customerAuth.from('customer_addresses').select('id,label,street,number,neighborhood,city,state,postal_code,complement,reference').eq('customer_id',auth.user.id).limit(20)
+   ]);
+   if(!p.error)customerProfile=p.data;
+   if(!a.error)savedAddresses=a.data||[];
+  }
+ }catch{/* Conta de cliente opcional: falhas de perfil nao impedem checkout guest. */}
  const pickupAllowed=configured.pickup_configured!==false;
  const deliveryAllowed=configured.delivery_configured===true&&zones.length>0;
  const defaultKind=pickupAllowed?'pickup':'delivery';
@@ -52,6 +65,8 @@ export async function renderCheckout({supabase,box,esc,link}){
    +(pickupAllowed?'<label><input type="radio" name="kind" value="pickup" '+(defaultKind==='pickup'?'checked':'')+'> Retirada</label>':'')
    +(deliveryAllowed?'<label><input type="radio" name="kind" value="delivery" '+(defaultKind==='delivery'?'checked':'')+'> Entrega própria</label>':'')
    +'</div><div id="iv-delivery-fields" '+(defaultKind==='pickup'?'hidden':'')+'><h3>Endereço</h3>'
+   +(savedAddresses.length?'<label class="iv-com-field">Usar endereço salvo<select id="iv-saved-address"><option value="">Preencher manualmente</option>'
+     +savedAddresses.map(a=>'<option value="'+esc(a.id)+'">'+esc(a.label+' · '+a.street+', '+a.number)+'</option>').join('')+'</select></label>':'')
    +'<label class="iv-com-field">Região de entrega<select name="zone"><option value="">Selecione</option>'
    +zones.map(z=>'<option value="'+esc(z.id)+'">'+esc(z.name+' · '+z.city+'/'+z.state)+' — '+formatBRL(z.fee_cents)+'</option>').join('')+'</select></label>'
    +'<div class="iv-com-dual"><label class="iv-com-field">CEP<input name="postal_code" inputmode="numeric" maxlength="9" placeholder="00000-000"></label>'
@@ -63,8 +78,8 @@ export async function renderCheckout({supabase,box,esc,link}){
    +'<label class="iv-com-field">Complemento<input name="complement" maxlength="120"></label></div>'
    +'<label class="iv-com-field">Referência<input name="reference" maxlength="160"></label></div></section>'
    +'<section class="iv-com-panel"><h2>Contato</h2><p>Não precisa criar senha ou informar CPF.</p>'
-   +'<label class="iv-com-field">Nome<input name="name" autocomplete="name" maxlength="120"></label>'
-   +'<label class="iv-com-field">Celular / WhatsApp<input name="phone" autocomplete="tel" inputmode="tel" maxlength="20"></label>'
+   +'<label class="iv-com-field">Nome<input name="name" autocomplete="name" maxlength="120" value="'+esc(customerProfile?.display_name||'')+'"></label>'
+   +'<label class="iv-com-field">Celular / WhatsApp<input name="phone" autocomplete="tel" inputmode="tel" maxlength="20" value="'+esc(customerProfile?.phone||'')+'"></label>'
    +'<label class="iv-com-field">Observações gerais<textarea name="note" maxlength="500" rows="2"></textarea></label></section>'
    +'<section class="iv-com-panel"><h2>Pagamento na entrega/retirada</h2><div class="iv-com-choices">'
    +'<label><input type="radio" name="payment" value="pix" checked> Pix</label>'
@@ -110,6 +125,16 @@ export async function renderCheckout({supabase,box,esc,link}){
  const reset=()=>{quote=null;fingerprint='';placeBtn.hidden=true;quoteBtn.hidden=false;fee.textContent='A calcular';price.textContent='—';warn('')};
  form.addEventListener('input',reset);form.addEventListener('change',reset);
  form.querySelectorAll('[name="kind"]').forEach(x=>x.addEventListener('change',()=>{delivery.hidden=x.value==='pickup'&&x.checked}));
+ const picker=document.getElementById('iv-saved-address');
+ if(picker)picker.onchange=()=>{
+  const a=savedAddresses.find(x=>x.id===picker.value);if(!a)return;
+  for(const field of ['street','number','complement','neighborhood','city','state','postal_code','reference']){
+   form.elements.namedItem(field).value=a[field]||'';
+  }
+  // Região/frete exigem nova seleção e cálculo a cada restaurante.
+  form.elements.namedItem('zone').value='';
+  reset();
+ };
  const zone=form.elements.namedItem('zone');
  if(zone)zone.addEventListener('change',()=>{const z=zones.find(x=>x.id===zone.value);if(z){form.elements.namedItem('city').value=z.city;form.elements.namedItem('state').value=z.state}});
  document.querySelectorAll('[data-cart]').forEach(b=>b.onclick=()=>{
