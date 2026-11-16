@@ -1,4 +1,4 @@
-// Intervalo Marketplace — Checkout mobile-first rc7.
+// Intervalo Marketplace — Checkout mobile-first rc9 · InfinitePay Novo Mundo.
 // Apenas apresentação: cotação, finalização, termos, idempotência e requisições seguem o contrato rc4.
 import {icon} from './ui-icons.js?v=1.0.0-rc.1';
 import {customerAuth} from './marketplace-customer-rc5.js?v=1.1.0-rc.5';
@@ -44,6 +44,7 @@ export async function renderCheckout({supabase,box,esc,link}){
  const products=data.products??[],options=data.options??[];
  const configured=data.online_settings??{},zones=data.delivery_zones??[];
  const canOrder=data.checkout_available===true;
+ const onlinePix=slug==='novo-mundo';
  let customerProfile=null,savedAddresses=[];
  try{
   const {data:auth}=await customerAuth.auth.getUser();
@@ -119,7 +120,7 @@ export async function renderCheckout({supabase,box,esc,link}){
   +'<div class="iv-ck-line"><span>Subtotal estimado</span><b>'+formatBRL(amount)+'</b></div>'
   +'<div class="iv-ck-line"><span>Entrega</span><b id="iv-fee">A calcular</b></div>'
   +'<div class="iv-ck-line iv-ck-total"><span>Total</span><b id="iv-total">—</b></div>'
-  +'<p class="iv-ck-hint">Os valores são confirmados antes do envio. O pagamento é feito na entrega ou retirada.</p>'
+  +'<p class="iv-ck-hint">Os valores são confirmados antes do envio. Para pagar online, o QR Pix e o Copia e Cola aparecem na página segura InfinitePay.</p>'
   +'</aside></div>'
   // Os campos dos dialogs continuam dentro do único form do checkout, inclusive quando o dialog está fechado.
   +sheet('address','Endereço de entrega','Confira a região e onde devemos entregar.',
@@ -141,10 +142,11 @@ export async function renderCheckout({supabase,box,esc,link}){
     +'<label class="iv-com-field">Celular / WhatsApp<input name="phone" autocomplete="tel" inputmode="tel" maxlength="20" value="'
     +esc(customerProfile?.phone||'')+'" placeholder="(00) 00000-0000"></label>'
     +'<label class="iv-com-field">Observações para o restaurante<textarea name="note" maxlength="500" rows="3" placeholder="Alguma observação sobre seu pedido?"></textarea></label>')
-  +sheet('payment','Forma de pagamento','O pagamento será feito na entrega ou retirada.',
+  +sheet('payment','Forma de pagamento',onlinePix?'Escolha pagar agora com Pix ou no recebimento.':'O pagamento será feito na entrega ou retirada.',
     '<div class="iv-ck-payment-list">'
-    +'<label><input type="radio" name="payment" value="pix" checked><span>'+icon('money',20)+'<strong>Pix</strong></span></label>'
-    +'<label><input type="radio" name="payment" value="card"><span>'+icon('card',20)+'<strong>Cartão</strong></span></label>'
+    +(onlinePix?'<label><input type="radio" name="payment" value="online" checked><span>'+icon('checkCircle',20)+'<strong>Pagar agora · Pix online</strong><small>Pagamento seguro pela InfinitePay, antes do preparo</small></span></label>':'')
+    +'<label><input type="radio" name="payment" value="pix" '+(!onlinePix?'checked':'')+'><span>'+icon('money',20)+'<strong>Pix na entrega/retirada</strong></span></label>'
+    +'<label><input type="radio" name="payment" value="card"><span>'+icon('card',20)+'<strong>Cartão na entrega/retirada</strong></span></label>'
     +'<label><input type="radio" name="payment" value="cash"><span>'+icon('wallet',20)+'<strong>Dinheiro</strong></span></label></div>')
   +'<div class="iv-ck-sticky"><div class="iv-ck-sticky-inner"><div class="iv-ck-sticky-price">'
   +'<small>Total do pedido</small><strong id="iv-ck-sticky-total">A calcular</strong></div>'
@@ -173,14 +175,14 @@ export async function renderCheckout({supabase,box,esc,link}){
    street:String(fd.get('street')??'').trim(),number:String(fd.get('number')??'').trim(),
    complement:String(fd.get('complement')??'').trim(),reference:String(fd.get('reference')??'').trim()
   }:null;
-  const payment=String(fd.get('payment')??'pix');
+  const payment=String(fd.get('payment')??(onlinePix?'online':'pix'));
   return {
    slug,items:loadCart(slug).items.map(x=>({product_id:x.product_id,quantity:x.quantity,option_ids:x.option_ids,note:x.note})),
    fulfillment_type:kind,zone_id:needsAddress?String(fd.get('zone')??''):null,address,
    customer_name:String(fd.get('name')??'').trim(),customer_phone:String(fd.get('phone')??'').trim(),
    customer_note:String(fd.get('note')??'').trim(),accept_terms:fd.get('terms')==='on',
    marketing_opt_in:fd.get('marketing')==='on',source:'storefront',
-   payment_method:needsAddress?(payment==='pix'?'pix_on_delivery':payment==='card'?'card_on_delivery':'cash'):
+   payment_method:payment==='online'&&onlinePix?'infinitepay':needsAddress?(payment==='pix'?'pix_on_delivery':payment==='card'?'card_on_delivery':'cash'):
     (payment==='pix'?'pix_on_pickup':payment==='card'?'card_on_pickup':'cash_on_pickup')
   };
  };
@@ -200,8 +202,9 @@ export async function renderCheckout({supabase,box,esc,link}){
    ?street+(number?', '+number:'')+(district?' · '+district:'')+(city?' · '+city:'')
    :'Informe seu endereço';
   const chosen=fd.get('payment')??'pix';
-  document.getElementById('iv-ck-preview-payment').textContent=(chosen==='card'?'Cartão':chosen==='cash'?'Dinheiro':'Pix')
-   +' · Pagamento na '+(hasDelivery?'entrega':'retirada');
+  document.getElementById('iv-ck-preview-payment').textContent=chosen==='online'&&onlinePix
+   ?'Pix online · Pagamento antecipado via InfinitePay'
+   :(chosen==='card'?'Cartão':chosen==='cash'?'Dinheiro':'Pix')+' · Pagamento na '+(hasDelivery?'entrega':'retirada');
  };
  const dialogs=[...form.querySelectorAll('.iv-ck-sheet')];
  const openSheet=key=>{
@@ -301,7 +304,7 @@ export async function renderCheckout({supabase,box,esc,link}){
    fee.textContent=formatBRL(quote.delivery_fee_cents);
    total.textContent=formatBRL(quote.total_cents);
    stickyTotal.textContent=formatBRL(quote.total_cents);
-   quoteBtn.hidden=true;placeBtn.hidden=false;warn('');
+   quoteBtn.hidden=true;placeBtn.hidden=false;placeBtn.innerHTML=(req.payment_method==='infinitepay'?'Ir para pagamento ':'Confirmar pedido ')+icon('checkCircle',17);warn('');
   }catch(e){warn(e.message)}
   finally{busy=false;quoteBtn.disabled=!canOrder;quoteBtn.innerHTML='Calcular total '+icon('arrowRight',17)}
  };
@@ -320,10 +323,20 @@ export async function renderCheckout({supabase,box,esc,link}){
    const key=saved?.fingerprint===fingerprintHash?saved.key:crypto.randomUUID();
    try{sessionStorage.setItem('intervalo-checkout-idempotency',JSON.stringify({fingerprint:fingerprintHash,key}))}catch{}
    const result=await call('marketplace-online',{action:'place',...req,checkout_key:key});
+   const trackingPath=link('/pedido/'+encodeURIComponent(result.tracking_token));
+   if(req.payment_method==='infinitepay'){
+    window.__ivPaymentRecovery=trackingPath;
+    const payment=await call('marketplace-infinitepay',{action:'create',token:result.tracking_token});
+    if(payment.paid===true){clearCart(slug);location.assign(trackingPath);return}
+    if(!payment.payment_url)throw Error('Não foi possível abrir o pagamento');
+    clearCart(slug);
+    location.assign(payment.payment_url);
+    return;
+   }
    clearCart(slug);
-   location.assign(link('/pedido/'+encodeURIComponent(result.tracking_token)));
-  }catch(e){warn(e.message)}
-  finally{busy=false;placeBtn.disabled=false;placeBtn.innerHTML='Confirmar pedido '+icon('checkCircle',17)}
+   location.assign(trackingPath);
+  }catch(e){warn(e.message);if(window.__ivPaymentRecovery){errorEl.innerHTML=esc(e.message)+' · <a href="'+window.__ivPaymentRecovery+'">Abrir pedido e tentar pagar novamente</a>';errorEl.hidden=false}}
+  finally{busy=false;placeBtn.disabled=false;placeBtn.innerHTML=(getData().payment_method==='infinitepay'?'Ir para pagamento ':'Confirmar pedido ')+icon('checkCircle',17)}
  };
  syncPreviews();
 }
