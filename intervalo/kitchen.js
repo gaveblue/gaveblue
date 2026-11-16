@@ -44,7 +44,18 @@ export async function renderPage({supabase,restaurant,box,esc,link}){
       if(!queue.length)out+='<div class="iv-empty">Nenhuma rodada nesta etapa</div>';
       out+='</div></section>';
     }
-    out+='</div>';
+    out+='</div><section class="iv-on-panel" style="margin-top:15px"><h2>'+icon('package',20)+' Pedidos Online</h2><p>Delivery e retirada, separados das comandas presenciais.</p><div class="k-grid">';
+    for(const o of online){
+     const label=o.fulfillment_type==='delivery'?'DELIVERY':'RETIRADA';
+     const next=o.status==='accepted'?'preparing':o.status==='preparing'?(o.fulfillment_type==='pickup'?'ready_for_pickup':'ready'):null;
+     out+='<article class="k-card"><div class="k-top"><h3>'+esc(o.public_code)+'</h3><span class="iv-chip orange">'+label+'</span></div>';
+     out+='<p>'+esc(o.status==='accepted'?'Aguardando preparo':o.status==='preparing'?'Em preparação':'Pronto')+'</p>';
+     out+=onlineItems.filter(i=>i.order_id===o.id).map(i=>'<div class="iv-kds-item"><span>'+Number(i.quantity)+'×</span><div><b>'+esc(i.product_name)+'</b>'+(i.note?'<p>'+esc(i.note)+'</p>':'')+'</div></div>').join('');
+     if(next)out+='<button type="button" class="iv-kds-next" data-online-order="'+esc(o.id)+'" data-online-next="'+next+'">'+(next==='preparing'?'Iniciar preparo':'Marcar pronto')+'</button>';
+     out+='</article>';
+    }
+    if(!online.length)out+='<div class="iv-empty">Nenhum delivery ou retirada em preparo.</div>';
+    out+='</div></section>';
     box(out);
     const kOnline=document.getElementById('k-online');if(kOnline)kOnline.textContent=navigator.onLine?'Conectado à internet':'Sem internet';
     document.getElementById('k-reload').onclick=()=>refresh();
@@ -52,6 +63,15 @@ export async function renderPage({supabase,restaurant,box,esc,link}){
       b.disabled=true;
       try{await call('round_progress',{order_id:b.dataset.progress,round_no:Number(b.dataset.round),p_next:b.dataset.next});await refresh()}
       catch(e){alert(e.message);b.disabled=false}
+    });
+    document.querySelectorAll('[data-online-order]').forEach(b=>b.onclick=async()=>{
+     b.disabled=true;
+     try{
+      const result=await supabase.functions.invoke('marketplace-operations',{body:{restaurant_id:restaurant.id,
+       action:'transition',order_id:b.dataset.onlineOrder,target:b.dataset.onlineNext}});
+      if(result.error||result.data?.error)throw Error(result.data?.error??result.error?.message??'Erro ao atualizar delivery');
+      await refresh();
+     }catch(e){alert(e.message);b.disabled=false}
     });
     document.querySelectorAll('[data-ticket]').forEach(button=>button.onclick=()=>{
       const order=orders.find(o=>o.id===button.dataset.ticket);
