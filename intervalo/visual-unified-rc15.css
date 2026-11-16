@@ -16,7 +16,8 @@ body.iv-unified .op-btn.alt,
 body.iv-unified .p-btn.alt{background:#fff;color:#39495d;border:1px solid #e3e8ee;border-radius:12px}
 body.iv-unified .x-panel,
 body.iv-unified .op-card,
-body.iv-unified .p-card,
+body.iv-unified .p-grid>.p-card,
+body.iv-unified .iv-restaurant-list>[data-restaurant-card],
 body.iv-unified .c-card,
 body.iv-unified .k-card,
 body.iv-unified .account-layout .panel{background:#fff;border:1px solid #e8edf2;border-radius:17px;box-shadow:0 3px 16px #21324908}
@@ -103,7 +104,7 @@ dialog.iv-op-sheet .c-payment-form h3{font-size:12px}
 dialog.iv-op-sheet.iv-inventory .x-form{display:grid;grid-template-columns:minmax(0,1fr)}
 dialog.iv-op-sheet.iv-inventory .x-form>button{width:100%}
 dialog.iv-op-sheet .x-form input[type=checkbox].x-toggle{appearance:none}
-body.iv-unified .iv-platform .p-card{border-radius:16px}
+body.iv-unified .iv-platform .p-grid>.p-card{border-radius:16px}
 @media(max-width:700px){
  body.iv-unified #app .wrap{padding:16px 14px calc(94px + env(safe-area-inset-bottom))}
  body.iv-unified .iv-header{align-items:flex-start}
