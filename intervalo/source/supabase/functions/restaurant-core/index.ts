@@ -51,7 +51,7 @@ Deno.serve(async(req:Request)=>{
   if(!manage()&&!allowed("garcom"))return fail();
   const [cs,ps,os,pub]=await Promise.all([
    db.from("menu_categories").select("id,name,sort_order,active").eq("restaurant_id",tenant).order("sort_order"),
-   db.from("menu_products").select("id,category_id,name,description,price_cents,image_url,available,show_on_menu,sort_order").eq("restaurant_id",tenant).order("sort_order"),
+   db.from("menu_products").select("id,category_id,name,description,price_cents,image_url,available,show_on_menu,sort_order,variant_group_name,variant_label").eq("restaurant_id",tenant).order("sort_order"),
    db.from("menu_product_options").select("id,product_id,name,price_delta_cents,available").eq("restaurant_id",tenant),
    db.from("restaurant_publication").select("is_published,accepts_customer_orders").eq("restaurant_id",tenant).maybeSingle()
   ]);
@@ -105,7 +105,13 @@ Deno.serve(async(req:Request)=>{
   const hasMenuFlag=Object.prototype.hasOwnProperty.call(body,"show_on_menu");
   if(hasMenuFlag&&typeof body.show_on_menu!=="boolean")
     return error("Exibição no cardápio inválida",400);
-  const row={category_id,name,description,price_cents,sort_order,available:body.available,
+  const hasVariant=Object.prototype.hasOwnProperty.call(body,"variant_label");
+  const variantLabel=hasVariant?txt(body.variant_label,45):"";
+  if(hasVariant&&typeof body.variant_label!=="string")return error("Variação inválida",400);
+  if(variantLabel&&(name.length>100||variantLabel.length>45||name.length+variantLabel.length+3>150))return error("Nome ou tamanho da variação muito longo",400);
+  const variantData=hasVariant?{variant_group_name:variantLabel?name:null,variant_label:variantLabel||null}:{};
+  const storedName=variantLabel?name+" — "+variantLabel:name;
+  const row={category_id,name:storedName,description,price_cents,sort_order,available:body.available,...variantData,
     ...(hasMenuFlag?{show_on_menu:body.show_on_menu as boolean}:{}),
     ...(hasImage?{image_url:(imageInput as string).trim()||null}:{}),
     updated_at:new Date().toISOString()};
