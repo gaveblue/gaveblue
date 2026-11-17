@@ -1,5 +1,11 @@
 # Intervalo — CHANGELOG
 
+## 1.2.0-rc.7 — 2026-11-17 · Navegação global do restaurante
+
+- Menu lateral compartilhado em Gestão, Caixa, Garçom, Cozinha, Mesas, Produtos, Estoque, Cardápio administrativo, Impressão e Relatórios. Seções, ícones, restaurante selecionado e destaque do destino atual comuns; acesso direto entre módulos do mesmo restaurante. Gestão preserva sidebar desktop e trocas internas de abas; módulos operacionais preservam suas ações locais, incluindo voltar e atualizar.
+- Consulta única das flags e exceções do usuário para o restaurante atual, usada na rota e no menu. Master vê os módulos habilitados; outros perfis veem somente os autorizados; Gestão e áreas administrativas reservadas a Master/gerente. Menu não concede acesso à API, nem altera permissões no banco. Super Admin, marketplace público e conta pessoal permanecem fora do escopo do menu de restaurante.
+- Sem mudança de Supabase ou custos. Sintaxe e testes simulados de permissões; teste visual, navegação autenticada e propagação pendentes.
+
 ## 1.2.0-rc.6 — 2026-11-17 · Caixa como central de operações
 
 - Nova home compacta aprovada: resumo da sessão, quatro blocos (Pedidos em aberto, Recebimentos, Pedidos pagos, Delivery e retirada), cabeçalho e navegação por telas internas. Busca local e detalhes acessados por pedido; ações de impressão dentro dos detalhes. Terminologia Pedido na interface do Caixa (modelos de impressão salvos preservados).

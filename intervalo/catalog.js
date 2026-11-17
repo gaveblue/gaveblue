@@ -1,4 +1,5 @@
 import {icon} from './ui-icons.js?v=1.0.0-rc.1';
+import {menuButtonMarkup} from './global-navigation-rc7.js?v=1.2.0-rc.7';
 import {sheetifyForms,showFormSheetError} from './operational-sheets-rc15.js?v=1.0.0-rc.15';
 // Intervalo: cadastro de categorias, produtos e publicação de cardápio.
 export async function renderPage({supabase,restaurant,box,esc,link}){
@@ -16,7 +17,7 @@ export async function renderPage({supabase,restaurant,box,esc,link}){
  const group=section==='publicacao'?'':'?tab=produtos';
  const tabs='<nav class="iv-cat-subnav" aria-label="Seções de produtos">'+[['estoque?aba=produtos','Produtos'],['catalogo?aba=categorias','Categorias'],['catalogo?aba=adicionais','Adicionais']].map(([p,label])=>'<a href="'+link('/'+restaurant.slug+'/'+p)+'" '+(p.endsWith('='+section)?'aria-current="page"':'')+'>'+label+'</a>').join('')+'</nav>';
  const navStyle='<style>.iv-cat-subnav{display:flex;gap:5px;background:white;border:1px solid #e8edf2;padding:5px;border-radius:13px;margin:12px 0 18px}.iv-cat-subnav a{flex:1;text-align:center;padding:10px 5px;font-size:12px;border-radius:9px;font-weight:650;color:#64748b}.iv-cat-subnav a[aria-current=page]{background:#fff0e4;color:#da6b00}.iv-catalog [data-cat-area][hidden]{display:none!important}</style>';
- const start=style+navStyle+'<div class="iv-header"><div><span class="iv-section-caption">CARDÁPIO DO RESTAURANTE</span><h1>'+icon(section==='publicacao'?'receipt':'layers',25)+' '+heading+'</h1><p>'+esc(restaurant.name)+'</p></div><a class="iv-btn secondary" href="'+link('/'+restaurant.slug+'/gestao'+group)+'">'+icon('arrowLeft',16)+(group?' Produtos':' Gestão')+'</a></div>'+(group?tabs:'');
+ const start=style+navStyle+'<div class="iv-header"><div><div class="iv-global-title">'+menuButtonMarkup()+'<div><span class="iv-section-caption">CARDÁPIO DO RESTAURANTE</span><h1>'+heading+'</h1></div></div><p>'+esc(restaurant.name)+'</p></div><a class="iv-btn secondary" href="'+link('/'+restaurant.slug+'/gestao'+group)+'">'+icon('arrowLeft',16)+(group?' Produtos':' Gestão')+'</a></div>'+(group?tabs:'');
  async function load(){
   box(start+'<div class="iv-loading-inline" role="status" aria-live="polite" aria-busy="true"><div class="iv-loading-inline-label"><span class="iv-load-dot" aria-hidden="true"></span><span>Preparando o cardápio...</span></div><div class="iv-loading-inline-lines" aria-hidden="true"><span class="iv-load-skeleton"></span><span class="iv-load-skeleton"></span></div></div>');
   try{

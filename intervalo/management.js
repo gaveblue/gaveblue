@@ -1,6 +1,7 @@
 // Intervalo 0.7.0 — Gestao de restaurante e equipe; apenas UI, servidor decide permissões.
 import {icon} from './ui-icons.js?v=1.0.0-rc.1';
-export async function renderManagement({supabase,restaurant,role,box,esc,link}) {
+import {sidebarMarkup} from './global-navigation-rc7.js?v=1.2.0-rc.7';
+export async function renderManagement({supabase,restaurant,role,box,esc,link,navContext}) {
  const modules=["gestao","garcom","cozinha","caixa","cardapio"];
  const labels={gestao:"Gestão",garcom:"Garçom",cozinha:"Cozinha",caixa:"Caixa",cardapio:"Cardápio"};
  const roles={master:"Master",manager:"Gerente",waiter:"Garçom",kitchen:"Cozinha",cashier:"Caixa"};
@@ -79,16 +80,9 @@ export async function renderManagement({supabase,restaurant,role,box,esc,link}) 
    const note=s.onboarding_completed_at?"Cadastro inicial concluído. Você pode atualizar os dados abaixo.":"Preencha telefone, cidade e UF para concluir o cadastro inicial do restaurante.";
    const tabs=[["visao","Visão geral"],["vendas","Vendas online"],["dados","Dados do restaurante"],["equipe","Equipe"],["acessos","Permissões"]];
    const quickModules=[["garcom","Garçom","garcom"],["cozinha","Cozinha","cozinha"],["caixa","Caixa","caixa"],["catalogo","Cardápio","gestao"],["mesas","Mesas","gestao"],["estoque","Estoque","gestao"],["relatorios","Relatórios","gestao"],["impressao","Impressão","gestao"]];
-   const accessible=quickModules.filter(([path,label,required])=>(d.enabled??[]).some(m=>m.module===required&&m.enabled));
+   const accessible=quickModules.filter(([path,label,required])=>navContext.can(required));
    const modIcons={catalogo:"receipt",mesas:"table",garcom:"utensils",cozinha:"chef",caixa:"register",estoque:"package",impressao:"printer",relatorios:"chart"};
    const moduleLinks=accessible.map(([path,label])=>'<a class="mg-v2-module" href="'+link("/"+d.restaurant.slug+"/"+path)+'"><span class="mg-v2-module-icon">'+icon(modIcons[path]??"layers",20)+'</span>'+esc(label)+'</a>').join("");
-   const menuModule=(path)=>{
-     const entry=accessible.find(([p])=>p===path);
-     return entry?'<a class="mg-v2-navlink" href="'+link("/"+d.restaurant.slug+"/"+path)+'">'+icon(modIcons[path]??"layers",18)+esc(entry[1])+'</a>':'';
-   };
-   const menuTab=(tab,label,symbol,area='')=>'<button class="mg-v2-navlink '+(state.tab===tab&&(!area||state.area===area)?"active":"")+'" type="button" data-tab="'+tab+'"'+(area?' data-area="'+area+'"':'')+'>'+icon(symbol,18)+esc(label)+'</button>';
-   const menuLink=(url,label,symbol)=>'<a class="mg-v2-navlink" href="'+url+'">'+icon(symbol,18)+esc(label)+'</a>';
-   const section=(name,rows)=>rows?'<div class="mg-v2-nav-title">'+esc(name)+'</div><nav class="mg-v2-nav" aria-label="'+esc(name)+'">'+rows+'</nav>':'';
    const storeName=String(d.restaurant.name||d.restaurant.slug).replace(/(^|[-\s])\p{L}/gu,x=>x.replace('-',' ').toLocaleUpperCase('pt-BR'));
    const pageTitle=state.tab==='vendas'?onlineTitles[state.area]:({visao:"Visão geral",dados:"Dados do restaurante",equipe:"Equipe do restaurante",acessos:"Permissões da equipe",produtos:"Produtos",estoque:"Estoque"}[state.tab]??"Gestão");
    const topTitle=state.tab==="visao"?"Olá, gestor!":pageTitle;
@@ -99,15 +93,7 @@ export async function renderManagement({supabase,restaurant,role,box,esc,link}) 
    const bottom='';
    const viewHead=sty+'<div class="mg-v2-shell" id="mg-v2-root">'
      +'<button type="button" class="mg-v2-side-overlay" data-mg-close-nav aria-label="Fechar menu"></button>'
-     +'<aside class="mg-v2-side" aria-label="Menu da Gestão"><div class="mg-v2-brand">Intervalo</div>'
-     +'<a class="mg-v2-restaurant" href="'+mainLink+'" aria-label="Trocar restaurante"><span class="mg-rest-icon">'+icon("store",19)+'</span><span class="mg-rest-text">'+value(storeName)+'<small>Trocar restaurante</small></span>'+icon("chevronRight",14)+'</a>'
-     +section('Principal',menuTab('visao','Visão geral','dashboard')+menuTab('vendas','Pedidos','bag','pedidos'))
-     +section('Operação',menuModule('mesas')+menuModule('garcom')+menuModule('cozinha')+menuModule('caixa'))
-     +section('Gerenciamento',menuTab('produtos','Produtos','package')+menuTab('estoque','Estoque','layers')+menuModule('relatorios'))
-     +section('Canais de venda',menuLink(link('/'+d.restaurant.slug+'/catalogo?aba=publicacao'),'Cardápio digital','receipt')+menuTab('vendas','Loja online','store','vitrine'))
-     +section('Restaurante',menuTab('dados','Dados do restaurante','store')+menuTab('vendas','Horários de funcionamento','clock','horarios')+menuTab('vendas','Entrega e retirada','bike','entregas')+menuTab('vendas','Formas de pagamento','wallet','pagamentos')+menuModule('impressao')+menuTab('equipe','Equipe','users')+(isMaster?menuTab('acessos','Permissões','shield'):''))
-     +section('Pessoal',menuLink(link('/minha-conta'),'Minha conta','user')+'<button type="button" class="mg-v2-navlink" id="mg-v2-logout">'+icon('logout',18)+'Sair</button>')
-     +'<div class="mg-v2-side-spacer"></div><div class="mg-v2-side-user"><span class="mg-v2-avatar">'+value(storeName.slice(0,2).toUpperCase())+'</span><span><strong>'+value(storeName)+'</strong><small>'+value(roleText)+'</small></span></div></aside>'
+     +'<aside class="mg-v2-side" aria-label="Menu do restaurante">'+sidebarMarkup(navContext,{active:state.tab==='vendas'?state.area:state.tab,local:true})+'</aside>'
      +'<div class="mg-v2-workspace"><header class="mg-v2-topbar">'
      +'<div class="mg-v2-top-left"><button type="button" class="mg-v2-iconbtn mg-v2-menuopen" data-mg-open-nav aria-label="Abrir menu">'+icon("menu",19)+'</button>'
      +'<div class="mg-v2-crumb">Intervalo / <b>'+value(pageTitle)+'</b></div></div>'
@@ -213,8 +199,8 @@ export async function renderManagement({supabase,restaurant,role,box,esc,link}) 
      history.replaceState(history.state,'',url.pathname+url.search+url.hash);
      if(tab==='visao'&&!state.overview){draw();void refresh().catch(e=>message(e.message,'error'))}else draw();
    };
-   document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>switchTab(b.dataset.tab,b.dataset.area));
-   document.getElementById('mg-v2-logout').onclick=async e=>{const b=e.currentTarget;b.disabled=true;try{const {error}=await supabase.auth.signOut();if(error)throw error;location.assign(link('/login'))}catch(err){message(err.message,'error');b.disabled=false}};
+   document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{shell?.classList.remove("menu-open");switchTab(b.dataset.tab,b.dataset.area)});
+   // Logout is handled by the shared navigation controller.
    shell?.querySelector("[data-mg-open-nav]")?.addEventListener("click",()=>shell.classList.add("menu-open"));
    shell?.querySelector("[data-mg-close-nav]")?.addEventListener("click",()=>shell.classList.remove("menu-open"));
    function openSheet(kind){

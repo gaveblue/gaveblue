@@ -1,5 +1,6 @@
 // Intervalo — caixa: apenas registros de recebimentos externos, sem integração com adquirentes.
 import {icon} from './ui-icons.js?v=1.0.0-rc.1';
+import {menuButtonMarkup} from './global-navigation-rc7.js?v=1.2.0-rc.7';
 import {sheetifyForms,showFormSheetError} from './operational-sheets-rc15.js?v=1.0.0-rc.15';
 import {printConfigured} from './print-template-rc2.js?v=1.2.0-rc.5';
 export async function renderPage({supabase,restaurant,box,esc,link}){
@@ -29,7 +30,7 @@ export async function renderPage({supabase,restaurant,box,esc,link}){
  const date=s=>{if(!s)return '—';try{return new Intl.DateTimeFormat('pt-BR',{dateStyle:'short',timeStyle:'short'}).format(new Date(s))}catch{return '—'}};
  const normalize=s=>str(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-BR');
  let screen='home',selectedOrderId=null,query='',snapshot=null,loading=false;
- const header=title=>css+'<div class="iv-cash-app"><div class="iv-cash-head">'+(screen==='home'?'<details class="iv-cash-menu"><summary class="iv-cash-icon-btn" aria-label="Menu">'+icon('menu',23)+'</summary><div class="iv-cash-menu-pop"><a href="'+link('/inicio')+'">'+icon('store',18)+' Restaurantes</a><button type="button" data-cash-refresh>'+icon('refresh',18)+' Atualizar caixa</button></div></details>':'<button type="button" data-cash-back class="iv-cash-icon-btn" aria-label="Voltar">'+icon('arrowLeft',23)+'</button>')+'<div class="iv-cash-head-copy"><h1>'+esc(title)+'</h1><p>'+esc(formattedName)+'</p></div><a class="iv-cash-icon-btn" aria-label="Restaurantes" href="'+link('/inicio')+'">'+icon('store',21)+'</a></div><main class="iv-cash-content">';
+ const header=title=>css+'<div class="iv-cash-app"><div class="iv-cash-head">'+menuButtonMarkup()+(screen==='home'?'':'<button type="button" data-cash-back class="iv-cash-icon-btn" aria-label="Voltar">'+icon('arrowLeft',21)+'</button>')+'<div class="iv-cash-head-copy"><h1>'+esc(title)+'</h1><p>'+esc(formattedName)+'</p></div><button class="iv-cash-icon-btn" type="button" data-cash-refresh aria-label="Atualizar caixa" title="Atualizar caixa">'+icon('refresh',20)+'</button></div><main class="iv-cash-content">';
  const wrap=(title,body)=>header(title)+body+'</main></div>';
  const bindNav=()=>{
   document.querySelector('[data-cash-back]')?.addEventListener('click',()=>{if(selectedOrderId){selectedOrderId=null;draw()}else navigate('home')});

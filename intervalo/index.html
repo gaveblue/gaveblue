@@ -374,20 +374,24 @@ async function tenant(user,slug,mod){
  const m=members?.find(x=>x.restaurants?.slug===slug&&x.status==='active'&&x.restaurants.status==='active');
  if(!m){box('<section class="panel"><h1>Acesso não autorizado</h1><p>Sua conta não possui vínculo ativo com este restaurante.</p></section>');return}
  const requiredModule=internalModules.includes(mod)?'gestao':mod;
- if(internalModules.includes(mod)&&!['master','manager'].includes(m.role)){
+ if(requiredModule==='gestao'&&!['master','manager'].includes(m.role)){
   box('<section class="panel"><h1>Sem permissão</h1><p>Somente Master e gerente com acesso à Gestão podem utilizar esta área.</p></section>');return
  }
- const [{data:moduleRow,error:modErr},{data:override,error:overrideErr}]=await Promise.all([
-  supabase.from('restaurant_modules').select('enabled').eq('restaurant_id',m.restaurant_id).eq('module',requiredModule).maybeSingle(),
-  supabase.from('restaurant_member_module_access').select('allowed').eq('restaurant_id',m.restaurant_id).eq('user_id',user.id).eq('module',requiredModule).maybeSingle()
+ // Fetch once for this tenant, then use the same access decision for route and menu.
+ const [{data:moduleRows,error:modErr},{data:overrides,error:overrideErr}]=await Promise.all([
+  supabase.from('restaurant_modules').select('module,enabled').eq('restaurant_id',m.restaurant_id),
+  supabase.from('restaurant_member_module_access').select('module,allowed').eq('restaurant_id',m.restaurant_id).eq('user_id',user.id)
  ]);
  if(modErr||overrideErr){box(err(modErr??overrideErr));return}
- const permitted=m.role==='master'||(override?override.allowed:(permissions[m.role]??[]).includes(requiredModule));
- if(!permitted){box('<section class="panel"><h1>Sem permissão</h1><p>Seu papel neste restaurante não permite abrir este módulo.</p></section>');return}
- if(!moduleRow?.enabled){box('<section class="panel"><h1>Módulo ainda não habilitado</h1><p>O Super Admin precisa habilitar este recurso para o estabelecimento.</p>'+btn('Meus restaurantes','/inicio')+'</section>');return}
+ const {moduleAllowed,installGlobalNavigation}=await import('/intervalo/global-navigation-rc7.js?v=1.2.0-rc.7');
+ const can=module=>moduleAllowed(m.role,moduleRows??[],overrides??[],module);
+ if(!(moduleRows??[]).some(r=>r.module===requiredModule&&r.enabled===true)){box('<section class="panel"><h1>Módulo ainda não habilitado</h1><p>O Super Admin precisa habilitar este recurso para o estabelecimento.</p>'+btn('Meus restaurantes','/inicio')+'</section>');return}
+ if(!can(requiredModule)){box('<section class="panel"><h1>Sem permissão</h1><p>Seu papel neste restaurante não permite abrir este módulo.</p></section>');return}
+ const navContext={supabase,restaurant:m.restaurants,role:m.role,can,module:mod,link};
+ installGlobalNavigation(navContext);
  if(mod==='gestao'){
-  const {renderManagement}=await import('/intervalo/management.js?v=1.2.0-rc.1');
-  return renderManagement({supabase,restaurant:m.restaurants,role:m.role,box,esc,link});
+  const {renderManagement}=await import('/intervalo/management.js?v=1.2.0-rc.7');
+  return renderManagement({supabase,restaurant:m.restaurants,role:m.role,box,esc,link,navContext});
  }
  if(mod==='vendas-online'){
   // O link antigo continua válido, mas abre Vendas dentro da Gestão.
@@ -396,7 +400,7 @@ async function tenant(user,slug,mod){
  }
  const asset={catalogo:'catalog.js',mesas:'support.js',estoque:'support.js',impressao:'support.js',relatorios:'support.js',garcom:'waiter.js',cozinha:'kitchen.js',caixa:'cash.js'}[mod];
  if(!asset){box('<h1>Módulo não encontrado</h1>');return}
- const {renderPage}=await import('/intervalo/'+asset+'?v='+(mod==='garcom'?'1.1.0-rc.29':mod==='estoque'?'1.2.0-rc.5':mod==='catalogo'?'1.2.0-rc.1':mod==='caixa'?'1.2.0-rc.6a':mod==='impressao'||mod==='cozinha'?'1.2.0-rc.5':mod==='mesas'?'1.1.0-rc.14':'1.1.0-rc.4'));
+ const {renderPage}=await import('/intervalo/'+asset+'?v=1.2.0-rc.7');
  return renderPage({supabase,restaurant:m.restaurants,module:mod,box,esc,link});
 }
 async function account(user){

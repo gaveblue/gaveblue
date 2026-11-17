@@ -1,0 +1,20 @@
+/* Shared restaurant menu. Scoped: no changes to layouts or public storefronts. */
+.iv-global-menu-button{display:inline-grid!important;place-items:center;flex:0 0 40px;width:40px;height:40px;border:0;background:transparent;color:#263247;border-radius:10px;padding:0;cursor:pointer;vertical-align:middle}
+.iv-global-menu-button:active,.iv-global-menu-button:hover{background:#eef1f5}
+.iv-global-menu-button:focus-visible,.iv-global-nav-close:focus-visible{outline:2px solid #ff9d4c;outline-offset:2px}
+.iv-global-title{display:flex;align-items:center;gap:8px;min-width:0}
+.iv-global-title .iv-global-menu-button{margin-left:-5px}
+.iv-global-nav-dialog{position:fixed!important;inset:0 auto 0 0!important;width:min(84vw,310px)!important;height:100dvh!important;max-height:100dvh!important;max-width:100%!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;background:#fff;color:#1b283d;overflow:hidden!important;box-shadow:12px 0 35px #16263b24}
+.iv-global-nav-dialog::backdrop{background:#18263c80}
+.iv-global-nav-inner{height:100%;width:100%;--mg-orange:#ff7900;--mg-line:#e9edf2;--mg-sub:#8391a4;font-family:Inter,"Segoe UI",Arial,sans-serif}
+.iv-global-nav-dialog .mg-v2-side{position:relative!important;transform:none!important;inset:auto!important;width:100%!important;height:100%!important;flex:none!important;padding:22px 13px max(15px,env(safe-area-inset-bottom))!important;overflow-y:auto!important;overscroll-behavior:contain;box-shadow:none!important;border:0}
+.iv-global-nav-dialog .mg-v2-brand{margin-left:12px;margin-bottom:20px}
+.iv-global-nav-dialog .mg-v2-navlink{font:inherit;font-size:13px;font-weight:650;min-height:42px;text-decoration:none;white-space:normal;line-height:1.3}
+.iv-global-nav-dialog .mg-v2-nav-title{font-size:10px}
+.iv-global-nav-dialog .mg-v2-navlink[aria-current=page]{background:#fff1e6;color:#ec7000}
+.iv-global-nav-dialog .mg-v2-navlink:focus-visible{outline:2px solid #fb923c;outline-offset:-2px}
+.iv-global-nav-close{position:absolute;right:12px;top:17px;display:grid;place-items:center;width:34px;height:34px;border:0;background:#f4f6f8;color:#78879a;border-radius:10px;cursor:pointer;z-index:2}
+.iv-global-nav-dialog .mg-v2-side-user{margin-top:10px}.iv-global-nav-dialog .mg-v2-avatar{flex:none}
+.iv-global-nav-dialog[open]{animation:iv-global-slide .18s ease-out}
+@keyframes iv-global-slide{from{transform:translateX(-100%)}to{transform:translateX(0)}}
+@media(prefers-reduced-motion:reduce){.iv-global-nav-dialog[open]{animation:none}}
