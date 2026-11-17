@@ -28,8 +28,15 @@ Deno.serve(async(req:Request)=>{
   if(!body||typeof body!=="object"||Array.isArray(body))throw Error("invalid");
  }catch{return bad("Requisição inválida",400)}
  const action=body.action;
- if(action!=="discover"&&action!=="store")return bad("Ação inválida");
+ if(action!=="discover"&&action!=="store"&&action!=="search")return bad("Ação inválida");
  try{
+  if(action==="search"){
+   const query=str(body.query,80);
+   if(query.length<3)return respond({results:[]});
+   const {data,error}=await db.rpc("marketplace_search_products",{p_query:query});
+   if(error)return bad("Não foi possível buscar produtos",503);
+   return respond({results:data??[]});
+  }
   if(action==="discover"){
    const query=str(body.query,80),city=str(body.city,80);
    const {data:storefronts,error:fe}=await db.from("restaurant_storefront")
