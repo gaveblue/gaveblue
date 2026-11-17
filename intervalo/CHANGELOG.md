@@ -1,5 +1,12 @@
 # Intervalo — CHANGELOG
 
+## 1.1.0-rc.25 — 2026-11-17 · Navegação pública e cache
+
+- Rota explícita validada antes da inicialização; rota legada não sobrescreve destino explícito ou navegação direta.
+- Início, Buscar e links de lojas do marketplace passam pela entrada única versionada; Início continua apontando para Explorar.
+- Entradas estáticas de Explorar e Novo Mundo atualizadas; service worker recarrega navegações públicas pela rede, sem armazenar respostas autenticadas.
+- QA: análise sintática e simulação de rotas com objetos de navegador simulados; propagação e teste real no PWA pendentes.
+
 ## 1.1.0-rc.24 — 2026-11-17 · Ícones de visualização do cardápio
 
 - Loja pública e cardápio digital: substitui os textos Lista/Grade pelos mesmos SVGs `bars` e `dashboard` (19 px), na mesma ordem e com o mesmo estilo compacto do Garçom.

@@ -19,7 +19,7 @@ a{color:#de6d00}
   // Entrada estática HTTP 200 para o GitHub Pages; restaura a rota original no app.
   var path=window.location.pathname.replace(/\/+$/,'');
   if (!path.startsWith('/intervalo/')) return;
-  var destination='/intervalo/?intervalo_route='+encodeURIComponent(path+window.location.search+window.location.hash);
+  var destination='/intervalo/?intervalo_route='+encodeURIComponent(path+window.location.search+window.location.hash)+'&iv_release=1.1.0-rc.25';
   window.location.replace(destination);
 })();
 </script>

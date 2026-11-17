@@ -4,6 +4,11 @@ import {addCartItem,loadCart,cartCount} from './marketplace-cart-rc4.js?v=1.1.0-
 // Vitrine prévia real. NÃO cria pedidos e não envia dados pessoais.
 export async function renderMarketplace({supabase,route,box,esc,link}){
  document.body.classList.add('iv-marketplace');
+ const originalLink=link;
+ link=(target)=>{
+  if(target==='/explorar'||/^\/loja\/[a-z0-9]+(?:-[a-z0-9]+)*$/.test(target))return originalLink('/?intervalo_route='+encodeURIComponent(originalLink(target))+'&iv_release=1.1.0-rc.25');
+  return originalLink(target);
+ };
  const css='<link rel="stylesheet" href="/intervalo/marketplace-preview-rc1.css?v=1.1.0-rc.24"><link rel="stylesheet" href="/intervalo/marketplace-commerce-rc4.css?v=1.1.0-rc.4">';
  const money=n=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(n??0)/100);
  const nav=css+'<nav class="iv-mkt-nav" aria-label="Navegação do marketplace"><a class="iv-mkt-brand" href="'+link('/explorar')+'">intervalo</a>'

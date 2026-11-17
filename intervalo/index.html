@@ -6,6 +6,36 @@
 <meta name="theme-color" content="#ff7600"><meta name="description" content="Intervalo, plataforma de gestão de restaurantes da Gaveblue.">
 <link rel="manifest" href="/intervalo/manifest.webmanifest">
 <script>
+(function(){
+// Recupera a rota original quando o hosting estático redireciona o 404 à aplicação.
+// O parâmetro sobrevive a navegadores que bloqueiam sessionStorage (Instagram/PWA).
+try{
+ const query=new URLSearchParams(location.search);
+ let legacyRoute=null;
+ try{legacyRoute=sessionStorage.getItem('intervalo.deepLink');sessionStorage.removeItem('intervalo.deepLink')}catch{}
+ if(location.pathname==='/intervalo/'||location.pathname==='/intervalo'||location.pathname==='/intervalo/index.html'){
+  const requested=query.has('intervalo_route')?query.get('intervalo_route'):(!query.has('iv_release')&&!query.has('app')&&!query.has('destino')?legacyRoute:null);
+  if(requested&&requested.length<850&&requested.startsWith('/intervalo/')){
+   const u=new URL(requested,location.origin);
+   const parts=u.pathname.slice('/intervalo/'.length).split('/').filter(Boolean);
+   const slug=/^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+   const single=['login','admin','inicio','garcom','ativar','redefinir','configurar-admin',
+    'minha-conta','trocar-senha','recuperar-senha','explorar','checkout','pedido','cliente'];
+   const modules=['gestao','garcom','cozinha','caixa','cardapio','catalogo','mesas','estoque',
+    'impressao','relatorios','vendas-online'];
+   const valid=(parts.length===1&&single.includes(parts[0]))||
+    (parts.length===2&&((parts[0]==='loja'&&slug.test(parts[1]))||
+     (parts[0]==='pedido'&&/^[0-9a-f-]{36}\.[a-f0-9]{64}$/i.test(parts[1]))||
+     (slug.test(parts[0])&&modules.includes(parts[1]))));
+   if(valid&&u.origin===location.origin){
+    try{sessionStorage.removeItem('intervalo.deepLink')}catch{}
+    history.replaceState({},'',u.pathname+u.search+u.hash);
+   }
+  }
+ }
+}catch{/* Se não for possível recuperar a rota, abrir a home com segurança. */}
+
+})();
 /* Identidade distinta para o PWA Garçom; reavaliar depois do fallback da rota. */
 function intervaloApplyManifest(){
  const path=location.pathname,query=new URLSearchParams(location.search);
@@ -83,7 +113,6 @@ body.iv-initializing #app{min-height:100dvh;display:block}
 })();
 </script>
 <script>
-(function(){try{var deep=sessionStorage.getItem('intervalo.deepLink');if(deep&&deep.startsWith('/intervalo/')&&deep.length<2100){sessionStorage.removeItem('intervalo.deepLink');history.replaceState(null,'',deep+window.location.hash)}}catch(e){}})();
 intervaloApplyManifest();
 </script>
 </head><body class="iv-initializing iv-unified"><header><div class="inner"><a class="logo" href="/intervalo/" aria-label="Intervalo, página inicial">Intervalo<span class="iv-brand-tail" aria-hidden="true"></span><small>UM PRODUTO GAVEBLUE</small></a><nav id="nav"><a href="/intervalo/login">Entrar</a></nav></div></header><main id="app"><section id="intervalo-boot-loader" class="iv-boot" role="status" aria-live="polite" aria-busy="true" aria-label="Preparando aplicativo"><div class="iv-boot-brand"><span class="iv-boot-mark" aria-hidden="true">I</span><strong>Intervalo</strong></div><div class="iv-boot-status"><span class="iv-load-dot" aria-hidden="true"></span><span>Preparando sua experiência...</span></div><div class="iv-boot-grid" aria-hidden="true"><div class="iv-boot-card"><span class="iv-load-skeleton"></span><span class="iv-load-skeleton"></span><span class="iv-load-skeleton"></span></div><div class="iv-boot-card"><span class="iv-load-skeleton"></span><span class="iv-load-skeleton"></span><span class="iv-load-skeleton"></span></div><div class="iv-boot-card"><span class="iv-load-skeleton"></span><span class="iv-load-skeleton"></span><span class="iv-load-skeleton"></span></div><div class="iv-boot-card"><span class="iv-load-skeleton"></span><span class="iv-load-skeleton"></span><span class="iv-load-skeleton"></span></div></div><div class="iv-boot-row" aria-hidden="true"><span class="iv-load-skeleton"></span><span class="iv-load-skeleton"></span></div><div class="iv-boot-retry" id="iv-boot-retry"><p>Está demorando mais que o esperado. Confira a conexão e tente novamente.</p><button id="iv-boot-retry-action" type="button">Tentar novamente</button></div></section></main><footer class="foot">Gaveblue © 2026 · Intervalo 1.1.0-rc.6 · Marketplace, delivery e retirada</footer>
@@ -161,34 +190,6 @@ const err=e=>'<p class="error" role="alert">'+esc(e?.message??String(e))+'</p>';
 function box(content){app.innerHTML='<div class="wrap">'+content+'</div>';finishBoot()}
 const modules=['gestao','garcom','cozinha','caixa','cardapio'], labels={gestao:'Gestão',garcom:'Garçom',cozinha:'Cozinha',caixa:'Caixa',cardapio:'Cardápio'};
 const permissions={master:['gestao','garcom','cozinha','caixa','cardapio'],manager:['gestao','garcom','cozinha','caixa','cardapio'],waiter:['garcom','cardapio'],kitchen:['cozinha','cardapio'],cashier:['caixa','cardapio']};
-// Recupera a rota original quando o hosting estático redireciona o 404 à aplicação.
-// O parâmetro sobrevive a navegadores que bloqueiam sessionStorage (Instagram/PWA).
-try{
- if(location.pathname==='/intervalo/'||location.pathname==='/intervalo'){
-  const query=new URLSearchParams(location.search);
-  let requested=query.get('intervalo_route');
-  if(!requested){
-   try{requested=sessionStorage.getItem('intervalo.deepLink')}catch{}
-  }
-  if(requested&&requested.length<850&&requested.startsWith('/intervalo/')){
-   const u=new URL(requested,location.origin);
-   const parts=u.pathname.slice('/intervalo/'.length).split('/').filter(Boolean);
-   const slug=/^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-   const single=['login','admin','inicio','garcom','ativar','redefinir','configurar-admin',
-    'minha-conta','trocar-senha','recuperar-senha','explorar','checkout','pedido','cliente'];
-   const modules=['gestao','garcom','cozinha','caixa','cardapio','catalogo','mesas','estoque',
-    'impressao','relatorios','vendas-online'];
-   const valid=(parts.length===1&&single.includes(parts[0]))||
-    (parts.length===2&&((parts[0]==='loja'&&slug.test(parts[1]))||
-     (parts[0]==='pedido'&&/^[0-9a-f-]{36}\.[a-f0-9]{64}$/i.test(parts[1]))||
-     (slug.test(parts[0])&&modules.includes(parts[1]))));
-   if(valid&&u.origin===location.origin){
-    try{sessionStorage.removeItem('intervalo.deepLink')}catch{}
-    history.replaceState({},'',u.pathname+u.search+u.hash);
-   }
-  }
- }
-}catch{/* Se não for possível recuperar a rota, abrir a home com segurança. */}
 const paths=location.pathname.replace(/^\/intervalo\/?/,'').split('/').filter(Boolean);
 async function me(){const {data}=await supabase.auth.getUser();return data?.user??null}
 async function setupNav(user){
@@ -417,7 +418,7 @@ async function start(){
   return renderCustomer({box,esc,link});
  }
  if(['explorar','loja'].includes(paths[0])){
-  const {renderMarketplace}=await import('/intervalo/marketplace-preview-rc1.js?v=1.1.0-rc.24');
+  const {renderMarketplace}=await import('/intervalo/marketplace-preview-rc1.js?v=1.1.0-rc.25');
   return renderMarketplace({supabase,route:paths,box,esc,link});
  }
  const user=await me();if(user?.app_metadata?.intervalo_password_change_required&&!['trocar-senha','login','redefinir','recuperar-senha'].includes(paths[0])){location.assign(link('/trocar-senha'));return}await setupNav(user);if(paths.length===0)return new URLSearchParams(location.search).get('app')==='garcom'
