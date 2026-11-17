@@ -1,15 +1,16 @@
 import {icon} from './ui-icons.js?v=1.0.0-rc.1';
 import {sheetifyForms,showFormSheetError} from './operational-sheets-rc15.js?v=1.0.0-rc.15';
 import {openThermalReceipt} from './thermal-receipt-rc16.js?v=1.1.0-rc.16';
+import {initProductPhotoForm,resolveProductPhoto} from './product-photo-rc19.js?v=1.1.0-rc.19';
 // Intervalo — cadastros operacionais auxiliares (mesas, estoque, dispositivos, relatórios).
 export async function renderPage({supabase,restaurant,module,box,esc,link}){
  document.body.classList.add('iv-fullwidth','iv-support');
- const css='<style>.x-panel{padding:19px;background:#fff;border:1px solid #e2e8f0;border-radius:14px;margin:13px 0}.x-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(235px,1fr));gap:14px}.x-form{display:flex;flex-wrap:wrap;gap:12px;align-items:end}.x-form label{flex:1 1 180px;font-size:12px;font-weight:700}.x-form input,.x-form select{display:block;width:100%;margin-top:7px;padding:10px 12px;border:1px solid #cbd5e1;border-radius:9px;background:#fff;color:#0f172a}.x-form button,.x-btn{padding:11px 14px;background:#0f766e;color:#fff;border:0;border-radius:9px;cursor:pointer;font-size:12px;font-weight:700}.x-muted{font-size:12px;color:#64748b}.x-note{font-size:12px;line-height:1.55;background:#fff7ed;border:1px solid #fdba74;border-radius:10px;color:#9a3412;padding:13px}.x-panel h3{margin:2px 0 11px}</style>';
+ const css='<link rel="stylesheet" href="/intervalo/product-photo-rc19.css?v=1.1.0-rc.19"><style>.x-panel{padding:19px;background:#fff;border:1px solid #e2e8f0;border-radius:14px;margin:13px 0}.x-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(235px,1fr));gap:14px}.x-form{display:flex;flex-wrap:wrap;gap:12px;align-items:end}.x-form label{flex:1 1 180px;font-size:12px;font-weight:700}.x-form input,.x-form select{display:block;width:100%;margin-top:7px;padding:10px 12px;border:1px solid #cbd5e1;border-radius:9px;background:#fff;color:#0f172a}.x-form button,.x-btn{padding:11px 14px;background:#0f766e;color:#fff;border:0;border-radius:9px;cursor:pointer;font-size:12px;font-weight:700}.x-muted{font-size:12px;color:#64748b}.x-note{font-size:12px;line-height:1.55;background:#fff7ed;border:1px solid #fdba74;border-radius:10px;color:#9a3412;padding:13px}.x-panel h3{margin:2px 0 11px}</style>';
  const names={mesas:'Mesas e salões',estoque:'Estoque e Produtos',impressao:'Impressão manual',relatorios:'Relatórios operacionais'};
  const title=css+'<div class="iv-header"><div><span class="iv-section-caption">OPERAÇÃO DO RESTAURANTE</span><h1>'+icon({mesas:'table',estoque:'package',impressao:'printer',relatorios:'chart'}[module]??'layers',25)+' '+esc(names[module]??'Operação')+'</h1><p>'+esc(restaurant.name)+'</p></div><a class="iv-btn secondary" href="'+link('/'+restaurant.slug+'/gestao')+'">'+icon('arrowLeft',16)+' Voltar à gestão</a></div>';
  const fmt=n=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(n)/100);
  const call=async(action,params={})=>{const r=await supabase.functions.invoke('restaurant-core',{body:{restaurant_id:restaurant.id,action,...params}});if(r.error||r.data?.error){let message=r.data?.error??r.error?.message??'Falha';try{const x=await r.error?.context?.json?.();if(x?.error)message=x.error}catch{}throw Error(message)}return r.data};
- const form=(id,callback)=>{const f=document.getElementById(id);if(!f)return;f.onsubmit=async e=>{e.preventDefault();const b=f.querySelector('button[type=submit]');b.disabled=true;try{await callback(Object.fromEntries(new FormData(f).entries()));await load()}catch(err){if(!showFormSheetError(f,err.message))alert(err.message);b.disabled=false}}};
+ const form=(id,callback)=>{const f=document.getElementById(id);if(!f)return;f.onsubmit=async e=>{e.preventDefault();const b=f.querySelector('button[type=submit]');b.disabled=true;try{await callback(Object.fromEntries(new FormData(f).entries()),f);await load()}catch(err){if(!showFormSheetError(f,err.message))alert(err.message);b.disabled=false}}};
  const stockTabsAllowed=["insumos","produtos","fichas","historico"];
  let stockTab=stockTabsAllowed.includes(new URLSearchParams(location.search).get("aba"))?new URLSearchParams(location.search).get("aba"):"insumos";
  const moneyInput=n=>(Number(n??0)/100).toFixed(2).replace(".",",");
@@ -252,6 +253,11 @@ export async function renderPage({supabase,restaurant,module,box,esc,link}){
       out+='</section>';
     }
     box(out);
+    document.querySelectorAll('.x-product-photo').forEach(img=>img.addEventListener('error',()=>{
+     const fallback=document.createElement('span');
+     fallback.className='x-product-placeholder';fallback.textContent='Imagem indisponível';
+     img.replaceWith(fallback);
+    },{once:true}));
     document.querySelectorAll('[data-stock-tab]').forEach(button=>button.onclick=()=>{
       stockTab=button.dataset.stockTab;
       try{const url=new URL(location.href);url.searchParams.set('aba',stockTab);history.replaceState(null,'',url.pathname+url.search)}catch{}
@@ -261,10 +267,13 @@ export async function renderPage({supabase,restaurant,module,box,esc,link}){
     form('adjuststock',v=>call('stock_adjust',{stock_item_id:v.stock_item_id,reason:v.reason,delta:Number(v.delta)}));
     form('recipeset',v=>call('recipe_set',{product_id:v.product_id,stock_item_id:v.stock_item_id,quantity:Number(v.quantity)}));
     form('newcatstock',v=>call('category_create',{name:v.name,sort_order:0}));
-    form('newprodstock',v=>call('product_create',{
-      name:v.name,category_id:v.category_id,price_cents:cents(v.price),description:v.description??'',
-      image_url:v.image_url??'',sort_order:0,available:v.available==='on',show_on_menu:v.show_on_menu==='on'
-    }));
+    form('newprodstock',async (v,f)=>{
+      const image_url=await resolveProductPhoto(f);
+      return call('product_create',{
+       name:v.name,category_id:v.category_id,price_cents:cents(v.price),description:v.description??'',
+       image_url,sort_order:0,available:v.available==='on',show_on_menu:v.show_on_menu==='on'
+      });
+    });
     document.querySelectorAll('[data-product-flag]').forEach(t=>t.onchange=async()=>{
       t.disabled=true;
       const previous=!t.checked;
@@ -277,9 +286,10 @@ export async function renderPage({supabase,restaurant,module,box,esc,link}){
       try{
         const p=products.find(p=>p.id===f.dataset.editProduct);if(!p)throw Error('Produto não encontrado');
         const v=Object.fromEntries(new FormData(f).entries());
+        const image_url=await resolveProductPhoto(f);
         await call('product_update',{
           id:p.id,name:v.name,category_id:v.category_id,price_cents:cents(v.price),description:v.description??'',
-          image_url:v.image_url??'',sort_order:p.sort_order??0,available:p.available,show_on_menu:p.show_on_menu
+          image_url,sort_order:p.sort_order??0,available:p.available,show_on_menu:p.show_on_menu
         });
         await load();
       }catch(err){if(!showFormSheetError(f,err.message))alert(err.message);button.disabled=false}
@@ -298,6 +308,11 @@ export async function renderPage({supabase,restaurant,module,box,esc,link}){
        {id:'newprodstock',label:'Novo produto',title:'Cadastrar produto',description:'Dados, preço, foto e disponibilidade.',context:'iv-inventory',replaceDetails:true},
        ...editSpecs
      ]);
+     initProductPhotoForm({form:document.getElementById('newprodstock'),supabase,restaurant});
+     for(const f of productEditForms){
+      const p=products.find(p=>p.id===f.dataset.editProduct);
+      initProductPhotoForm({form:f,existingUrl:p?.image_url??'',supabase,restaurant});
+     }
   }else if(module==='impressao'){
     const kitchen=link('/'+restaurant.slug+'/cozinha'),cash=link('/'+restaurant.slug+'/caixa');
     let out=title
