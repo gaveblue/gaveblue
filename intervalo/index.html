@@ -417,7 +417,7 @@ async function start(){
   return renderCustomer({box,esc,link});
  }
  if(['explorar','loja'].includes(paths[0])){
-  const {renderMarketplace}=await import('/intervalo/marketplace-preview-rc1.js?v=1.1.0-rc.4');
+  const {renderMarketplace}=await import('/intervalo/marketplace-preview-rc1.js?v=1.1.0-rc.19');
   return renderMarketplace({supabase,route:paths,box,esc,link});
  }
  const user=await me();if(user?.app_metadata?.intervalo_password_change_required&&!['trocar-senha','login','redefinir','recuperar-senha'].includes(paths[0])){location.assign(link('/trocar-senha'));return}await setupNav(user);if(paths.length===0)return new URLSearchParams(location.search).get('app')==='garcom'
