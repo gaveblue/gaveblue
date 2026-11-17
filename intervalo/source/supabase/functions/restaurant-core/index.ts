@@ -77,6 +77,21 @@ Deno.serve(async(req:Request)=>{
   await db.from("audit_logs").insert({restaurant_id:tenant,actor_user_id:user.id,event:"catalog_category_saved",details:{action}});
   return reply({saved:true});
  }
+ if(action==="category_delete"){
+  if(!manage())return fail();
+  if(!isId(id))return error("Categoria inválida",400);
+  const [found,linked]=await Promise.all([
+   db.from("menu_categories").select("id").eq("restaurant_id",tenant).eq("id",id).maybeSingle(),
+   db.from("menu_products").select("id",{head:true,count:"exact"}).eq("restaurant_id",tenant).eq("category_id",id)
+  ]);
+  if(found.error||linked.error)return error("Falha ao validar categoria",503);
+  if(!found.data)return error("Categoria não encontrada",404);
+  if((linked.count??0)>0)return error("Mova ou exclua os produtos vinculados antes de excluir esta categoria.",409);
+  const {data,error:e}=await db.from("menu_categories").delete().eq("restaurant_id",tenant).eq("id",id).select("id").maybeSingle();
+  if(e||!data)return error("Não foi possível excluir a categoria. Verifique os vínculos.",409);
+  await db.from("audit_logs").insert({restaurant_id:tenant,actor_user_id:user.id,event:"catalog_category_deleted",details:{id}});
+  return reply({deleted:true});
+ }
  if(action==="product_create"||action==="product_update"){
   if(!manage())return fail();
   const name=txt(body.name,150),description=txt(body.description??"",1000),category_id=body.category_id;
@@ -247,6 +262,41 @@ Deno.serve(async(req:Request)=>{
   return reply({saved:true,stock_item_id:data});
  }
 
+ if(action==="stock_update"){
+  if(!manage())return fail();
+  if(!isId(id))return error("Insumo inválido",400);
+  const name=txt(body.name,120),unit=txt(body.unit,3),min_quantity=body.min_quantity;
+  if(name.length<2||name.length>120||!["un","kg","g","l","ml"].includes(unit)
+   ||typeof min_quantity!=="number"||!Number.isFinite(min_quantity)||min_quantity<0||min_quantity>10000000
+   ||min_quantity!==Math.round(min_quantity*1000)/1000)return error("Dados do insumo inválidos",400);
+  const [current,usage]=await Promise.all([
+   db.from("stock_items").select("id,unit").eq("restaurant_id",tenant).eq("id",id).maybeSingle(),
+   db.from("recipe_components").select("id",{head:true,count:"exact"}).eq("restaurant_id",tenant).eq("stock_item_id",id)
+  ]);
+  if(current.error||usage.error)return error("Falha ao validar insumo",503);
+  if(!current.data)return error("Insumo não encontrado",404);
+  if(current.data.unit!==unit&&(usage.count??0)>0)return error("Remova o insumo das fichas técnicas antes de alterar sua unidade.",409);
+  const {data,error:e}=await db.from("stock_items").update({name,unit,min_quantity}).eq("restaurant_id",tenant).eq("id",id).select("id").maybeSingle();
+  if(e||!data)return error("Não foi possível atualizar o insumo",409);
+  await db.from("audit_logs").insert({restaurant_id:tenant,actor_user_id:user.id,event:"stock_item_updated",details:{id,name,unit,min_quantity}});
+  return reply({saved:true});
+ }
+ if(action==="stock_delete"||action==="stock_restore"){
+  if(!manage())return fail();
+  if(!isId(id))return error("Insumo inválido",400);
+  const deactivate=action==="stock_delete";
+  const [current,usage]=await Promise.all([
+   db.from("stock_items").select("id,active").eq("restaurant_id",tenant).eq("id",id).maybeSingle(),
+   db.from("recipe_components").select("id",{head:true,count:"exact"}).eq("restaurant_id",tenant).eq("stock_item_id",id)
+  ]);
+  if(current.error||usage.error)return error("Falha ao validar insumo",503);
+  if(!current.data)return error("Insumo não encontrado",404);
+  if(deactivate&&(usage.count??0)>0)return error("Remova primeiro o insumo das fichas técnicas. O histórico do estoque será preservado.",409);
+  const {data,error:e}=await db.from("stock_items").update({active:!deactivate}).eq("restaurant_id",tenant).eq("id",id).select("id").maybeSingle();
+  if(e||!data)return error("Não foi possível atualizar o estado do insumo",409);
+  await db.from("audit_logs").insert({restaurant_id:tenant,actor_user_id:user.id,event:deactivate?"stock_item_archived":"stock_item_restored",details:{id}});
+  return reply({saved:true,archived:deactivate});
+ }
  if(action==="recipe_set"){
   if(!manage())return fail();
   const product_id=body.product_id,stock_item_id=body.stock_item_id,quantity=body.quantity;
