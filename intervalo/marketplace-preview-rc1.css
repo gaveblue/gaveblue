@@ -81,3 +81,21 @@ dialog.iv-mkt-sheet::backdrop{background:#1b2b4199}
 .iv-mkt-store-head{position:relative;margin:-23px 0 20px;padding:0 13px;align-items:center}
 .iv-mkt-store-avatar{border:4px solid #fff;box-shadow:0 3px 12px #17233812}
 @media(max-width:640px){.iv-mkt-cover{aspect-ratio:16/7;min-height:133px;margin-top:10px;border-radius:13px}.iv-mkt-store-head{margin-top:-18px;padding:0 9px}.iv-mkt-store-avatar{width:68px;height:68px;border-radius:17px}}
+
+/* RC22 · Cardápio em grade ou lista (vitrine pública) */
+.iv-mkt-catalog-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:13px 0 18px}
+.iv-mkt-catalog-head .iv-mkt-description{margin:4px 0 0}
+.iv-mkt-view{display:flex;align-items:center;flex:none;gap:3px;padding:3px;border:1px solid #e7ebf1;border-radius:11px;background:#fff}
+.iv-mkt-view button{background:transparent;border:0;border-radius:8px;padding:8px 10px;color:#677a8c;font-size:12px;font-weight:750;cursor:pointer}
+.iv-mkt-view button[aria-pressed="true"]{background:#ff7900;color:#fff}
+.iv-mkt-product-grid.is-list{display:flex;flex-direction:column;gap:9px}
+.iv-mkt-product-grid.is-list .iv-mkt-product{flex-direction:row;min-height:108px;width:100%}
+.iv-mkt-product-grid.is-list .iv-mkt-photo{flex:none;width:126px;height:auto;min-height:108px}
+.iv-mkt-product-grid.is-list .iv-mkt-body{min-width:0;justify-content:center;padding:12px}
+.iv-mkt-product-grid.is-list .iv-mkt-price{margin-top:3px}
+@media(max-width:640px){
+ .iv-mkt-catalog-head{align-items:flex-start}
+ .iv-mkt-view button{padding:7px 8px}
+ .iv-mkt-product-grid.is-list .iv-mkt-photo{width:101px;min-height:105px}
+ .iv-mkt-product-grid.is-list .iv-mkt-body{padding:9px}
+}
