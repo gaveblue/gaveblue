@@ -4,7 +4,7 @@
 
 - Nova home compacta aprovada: resumo da sessão, quatro blocos (Pedidos em aberto, Recebimentos, Pedidos pagos, Delivery e retirada), cabeçalho e navegação por telas internas. Busca local e detalhes acessados por pedido; ações de impressão dentro dos detalhes. Terminologia Pedido na interface do Caixa (modelos de impressão salvos preservados).
 - Sessão com data legível e detalhamento por meio de pagamento; valores presenciais mantidos separados de delivery. Formulários em Bottom Sheet com ação no rodapé e orientação Pix contextual. Pagamento online manual também em folha, sem prompt de digitação.
-- Reutiliza API, QR Pix, impressão e regras de recebimento existentes; sem alterações no banco ou custos. Contagens e histórico limitados ao recorte da API atual. Sintaxe verificada; teste real e propagação pendentes.
+- Reutiliza API, QR Pix, impressão e regras de recebimento existentes; sem alterações no banco ou custos. Contagens e histórico limitados ao recorte da API atual. Atualização manual disponível diretamente nas listas; rodapé das folhas em flex com ação fixa. Teste de navegação com dados simulados e sintaxe verificados; teste real e propagação pendentes.
 
 ## 1.2.0-rc.5 — 2026-11-17 · Recibos e QR Pix no caixa
 

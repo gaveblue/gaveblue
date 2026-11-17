@@ -1,0 +1,6 @@
+# QA — Intervalo 1.2.0-rc.6 · Caixa
+
+- Simulação com um pedido aberto, um servido aguardando pagamento, um fechado com recibo e um pedido online: oito verificações passaram (home, lista aberta, detalhe aberto sem formulário, fila, detalhe com pagamento/Pix e especificação de Bottom Sheet, recibo de pedido pago, lista online e apenas três consultas iniciais na navegação simulada). Sintaxe JS verificada.
+- Atualização manual na home e nas listas. Não executa polling. Status dependem da última consulta. Totais presenciais e online não são misturados. Contagem e histórico dependem dos limites da API atual; não representam histórico integral.
+- Preserva os modelos de impressão configurados: nomenclatura Pedido na interface, sem sobrescrever título personalizado impresso. Pedido e recibo presencial permanecem disponíveis; a tela de delivery mostra dados do endpoint existente (não traz os itens nem impressão de pedido/recibo online).
+- Pendentes: verificar tela no Android, navegação real e interação de Bottom Sheets/teclado/rodapé; confirmar pagamentos, QR Pix/recibo e abertura/fechamento em ambiente autenticado de teste; conferir propagação. Nenhuma cobrança, pedido ou pagamento real criado nesta validação. Sem alteração de Supabase.
