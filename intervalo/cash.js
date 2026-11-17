@@ -1,14 +1,25 @@
 // Intervalo — caixa: apenas registros de recebimentos externos, sem integração com adquirentes.
 import {icon} from './ui-icons.js?v=1.0.0-rc.1';
 import {sheetifyForms,showFormSheetError} from './operational-sheets-rc15.js?v=1.0.0-rc.15';
-import {printConfigured} from './print-template-rc2.js?v=1.2.0-rc.3';
+import {printConfigured} from './print-template-rc2.js?v=1.2.0-rc.5';
 export async function renderPage({supabase,restaurant,box,esc,link}){
  document.body.classList.add('iv-fullwidth','iv-pos');
  const css='<style>.c-card{padding:20px;background:white;border:1px solid #e2e8f0;border-radius:14px;margin:14px 0}.c-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:13px}.c-form{display:flex;gap:10px;flex-wrap:wrap;align-items:end}.c-form label{flex:1 1 185px;font-size:12px;font-weight:700}.c-form input,.c-form select{display:block;width:100%;padding:11px;border:1px solid #cbd5e1;border-radius:9px;margin-top:6px;background:white}.c-form button{border:0;background:#0f766e;color:white;border-radius:9px;padding:12px 13px;font-weight:700;cursor:pointer}.c-form button:disabled{opacity:.45}.c-warning{background:#fff7ed;border:1px solid #fdba74;padding:12px;border-radius:10px;color:#9a3412;font-size:13px}.c-muted{font-size:12px;color:#64748b}.c-money{color:#0f766e;font-weight:800}.c-preview{padding:9px 12px;margin-bottom:13px;border:1px solid #0f766e;background:#f0fdfa;color:#0f766e;border-radius:9px;font-size:12px;font-weight:700} .c-round-head{display:flex;justify-content:space-between;align-items:center;gap:10px;background:#fff4e7;color:#99500a;border-radius:10px;padding:9px 10px;margin:12px 0 7px;font-size:12px}.c-paid-note{font-size:12px;color:#0c8d55;display:flex;align-items:center;gap:6px;margin-top:8px}</style>';
  const money=n=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(n)/100);
  const toCents=s=>{const raw=String(s??'').trim().replace(/\s/g,'');const t=raw.includes(',')?raw.replace(/\./g,'').replace(',','.'):raw;if(!/^\d{1,8}(?:\.\d{1,2})?$/.test(t))throw Error('Valor inválido. Exemplo: 15,50');let [i,f='']=t.split('.');return Number(i)*100+Number((f+'00').slice(0,2))};
  const call=async(action,data={})=>{const r=await supabase.functions.invoke('restaurant-core',{body:{restaurant_id:restaurant.id,action,...data}});if(r.error||r.data?.error){let message=r.data?.error??r.error?.message??'Falha';try{const v=await r.error?.context?.json?.();if(v?.error)message=v.error}catch{}throw Error(message)}return r.data};
- const main=css+'<div class="iv-header"><div><span class="iv-section-caption">FRENTE DE CAIXA</span><h1>'+icon('register',26)+' Caixa · Recebimentos</h1><p>'+esc(restaurant.name)+' · Pagamentos registrados manualmente após confirmação externa</p></div><div class="iv-actions"><a class="iv-btn secondary" href="'+link('/inicio')+'">'+icon('arrowLeft',16)+' Restaurantes</a></div></div><div class="iv-note">'+icon('info',16)+' Pix e cartões não são processados aqui. Confirme o recebimento fora do Intervalo antes de registrá-lo no caixa.</div>'
+ const main=css+'<div class="iv-header"><div><span class="iv-section-caption">FRENTE DE CAIXA</span><h1>'+icon('register',26)+' Caixa · Recebimentos</h1><p>'+esc(restaurant.name)+' · Pagamentos registrados manualmente após confirmação externa</p></div><div class="iv-actions"><a class="iv-btn secondary" href="'+link('/inicio')+'">'+icon('arrowLeft',16)+' Restaurantes</a></div></div><div class="iv-note">'+icon('info',16)+' O Pix pode ser cobrado por QR Code. Confira o recebimento no banco ou na maquininha antes de registrá-lo.</div>'
+ let qrPromise=null;
+ const qrLib=()=>{
+  if(typeof window.qrcode==='function')return Promise.resolve(window.qrcode);
+  if(qrPromise)return qrPromise;
+  qrPromise=new Promise((resolve,reject)=>{
+   const el=document.createElement('script');el.src='https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js';el.referrerPolicy='no-referrer';
+   const timer=setTimeout(()=>{el.remove();reject(Error('Gerador QR indisponível. Tente novamente com internet.'))},12000);
+   el.onload=()=>{clearTimeout(timer);if(typeof window.qrcode==='function')resolve(window.qrcode);else reject(Error('Gerador QR indisponível.'))};
+   el.onerror=()=>{clearTimeout(timer);el.remove();reject(Error('Não foi possível carregar o gerador QR.'))};document.head.append(el)
+  }).catch(err=>{qrPromise=null;throw err});return qrPromise;
+ };
  let selectedOrderId=null;
  async function reload(){
   box(main+'<div class="iv-loading-inline" role="status" aria-live="polite" aria-busy="true"><div class="iv-loading-inline-label"><span class="iv-load-dot" aria-hidden="true"></span><span>Preparando o caixa...</span></div><div class="iv-loading-inline-lines" aria-hidden="true"><span class="iv-load-skeleton"></span><span class="iv-load-skeleton"></span></div></div>');
@@ -34,7 +45,7 @@ export async function renderPage({supabase,restaurant,box,esc,link}){
     out+='</div><h3 class="c-closed-heading">'+icon('checkCircle',17)+' Quitadas recentemente</h3><div class="c-queue-list">';
     for(const o of recentClosed){
       const table=tables.find(t=>t.id===o.table_id),d=calc(o);
-      out+='<div class="c-closed-row"><b>'+esc(table?.label??'Comanda')+'<small>'+money(d.total)+'</small></b><button class="c-preview" data-receipt="'+esc(o.id)+'" type="button">'+icon("printer",16)+' Imprimir</button></div>';
+      out+='<div class="c-closed-row"><b>'+esc(table?.label??'Comanda')+'<small>'+money(d.total)+'</small></b><button class="c-preview" data-receipt="'+esc(o.id)+'" type="button">'+icon("printer",16)+' Comanda</button></div>'+pay.filter(p=>p.order_id===o.id).map(p=>'<div class="c-closed-row"><small>'+money(p.amount_cents)+'</small><button class="c-preview" type="button" data-payment-receipt="'+esc(p.id)+'">'+icon('printer',16)+' Recibo</button></div>').join('');
     }
     if(!recentClosed.length)out+='<p class="c-muted">Nenhuma comanda quitada neste recorte.</p>';
     out+='</div></aside><section class="c-details">';
@@ -48,18 +59,18 @@ export async function renderPage({supabase,restaurant,box,esc,link}){
         out+='<div class="c-round-head"><strong>Rodada '+esc(round.round_no)+'</strong><span>'+money(subtotal)+'</span></div>';
         for(const item of group)out+='<div class="c-line"><div><b>'+Number(item.quantity)+'× '+esc(item.product_name)+'</b>'+(item.note?'<small>'+esc(item.note)+'</small>':'')+'</div><strong>'+money(Number(item.unit_price_cents)*Number(item.quantity))+'</strong></div>';
       }
-      if(d.paid>0)out+='<div class="c-paid-note">'+icon('checkCircle',15)+' '+pay.filter(p=>p.order_id===selected.id).length+' recebimento(s) parcial(is) registrado(s).</div>';
+      if(d.paid>0)out+='<div class="c-paid-note">'+icon('checkCircle',15)+' '+pay.filter(p=>p.order_id===selected.id).length+' recebimento(s) parcial(is) registrado(s).</div>'+pay.filter(p=>p.order_id===selected.id).map(p=>'<button type="button" class="c-preview" data-payment-receipt="'+esc(p.id)+'">'+icon('printer',16)+' Recibo '+money(p.amount_cents)+'</button>').join('');
       out+='<div class="c-totals"><div><span>Total da comanda</span><b>'+money(d.total)+'</b></div><div><span>Já recebido</span><b>'+money(d.paid)+'</b></div><div class="c-total-main"><span>Saldo a receber</span><strong>'+money(d.outstanding)+'</strong></div></div>'
        +'<button type="button" class="c-preview" data-receipt="'+esc(selected.id)+'">'+icon("printer",16)+' Visualizar / imprimir comanda</button>';
     }else out+='<div class="iv-empty">Selecione uma comanda para conferir o pagamento.</div>';
     out+='</section><aside class="c-payment"><div class="c-pane-title"><h2>'+icon('wallet',20)+' Pagamento</h2></div>';
     if(selected){
       const d=calc(selected);
-      out+='<p class="c-muted">Selecione a forma de recebimento já confirmada. Para dividir a conta, registre valores parciais.</p><form class="c-form c-payment-form" data-payment="'+esc(selected.id)+'"><h3>Forma de pagamento</h3><div class="c-methods">';
+      out+='<p class="c-muted">Escolha a forma de pagamento. Se for Pix, gere a cobrança antes de confirmar.</p><form class="c-form c-payment-form" data-payment="'+esc(selected.id)+'"><h3>Forma de pagamento</h3><div class="c-methods">';
       for(const [method,label,ico] of [["pix_recorded","Pix","card"],["credit_recorded","Crédito","card"],["debit_recorded","Débito","card"],["cash","Dinheiro","banknote"],["other_recorded","Outro","wallet"]]){
         out+='<label class="c-method"><input type="radio" name="method" value="'+method+'" '+(method==='pix_recorded'?'checked':'')+'><span>'+icon(ico,22)+'<b>'+label+'</b></span></label>';
       }
-      out+='</div><label>Valor recebido (R$)<input name="amount" required inputmode="decimal" value="'+(d.outstanding/100).toFixed(2).replace('.',',')+'"></label><div class="iv-note">Para pagamentos parciais, informe o valor de cada recebimento separadamente.</div>'
+      out+='</div><label>Valor do pagamento (R$)<input name="amount" required inputmode="decimal" value="'+(d.outstanding/100).toFixed(2).replace('.',',')+'"></label><div class="iv-note">Para pagamentos parciais, informe o valor de cada recebimento separadamente.</div><button type="button" class="iv-btn secondary" id="cash-pix-print">'+icon('printer',16)+' Imprimir cobrança Pix</button><label style="display:flex;align-items:center;gap:8px;font-weight:500"><input type="checkbox" name="print_receipt" checked style="width:18px;height:18px;margin:0;accent-color:#ff7900"> Abrir recibo após confirmar</label>'
        +'<button type="submit" class="iv-btn c-confirm" '+(!open||d.outstanding<=0?'disabled':'')+'>'+icon("checkCircle",18)+' Registrar recebimento</button></form>';
       if(!open)out+='<p class="c-muted">Abra uma sessão de caixa para registrar pagamentos.</p>';
     }else out+='<div class="iv-empty">Aguardando uma comanda servida.</div>';
@@ -98,20 +109,60 @@ export async function renderPage({supabase,restaurant,box,esc,link}){
       const shortId=String(order.id||'').replace(/-/g,'').slice(-8).toUpperCase();
       void printConfigured({supabase,restaurant,kind:'cash',data:{id:shortId,table:table?.label??'Mesa',status:order.status,opened_at:order.opened_at,items:rows,received}});
     });
+    const receiptData=(order,receipt=null)=>{
+     const d=calc(order),table=tables.find(t=>t.id===order.table_id);
+     return {id:String(order.id).replace(/-/g,'').slice(-8).toUpperCase(),table:table?.label??'Comanda',status:order.status,opened_at:order.opened_at,items:d.rows,received:d.paid,...(receipt?{receipt}:{})};
+    };
+    document.querySelectorAll('[data-payment-receipt]').forEach(b=>b.onclick=()=>{
+     const p=pay.find(x=>x.id===b.dataset.paymentReceipt),o=p&&(ordersData.orders??[]).find(x=>x.id===p.order_id);
+     if(o)void printConfigured({supabase,restaurant,kind:'cash',data:receiptData(o,p)});
+    });
     const bind=(selector,callback)=>{const f=document.querySelector(selector);if(f)f.onsubmit=async e=>{e.preventDefault();const b=f.querySelector('button[type=submit]');b.disabled=true;try{await callback(Object.fromEntries(new FormData(f).entries()));await reload()}catch(err){if(!showFormSheetError(f,err.message))alert(err.message);b.disabled=false}}};
     bind('#cash-open',v=>call('cash_open',{starting_cash_cents:toCents(v.amount)}));
     bind('#cash-close',async v=>{const d=await call('cash_close',{counted_cash_cents:toCents(v.amount)});alert('Conferência encerrada. Diferença em dinheiro: '+money(d.result?.difference_cents??0))});
-    document.querySelectorAll('form[data-payment]').forEach(f=>f.onsubmit=async e=>{
-      e.preventDefault();const b=f.querySelector('button');b.disabled=true;
-      try{const v=Object.fromEntries(new FormData(f).entries());await call('pay_manual',{order_id:f.dataset.payment,amount_cents:toCents(v.amount),method:v.method});await reload()}
-      catch(err){if(!showFormSheetError(f,err.message))alert(err.message);b.disabled=false}
+    document.querySelectorAll('form[data-payment]').forEach(f=>{
+     const pix=f.querySelector('#cash-pix-print'),submit=f.querySelector('[type=submit]');
+     const sync=()=>{pix.hidden=f.elements.method.value!=='pix_recorded';pix.style.display=pix.hidden?'none':''};
+     f.addEventListener('change',sync);sync();
+     const showError=err=>{if(!showFormSheetError(f,err.message))alert(err.message)};
+     pix.onclick=async()=>{
+      if(pix.disabled||submit.disabled)return;
+      let amount;
+      try{amount=toCents(f.elements.amount.value);if(amount<=0||amount>calc(selected).outstanding)throw Error('Informe um valor dentro do saldo em aberto.')}catch(err){showError(err);return}
+      const popup=window.open('','_blank');if(!popup){alert('Autorize pop-ups para abrir a impressão.');return}
+      popup.document.body.textContent='Preparando cobrança Pix…';pix.disabled=true;submit.disabled=true;
+      try{
+       const [charge,qr]=await Promise.all([call('cash_pix_quote',{order_id:f.dataset.payment,amount_cents:amount}),qrLib()]);
+       if(popup.closed)return;
+       const code=qr(0,'M');code.addData(charge.payload,'Byte');code.make();const n=code.getModuleCount(),matrix=Array.from({length:n},(_,r)=>Array.from({length:n},(_,col)=>code.isDark(r,col)));
+       await printConfigured({supabase,restaurant,kind:'cash',popup,qrMatrix:matrix,data:{...receiptData(selected),pix:charge}});
+      }catch(err){popup.close();showError(err)}finally{pix.disabled=false;submit.disabled=!open||calc(selected).outstanding<=0}
+     };
+     f.onsubmit=async event=>{
+      event.preventDefault();if(submit.disabled||pix.disabled)return;
+      let v,amount;try{v=Object.fromEntries(new FormData(f));amount=toCents(v.amount);if(amount<=0||amount>calc(selected).outstanding)throw Error('Informe um valor dentro do saldo em aberto.')}catch(err){showError(err);return}
+      if(!confirm('Confirma que recebeu '+money(amount)+'? Confira o pagamento real antes de registrar.'))return;
+      const popup=v.print_receipt?window.open('','_blank'):null;if(popup)popup.document.body.textContent='Preparando recibo…';
+      submit.disabled=true;pix.disabled=true;
+      let result;
+      try{result=await call('pay_manual',{order_id:f.dataset.payment,amount_cents:amount,method:v.method})}
+      catch(err){popup?.close();showError(err);submit.disabled=false;pix.disabled=false;return}
+      // A impressão nunca repete ou condiciona um pagamento já registrado.
+      const receipt={id:result.result?.payment_id,method:v.method,amount_cents:amount,at:new Date().toISOString()};
+      const data={...receiptData(selected,receipt),received:calc(selected).total-Number(result.result?.remaining_cents??Math.max(0,calc(selected).outstanding-amount)),status:result.result?.fully_paid?'closed':'served'};
+      if(popup)void printConfigured({supabase,restaurant,kind:'cash',data,popup}).catch(()=>{try{popup.close()}catch{}alert('Pagamento registrado. Falha ao preparar recibo; não registre novamente.')});
+      if(v.print_receipt&&!popup)alert('Pagamento registrado. Autorize pop-ups para imprimir o recibo.');
+      // Fecha painel antigo, mesmo enquanto o novo estado é carregado.
+      const dialog=f.closest('dialog');if(dialog?.open)dialog.close();
+      await reload();
+     };
     });
     const payForm=document.querySelector('form[data-payment]');
     if(payForm)payForm.id='cash-payment-form';
     sheetifyForms([
       {id:'cash-open',label:'Abrir sessão de caixa',title:'Abrir caixa',description:'Informe o troco inicial antes de receber.'},
       {id:'cash-close',label:'Fechar sessão de caixa',title:'Conferência de caixa',description:'Conte o dinheiro disponível antes de encerrar.'},
-      {id:'cash-payment-form',label:'Registrar recebimento',title:'Recebimento confirmado',description:'Registre somente pagamentos confirmados fora do aplicativo.'}
+      {id:'cash-payment-form',label:'Registrar recebimento',title:'Recebimento confirmado',description:'Gere a cobrança Pix ou registre um pagamento já confirmado.'}
     ]);
   }catch(e){box(main+'<div class="c-card"><p class="error">'+esc(e.message)+'</p></div>')}
  }

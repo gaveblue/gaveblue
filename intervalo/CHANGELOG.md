@@ -1,5 +1,11 @@
 # Intervalo — CHANGELOG
 
+## 1.2.0-rc.5 — 2026-11-17 · Recibos e QR Pix no caixa
+
+- Caixa presencial: cobrança Pix impressa antes de receber, usando chave de Pix direto já ativada no restaurante e valor parcial ou integral validado pelo servidor. QR estático gerado sem registrar pagamento, biblioteca QR já usada no marketplace, carregada sob demanda; matriz integrada ao PNG térmico e impressão Android.
+- Após confirmação manual, opção de abrir recibo individual; reimpressão de recebimentos parciais e quitados. Reutiliza modelo de caixa com título e dados específicos de recibo/Pix editáveis. Não é comprovante bancário, fiscal ou confirmação automática. QR não é reutilizado em recibos pagos.
+- Edge restaurant-core v18, sem novas tabelas, serviços pagos ou mudanças no fluxo de pedidos online. Sintaxe e renderização simulada; autenticação real, leitura do QR no banco e impressão física pendentes.
+
 ## 1.2.0-rc.4 — 2026-11-17 · Carregamento padronizado da impressão
 
 - Substitui texto antigo e skeleton sem dimensões pelo componente visual compartilhado `iv-loading-inline` / `iv-load-skeleton`, com blocos que antecipam a configuração e a prévia da comanda. Rótulo de carregamento acessível e sem texto visível antigo.

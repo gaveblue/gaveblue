@@ -1,6 +1,6 @@
 import {icon} from './ui-icons.js?v=1.0.0-rc.1';
 import {sheetifyForms,showFormSheetError} from './operational-sheets-rc15.js?v=1.0.0-rc.15';
-import {mountPrintSettings} from './print-settings-rc2.js?v=1.2.0-rc.4';
+import {mountPrintSettings} from './print-settings-rc2.js?v=1.2.0-rc.5';
 import {initProductPhotoForm,resolveProductPhoto} from './product-photo-rc19.js?v=1.1.0-rc.20';
 // Intervalo — cadastros operacionais auxiliares (mesas, estoque, dispositivos, relatórios).
 export async function renderPage({supabase,restaurant,module,box,esc,link}){

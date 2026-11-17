@@ -108,6 +108,11 @@ function buildCanvas(doc,rows,profile){
  const fontHeight=(kind)=>kind==='small'?Math.max(19,Math.round(base*.91)):kind==='center'?Math.round((base+1)*1.35):Math.round(base*1.32);
  function processRow(row,y,paint){
   const kind=row.kind;
+  if(kind==='qr'){
+   const n=row.matrix.length,unit=Math.max(1,Math.floor(Math.min(contentWidth,profile.paper===80?360:300)/(n+8))),size=(n+8)*unit,x=Math.floor((width-size)/2),top=y+6;
+   if(paint){ctx.fillStyle='#fff';ctx.fillRect(x,top,size,size);ctx.fillStyle='#000';for(let r=0;r<n;r++)for(let col=0;col<n;col++)if(row.matrix[r][col])ctx.fillRect(x+(col+4)*unit,top+(r+4)*unit,unit,unit)}
+   return size+12;
+  }
   if(kind==='rule'){
    if(paint){ctx.beginPath();ctx.strokeStyle='#444';ctx.setLineDash([6,4]);ctx.moveTo(side,y+5);ctx.lineTo(width-side,y+5);ctx.stroke();ctx.setLineDash([])}
    return 17;
@@ -155,7 +160,7 @@ function dataUrlFile(url,name){
  for(let i=0;i<raw.length;i++)bytes[i]=raw.charCodeAt(i);
  return new File([bytes],name,{type:'image/png'});
 }
-export function openThermalReceipt({title,content,popup:existingPopup,warning=''}){
+export function openThermalReceipt({title,content,popup:existingPopup,warning='',qrMatrix=null}){
  const popup=existingPopup??window.open('','_blank');
  if(!popup){alert('Autorize pop-ups para abrir a prévia de impressão.');return false}
  const markup=String(content||'');
@@ -201,6 +206,14 @@ export function openThermalReceipt({title,content,popup:existingPopup,warning=''
  const doc=popup.document;
  const byId=id=>doc.getElementById(id);
  const rows=extractThermalRows(byId('iv-receipt-paper'));
+ if(Array.isArray(qrMatrix)&&qrMatrix.length>=21&&qrMatrix.length<=177&&qrMatrix.every(row=>Array.isArray(row)&&row.length===qrMatrix.length&&row.every(v=>typeof v==='boolean'))){
+  rows.push({kind:'qr',matrix:qrMatrix});
+  const ns='http://www.w3.org/2000/svg',svg=doc.createElementNS(ns,'svg'),n=qrMatrix.length,background=doc.createElementNS(ns,'rect'),pixels=doc.createElementNS(ns,'path');
+  svg.setAttribute('viewBox','0 0 '+(n+8)+' '+(n+8));svg.setAttribute('role','img');svg.setAttribute('aria-label','QR Code Pix');svg.setAttribute('shape-rendering','crispEdges');svg.setAttribute('style','display:block;width:36mm;max-width:100%;height:auto;margin:2mm auto');
+  background.setAttribute('width',String(n+8));background.setAttribute('height',String(n+8));background.setAttribute('fill','white');
+  let d='';for(let r=0;r<n;r++)for(let col=0;col<n;col++)if(qrMatrix[r][col])d+='M'+(col+4)+' '+(r+4)+'h1v1h-1z';
+  pixels.setAttribute('d',d);pixels.setAttribute('fill','black');svg.append(background,pixels);byId('iv-receipt-paper').append(svg);
+ }
  let profile=getThermalProfile();
  const names={paper:'iv-pr-paper',scale:'iv-pr-scale',margin:'iv-pr-margin',feed:'iv-pr-feed'};
  Object.entries(names).forEach(([key,id])=>{byId(id).value=String(profile[key])});
