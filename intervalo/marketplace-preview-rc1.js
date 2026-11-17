@@ -1,4 +1,4 @@
-import {mountHome} from './marketplace-home-rc30.js?v=1.1.0-rc.30';
+import {mountHome,matchesQuery} from './marketplace-home-rc30.js?v=1.1.0-rc.31';
 import {groupProducts,chooseVariant} from './product-variants-rc28.js?v=1.1.0-rc.28';
 import {icon} from './ui-icons.js?v=1.0.0-rc.1';
 import {readCatalog,saveCatalog,forgetCatalog,publicResult} from './public-catalog-cache-rc26.js?v=1.1.0-rc.28';
@@ -9,10 +9,10 @@ export async function renderMarketplace({supabase,route,box,esc,link}){
  document.body.classList.add('iv-marketplace');
  const originalLink=link;
  link=(target)=>{
-  if((target==='/explorar'||target==='/explorar?buscar=1')||/^\/loja\/[a-z0-9]+(?:-[a-z0-9]+)*$/.test(target))return originalLink('/?intervalo_route='+encodeURIComponent(originalLink(target))+'&iv_release=1.1.0-rc.30');
+  if((target==='/explorar'||target==='/explorar?buscar=1')||/^\/loja\/[a-z0-9]+(?:-[a-z0-9]+)*(?:\?q=[^#]*)?$/.test(target))return originalLink('/?intervalo_route='+encodeURIComponent(originalLink(target))+'&iv_release=1.1.0-rc.31');
   return originalLink(target);
  };
- const css='<link rel="stylesheet" href="/intervalo/marketplace-preview-rc1.css?v=1.1.0-rc.30"><link rel="stylesheet" href="/intervalo/marketplace-commerce-rc4.css?v=1.1.0-rc.4">';
+ const css='<link rel="stylesheet" href="/intervalo/marketplace-preview-rc1.css?v=1.1.0-rc.31"><link rel="stylesheet" href="/intervalo/marketplace-commerce-rc4.css?v=1.1.0-rc.4">';
  const money=n=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(n??0)/100);
  const nav=css+'<nav class="iv-mkt-nav" aria-label="Navegação do marketplace"><a class="iv-mkt-brand" href="'+link('/explorar')+'">intervalo</a>'
   +'</nav>';
@@ -39,7 +39,7 @@ export async function renderMarketplace({supabase,route,box,esc,link}){
  const placeholder=(title,description,retryLink='/explorar',retryLabel='Explorar restaurantes')=>'<div class="iv-mkt-empty">'+icon('info',27)+'<h2>'+esc(title)+'</h2><p>'+esc(description)+'</p><a class="iv-mkt-action" href="'+link(retryLink)+'">'+icon('arrowLeft',15)+' '+esc(retryLabel)+'</a></div>';
  if(route[0]==='explorar'){
   const searchMode=new URLSearchParams(location.search).get('buscar')==='1';
-  const args={page,esc,link,safePhoto,logo,searchMode};
+  const args={page,esc,link,safePhoto,logo,searchMode,searchProducts:query=>service({action:'search',query})};
   mountHome({...args,rows:[],busy:true});
   try{const data=await service({action:'discover'});mountHome({...args,rows:data.restaurants??[]})}
   catch{mountHome({...args,rows:[],error:true})}
@@ -150,8 +150,8 @@ export async function renderMarketplace({supabase,route,box,esc,link}){
    };
    let activeCat='all';
    const filter=()=>{
-    const q=search.value.trim().toLocaleLowerCase('pt-BR');let count=0;
-    for(const el of inputs){const show=(activeCat==='all'||el.dataset.category===activeCat)&&(!q||el.dataset.search.includes(q));el.hidden=!show;if(show)count++}
+    const q=search.value.trim();let count=0;
+    for(const el of inputs){const show=(activeCat==='all'||el.dataset.category===activeCat)&&matchesQuery(el.dataset.search,q);el.hidden=!show;if(show)count++}
     document.getElementById('iv-mkt-empty').hidden=count>0;
    };
    search.oninput=filter;
@@ -160,6 +160,8 @@ export async function renderMarketplace({supabase,route,box,esc,link}){
     document.querySelectorAll('[data-mkt-cat]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));
     filter();
    });
+   const incoming=(new URLSearchParams(location.search).get('q')??'').slice(0,80);
+   if(incoming&&!previous){search.value=incoming;searchPanel.hidden=false;searchButton.setAttribute('aria-expanded','true');filter()}
    if(previous){
     if(previous.cat==='all'||cats.some(c=>String(c.id)===previous.cat))activeCat=previous.cat;
     search.value=previous.query;

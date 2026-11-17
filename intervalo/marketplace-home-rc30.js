@@ -11,13 +11,19 @@ const pin='<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="c
 const heart='<svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.9 8.5c0 4.1-8.9 9.4-8.9 9.4S3.1 12.6 3.1 8.5a4.7 4.7 0 0 1 8.9-2.1 4.7 4.7 0 0 1 8.9 2.1Z"/></svg>';
 const categories=[['burger','Lanches',/lanch|hamb[uú]rg|burger|sandu[ií]ch/],['pizza','Pizzas',/pizza/],['meal','Refeições',/refei[cç]|restaurante|almo[cç]|marmit|comida|prato|churras|jantar/],['drink','Bebidas',/bebida|drink|sucos|refrigerante|bar/],['acai','Açaí',/a[cç]a[ií]|sorvete/]];
 const normalize=s=>String(s??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-BR');
+export function matchesQuery(haystack,query){
+ const q=normalize(query).trim(),hay=normalize(haystack);
+ if(!q)return true;
+ const words=[...new Set(q.split(/[^a-z0-9]+/).filter(x=>x.length>=2))].slice(0,8);
+ return words.length?words.every(word=>hay.includes(word)):hay.includes(q);
+}
 const cityKey=r=>[r.city,r.state].filter(Boolean).join(', ');
 export const displayName=r=>{const name=String(r.name??'').trim();return !name||name===r.slug?String(r.slug??'').replace(/-/g,' ').replace(/(^|\s)\p{L}/gu,x=>x.toLocaleUpperCase('pt-BR')):name};
 const getLocal=(k,fallback)=>{try{return JSON.parse(localStorage.getItem(k))??fallback}catch{return fallback}};
 const putLocal=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));return true}catch{return false}};
 const keys={city:'intervalo-market-city-v1',favorites:'intervalo-market-favorites-v1'};
 const validSlug=s=>typeof s==='string'&&/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(s);
-export function mountHome({rows,page,esc,link,safePhoto,logo,searchMode=false,busy=false,error=false}){
+export function mountHome({rows,page,esc,link,safePhoto,logo,searchMode=false,busy=false,error=false,searchProducts}){
  const records=Array.isArray(rows)?rows.filter(r=>validSlug(r.slug)):[];
  const cities=[...new Set(records.map(cityKey).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
  let city=getLocal(keys.city,'');
@@ -25,40 +31,71 @@ export function mountHome({rows,page,esc,link,safePhoto,logo,searchMode=false,bu
  if(!city&&cities.length===1&&records.every(x=>cityKey(x)))city=cities[0];
  const saved=getLocal(keys.favorites,[]);const favorites=new Set(Array.isArray(saved)?saved.filter(validSlug).slice(0,100):[]);
  let selected='all',openOnly=false,favoriteOnly=false,mode='all',q='';
+ let productMatches=new Map(),searchState='idle',timer=null,generation=0;
+ const recent=new Map(),bySlug=new Map(records.map(r=>[r.slug,r]));
  const status=r=>r.checkout_available===true?['open','Aberto para pedidos']:r.customer_orders_enabled?['closed','Fechado no momento']:['closed','Pedidos indisponíveis'];
  const cards=records.map(r=>{
   const name=displayName(r),cover=safePhoto(r.banner_url),st=status(r);
   const tags=Array.isArray(r.cuisine_tags)?r.cuisine_tags.filter(t=>typeof t==='string').slice(0,3).join(' · '):'';
-  return '<article class="iv-home-card" data-home-card="'+esc(r.slug)+'"><a class="iv-home-card-link" href="'+link('/loja/'+r.slug)+'" aria-label="Abrir '+esc(name)+'"><div class="iv-home-card-cover">'+(cover?'<img src="'+esc(cover)+'" alt="" loading="lazy" decoding="async">':'<span>'+icon('store',37)+'</span>')+'</div><div class="iv-home-card-body"><span class="iv-mkt-store-icon">'+logo(r.logo_url,name)+'</span><div class="iv-home-card-copy"><strong>'+esc(name)+'</strong>'+(tags||cityKey(r)?'<small>'+esc(tags||cityKey(r))+'</small>':'')+'<span class="iv-home-status '+st[0]+'">'+st[1]+'</span></div></div></a><button class="iv-home-favorite" type="button" data-home-favorite="'+esc(r.slug)+'" aria-label="Favoritar '+esc(name)+'" aria-pressed="'+favorites.has(r.slug)+'">'+heart+'</button></article>';
+  return '<article class="iv-home-card" data-home-card="'+esc(r.slug)+'"><a class="iv-home-card-link" href="'+link('/loja/'+r.slug)+'" aria-label="Abrir '+esc(name)+'"><div class="iv-home-card-cover">'+(cover?'<img src="'+esc(cover)+'" alt="" loading="lazy" decoding="async">':'<span>'+icon('store',37)+'</span>')+'</div><div class="iv-home-card-body"><span class="iv-mkt-store-icon">'+logo(r.logo_url,name)+'</span><div class="iv-home-card-copy"><strong>'+esc(name)+'</strong>'+(tags||cityKey(r)?'<small>'+esc(tags||cityKey(r))+'</small>':'')+'<span class="iv-home-status '+st[0]+'">'+st[1]+'</span><small class="iv-home-product-match" data-home-match hidden></small></div></div></a><button class="iv-home-favorite" type="button" data-home-favorite="'+esc(r.slug)+'" aria-label="Favoritar '+esc(name)+'" aria-pressed="'+favorites.has(r.slug)+'">'+heart+'</button></article>';
  }).join('');
- const markup='<section class="iv-home-head"><div class="iv-home-top"><button class="iv-home-location" type="button" id="iv-home-city"><small>Entregar em</small><strong>'+pin+'<span id="iv-home-city-label">'+esc(city||'Selecionar cidade')+'</span>'+icon('chevronDown',15)+'</strong></button><button class="iv-home-bell" type="button" id="iv-home-bell" aria-label="Notificações">'+icon('bell',23)+'</button></div><label class="iv-home-search">'+icon('search',21)+'<input type="search" id="iv-home-search" placeholder="O que vamos pedir hoje?" aria-label="Buscar restaurantes ou tipos de comida" autocomplete="off"></label></section>'
+ const markup='<section class="iv-home-head"><div class="iv-home-top"><button class="iv-home-location" type="button" id="iv-home-city"><small>Entregar em</small><strong>'+pin+'<span id="iv-home-city-label">'+esc(city||'Selecionar cidade')+'</span>'+icon('chevronDown',15)+'</strong></button><button class="iv-home-bell" type="button" id="iv-home-bell" aria-label="Notificações">'+icon('bell',23)+'</button></div><label class="iv-home-search">'+icon('search',21)+'<input type="search" id="iv-home-search" placeholder="O que vamos pedir hoje?" aria-label="Buscar restaurantes e produtos" maxlength="80" autocomplete="off"></label></section>'
  +'<section class="iv-home-banner"><div><small>SEU MOMENTO INTERVALO</small><h1>Deu fome?</h1><p>Peça seus favoritos por aqui.</p></div><span class="iv-home-banner-art">'+svg(burger)+'</span></section>'
  +'<div class="iv-home-categories" role="group" aria-label="Categorias de comida">'+categories.map(([id,name])=>'<button type="button" data-home-category="'+id+'" aria-pressed="false"><span>'+svg(arts[id])+'</span><strong>'+name+'</strong></button>').join('')+'</div>'
  +'<div class="iv-home-filters" role="group" aria-label="Filtrar restaurantes"><button type="button" id="iv-home-all" aria-pressed="true">Todos</button><button type="button" id="iv-home-open" aria-pressed="false">Abertos agora</button><button type="button" id="iv-home-filters" aria-pressed="false">'+icon('sliders',16)+' Filtros</button></div>'
- +'<div class="iv-home-heading"><h2 id="iv-home-heading">Restaurantes para você</h2></div>'
+ +'<div class="iv-home-heading"><h2 id="iv-home-heading">Restaurantes para você</h2></div><p class="iv-home-search-status" id="iv-home-search-status" role="status" aria-live="polite" hidden></p>'
  +(busy?'<div class="iv-home-skeleton" role="status" aria-label="Carregando restaurantes"><div></div><span></span><span></span></div>':error?'<div class="iv-mkt-empty">Não foi possível carregar os restaurantes.<br><a class="iv-mkt-action" href="'+link('/explorar')+'">Tentar novamente</a></div>':'<div class="iv-home-grid" id="iv-home-grid">'+cards+'</div><div class="iv-mkt-empty" id="iv-home-empty" hidden><h2>Nenhum restaurante encontrado</h2><p>Tente outra cidade ou limpe os filtros.</p><button class="iv-mkt-action" type="button" id="iv-home-reset">Limpar filtros</button></div>');
  page(markup,searchMode?'buscar':'inicio');
  const $=id=>document.getElementById(id);
- const search=$('iv-home-search');
+ const search=$('iv-home-search');search.disabled=busy||error;
  const items=[...document.querySelectorAll('[data-home-card]')];
  const filter=()=>{
   const term=normalize(q.trim());let count=0;
   for(const card of items){
-   const r=records.find(x=>x.slug===card.dataset.homeCard);
+   const r=bySlug.get(card.dataset.homeCard);
    const hay=normalize([displayName(r),r.description,...(Array.isArray(r.cuisine_tags)?r.cuisine_tags:[]),cityKey(r)].join(' '));
+   const match=productMatches.get(r.slug), localMatch=matchesQuery(hay,term);
+   const hint=card.querySelector('[data-home-match]');
+   hint.hidden=!match;
+   if(match)hint.textContent='Encontrado: '+match.matches.join(' · ')+(match.matched_count>match.matches.length?' +'+(match.matched_count-match.matches.length):'');
+   else hint.textContent='';
+   card.querySelector('.iv-home-card-link').href=link('/loja/'+r.slug+(match&&term?'?q='+encodeURIComponent(q.trim()):''));
    const rule=categories.find(c=>c[0]===selected)?.[2];
-   const hide=!!((city&&cityKey(r)!==city)||(term&&!hay.includes(term))||(rule&&!rule.test(hay))||(openOnly&&r.checkout_available!==true)||(favoriteOnly&&!favorites.has(r.slug))||(mode==='delivery'&&!r.delivery_available)||(mode==='pickup'&&!r.pickup_available));
+   const hide=!!((city&&cityKey(r)!==city)||(term&&!localMatch&&!match)||(rule&&!rule.test(hay))||(openOnly&&r.checkout_available!==true)||(favoriteOnly&&!favorites.has(r.slug))||(mode==='delivery'&&!r.delivery_available)||(mode==='pickup'&&!r.pickup_available));
    card.hidden=hide;if(!hide)count++;
   }
-  if($('iv-home-empty'))$('iv-home-empty').hidden=count>0;
-  $('iv-home-heading').textContent=city?'Restaurantes perto de você':'Restaurantes para você';
+  if($('iv-home-empty'))$('iv-home-empty').hidden=count>0||searchState==='pending';
+  const live=$('iv-home-search-status');
+  live.hidden=!term;
+  live.textContent=searchState==='pending'?'Buscando produtos nos cardápios...':searchState==='error'?'Busca de produtos indisponível. Exibindo apenas resultados por restaurante.':term.length<3?'Digite pelo menos 3 caracteres para procurar produtos.':count+' restaurante(s) encontrado(s)';
+  $('iv-home-heading').textContent=term?'Resultados da busca':city?'Restaurantes perto de você':'Restaurantes para você';
   $('iv-home-city-label').textContent=city||'Selecionar cidade';
   $('iv-home-all').setAttribute('aria-pressed',String(selected==='all'&&!openOnly&&!favoriteOnly&&mode==='all'));
   $('iv-home-open').setAttribute('aria-pressed',String(openOnly));
   $('iv-home-filters').setAttribute('aria-pressed',String(favoriteOnly||mode!=='all'));
   document.querySelectorAll('[data-home-category]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.homeCategory===selected)));
  };
- const reset=()=>{selected='all';openOnly=false;favoriteOnly=false;mode='all';q='';search.value='';filter()};
+ const cancelSearch=()=>{generation++;clearTimeout(timer);timer=null;productMatches=new Map();searchState='idle'};
+ const applyResults=data=>{
+  productMatches=new Map((Array.isArray(data?.results)?data.results:[]).filter(r=>validSlug(r.slug)&&Array.isArray(r.matches)).map(r=>[r.slug,{matches:r.matches.filter(x=>typeof x==='string').slice(0,3),matched_count:Number(r.matched_count)||0}]));
+  searchState='done';filter();
+ };
+ const scheduleSearch=()=>{
+  cancelSearch();const term=normalize(q).trim();
+  if(busy||error||typeof searchProducts!=='function'||term.length<3||!/[a-z0-9]{2}/.test(term)){filter();return}
+  const old=recent.get(term);
+  if(old&&Date.now()-old.at<60000){applyResults(old.data);return}
+  searchState='pending';filter();const ticket=generation,requested=q.trim().slice(0,80);
+  timer=setTimeout(async()=>{
+   try{
+    const result=await searchProducts(requested);
+    if(ticket!==generation||!search.isConnected)return;
+    if(recent.size>=20)recent.delete(recent.keys().next().value);
+    recent.set(term,{at:Date.now(),data:result});applyResults(result);
+   }catch{if(ticket===generation&&search.isConnected){searchState='error';filter()}}
+  },500);
+ };
+ const reset=()=>{selected='all';openOnly=false;favoriteOnly=false;mode='all';q='';search.value='';cancelSearch();filter()};
  const sheet=(title,body,onBind)=>{
   const dlg=document.createElement('dialog');dlg.className='iv-mkt-sheet iv-home-sheet';dlg.setAttribute('aria-label',title);
   dlg.innerHTML='<div class="iv-mkt-sheet-handle"></div><div class="iv-mkt-sheet-content"><h2>'+esc(title)+'</h2>'+body+'<button type="button" class="iv-mkt-sheet-close" data-home-close>Fechar</button></div>';
@@ -72,7 +109,7 @@ export function mountHome({rows,page,esc,link,safePhoto,logo,searchMode=false,bu
  });
  $('iv-home-all').onclick=reset;$('iv-home-open').onclick=()=>{openOnly=!openOnly;filter()};
  $('iv-home-reset')?.addEventListener('click',reset);
- search.oninput=()=>{q=search.value;filter()};
+ search.oninput=()=>{q=search.value;scheduleSearch()};
  document.querySelectorAll('[data-home-category]').forEach(b=>b.onclick=()=>{selected=selected===b.dataset.homeCategory?'all':b.dataset.homeCategory;filter()});
  document.querySelectorAll('[data-home-favorite]').forEach(b=>b.onclick=()=>{const s=b.dataset.homeFavorite;if(favorites.has(s))favorites.delete(s);else {if(favorites.size>=100)favorites.delete(favorites.values().next().value);favorites.add(s)}putLocal(keys.favorites,[...favorites]);b.setAttribute('aria-pressed',String(favorites.has(s)));filter()});
  document.querySelectorAll('.iv-home-card-cover img').forEach(img=>{const fallback=()=>{if(img.isConnected){const parent=img.parentElement;img.remove();parent.innerHTML='<span>'+icon('store',37)+'</span>'}};img.addEventListener('error',fallback,{once:true});if(img.complete&&!img.naturalWidth)fallback()});

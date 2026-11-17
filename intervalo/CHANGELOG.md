@@ -1,5 +1,12 @@
 # Intervalo — CHANGELOG
 
+## 1.1.0-rc.31 — 2026-11-17 · Busca integrada de restaurantes e produtos
+
+- Busca local imediata por nome, descrição, cidade e tags do restaurante; pesquisa de produtos públicos via API após 500 ms sem digitação e mínimo de 3 caracteres. Correspondência sem acentos e por palavras, sem serviço externo de IA.
+- Resultados exibem nomes de até 3 produtos por restaurante e quantidade adicional; ao abrir uma loja com correspondência de produto, a busca é pré-preenchida. Filtros existentes continuam aplicáveis.
+- RPC `marketplace_search_products` usa produtos disponíveis e visíveis, restaurantes ativos/publicados e categorias ativas; execução direta restrita ao service_role, retorno limitado a 100 restaurantes. Edge Function marketplace-public v6. Cache volátil limitado a 20 consultas por 60 s, sem guardar catálogos completos.
+- Busca do cardápio também ignora acentos e ordem de palavras. Nenhum plano pago ativado. Sintaxe e consulta SQL real conferidas; teste de interface e propagação pendentes.
+
 ## 1.1.0-rc.30 — 2026-11-17 · Nova home do marketplace
 
 - Home pública com seleção de cidade, campo de busca, banner compacto, categorias visuais, filtros e cards com capas/logos reais. Gestão removida da navegação do consumidor, mantida em `/intervalo/inicio`.
