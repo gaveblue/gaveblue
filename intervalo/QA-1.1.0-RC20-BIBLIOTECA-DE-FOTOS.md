@@ -38,7 +38,11 @@ Evitar a repetição de uploads: a foto usada por um produto pode ser selecionad
 - No momento do QA, bucket possuía **1 imagem** e Novo Mundo possuía **1 imagem vinculada a produto**; biblioteca tem fontes para apresentar uma foto existente.
 - Auditoria da Storage: **0 políticas de escrita direta para authenticated/anon/PUBLIC**.
 - Edge Function com `verify_jwt=true`, versão 2 implantada com sucesso. A leitura está posicionada **depois** das validações de identidade e escopo de restaurante.
-- Sintaxe JS dos módulos novos e alterados e do entrypoint: a verificar na validação final.
+- Sintaxe JavaScript do módulo Biblioteca, seletor de fotos, Estoque e entrypoint principal: **OK**.
+- Testes estáticos de integração: **19/19** pontos verificados, cobrindo seleção, URL reutilizada, deduplicação, segurança de escopo e cache.
+- Casos de validação de URL: **6/6** (HTTPS direto, query, HTTP, javascript:, caracteres injetados e espaços).
+- Inspeção confirmou ausência de chamadas de exclusão ao remover imagem de produto, preservando arquivos reutilizados.
+- A URL do domínio não pôde ser consultada pelo verificador de disponibilidade nesta execução; **publicação no domínio segue não confirmada**.
 - Sem criação de tabela nova e sem ações sobre dados de pedidos/caixa/estoque.
 - Não foi possível chamar a nova função com sessão real de Master/gerente nem validar fisicamente a galeria Android nesta etapa. **Não homologar na produção sem essas evidências.**
 
