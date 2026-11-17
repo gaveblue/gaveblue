@@ -4,7 +4,7 @@ import {addCartItem,loadCart,cartCount} from './marketplace-cart-rc4.js?v=1.1.0-
 // Vitrine prévia real. NÃO cria pedidos e não envia dados pessoais.
 export async function renderMarketplace({supabase,route,box,esc,link}){
  document.body.classList.add('iv-marketplace');
- const css='<link rel="stylesheet" href="/intervalo/marketplace-preview-rc1.css?v=1.1.0-rc.23"><link rel="stylesheet" href="/intervalo/marketplace-commerce-rc4.css?v=1.1.0-rc.4">';
+ const css='<link rel="stylesheet" href="/intervalo/marketplace-preview-rc1.css?v=1.1.0-rc.24"><link rel="stylesheet" href="/intervalo/marketplace-commerce-rc4.css?v=1.1.0-rc.4">';
  const money=n=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(n??0)/100);
  const nav=css+'<nav class="iv-mkt-nav" aria-label="Navegação do marketplace"><a class="iv-mkt-brand" href="'+link('/explorar')+'">intervalo</a>'
   +'<div class="iv-mkt-links"><span class="iv-mkt-preview">PRÉVIA</span><a href="'+link('/inicio')+'">'+icon('store',15)+' Gestão</a></div></nav>';
@@ -98,7 +98,7 @@ export async function renderMarketplace({supabase,route,box,esc,link}){
       +'<div class="iv-mkt-pills" role="group" aria-label="Categorias"><button type="button" data-mkt-cat="all" aria-pressed="true">Todos</button>'
       +cats.map(c=>'<button type="button" data-mkt-cat="'+esc(c.id)+'" aria-pressed="false">'+esc(c.name)+'</button>').join('')+'</div>'
       +'<div class="iv-mkt-catalog-head"><div><h2 class="iv-mkt-title" style="font-size:21px">Cardápio</h2><p class="iv-mkt-description">'+products.length+' produto(s) disponíveis para consulta</p></div>'
-      +'<div class="iv-mkt-view" role="group" aria-label="Modo de visualização"><button type="button" data-mkt-view="grid" aria-pressed="true">Grade</button><button type="button" data-mkt-view="list" aria-pressed="false">Lista</button></div></div><div class="iv-mkt-product-grid">';
+      +'<div class="iv-mkt-view" role="group" aria-label="Modo de visualização"><button type="button" data-mkt-view="list" aria-label="Exibir produtos em lista" title="Lista" aria-pressed="false">'+icon('bars',19)+'</button><button type="button" data-mkt-view="grid" aria-label="Exibir produtos em grade" title="Grade" aria-pressed="true">'+icon('dashboard',19)+'</button></div></div><div class="iv-mkt-product-grid">';
    for(const p of products){
     const category=cats.find(c=>c.id===p.category_id);
     const picture=safePhoto(p.image_url);

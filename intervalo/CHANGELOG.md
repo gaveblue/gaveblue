@@ -1,5 +1,11 @@
 # Intervalo — CHANGELOG
 
+## 1.1.0-rc.24 — 2026-11-17 · Ícones de visualização do cardápio
+
+- Loja pública e cardápio digital: substitui os textos Lista/Grade pelos mesmos SVGs `bars` e `dashboard` (19 px), na mesma ordem e com o mesmo estilo compacto do Garçom.
+- Mantém rótulos acessíveis, títulos, indicador de seleção e preferência gravada por restaurante. Nenhuma mudança na lógica de pedidos ou banco de dados.
+- Cache JS/CSS atualizado; sintaxe verificada. Teste visual no Android e propagação do domínio pendentes.
+
 ## 1.1.0-rc.23 — 2026-11-17 · Vitrine pública reorganizada
 
 - Capa ampla sem margens laterais no celular, logo quadrada com cantos arredondados sobreposta à transição da capa, nome e dados abaixo em painel branco.
