@@ -47,6 +47,43 @@ Deno.serve(async(req:Request)=>{
  const manage=()=>allowed("gestao")&&["master","manager"].includes(member.role);
  const id=body.id;
  const fail=()=>error("Operação não autorizada",403);
+ if(action==="print_config"||action==="print_config_save"){
+  if(action==="print_config_save"&&!manage())return fail();
+  if(!manage()&&!allowed("cozinha")&&!allowed("caixa"))return fail();
+  if(action==="print_config"){
+   const [config,settings,store]=await Promise.all([
+    db.from("restaurant_print_templates").select("config").eq("restaurant_id",tenant).maybeSingle(),
+    db.from("restaurant_settings").select("phone,street,address_number,neighborhood,city,state,postal_code,timezone").eq("restaurant_id",tenant).maybeSingle(),
+    db.from("restaurant_storefront").select("display_name").eq("restaurant_id",tenant).maybeSingle()
+   ]);
+   if(config.error||settings.error||store.error)return error("Não foi possível carregar modelo de impressão",503);
+   return reply({config:config.data?.config??{},business:{name:store.data?.display_name||restaurant.name,...(settings.data??{})},can_edit:manage()});
+  }
+  const obj=(v:unknown):v is Record<string,unknown>=>!!v&&typeof v==="object"&&!Array.isArray(v);
+  const raw=body.config;
+  if(!obj(raw))return error("Modelo inválido");
+  const businessSpec={name:120,legal_name:150,cnpj:32,address:250,phone:80,extra:300};
+  const templateSpec={title:85,header:500,details:500,footer:500,total_label:40,received_label:40,balance_label:40,round_label:40,note_label:40};
+  const clean=(input:unknown,spec:Record<string,number>)=>{
+   if(!obj(input))throw Error("Modelo inválido");
+   const out:Record<string,string>={};
+   for(const [k,max] of Object.entries(spec)){
+    const val=input[k];if(typeof val!=="string"||val.length>max)throw Error("Confira o tamanho dos textos do modelo.");
+    out[k]=val.trim();
+   }
+   return out;
+  };
+  const model=(v:unknown)=>{
+   if(!obj(v)||typeof v.show_rounds!=="boolean"||typeof v.separators!=="boolean")throw Error("Modelo inválido");
+   return {...clean(v,templateSpec),show_rounds:v.show_rounds,separators:v.separators};
+  };
+  let config;
+  try{config={business:clean(raw.business,businessSpec),cash:model(raw.cash),kitchen:model(raw.kitchen)}}catch(e){return error(e instanceof Error?e.message:"Modelo inválido")}
+  const {error:e}=await db.from("restaurant_print_templates").upsert({restaurant_id:tenant,config,updated_at:new Date().toISOString()},{onConflict:"restaurant_id"});
+  if(e)return error("Não foi possível salvar o modelo",503);
+  await db.from("audit_logs").insert({restaurant_id:tenant,actor_user_id:user.id,event:"print_templates_saved",details:{action}});
+  return reply({saved:true,config});
+ }
  if(action==="catalog"){
   if(!manage()&&!allowed("garcom"))return fail();
   const [cs,ps,os,pub]=await Promise.all([
