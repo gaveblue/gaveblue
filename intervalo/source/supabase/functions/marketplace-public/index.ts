@@ -88,7 +88,7 @@ Deno.serve(async(req:Request)=>{
    db.from("restaurant_business_hours").select("weekday,opens_at,closes_at,active,delivery_enabled,pickup_enabled").eq("restaurant_id",r.id).eq("active",true),
    db.from("restaurant_delivery_zones").select("id,name,city,state,postal_code_from,postal_code_to,neighborhoods,fee_cents,minimum_order_cents,estimated_delivery_minutes").eq("restaurant_id",r.id).eq("active",true),
    db.from("menu_categories").select("id,name,sort_order").eq("restaurant_id",r.id).eq("active",true).order("sort_order"),
-   db.from("menu_products").select("id,category_id,name,description,price_cents,image_url,sort_order").eq("restaurant_id",r.id).eq("available",true).eq("show_on_menu",true).order("sort_order"),
+   db.from("menu_products").select("id,category_id,name,description,price_cents,image_url,sort_order,variant_group_name,variant_label").eq("restaurant_id",r.id).eq("available",true).eq("show_on_menu",true).order("sort_order"),
    db.from("menu_product_options").select("id,product_id,name,price_delta_cents,sort_order").eq("restaurant_id",r.id).eq("available",true).order("sort_order")
   ]);
   if([pub,mod,store,settings,place,hrs,zones,cs,ps,os].some(x=>x.error))return bad("Não foi possível carregar a loja",503);
