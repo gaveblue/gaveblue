@@ -4,7 +4,7 @@
 
 - Menu hambúrguer mantido como navegação principal, agrupado por Principal, Operação, Gerenciamento, Canais de venda, Restaurante e Pessoal. Remove barra inferior redundante e mantém ações rápidas no início. Seletor de restaurante por link.
 - Horários, entrega/retirada, formas de pagamento e loja online têm destinos próprios integrados à Gestão; resumo semanal dos horários e edição no Bottom Sheet original. Ativação de pedidos fica na Loja online. Pedidos nesta fase são os de delivery/retirada; comandas presenciais continuam em Mesas/Garçom/Caixa.
-- Produtos e Estoque ganham centrais de acesso aos cadastros existentes. Nesta fase os submódulos mantêm suas rotas; categorias/adicionais ainda compartilham a tela de catálogo. Nenhuma alteração de schema, APIs ou papéis.
+- Produtos e Estoque ganham centrais de acesso aos cadastros existentes. Submódulos mantêm rotas compatíveis, agora com seções separadas de publicação, categorias e adicionais e navegação própria de Produtos e Estoque. Nenhuma alteração de schema, APIs ou papéis.
 - Sintaxe e verificação estrutural; teste visual, navegação e salvamento reais pendentes. Próximas fases: telas internas, unificação de pedidos e Design System.
 
 ## 1.1.0-rc.37 — 2026-11-17 · Progresso visual sem numeração
