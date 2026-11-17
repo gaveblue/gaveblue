@@ -7,10 +7,10 @@ export async function renderMarketplace({supabase,route,box,esc,link}){
  document.body.classList.add('iv-marketplace');
  const originalLink=link;
  link=(target)=>{
-  if(target==='/explorar'||/^\/loja\/[a-z0-9]+(?:-[a-z0-9]+)*$/.test(target))return originalLink('/?intervalo_route='+encodeURIComponent(originalLink(target))+'&iv_release=1.1.0-rc.26');
+  if(target==='/explorar'||/^\/loja\/[a-z0-9]+(?:-[a-z0-9]+)*$/.test(target))return originalLink('/?intervalo_route='+encodeURIComponent(originalLink(target))+'&iv_release=1.1.0-rc.27');
   return originalLink(target);
  };
- const css='<link rel="stylesheet" href="/intervalo/marketplace-preview-rc1.css?v=1.1.0-rc.26"><link rel="stylesheet" href="/intervalo/marketplace-commerce-rc4.css?v=1.1.0-rc.4">';
+ const css='<link rel="stylesheet" href="/intervalo/marketplace-preview-rc1.css?v=1.1.0-rc.27"><link rel="stylesheet" href="/intervalo/marketplace-commerce-rc4.css?v=1.1.0-rc.4">';
  const money=n=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(n??0)/100);
  const nav=css+'<nav class="iv-mkt-nav" aria-label="Navegação do marketplace"><a class="iv-mkt-brand" href="'+link('/explorar')+'">intervalo</a>'
   +'<div class="iv-mkt-links"><span class="iv-mkt-preview">PRÉVIA</span><a href="'+link('/inicio')+'">'+icon('store',15)+' Gestão</a></div></nav>';
@@ -107,7 +107,7 @@ export async function renderMarketplace({supabase,route,box,esc,link}){
     const category=cats.find(c=>c.id===p.category_id);
     const picture=safePhoto(p.image_url);
     out+='<button class="iv-mkt-product" type="button" data-mkt-product="'+esc(p.id)+'" data-category="'+esc(p.category_id)+'" data-search="'+esc([p.name,p.description,category?.name].join(' ').toLocaleLowerCase('pt-BR'))+'" aria-label="Ver detalhes de '+esc(p.name)+'">'
-     +'<span class="iv-mkt-photo">'+(picture?'<img src="'+esc(picture)+'" alt="'+esc(p.name)+'" loading="lazy">':icon('burger',46))+'</span>'
+     +'<span class="iv-mkt-photo">'+(picture?'<img src="'+esc(picture)+'" alt="'+esc(p.name)+'" loading="lazy" decoding="async">':icon('burger',46))+'</span>'
      +'<span class="iv-mkt-body"><strong>'+esc(p.name)+'</strong><p>'+esc(p.description??'')+'</p><span class="iv-mkt-price">'+money(p.price_cents)+'</span></span></button>';
    }
    if(!products.length)out+=placeholder('Cardápio sem produtos','O restaurante ainda não cadastrou itens disponíveis.');
@@ -198,12 +198,21 @@ export async function renderMarketplace({supabase,route,box,esc,link}){
     const p=products.find(x=>String(x.id)===b.dataset.mktProduct);if(!p)return;
     const extras=(data.options??[]).filter(x=>x.product_id===p.id);
     const dialog=document.createElement('dialog');dialog.className='iv-mkt-sheet';dialog.setAttribute('aria-label','Detalhes de '+p.name);
-    dialog.innerHTML='<div class="iv-mkt-sheet-handle"></div><div class="iv-mkt-sheet-content"><h2>'+esc(p.name)+'</h2><p>'+esc(p.description??'')+'</p><strong class="iv-mkt-price">'+money(p.price_cents)+'</strong>'
+    const detailPhoto=safePhoto(p.image_url);
+    dialog.innerHTML='<div class="iv-mkt-sheet-handle"></div><div class="iv-mkt-sheet-content">'
+      +(detailPhoto?'<figure class="iv-mkt-detail-photo"><div><img src="'+esc(detailPhoto)+'" alt="'+esc(p.name)+'" decoding="async"></div><figcaption>Imagem meramente ilustrativa</figcaption></figure>':'')
+      +'<div class="iv-mkt-detail-heading"><h2>'+esc(p.name)+'</h2><strong class="iv-mkt-price">'+money(p.price_cents)+'</strong></div><p>'+esc(p.description??'')+'</p>'
       +(extras.length?'<h3>Adicionais</h3><div class="iv-com-options">'+extras.map(x=>'<label class="iv-com-option"><input type="checkbox" name="option" value="'+esc(x.id)+'"><span>'+esc(x.name)+'</span><strong>+ '+money(x.price_delta_cents)+'</strong></label>').join('')+'</div>':'')
       +'<label class="iv-com-field">Observações<textarea id="iv-com-note" maxlength="350" rows="2" placeholder="Ex.: sem cebola"></textarea></label>'
       +'<div class="iv-com-quantity"><span>Quantidade</span><button type="button" data-qty="-1">−</button><strong id="iv-com-qty">1</strong><button type="button" data-qty="1">+</button></div>'
       +'<p class="iv-com-error" id="iv-com-error" hidden></p>'
       +'<div class="iv-com-actions"><button type="button" class="iv-com-secondary" data-close>Cancelar</button><button type="button" class="iv-com-primary" data-add>Adicionar ao carrinho</button></div></div>';
+    const previewImg=dialog.querySelector('.iv-mkt-detail-photo img');
+    if(previewImg){
+     const onFailure=()=>previewImg.closest('figure')?.remove();
+     previewImg.addEventListener('error',onFailure,{once:true});
+     if(previewImg.complete&&!previewImg.naturalWidth)onFailure();
+    }
     let qty=1;
     dialog.querySelectorAll('[data-qty]').forEach(btn=>btn.onclick=()=>{
       qty=Math.max(1,Math.min(20,qty+Number(btn.dataset.qty)));

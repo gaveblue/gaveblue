@@ -1,5 +1,12 @@
 # Intervalo — CHANGELOG
 
+## 1.1.0-rc.27 — 2026-11-17 · Miniaturas compactas no cardápio
+
+- Modo lista da loja e do cardápio público: fotos quadradas de 56 px no celular e 64 px em telas maiores, com recorte central e dimensões independentes do arquivo original. Cards compactos, descrição em até duas linhas e preço laranja alinhado à direita.
+- Seleção do produto na loja: prévia da foto em quadro quadrado de até 190 px, preservando proporção, legenda discreta “Imagem meramente ilustrativa” e preço à direita do título. Sem foto ou com erro, omite a prévia.
+- Mantém carregamento preguiçoso das fotos da lista, reutiliza a URL original, preserva grade/lista e cache RC26; sem novas dependências ou alterações no banco.
+- Sintaxe JavaScript verificada; teste visual no Android e propagação pendentes.
+
 ## 1.1.0-rc.26 — 2026-11-17 · Cache público por restaurante
 
 - Loja e cardápio de consulta exibem a última resposta pública válida (até 15 min na abertura) enquanto consultam o servidor. Primeira visita continua consultando a API; cada acesso revalida.
