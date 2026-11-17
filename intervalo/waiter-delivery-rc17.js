@@ -23,7 +23,7 @@ export async function openWaiterDelivery({supabase,restaurant,products,afterCrea
  const cart=new Map();
  const fields={name:'',phone:'',zone:'',street:'',number:'',complement:'',neighborhood:'',city:'',state:'',postal_code:'',reference:'',note:'',method:''};
  let kind='delivery';
- const available=(products||[]).filter(p=>p.available!==false&&p.show_on_menu!==false&&p.category_id);
+ const available=(products||[]).filter(p=>p.available!==false&&p.show_on_menu===true&&p.category_id);
  function total(){return [...cart.values()].reduce((n,r)=>n+Number(r.product.price_cents)*r.qty,0)}
  function fee(){return kind==='delivery'?Number(config?.zones?.find(z=>z.id===fields.zone)?.fee_cents||0):0}
  function field(name,label,props=''){
