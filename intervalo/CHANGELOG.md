@@ -1,5 +1,11 @@
 # Intervalo — CHANGELOG
 
+## 1.1.0-rc.34 — 2026-11-17 · Acesso e cadastro em Bottom Sheets
+
+- Tela de acesso compacta, login manual em Bottom Sheet e cadastro em uma folha de três etapas, com progresso, rolagem interna, rodapé fixo, voltar/cancelar, gesto de expansão/fechamento e ajuste ao teclado.
+- Mostrar/ocultar senha no login, criação e confirmação; senha manual mínima de 6 caracteres no frontend (não restrita a números). Política global do Supabase permanece intacta e pode exigir mais; mensagens de senha fraca orientam o usuário. Senhas não são persistidas localmente pelo formulário.
+- Compra visitante e retorno ao checkout preservados; Google ainda depende de configuração. Sem mudanças no banco, dependências ou custos. Sintaxe conferida; teste visual, teclado e cadastro real pendentes.
+
 ## 1.1.0-rc.33 — 2026-11-17 · Nome único no cadastro
 
 - Cadastro e edição de perfil usam um único campo Nome, com orientação para nome completo ou social, exibido nos pedidos.

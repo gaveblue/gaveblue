@@ -1,6 +1,6 @@
 import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.50.0/+esm';
 import {icon} from './ui-icons.js?v=1.0.0-rc.1';
-import {showOnboarding,googleLogin,googleButton,onboardingStyle,returnTarget,finishCustomer,clearReturnTarget} from './marketplace-onboarding-rc32.js?v=1.1.0-rc.33';
+import {showOnboarding,googleLogin,googleButton,onboardingStyle,returnTarget,finishCustomer,clearReturnTarget,passwordField,bindPasswordFields,clientSheet} from './marketplace-onboarding-rc32.js?v=1.1.0-rc.34';
 
 // Área do consumidor independente do Auth e dos papéis dos funcionários.
 // O checkout visitante não depende desta sessão nem de cadastro.
@@ -30,22 +30,29 @@ export async function renderCustomer({box,esc,link}){
  const user=ud?.user;
  const onboarding=(u=null,p=null)=>showOnboarding({auth:customerAuth,page,esc,link,user:u,profile:p,onDone:()=>finishCustomer(link),onLogin:()=>renderCustomer({box,esc,link})});
  if(!user){
-  page(onboardingStyle()+'<section class="iv-client-wizard"><h1>Minha conta</h1><p class="iv-client-muted">Acesse sua conta para agilizar seus pedidos.</p><section class="iv-client-card">'
-   +googleButton()+'<div class="iv-client-divider">ou entre com e-mail</div><form id="iv-client-auth" class="iv-client-form">'
-   +'<label>E-mail<input type="email" name="email" maxlength="254" autocomplete="email" required></label>'
-   +'<label>Senha<input type="password" name="password" autocomplete="current-password" required></label>'
-   +'<p role="alert" id="iv-client-auth-status" class="iv-client-error"></p><button class="iv-client-primary" type="submit">Entrar</button></form>'
-   +'<div class="iv-client-actions"><button class="iv-client-secondary" id="iv-client-register" type="button">Criar minha conta</button></div>'
-   +'<div class="iv-client-actions"><a id="iv-client-guest" href="'+destination+'">Continuar sem cadastro</a></div></section></section>');
-  const form=document.getElementById('iv-client-auth'),google=document.getElementById('iv-client-google');
+  page(onboardingStyle()+'<section class="iv-client-wizard iv-client-welcome"><div class="iv-client-brand-mark" aria-hidden="true">I</div><h1>Minha conta</h1><p class="iv-client-muted">Acesse sua conta para agilizar seus pedidos.</p><section class="iv-client-card">'
+   +googleButton()+'<div class="iv-client-divider">ou use seu e-mail</div>'
+   +'<button class="iv-client-primary" id="iv-client-email-login" type="button">Entrar com e-mail</button><div class="iv-client-actions"><button class="iv-client-secondary" id="iv-client-register" type="button">Criar minha conta</button></div>'
+   +'<p role="alert" id="iv-client-auth-status" class="iv-client-error"></p></section><a class="iv-client-guest" id="iv-client-guest" href="'+destination+'">Continuar sem cadastro</a></section>');
+  const google=document.getElementById('iv-client-google');
   document.getElementById('iv-client-register').onclick=()=>onboarding();
   document.getElementById('iv-client-guest').onclick=()=>clearReturnTarget();
   google.onclick=async()=>{google.disabled=true;try{await googleLogin(customerAuth)}catch{setMsg('iv-client-auth-status','Acesso pelo Google indisponível. Use e-mail ou tente novamente após a configuração.',true);google.disabled=false}};
-  form.onsubmit=async e=>{e.preventDefault();const b=form.querySelector('button[type=submit]');b.disabled=true;try{
-   const {error}=await customerAuth.auth.signInWithPassword({email:form.elements.email.value.trim().toLowerCase(),password:form.elements.password.value});
-   if(error)throw Error('Não foi possível acessar. Confira e-mail, senha e confirmação.');
-   await renderCustomer({box,esc,link});
-  }catch(err){setMsg('iv-client-auth-status',err.message,true)}finally{b.disabled=false}};
+  document.getElementById('iv-client-email-login').onclick=()=>{
+   let busy=false;
+   const sheet=clientSheet({locked:()=>busy});
+   sheet.heading.innerHTML='<h2 id="iv-client-sheet-title">Entrar na sua conta</h2><p class="iv-client-muted">Informe seu e-mail e senha.</p>';
+   sheet.body.innerHTML='<form id="iv-client-auth" class="iv-client-form"><label>E-mail<input type="email" name="email" maxlength="254" autocomplete="email" required></label>'+passwordField('Senha','password','current-password')+'<p role="alert" id="iv-client-login-error" class="iv-client-error"></p></form>';
+   sheet.footer.innerHTML='<button type="button" class="iv-client-secondary" id="iv-client-login-back">Voltar</button><button class="iv-client-primary" type="submit" form="iv-client-auth">Entrar</button>';
+   const form=sheet.body.querySelector('form'),b=sheet.footer.querySelector('button[type=submit]');
+   bindPasswordFields(form);document.getElementById('iv-client-login-back').onclick=()=>sheet.close();
+   form.onsubmit=async e=>{e.preventDefault();if(busy)return;busy=true;b.disabled=true;b.textContent='Entrando...';try{
+    const {error}=await customerAuth.auth.signInWithPassword({email:form.elements.email.value.trim().toLowerCase(),password:form.elements.password.value});
+    if(error)throw Error('Não foi possível acessar. Confira e-mail, senha e confirmação.');
+    sheet.dispose();await renderCustomer({box,esc,link});
+   }catch(err){setMsg('iv-client-login-error',err.message,true)}finally{busy=false;b.disabled=false;b.textContent='Entrar'}};
+   sheet.open();
+  };
   return;
  }
  let profile=null,addresses=[];

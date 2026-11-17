@@ -25,20 +25,58 @@ export async function googleLogin(auth){
 export function googleButton(){
  return '<button type="button" id="iv-client-google" class="iv-client-google"><svg viewBox="0 0 48 48" width="20" height="20" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.97 6.19C12.43 13.72 17.74 9.5 24 9.5Z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9h12.94c-.58 2.96-2.22 5.48-4.75 7.18l7.72 5.99c4.51-4.16 7.07-10.29 7.07-17.62Z"/><path fill="#FBBC05" d="M10.53 28.59A14.4 14.4 0 0 1 9.77 24c0-1.59.28-3.13.76-4.59l-7.97-6.19A23.93 23.93 0 0 0 0 24c0 3.86.92 7.52 2.56 10.78l7.97-6.19Z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.91-5.83l-7.72-5.99A14.35 14.35 0 0 1 24 38.5c-6.26 0-11.57-4.22-13.47-9.91l-7.97 6.19C6.51 42.62 14.62 48 24 48Z"/></svg> Continuar com Google</button>';
 }
-export function onboardingStyle(){return '<style>.iv-client-wizard{max-width:460px;margin:16px auto 90px}.iv-client-wizard h1{font-size:27px;margin:12px 0 5px;letter-spacing:-.7px}.iv-client-step{display:flex;gap:6px;margin:20px 0 18px}.iv-client-step i{height:4px;background:#e7ebf1;border-radius:8px;flex:1}.iv-client-step i.active{background:#ff7900}.iv-client-wizard .iv-client-form{gap:12px}.iv-client-wizard .iv-client-form input,.iv-client-wizard .iv-client-form select{font:inherit;font-size:14px;min-height:46px;box-sizing:border-box;width:100%;border:1px solid #dce2e9;border-radius:11px;padding:10px;background:#fff;color:#263249}.iv-client-wizard .iv-client-form input:focus{outline:2px solid #fed7aa}.iv-client-wizard .iv-client-form small{font-weight:400;color:#8290a0;font-size:11px;line-height:1.5}.iv-client-google{display:flex;align-items:center;justify-content:center;gap:10px;padding:12px 16px;border:1px solid #dce2e9;background:#fff;color:#334155;border-radius:12px;width:100%;font:inherit;font-size:14px;font-weight:650;cursor:pointer}.iv-client-divider{display:flex;align-items:center;gap:12px;font-size:12px;color:#8995a5;margin:17px 0}.iv-client-divider:before,.iv-client-divider:after{content:"";height:1px;background:#e6eaf0;flex:1}.iv-client-wizard .iv-client-actions{display:flex;gap:8px}.iv-client-wizard .iv-client-primary{flex:1;min-height:46px}.iv-client-wizard .iv-client-consent{display:flex!important;grid-template-columns:none!important;align-items:flex-start;font-size:12px!important;line-height:1.5;font-weight:400!important}.iv-client-wizard .iv-client-consent input{width:18px!important;min-height:18px!important;margin:2px 6px 0 0;flex:none;accent-color:#ff7900}.iv-client-wizard a{color:#d96b00;text-decoration:underline}.iv-client-wizard .iv-client-card{padding:18px;margin-top:12px}.iv-client-wizard .iv-client-grid{grid-template-columns:1fr 1fr}.iv-client-wizard button:disabled,.iv-client-google:disabled{opacity:.55;cursor:wait}@media(max-width:350px){.iv-client-wizard .iv-client-grid{grid-template-columns:1fr}}</style>'}
+export function onboardingStyle(){return "<style>\n.iv-client-welcome{text-align:center;max-width:420px}.iv-client-welcome h1{letter-spacing:-.7px}.iv-client-welcome .iv-client-card{box-shadow:none;padding:20px}.iv-client-welcome .iv-client-primary,.iv-client-welcome .iv-client-secondary{width:100%;min-height:46px}.iv-client-welcome .iv-client-guest{display:block;margin:18px 0;text-align:center;color:#6b7788;font-size:13px}.iv-client-welcome .iv-client-brand-mark{display:grid;place-items:center;width:58px;height:58px;margin:0 auto 17px;border-radius:19px;background:#ff7900;color:#fff;font-size:33px;font-style:italic;font-weight:900}\ndialog.iv-client-sheet{position:fixed;inset:auto 0 0;margin:0 auto;padding:0;width:min(100%,540px);max-width:100%;max-height:min(88dvh,var(--iv-client-height,98dvh));border:0;outline:0;border-radius:23px 23px 0 0;overflow:visible;background:#fff;color:#26364b;box-shadow:0 -12px 40px #19283b26}dialog.iv-client-sheet:not([open]){display:none!important}dialog.iv-client-sheet::backdrop{background:#17243699}.iv-client-sheet-frame{display:flex;flex-direction:column;max-height:min(88dvh,var(--iv-client-height,98dvh));overflow:hidden;border-radius:23px 23px 0 0;background:#fff}dialog.iv-client-sheet.is-expanded,dialog.iv-client-sheet.is-expanded .iv-client-sheet-frame{max-height:var(--iv-client-height,98dvh)}.iv-client-sheet-grip{height:27px;flex:none;display:grid;place-items:center;touch-action:none;cursor:ns-resize}.iv-client-sheet-grip span{width:42px;height:5px;border-radius:99px;background:#d8dee7}.iv-client-sheet-header{position:static!important;display:flex;justify-content:space-between;gap:10px;padding:0 19px 13px;background:#fff;border:0!important;flex:none}.iv-client-sheet-header>div{min-width:0;flex:1}.iv-client-sheet-header h2{font-size:22px;letter-spacing:-.6px;margin:7px 0 4px;line-height:1.2}.iv-client-sheet-header p{margin:0;font-size:12px}.iv-client-sheet-header .iv-client-step{margin:9px 0}.iv-client-sheet-x{display:grid;place-items:center;width:34px;height:34px;border:0;border-radius:10px;background:#f3f5f7;color:#64748b;font-size:24px;line-height:1;cursor:pointer;flex:none}.iv-client-sheet-scroll{overflow-y:auto;min-height:0;flex:1;padding:5px 19px 13px;overscroll-behavior:contain}.iv-client-sheet-scroll .iv-client-form{gap:11px}.iv-client-sheet-scroll .iv-client-form input,.iv-client-sheet-scroll .iv-client-form select{min-height:46px;font:inherit;font-size:16px;padding:10px 11px;width:100%;min-width:0;box-sizing:border-box;border:1px solid #dce2e9;background:#fff;border-radius:11px;color:#26364b}.iv-client-sheet-scroll .iv-client-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:9px}.iv-client-sheet-scroll .iv-client-form small{font-size:11px;font-weight:400;line-height:1.4}.iv-client-sheet-scroll .iv-client-consent{display:flex!important;align-items:flex-start;font-size:12px!important;line-height:1.5;font-weight:400!important;gap:7px}.iv-client-sheet-scroll .iv-client-consent input{width:18px!important;min-height:18px!important;flex:none;accent-color:#ff7900}.iv-client-sheet-scroll .iv-client-error:empty{display:none}.iv-client-sheet-footer{display:flex;gap:9px;padding:12px 19px max(14px,env(safe-area-inset-bottom));border-top:1px solid #e9edf2;background:#fff;flex:none}.iv-client-sheet-footer .iv-client-primary{flex:1;min-height:46px}.iv-client-sheet-footer .iv-client-secondary{min-height:46px}.iv-client-password{position:relative;display:block}.iv-client-password input{padding-right:50px!important}.iv-client-eye{position:absolute;right:4px;top:50%;transform:translateY(-50%);display:grid;place-items:center;width:42px;height:40px;border:0;background:transparent;color:#64748b;border-radius:10px;cursor:pointer}.iv-client-eye[aria-pressed=true]{color:#e86f00}.iv-client-eye:focus-visible,.iv-client-sheet-x:focus-visible{outline:2px solid #ff9b47}.iv-client-sheet button:disabled{opacity:.55;cursor:wait}@media(max-width:350px){.iv-client-sheet-scroll .iv-client-grid{grid-template-columns:1fr}.iv-client-sheet-header,.iv-client-sheet-scroll,.iv-client-sheet-footer{padding-left:15px;padding-right:15px}}@media(max-height:430px){.iv-client-sheet-header p{display:none}.iv-client-sheet-header h2{font-size:18px}.iv-client-sheet-grip{height:18px}.iv-client-sheet-footer{padding-top:7px;padding-bottom:7px}}\n</style>"+'<style>.iv-client-wizard{max-width:460px;margin:16px auto 90px}.iv-client-wizard h1{font-size:27px;margin:12px 0 5px;letter-spacing:-.7px}.iv-client-step{display:flex;gap:6px;margin:20px 0 18px}.iv-client-step i{height:4px;background:#e7ebf1;border-radius:8px;flex:1}.iv-client-step i.active{background:#ff7900}.iv-client-wizard .iv-client-form{gap:12px}.iv-client-wizard .iv-client-form input,.iv-client-wizard .iv-client-form select{font:inherit;font-size:14px;min-height:46px;box-sizing:border-box;width:100%;border:1px solid #dce2e9;border-radius:11px;padding:10px;background:#fff;color:#263249}.iv-client-wizard .iv-client-form input:focus{outline:2px solid #fed7aa}.iv-client-wizard .iv-client-form small{font-weight:400;color:#8290a0;font-size:11px;line-height:1.5}.iv-client-google{display:flex;align-items:center;justify-content:center;gap:10px;padding:12px 16px;border:1px solid #dce2e9;background:#fff;color:#334155;border-radius:12px;width:100%;font:inherit;font-size:14px;font-weight:650;cursor:pointer}.iv-client-divider{display:flex;align-items:center;gap:12px;font-size:12px;color:#8995a5;margin:17px 0}.iv-client-divider:before,.iv-client-divider:after{content:"";height:1px;background:#e6eaf0;flex:1}.iv-client-wizard .iv-client-actions{display:flex;gap:8px}.iv-client-wizard .iv-client-primary{flex:1;min-height:46px}.iv-client-wizard .iv-client-consent{display:flex!important;grid-template-columns:none!important;align-items:flex-start;font-size:12px!important;line-height:1.5;font-weight:400!important}.iv-client-wizard .iv-client-consent input{width:18px!important;min-height:18px!important;margin:2px 6px 0 0;flex:none;accent-color:#ff7900}.iv-client-wizard a{color:#d96b00;text-decoration:underline}.iv-client-wizard .iv-client-card{padding:18px;margin-top:12px}.iv-client-wizard .iv-client-grid{grid-template-columns:1fr 1fr}.iv-client-wizard button:disabled,.iv-client-google:disabled{opacity:.55;cursor:wait}@media(max-width:350px){.iv-client-wizard .iv-client-grid{grid-template-columns:1fr}}</style>'}
+
+export function passwordField(title,name,autocomplete='new-password',minimum=0){
+ return '<label>'+title+'<span class="iv-client-password"><input type="password" name="'+name+'" '+(minimum?'minlength="'+minimum+'" ':'')+'maxlength="128" required autocomplete="'+autocomplete+'" placeholder="Digite sua senha"><button type="button" class="iv-client-eye" data-password-toggle="'+name+'" aria-label="Mostrar senha" aria-pressed="false">'+eye(false)+'</button></span></label>';
+}
+function eye(visible){return '<svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(visible?'<path d="m3 3 18 18M10.6 10.7a2 2 0 0 0 2.7 2.7M9 5.5A11 11 0 0 1 12 5c6 0 10 7 10 7a17 17 0 0 1-3 3.6M6.2 6.2C3.6 8.4 2 12 2 12s4 7 10 7a10 10 0 0 0 4-.8"/>':'<path d="M2 12s3.8-7 10-7 10 7 10 7-3.8 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>')+'</svg>'}
+export function bindPasswordFields(root){
+ root.querySelectorAll('[data-password-toggle]').forEach(b=>b.onclick=()=>{
+  const input=b.closest('label').querySelector('input'),visible=input.type==='password';
+  input.type=visible?'text':'password';b.setAttribute('aria-pressed',String(visible));b.setAttribute('aria-label',visible?'Ocultar senha':'Mostrar senha');b.innerHTML=eye(visible);
+ });
+}
+export function clientSheet({onClose,locked=()=>false}={}){
+ const dialog=document.createElement('dialog');
+ dialog.className='iv-client-sheet';
+ dialog.setAttribute('aria-labelledby','iv-client-sheet-title');
+ dialog.innerHTML='<div class="iv-client-sheet-frame"><div class="iv-client-sheet-grip" aria-hidden="true"><span></span></div><header class="iv-client-sheet-header"><div id="iv-client-sheet-heading"></div><button type="button" class="iv-client-sheet-x" aria-label="Fechar painel">×</button></header><div class="iv-client-sheet-scroll"></div><footer class="iv-client-sheet-footer"></footer></div>';
+ document.querySelector('.iv-client')?.append(dialog);
+ if(!dialog.isConnected)document.body.append(dialog);
+ const frame=dialog.querySelector('.iv-client-sheet-frame'),grip=dialog.querySelector('.iv-client-sheet-grip');
+ const viewport=window.visualViewport;
+ const align=()=>{if(!dialog.open)return;const h=viewport?.height??window.innerHeight;dialog.style.bottom=Math.max(0,window.innerHeight-h-(viewport?.offsetTop??0))+'px';dialog.style.setProperty('--iv-client-height',Math.max(180,Math.floor(h-8))+'px')};
+ const close=()=>{if(!locked()&&dialog.open)dialog.close()};
+ dialog.querySelector('.iv-client-sheet-x').onclick=close;
+ dialog.addEventListener('cancel',e=>{if(locked())e.preventDefault()});
+ dialog.addEventListener('click',e=>{if(e.target===dialog)close()});
+ let start=null,dy=0;
+ grip.addEventListener('pointerdown',e=>{start=e.clientY;dy=0;grip.setPointerCapture?.(e.pointerId)});
+ grip.addEventListener('pointermove',e=>{if(start===null)return;dy=e.clientY-start;frame.style.transform=dy>0?'translateY('+Math.min(120,dy)+'px)':''});
+ function release(){if(start===null)return;start=null;frame.style.transform='';if(dy>80)close();else if(dy< -45)dialog.classList.add('is-expanded');dy=0;align()}
+ grip.addEventListener('pointerup',release);grip.addEventListener('pointercancel',()=>{start=null;frame.style.transform='';dy=0});
+ let disposed=false,observer=null;
+ const dispose=()=>{if(disposed)return;disposed=true;viewport?.removeEventListener('resize',align);viewport?.removeEventListener('scroll',align);window.removeEventListener('resize',align);observer?.disconnect();dialog.remove()};
+ dialog.addEventListener('close',()=>{if(disposed)return;dispose();onClose?.()},{once:true});
+ viewport?.addEventListener('resize',align);viewport?.addEventListener('scroll',align);window.addEventListener('resize',align);
+ observer=new MutationObserver(()=>{if(!dialog.isConnected)dispose()});observer.observe(document.getElementById('app')||document.body,{childList:true,subtree:true});
+ return {dialog,heading:dialog.querySelector('#iv-client-sheet-heading'),body:dialog.querySelector('.iv-client-sheet-scroll'),footer:dialog.querySelector('.iv-client-sheet-footer'),open(){if(!dialog.open)dialog.showModal();align();dialog.querySelector('.iv-client-sheet-x').focus({preventScroll:true})},close,dispose};
+}
+
 export function showOnboarding({auth,page,esc,link,user=null,profile=null,onDone,onLogin}){
  const seed=profile??{},meta=user?.user_metadata??{};
  let stage=0,busy=false,awaiting=false;
  const v={name:seed.display_name||seed.social_name||seed.full_name||meta.full_name||meta.name||'',cpf:seed.cpf??'',password:'',again:'',email:user?.email??'',phone:seed.phone??'',postal_code:'',state:'',city:'',street:'',number:'',neighborhood:'',complement:'',reference:'',terms:false};
  const field=(title,k,attrs='')=>'<label>'+title+'<input name="'+k+'" value="'+esc(v[k]??'')+'" '+attrs+'></label>';
- const secret=(title,k)=>'<label>'+title+'<input name="'+k+'" type="password" required minlength="8" maxlength="128" autocomplete="new-password" value="'+esc(v[k])+'"></label>';
+ const secret=(title,k)=>passwordField(title,k,'new-password',6);
  const setError=message=>{const el=document.getElementById('iv-wizard-error');if(el)el.textContent=message};
- const writeForm=form=>{for(const el of form.elements){if(!el.name)continue;v[el.name]=el.type==='checkbox'?el.checked:el.type==='password'?el.value:el.value.trim()}};
+ const writeForm=form=>{for(const el of form.elements){if(!el.name)continue;v[el.name]=el.type==='checkbox'?el.checked:(el.name==='password'||el.name==='again')?el.value:el.value.trim()}};
  const validate=()=>{
   if(stage===0){
    if(v.name.trim().length<3||v.name.length>120)throw Error('Informe seu nome completo ou social (de 3 a 120 caracteres).');
    if(!cpfValid(v.cpf))throw Error('Confira os dígitos do CPF.');
-   if(!user&&(v.password.length<8||v.password!==v.again))throw Error('Crie uma senha com pelo menos 8 caracteres e repita a mesma senha.');
+   if(!user&&(v.password.length<6||v.password!==v.again))throw Error('Crie uma senha com pelo menos 6 caracteres e repita a mesma senha.');
   }else if(stage===1){
    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.email))throw Error('Informe um e-mail válido.');
    if(!/^[1-9]\d9\d{8}$/.test(digits(v.phone)))throw Error('Informe o celular com DDD (11 dígitos).');
@@ -51,19 +89,28 @@ export function showOnboarding({auth,page,esc,link,user=null,profile=null,onDone
   let u=user;
   if(!u){
    const result=await auth.auth.signUp({email:v.email.trim().toLowerCase(),password:v.password,options:{emailRedirectTo:redirect()}});
-   if(result.error)throw Error('Não foi possível cadastrar. Confira o e-mail e os requisitos da senha ou tente entrar se já tiver conta.');
+   if(result.error){
+    if(result.error.code==='weak_password')throw Error('A senha não atende aos requisitos do servidor. Use uma senha mais longa e difícil de adivinhar.');
+    throw Error('Não foi possível cadastrar. Confira o e-mail e os requisitos da senha ou tente entrar se já tiver conta.');
+   }
    if(!result.data.session){awaiting=true;draw();return}
    u=result.data.user;user=u;
   }
   if(!u)throw Error('Não foi possível confirmar seu acesso. Entre novamente.');
   const {error}=await auth.rpc('customer_complete_registration',{p_full_name:v.name,p_social_name:null,p_display_name:v.name,p_cpf:digits(v.cpf),p_phone:digits(v.phone),p_accept:v.terms,p_address:{postal_code:digits(v.postal_code),state:v.state,city:v.city,street:v.street,number:v.number,neighborhood:v.neighborhood,complement:v.complement,reference:v.reference}});
   if(error)throw Error('Não foi possível salvar seu cadastro e endereço. Confira os dados e tente novamente.');
-  v.password='';v.again='';v.cpf='';onDone();
+  v.password='';v.again='';v.cpf='';sheet.dispose();onDone();
  };
+ const leave=async()=>{v.password='';v.again='';v.cpf='';if(user){await auth.auth.signOut({scope:'local'})}onLogin()};
+ page(onboardingStyle()+'<section class="iv-client-wizard iv-client-welcome"><h1>Crie sua conta</h1><p class="iv-client-muted">Seus dados e endereços para pedir com mais facilidade.</p></section>');
+ const sheet=clientSheet({onClose:leave,locked:()=>busy});
  function draw(){
+  sheet.body.scrollTop=0;
   if(awaiting){
-   page(onboardingStyle()+'<section class="iv-client-wizard"><h1>Confirme seu e-mail</h1><p class="iv-client-muted">Abra a confirmação enviada para o seu e-mail. Se continuar nesta tela, seus dados permanecem aqui até você concluir. Se abrir em outro navegador, será necessário completar o perfil novamente.</p><p class="iv-client-error" id="iv-wizard-error" role="alert"></p><button class="iv-client-primary" id="iv-wizard-confirm" type="button">Já confirmei, acessar</button><div class="iv-client-actions"><button class="iv-client-secondary" id="iv-wizard-exit" type="button">Voltar ao login</button></div></section>');
-   document.getElementById('iv-wizard-exit').onclick=()=>{v.password='';v.again='';onLogin()};
+   sheet.heading.innerHTML='<h2 id="iv-client-sheet-title">Confirme seu e-mail</h2>';
+   sheet.body.innerHTML='<p class="iv-client-muted">Abra a confirmação enviada ao e-mail. Se abrir em outro navegador, será necessário completar o perfil novamente.</p><p class="iv-client-error" id="iv-wizard-error" role="alert"></p>';
+   sheet.footer.innerHTML='<button class="iv-client-secondary" id="iv-wizard-exit" type="button">Voltar</button><button class="iv-client-primary" id="iv-wizard-confirm" type="button">Já confirmei, acessar</button>';
+   document.getElementById('iv-wizard-exit').onclick=()=>sheet.close();
    const b=document.getElementById('iv-wizard-confirm');b.onclick=async()=>{if(busy)return;busy=true;b.disabled=true;try{const r=await auth.auth.signInWithPassword({email:v.email,password:v.password});if(r.error)throw Error('Confirme o e-mail antes de acessar.');user=r.data.user;awaiting=false;await complete()}catch(e){setError(e.message)}finally{busy=false;b.disabled=false}};
    return;
   }
@@ -73,7 +120,7 @@ export function showOnboarding({auth,page,esc,link,user=null,profile=null,onDone
   if(stage===0)fields=field('Nome','name','required minlength="3" maxlength="120" autocomplete="name" placeholder="Como deseja ser chamado?"')
    +'<small class="iv-client-muted" style="margin-top:-7px">Informe seu nome completo ou social. Esse será o nome exibido nos seus pedidos.</small>'
    +field('CPF','cpf','required inputmode="numeric" maxlength="14" placeholder="000.000.000-00"')
-   +(user?'<small class="iv-client-muted">A senha é gerenciada pelo seu método de acesso.</small>':secret('Crie sua senha (mínimo 8 caracteres)','password')+secret('Repita a senha','again'));
+   +(user?'<small class="iv-client-muted">A senha é gerenciada pelo seu método de acesso.</small>':secret('Crie sua senha (mínimo 6 caracteres)','password')+secret('Repita a senha','again'));
   if(stage===1)fields=field('E-mail','email','type="email" maxlength="254" required autocomplete="email" '+(user?'readonly':''))+field('Celular com DDD','phone','required inputmode="tel" maxlength="15" autocomplete="tel" placeholder="(00) 90000-0000"');
   if(stage===2)fields=field('CEP','postal_code','required inputmode="numeric" maxlength="9" autocomplete="postal-code" placeholder="00000-000"')
    +'<div class="iv-client-grid"><label>UF<select name="state" required><option value="">Selecione</option>'+states.map(s=>'<option '+(v.state===s?'selected':'')+'>'+s+'</option>').join('')+'</select></label>'+field('Cidade','city','required maxlength="100" autocomplete="address-level2"')+'</div>'
@@ -82,15 +129,17 @@ export function showOnboarding({auth,page,esc,link,user=null,profile=null,onDone
    +field('Complemento (opcional)','complement','maxlength="120"')
    +field('Ponto de referência (opcional)','reference','maxlength="160"')
    +'<label class="iv-client-consent"><input type="checkbox" name="terms" '+(v.terms?'checked':'')+' required><span>Li e concordo com os <a href="/intervalo/termos/" target="_blank" rel="noopener noreferrer">Termos de uso</a> e a <a href="/intervalo/privacidade/" target="_blank" rel="noopener noreferrer">Política de Privacidade</a>.</span></label>';
-  page(onboardingStyle()+'<section class="iv-client-wizard"><small class="iv-client-muted">ETAPA '+(stage+1)+' DE 3</small><div class="iv-client-step" aria-hidden="true">'+[0,1,2].map(i=>'<i class="'+(i<=stage?'active':'')+'"></i>').join('')+'</div><h1>'+titles[stage]+'</h1><p class="iv-client-muted">'+descriptions[stage]+'</p><form class="iv-client-form iv-client-card" id="iv-client-wizard">'+fields+'<p class="iv-client-error" id="iv-wizard-error" role="alert"></p><div class="iv-client-actions"><button class="iv-client-secondary" id="iv-wizard-back" type="button">'+(stage?'Voltar':'Cancelar')+'</button><button class="iv-client-primary" type="submit">'+(stage===2?'Finalizar e acessar':'Continuar')+'</button></div></form><a id="iv-wizard-guest" href="'+returnTarget(link)+'">Continuar sem cadastro</a></section>');
-  document.getElementById('iv-wizard-guest').onclick=()=>clearReturnTarget();
+  sheet.heading.innerHTML='<small class="iv-client-muted">ETAPA '+(stage+1)+' DE 3</small><div class="iv-client-step" aria-hidden="true">'+[0,1,2].map(i=>'<i class="'+(i<=stage?'active':'')+'"></i>').join('')+'</div><h2 id="iv-client-sheet-title">'+titles[stage]+'</h2><p class="iv-client-muted">'+descriptions[stage]+'</p>';
+  sheet.body.innerHTML='<form class="iv-client-form" id="iv-client-wizard" novalidate>'+fields+'<p class="iv-client-error" id="iv-wizard-error" role="alert"></p></form>';
+  sheet.footer.innerHTML='<button class="iv-client-secondary" id="iv-wizard-back" type="button">'+(stage?'Voltar':'Cancelar')+'</button><button class="iv-client-primary" type="submit" form="iv-client-wizard">'+(stage===2?'Finalizar e acessar':'Continuar')+'</button>';
   const form=document.getElementById('iv-client-wizard');
-  document.getElementById('iv-wizard-back').onclick=async()=>{if(busy)return;writeForm(form);if(stage>0){stage--;draw()}else{v.password='';v.again='';if(user){await auth.auth.signOut({scope:'local'})}onLogin()}};
-  form.onsubmit=async e=>{e.preventDefault();if(busy)return;writeForm(form);try{validate()}catch(err){setError(err.message);return}
+  if(stage===0&&!user){form.elements.password.value=v.password;form.elements.again.value=v.again;bindPasswordFields(form)}
+  document.getElementById('iv-wizard-back').onclick=()=>{if(busy)return;writeForm(form);if(stage>0){stage--;draw()}else sheet.close()};
+  form.onsubmit=async e=>{e.preventDefault();if(busy)return;writeForm(form);try{validate();if(!form.checkValidity()){const invalid=[...form.elements].find(el=>el.willValidate&&!el.validity.valid);invalid?.focus();throw Error('Confira o campo destacado.')}}catch(err){setError(err.message);return}
    if(stage<2){stage++;draw();return}
-   busy=true;const b=form.querySelector('button[type=submit]');b.disabled=true;b.textContent='Salvando...';
+   busy=true;const b=sheet.footer.querySelector('button[type=submit]');b.disabled=true;b.textContent='Salvando...';
    try{await complete()}catch(err){setError(err.message||'Não foi possível finalizar.')}finally{busy=false;b.disabled=false;b.textContent='Finalizar e acessar'}
   };
  }
- draw();
+ draw();sheet.open();
 }
