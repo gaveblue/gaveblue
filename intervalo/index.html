@@ -385,12 +385,13 @@ async function tenant(user,slug,mod){
  if(!permitted){box('<section class="panel"><h1>Sem permissão</h1><p>Seu papel neste restaurante não permite abrir este módulo.</p></section>');return}
  if(!moduleRow?.enabled){box('<section class="panel"><h1>Módulo ainda não habilitado</h1><p>O Super Admin precisa habilitar este recurso para o estabelecimento.</p>'+btn('Meus restaurantes','/inicio')+'</section>');return}
  if(mod==='gestao'){
-  const {renderManagement}=await import('/intervalo/management.js?v=1.1.0-rc.13');
+  const {renderManagement}=await import('/intervalo/management.js?v=1.1.0-rc.18');
   return renderManagement({supabase,restaurant:m.restaurants,role:m.role,box,esc,link});
  }
  if(mod==='vendas-online'){
-  const {renderPage}=await import('/intervalo/online-management-rc1.js?v=1.1.0-rc.14');
-  return renderPage({supabase,restaurant:m.restaurants,role:m.role,box,esc,link});
+  // O link antigo continua válido, mas abre Vendas dentro da Gestão.
+  location.replace(link('/'+slug+'/gestao?tab=vendas'));
+  return;
  }
  const asset={catalogo:'catalog.js',mesas:'support.js',estoque:'support.js',impressao:'support.js',relatorios:'support.js',garcom:'waiter.js',cozinha:'kitchen.js',caixa:'cash.js'}[mod];
  if(!asset){box('<h1>Módulo não encontrado</h1>');return}
