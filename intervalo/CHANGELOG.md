@@ -1,5 +1,11 @@
 # Intervalo — CHANGELOG
 
+## 1.2.0-rc.10 — 2026-11-17 · Alerta de atraso e seleção segura de mesas
+
+- Após mais de 5 minutos desde `ready_at` da rodada pronta mais antiga ainda não servida, mesa e aviso ganham ícone de alerta e destaque vermelho, com pulso suave na borda da mesa (respeita redução de movimento). Cronômetro local verifica a mudança a cada 5 s, sem novas consultas. Sem horário válido mantém alerta verde, sem inferir atraso.
+- Nenhuma mesa selecionada ao entrar; segundo toque na mesma mesa ou botão Desmarcar limpa a seleção, oculta atalho inferior e desabilita lançamentos até nova escolha. A seleção não é recriada automaticamente em recargas. Guardas contra seleção alterada durante escolha de variante e inclusão; não cancela pedidos existentes.
+- Sintaxe e regras simuladas verificadas. Sem alterações no banco ou custos. Testes visuais e fluxo real pendentes.
+
 ## 1.2.0-rc.9 — 2026-11-17 · Relógio e alerta para servir
 
 - Ícone de relógio em Em preparo e minutos desde o início real da rodada mais antiga em preparo (se houver horário). Ícone de sino e destaque verde em Pronto. Cronômetro atualizado localmente, sem requisições adicionais.
