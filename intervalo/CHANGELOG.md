@@ -5,7 +5,7 @@
 - Onboarding em três etapas: identificação (nome completo/social/no pedido, CPF, senha), contato (e-mail/celular) e endereço/aceite. Senha manual mínima de oito caracteres; não reduz a política do Auth. Google preparado via OAuth; depende de credenciais e redirect allowlist do provedor.
 - Tabelas existentes ampliadas com dados de cadastro; RPC autenticada e security invoker valida CPF e celular e grava perfil/endereço inicial na mesma transação. RLS por titular preservada. CPF não enviado ao checkout; não comprova titularidade fiscal.
 - Contas antigas completam perfil; endereço salvo pré-preenchido no checkout, com escolha de outros ou preenchimento manual. Compra visitante independente. Histórico de pedidos vinculado à conta permanece pendente.
-- Termos/privacidade atualizados como textos de teste, pendentes de revisão jurídica. Sem nova assinatura ou envio de dados a serviços externos. Confirmação de e-mail segue configuração existente; sem sessão, formulário pode precisar ser preenchido novamente.
+- Termos/privacidade atualizados como textos de teste, pendentes de revisão jurídica. Sem nova assinatura ou envio de dados a serviços externos. Ao continuar como visitante, limpa o destino de retorno do login. Confirmação de e-mail segue configuração existente; sem sessão, formulário pode precisar ser preenchido novamente.
 - Cupons e promoções foram deslocados para versão posterior. QA: sintaxe, CPF e permissões verificadas; Google, confirmação de e-mail, cadastro integral e checkout real pendentes.
 
 ## 1.1.0-rc.31 — 2026-11-17 · Busca integrada de restaurantes e produtos

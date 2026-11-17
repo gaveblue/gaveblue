@@ -13,6 +13,7 @@ export function returnTarget(link){
  try{if(slugOk(slug))sessionStorage.setItem(returnKey,slug);else slug=sessionStorage.getItem(returnKey)}catch{}
  return slugOk(slug)?link('/checkout?loja='+encodeURIComponent(slug)):link('/explorar');
 }
+export function clearReturnTarget(){try{sessionStorage.removeItem(returnKey)}catch{}}
 export function finishCustomer(link){
  const target=returnTarget(link);try{sessionStorage.removeItem(returnKey)}catch{}location.assign(target);
 }
@@ -83,7 +84,8 @@ export function showOnboarding({auth,page,esc,link,user=null,profile=null,onDone
    +field('Complemento (opcional)','complement','maxlength="120"')
    +field('Ponto de referência (opcional)','reference','maxlength="160"')
    +'<label class="iv-client-consent"><input type="checkbox" name="terms" '+(v.terms?'checked':'')+' required><span>Li e concordo com os <a href="/intervalo/termos/" target="_blank" rel="noopener noreferrer">Termos de uso</a> e a <a href="/intervalo/privacidade/" target="_blank" rel="noopener noreferrer">Política de Privacidade</a>.</span></label>';
-  page(onboardingStyle()+'<section class="iv-client-wizard"><small class="iv-client-muted">ETAPA '+(stage+1)+' DE 3</small><div class="iv-client-step" aria-hidden="true">'+[0,1,2].map(i=>'<i class="'+(i<=stage?'active':'')+'"></i>').join('')+'</div><h1>'+titles[stage]+'</h1><p class="iv-client-muted">'+descriptions[stage]+'</p><form class="iv-client-form iv-client-card" id="iv-client-wizard">'+fields+'<p class="iv-client-error" id="iv-wizard-error" role="alert"></p><div class="iv-client-actions"><button class="iv-client-secondary" id="iv-wizard-back" type="button">'+(stage?'Voltar':'Cancelar')+'</button><button class="iv-client-primary" type="submit">'+(stage===2?'Finalizar e acessar':'Continuar')+'</button></div></form><a href="'+returnTarget(link)+'">Continuar sem cadastro</a></section>');
+  page(onboardingStyle()+'<section class="iv-client-wizard"><small class="iv-client-muted">ETAPA '+(stage+1)+' DE 3</small><div class="iv-client-step" aria-hidden="true">'+[0,1,2].map(i=>'<i class="'+(i<=stage?'active':'')+'"></i>').join('')+'</div><h1>'+titles[stage]+'</h1><p class="iv-client-muted">'+descriptions[stage]+'</p><form class="iv-client-form iv-client-card" id="iv-client-wizard">'+fields+'<p class="iv-client-error" id="iv-wizard-error" role="alert"></p><div class="iv-client-actions"><button class="iv-client-secondary" id="iv-wizard-back" type="button">'+(stage?'Voltar':'Cancelar')+'</button><button class="iv-client-primary" type="submit">'+(stage===2?'Finalizar e acessar':'Continuar')+'</button></div></form><a id="iv-wizard-guest" href="'+returnTarget(link)+'">Continuar sem cadastro</a></section>');
+  document.getElementById('iv-wizard-guest').onclick=()=>clearReturnTarget();
   const form=document.getElementById('iv-client-wizard');
   document.getElementById('iv-wizard-back').onclick=async()=>{if(busy)return;writeForm(form);if(stage>0){stage--;draw()}else{v.password='';v.again='';if(user){await auth.auth.signOut({scope:'local'})}onLogin()}};
   form.onsubmit=async e=>{e.preventDefault();if(busy)return;writeForm(form);try{validate()}catch(err){setError(err.message);return}

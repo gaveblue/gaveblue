@@ -1,6 +1,6 @@
 import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.50.0/+esm';
 import {icon} from './ui-icons.js?v=1.0.0-rc.1';
-import {showOnboarding,googleLogin,googleButton,onboardingStyle,returnTarget,finishCustomer} from './marketplace-onboarding-rc32.js?v=1.1.0-rc.32';
+import {showOnboarding,googleLogin,googleButton,onboardingStyle,returnTarget,finishCustomer,clearReturnTarget} from './marketplace-onboarding-rc32.js?v=1.1.0-rc.32a';
 
 // Área do consumidor independente do Auth e dos papéis dos funcionários.
 // O checkout visitante não depende desta sessão nem de cadastro.
@@ -36,9 +36,10 @@ export async function renderCustomer({box,esc,link}){
    +'<label>Senha<input type="password" name="password" autocomplete="current-password" required></label>'
    +'<p role="alert" id="iv-client-auth-status" class="iv-client-error"></p><button class="iv-client-primary" type="submit">Entrar</button></form>'
    +'<div class="iv-client-actions"><button class="iv-client-secondary" id="iv-client-register" type="button">Criar minha conta</button></div>'
-   +'<div class="iv-client-actions"><a href="'+destination+'">Continuar sem cadastro</a></div></section></section>');
+   +'<div class="iv-client-actions"><a id="iv-client-guest" href="'+destination+'">Continuar sem cadastro</a></div></section></section>');
   const form=document.getElementById('iv-client-auth'),google=document.getElementById('iv-client-google');
   document.getElementById('iv-client-register').onclick=()=>onboarding();
+  document.getElementById('iv-client-guest').onclick=()=>clearReturnTarget();
   google.onclick=async()=>{google.disabled=true;try{await googleLogin(customerAuth)}catch{setMsg('iv-client-auth-status','Acesso pelo Google indisponível. Use e-mail ou tente novamente após a configuração.',true);google.disabled=false}};
   form.onsubmit=async e=>{e.preventDefault();const b=form.querySelector('button[type=submit]');b.disabled=true;try{
    const {error}=await customerAuth.auth.signInWithPassword({email:form.elements.email.value.trim().toLowerCase(),password:form.elements.password.value});
