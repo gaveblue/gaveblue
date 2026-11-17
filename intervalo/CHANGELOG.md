@@ -1,5 +1,11 @@
 # Intervalo — CHANGELOG
 
+## 1.2.0-rc.11 — 2026-11-17 · Seleção de mesa sem deslocar a tela
+
+- Primeiro toque na mesa apenas seleciona e conserva grade/rolagem; segundo toque na mesma abre a comanda. Acesso ao cardápio ou comanda também marca a seleção como visitada; ao retornar às mesas, tocar na mesma limpa a seleção, sem botão extra. Outra mesa inicia novo ciclo. Mantém lançamento bloqueado sem mesa.
+- Remove linha de seleção inserida no fluxo da página. Atalho da comanda fica flutuante acima da navegação no celular, oculto sem seleção ou dentro da comanda; reserva inferior constante para permitir rolar até o último card sem mudar altura ao selecionar. Mantém indicação da mesa no cardápio, destaque dos status e proteção contra lançamento em mesa errada.
+- Teste de sintaxe e transições simuladas; comportamento de rolagem e dimensões no Android pendentes. Sem alteração de banco.
+
 ## 1.2.0-rc.10 — 2026-11-17 · Alerta de atraso e seleção segura de mesas
 
 - Após mais de 5 minutos desde `ready_at` da rodada pronta mais antiga ainda não servida, mesa e aviso ganham ícone de alerta e destaque vermelho, com pulso suave na borda da mesa (respeita redução de movimento). Cronômetro local verifica a mudança a cada 5 s, sem novas consultas. Sem horário válido mantém alerta verde, sem inferir atraso.
