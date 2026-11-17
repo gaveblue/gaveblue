@@ -1,5 +1,19 @@
 # Intervalo — CHANGELOG
 
+## 1.1.0-rc.17 — 2026-11-16 · Garçom: Cardápio em lista/grade + pedidos delivery e retirada
+
+**Status:** atualizado no GitHub `main`; migração Supabase aplicada, Edge Function ativa e testes técnicos com rollback aprovados. **Pendente:** conferir propagação no domínio e homologar o fluxo real no Android, com perfil Garçom.
+
+- **Cardápio:** criado seletor de visualização **Lista / Grade**. Padrão inicial em lista (produto em linha horizontal com foto, nome, preço, descrição e botão de adicionar); a preferência fica salva no navegador em `intervalo.waiter.catalog.layout.v1`. Busca, filtros e seleção de mesas preservados.
+- **Delivery e retirada:** botão **Novo delivery ou retirada** na área de Mesas e atalho em Ações rápidas. Formulário móvel independente da mesa para selecionar produtos, quantidades e observações, cliente, celular, modalidade, região/endereço, pagamento previsto e confirmação.
+- O funcionário escolhe **dinheiro, Pix ou cartão no recebimento**, sem processar ou confirmar pagamentos automaticamente. Ao finalizar recebe código e link de acompanhamento do pedido.
+- Pedido gravado em `online_orders` e `online_order_items`, com evento de auditoria (`origin=garcom` e funcionário responsável), status `accepted` e pagamento `unpaid`. Não usa mesa fictícia e não atribui aceite de termos do consumidor.
+- Backend: migração `marketplace_staff_orders_rc17` (RPC `marketplace_staff_place_order`) com transação atômica, idempotência e execução restrita a `service_role`, além da Edge Function `marketplace-staff-orders` autenticada, `verify_jwt=true`, validando membro ativo, papel e módulo Garçom.
+- Precificação, regiões, taxas, disponibilidade e horários reaproveitam as regras de `marketplace_quote_order`. O aceite usa `marketplace_transition_order`, mantendo a reserva/baixa de estoque e a fila unificada da Cozinha.
+- Status de infraestrutura: os testes transacionais de delivery e retirada no `novo-mundo` chegaram a `accepted` e foram revertidos sem persistir registros de teste; privilégios conferidos (`service_role=true`, `authenticated=false`, `anon=false`).
+- QA sintático de JS, verificação do ponto de entrada e 15 verificações estáticas aprovados. Documentação em `QA-1.1.0-RC17-GARCOM-DELIVERY.md`.
+- O pedido atendido pelo Garçom exige Loja Online publicada e operante; pedidos fora do horário ou com loja pausada seguem as validações atuais e podem ser recusados. Nenhum GitHub Actions foi utilizado.
+
 ## 1.1.0-rc.16 — 2026-11-16 · Impressão configurável e cupom compacto para Android
 
 **Status:** atualizado no GitHub `main`; testes técnicos e Canvas aprovados. **Impressão real na GAO MPT-II e disponibilidade em gaveblue.com.br ainda pendentes de validação no celular.**
