@@ -34,6 +34,11 @@ export async function renderPage({supabase,restaurant,box,esc,link}){
     out+='</div>';
   out+='<section class="op-card"><h2>Adicionais</h2><p class="op-warn">Os adicionais podem aparecer no cardápio, mas a composição de adicionais em comandas ainda depende da próxima implementação.</p><form class="op-form" id="newopt"><label>Produto<select name="product_id" required>'+products.map(p=>'<option value="'+esc(p.id)+'">'+esc(p.name)+'</option>').join('')+'</select></label>'+field('name','Nome do adicional','','required minlength="2" maxlength="120"')+field('price','Valor adicional em R$','0,00','required')+'<button class="op-btn">Adicionar</button></form></section>';
   box(out);
+  document.querySelectorAll('.op-photo').forEach(img=>img.addEventListener('error',()=>{
+   if(!img.isConnected)return;
+   const fallback=document.createElement('div');fallback.className='op-photo-placeholder';
+   fallback.innerHTML=icon('store',43);img.replaceWith(fallback);
+  },{once:true}));
   form('newcat',v=>call('category_create',{name:v.name,sort_order:0}));
   form('newopt',v=>call('option_create',{name:v.name,price_delta_cents:cents(v.price),product_id:v.product_id}));
   sheetifyForms([{id:'newcat',label:'Nova categoria',title:'Cadastrar categoria'},{id:'newopt',label:'Novo adicional',title:'Cadastrar adicional'}]);
