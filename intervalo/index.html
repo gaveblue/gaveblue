@@ -396,7 +396,7 @@ async function tenant(user,slug,mod){
  }
  const asset={catalogo:'catalog.js',mesas:'support.js',estoque:'support.js',impressao:'support.js',relatorios:'support.js',garcom:'waiter.js',cozinha:'kitchen.js',caixa:'cash.js'}[mod];
  if(!asset){box('<h1>Módulo não encontrado</h1>');return}
- const {renderPage}=await import('/intervalo/'+asset+'?v='+(mod==='garcom'?'1.1.0-rc.29':mod==='estoque'?'1.2.0-rc.5':mod==='catalogo'?'1.2.0-rc.1':mod==='impressao'||mod==='cozinha'||mod==='caixa'?'1.2.0-rc.5':mod==='mesas'?'1.1.0-rc.14':'1.1.0-rc.4'));
+ const {renderPage}=await import('/intervalo/'+asset+'?v='+(mod==='garcom'?'1.1.0-rc.29':mod==='estoque'?'1.2.0-rc.5':mod==='catalogo'?'1.2.0-rc.1':mod==='caixa'?'1.2.0-rc.6':mod==='impressao'||mod==='cozinha'?'1.2.0-rc.5':mod==='mesas'?'1.1.0-rc.14':'1.1.0-rc.4'));
  return renderPage({supabase,restaurant:m.restaurants,module:mod,box,esc,link});
 }
 async function account(user){
