@@ -1,14 +1,14 @@
 // Intervalo Marketplace — Checkout mobile-first rc9 · InfinitePay Novo Mundo.
 // Apenas apresentação: cotação, finalização, termos, idempotência e requisições seguem o contrato rc4.
 import {icon} from './ui-icons.js?v=1.0.0-rc.1';
-import {customerAuth} from './marketplace-customer-rc5.js?v=1.1.0-rc.36';
+import {customerAuth} from './marketplace-customer-rc5.js?v=1.1.0-rc.37';
 import {loadCart,setCartItemQuantity,clearCart,formatBRL} from './marketplace-cart-rc4.js?v=1.1.0-rc.4';
 
 export async function renderCheckout({supabase,box,esc,link}){
  document.body.classList.add('iv-marketplace','iv-commerce','iv-checkout-rc7');
  const css='<link rel="stylesheet" href="/intervalo/marketplace-preview-rc1.css?v=1.1.0-rc.4">'
   +'<link rel="stylesheet" href="/intervalo/marketplace-commerce-rc4.css?v=1.1.0-rc.4">'
-  +'<link rel="stylesheet" href="/intervalo/marketplace-checkout-rc7.css?v=1.1.0-rc.36">';
+  +'<link rel="stylesheet" href="/intervalo/marketplace-checkout-rc7.css?v=1.1.0-rc.37">';
  const slug=new URLSearchParams(location.search).get('loja');
  const safe=/^[a-z0-9]+(?:-[a-z0-9]+)*$/;
  const storeHref=slug&&safe.test(slug)?link('/loja/'+slug):link('/explorar');
@@ -241,7 +241,7 @@ export async function renderCheckout({supabase,box,esc,link}){
   const list=activeSteps(),index=list.indexOf(key);if(index<0)return;
   for(const other of dialogs)if(other!==dialog&&other.open)other.close();
   const meta=dialog.querySelector('[data-ck-step-meta]');
-  meta.innerHTML='<small>ETAPA '+(index+1)+' DE '+list.length+'</small><div class="iv-ck-step-bars">'+list.map((_,i)=>'<i class="'+(i<=index?'active':'')+'"></i>').join('')+'</div>';
+  meta.innerHTML='<div class="iv-ck-step-bars" role="progressbar" aria-label="Progresso do pedido" aria-valuemin="0" aria-valuemax="'+list.length+'" aria-valuenow="'+(index+1)+'">'+list.map((_,i)=>'<i class="'+(i<=index?'active':'')+'"></i>').join('')+'</div>';
   dialog.querySelector('[data-ck-back]').textContent=index===0?'Voltar':'Voltar';
   if(!dialog.open)dialog.showModal();
   dialog.__ckAlign?.();

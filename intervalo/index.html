@@ -94,7 +94,7 @@ body.iv-initializing #app{min-height:100dvh;display:block}
   var target=deep&&deep.startsWith('/intervalo/')?deep.split(/[?#]/)[0]:location.pathname;
   if(!/^\/intervalo\/checkout\/?$/.test(target))return;
   var style=document.createElement('link');style.rel='stylesheet';
-  style.href='/intervalo/marketplace-checkout-rc7.css?v=1.1.0-rc.36';
+  style.href='/intervalo/marketplace-checkout-rc7.css?v=1.1.0-rc.37';
   document.head.appendChild(style);
  }catch(e){}
 })();
@@ -407,7 +407,7 @@ async function account(user){
 async function start(){
  if(paths.length===2&&paths[1]==='cardapio'&&/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(paths[0]))return tenant(null,paths[0],'cardapio');
  if(paths[0]==='checkout'){
-  const {renderCheckout}=await import('/intervalo/marketplace-checkout-rc7.js?v=1.1.0-rc.36');
+  const {renderCheckout}=await import('/intervalo/marketplace-checkout-rc7.js?v=1.1.0-rc.37');
   return renderCheckout({supabase,box,esc,link});
  }
  if(paths[0]==='pedido'){
@@ -415,7 +415,7 @@ async function start(){
   return renderTracking({supabase,route:paths,box,esc,link});
  }
  if(paths[0]==='cliente'){
-  const {renderCustomer}=await import('/intervalo/marketplace-customer-rc5.js?v=1.1.0-rc.36');
+  const {renderCustomer}=await import('/intervalo/marketplace-customer-rc5.js?v=1.1.0-rc.37');
   return renderCustomer({box,esc,link});
  }
  if(['explorar','loja'].includes(paths[0])){

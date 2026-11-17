@@ -1,6 +1,6 @@
 import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.50.0/+esm';
 import {icon} from './ui-icons.js?v=1.0.0-rc.1';
-import {showOnboarding,googleLogin,googleButton,onboardingStyle,returnTarget,finishCustomer,clearReturnTarget,passwordField,bindPasswordFields,clientSheet} from './marketplace-onboarding-rc32.js?v=1.1.0-rc.36';
+import {showOnboarding,googleLogin,googleButton,onboardingStyle,returnTarget,finishCustomer,clearReturnTarget,passwordField,bindPasswordFields,clientSheet} from './marketplace-onboarding-rc32.js?v=1.1.0-rc.37';
 
 // Área do consumidor independente do Auth e dos papéis dos funcionários.
 // O checkout visitante não depende desta sessão nem de cadastro.

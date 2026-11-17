@@ -1,5 +1,10 @@
 # Intervalo — CHANGELOG
 
+## 1.1.0-rc.37 — 2026-11-17 · Progresso visual sem numeração
+
+- Cadastro e checkout exibem apenas as barras de progresso, sem legendas de contagem de etapas. A informação de progresso permanece disponível a tecnologias assistivas. Fluxos, validações, pagamento e navegação preservados.
+- Sem alteração no banco ou custos; sintaxe e estrutura verificadas, teste visual no Android pendente.
+
 ## 1.1.0-rc.36 — 2026-11-17 · Cadastro compacto e checkout em etapas
 
 - Corrige margens herdadas do seletor global `form label` no cadastro, pesos de inputs, placeholders e espaçamento; orientação de nome mais curta, foco inicial no botão fechar.
