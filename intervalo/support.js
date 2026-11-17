@@ -175,8 +175,17 @@ export async function renderPage({supabase,restaurant,module,box,esc,link}){
        +'<div class="iv-toolbar"><h2>Insumos ('+items.length+')</h2><span class="iv-chip '+(low.length?'danger':'success')+'">'+low.length+' abaixo do mínimo</span></div><div class="x-grid">';
       for(const item of items){
         const isLow=Number(item.quantity)<=Number(item.min_quantity);
+        const unitOptions=[['un','Unidades'],['kg','Kg'],['g','Gramas'],['l','Litros'],['ml','mL']]
+          .map(([id,label])=>'<option value="'+id+'" '+(id===item.unit?'selected':'')+'>'+label+'</option>').join('');
         out+='<article class="x-panel"><h3>'+icon('package',18)+' '+esc(item.name)+'</h3><p>Saldo atual: <b>'+esc(item.quantity)+' '+esc(item.unit)+'</b></p>'
-          +'<p class="x-muted">Estoque mínimo: '+esc(item.min_quantity)+' · <span class="iv-chip '+(isLow?'danger':'success')+'">'+(isLow?'Repor':'Regular')+'</span></p></article>';
+          +'<p class="x-muted">Estoque mínimo: '+esc(item.min_quantity)+' · <span class="iv-chip '+(!item.active?'':isLow?'danger':'success')+'">'+(!item.active?'Arquivado':isLow?'Repor':'Regular')+'</span></p>'
+          +'<form class="x-form" data-edit-stock="'+esc(item.id)+'"><label>Nome<input name="name" required minlength="2" maxlength="120" value="'+esc(item.name)+'"></label>'
+          +'<label>Unidade<select name="unit">'+unitOptions+'</select></label>'
+          +'<label>Estoque mínimo<input name="min_quantity" type="number" min="0" max="10000000" step=".001" required value="'+esc(item.min_quantity)+'"></label>'
+          +'<p class="x-muted">Para corrigir o saldo, use uma movimentação; o histórico não é alterado aqui.</p>'
+          +'<button type="submit">'+icon('checkCircle',16)+' Salvar insumo</button></form>'
+          +'<button type="button" class="iv-btn secondary" data-stock-archive="'+esc(item.id)+'" data-archive="'+(item.active?'true':'false')+'">'
+          +icon(item.active?'x':'checkCircle',16)+(item.active?' Excluir / arquivar':' Restaurar insumo')+'</button></article>';
       }
       if(!items.length)out+='<div class="iv-empty">Nenhum insumo cadastrado.</div>';
       out+='</div>';
@@ -264,6 +273,22 @@ export async function renderPage({supabase,restaurant,module,box,esc,link}){
       load();
     });
     form('newstock',v=>call('stock_create',{name:v.name,unit:v.unit,quantity:Number(v.quantity),min_quantity:Number(v.min_quantity)}));
+    const stockEditForms=[...document.querySelectorAll('[data-edit-stock]')];
+    stockEditForms.forEach((editForm,index)=>{
+      editForm.id='iv-edit-stock-'+index;
+      form(editForm.id,v=>call('stock_update',{
+        id:editForm.dataset.editStock,name:v.name,unit:v.unit,min_quantity:Number(v.min_quantity)
+      }));
+    });
+    document.querySelectorAll('[data-stock-archive]').forEach(button=>button.onclick=async()=>{
+      const item=items.find(row=>row.id===button.dataset.stockArchive);
+      if(!item)return;
+      const archive=button.dataset.archive==='true';
+      if(archive&&!confirm('Arquivar o insumo "'+item.name+'"? O histórico ficará preservado.'))return;
+      button.disabled=true;
+      try{await call(archive?'stock_delete':'stock_restore',{id:item.id});await load()}
+      catch(e){alert(e.message);button.disabled=false}
+    });
     form('adjuststock',v=>call('stock_adjust',{stock_item_id:v.stock_item_id,reason:v.reason,delta:Number(v.delta)}));
     form('recipeset',v=>call('recipe_set',{product_id:v.product_id,stock_item_id:v.stock_item_id,quantity:Number(v.quantity)}));
     form('newcatstock',v=>call('category_create',{name:v.name,sort_order:0}));
@@ -302,6 +327,7 @@ export async function renderPage({supabase,restaurant,module,box,esc,link}){
      });
      sheetifyForms([
        {id:'newstock',label:'Novo insumo',title:'Cadastrar insumo',description:'Dados, unidade e saldos iniciais.',context:'iv-inventory'},
+       ...stockEditForms.map(f=>({id:f.id,label:'Editar insumo',title:'Editar insumo',description:'Altere nome, unidade e estoque mínimo. Saldo via movimentação.',context:'iv-inventory'})),
        {id:'adjuststock',label:'Registrar movimentação',title:'Movimentar estoque',description:'Registre entrada, perda ou ajuste.',context:'iv-inventory'},
        {id:'recipeset',label:'Vincular ingrediente',title:'Ficha técnica',description:'Defina a quantidade usada por produto.',context:'iv-inventory'},
        {id:'newcatstock',label:'Nova categoria',title:'Cadastrar categoria',context:'iv-inventory',replaceDetails:true},
