@@ -1,5 +1,12 @@
 # Intervalo — CHANGELOG
 
+## 1.1.0-rc.29 — 2026-11-17 · Padrão de cardápio no Garçom
+
+- Mesas: agrupamento de opções compartilhado com a vitrine, miniaturas quadradas compactas, preço à direita junto da ação, prévia da foto e descrição no detalhe. Mantém fluxo de comanda existente.
+- Delivery/retirada: usa o mesmo agrupador e seletor de variantes, busca, categorias e ícones de grade/lista com preferência compartilhada com o salão, fotos e preço inicial. Carrinho conserva ID e preço da variação escolhida. Mantém elegibilidade de venda online e controles do servidor.
+- Busca do delivery filtra DOM sem reconstruir fotos a cada tecla. Atualização silenciosa do garçom não reconstrói tela durante os painéis de pedido/variação/delivery abertos.
+- Sem alteração no banco ou nos preços; sintaxe verificada, testes reais Android/propagação e pedidos completos pendentes.
+
 ## 1.1.0-rc.28 — 2026-11-17 · Variações de produtos
 
 - Cadastro de produtos com variação opcional e atalho para criar outra opção (mesmo nome-base/categoria, preço próprio). Agrupa por restaurante, categoria e nome-base; cada opção mantém ID, nome completo, preço, disponibilidade e ficha técnica independente. Para agrupar um produto já existente, edite-o e preencha sua variação também.
