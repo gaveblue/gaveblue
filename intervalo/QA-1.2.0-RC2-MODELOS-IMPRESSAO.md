@@ -1,0 +1,4 @@
+# QA — Intervalo 1.2.0-rc.2
+- Modelos de cozinha e caixa e dados comuns persistidos por restaurante. Permissões do restaurant-core v16: vínculo ativo, restaurante ativo e módulos permitidos; edição apenas Master/gerente com Gestão. RLS ativa sem políticas diretas por design (advisor INFO); anon/authenticated sem SELECT/UPDATE, service_role com INSERT.
+- Testes: sintaxe JS; escape de texto HTML; substituição de campos; dados comerciais multiline; cálculo dos itens; independência dos modelos e aviso não fiscal. Função implantada e tabela confirmada.
+- Sem pedidos reais ou impressão automática. Pendente teste de login, editar/salvar, reabrir em outro dispositivo autorizado, imprimir amostra e pedido real com observações, preços e rodadas; isolamento entre restaurantes; fallback sinalizado quando API falhar. Testar MPT-II 58 mm e 80 mm, propagação e interface. Não homologado fisicamente. Editor textual, não inclui logo raster nem layout gráfico livre.

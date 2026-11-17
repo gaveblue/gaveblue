@@ -121,7 +121,7 @@ function buildCanvas(doc,rows,profile){
   if(kind==='pair'){
    const rightWidth=Math.round(contentWidth*.38);
    const leftWidth=contentWidth-rightWidth-8;
-   const left=split.flatMap(t=>wrapLine(ctx,row.left||t,leftWidth));
+   const left=String(row.left||'').split('\n').flatMap(t=>wrapLine(ctx,t,leftWidth));
    const right=String(row.right||'').split('\n').flatMap(t=>wrapLine(ctx,t,rightWidth));
    const count=Math.max(left.length,right.length,1);
    if(paint){

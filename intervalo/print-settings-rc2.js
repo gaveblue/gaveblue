@@ -1,6 +1,6 @@
 import {icon} from './ui-icons.js?v=1.0.0-rc.1';
-import {openThermalReceipt} from './thermal-receipt-rc16.js?v=1.2.0-rc.2';
-import {printRequest,normalizePrintConfig,sampleReceipt,defaultPrintModel} from './print-template-rc2.js?v=1.2.0-rc.2';
+import {openThermalReceipt} from './thermal-receipt-rc16.js?v=1.2.0-rc.2a';
+import {printRequest,normalizePrintConfig,sampleReceipt,defaultPrintModel} from './print-template-rc2.js?v=1.2.0-rc.2a';
 const businessFields=[['name','Nome comercial',120],['legal_name','Razão social',150],['cnpj','CNPJ',32],['address','Endereço completo',250],['phone','Telefone / WhatsApp',80],['extra','Outros dados (Instagram, site, inscrição etc.)',300,true]];
 const common=[['title','Título',85],['header','Cabeçalho',500,true],['details','Dados do pedido',500,true],['footer','Rodapé / mensagem',500,true],['round_label','Texto para rodada',40],['note_label','Texto para observação',40]];
 const cashFields=[['total_label','Texto do total',40],['received_label','Texto do valor recebido',40],['balance_label','Texto do saldo',40]];

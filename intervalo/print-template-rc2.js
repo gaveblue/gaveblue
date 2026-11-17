@@ -1,4 +1,4 @@
-import {openThermalReceipt} from './thermal-receipt-rc16.js?v=1.2.0-rc.2';
+import {openThermalReceipt} from './thermal-receipt-rc16.js?v=1.2.0-rc.2a';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money=n=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(n||0)/100);
 const header='{restaurante}\n{razao_social}\nCNPJ: {cnpj}\n{endereco}\nTelefone: {telefone}\n{dados_extras}';
@@ -21,7 +21,7 @@ export function resolveLines(text,values){
   const tokens=[...line.matchAll(/\{([a-z_]+)\}/g)];
   if(tokens.length&&tokens.every(t=>Object.hasOwn(values,t[1])&&!String(values[t[1]]??'').trim()))return '';
   return line.replace(/\{([a-z_]+)\}/g,(full,key)=>Object.hasOwn(values,key)?String(values[key]??''):full).trim();
- }).filter(Boolean);
+ }).flatMap(line=>line.split(/\r?\n/).map(x=>x.trim())).filter(Boolean);
 }
 export function buildReceipt(config,kind,data={}){
  const m=config[kind],b=config.business,items=(data.items??[]).filter(x=>x.status!=='cancelled');
