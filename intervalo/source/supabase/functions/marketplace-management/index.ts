@@ -72,6 +72,9 @@ Deno.serve(async(req:Request)=>{
   const estimated_prep_minutes=integer(body.estimated_prep_minutes,5,240);
   const notes=text(body.notes,500);
   if(minimum_order_cents===null||estimated_prep_minutes===null||notes.length>500)return error("Valores ou instruções inválidos");
+  // Identidade visual opcional: valida URLs HTTPS e permite remover ou manter as anteriores.
+  const validMedia=(url:unknown)=>typeof url==="string"&&url.length<=1200&&/^https:\/\/[^\s<>"']+$/i.test(url);
+  for(const key of ["logo_url","banner_url"]){const v=body[key];if(v!==undefined&&v!==null&&v!==""&&!validMedia(v))return error("Endereço de imagem inválido");}
   // Preservar visibilidade, mídia, pausa e prazo ao salvar somente campos de rascunho.
   const [priorStore,priorOnline]=await Promise.all([
    db.from("restaurant_storefront").select("marketplace_visible,logo_url,banner_url").eq("restaurant_id",restaurant_id).maybeSingle(),
@@ -82,7 +85,8 @@ Deno.serve(async(req:Request)=>{
   const storeSave=await db.from("restaurant_storefront").upsert({
    restaurant_id,display_name:name,description,cuisine_tags,
    marketplace_visible:priorStore.data?.marketplace_visible??false,
-   logo_url:priorStore.data?.logo_url??null,banner_url:priorStore.data?.banner_url??null,
+   logo_url:body.logo_url===undefined?(priorStore.data?.logo_url??null):(body.logo_url||null),
+   banner_url:body.banner_url===undefined?(priorStore.data?.banner_url??null):(body.banner_url||null),
    updated_at:now
   },{onConflict:"restaurant_id"});
   if(storeSave.error)return error("Não foi possível salvar a vitrine",503);
