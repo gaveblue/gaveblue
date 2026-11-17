@@ -10,7 +10,16 @@ export async function renderMarketplace({supabase,route,box,esc,link}){
   +'<div class="iv-mkt-links"><span class="iv-mkt-preview">PRÉVIA</span><a href="'+link('/inicio')+'">'+icon('store',15)+' Gestão</a></div></nav>';
  const bottom=(active='inicio')=>'<nav class="iv-mkt-bottom" aria-label="Navegação do consumidor">'
   +[['inicio','home','Início','/explorar'],['buscar','search','Buscar','/explorar'],['pedidos','receipt','Pedidos','/pedido'],['perfil','user','Perfil','/cliente']].map(([id,sym,label,to])=>'<a href="'+link(to)+'" class="'+(id===active?'active':'')+'">'+icon(sym,20)+esc(label)+'</a>').join('')+'</nav>';
- const page=(inner,active='inicio')=>box('<div class="iv-mkt-shell">'+nav+inner+bottom(active)+'</div>');
+ const page=(inner,active='inicio')=>{
+  box('<div class="iv-mkt-shell">'+nav+inner+bottom(active)+'</div>');
+  document.querySelectorAll('.iv-mkt-photo img,.iv-mkt-store-icon img,.iv-mkt-store-avatar img').forEach(img=>img.addEventListener('error',()=>{
+   if(!img.isConnected)return;
+   const span=document.createElement('span');
+   span.innerHTML=icon(img.closest('.iv-mkt-photo')?'burger':'store',img.closest('.iv-mkt-photo')?43:27);
+   span.setAttribute('aria-label','Imagem indisponível');
+   img.replaceWith(span);
+  },{once:true}));
+ };
  const loading=()=>page('<div class="iv-mkt-hero"><div><span class="iv-mkt-eyebrow">INTERVALO MARKETPLACE</span><h1>Seu próximo pedido começa aqui</h1><p>Estamos preparando uma nova experiência de delivery.</p></div><div class="iv-mkt-icon-large">'+icon('store',54)+'</div></div><div class="iv-loading-inline" role="status" aria-busy="true"><span class="iv-load-dot" aria-hidden="true"></span> Preparando os restaurantes...</div>');
  const safePhoto=url=>typeof url==='string'&&/^https:\/\/[^\s<>"']+$/.test(url)?url:null;
  const logo=(url,name)=>safePhoto(url)?'<img src="'+esc(url)+'" alt="'+esc(name)+'" loading="lazy">':icon('store',27);
