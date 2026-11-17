@@ -99,3 +99,45 @@ dialog.iv-mkt-sheet::backdrop{background:#1b2b4199}
  .iv-mkt-product-grid.is-list .iv-mkt-photo{width:101px;min-height:105px}
  .iv-mkt-product-grid.is-list .iv-mkt-body{padding:9px}
 }
+
+/* RC23 · Vitrine: composição inspirada em perfil de restaurante, sem duplicar avisos. */
+.iv-mkt-shell.is-store-page>.iv-mkt-nav{display:none}
+.iv-mkt-store-profile{position:relative;background:#fff;border-radius:20px;overflow:hidden;margin:18px 0 16px;border:1px solid #edf0f3}
+.iv-mkt-store-profile .iv-mkt-cover{margin:0;width:100%;aspect-ratio:16/6;max-height:300px;min-height:170px;border-radius:0}
+.iv-mkt-store-profile .iv-mkt-cover img{object-fit:cover;object-position:center}
+.iv-mkt-cover-actions{position:absolute;top:14px;left:15px;right:15px;display:flex;justify-content:space-between;pointer-events:none}
+.iv-mkt-cover-button{display:grid;place-items:center;width:43px;height:43px;padding:0;border:1px solid #eaeef2;background:#fff;color:#263549;border-radius:13px;box-shadow:0 2px 12px #10182820;pointer-events:auto;text-decoration:none;cursor:pointer}
+.iv-mkt-cover-button:focus-visible,.iv-mkt-store-info:focus-visible{outline:3px solid #ffb270;outline-offset:2px}
+.iv-mkt-store-profile .iv-mkt-store-head{position:relative;display:block;background:#fff;margin:0;padding:0 22px 18px;min-width:0}
+.iv-mkt-store-profile .iv-mkt-store-avatar{position:relative;width:88px;height:88px;margin:0 0 -39px;border:4px solid #fff;border-radius:19px;transform:translateY(-49%);background:#fff;box-shadow:0 3px 13px #0f172a18;z-index:1}
+.iv-mkt-store-profile .iv-mkt-store-avatar img{width:100%;height:100%;object-fit:cover}
+.iv-mkt-store-profile .iv-mkt-store-head h1{font-size:clamp(23px,3vw,32px);line-height:1.17;letter-spacing:-.6px;margin:10px 0 11px;color:#202b3a;overflow-wrap:anywhere}
+.iv-mkt-store-meta{display:flex;flex-wrap:wrap;align-items:center;gap:7px 12px;font-size:13px;line-height:1.35}
+.iv-mkt-store-status{display:inline-flex;align-items:center;gap:6px;font-weight:800}
+.iv-mkt-store-status::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor;flex:none}
+.iv-mkt-store-status.is-open{color:#19834d}.iv-mkt-store-status.is-closed{color:#a26332}
+.iv-mkt-store-min{font-weight:600;color:#667587;white-space:nowrap}
+.iv-mkt-store-info{display:inline-flex;align-items:center;gap:2px;background:transparent;border:0;padding:3px 0;font-size:13px;font-weight:800;color:#27374a;cursor:pointer}
+.iv-mkt-store-place{margin-top:9px;color:#657386;font-size:13px;font-weight:600}
+.iv-mkt-store-profile .iv-mkt-store-description{color:#718095;font-size:13px;line-height:1.5;margin:7px 0 0;max-width:680px;overflow-wrap:anywhere;white-space:pre-line}
+.iv-mkt-store-profile .iv-mkt-store-notice{display:flex;align-items:flex-start;gap:7px;margin:10px 0 0;font-size:11px;line-height:1.45;color:#7e6959}
+.iv-mkt-store-notice .iv-icon{flex:none;color:#b87940}
+.iv-mkt-store-search{margin:0 0 10px}.iv-mkt-store-search[hidden]{display:none!important}
+.iv-mkt-info-row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:10px 0;border-bottom:1px solid #edf0f3;font-size:12px}
+.iv-mkt-info-row strong{text-align:right;overflow-wrap:anywhere}
+.is-store-page .iv-mkt-pills{padding-top:0;padding-bottom:5px;margin-bottom:5px}
+.is-store-page .iv-mkt-catalog-head{margin:10px 0 13px}
+@media(max-width:640px){
+ .iv-mkt-store-profile{margin:0 -14px 13px;border:0;border-bottom:1px solid #e9edf2;border-radius:0}
+ .iv-mkt-store-profile .iv-mkt-cover{aspect-ratio:16/7;min-height:136px;max-height:240px}
+ .iv-mkt-cover-actions{left:14px;right:14px;top:12px}
+ .iv-mkt-cover-button{width:42px;height:42px;border-radius:12px}
+ .iv-mkt-store-profile .iv-mkt-store-head{padding:0 16px 12px}
+ .iv-mkt-store-profile .iv-mkt-store-avatar{width:76px;height:76px;border-radius:18px;margin-bottom:-34px}
+ .iv-mkt-store-profile .iv-mkt-store-head h1{font-size:22px;margin:8px 0 7px}
+ .iv-mkt-store-meta{font-size:11px;gap:4px 10px}
+ .iv-mkt-store-info{font-size:11px}
+ .iv-mkt-store-place{font-size:12px;margin-top:6px}
+ .iv-mkt-store-profile .iv-mkt-store-description{font-size:12px;margin-top:5px}
+ .iv-mkt-store-profile .iv-mkt-store-notice{margin-top:8px;font-size:11px}
+}

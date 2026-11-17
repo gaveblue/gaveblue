@@ -1,5 +1,14 @@
 # Intervalo — CHANGELOG
 
+## 1.1.0-rc.23 — 2026-11-17 · Vitrine pública reorganizada
+
+- Capa ampla sem margens laterais no celular, logo quadrada com cantos arredondados sobreposta à transição da capa, nome e dados abaixo em painel branco.
+- Status único baseado na disponibilidade real do checkout, pedido mínimo quando configurado, localização quando cadastrada e botão Informações com horários e modalidades reais.
+- Busca por botão sobre a capa; área de busca expansível. Removidos da vitrine do consumidor os controles de prévia e Gestão; navegação inferior, filtros, grade/lista e carrinho preservados.
+- Ajuste visual para nomes que coincidem com o slug, sem alterar o cadastro.
+- Sem mudanças no Supabase ou em pagamentos. Cache dos módulos da vitrine atualizado.
+- Validação: sintaxe JavaScript conferida; teste visual no navegador/Android e propagação do domínio pendentes.
+
 ## 1.1.0-rc.22 — 2026-11-16/17 · Edição de insumos/categorias, vitrine e grade/lista
 
 **Status:** GitHub `main` atualizado; `restaurant-core` v14 ativa no Supabase; parser JavaScript aprovado. **Pendente:** comprovação da propagação no site e testes de interação reais no Android.

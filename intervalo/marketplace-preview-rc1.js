@@ -4,14 +4,14 @@ import {addCartItem,loadCart,cartCount} from './marketplace-cart-rc4.js?v=1.1.0-
 // Vitrine prévia real. NÃO cria pedidos e não envia dados pessoais.
 export async function renderMarketplace({supabase,route,box,esc,link}){
  document.body.classList.add('iv-marketplace');
- const css='<link rel="stylesheet" href="/intervalo/marketplace-preview-rc1.css?v=1.1.0-rc.22"><link rel="stylesheet" href="/intervalo/marketplace-commerce-rc4.css?v=1.1.0-rc.4">';
+ const css='<link rel="stylesheet" href="/intervalo/marketplace-preview-rc1.css?v=1.1.0-rc.23"><link rel="stylesheet" href="/intervalo/marketplace-commerce-rc4.css?v=1.1.0-rc.4">';
  const money=n=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(n??0)/100);
  const nav=css+'<nav class="iv-mkt-nav" aria-label="Navegação do marketplace"><a class="iv-mkt-brand" href="'+link('/explorar')+'">intervalo</a>'
   +'<div class="iv-mkt-links"><span class="iv-mkt-preview">PRÉVIA</span><a href="'+link('/inicio')+'">'+icon('store',15)+' Gestão</a></div></nav>';
  const bottom=(active='inicio')=>'<nav class="iv-mkt-bottom" aria-label="Navegação do consumidor">'
   +[['inicio','home','Início','/explorar'],['buscar','search','Buscar','/explorar'],['pedidos','receipt','Pedidos','/pedido'],['perfil','user','Perfil','/cliente']].map(([id,sym,label,to])=>'<a href="'+link(to)+'" class="'+(id===active?'active':'')+'">'+icon(sym,20)+esc(label)+'</a>').join('')+'</nav>';
- const page=(inner,active='inicio')=>{
-  box('<div class="iv-mkt-shell">'+nav+inner+bottom(active)+'</div>');
+ const page=(inner,active='inicio',storePage=false)=>{
+  box('<div class="iv-mkt-shell'+(storePage?' is-store-page':'')+'">'+nav+inner+bottom(active)+'</div>');
   document.querySelectorAll('.iv-mkt-photo img,.iv-mkt-store-icon img,.iv-mkt-store-avatar img').forEach(img=>img.addEventListener('error',()=>{
    if(!img.isConnected)return;
    const span=document.createElement('span');
@@ -70,15 +70,31 @@ export async function renderMarketplace({supabase,route,box,esc,link}){
    if(!data.published){page(placeholder('Loja indisponível','Este restaurante ainda não publicou seu cardápio.'));return}
    const r=data.restaurant,cats=data.categories??[],allowed=new Set(cats.map(x=>x.id));
    const products=(data.products??[]).filter(x=>allowed.has(x.category_id));
-   const storeTitle=esc(r.name);
-   const photo=logo(r.logo_url,r.name);
+   // RC23 — perfil da loja com capa, avatar sobreposto e metadados compactos.
+   const rawName=String(r.name??'').trim();
+   const publicName=(!rawName||rawName===r.slug)?String(r.slug??route[1]).replace(/-/g,' ').replace(/(^|\s)\p{L}/gu,x=>x.toLocaleUpperCase('pt-BR')):rawName;
+   const storeTitle=esc(publicName);
+   const photo=logo(r.logo_url,publicName);
    const cover=safePhoto(r.banner_url);
-   let out='<div class="iv-mkt-cover">'+(cover?'<img src="'+esc(cover)+'" alt="Capa do restaurante" loading="eager">':'<div class="iv-mkt-cover-placeholder">'+icon('store',30)+'</div>')+'</div>'
-      +'<div class="iv-mkt-store-head"><div class="iv-mkt-store-avatar">'+photo+'</div><div><span class="iv-mkt-eyebrow">LOJA DO RESTAURANTE</span><h1>'+storeTitle+'</h1><p>'+esc(r.description||'Conheça o cardápio deste restaurante.')+'</p>'
-      +'<span class="iv-mkt-pill">'+icon('store',14)+' '+esc([r.city,r.state].filter(Boolean).join(' · ')||'Cardápio público')+'</span>'
-      +'<span class="iv-mkt-pill">'+icon('info',14)+' '+(data.customer_orders_enabled?'Pedidos '+(data.checkout_available?'abertos agora':'temporariamente fechados'):'Pedidos online ainda não ativados')+'</span></div></div>'
-      +'<div class="iv-mkt-empty" style="padding:14px;text-align:left;margin-bottom:21px">'+icon('info',20)+' <strong>'+(data.checkout_available?'Pedidos online disponíveis':'Pedidos temporariamente indisponíveis')+'.</strong> Monte seu carrinho. A finalização depende do restaurante estar recebendo pedidos.</div>'
-      +'<div class="iv-mkt-filter"><label class="iv-mkt-input">'+icon('search',17)+'<input id="iv-mkt-product-search" type="search" aria-label="Buscar produto" placeholder="Buscar no cardápio"></label></div>'
+   const online=data.online_settings??{};
+   const isOpen=data.checkout_available===true;
+   const statusLabel=isOpen?'Aberto para pedidos':data.customer_orders_enabled?'Fechado para pedidos':'Pedidos online indisponíveis';
+   const min=Number(online.minimum_order_cents??0);
+   const hasMin=Number.isFinite(min)&&min>0;
+   const place=[r.city,r.state].filter(Boolean).join(' - ');
+   const description=String(r.description??'').trim();
+   let out='<section class="iv-mkt-store-profile" aria-label="Informações do restaurante">'
+      +'<div class="iv-mkt-cover">'+(cover?'<img src="'+esc(cover)+'" alt="Capa do restaurante" loading="eager">':'<div class="iv-mkt-cover-placeholder">'+icon('store',30)+'</div>')+'</div>'
+      +'<div class="iv-mkt-cover-actions"><a class="iv-mkt-cover-button" href="'+link('/explorar')+'" aria-label="Voltar para restaurantes" title="Voltar">'+icon('arrowLeft',22)+'</a><button class="iv-mkt-cover-button" id="iv-mkt-open-search" type="button" aria-label="Buscar no cardápio" aria-controls="iv-mkt-search-panel" aria-expanded="false">'+icon('search',23)+'</button></div>'
+      +'<div class="iv-mkt-store-head"><div class="iv-mkt-store-avatar">'+photo+'</div><h1>'+storeTitle+'</h1>'
+      +'<div class="iv-mkt-store-meta"><span class="iv-mkt-store-status '+(isOpen?'is-open':'is-closed')+'" role="status">'+statusLabel+'</span>'
+      +(hasMin?'<span class="iv-mkt-store-min">Mín. '+money(min)+'</span>':'')
+      +'<button type="button" class="iv-mkt-store-info" id="iv-mkt-store-info">Informações '+icon('chevronRight',14)+'</button></div>'
+      +(place?'<div class="iv-mkt-store-place">'+esc(place)+'</div>':'')
+      +(description?'<p class="iv-mkt-store-description">'+esc(description)+'</p>':'')
+      +(!isOpen?'<p class="iv-mkt-store-notice">'+icon('info',15)+'<span>Você pode consultar o cardápio; a finalização está indisponível no momento.</span></p>':'')
+      +'</div></section>'
+      +'<div class="iv-mkt-filter iv-mkt-store-search" id="iv-mkt-search-panel" hidden><label class="iv-mkt-input">'+icon('search',17)+'<input id="iv-mkt-product-search" type="search" aria-label="Buscar produto" placeholder="Buscar no cardápio"></label></div>'
       +'<div class="iv-mkt-pills" role="group" aria-label="Categorias"><button type="button" data-mkt-cat="all" aria-pressed="true">Todos</button>'
       +cats.map(c=>'<button type="button" data-mkt-cat="'+esc(c.id)+'" aria-pressed="false">'+esc(c.name)+'</button>').join('')+'</div>'
       +'<div class="iv-mkt-catalog-head"><div><h2 class="iv-mkt-title" style="font-size:21px">Cardápio</h2><p class="iv-mkt-description">'+products.length+' produto(s) disponíveis para consulta</p></div>'
@@ -92,7 +108,29 @@ export async function renderMarketplace({supabase,route,box,esc,link}){
    }
    if(!products.length)out+=placeholder('Cardápio sem produtos','O restaurante ainda não cadastrou itens disponíveis.');
    out+='</div><div id="iv-mkt-empty" class="iv-mkt-empty" hidden>Nenhum produto encontrado.</div><div id="iv-com-cartbar" class="iv-com-cartbar" hidden></div>';
-   page(out,'buscar');
+   page(out,'buscar',true);
+   const coverImg=document.querySelector('.iv-mkt-store-profile .iv-mkt-cover img');
+   coverImg?.addEventListener('error',()=>{
+     const fallback=document.createElement('div');fallback.className='iv-mkt-cover-placeholder';fallback.innerHTML=icon('store',30);coverImg.replaceWith(fallback);
+   },{once:true});
+   const infoButton=document.getElementById('iv-mkt-store-info');
+   infoButton.onclick=()=>{
+     const hours=Array.isArray(data.hours)?data.hours:[];
+     const weekdays=['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
+     const hourRows=hours.map(h=>'<div class="iv-mkt-info-row"><span>'+esc(weekdays[Number(h.weekday)]??'Dia')+'</span><strong>'+esc(String(h.opens_at??'').slice(0,5))+' – '+esc(String(h.closes_at??'').slice(0,5))+'</strong></div>').join('');
+     const modes=[online.delivery_configured?'Entrega':null,online.pickup_configured?'Retirada':null].filter(Boolean).join(' · ');
+     const dialog=document.createElement('dialog');dialog.className='iv-mkt-sheet';dialog.setAttribute('aria-label','Informações do restaurante');
+     dialog.innerHTML='<div class="iv-mkt-sheet-handle"></div><div class="iv-mkt-sheet-content"><h2>'+storeTitle+'</h2><p>'+statusLabel+'</p>'
+      +(description?'<p>'+esc(description)+'</p>':'')+(place?'<div class="iv-mkt-info-row"><span>Localização</span><strong>'+esc(place)+'</strong></div>':'')
+      +(hasMin?'<div class="iv-mkt-info-row"><span>Pedido mínimo</span><strong>'+money(min)+'</strong></div>':'')
+      +(modes?'<div class="iv-mkt-info-row"><span>Modalidades</span><strong>'+esc(modes)+'</strong></div>':'')
+      +'<h3>Horários cadastrados</h3>'+(hourRows||'<p>Nenhum horário informado pelo restaurante.</p>')
+      +'<button class="iv-mkt-sheet-close" type="button">Fechar</button></div>';
+     dialog.querySelector('button').onclick=()=>dialog.close();
+     dialog.addEventListener('close',()=>dialog.remove(),{once:true});
+     dialog.addEventListener('click',e=>{if(e.target===dialog)dialog.close()});
+     document.body.append(dialog);dialog.showModal();
+   };
    const cartBar=document.getElementById('iv-com-cartbar');
    const refreshCart=()=>{
      const current=loadCart(route[1]),qty=cartCount(current);
@@ -120,6 +158,14 @@ export async function renderMarketplace({supabase,route,box,esc,link}){
    try{preferredView=localStorage.getItem('intervalo-market-view:'+route[1])==='list'?'list':'grid'}catch{}
    setView(preferredView);
    const search=document.getElementById('iv-mkt-product-search');
+   const searchPanel=document.getElementById('iv-mkt-search-panel');
+   const searchButton=document.getElementById('iv-mkt-open-search');
+   searchButton.onclick=()=>{
+     const show=searchPanel.hidden;searchPanel.hidden=!show;
+     searchButton.setAttribute('aria-expanded',String(show));
+     if(show){search.focus({preventScroll:true});searchPanel.scrollIntoView({block:'nearest'})}
+     else{search.value='';filter()}
+   };
    let activeCat='all';
    const filter=()=>{
     const q=search.value.trim().toLocaleLowerCase('pt-BR');let count=0;
