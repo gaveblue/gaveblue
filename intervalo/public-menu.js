@@ -1,33 +1,19 @@
 import {icon} from './ui-icons.js?v=1.0.0-rc.1';
+import {readCatalog,saveCatalog,forgetCatalog,publicResult} from './public-catalog-cache-rc26.js?v=1.1.0-rc.26';
 // Intervalo 0.9.7 — cardápio público somente consulta. Sem pedidos ou cobranças online.
 export async function renderPublicMenu({supabase,slug,box,esc,link}){
  document.body.classList.add('intervalo-menu');
  const css='<style>body.intervalo-menu{background:#fff8f3;color:#172033}body.intervalo-menu>header,body.intervalo-menu>.foot{display:none}body.intervalo-menu #app .wrap{max-width:1120px;padding:0 18px 50px}.dm-bar{display:flex;align-items:center;justify-content:space-between;padding:18px 0;gap:15px}.dm-logo{font-size:26px;font-weight:900;font-style:italic;letter-spacing:-1.5px}.dm-logo:after{content:"";display:block;width:66%;height:4px;background:#ff7600;border-radius:20px;transform:rotate(-3deg);margin:-2px 0 0 21px}.dm-bar small{font-size:11px;color:#81909d;text-align:right}.dm-hero{background:linear-gradient(120deg,#ff840b,#ed5700);border-radius:24px;padding:38px;color:#fff;position:relative;overflow:hidden}.dm-hero:after{content:"";width:210px;height:210px;border:38px solid #ffffff27;border-radius:100%;position:absolute;right:-75px;top:-80px}.dm-hero>*{position:relative;z-index:1}.dm-hero h1{font-size:clamp(28px,5vw,46px);letter-spacing:-1.3px;margin:9px 0}.dm-hero p{font-size:14px;line-height:1.6;color:#fff9f0;max-width:580px}.dm-tag{font-size:11px;letter-spacing:2px;font-weight:900;text-transform:uppercase}.dm-hero button{margin:9px 8px 0 0;padding:10px 14px;border-radius:11px;border:1px solid #ffffff80;background:#ffffff29;color:#fff;font-weight:800;cursor:pointer}.dm-tools{position:sticky;top:0;z-index:10;background:#fff8f3ec;backdrop-filter:blur(12px);padding:15px 0 10px;border-bottom:1px solid #ffe0c5}.dm-tools input{background:#fff;width:100%;border:1px solid #ffdcbd;border-radius:14px;padding:13px 15px;box-shadow:none}.dm-categories{display:flex;gap:8px;overflow:auto;scrollbar-width:none;padding:13px 0 0}.dm-categories::-webkit-scrollbar{display:none}.dm-categories button{white-space:nowrap;background:#fff;border:1px solid #ffdac0;border-radius:50px;padding:9px 14px;color:#815536;font-size:13px;font-weight:800;cursor:pointer}.dm-categories button[aria-pressed=true]{background:#ff7100;color:#fff;border-color:#ff7100}.dm-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:25px 0 16px}.dm-head h2{margin:0;font-size:25px;letter-spacing:-.8px}.dm-counter{font-size:12px;color:#818c99}.dm-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:15px}.dm-card{background:#fff;border:1px solid #f4e4d6;border-radius:19px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 5px 12px #653d1f08}.dm-photo{height:165px;background:linear-gradient(130deg,#fff3e4,#ffdeb7);display:grid;place-items:center;position:relative;overflow:hidden}.dm-photo img{width:100%;height:100%;object-fit:cover;display:block}.dm-photo span{font-size:68px}.dm-photo b{font-size:10px;background:#ffffffed;border-radius:50px;color:#e66b04;position:absolute;left:10px;top:10px;padding:6px 10px}.dm-content{padding:17px;display:flex;flex-direction:column;flex:1;gap:6px}.dm-content h3{font-size:17px;line-height:1.25;margin:2px 0}.dm-content p{font-size:12px;color:#728096;line-height:1.5;flex:1;margin:3px 0;overflow-wrap:anywhere}.dm-content strong{color:#f06a00;font-size:19px;margin:10px 0}.dm-content details{font-size:12px;color:#485569;border-top:1px solid #f3e3d5;padding-top:10px}.dm-content summary{cursor:pointer;font-weight:750}.dm-content ul{padding-left:19px;line-height:1.8}.dm-card[hidden]{display:none!important}.dm-empty[hidden]{display:none!important}.dm-empty{background:#fff;border:1px dashed #ffca9f;border-radius:15px;padding:35px;text-align:center;color:#856447}.dm-footer{text-align:center;margin:35px 0;padding:20px 0;border-top:1px solid #f2ddc8;font-size:12px;line-height:1.6;color:#80909b}.dm-footer b{color:#ee6e00}@media(max-width:580px){.dm-bar{padding:14px 0}.dm-logo{font-size:22px}.dm-hero{padding:26px 22px;border-radius:18px}.dm-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.dm-photo{height:117px}.dm-photo span{font-size:47px}.dm-content{padding:11px}.dm-content h3{font-size:14px}.dm-content strong{font-size:17px}.dm-content p{font-size:11px}.dm-photo b{display:none}}.dm-head-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}.dm-view-controls{display:flex;align-items:center;flex:none;gap:2px;padding:3px;border:1px solid #e7eaf0;border-radius:12px;background:#f5f7fa}.dm-view-controls button{width:34px;height:33px;padding:0;border:0;border-radius:9px;background:transparent;color:#7f8a9c;cursor:pointer;display:grid;place-items:center}.dm-view-controls button[aria-pressed="true"]{background:#fff;color:#ef7000;box-shadow:0 1px 5px #0b253016}.dm-view-controls button:focus-visible{outline:2px solid #fb923c;outline-offset:1px}.dm-grid.is-list{display:flex;flex-direction:column;gap:10px}.dm-grid.is-list .dm-card{flex-direction:row;align-items:stretch;min-height:110px}.dm-grid.is-list .dm-photo{width:130px;height:auto;min-height:110px;flex:none}.dm-grid.is-list .dm-content{padding:12px;min-width:0}.dm-grid.is-list .dm-content h3{font-size:15px}.dm-grid.is-list .dm-content strong{margin:3px 0 0;font-size:16px}.dm-grid.is-list .dm-photo b{display:none}@media(max-width:580px){.dm-head{align-items:flex-start}.dm-head-actions{max-width:220px}.dm-grid.is-list .dm-photo{width:104px;min-height:106px}.dm-grid.is-list .dm-content{padding:10px}.dm-grid.is-list .dm-content h3{font-size:13px}.dm-grid.is-list .dm-content p{font-size:11px}}@media(max-width:340px){.dm-grid{grid-template-columns:1fr}.dm-photo{height:175px}}</style>';
  const bar='<div class="dm-bar"><div class="dm-logo">Intervalo</div><small>Cardápio digital<br>Uma experiência Gaveblue</small></div>';
- box(css+bar+'<div class="iv-loading-inline" role="status" aria-live="polite" aria-busy="true"><div class="iv-loading-inline-label"><span class="iv-load-dot" aria-hidden="true"></span><span>Preparando o cardápio...</span></div><div class="iv-loading-inline-lines" aria-hidden="true"><span class="iv-load-skeleton"></span><span class="iv-load-skeleton"></span></div></div>');
- let data;
- try{
-  const result=await supabase.functions.invoke('public-menu',{body:{slug}});
-  if(result.error){
-   let details=null;
-   try{details=await result.error.context?.json?.()}catch{}
-   if(details?.published===false)throw Error('Este restaurante ainda não publicou seu cardápio.');
-   throw Error('Não foi possível consultar o cardápio agora. Verifique a conexão e tente novamente.');
-  }
-  if(result.data?.published===false)throw Error('Este restaurante ainda não publicou seu cardápio.');
-  if(result.data?.published!==true)throw Error('O serviço de cardápio está temporariamente indisponível.');
-  data=result.data;
- }catch(e){
-  const message=e instanceof Error?e.message:'Não foi possível consultar o cardápio.';
-  box(css+bar+'<section class="dm-empty" role="alert"><h1>Cardápio indisponível</h1><p>'+esc(message)+'</p><a href="'+link('/'+slug+'/cardapio')+'">Tentar novamente</a></section>');
-  return;
- }
+ const loading=()=>{box(css+bar+'<div class="iv-loading-inline" role="status" aria-live="polite" aria-busy="true"><div class="iv-loading-inline-label"><span class="iv-load-dot" aria-hidden="true"></span><span>Preparando o cardápio...</span></div><div class="iv-loading-inline-lines" aria-hidden="true"><span class="iv-load-skeleton"></span><span class="iv-load-skeleton"></span></div></div>');};
+ const render=(data,checking=false,previous=null)=>{
  const cats=data.categories??[],catIds=new Set(cats.map(c=>c.id));
  const products=(data.products??[]).filter(p=>catIds.has(p.category_id));
  const money=n=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(n??0)/100);
  const categoryIcon=name=>icon(/bebid|sucos|refriger|drink/i.test(name)?'cup':/pizza/i.test(name)?'pizza':/sobremesa|doce/i.test(name)?'cake':/batata|porç|acomp/i.test(name)?'package':/cafe|café/i.test(name)?'coffee':'burger',52);
  const safeImage=p=>typeof p.image_url==='string'&&/^https:\/\/[^\s<>"']+$/.test(p.image_url)?p.image_url:null;
  let out=css+bar+'<section class="dm-hero"><span class="dm-tag">Bem-vindo ao nosso cardápio</span><h1>'+esc(data.restaurant.name)+'</h1><p>Encontre seus sabores favoritos. Consulte a equipe do restaurante para realizar seu pedido.</p><button type="button" id="dm-share">Compartilhar cardápio</button><button type="button" id="dm-copy">Copiar link</button></section>'
+ +(checking?'<p id="dm-cache-status" role="status" style="font-size:12px;color:#80644d;margin:12px 0">Atualizando preços e disponibilidade...</p>':'')
  +'<section class="dm-tools"><input type="search" id="dm-search" aria-label="Buscar no cardápio" placeholder="Buscar lanches, bebidas, produtos..." autocomplete="off"><div class="dm-categories" role="group" aria-label="Categorias">'
  +'<button type="button" data-dm-cat="all" aria-pressed="true">Todos</button>'+cats.map(c=>'<button type="button" data-dm-cat="'+esc(c.id)+'" aria-pressed="false">'+esc(c.name)+'</button>').join('')+'</div></section>'
  +'<div class="dm-head"><h2>Nosso cardápio</h2><div class="dm-head-actions"><span id="dm-counter" class="dm-counter">'+products.length+' opções</span>'
@@ -69,6 +55,12 @@ export async function renderPublicMenu({supabase,slug,box,esc,link}){
   document.querySelectorAll('[data-dm-cat]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));
   refresh();
  });
+ if(previous){
+  if(previous.cat==='all'||cats.some(c=>String(c.id)===previous.cat))category=previous.cat;
+  input.value=previous.query;
+  document.querySelectorAll('[data-dm-cat]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.dmCat===category)));
+  refresh();if(previous.y)window.scrollTo(0,previous.y);if(previous.focused)input.focus({preventScroll:true});
+ }
  const url=new URL(link('/'+slug+'/cardapio'),location.origin).href;
  const copy=async()=>{try{await navigator.clipboard.writeText(url);return true}catch{return false}};
  document.getElementById('dm-copy').onclick=async e=>{e.currentTarget.textContent=(await copy())?'Link copiado':'Copie o link na barra de endereço'};
@@ -76,4 +68,21 @@ export async function renderPublicMenu({supabase,slug,box,esc,link}){
   if(typeof navigator.share==='function')try{await navigator.share({title:'Cardápio · '+data.restaurant.name,url});return}catch(e){if(e?.name==='AbortError')return}
   if(await copy())alert('Link do cardápio copiado.');
  };
+ };
+ const cached=readCatalog('menu',slug);let shownCache=false;
+ if(cached){try{render(cached.data,true);shownCache=true}catch{forgetCatalog('menu',slug);loading()}}else loading();
+ try{
+  const data=await publicResult(await supabase.functions.invoke('public-menu',{body:{slug}}));
+  if(data?.published!==true||data.restaurant?.slug!==slug){const e=Error('Cardápio indisponível.');e.unavailable=true;throw e}
+  const previous=shownCache?{cat:document.querySelector('[data-dm-cat][aria-pressed="true"]')?.dataset.dmCat??'all',query:document.getElementById('dm-search')?.value??'',y:window.scrollY,focused:document.activeElement?.id==='dm-search'}:null;
+  saveCatalog('menu',slug,data);render(data,false,previous);
+ }catch(e){
+  if(e?.unavailable)forgetCatalog('menu',slug);
+  if(shownCache&&!e?.unavailable){
+   const status=document.getElementById('dm-cache-status');
+   if(status){status.textContent='Não foi possível atualizar. Exibindo a última consulta; confirme preços e disponibilidade com o restaurante. ';const b=document.createElement('button');b.type='button';b.textContent='Tentar novamente';b.onclick=()=>location.reload();status.append(b)}
+   return;
+  }
+  box(css+bar+'<section class="dm-empty" role="alert"><h1>Cardápio indisponível</h1><p>'+esc(e?.unavailable?'Este restaurante não disponibilizou seu cardápio.':'Não foi possível consultar o cardápio agora.')+'</p><a href="'+link('/'+slug+'/cardapio')+'">Tentar novamente</a></section>');
+ }
 }

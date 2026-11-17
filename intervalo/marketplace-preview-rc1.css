@@ -138,3 +138,6 @@ dialog.iv-mkt-sheet::backdrop{background:#1b2b4199}
  .iv-mkt-store-profile .iv-mkt-store-description{font-size:12px;margin-top:5px}
  .iv-mkt-store-profile .iv-mkt-store-notice{margin-top:8px;font-size:11px}
 }
+
+/* RC26: catálogo local durante atualização, sem ação comercial até validar. */
+.iv-mkt-product:disabled{opacity:1;cursor:default;color:inherit}.iv-mkt-cache-retry{font:inherit;font-weight:750;color:#bd5b00;border:0;background:transparent;padding:0;text-decoration:underline;cursor:pointer}

@@ -1,5 +1,13 @@
 # Intervalo — CHANGELOG
 
+## 1.1.0-rc.26 — 2026-11-17 · Cache público por restaurante
+
+- Loja e cardápio de consulta exibem a última resposta pública válida (até 15 min na abertura) enquanto consultam o servidor. Primeira visita continua consultando a API; cada acesso revalida.
+- Cache local separado por slug e canal, limitado a 8 entradas de até 180 mil caracteres; guarda campos públicos selecionados, URLs das fotos (não binários), sem sessão, pedidos, dados de cliente ou status de checkout.
+- Vitrine em atualização bloqueia ações de compra e oculta carrinho até resposta atual. Falha mantém aviso e botão de nova tentativa; publicação negada remove o cache. Preferências e busca/filtro preservados durante atualização.
+- Rota de cardápio público não espera consulta de usuário autenticado. Sem alterações no Supabase.
+- QA: análise sintática e testes simulados de cache; validação visual Android, tempo real de carregamento e propagação pendentes.
+
 ## 1.1.0-rc.25 — 2026-11-17 · Navegação pública e cache
 
 - Rota explícita validada antes da inicialização; rota legada não sobrescreve destino explícito ou navegação direta.

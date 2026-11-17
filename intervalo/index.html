@@ -365,7 +365,7 @@ async function waiterHome(user){
 const internalModules=['catalogo','mesas','estoque','impressao','relatorios','vendas-online'];
 async function tenant(user,slug,mod){
  if(mod==='cardapio'){
-  const {renderPublicMenu}=await import('/intervalo/public-menu.js?v=1.1.0-rc.24');
+  const {renderPublicMenu}=await import('/intervalo/public-menu.js?v=1.1.0-rc.26');
   return renderPublicMenu({supabase,slug,box,esc,link});
  }
  if(!user){location.assign(link('/login'));return}
@@ -405,6 +405,7 @@ async function account(user){
  return renderAccount({supabase,box,esc,link,user});
 }
 async function start(){
+ if(paths.length===2&&paths[1]==='cardapio'&&/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(paths[0]))return tenant(null,paths[0],'cardapio');
  if(paths[0]==='checkout'){
   const {renderCheckout}=await import('/intervalo/marketplace-checkout-rc7.js?v=1.1.0-rc.10');
   return renderCheckout({supabase,box,esc,link});
@@ -418,7 +419,7 @@ async function start(){
   return renderCustomer({box,esc,link});
  }
  if(['explorar','loja'].includes(paths[0])){
-  const {renderMarketplace}=await import('/intervalo/marketplace-preview-rc1.js?v=1.1.0-rc.25');
+  const {renderMarketplace}=await import('/intervalo/marketplace-preview-rc1.js?v=1.1.0-rc.26');
   return renderMarketplace({supabase,route:paths,box,esc,link});
  }
  const user=await me();if(user?.app_metadata?.intervalo_password_change_required&&!['trocar-senha','login','redefinir','recuperar-senha'].includes(paths[0])){location.assign(link('/trocar-senha'));return}await setupNav(user);if(paths.length===0)return new URLSearchParams(location.search).get('app')==='garcom'
