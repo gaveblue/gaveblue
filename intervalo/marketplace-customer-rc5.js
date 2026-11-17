@@ -1,5 +1,6 @@
 import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.50.0/+esm';
 import {icon} from './ui-icons.js?v=1.0.0-rc.1';
+import {showOnboarding,googleLogin,googleButton,onboardingStyle,returnTarget,finishCustomer} from './marketplace-onboarding-rc32.js?v=1.1.0-rc.32';
 
 // Área do consumidor independente do Auth e dos papéis dos funcionários.
 // O checkout visitante não depende desta sessão nem de cadastro.
@@ -20,65 +21,36 @@ export async function renderCustomer({box,esc,link}){
   +'<main class="iv-client">'+x+'</main></div>');
  const notice='<p class="iv-client-muted">A conta é opcional. Você continua podendo comprar sem cadastro. Ela é separada do acesso de funcionários e restaurantes.</p>';
  const setMsg=(id,message,isError)=>{const el=document.getElementById(id);if(el){el.textContent=message;el.className=isError?'iv-client-error':'iv-client-ok'}};
+ const destination=returnTarget(link);
+ page(onboardingStyle()+'<section class="iv-client-wizard" role="status" aria-busy="true"><div class="iv-home-skeleton"><div></div><span></span><span></span></div></section>');
  const {data:ud,error:userError}=await customerAuth.auth.getUser();
  if(userError&&userError.name!=='AuthSessionMissingError'){
   page('<section class="iv-client-card"><h2>Não foi possível verificar seu acesso</h2><p class="iv-client-error">'+esc(userError.message)+'</p><a href="'+link('/cliente')+'">Tentar novamente</a></section>');return;
  }
  const user=ud?.user;
+ const onboarding=(u=null,p=null)=>showOnboarding({auth:customerAuth,page,esc,link,user:u,profile:p,onDone:()=>finishCustomer(link),onLogin:()=>renderCustomer({box,esc,link})});
  if(!user){
-  page('<header class="iv-client-head"><span class="iv-mkt-eyebrow">PARA QUEM PEDE</span><h1>Minha conta</h1>'+notice+'</header>'
-   +'<section class="iv-client-card"><h2 id="iv-client-auth-title">Entrar</h2><form id="iv-client-auth" class="iv-client-form">'
-   +'<label id="iv-client-name-row" hidden>Nome completo<input name="name" maxlength="120" autocomplete="name"></label>'
+  page(onboardingStyle()+'<section class="iv-client-wizard"><h1>Minha conta</h1><p class="iv-client-muted">Acesse sua conta para agilizar seus pedidos.</p><section class="iv-client-card">'
+   +googleButton()+'<div class="iv-client-divider">ou entre com e-mail</div><form id="iv-client-auth" class="iv-client-form">'
    +'<label>E-mail<input type="email" name="email" maxlength="254" autocomplete="email" required></label>'
-   +'<label>Senha<input type="password" name="password" minlength="8" autocomplete="current-password" required></label>'
-   +'<p role="status" id="iv-client-auth-status"></p>'
-   +'<button class="iv-client-primary" type="submit">Entrar</button></form>'
-   +'<div class="iv-client-actions"><button class="iv-client-secondary" id="iv-client-switch" type="button">Criar minha conta</button>'
-   +'<a href="'+link('/explorar')+'">Continuar sem cadastro</a></div></section>'
-   +'<section class="iv-client-card"><h2>Já fez um pedido sem conta?</h2>'
-   +'<p class="iv-client-muted">Acompanhe pelo link privado mostrado ao confirmar a compra. Não é necessário entrar nesta área.</p></section>');
-  const form=document.getElementById('iv-client-auth'),sw=document.getElementById('iv-client-switch');
-  let registering=false;
-  sw.onclick=()=>{
-   registering=!registering;
-   document.getElementById('iv-client-name-row').hidden=!registering;
-   document.getElementById('iv-client-auth-title').textContent=registering?'Criar conta':'Entrar';
-   form.querySelector('button[type=submit]').textContent=registering?'Cadastrar':'Entrar';
-   form.elements.password.autocomplete=registering?'new-password':'current-password';
-   sw.textContent=registering?'Já tenho conta':'Criar minha conta';
-   setMsg('iv-client-auth-status','',false);
-  };
-  form.onsubmit=async e=>{
-   e.preventDefault();const button=form.querySelector('button[type=submit]');button.disabled=true;
-   const email=form.elements.email.value.trim().toLowerCase(),password=form.elements.password.value;
-   const name=String(form.elements.name.value||'').trim();
-   try{
-    if(registering){
-     if(name.length<2)throw Error('Informe seu nome para criar a conta.');
-     if(password.length<8)throw Error('Use uma senha de pelo menos 8 caracteres.');
-     const {data,error}=await customerAuth.auth.signUp({email,password,options:{
-      data:{display_name:name},
-      emailRedirectTo:location.origin+link('/cliente')
-     }});
-     if(error)throw error;
-     if(!data?.session){setMsg('iv-client-auth-status','Verifique seu e-mail para confirmar o cadastro e depois faça login.',false);return}
-     const {error:pe}=await customerAuth.from('customer_profiles')
-      .insert({id:data.user.id,display_name:name});
-     if(pe)throw pe;
-    }else{
-     const {error}=await customerAuth.auth.signInWithPassword({email,password});
-     if(error)throw error;
-    }
-    return renderCustomer({box,esc,link});
-   }catch(err){setMsg('iv-client-auth-status',err.message||'Não foi possível acessar.',true)}
-   finally{button.disabled=false}
-  };
+   +'<label>Senha<input type="password" name="password" autocomplete="current-password" required></label>'
+   +'<p role="alert" id="iv-client-auth-status" class="iv-client-error"></p><button class="iv-client-primary" type="submit">Entrar</button></form>'
+   +'<div class="iv-client-actions"><button class="iv-client-secondary" id="iv-client-register" type="button">Criar minha conta</button></div>'
+   +'<div class="iv-client-actions"><a href="'+destination+'">Continuar sem cadastro</a></div></section></section>');
+  const form=document.getElementById('iv-client-auth'),google=document.getElementById('iv-client-google');
+  document.getElementById('iv-client-register').onclick=()=>onboarding();
+  google.onclick=async()=>{google.disabled=true;try{await googleLogin(customerAuth)}catch{setMsg('iv-client-auth-status','Acesso pelo Google indisponível. Use e-mail ou tente novamente após a configuração.',true);google.disabled=false}};
+  form.onsubmit=async e=>{e.preventDefault();const b=form.querySelector('button[type=submit]');b.disabled=true;try{
+   const {error}=await customerAuth.auth.signInWithPassword({email:form.elements.email.value.trim().toLowerCase(),password:form.elements.password.value});
+   if(error)throw Error('Não foi possível acessar. Confira e-mail, senha e confirmação.');
+   await renderCustomer({box,esc,link});
+  }catch(err){setMsg('iv-client-auth-status',err.message,true)}finally{b.disabled=false}};
   return;
  }
  let profile=null,addresses=[];
  try{
   const [p,a]=await Promise.all([
-   customerAuth.from('customer_profiles').select('id,display_name,phone').eq('id',user.id).maybeSingle(),
+   customerAuth.from('customer_profiles').select('id,display_name,phone,full_name,social_name,cpf,terms_accepted_at').eq('id',user.id).maybeSingle(),
    customerAuth.from('customer_addresses').select('id,label,street,number,complement,neighborhood,city,state,postal_code,reference,created_at')
     .eq('customer_id',user.id).order('created_at',{ascending:false}).limit(20)
   ]);
@@ -88,15 +60,17 @@ export async function renderCustomer({box,esc,link}){
   page('<section class="iv-client-card"><h2>Dados indisponíveis</h2><p class="iv-client-error">'+esc(err.message)+'</p>'
    +'<a href="'+link('/cliente')+'">Tentar novamente</a></section>');return;
  }
+ if(!profile?.terms_accepted_at||!profile?.full_name||!profile?.cpf){onboarding(user,profile);return}
+ if(destination.includes('/checkout?')&&new URLSearchParams(location.search).get('perfil')!=='1'){finishCustomer(link);return}
  const addressesHtml=addresses.length?addresses.map(a=>'<div class="iv-client-address">'
   +'<b>'+esc(a.label)+'</b><p>'+esc(a.street)+', '+esc(a.number)+' · '+esc(a.neighborhood)+' · '+esc(a.city)+'/'+esc(a.state)+' · CEP '+esc(a.postal_code)+'</p>'
   +'<div class="iv-client-actions"><button class="iv-client-secondary" data-edit="'+esc(a.id)+'" type="button">Editar</button>'
   +'<button class="iv-client-secondary" data-delete="'+esc(a.id)+'" type="button">Excluir</button></div></div>').join('')
   :'<p class="iv-client-muted">Nenhum endereço salvo.</p>';
  page('<header class="iv-client-head"><span class="iv-mkt-eyebrow">ÁREA DO CONSUMIDOR</span><h1>Minha conta</h1>'
-  +'<p class="iv-client-muted">'+esc(user.email||'')+' · Seus dados não fazem parte da conta dos funcionários.</p></header>'
+  +'<p class="iv-client-muted">'+esc(user.email||'')+'</p></header>'
   +'<section class="iv-client-card"><h2>Meu perfil</h2><form id="iv-client-profile" class="iv-client-form">'
-  +'<label>Nome<input name="name" maxlength="120" required value="'+esc(profile?.display_name||user.user_metadata?.display_name||'')+'"></label>'
+  +'<label>Nome completo<input name="full_name" maxlength="150" required value="'+esc(profile.full_name||'')+'"></label><label>Nome social (opcional)<input name="social_name" maxlength="120" value="'+esc(profile.social_name||'')+'"></label><label>Nome no pedido<input name="name" maxlength="120" required value="'+esc(profile.display_name||'')+'"></label><label>CPF<input readonly value="***.***.***-'+esc(String(profile.cpf||'').slice(-2))+'"></label>'
   +'<label>Celular<input name="phone" inputmode="tel" maxlength="20" value="'+esc(profile?.phone||'')+'"></label>'
   +'<p id="iv-client-profile-status" role="status"></p><div class="iv-client-actions">'
   +'<button class="iv-client-primary" type="submit">Salvar perfil</button>'
@@ -121,19 +95,19 @@ export async function renderCustomer({box,esc,link}){
  const profileForm=document.getElementById('iv-client-profile');
  profileForm.onsubmit=async e=>{
   e.preventDefault();
-  const name=profileForm.elements.name.value.trim(),phone=cleanPhone(profileForm.elements.phone.value);
-  if(name.length<2||name.length>120||phone&&phone.length<10){setMsg('iv-client-profile-status','Confira nome e celular.',true);return}
+  const name=profileForm.elements.name.value.trim(),phone=cleanPhone(profileForm.elements.phone.value),full_name=profileForm.elements.full_name.value.trim(),social_name=profileForm.elements.social_name.value.trim()||null;
+  if(name.length<2||name.length>120||full_name.split(/\s+/).length<2||full_name.length>150||social_name&&social_name.length<2||!/^[1-9]\d9\d{8}$/.test(phone)){setMsg('iv-client-profile-status','Confira nome e celular.',true);return}
   const b=profileForm.querySelector('button[type=submit]');b.disabled=true;
-  const payload={display_name:name,phone:phone||null};
+  const payload={display_name:name,phone,full_name,social_name};
   const {error}=profile
    ?await customerAuth.from('customer_profiles').update({...payload,updated_at:new Date().toISOString()}).eq('id',user.id)
    :await customerAuth.from('customer_profiles').insert({...payload,id:user.id});
-  if(!error)profile={id:user.id,...payload};
+  if(!error)profile={...profile,id:user.id,...payload};
   b.disabled=false;
   setMsg('iv-client-profile-status',error?error.message:'Perfil atualizado.',Boolean(error));
  };
  document.getElementById('iv-client-logout').onclick=async()=>{
-  const {error}=await customerAuth.auth.signOut();
+  const {error}=await customerAuth.auth.signOut({scope:'local'});
   if(error){setMsg('iv-client-profile-status',error.message,true);return}
   await renderCustomer({box,esc,link});
  };

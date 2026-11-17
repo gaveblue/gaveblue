@@ -1,7 +1,7 @@
 // Intervalo Marketplace — Checkout mobile-first rc9 · InfinitePay Novo Mundo.
 // Apenas apresentação: cotação, finalização, termos, idempotência e requisições seguem o contrato rc4.
 import {icon} from './ui-icons.js?v=1.0.0-rc.1';
-import {customerAuth} from './marketplace-customer-rc5.js?v=1.1.0-rc.5';
+import {customerAuth} from './marketplace-customer-rc5.js?v=1.1.0-rc.32';
 import {loadCart,setCartItemQuantity,clearCart,formatBRL} from './marketplace-cart-rc4.js?v=1.1.0-rc.4';
 
 export async function renderCheckout({supabase,box,esc,link}){
@@ -47,16 +47,17 @@ export async function renderCheckout({supabase,box,esc,link}){
  const onlinePix=slug==='novo-mundo';
  let manualPixEnabled=false;
  try{manualPixEnabled=(await call('marketplace-manual-pix',{action:'config',slug})).enabled===true}catch{}
- let customerProfile=null,savedAddresses=[];
+ let customerProfile=null,savedAddresses=[],signedIn=false;
  try{
   const {data:auth}=await customerAuth.auth.getUser();
   if(auth?.user){
+   signedIn=true;
    const [p,a]=await Promise.all([
-    customerAuth.from('customer_profiles').select('display_name,phone').eq('id',auth.user.id).maybeSingle(),
-    customerAuth.from('customer_addresses').select('id,label,street,number,neighborhood,city,state,postal_code,complement,reference').eq('customer_id',auth.user.id).limit(20)
+    customerAuth.from('customer_profiles').select('display_name,phone,terms_accepted_at').eq('id',auth.user.id).maybeSingle(),
+    customerAuth.from('customer_addresses').select('id,label,street,number,neighborhood,city,state,postal_code,complement,reference').eq('customer_id',auth.user.id).order('created_at',{ascending:true}).limit(20)
    ]);
-   if(!p.error)customerProfile=p.data;
-   if(!a.error)savedAddresses=a.data||[];
+   if(!p.error&&p.data?.terms_accepted_at)customerProfile=p.data;
+   if(customerProfile&&!a.error)savedAddresses=a.data||[];
   }
  }catch{/* Usuário visitante também pode comprar; não dependemos desta consulta. */}
  const pickupAllowed=configured.pickup_configured!==false;
@@ -82,6 +83,7 @@ export async function renderCheckout({supabase,box,esc,link}){
   +'<span class="iv-ck-edit-label">Editar '+icon('chevronRight',15)+'</span></button>';
  let html='<header class="iv-ck-head"><span class="iv-mkt-eyebrow">SEU PEDIDO</span><h1>Finalizar compra</h1>'
   +'<p>'+esc(data.restaurant?.name??slug)+' · Compra rápida, sem precisar de cadastro</p></header>';
+ if(!customerProfile)html+='<div class="iv-ck-card"><p style="margin:0 0 7px;font-size:13px">Você pode comprar sem cadastro, ou usar sua conta para preencher os dados.</p><a class="iv-ck-inline-link" href="'+link('/cliente?voltar=checkout&loja='+encodeURIComponent(slug))+'">'+(signedIn?'Completar cadastro':'Entrar ou criar conta')+' '+icon('chevronRight',15)+'</a></div>';
  if(!canOrder)html+='<div class="iv-com-warning">'+icon('info',18)
   +' O restaurante não está recebendo pedidos neste momento. Você pode conferir os dados, mas não concluir a compra.</div>';
  html+='<form id="iv-checkout-form" novalidate><div class="iv-ck-grid"><main class="iv-ck-column">'
@@ -264,13 +266,14 @@ export async function renderCheckout({supabase,box,esc,link}){
  form.addEventListener('change',()=>{reset();syncPreviews()});
  const picker=document.getElementById('iv-saved-address');
  if(picker)picker.onchange=()=>{
-  const address=savedAddresses.find(x=>x.id===picker.value);if(!address)return;
+  const address=savedAddresses.find(x=>x.id===picker.value);
   for(const field of ['street','number','complement','neighborhood','city','state','postal_code','reference'])
-   form.elements.namedItem(field).value=address[field]||'';
+   form.elements.namedItem(field).value=address?.[field]||'';
   // Região e taxa sempre revalidadas por restaurante.
   form.elements.namedItem('zone').value='';
   reset();syncPreviews();
  };
+ if(picker&&savedAddresses.length){picker.value=savedAddresses[0].id;picker.onchange()}
  const zone=form.elements.namedItem('zone');
  if(zone)zone.addEventListener('change',()=>{
   const chosen=zones.find(x=>x.id===zone.value);
