@@ -1,5 +1,5 @@
 // Intervalo 0.9.8 — SW com fallback offline. Nenhuma resposta privada, JWT ou comanda é armazenada.
-const OFFLINE_CACHE='intervalo-offline-v0.9.8';
+const OFFLINE_CACHE='intervalo-offline-v1.1.0-rc22';
 const OFFLINE_PAGE='/intervalo/offline.html';
 self.addEventListener('install',event=>{
  event.waitUntil(caches.open(OFFLINE_CACHE).then(cache=>cache.add(new Request(OFFLINE_PAGE,{cache:'reload'})))
