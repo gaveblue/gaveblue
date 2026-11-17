@@ -1,5 +1,11 @@
 # Intervalo — CHANGELOG
 
+## 1.1.0-rc.35 — 2026-11-17 · Cadastro compacto em quatro etapas
+
+- Cadastro manual: nome/CPF, senha, contato e endereço/aceite. Acesso já autenticado (Google ou conta existente) pula a senha e mostra três etapas. Progresso, voltar e ações fixas mantidos.
+- Menor espaçamento entre campos, inputs com altura mínima de 44 px, endereço organizado em três linhas duplas; complemento e referência opcionais recolhíveis. Conserva valores em memória. No erro de senha fraca do servidor, volta à etapa de senha.
+- Sem alteração no banco, autenticação, dependências ou custos. Sintaxe e estrutura verificadas; teste real no Android, propagação e Google pendentes.
+
 ## 1.1.0-rc.34 — 2026-11-17 · Acesso e cadastro em Bottom Sheets
 
 - Tela de acesso compacta, login manual em Bottom Sheet e cadastro em uma folha de três etapas, com progresso, rolagem interna, rodapé fixo, voltar/cancelar, gesto de expansão/fechamento e ajuste ao teclado.

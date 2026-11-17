@@ -1,7 +1,7 @@
 // Intervalo Marketplace — Checkout mobile-first rc9 · InfinitePay Novo Mundo.
 // Apenas apresentação: cotação, finalização, termos, idempotência e requisições seguem o contrato rc4.
 import {icon} from './ui-icons.js?v=1.0.0-rc.1';
-import {customerAuth} from './marketplace-customer-rc5.js?v=1.1.0-rc.34';
+import {customerAuth} from './marketplace-customer-rc5.js?v=1.1.0-rc.35';
 import {loadCart,setCartItemQuantity,clearCart,formatBRL} from './marketplace-cart-rc4.js?v=1.1.0-rc.4';
 
 export async function renderCheckout({supabase,box,esc,link}){
