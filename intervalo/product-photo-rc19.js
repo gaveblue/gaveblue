@@ -1,4 +1,5 @@
-// Intervalo 1.1.0-rc.19 — foto local ou URL pública, prévia e otimização antes do Storage.
+// Intervalo 1.1.0-rc.20 — foto local/URL, prévia e biblioteca reutilizável de imagens.
+import {openProductImageLibrary} from './product-image-library-rc20.js?v=1.1.0-rc.20';
 // Não oferece upload a visitantes: o servidor assina um único caminho para Master/gerente.
 const BUCKET='intervalo-product-images';
 const controllers=new WeakMap();
@@ -74,6 +75,7 @@ export function initProductPhotoForm({form,existingUrl='',supabase,restaurant}){
   +'<div class="iv-photo-view"><div class="iv-photo-thumb" data-photo-preview><span class="iv-photo-placeholder">Sem foto</span></div>'
   +'<div class="iv-photo-content"><div class="iv-photo-actions">'
   +'<button type="button" data-photo-gallery class="iv-photo-primary">Enviar foto</button>'
+  +'<button type="button" class="iv-photo-library-open" data-photo-library>Biblioteca</button>'
   +'<button type="button" data-photo-camera>Câmera</button>'
   +'<button type="button" data-photo-clear class="iv-photo-remove" hidden>Remover</button></div>'
   +'<p class="iv-photo-help">Galeria ou câmera · JPG, PNG ou WebP · até 16 MB na origem. A imagem é reduzida antes do envio.</p>'
@@ -119,6 +121,13 @@ export function initProductPhotoForm({form,existingUrl='',supabase,restaurant}){
  camera.addEventListener('change',()=>fileChanged(camera.files?.[0]));
  wrap.querySelector('[data-photo-gallery]').onclick=()=>gallery.click();
  wrap.querySelector('[data-photo-camera]').onclick=()=>camera.click();
+ wrap.querySelector('[data-photo-library]').onclick=()=>{
+  void openProductImageLibrary({supabase,restaurant,onSelect:url=>{
+   urlInput.value=url;
+   urlInput.dispatchEvent(new Event('input',{bubbles:true}));
+   setStatus('Foto da biblioteca selecionada. Ao salvar, ela será reutilizada sem novo upload.','success');
+  }}).catch(e=>setStatus(e.message||'Não foi possível abrir a biblioteca','error'));
+ };
  clear.onclick=()=>{
   chosen=null;uploaded=null;removed=true;gallery.value='';camera.value='';urlInput.value='';checkId++;
   clearTimeout(checkTimer);release();display(null);clear.hidden=true;
