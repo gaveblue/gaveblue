@@ -6,7 +6,7 @@ export async function renderManagement({supabase,restaurant,role,box,esc,link}) 
  const roles={master:"Master",manager:"Gerente",waiter:"Garçom",kitchen:"Cozinha",cashier:"Caixa"};
  const defaults={master:modules,manager:modules,waiter:["garcom","cardapio"],kitchen:["cozinha","cardapio"],cashier:["caixa","cardapio"]};
  document.body.classList.add("iv-fullwidth","iv-master","iv-management-v2");
- let state={tab:"visao",data:null,overview:null};
+ let state={tab:new URLSearchParams(location.search).get('tab')==='vendas'?'vendas':'visao',data:null,overview:null};
  const sty='<link rel="stylesheet" href="/intervalo/management-design-rc11.css?v=1.0.0-rc.13"><style>.mtabs{display:flex;gap:8px;overflow:auto;margin:23px 0}.mtabs button{border:1px solid #dbe2e8;background:white;padding:11px 16px;border-radius:10px;font-size:13px;font-weight:700;color:#334155;white-space:nowrap}.mtabs button.selected{color:white;background:#0f766e;border-color:#0f766e}.mg{display:grid;grid-template-columns:1fr 1fr;gap:14px}.mg .full{grid-column:1/-1}.mg label{display:block;font-size:12px;font-weight:700;color:#475569;margin-bottom:7px}.mg input,.mg select{padding:11px;width:100%;border:1px solid #cbd5e1;border-radius:9px;background:white;color:#0f172a}.mg input:focus,.mg select:focus{outline:2px solid #99f6e4}.team-card{background:#fff;border:1px solid #dce4ec;border-radius:13px;padding:17px;margin:12px 0}.team-top{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center}.team-actions{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin-top:13px}.team-actions select{border-radius:8px;padding:9px;border:1px solid #cbd5e1}.smallbtn{border:1px solid #cbd5e1;background:#fff;color:#334155;border-radius:8px;padding:9px 12px;font-weight:700;font-size:12px}.smallbtn.danger{color:#b91c1c;border-color:#fecaca}.status{font-size:11px;border-radius:50px;background:#f1f5f9;padding:6px 10px;font-weight:750;color:#475569}.pgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:10px}.pitem{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:13px}.pitem strong{display:block;margin:0 0 8px}.pitem span{font-size:12px;color:#64748b}.pitem button{margin-top:9px}.onboarding-note{font-size:13px;padding:12px;background:#ecfdf5;border:1px solid #ccfbf1;border-radius:10px;color:#115e59}.muted-sm{font-size:12px;color:#64748b;line-height:1.6}@media(max-width:650px){.mg{grid-template-columns:1fr}.mg .full{grid-column:auto}.team-actions{align-items:stretch}}</style>';
  function renderLoading(){
   const line=(size="")=>'<span class="mg-v2-skel mg-v2-skel-line '+size+'"></span>';
@@ -52,8 +52,12 @@ export async function renderManagement({supabase,restaurant,role,box,esc,link}) 
     const fetchCore=async action=>{
      try{const {data,error}=await supabase.functions.invoke("restaurant-core",{body:{restaurant_id:restaurant.id,action}});return error||data?.error?null:data}catch{return null}
     };
-    const [orders,stock]=await Promise.all([fetchCore("orders"),fetchCore("stock_list")]);
-    state.overview={orders,stock};
+    const fetchOnline=async()=>{try{
+     const {data,error}=await supabase.functions.invoke('marketplace-operations',{body:{restaurant_id:restaurant.id,action:'overview'}});
+     return error||data?.error?null:data;
+    }catch{return null}};
+    const [orders,stock,online]=await Promise.all([fetchCore("orders"),fetchCore("stock_list"),fetchOnline()]);
+    state.overview={orders,stock,online};
    }
    draw();
   }finally{
@@ -68,7 +72,7 @@ export async function renderManagement({supabase,restaurant,role,box,esc,link}) 
    const d=state.data;if(!d)return;
    const s=d.settings??{},isMaster=d.actor_role==="master",isManager=d.actor_role==="manager";
    const note=s.onboarding_completed_at?"Cadastro inicial concluído. Você pode atualizar os dados abaixo.":"Preencha telefone, cidade e UF para concluir o cadastro inicial do restaurante.";
-   const tabs=[["visao","Visão geral"],["dados","Dados do restaurante"],["equipe","Equipe"],["acessos","Permissões"]];
+   const tabs=[["visao","Visão geral"],["vendas","Vendas online"],["dados","Dados do restaurante"],["equipe","Equipe"],["acessos","Permissões"]];
    const quickModules=[["garcom","Garçom","garcom"],["cozinha","Cozinha","cozinha"],["caixa","Caixa","caixa"],["catalogo","Cardápio","gestao"],["mesas","Mesas","gestao"],["estoque","Estoque","gestao"],["relatorios","Relatórios","gestao"],["impressao","Impressão","gestao"]];
    const accessible=quickModules.filter(([path,label,required])=>(d.enabled??[]).some(m=>m.module===required&&m.enabled));
    const modIcons={catalogo:"receipt",mesas:"table",garcom:"utensils",cozinha:"chef",caixa:"register",estoque:"package",impressao:"printer",relatorios:"chart"};
@@ -78,9 +82,9 @@ export async function renderManagement({supabase,restaurant,role,box,esc,link}) 
      return entry?'<a class="mg-v2-navlink" href="'+link("/"+d.restaurant.slug+"/"+path)+'">'+icon(modIcons[path]??"layers",18)+esc(entry[1])+'</a>':'';
    };
    const menuTab=(tab,label,symbol)=>'<button class="mg-v2-navlink '+(state.tab===tab?"active":"")+'" type="button" data-tab="'+tab+'">'+icon(symbol,18)+esc(label)+'</button>';
-   const pageTitle={visao:"Visão geral",dados:"Dados do restaurante",equipe:"Equipe do restaurante",acessos:"Permissões da equipe"}[state.tab]??"Gestão";
+   const pageTitle={visao:"Visão geral",vendas:"Vendas online",dados:"Dados do restaurante",equipe:"Equipe do restaurante",acessos:"Permissões da equipe"}[state.tab]??"Gestão";
    const topTitle=state.tab==="visao"?"Olá, gestor!":pageTitle;
-   const topSubtitle=state.tab==="visao"?"Tudo o que importa para sua operação.":state.tab==="dados"?"Informações e configurações do estabelecimento.":"Gerencie esta área com as regras de acesso existentes.";
+   const topSubtitle=state.tab==="visao"?"Tudo o que importa para sua operação.":state.tab==="vendas"?"Delivery, retirada, pedidos, vitrine e pagamentos em um só lugar.":state.tab==="dados"?"Informações e configurações do estabelecimento.":"Gerencie esta área com as regras de acesso existentes.";
    const roleText=roles[d.actor_role]??d.actor_role;
    const mainLink=link("/inicio");
    const quickLinks='<section class="mg-v2-section"><div class="mg-v2-section-head"><h2>Acessar módulos</h2><button type="button" class="mg-link" data-mg-sheet="more">Ver todos '+icon("chevronRight",13)+'</button></div><div class="mg-v2-modules">'+moduleLinks+'</div></section>';
@@ -88,19 +92,19 @@ export async function renderManagement({supabase,restaurant,role,box,esc,link}) 
     +'<button type="button" class="'+(state.tab==="visao"?"mg-v2-active":"")+'" data-tab="visao">'+icon("home",21)+'Início</button>'
     +(accessible.some(([p])=>p==="mesas")?'<a href="'+link("/"+d.restaurant.slug+"/mesas")+'">'+icon("table",21)+'Mesas</a>':'<button type="button" data-mg-sheet="more">'+icon("table",21)+'Módulos</button>')
     +'<button type="button" class="mg-v2-plus" data-mg-sheet="quick" aria-label="Ações rápidas">'+icon("plus",26)+'</button>'
-    +(accessible.some(([p])=>p==="relatorios")?'<a href="'+link("/"+d.restaurant.slug+"/relatorios")+'">'+icon("chart",21)+'Relatórios</a>':'<button type="button" data-mg-sheet="more">'+icon("chart",21)+'Módulos</button>')
+    +'<button type="button" class="'+(state.tab==="vendas"?"mg-v2-active":"")+'" data-tab="vendas">'+icon("bag",21)+'Vendas</button>'
     +'<button type="button" data-mg-sheet="more">'+icon("more",21)+'Mais</button></nav>';
    const viewHead=sty+'<div class="mg-v2-shell" id="mg-v2-root">'
      +'<button type="button" class="mg-v2-side-overlay" data-mg-close-nav aria-label="Fechar menu"></button>'
      +'<aside class="mg-v2-side" aria-label="Menu da Gestão"><div class="mg-v2-brand">Intervalo</div>'
      +'<div class="mg-v2-restaurant"><span class="mg-rest-icon">'+icon("store",19)+'</span><span class="mg-rest-text">'+value(d.restaurant.name)+'<small>Restaurante selecionado</small></span>'+icon("chevronRight",14)+'</div>'
      +'<div class="mg-v2-nav-title">Principal</div><nav class="mg-v2-nav" aria-label="Módulos principais">'
-     +menuTab("visao","Visão geral","dashboard")+menuModule("mesas")+menuModule("catalogo")+menuModule("estoque")+menuModule("relatorios")+'</nav>'
+     +menuTab("visao","Visão geral","dashboard")+menuTab("vendas","Vendas online","bag")+menuModule("mesas")+menuModule("catalogo")+menuModule("estoque")+menuModule("relatorios")+'</nav>'
      +'<div class="mg-v2-nav-title">Operação</div><nav class="mg-v2-nav" aria-label="Módulos operacionais">'
      +menuModule("garcom")+menuModule("cozinha")+menuModule("caixa")+menuModule("impressao")+'</nav>'
      +'<div class="mg-v2-nav-title">Restaurante</div><nav class="mg-v2-nav" aria-label="Configurações do restaurante">'
      +menuTab("dados","Dados do restaurante","store")
-     +'<a class="mg-v2-navlink" href="'+link("/"+d.restaurant.slug+"/vendas-online")+'">'+icon("store",18)+'Loja Online</a>'
+     
      +menuTab("equipe","Equipe","users")
      +(isMaster?menuTab("acessos","Permissões","shield"):"")+'</nav>'
      +'<div class="mg-v2-side-spacer"></div><a class="mg-v2-navlink" href="'+mainLink+'">'+icon("arrowLeft",18)+'Trocar restaurante</a>'
