@@ -3,7 +3,7 @@ import {sheetifyForms,showFormSheetError} from './operational-sheets-rc15.js?v=1
 // Intervalo: cadastro de categorias, produtos e publicação de cardápio.
 export async function renderPage({supabase,restaurant,box,esc,link}){
  document.body.classList.add('iv-fullwidth','iv-catalog');
- const style='<style>.op-card{padding:19px;border:1px solid #e2e8f0;border-radius:14px;background:#fff;margin:12px 0}.op-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}.op-cards .op-card{margin:0}.op-form{display:flex;gap:11px;flex-wrap:wrap;align-items:end}.op-form label{font-size:12px;font-weight:700;flex:1 1 175px}.op-form input,.op-form select{display:block;width:100%;padding:11px;border:1px solid #cbd5e1;border-radius:9px;margin-top:7px;background:white;color:#0f172a}.op-btn{background:#ff7600;color:#fff;border:0;padding:11px 14px;border-radius:9px;cursor:pointer;font-weight:700}.op-btn.alt{background:#e2e8f0;color:#334155}.op-photo{width:100%;height:130px;background:#ffede0;border-radius:11px;object-fit:cover;display:block;margin-bottom:10px}.op-photo-placeholder{height:130px;display:grid;place-items:center;background:linear-gradient(135deg,#fff3e7,#ffddbb);border-radius:11px;font-size:55px;margin-bottom:10px}.op-warn{padding:14px;background:#fffbeb;border:1px solid #fcd34d;border-radius:11px;font-size:12px}.op-muted{color:#64748b;font-size:13px}</style>';
+ const style='<style>.op-card{padding:19px;border:1px solid #e2e8f0;border-radius:14px;background:#fff;margin:12px 0}.op-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}.op-cards .op-card{margin:0}.op-form{display:flex;gap:11px;flex-wrap:wrap;align-items:end}.op-form label{font-size:12px;font-weight:700;flex:1 1 175px}.op-form input,.op-form select{display:block;width:100%;padding:11px;border:1px solid #cbd5e1;border-radius:9px;margin-top:7px;background:white;color:#0f172a}.op-btn{background:#ff7600;color:#fff;border:0;padding:11px 14px;border-radius:9px;cursor:pointer;font-weight:700}.op-btn.alt{background:#e2e8f0;color:#334155}.op-btn:disabled{opacity:.45;cursor:not-allowed}.op-card .iv-actions{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0}.op-photo{width:100%;height:130px;background:#ffede0;border-radius:11px;object-fit:cover;display:block;margin-bottom:10px}.op-photo-placeholder{height:130px;display:grid;place-items:center;background:linear-gradient(135deg,#fff3e7,#ffddbb);border-radius:11px;font-size:55px;margin-bottom:10px}.op-warn{padding:14px;background:#fffbeb;border:1px solid #fcd34d;border-radius:11px;font-size:12px}.op-muted{color:#64748b;font-size:13px}</style>';
  const money=n=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(n)/100);
  const cents=t=>{const raw=String(t??'').replace(/\s/g,'');const v=raw.includes(',')?raw.replace(/\./g,'').replace(',','.'):raw;if(!/^\d{1,8}(?:\.\d{1,2})?$/.test(v))throw Error('Informe valor no formato 18,50');const [i,f='']=v.split('.');return Number(i)*100+Number((f+'00').slice(0,2))};
  const call=async(action,params={})=>{const {data,error}=await supabase.functions.invoke('restaurant-core',{body:{restaurant_id:restaurant.id,action,...params}});if(error){let msg=error.message;try{const d=await error.context?.json?.();msg=d?.error??msg}catch{}throw Error(msg)}if(data?.error)throw Error(data.error);return data};
@@ -20,7 +20,17 @@ export async function renderPage({supabase,restaurant,box,esc,link}){
     +'<section class="op-card"><h2>'+icon('store',19)+' Cadastro de produtos</h2><p class="op-muted">O nome, preço, foto, disponibilidade e a chave <b>Exibir no cardápio</b> ficam concentrados em <b>Estoque e Produtos → Produtos</b>.</p>'
     +'<a class="iv-btn" href="'+link('/'+restaurant.slug+'/estoque?aba=produtos')+'">'+icon('arrowRight',17)+' Abrir cadastro de produtos</a></section></div>';
   out+='<h2>Categorias ('+cats.length+')</h2><div class="op-cards">';
-  for(const c of cats)out+='<article class="op-card"><strong>'+esc(c.name)+'</strong><p class="op-muted">'+(c.active?'Ativa':'Oculta')+' · '+products.filter(p=>p.category_id===c.id).length+' produto(s)</p><button class="op-btn alt" data-cat="'+esc(c.id)+'">'+(c.active?'Ocultar':'Exibir')+'</button></article>';
+  for(const c of cats){
+    const count=products.filter(p=>p.category_id===c.id).length;
+    out+='<article class="op-card"><strong>'+esc(c.name)+'</strong><p class="op-muted">'+(c.active?'Ativa':'Oculta')+' · '+count+' produto(s)</p>'
+      +'<form class="op-form" data-category-edit="'+esc(c.id)+'">'
+      +field('name','Nome',c.name,'required minlength="2" maxlength="90"')
+      +'<label>Ordem<input type="number" name="sort_order" min="0" max="99999" value="'+esc(c.sort_order??0)+'" required></label>'
+      +'<button class="op-btn" type="submit">Salvar categoria</button></form>'
+      +'<div class="iv-actions"><button type="button" class="op-btn alt" data-cat="'+esc(c.id)+'">'+(c.active?'Ocultar':'Exibir')+'</button>'
+      +'<button type="button" class="op-btn alt" data-cat-delete="'+esc(c.id)+'" '+(count?'disabled title="Mova os produtos desta categoria antes de excluir"':'')+'>Excluir</button></div>'
+      +(count?'<p class="op-muted">Para excluir, primeiro mova os produtos para outra categoria.</p>':'')+'</article>';
+  }
   out+='</div><div class="iv-toolbar"><h2>'+icon('receipt',19)+' Produtos do catálogo ('+products.length+')</h2><a href="'+link('/'+restaurant.slug+'/estoque?aba=produtos')+'" class="iv-btn secondary">'+icon('settings',16)+' Editar preços</a></div><div class="op-cards">';
     for(const p of products){
       const photo=typeof p.image_url==='string'&&/^https:\/\/[^\s<>"']+$/.test(p.image_url)?p.image_url:null;
@@ -40,8 +50,25 @@ export async function renderPage({supabase,restaurant,box,esc,link}){
    fallback.innerHTML=icon('store',43);img.replaceWith(fallback);
   },{once:true}));
   form('newcat',v=>call('category_create',{name:v.name,sort_order:0}));
+  const catEditForms=[...document.querySelectorAll('[data-category-edit]')];
+  catEditForms.forEach((f,index)=>{
+    f.id='iv-edit-category-'+index;
+    form(f.id,v=>{
+      const category=cats.find(c=>c.id===f.dataset.categoryEdit);
+      if(!category)throw Error('Categoria não encontrada');
+      return call('category_update',{id:category.id,name:v.name,sort_order:Number(v.sort_order),active:category.active});
+    });
+  });
+  document.querySelectorAll('[data-cat-delete]').forEach(button=>button.onclick=async()=>{
+    const category=cats.find(c=>c.id===button.dataset.catDelete);
+    if(!category||!confirm('Excluir a categoria "'+category.name+'"? Esta ação não poderá ser desfeita.'))return;
+    button.disabled=true;
+    try{await call('category_delete',{id:category.id});await load()}
+    catch(e){alert(e.message);button.disabled=false}
+  });
   form('newopt',v=>call('option_create',{name:v.name,price_delta_cents:cents(v.price),product_id:v.product_id}));
-  sheetifyForms([{id:'newcat',label:'Nova categoria',title:'Cadastrar categoria'},{id:'newopt',label:'Novo adicional',title:'Cadastrar adicional'}]);
+  sheetifyForms([{id:'newcat',label:'Nova categoria',title:'Cadastrar categoria'},{id:'newopt',label:'Novo adicional',title:'Cadastrar adicional'},
+    ...catEditForms.map(f=>({id:f.id,label:'Editar categoria',title:'Editar categoria',description:'Altere o nome e a ordem de exibição.'}))]);
   binding('[data-cat]',b=>{const c=cats.find(c=>c.id===b.dataset.cat);return call('category_update',{id:c.id,name:c.name,sort_order:c.sort_order,active:!c.active})});
   binding('#publish',()=>call('menu_publish',{published:!published}));
   const menuUrl=new URL(link('/'+restaurant.slug+'/cardapio'),location.origin).href;
