@@ -25,7 +25,7 @@ Deno.serve(async(req:Request)=>{
   body=JSON.parse(raw);
   if(!body||Array.isArray(body)||typeof body!=="object")throw Error("Body inválido");
  }catch{return fail("Solicitação inválida")}
- if(body.action!=="sign")return fail("Ação inválida");
+ if(!["sign","list"].includes(String(body.action||"")))return fail("Ação inválida");
  if(typeof body.restaurant_id!=="string"||!validUUID.test(body.restaurant_id))return fail("Restaurante inválido");
  const db=createClient(url,secret,{auth:{persistSession:false,autoRefreshToken:false}});
  try{
@@ -44,6 +44,40 @@ Deno.serve(async(req:Request)=>{
     !["master","manager"].includes(member.data?.role??"")||mod.data?.enabled!==true||
     (member.data?.role!=="master"&&override.data?.allowed===false))
    return fail("Somente Gestão autorizada pode enviar fotos",403);
+  // Biblioteca: consulta SOMENTE o diretório do restaurante autenticado.
+  // Os objetos podem ser reutilizados por N produtos sem copiá-los nem multiplicar armazenamento.
+  if(body.action==="list"){
+   const offset=body.offset===undefined?0:body.offset;
+   if(!Number.isSafeInteger(offset)||offset<0||offset>10000)return fail("Página inválida");
+   const [listed,existing]=await Promise.all([
+    db.storage.from(bucket).list(restaurantId,{
+     limit:49,offset,sortBy:{column:"created_at",order:"desc"}
+    }),
+    db.from("menu_products").select("name,image_url").eq("restaurant_id",restaurantId)
+     .not("image_url","is",null).limit(500)
+   ]);
+   if(listed.error||existing.error)return fail("Não foi possível carregar biblioteca de fotos",503);
+   const refs=new Map<string,{url:string,used:number,names:string[]}>();
+   for(const product of existing.data??[]){
+    const photo=String(product.image_url||"").trim();
+    if(!/^https:\/\/[^\s<>"']+$/i.test(photo)||photo.length>1200)continue;
+    let ref=refs.get(photo);
+    if(!ref){ref={url:photo,used:0,names:[]};refs.set(photo,ref)}
+    ref.used++;
+    if(ref.names.length<5&&typeof product.name==="string")ref.names.push(product.name.slice(0,150));
+   }
+   const files=(listed.data??[]).filter(f=>f?.id&&/^[0-9a-f-]{36}\.jpg$/i.test(f.name));
+   const visible=files.slice(0,48);
+   const items=visible.map(f=>{
+    const path=restaurantId+"/"+f.name;
+    const u=db.storage.from(bucket).getPublicUrl(path).data.publicUrl;
+    const use=refs.get(u);
+    return {url:u,name:f.name,created_at:f.created_at??null,used:use?.used??0,
+     product_names:use?.names??[]};
+   });
+   return json({items,linked:Array.from(refs.values()),next_offset:offset+visible.length,
+    has_more:files.length>48});
+  }
   // Limite por usuário: 12 tokens de upload a cada 60s, 150 por dia.
   const userHash=await hmac("intervalo:photo-upload:"+restaurantId+":"+user.id);
   const [minute,day]=await Promise.all([
