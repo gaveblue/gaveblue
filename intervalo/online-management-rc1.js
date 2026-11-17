@@ -4,9 +4,9 @@ import {initInfinitePaySettings} from './marketplace-infinitepay-settings-rc8.js
 import {initManualPixSettings} from './marketplace-manual-pix-settings-rc10.js?v=1.1.0-rc.10';
 
 // Gestão > Loja Online. Painel rc6; estado e permissões decididos no backend.
-export async function renderPage({supabase,restaurant,role,box,esc,link}){
- document.body.classList.add('iv-fullwidth','iv-online-admin');
- const css='<link rel="stylesheet" href="/intervalo/online-management-rc1.css?v=1.1.0-rc.8">';
+export async function renderPage({supabase,restaurant,role,box,esc,link,embedded=false,isActive=()=>true,initialSection='pedidos'}){
+ if(!embedded)document.body.classList.add('iv-fullwidth','iv-online-admin');
+ const css='<link rel="stylesheet" href="/intervalo/online-management-rc1.css?v=1.1.0-rc.18">';
  const money=n=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(n||0)/100);
  const realToCents=str=>{
   const raw=String(str).trim().replace(/\s/g,'');
@@ -21,10 +21,11 @@ export async function renderPage({supabase,restaurant,role,box,esc,link}){
   if(error||data?.error){let message=data?.error??error?.message??'Falha no serviço';try{const body=await error?.context?.json?.();message=body?.error??message}catch{}throw Error(message)}
   return data;
  };
- const base=css+'<div class="iv-on-shell"><header class="iv-on-header">'
-  +'<div class="iv-on-heading"><span class="iv-on-eyebrow">INTERVALO / GESTÃO / MARKETPLACE</span>'
+ let activeSection=['pedidos','entregas','vitrine','pagamentos'].includes(initialSection)?initialSection:'pedidos';
+ const base=css+'<div class="iv-on-shell'+(embedded?' is-integrated':'')+'">'+(embedded?'':'<header class="iv-on-header">'
+  +'<div class="iv-on-heading"><span class="iv-on-eyebrow">INTERVALO / GESTÃO / VENDAS</span>'
   +'<h1>'+icon('store',25)+' Loja Online</h1><p>'+esc(restaurant.name)+'</p></div>'
-  +'<a class="iv-on-back" href="'+link('/'+restaurant.slug+'/gestao')+'">'+icon('arrowLeft',16)+' Voltar à Gestão</a></header>';
+  +'<a class="iv-on-back" href="'+link('/'+restaurant.slug+'/gestao')+'">'+icon('arrowLeft',16)+' Voltar à Gestão</a></header>');
  let initialized=false;
  function pending(){
   const line=(size='')=>'<span class="iv-on-skeleton '+size+'"></span>';
@@ -43,6 +44,7 @@ export async function renderPage({supabase,restaurant,role,box,esc,link}){
   else if(active){active.classList.add('iv-on-refreshing');active.setAttribute('aria-busy','true')}
   let data;
   try{data=await request('get')}catch(e){
+   if(!isActive())return;
    if(initialized){
     const root=document.querySelector('.iv-on-shell');
     root?.classList.remove('iv-on-refreshing');root?.removeAttribute('aria-busy');
@@ -54,6 +56,7 @@ export async function renderPage({supabase,restaurant,role,box,esc,link}){
    }
    return;
   }
+  if(!isActive())return;
   const store=data.storefront??{},online=data.online_settings??{},pub=data.publication??{};
   const visible=store.marketplace_visible===true;
   const published=pub.is_published===true&&pub.cardapio_enabled===true;
@@ -68,17 +71,18 @@ export async function renderPage({supabase,restaurant,role,box,esc,link}){
   const state=(ok,label)=>'<span class="iv-on-status '+(ok?'ready':'')+'">'+label+'</span>';
   const value=(label,number,description,ic)=>'<article class="iv-on-stat"><div class="iv-on-stat-top"><span>'+esc(label)+'</span><span class="iv-on-stat-symbol">'+icon(ic,18)+'</span></div><strong>'+number+'</strong><small>'+esc(description)+'</small></article>';
   let out=base+'<main class="iv-on-main">'
-   +'<div class="iv-on-intro"><div><span class="iv-on-eyebrow">CENTRAL DA LOJA</span>'
-   +'<h2>Seu restaurante na internet</h2><p>Configure sua vitrine e acompanhe seus pedidos em um só lugar.</p></div>'
+   +'<div class="iv-on-intro"><div><span class="iv-on-eyebrow">OPERAÇÃO DIGITAL</span>'
+   +'<h2>Vendas online</h2><p>Pedidos, entregas, vitrine e recebimentos no mesmo painel do restaurante.</p></div>'
    +state(salesActive,salesActive?'Recebendo pedidos':online.paused?'Loja pausada':'Pedidos desligados')+'</div>'
+   +(embedded?'<nav class="iv-on-integrated-nav" aria-label="Áreas das vendas online">'+[['pedidos','Pedidos','bag'],['entregas','Entregas','bike'],['vitrine','Vitrine','store'],['pagamentos','Pagamentos','wallet']].map(([key,label,ic])=>'<button type="button" data-on-view="'+key+'" aria-pressed="'+(activeSection===key)+'">'+icon(ic,16)+label+'</button>').join('')+'</nav>':'')
    +'<p class="iv-on-notice" id="iv-on-notice" role="alert" hidden></p>'
-   +'<section class="iv-on-stats" aria-label="Situação da loja">'
+   +'<section class="iv-on-stats" data-on-section="pedidos" aria-label="Situação da loja">'
    +value('Cardápio',published?'Publicado':'Pendente',published?'Pronto para consulta':'Publique o cardápio primeiro','receipt')
    +value('Marketplace',visible&&published?'Visível':'Oculto',visible?'Participação configurada':'Não aparece nas buscas','search')
    +value('Pedidos',salesActive?'Ativos':'Desligados',salesActive?'Recebimento habilitado':'Sem compras novas','bag')
    +'</section>'
    +'<div class="iv-on-columns"><div class="iv-on-column">'
-   +'<section class="iv-on-card"><div class="iv-on-card-heading"><span class="iv-on-card-icon">'+icon('store',19)+'</span>'
+   +'<section class="iv-on-card" data-on-section="vitrine"><div class="iv-on-card-heading"><span class="iv-on-card-icon">'+icon('store',19)+'</span>'
    +'<div><h2>Minha vitrine</h2><p>Como o cliente encontra e conhece seu restaurante.</p></div></div>'
    +'<div class="iv-on-store-preview"><div class="iv-on-store-avatar">'+icon('store',24)+'</div><div><strong>'+esc(store.display_name||restaurant.name)+'</strong>'
    +'<small>'+esc(store.description||'Adicione uma descrição para a sua loja.')+'</small></div></div>'
@@ -92,7 +96,7 @@ export async function renderPage({supabase,restaurant,role,box,esc,link}){
    +icon(visible?'x':'checkCircle',16)+(visible?' Ocultar':' Exibir')+'</button></div>'
    +(!published?'<p class="iv-on-hint">Publique o cardápio para habilitar essa opção.</p>':'')
    +'</section>'
-   +'<section class="iv-on-card"><div class="iv-on-card-heading"><span class="iv-on-card-icon">'+icon('clock',19)+'</span><div><h2>Operação e entregas</h2>'
+   +'<section class="iv-on-card" data-on-section="entregas"><div class="iv-on-card-heading"><span class="iv-on-card-icon">'+icon('clock',19)+'</span><div><h2>Operação e entregas</h2>'
    +'<p>Horários de atendimento e regiões atendidas.</p></div></div>'
    +'<div class="iv-on-option"><div><strong>Horários dos pedidos</strong><p>'+hours.length+' faixa(s) cadastrada(s)</p></div>'
    +'<button type="button" id="iv-on-edit-hours" class="iv-on-button secondary">Configurar '+icon('chevronRight',15)+'</button></div>'
@@ -102,7 +106,7 @@ export async function renderPage({supabase,restaurant,role,box,esc,link}){
       +'<button type="button" class="iv-on-text-action" data-zone-edit="'+esc(z.id)+'">Editar</button></div>').join('')+'</div>'
    +(!zones.length?'<p class="iv-on-hint">Nenhuma região cadastrada. Para entregas, adicione pelo menos uma.</p>':'')
    +'</section></div><div class="iv-on-column">'
-   +'<section class="iv-on-card"><div class="iv-on-card-heading"><span class="iv-on-card-icon">'+icon('receipt',19)+'</span><div><h2>Recebimento online</h2>'
+   +'<section class="iv-on-card" data-on-section="pagamentos"><div class="iv-on-card-heading"><span class="iv-on-card-icon">'+icon('receipt',19)+'</span><div><h2>Recebimento online</h2>'
    +'<p>Controle a abertura de pedidos sem afetar o atendimento presencial.</p></div></div>'
    +'<div class="iv-on-sales-state"><div><small>Estado atual</small><strong>'+(salesActive?'Recebendo pedidos':online.paused?'Pausado':'Pedidos desativados')+'</strong>'
    +'<p>Entrega própria e retirada no local, conforme configuração da vitrine.</p></div>'
@@ -113,9 +117,9 @@ export async function renderPage({supabase,restaurant,role,box,esc,link}){
    +icon(salesActive?'x':'checkCircle',16)+(salesActive?' Desativar pedidos':' Ativar recebimento')+'</button>'
    +'<p class="iv-on-hint">A ativação exige confirmação do Master e configurações válidas.</p>'
    +'</section>'
-   +'<section class="iv-on-card" id="iv-on-manual-pix"></section>'
-   +'<section class="iv-on-card" id="iv-on-infinitepay"></section>'
-   +'<section class="iv-on-card"><div class="iv-on-card-heading"><span class="iv-on-card-icon">'+icon('bag',19)+'</span>'
+   +'<section class="iv-on-card" data-on-section="pagamentos" id="iv-on-manual-pix"></section>'
+   +'<section class="iv-on-card" data-on-section="pagamentos" id="iv-on-infinitepay"></section>'
+   +'<section class="iv-on-card" data-on-section="pedidos"><div class="iv-on-card-heading"><span class="iv-on-card-icon">'+icon('bag',19)+'</span>'
    +'<div><h2>Pedidos recebidos</h2><p>Acompanhe os pedidos de delivery e retirada.</p></div>'
    +'<button type="button" class="iv-on-icon-action" id="iv-on-orders-refresh" aria-label="Atualizar pedidos" title="Atualizar pedidos">'+icon('refresh',17)+'</button></div>'
    +'<div id="iv-on-orders-list" class="iv-on-orders" role="status" aria-live="polite">'
@@ -147,6 +151,23 @@ export async function renderPage({supabase,restaurant,role,box,esc,link}){
    +'<button class="iv-on-button" type="submit">Salvar região</button></form>'
    +'</div></main></div>';
   box(out);
+  if(!isActive())return;
+  if(embedded){
+   const root=document.querySelector('.iv-on-shell.is-integrated');
+   const showSection=()=>{
+    root?.querySelectorAll('[data-on-section]').forEach(el=>{el.hidden=el.dataset.onSection!==activeSection});
+    root?.querySelectorAll('[data-on-view]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.onView===activeSection)));
+   };
+   root?.querySelectorAll('[data-on-view]').forEach(b=>b.onclick=()=>{
+    activeSection=b.dataset.onView;
+    showSection();
+    const url=new URL(location.href);
+    url.searchParams.set('tab','vendas');
+    url.searchParams.set('area',activeSection);
+    history.replaceState(history.state,'',url.pathname+url.search+url.hash);
+   });
+   showSection();
+  }
   initialized=true;
   void initInfinitePaySettings({supabase,restaurant,role,esc});
   void initManualPixSettings({supabase,restaurant,role,esc});
