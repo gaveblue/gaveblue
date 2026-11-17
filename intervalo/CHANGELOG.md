@@ -1,5 +1,17 @@
 # Intervalo — CHANGELOG
 
+## 1.1.0-rc.21 — 2026-11-16 · Logo e capa na vitrine do restaurante
+
+**Status:** arquivos do GitHub `main` atualizados; `marketplace-management` v5 implantada; verificação sintática aprovada. **Pendente:** conferir propagação do domínio, testar upload e biblioteca no Android, homologar aparência da vitrine.
+
+- **Gestão > Vendas Online > Vitrine:** configuração de logo/foto de perfil e imagem de capa, com pré-visualização, envio otimizado, escolha da biblioteca de fotos e remoção de vínculos.
+- **Loja pública:** capa horizontal no topo, logo do restaurante e apresentação padrão quando não houver imagem.
+- Reutiliza bucket `intervalo-product-images` e sua autorização assinada; arquivos de biblioteca existentes podem ser associados sem novo upload.
+- Campos `restaurant_storefront.logo_url` e `banner_url` já existiam; nenhuma migração, módulo pago ou GitHub Actions.
+- Backend `marketplace-management`: valida URLs HTTPS e mantém compatibilidade com clientes antigos, sem alterar pedidos e pagamentos.
+- QA: `QA-1.1.0-RC21-VITRINE.md`.
+- Backlog comercial: backups externos, monitoramento avançado e simulações de desastre adiados para fase de preparação para comercialização.
+
 ## 1.1.0-rc.20 — 2026-11-16 · Biblioteca de fotos reutilizáveis dos produtos
 
 **Status:** GitHub `main` atualizado; Edge Function Supabase `restaurant-product-photos` v2 ativa e isolada por restaurante. **Pendente:** homologação visual no Android e confirmação da publicação no domínio.
