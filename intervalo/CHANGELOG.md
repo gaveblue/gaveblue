@@ -1,5 +1,12 @@
 # Intervalo — CHANGELOG
 
+## 1.1.0-rc.30 — 2026-11-17 · Nova home do marketplace
+
+- Home pública com seleção de cidade, campo de busca, banner compacto, categorias visuais, filtros e cards com capas/logos reais. Gestão removida da navegação do consumidor, mantida em `/intervalo/inicio`.
+- Favoritos e cidade persistidos localmente; busca e filtros sobre dados públicos retornados, sem requisição por toque. Categoria usa tags/nome/descrição da vitrine; busca não indexa os produtos de cada loja. Ícones de comida e banner são arte vetorial local (sem fotos externas); notificações ainda sem serviço ativo.
+- API marketplace-public v5 adiciona capa e disponibilidade de checkout calculada a partir de horários, fuso, configuração e zonas, com consultas em lote. Nenhuma nova tabela/recurso pago; checkout continua validando no servidor.
+- Início e Buscar têm destinos diferenciados; Busca abre o campo. Sintaxe verificada; homologação visual e testes reais pendentes.
+
 ## 1.1.0-rc.29 — 2026-11-17 · Padrão de cardápio no Garçom
 
 - Mesas: agrupamento de opções compartilhado com a vitrine, miniaturas quadradas compactas, preço à direita junto da ação, prévia da foto e descrição no detalhe. Mantém fluxo de comanda existente.

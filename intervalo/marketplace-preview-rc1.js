@@ -1,3 +1,4 @@
+import {mountHome} from './marketplace-home-rc30.js?v=1.1.0-rc.30';
 import {groupProducts,chooseVariant} from './product-variants-rc28.js?v=1.1.0-rc.28';
 import {icon} from './ui-icons.js?v=1.0.0-rc.1';
 import {readCatalog,saveCatalog,forgetCatalog,publicResult} from './public-catalog-cache-rc26.js?v=1.1.0-rc.28';
@@ -8,17 +9,17 @@ export async function renderMarketplace({supabase,route,box,esc,link}){
  document.body.classList.add('iv-marketplace');
  const originalLink=link;
  link=(target)=>{
-  if(target==='/explorar'||/^\/loja\/[a-z0-9]+(?:-[a-z0-9]+)*$/.test(target))return originalLink('/?intervalo_route='+encodeURIComponent(originalLink(target))+'&iv_release=1.1.0-rc.28');
+  if((target==='/explorar'||target==='/explorar?buscar=1')||/^\/loja\/[a-z0-9]+(?:-[a-z0-9]+)*$/.test(target))return originalLink('/?intervalo_route='+encodeURIComponent(originalLink(target))+'&iv_release=1.1.0-rc.30');
   return originalLink(target);
  };
- const css='<link rel="stylesheet" href="/intervalo/marketplace-preview-rc1.css?v=1.1.0-rc.27"><link rel="stylesheet" href="/intervalo/marketplace-commerce-rc4.css?v=1.1.0-rc.4">';
+ const css='<link rel="stylesheet" href="/intervalo/marketplace-preview-rc1.css?v=1.1.0-rc.30"><link rel="stylesheet" href="/intervalo/marketplace-commerce-rc4.css?v=1.1.0-rc.4">';
  const money=n=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(n??0)/100);
  const nav=css+'<nav class="iv-mkt-nav" aria-label="Navegação do marketplace"><a class="iv-mkt-brand" href="'+link('/explorar')+'">intervalo</a>'
-  +'<div class="iv-mkt-links"><span class="iv-mkt-preview">PRÉVIA</span><a href="'+link('/inicio')+'">'+icon('store',15)+' Gestão</a></div></nav>';
+  +'</nav>';
  const bottom=(active='inicio')=>'<nav class="iv-mkt-bottom" aria-label="Navegação do consumidor">'
-  +[['inicio','home','Início','/explorar'],['buscar','search','Buscar','/explorar'],['pedidos','receipt','Pedidos','/pedido'],['perfil','user','Perfil','/cliente']].map(([id,sym,label,to])=>'<a href="'+link(to)+'" class="'+(id===active?'active':'')+'">'+icon(sym,20)+esc(label)+'</a>').join('')+'</nav>';
+  +[['inicio','home','Início','/explorar'],['buscar','search','Buscar','/explorar?buscar=1'],['pedidos','receipt','Pedidos','/pedido'],['perfil','user','Perfil','/cliente']].map(([id,sym,label,to])=>'<a href="'+link(to)+'" class="'+(id===active?'active':'')+'">'+icon(sym,20)+esc(label)+'</a>').join('')+'</nav>';
  const page=(inner,active='inicio',storePage=false)=>{
-  box('<div class="iv-mkt-shell'+(storePage?' is-store-page':'')+'">'+nav+inner+bottom(active)+'</div>');
+  box('<div class="iv-mkt-shell'+(storePage?' is-store-page':route[0]==='explorar'?' is-home-page':'')+'">'+nav+inner+bottom(active)+'</div>');
   document.querySelectorAll('.iv-mkt-photo img,.iv-mkt-store-icon img,.iv-mkt-store-avatar img').forEach(img=>img.addEventListener('error',()=>{
    if(!img.isConnected)return;
    const span=document.createElement('span');
@@ -36,36 +37,12 @@ export async function renderMarketplace({supabase,route,box,esc,link}){
   return data;
  };
  const placeholder=(title,description,retryLink='/explorar',retryLabel='Explorar restaurantes')=>'<div class="iv-mkt-empty">'+icon('info',27)+'<h2>'+esc(title)+'</h2><p>'+esc(description)+'</p><a class="iv-mkt-action" href="'+link(retryLink)+'">'+icon('arrowLeft',15)+' '+esc(retryLabel)+'</a></div>';
- const sectionHeading='<div class="iv-mkt-eyebrow">ESCOLHA SEU PRÓXIMO SABOR</div><h2 class="iv-mkt-title">Restaurantes para você</h2><p class="iv-mkt-description">As lojas só ficam visíveis nesta lista quando o estabelecimento decide participar do marketplace.</p>';
-
  if(route[0]==='explorar'){
-  loading();
-  try{
-   const data=await service({action:'discover'});
-   const rows=data.restaurants??[];
-   let cards=rows.map(r=>'<a class="iv-mkt-store" href="'+link('/loja/'+encodeURIComponent(r.slug))+'" data-mkt-store data-search="'+esc([r.name,r.description,...(r.cuisine_tags??[]),r.city??''].join(' ').toLocaleLowerCase('pt-BR'))+'">'
-    +'<span class="iv-mkt-store-icon">'+logo(r.logo_url,r.name)+'</span><span class="iv-mkt-store-copy"><strong>'+esc(r.name)+'</strong>'
-    +'<small>'+esc([r.city,r.state].filter(Boolean).join(' · ')||'Consulte o cardápio digital')+'</small>'
-    +'<small>'+(r.customer_orders_enabled?'Pedido online disponível':'Cardápio para consulta · pedidos em breve')+'</small></span>'+icon('chevronRight',18)+'</a>').join('');
-   if(!rows.length)cards=placeholder('Restaurantes em preparação','Estamos organizando as primeiras lojas do Intervalo. O marketplace ainda não recebe pedidos online.','/','Voltar ao Intervalo');
-   page('<section class="iv-mkt-hero"><div><span class="iv-mkt-eyebrow">INTERVALO MARKETPLACE</span><h1>Descubra novos sabores</h1><p>Restaurantes perto de você, cardápios próprios e, em breve, pedidos de delivery e retirada.</p></div><div class="iv-mkt-icon-large">'+icon('store',56)+'</div></section>'
-     +sectionHeading
-     +(rows.length?'<div class="iv-mkt-filter"><label class="iv-mkt-input">'+icon('search',19)+'<input id="iv-mkt-search" type="search" aria-label="Buscar restaurantes" placeholder="Buscar restaurantes ou comidas"></label></div>':'')
-     +'<div class="iv-mkt-grid" id="iv-mkt-results">'+cards+'</div>'
-     +(rows.length?'<p id="iv-mkt-count" class="iv-mkt-description">'+rows.length+' restaurante(s)</p><div class="iv-mkt-empty" id="iv-mkt-not-found" hidden>Nenhum restaurante encontrado para a busca.</div>':''),'inicio');
-   const search=document.getElementById('iv-mkt-search');
-   if(search){
-    const items=[...document.querySelectorAll('[data-mkt-store]')];
-    search.oninput=()=>{
-     const q=search.value.trim().toLocaleLowerCase('pt-BR');let n=0;
-     for(const item of items){item.hidden=!!q&&!item.dataset.search.includes(q);if(!item.hidden)n++}
-     document.getElementById('iv-mkt-not-found').hidden=n>0;
-     document.getElementById('iv-mkt-count').textContent=n+' restaurante(s)';
-    };
-   }
-  }catch{
-   page(placeholder('Não foi possível carregar os restaurantes','A consulta ao marketplace falhou. Tente atualizar a página.','/explorar','Tentar novamente'));
-  }
+  const searchMode=new URLSearchParams(location.search).get('buscar')==='1';
+  const args={page,esc,link,safePhoto,logo,searchMode};
+  mountHome({...args,rows:[],busy:true});
+  try{const data=await service({action:'discover'});mountHome({...args,rows:data.restaurants??[]})}
+  catch{mountHome({...args,rows:[],error:true})}
   return;
  }
 
