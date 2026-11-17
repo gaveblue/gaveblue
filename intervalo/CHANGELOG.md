@@ -1,5 +1,16 @@
 # Intervalo — CHANGELOG
 
+## 1.1.0-rc.22 — 2026-11-16/17 · Edição de insumos/categorias, vitrine e grade/lista
+
+**Status:** GitHub `main` atualizado; `restaurant-core` v14 ativa no Supabase; parser JavaScript aprovado. **Pendente:** comprovação da propagação no site e testes de interação reais no Android.
+
+- **Insumos:** editar nome, unidade e mínimo, arquivar/restaurar sem apagar movimentos; impedir arquivamento e mudança de unidade quando houver ficha técnica vinculada.
+- **Categorias:** editar nome/ordem, ocultar/exibir e excluir categorias vazias; categorias vinculadas a produtos ficam protegidas.
+- **Vitrine:** acesso direto aos controles de logo/capa dentro de Gestão > Vendas Online > Vitrine, usando o editor de mídia existente.
+- **Cardápio público e loja:** alternância grade/lista responsiva, com preferência gravada localmente por restaurante.
+- **Publicação:** URLs de módulos e estilos atualizadas para `1.1.0-rc.22`, sem GitHub Actions.
+- QA detalhado em `QA-1.1.0-RC22-EDICAO-CARDAPIO.md`.
+
 ## 1.1.0-rc.21 — 2026-11-16 · Logo e capa na vitrine do restaurante
 
 **Status:** arquivos do GitHub `main` atualizados; `marketplace-management` v5 implantada; verificação sintática aprovada. **Pendente:** conferir propagação do domínio, testar upload e biblioteca no Android, homologar aparência da vitrine.
