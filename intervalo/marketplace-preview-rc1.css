@@ -72,3 +72,12 @@ dialog.iv-mkt-sheet::backdrop{background:#1b2b4199}
 
 /* Respeitar atributo hidden nos filtros de cards */
 .iv-mkt-product[hidden],.iv-mkt-store[hidden],#iv-mkt-not-found[hidden],#iv-mkt-empty[hidden]{display:none!important}
+
+
+/* rc.21 · Capa e logomarca da vitrine pública */
+.iv-mkt-cover{width:100%;aspect-ratio:16/5;min-height:140px;max-height:270px;margin:20px 0 0;background:linear-gradient(125deg,#ffe6d1,#fff4e9);border-radius:18px;overflow:hidden}
+.iv-mkt-cover img{width:100%;height:100%;object-fit:cover;display:block}
+.iv-mkt-cover-placeholder{height:100%;display:grid;place-items:center;color:#dc7b2e}
+.iv-mkt-store-head{position:relative;margin:-23px 0 20px;padding:0 13px;align-items:center}
+.iv-mkt-store-avatar{border:4px solid #fff;box-shadow:0 3px 12px #17233812}
+@media(max-width:640px){.iv-mkt-cover{aspect-ratio:16/7;min-height:133px;margin-top:10px;border-radius:13px}.iv-mkt-store-head{margin-top:-18px;padding:0 9px}.iv-mkt-store-avatar{width:68px;height:68px;border-radius:17px}}
