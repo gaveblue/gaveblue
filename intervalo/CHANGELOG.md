@@ -1,5 +1,20 @@
 # Intervalo — CHANGELOG
 
+## 1.1.0-rc.19 — 2026-11-16 · Fotos dos produtos por câmera/galeria + armazenamento Supabase
+
+**Status:** GitHub `main` atualizado; bucket Storage e Edge Function implantados; QA sintático, segurança e simulação aprovados. **Pendente:** confirmar propagação no domínio e testar envio real pelo Android antes de homologar.
+
+- O cadastro de produtos em **Gestão → Estoque e Produtos → Produtos** passou a oferecer **Enviar foto**, **Câmera**, **Prévia** e **Remover**, além da URL HTTPS direta existente (agora em seção recolhível). Disponível em criação e edição, nos Bottom Sheets.
+- Nova biblioteca `product-photo-rc19.js` e estilo `product-photo-rc19.css`: fotos de origem até **16 MB** são reduzidas a **até 1.400 px** e convertidas para **JPEG até 1,5 MB**, para reduzir consumo de dados, preservar rapidez do cardápio e evitar arquivos enormes. Formatos de origem dependem da capacidade de decodificação do navegador.
+- Envio acontece ao **Salvar** produto: foto otimizada vai ao Supabase Storage; o endereço público é gravado pelo backend existente `restaurant-core`, sem alterar preço, disponibilidade, estoque ou permissões.
+- Nova migração `product_photo_storage_rc19`: bucket público somente para leitura `intervalo-product-images`, com MIME `image/jpeg` e máximo **1.500.000 bytes** por objeto. Sem políticas de upload direto para `anon`/`authenticated`.
+- Edge Function **`restaurant-product-photos`** com JWT obrigatório e token temporário de upload, restrito ao restaurante e usuário Master/gerente com Gestão ativa; caminho aleatório por restaurante; limite de solicitações por usuário. Nenhuma credencial privilegiada fica no frontend.
+- Campo alternativo de URL continua aceitando links HTTPS diretos, com prévia e aviso quando o navegador não consegue carregá-los; links de páginas privadas/Instagram/Drive continuam não sendo imagens diretas.
+- Cards do Estoque, Catálogo e Marketplace mostram placeholder quando imagens antigas externas falham, em vez de imagem quebrada. Garçom e cardápio público preservaram seus fallbacks existentes.
+- `index.html` atualizado para carregar `estoque`, `catalogo` e `marketplace-preview` em **rc.19**. Registros técnicos em `QA-1.1.0-RC19-FOTOS-PRODUTOS.md`.
+- QA: sintaxe JS dos módulos e ponto de entrada aprovada, **21/21** verificações de integração e **6/6** casos de URL; simulação de conversão para JPEG aprovada; bucket e restrições de escrita auditados.
+- Sem nova assinatura ou serviço pago: armazenamento consome a cota Supabase existente. Arquivos antigos substituídos não são apagados automaticamente nesta fase. Não foram usados GitHub Actions.
+
 ## 1.1.0-rc.18 — 2026-11-16 · Loja Online integrada à Gestão como Vendas
 
 **Status:** alterações integradas ao GitHub `main` e QA de sintaxe aprovado. **Pendente:** confirmar a publicação no domínio e testar a navegação completa no Android com perfil Master ou gerente.
