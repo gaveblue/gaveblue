@@ -2,12 +2,12 @@ import {icon} from './ui-icons.js?v=1.0.0-rc.1';
 import {sheetifyForms,showFormSheetError} from './operational-sheets-rc15.js?v=1.0.0-rc.15';
 import {initInfinitePaySettings} from './marketplace-infinitepay-settings-rc8.js?v=1.1.0-rc.9';
 import {initManualPixSettings} from './marketplace-manual-pix-settings-rc10.js?v=1.1.0-rc.10';
-import {storefrontMediaFields,initStorefrontMedia} from './storefront-media-rc21.js?v=1.1.0-rc.21';
+import {storefrontMediaFields,initStorefrontMedia} from './storefront-media-rc21.js?v=1.1.0-rc.22';
 
 // Gestão > Loja Online. Painel rc6; estado e permissões decididos no backend.
 export async function renderPage({supabase,restaurant,role,box,esc,link,embedded=false,isActive=()=>true,initialSection='pedidos'}){
  if(!embedded)document.body.classList.add('iv-fullwidth','iv-online-admin');
- const css='<link rel="stylesheet" href="/intervalo/online-management-rc1.css?v=1.1.0-rc.21">';
+ const css='<link rel="stylesheet" href="/intervalo/online-management-rc1.css?v=1.1.0-rc.22">';
  const money=n=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(n||0)/100);
  const realToCents=str=>{
   const raw=String(str).trim().replace(/\s/g,'');
@@ -91,6 +91,8 @@ export async function renderPage({supabase,restaurant,role,box,esc,link,embedded
    +'<div class="iv-on-detail"><span>Categorias</span><strong>'+esc(tags||'Não informadas')+'</strong></div>'
    +'<div class="iv-on-detail"><span>Exibição na busca</span>'+state(visible&&published,visible&&published?'Visível':'Oculta')+'</div>'
    +'<div class="iv-on-card-actions"><button type="button" id="iv-on-configure" class="iv-on-button">'+icon('settings',16)+' Configurar vitrine</button>'
+   +'<button type="button" class="iv-on-button secondary" data-on-edit-media="logo">'+icon('settings',16)+' Editar logo</button>'
+   +'<button type="button" class="iv-on-button secondary" data-on-edit-media="banner">'+icon('settings',16)+' Editar capa</button>'
    +'<a class="iv-on-button secondary" href="'+shopLink+'">'+icon('arrowRight',16)+' Ver loja</a></div>'
    +'<div class="iv-on-separator"></div>'
    +'<div class="iv-on-line"><div><h3>Mostrar no marketplace</h3><p>Exibir na busca não ativa o recebimento de pedidos.</p></div>'
@@ -202,7 +204,21 @@ export async function renderPage({supabase,restaurant,role,box,esc,link,embedded
    }catch(err){if(!showFormSheetError(form,err.message))alert(err.message);button.disabled=false;button.textContent='Salvar configurações'}
   };
   const [draftSheet]=sheetifyForms([{id:'iv-online-draft',label:'Configurar loja',title:'Dados da loja online',description:'Edite nome, categorias, preparo e modalidades de atendimento.'}]);
-  if(draftSheet){draftSheet.trigger.hidden=true;draftSheet.trigger.style.display='none';document.getElementById('iv-on-configure').onclick=()=>draftSheet.trigger.click()};
+  if(draftSheet){
+   draftSheet.trigger.hidden=true;draftSheet.trigger.style.display='none';
+   const openDraft=()=>{if(!draftSheet.dialog.open)draftSheet.trigger.click()};
+   document.getElementById('iv-on-configure').onclick=openDraft;
+   document.querySelectorAll('[data-on-edit-media]').forEach(button=>button.onclick=()=>{
+    openDraft();
+    const target=draftSheet.dialog.querySelector('[data-store-media="'+button.dataset.onEditMedia+'"]');
+    target?.scrollIntoView({behavior:'instant',block:'center'});
+    target?.querySelector('[data-media-pick]')?.focus({preventScroll:true});
+   });
+  }else{
+   const failed=()=>alert('Não foi possível abrir a edição da vitrine. Atualize a página e tente novamente.');
+   document.getElementById('iv-on-configure').onclick=failed;
+   document.querySelectorAll('[data-on-edit-media]').forEach(b=>b.onclick=failed);
+  }
   const hoursForm=document.getElementById('iv-on-hours'),hourList=document.getElementById('iv-on-hour-list');
   hourList.onclick=e=>{if(e.target.closest('[data-remove-time]'))e.target.closest('.iv-on-time-row')?.remove()};
   document.getElementById('iv-on-add-hour').onclick=()=>{
