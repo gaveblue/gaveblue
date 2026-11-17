@@ -72,7 +72,9 @@ export async function renderMarketplace({supabase,route,box,esc,link}){
    const products=(data.products??[]).filter(x=>allowed.has(x.category_id));
    const storeTitle=esc(r.name);
    const photo=logo(r.logo_url,r.name);
-   let out='<div class="iv-mkt-store-head"><div class="iv-mkt-store-avatar">'+photo+'</div><div><span class="iv-mkt-eyebrow">LOJA DO RESTAURANTE</span><h1>'+storeTitle+'</h1><p>'+esc(r.description||'Conheça o cardápio deste restaurante.')+'</p>'
+   const cover=safePhoto(r.banner_url);
+   let out='<div class="iv-mkt-cover">'+(cover?'<img src="'+esc(cover)+'" alt="Capa do restaurante" loading="eager">':'<div class="iv-mkt-cover-placeholder">'+icon('store',30)+'</div>')+'</div>'
+      +'<div class="iv-mkt-store-head"><div class="iv-mkt-store-avatar">'+photo+'</div><div><span class="iv-mkt-eyebrow">LOJA DO RESTAURANTE</span><h1>'+storeTitle+'</h1><p>'+esc(r.description||'Conheça o cardápio deste restaurante.')+'</p>'
       +'<span class="iv-mkt-pill">'+icon('store',14)+' '+esc([r.city,r.state].filter(Boolean).join(' · ')||'Cardápio público')+'</span>'
       +'<span class="iv-mkt-pill">'+icon('info',14)+' '+(data.customer_orders_enabled?'Pedidos '+(data.checkout_available?'abertos agora':'temporariamente fechados'):'Pedidos online ainda não ativados')+'</span></div></div>'
       +'<div class="iv-mkt-empty" style="padding:14px;text-align:left;margin-bottom:21px">'+icon('info',20)+' <strong>'+(data.checkout_available?'Pedidos online disponíveis':'Pedidos temporariamente indisponíveis')+'.</strong> Monte seu carrinho. A finalização depende do restaurante estar recebendo pedidos.</div>'
