@@ -73,12 +73,26 @@ Deno.serve(async(req:Request)=>{
    }
    return out;
   };
-  const model=(v:unknown)=>{
+  const model=(v:unknown,kind:"cash"|"kitchen")=>{
    if(!obj(v)||typeof v.show_rounds!=="boolean"||typeof v.separators!=="boolean")throw Error("Modelo inválido");
-   return {...clean(v,templateSpec),show_rounds:v.show_rounds,separators:v.separators};
+   // Novos campos opcionais para manter compatibilidade com clientes RC2.
+   const defaults={notice:kind==="cash"?"DOCUMENTO NÃO FISCAL · Não substitui nota fiscal ou comprovante bancário.":"PEDIDO INTERNO · NÃO FISCAL",sample_notice:"AMOSTRA · Sem pedido real",item_format:"{qtd} × {produto}",price_format:"{valor_item}"};
+   const extended:Record<string,string>={};
+   for(const [k,initial] of Object.entries(defaults)){
+    const val=v[k]===undefined?initial:v[k],max=k==="notice"||k==="sample_notice"?500:200;
+    if(typeof val!=="string"||val.length>max)throw Error("Confira o tamanho dos textos do modelo.");
+    extended[k]=val.trim();
+   }
+   const switches:Record<string,boolean>={};
+   for(const k of ["show_notes","show_prices","show_total","show_received","show_balance"]){
+    const val=v[k]===undefined?(k==="show_notes"||kind==="cash"):v[k];
+    if(typeof val!=="boolean")throw Error("Modelo inválido");
+    switches[k]=val;
+   }
+   return {...clean(v,templateSpec),...extended,...switches,show_rounds:v.show_rounds,separators:v.separators};
   };
   let config;
-  try{config={business:clean(raw.business,businessSpec),cash:model(raw.cash),kitchen:model(raw.kitchen)}}catch(e){return error(e instanceof Error?e.message:"Modelo inválido")}
+  try{config={business:clean(raw.business,businessSpec),cash:model(raw.cash,"cash"),kitchen:model(raw.kitchen,"kitchen")}}catch(e){return error(e instanceof Error?e.message:"Modelo inválido")}
   const {error:e}=await db.from("restaurant_print_templates").upsert({restaurant_id:tenant,config,updated_at:new Date().toISOString()},{onConflict:"restaurant_id"});
   if(e)return error("Não foi possível salvar o modelo",503);
   await db.from("audit_logs").insert({restaurant_id:tenant,actor_user_id:user.id,event:"print_templates_saved",details:{action}});
