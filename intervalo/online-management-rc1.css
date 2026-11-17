@@ -148,3 +148,31 @@ body.iv-online-admin #iv-infinite-form .iv-on-field input{width:100%;margin-top:
 body.iv-online-admin #iv-infinite-form .iv-on-hint{font-size:11px;line-height:1.6;color:#718198;margin:0}
 body.iv-online-admin #iv-infinite-form code{display:inline-block;background:#f2f5f9;color:#405268;padding:3px 6px;border-radius:5px;font-size:10px;overflow-wrap:anywhere}
 @media(max-width:430px){.iv-on-infinite-state{flex-direction:column}.iv-on-infinite-state .iv-on-status{align-self:flex-start}}
+
+/* Intervalo rc.18 · integração da Loja Online ao painel da Gestão
+   Mantém os formulários e a API atuais; remove a aparência de segunda aplicação. */
+.iv-on-shell.is-integrated{max-width:none;min-height:0;margin:0;padding:0 0 24px;background:transparent;width:100%;font-family:inherit}
+.iv-on-shell.is-integrated .iv-on-main{padding:0;min-width:0}
+.iv-on-shell.is-integrated .iv-on-intro{display:none}
+.iv-on-shell.is-integrated .iv-on-columns{display:block;min-width:0}
+.iv-on-shell.is-integrated .iv-on-column{display:block;min-width:0}
+.iv-on-shell.is-integrated [data-on-section][hidden]{display:none!important}
+.iv-on-shell.is-integrated .iv-on-column>.iv-on-card[data-on-section]{margin:0 0 14px}
+.iv-on-shell.is-integrated .iv-on-stats{margin:12px 0 15px}
+.iv-on-integrated-nav{display:flex;gap:7px;overflow-x:auto;max-width:100%;scrollbar-width:none;overscroll-behavior-x:contain;border-bottom:1px solid #e6ebf2;padding:1px 0 13px;margin:0 0 15px}
+.iv-on-integrated-nav::-webkit-scrollbar{display:none}
+.iv-on-integrated-nav button{white-space:nowrap;display:inline-flex;align-items:center;justify-content:center;gap:7px;flex:1 0 auto;min-height:42px;border-radius:11px;border:1px solid #e7ebf0;background:#fff;color:#657185;padding:10px 13px;font:800 12px/1.15 Inter,"Segoe UI",Arial,sans-serif;cursor:pointer}
+.iv-on-integrated-nav button[aria-pressed="true"]{color:#d86800;background:#fff4ea;border-color:#ffcfab}
+.iv-on-integrated-nav button:focus-visible{outline:2px solid #f9a55a;outline-offset:1px}
+.iv-on-shell.is-integrated .iv-on-card{box-shadow:0 2px 13px #25385008}
+.iv-on-shell.is-integrated .iv-on-orders{max-width:none}
+body.iv-management-v2 .iv-op-body #iv-infinite-form{display:grid;gap:15px}
+body.iv-management-v2 #iv-infinite-form .iv-on-field input{width:100%;margin-top:8px;min-height:46px;border-radius:11px;border:1px solid #dfe5ed;padding:12px;font-size:13px}
+body.iv-management-v2 #iv-infinite-form .iv-on-hint{font-size:11px;line-height:1.6;color:#718198;margin:0}
+@media(max-width:650px){
+ .iv-on-shell.is-integrated{padding:0 0 8px}
+ .iv-on-integrated-nav{gap:5px;margin:0 0 12px;padding-bottom:10px}
+ .iv-on-integrated-nav button{flex:0 0 auto;min-height:40px;font-size:11px;padding:9px 11px}
+ .iv-on-shell.is-integrated .iv-on-stats{gap:7px}
+ .iv-on-shell.is-integrated .iv-on-card{margin:0 0 11px}
+}
