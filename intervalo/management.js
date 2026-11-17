@@ -190,7 +190,7 @@ export async function renderManagement({supabase,restaurant,role,box,esc,link}) 
    if(state.tab==="vendas"){
     const host=document.getElementById('mg-v2-online-host');
     const isActive=()=>!!host?.isConnected&&state.tab==='vendas';
-    void import('/intervalo/online-management-rc1.js?v=1.1.0-rc.18').then(({renderPage})=>{
+    void import('/intervalo/online-management-rc1.js?v=1.1.0-rc.21').then(({renderPage})=>{
      if(!isActive())return;
      return renderPage({supabase,restaurant,role,esc,link,embedded:true,isActive,
       initialSection:new URLSearchParams(location.search).get('area')||'pedidos',
