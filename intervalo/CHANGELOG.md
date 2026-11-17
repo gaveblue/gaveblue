@@ -1,5 +1,11 @@
 # Intervalo — CHANGELOG
 
+## 1.2.0-rc.2 — 2026-11-17 · Modelos de impressão personalizáveis
+
+- Dados comerciais e modelos independentes de caixa/cozinha salvos por restaurante; campos automáticos, textos livres, títulos, cabeçalhos, rodapés, labels, separadores e agrupamento por rodada. Totais e itens reais preservados; aviso não fiscal obrigatório.
+- Configuração em Bottom Sheet, prévia e teste fictício; mantém PNG compacto, papel 58/80 mm, ajustes locais e impressão manual. Sem novos custos.
+- API restaurant-core v16; tabela protegida sem acesso direto para anon/authenticated. QA sintático e simulação; teste físico e login real pendentes.
+
 ## 1.2.0-rc.1 — 2026-11-17 · Reorganização da Gestão
 
 - Menu hambúrguer mantido como navegação principal, agrupado por Principal, Operação, Gerenciamento, Canais de venda, Restaurante e Pessoal. Remove barra inferior redundante e mantém ações rápidas no início. Seletor de restaurante por link.

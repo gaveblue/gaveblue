@@ -1,6 +1,6 @@
 // Intervalo — cozinha com consulta automática em intervalos de 15s, sem alegar Realtime ou impressão.
 import {icon} from './ui-icons.js?v=1.0.0-rc.1';
-import {openThermalReceipt} from './thermal-receipt-rc16.js?v=1.1.0-rc.16';
+import {printConfigured} from './print-template-rc2.js?v=1.2.0-rc.2';
 export async function renderPage({supabase,restaurant,box,esc,link}){
  document.body.classList.add('iv-fullwidth','iv-kds');
  const css='<style>.k-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}.k-card{background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:22px}.k-card h3{margin:0}.k-card button,.k-reload{margin-top:11px;border:0;border-radius:9px;padding:12px 15px;background:#0f766e;color:#fff;cursor:pointer;font-weight:700}.k-state{font-size:11px;border-radius:20px;background:#e2e8f0;padding:6px 10px;font-weight:700}.k-top{display:flex;justify-content:space-between;align-items:center;gap:10px}.k-card p{font-size:14px}.k-card small{color:#64748b}.k-empty{padding:36px;border:1px dashed #cbd5e1;border-radius:13px;color:#64748b}.iv-kds-table{font-weight:750}.iv-kds-online{border-color:#ffb766;border-left:4px solid #ff7900}.iv-kds-online .iv-kds-source{font-size:11px;font-weight:850;letter-spacing:.3px;color:#c56100}.iv-kds-alert{background:#fff7ed;border:1px solid #fed7aa;border-radius:13px;padding:13px 15px;color:#9a3412;font-size:13px;margin:12px 0}.iv-kds-online-status{font-size:12px;color:#64748b;margin:7px 0 11px}.iv-kds-online .iv-kds-head h3{font-size:15px}</style>';
@@ -113,12 +113,7 @@ export async function renderPage({supabase,restaurant,box,esc,link}){
       const ticketRound=Number(button.dataset.ticketRound);
       const orderItems=(data.items??[]).filter(i=>i.order_id===order.id&&Number(i.round_no||1)===ticketRound&&i.status!=='cancelled');
       const shortId=String(order.id||'').replace(/-/g,'').slice(-8).toUpperCase();
-      const ticket='<h1>PEDIDO · COZINHA</h1><p style="text-align:center">'+esc(restaurant.name)+'</p><hr>'
-       +'<p><b>Mesa: '+esc(table?.label??'Mesa')+'</b><br>Comanda: #'+esc(shortId)+'<br>Rodada: '+esc(ticketRound)+'<br>Status: '+esc(rounds.find(x=>x.order_id===order.id&&Number(x.round_no)===ticketRound)?.status??'')+'</p><hr>'
-       +orderItems.map(i=>'<p class="item">'+esc(i.quantity)+' × '+esc(i.product_name)
-         +(i.note?'<span class="note">Obs: '+esc(i.note)+'</span>':'')+'</p>').join('')
-       +'<hr><small>Pedido interno · Impressão manual</small>';
-      openThermalReceipt({title:'Pedido cozinha · Intervalo',content:ticket});
+      void printConfigured({supabase,restaurant,kind:'kitchen',data:{id:shortId,table:table?.label??'Mesa',status:rounds.find(x=>x.order_id===order.id&&Number(x.round_no)===ticketRound)?.status??'',round:ticketRound,opened_at:order.opened_at,items:orderItems}});
     });
   }catch(e){if(!silent)box(base+'<section class="k-card"><p class="error">'+esc(e.message)+'</p></section>')}
   finally{fetching=false}

@@ -1,6 +1,6 @@
 import {icon} from './ui-icons.js?v=1.0.0-rc.1';
 import {sheetifyForms,showFormSheetError} from './operational-sheets-rc15.js?v=1.0.0-rc.15';
-import {openThermalReceipt} from './thermal-receipt-rc16.js?v=1.1.0-rc.16';
+import {mountPrintSettings} from './print-settings-rc2.js?v=1.2.0-rc.2';
 import {initProductPhotoForm,resolveProductPhoto} from './product-photo-rc19.js?v=1.1.0-rc.20';
 // Intervalo — cadastros operacionais auxiliares (mesas, estoque, dispositivos, relatórios).
 export async function renderPage({supabase,restaurant,module,box,esc,link}){
@@ -351,21 +351,7 @@ export async function renderPage({supabase,restaurant,module,box,esc,link}){
       initProductPhotoForm({form:f,existingUrl:p?.image_url??'',supabase,restaurant});
      }
   }else if(module==='impressao'){
-    const kitchen=link('/'+restaurant.slug+'/cozinha'),cash=link('/'+restaurant.slug+'/caixa');
-    let out=title
-      +'<p class="x-note"><b>Impressão manual configurável.</b> Na MPT-II de 58 mm, escolha <b>Compartilhar cupom compacto</b> para enviar a imagem diretamente ao app Thermal Printer, sem uma página longa do Android. As preferências ficam salvas neste celular. Também é possível usar a impressão padrão do sistema.</p>'
-      +'<div class="x-grid">'
-      +'<section class="x-panel"><h2>Pedidos da cozinha</h2><p class="x-muted">Na fila da cozinha, clique em <b>Imprimir pedido (manual)</b> no pedido desejado. A prévia traz mesa, itens e observações.</p><p><a class="x-btn" href="'+kitchen+'">Abrir cozinha</a></p></section>'
-      +'<section class="x-panel"><h2>Comandas do caixa</h2><p class="x-muted">No caixa, localize a comanda, clique em <b>Visualizar / imprimir comanda</b> e imprima manualmente ou salve como PDF.</p><p><a class="x-btn" href="'+cash+'">Abrir caixa</a></p></section>'
-      +'</div><section class="x-panel"><h2>Configurações de impressão</h2><p class="x-muted">Teste e ajuste a largura do rolo, tamanho da fonte, margens e avanço final. O cupom de teste não cria pedidos nem gera cobranças.</p><button class="x-btn" type="button" id="iv-pr-test">Configurar e imprimir teste</button></section><section class="x-panel"><h2>Equipamentos</h2><p class="x-muted">A integração automática, o agente Windows, a fila de impressão e os testes com impressora térmica foram adiados para uma versão futura. Nenhuma impressão é disparada automaticamente.</p></section>';
-    box(out);
-    document.getElementById('iv-pr-test')?.addEventListener('click',()=>openThermalReceipt({
-      title:'Teste 58 mm · Intervalo',
-      content:'<h1>INTERVALO</h1><p style="text-align:center">TESTE DE IMPRESSÃO</p><hr>'
-        +'<p><b>Impressora:</b> MPT-II<br><b>Papel:</b> térmico 58 mm</p><hr>'
-        +'<p class="item">1 × X-Burger</p><p class="item">2 × Suco de laranja<span class="note">Obs: sem gelo</span></p>'
-        +'<hr><small>Teste sem pedido real · Fim do cupom</small>'
-    }));
+    await mountPrintSettings({supabase,restaurant,box,title,esc,link});
   }else if(module==='relatorios'){
     const d=await call('report');
     let out=title+'<div class="iv-report-controls"><span class="iv-chip orange">'+icon('chart',15)+' Indicadores reais</span><span class="iv-report-status">Últimas movimentações consultadas. Filtro por período ainda não disponível na API.</span></div><p class="x-note">Relatório gerencial preliminar. Não é relatório fiscal, nem conciliação bancária. O processamento está limitado às últimas movimentações consultadas.</p><h2>Comandas por status</h2><div class="x-grid">';

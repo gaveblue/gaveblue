@@ -155,8 +155,8 @@ function dataUrlFile(url,name){
  for(let i=0;i<raw.length;i++)bytes[i]=raw.charCodeAt(i);
  return new File([bytes],name,{type:'image/png'});
 }
-export function openThermalReceipt({title,content}){
- const popup=window.open('','_blank');
+export function openThermalReceipt({title,content,popup:existingPopup,warning=''}){
+ const popup=existingPopup??window.open('','_blank');
  if(!popup){alert('Autorize pop-ups para abrir a prévia de impressão.');return false}
  const markup=String(content||'');
  const css=[
@@ -186,7 +186,7 @@ export function openThermalReceipt({title,content}){
  ].join('');
  const html='<!doctype html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+escapeText(title||'Cupom Intervalo')+'</title><style>'+css+'</style><style id="iv-page-size"></style></head><body>'
   +'<header class="iv-pr-header"><div><b>Impressão térmica</b><small>Intervalo · Cupom configurável</small></div><small id="iv-pr-paper-label">58 mm</small></header>'
-  +'<div class="iv-pr-shell"><p class="iv-pr-info">O modo compacto envia apenas a imagem do cupom ao aplicativo, sem a página longa do Android.</p>'
+  +'<div class="iv-pr-shell">'+(warning?'<p class="iv-pr-info" role="alert" style="color:#9a3412;font-weight:700">'+escapeText(warning)+'</p>':'')+'<p class="iv-pr-info">O modo compacto envia apenas a imagem do cupom ao aplicativo, sem a página longa do Android.</p>'
   +'<div class="iv-pr-actions"><button class="iv-pr-button primary" id="iv-share" type="button">Compartilhar cupom compacto</button><button class="iv-pr-button" id="iv-save" type="button">Salvar imagem</button><button class="iv-pr-button" id="iv-native" type="button">Impressão do Android</button></div>'
   +'<details class="iv-pr-settings" id="iv-pr-settings"><summary>Ajustar tamanho e impressão</summary><div class="iv-pr-grid">'
   +'<label>Largura do papel<select id="iv-pr-paper"><option value="58">58 mm · MPT-II</option><option value="80">80 mm</option></select></label>'
