@@ -25,3 +25,35 @@
 .iv-photo-link input{display:block;width:100%;min-width:0;font-size:16px!important;line-height:1.3;margin:7px 0 0}
 .iv-photo-picker input[type=file]{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;pointer-events:none}
 @media(max-width:380px){.iv-photo-thumb{width:85px;height:87px}.iv-photo-view{gap:9px}.iv-photo-actions button{padding:8px 9px;min-height:37px;font-size:11px}}
+
+/* Intervalo rc.20 — biblioteca de fotos reutilizáveis no cadastro de produto */
+.iv-photo-actions button.iv-photo-library-open{background:#fff;color:#dd6b00;border-color:#ffd3ad}
+dialog.iv-photo-library{position:fixed;inset:auto 0 0;width:min(100%,620px);max-width:620px;height:min(89dvh,820px);max-height:89dvh;border:0;border-radius:24px 24px 0 0;padding:0;margin:0 auto;background:#f7f8fa;color:#202f42;box-shadow:0 -18px 75px #17233955;overflow:hidden;font-family:Inter,system-ui,sans-serif}
+dialog.iv-photo-library::backdrop{background:#14253b9a;backdrop-filter:blur(2px)}
+.iv-photo-library-shell{display:flex;flex-direction:column;height:100%;min-height:0}
+.iv-photo-library-head{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#fff;border-bottom:1px solid #e8edf3;padding:17px 16px}
+.iv-photo-library-head>div{min-width:0;display:grid;gap:4px}
+.iv-photo-library-head strong{font-size:18px;font-weight:850;color:#1e2b3d;line-height:1.2}
+.iv-photo-library-head small{font-size:11px;color:#8290a3;line-height:1.3}
+.iv-photo-library-close{flex:none;border:0;background:#f3f5f8;color:#48566a;border-radius:12px;width:39px;height:39px;cursor:pointer;font-size:25px}
+.iv-photo-library-toolbar{background:#fff;padding:13px 15px 11px;border-bottom:1px solid #ebeff4}
+.iv-photo-library-search{width:100%;height:46px;background:#f8fafc;border:1px solid #e0e6ef;border-radius:12px;font-size:16px;padding:10px 14px;color:#1f2f46;box-sizing:border-box}
+.iv-photo-library-filters{display:flex;gap:7px;margin-top:10px;overflow-x:auto;scrollbar-width:none}
+.iv-photo-library-filters button{border:1px solid #e5e9f0;background:#fff;color:#6c798a;padding:8px 12px;border-radius:11px;font-size:11px;font-weight:800;min-height:36px;white-space:nowrap;cursor:pointer}
+.iv-photo-library-filters button[aria-pressed=true]{background:#fff1e7;color:#db6800;border-color:#ffcda6}
+.iv-photo-library-body{flex:1;overflow-y:auto;overscroll-behavior:contain;padding:14px 14px 22px;min-height:0;-webkit-overflow-scrolling:touch}
+.iv-photo-library-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.iv-photo-library-tile{min-width:0;border:1px solid #e6eaf0;background:#fff;padding:0 0 10px;border-radius:14px;overflow:hidden;cursor:pointer;text-align:left;display:flex;flex-direction:column;color:#263247}
+.iv-photo-library-tile img,.iv-photo-library-broken{aspect-ratio:1/1;display:grid;place-items:center;width:100%;object-fit:cover;background:#fff0e2;color:#925a3b;font-size:11px;text-align:center}
+.iv-photo-library-tile .iv-photo-library-name{padding:9px 8px 2px;font-size:11px;font-weight:800;line-height:1.25;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;min-height:37px}
+.iv-photo-library-count{padding:0 8px;line-height:1.4;font-size:10px;color:#8895a7}
+.iv-photo-library-tile:disabled{opacity:.62;cursor:not-allowed}
+.iv-photo-library-tile:focus-visible{outline:3px solid #ffa457;outline-offset:2px}
+.iv-photo-library-tile:not(:disabled):active{transform:scale(.98)}
+.iv-photo-library-state{color:#697889;text-align:center;font-size:12px;line-height:1.5;margin:15px 0 6px}
+.iv-photo-library-state[data-error=true]{color:#b42318}
+.iv-photo-library-more{margin:8px auto 0;display:block;border-radius:11px;background:#fff;border:1px solid #ebd8c8;color:#d36b00;padding:11px 15px;font-size:12px;font-weight:850;cursor:pointer}
+.iv-photo-library-more[hidden]{display:none}
+.iv-photo-library-foot{background:#fff;padding:11px 17px max(12px,env(safe-area-inset-bottom));font-size:10.5px;color:#8290a1;border-top:1px solid #e8edf2;text-align:center;flex:none}
+@media(max-width:390px){.iv-photo-library-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.iv-photo-library-name{font-size:11px}}
+@media(min-width:700px){dialog.iv-photo-library{inset:0;margin:auto;border-radius:22px;height:min(86dvh,770px)}}
