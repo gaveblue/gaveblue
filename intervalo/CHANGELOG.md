@@ -1,5 +1,18 @@
 # Intervalo — CHANGELOG
 
+## 1.1.0-rc.18 — 2026-11-16 · Loja Online integrada à Gestão como Vendas
+
+**Status:** alterações integradas ao GitHub `main` e QA de sintaxe aprovado. **Pendente:** confirmar a publicação no domínio e testar a navegação completa no Android com perfil Master ou gerente.
+
+- A Loja Online deixa de aparecer como plataforma separada dentro do sistema: a **Gestão** passa a ter a área **Vendas online** no menu lateral e o atalho **Vendas** na barra inferior, mantendo a identidade do painel do restaurante.
+- **Quatro seções internas**: **Pedidos** (fila, aceite e andamento), **Entregas** (horários, regiões e taxas), **Vitrine** (dados da loja e exposição no marketplace) e **Pagamentos** (ativação de pedidos, Pix manual e InfinitePay). As áreas ficam separadas, sem a rolagem longa da tela antiga.
+- Vendas reaproveita o frontend `online-management-rc1.js`, agora com opção de incorporação `embedded`. O cabeçalho e a navegação duplicados deixam de aparecer no modo Gestão; APIs e permissões existentes permanecem.
+- A Visão geral da Gestão ganhou cartão **Vendas online**, com pendências e andamento consultados pelo serviço `marketplace-operations`, e botão **Abrir vendas**. O menu **Mais** também abre diretamente a aba Vendas.
+- O endereço antigo `/intervalo/{restaurante}/vendas-online` redireciona para `/intervalo/{restaurante}/gestao?tab=vendas` após validação de acesso. Favoritos antigos não ficam quebrados.
+- Os links do cardápio digital e marketplace públicos **não foram alterados**; clientes ainda compram pelo link normal. Pedidos, taxas, meios de pagamento e regras de estoque não sofrem migração.
+- CSS do `management-design-rc11.css` e `online-management-rc1.css` atualizado para integrar os cards e botões à estética da Gestão, inclusive no celular. Versionamento atualizado para rc.18.
+- Verificação técnica: sintaxe JavaScript do painel, do módulo online e da entrada principal aprovada. QA documentada em `QA-1.1.0-RC18-VENDAS-NA-GESTAO.md`. Nenhum serviço pago ou GitHub Actions utilizado.
+
 ## 1.1.0-rc.17 — 2026-11-16 · Garçom: Cardápio em lista/grade + pedidos delivery e retirada
 
 **Status:** atualizado no GitHub `main`; migração Supabase aplicada, Edge Function ativa e testes técnicos com rollback aprovados. **Pendente:** conferir propagação no domínio e homologar o fluxo real no Android, com perfil Garçom.
