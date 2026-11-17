@@ -47,6 +47,35 @@ Deno.serve(async(req:Request)=>{
  const manage=()=>allowed("gestao")&&["master","manager"].includes(member.role);
  const id=body.id;
  const fail=()=>error("Operação não autorizada",403);
+ if(action==="cash_pix_quote"){
+  if(!allowed("caixa"))return fail();
+  const amount=integer(body.amount_cents,1,10000000000),orderId=body.order_id;
+  if(amount===null||!isId(orderId))return error("Comanda ou valor inválido");
+  const [order,items,payments,setting]=await Promise.all([
+   db.from("orders").select("id,status").eq("restaurant_id",tenant).eq("id",orderId).maybeSingle(),
+   db.from("order_items").select("unit_price_cents,quantity").eq("restaurant_id",tenant).eq("order_id",orderId).neq("status","cancelled"),
+   db.from("payments").select("amount_cents").eq("restaurant_id",tenant).eq("order_id",orderId),
+   db.from("restaurant_manual_pix_settings").select("pix_key,recipient_name,recipient_city,enabled").eq("restaurant_id",tenant).maybeSingle()
+  ]);
+  if([order,items,payments,setting].some(r=>r.error))return error("Falha ao conferir cobrança Pix",503);
+  if(order.data?.status!=="served")return error("Comanda não está disponível para receber",409);
+  const due=(items.data??[]).reduce((n,i)=>n+Number(i.unit_price_cents)*Number(i.quantity),0)-(payments.data??[]).reduce((n,i)=>n+Number(i.amount_cents),0);
+  if(amount>due)return error("Valor maior que o saldo em aberto. Atualize o caixa.",409);
+  const st=setting.data;
+  if(!st?.enabled||!st.pix_key)return error("Ative o Pix direto em Gestão > Formas de pagamento.",409);
+  const key=String(st.pix_key);
+  const valid=/^[0-9]{11}$|^[0-9]{14}$|^\+55[1-9][0-9]{10,11}$|^[^\s@]+@[^\s@]+\.[^\s@]+$|^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  const clean=(v:string,max:number)=>v.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toUpperCase().replace(/[^A-Z0-9 .-]/g," ").replace(/\s+/g," ").trim().slice(0,max);
+  const name=clean(String(st.recipient_name??""),25),city=clean(String(st.recipient_city??""),15);
+  if(!valid.test(key)||!/^[\x21-\x7e]+$/.test(key)||key.length>77||name.length<2||city.length<2)return error("Confira a configuração da chave Pix e do titular.",422);
+  const tlv=(tag:string,value:string)=>{if(value.length>99)throw Error("Campo Pix excede o limite");return tag+String(value.length).padStart(2,"0")+value};
+  const crc=(str:string)=>{let n=65535;for(let i=0;i<str.length;i++){n^=str.charCodeAt(i)<<8;for(let b=0;b<8;b++)n=((n&0x8000)?(n<<1)^0x1021:n<<1)&65535}return n.toString(16).toUpperCase().padStart(4,"0")};
+  try{
+   const txid="IV"+crypto.randomUUID().replace(/-/g,"").slice(0,23).toUpperCase();
+   const raw=tlv("00","01")+tlv("01","11")+tlv("26",tlv("00","br.gov.bcb.pix")+tlv("01",key))+tlv("52","0000")+tlv("53","986")+tlv("54",(amount/100).toFixed(2))+tlv("58","BR")+tlv("59",name)+tlv("60",city)+tlv("62",tlv("05",txid))+"6304";
+   return reply({payload:raw+crc(raw),amount_cents:amount,recipient_name:name,txid,remaining_cents:due});
+  }catch{return error("Não foi possível gerar o Pix. Confira a chave cadastrada.",422)}
+ }
  if(action==="print_config"||action==="print_config_save"){
   if(action==="print_config_save"&&!manage())return fail();
   if(!manage()&&!allowed("cozinha")&&!allowed("caixa"))return fail();
@@ -76,10 +105,10 @@ Deno.serve(async(req:Request)=>{
   const model=(v:unknown,kind:"cash"|"kitchen")=>{
    if(!obj(v)||typeof v.show_rounds!=="boolean"||typeof v.separators!=="boolean")throw Error("Modelo inválido");
    // Novos campos opcionais para manter compatibilidade com clientes RC2.
-   const defaults={notice:kind==="cash"?"DOCUMENTO NÃO FISCAL · Não substitui nota fiscal ou comprovante bancário.":"PEDIDO INTERNO · NÃO FISCAL",sample_notice:"AMOSTRA · Sem pedido real",item_format:"{qtd} × {produto}",price_format:"{valor_item}"};
+   const defaults={notice:kind==="cash"?"DOCUMENTO NÃO FISCAL · Não substitui nota fiscal ou comprovante bancário.":"PEDIDO INTERNO · NÃO FISCAL",sample_notice:"AMOSTRA · Sem pedido real",item_format:"{qtd} × {produto}",price_format:"{valor_item}",receipt_title:"RECIBO DE PAGAMENTO",receipt_details:"Recebimento: {forma_pagamento}\nValor pago: {valor_pagamento}\nRegistro: {registro_pagamento}\nData: {data_pagamento}",pix_title:"PAGAMENTO PIX",pix_details:"Valor a pagar: {valor_pagamento}\nRecebedor: {recebedor_pix}\nEscaneie o QR Code. Aguardando confirmação."};
    const extended:Record<string,string>={};
    for(const [k,initial] of Object.entries(defaults)){
-    const val=v[k]===undefined?initial:v[k],max=k==="notice"||k==="sample_notice"?500:200;
+    const val=v[k]===undefined?initial:v[k],max=["notice","sample_notice","receipt_details","pix_details"].includes(k)?500:200;
     if(typeof val!=="string"||val.length>max)throw Error("Confira o tamanho dos textos do modelo.");
     extended[k]=val.trim();
    }
