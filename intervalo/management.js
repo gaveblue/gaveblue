@@ -131,6 +131,12 @@ export async function renderManagement({supabase,restaurant,role,box,esc,link}) 
     ];
     const kpiColors=["orange","","green","red"];
     inner='<div class="mg-v2-kpis">'+cards.map(([ic,label,number,detail],i)=>'<article class="mg-v2-kpi"><div class="mg-v2-kpi-top"><div class="mg-v2-kpi-label">'+esc(label)+'</div><span class="mg-v2-kpi-icon '+kpiColors[i]+'">'+icon(ic,19)+'</span></div><div class="mg-v2-kpi-val">'+value(number)+'</div><div class="mg-v2-kpi-note">'+esc(detail)+'</div></article>').join('')+'</div>'
+      +'<section class="mg-v2-sales-entry"><span class="mg-v2-sales-icon">'+icon("bag",22)+'</span>'
+      +'<div class="mg-v2-sales-copy"><strong>Vendas online</strong><small>'+(
+       state.overview?.online?
+        esc(String(state.overview.online.pending??0)+' aguardando aceite · '+String(state.overview.online.preparing??0)+' em andamento')
+        :'Pedidos de delivery e retirada no mesmo painel')+'</small></div>'
+      +'<button type="button" data-tab="vendas">Abrir vendas '+icon("chevronRight",15)+'</button></section>'
       +quickLinks
       +'<div class="mg-v2-dual"><section class="mg-v2-panel"><h3>Fluxo de atendimento</h3><p>Do lançamento do pedido ao recebimento no caixa.</p>'
       +'<div class="mg-v2-process"><span>Garçom</span>'+icon("chevronRight",14)+'<span>Cozinha</span>'+icon("chevronRight",14)+'<span>Caixa</span></div>'
@@ -141,6 +147,9 @@ export async function renderManagement({supabase,restaurant,role,box,esc,link}) 
       +(Array.isArray(stock)?low.length?low.slice(0,5).map(i=>'<div class="mg-v2-alert-row">'+icon("alert",17)+'<div><strong>'+value(i.name)+'</strong><small>Saldo: '+value(i.quantity)+' '+value(i.unit)+' · mínimo: '+value(i.min_quantity)+'</small></div></div>').join(''):'<div class="mg-v2-alert-row">'+icon("checkCircle",17)+'<div><strong>Nenhum alerta no momento</strong><small>Consulta de estoque concluída.</small></div></div>':'<div class="mg-v2-alert-row">'+icon("info",17)+'<div><strong>Consulta indisponível</strong><small>Atualize a página para tentar novamente.</small></div></div>')
       +(accessible.some(([path])=>path==="estoque")?'<a class="mg-v2-panel-link" href="'+link("/"+d.restaurant.slug+"/estoque")+'">Ver estoque '+icon("arrowRight",13)+'</a>':"")
       +'</section></div>';
+   }else if(state.tab==="vendas"){
+    inner='<section class="mg-v2-online-host" id="mg-v2-online-host" aria-label="Vendas online">'
+      +'<div class="iv-loading-inline" role="status" aria-live="polite"><span class="iv-load-dot" aria-hidden="true"></span> Carregando pedidos e configurações...</div></section>';
    }else if(state.tab==="dados"){
      inner='<section class="panel"><h2>Informações do estabelecimento</h2><p class="onboarding-note">'+note+'</p><form id="restaurant-settings" class="mg">'+input("Telefone","phone",s.phone,'inputmode="tel" maxlength="30"')+input("CEP (somente números)","postal_code",s.postal_code,'inputmode="numeric" maxlength="8"')+input("Rua / Avenida","street",s.street,'maxlength="150"')+input("Número","address_number",s.address_number,'maxlength="30"')+input("Bairro","neighborhood",s.neighborhood,'maxlength="100"')+input("Cidade","city",s.city,'maxlength="120"')+input("UF","state",s.state,'maxlength="2" style="text-transform:uppercase"')+'<div><label for="m-timezone">Fuso horário</label><select id="m-timezone" name="timezone">'+["America/Sao_Paulo","America/Manaus","America/Cuiaba","America/Rio_Branco","America/Belem","America/Fortaleza","America/Recife","America/Noronha"].map(t=>'<option value="'+t+'" '+((s.timezone??"America/Sao_Paulo")===t?"selected":"")+'>'+t.replace("America/","")+'</option>').join("")+'</select></div><div class="full team-actions"><button class="btn" type="submit">Salvar dados</button>'+(!s.onboarding_completed_at?'<button class="btn alt" name="finish" type="button" id="mg-finish">Concluir cadastro</button>':'')+'</div></form><p class="muted-sm">Cadastros e alterações ficam vinculados ao estabelecimento e registrados para auditoria.</p></section>';
    }else if(state.tab==="equipe"){
@@ -178,10 +187,24 @@ export async function renderManagement({supabase,restaurant,role,box,esc,link}) 
      }
    }
    box(viewHead+inner+"</div></main>"+bottom+"</div></div>");
+   if(state.tab==="vendas"){
+    const host=document.getElementById('mg-v2-online-host');
+    const isActive=()=>!!host?.isConnected&&state.tab==='vendas';
+    void import('/intervalo/online-management-rc1.js?v=1.1.0-rc.18').then(({renderPage})=>{
+     if(!isActive())return;
+     return renderPage({supabase,restaurant,role,esc,link,embedded:true,isActive,
+      initialSection:new URLSearchParams(location.search).get('area')||'pedidos',
+      box:html=>{if(isActive())host.innerHTML=html}});
+    }).catch(e=>{if(isActive())host.innerHTML='<div class="mg-v2-panel" role="alert">Não foi possível abrir Vendas: '+esc(e.message)+'</div>'});
+   }
    const shell=document.getElementById("mg-v2-root");
    const switchTab=tab=>{
-     if(!["visao","dados","equipe","acessos"].includes(tab)||tab==="acessos"&&!isMaster)return;
+     if(!["visao","vendas","dados","equipe","acessos"].includes(tab)||tab==="acessos"&&!isMaster)return;
      state.tab=tab;
+     const url=new URL(location.href);
+     if(tab==='vendas')url.searchParams.set('tab','vendas');
+     else{url.searchParams.delete('tab');url.searchParams.delete('area')}
+     history.replaceState(history.state,'',url.pathname+url.search+url.hash);
      draw();
    };
    document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));
@@ -200,10 +223,10 @@ export async function renderManagement({supabase,restaurant,role,box,esc,link}) 
          ["route","relatorios","Relatórios","Indicadores gerenciais","chart"],
          ["tab","equipe","Equipe","Configurações existentes, sem alterações","users"],
          ["tab","acessos","Permissões","Apenas para o Master","shield"],
-         ["route","vendas-online","Loja Online","Configurar vitrine e entrega própria","store"],
+         ["tab","vendas","Vendas online","Pedidos, entregas e pagamentos","bag"],
          ["route","impressao","Impressão","Prévia manual e documentos internos","printer"],
          ["route","inicio","Trocar restaurante","Voltar aos meus restaurantes","arrowLeft"]];
-     const available=choices.filter(([type,path])=>type==="tab"?(path!=="acessos"||isMaster):(path==="inicio"||path==="vendas-online"||accessible.some(([p])=>p===path)));
+     const available=choices.filter(([type,path])=>type==="tab"?(path!=="acessos"||isMaster):(path==="inicio"||accessible.some(([p])=>p===path)));
      const dialog=document.createElement("dialog");dialog.className="mg-v2-sheet";
      dialog.setAttribute("aria-label",kind==="quick"?"Ações rápidas":"Mais opções");
      const rows=available.map(([type,path,label,note,symbol])=>{
