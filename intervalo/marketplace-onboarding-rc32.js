@@ -29,16 +29,15 @@ export function onboardingStyle(){return '<style>.iv-client-wizard{max-width:460
 export function showOnboarding({auth,page,esc,link,user=null,profile=null,onDone,onLogin}){
  const seed=profile??{},meta=user?.user_metadata??{};
  let stage=0,busy=false,awaiting=false;
- const v={full_name:seed.full_name??meta.full_name??meta.name??'',social_name:seed.social_name??'',display_name:seed.display_name??'',cpf:seed.cpf??'',password:'',again:'',email:user?.email??'',phone:seed.phone??'',postal_code:'',state:'',city:'',street:'',number:'',neighborhood:'',complement:'',reference:'',terms:false};
+ const v={name:seed.display_name||seed.social_name||seed.full_name||meta.full_name||meta.name||'',cpf:seed.cpf??'',password:'',again:'',email:user?.email??'',phone:seed.phone??'',postal_code:'',state:'',city:'',street:'',number:'',neighborhood:'',complement:'',reference:'',terms:false};
  const field=(title,k,attrs='')=>'<label>'+title+'<input name="'+k+'" value="'+esc(v[k]??'')+'" '+attrs+'></label>';
  const secret=(title,k)=>'<label>'+title+'<input name="'+k+'" type="password" required minlength="8" maxlength="128" autocomplete="new-password" value="'+esc(v[k])+'"></label>';
  const setError=message=>{const el=document.getElementById('iv-wizard-error');if(el)el.textContent=message};
  const writeForm=form=>{for(const el of form.elements){if(!el.name)continue;v[el.name]=el.type==='checkbox'?el.checked:el.type==='password'?el.value:el.value.trim()}};
  const validate=()=>{
   if(stage===0){
-   if(v.full_name.trim().split(/\s+/).length<2||v.full_name.length>150)throw Error('Informe seu nome completo.');
+   if(v.name.trim().length<3||v.name.length>120)throw Error('Informe seu nome completo ou social (de 3 a 120 caracteres).');
    if(!cpfValid(v.cpf))throw Error('Confira os dígitos do CPF.');
-   if(v.social_name&&v.social_name.length<2||v.display_name&&v.display_name.length<2)throw Error('Confira o nome social ou nome no pedido.');
    if(!user&&(v.password.length<8||v.password!==v.again))throw Error('Crie uma senha com pelo menos 8 caracteres e repita a mesma senha.');
   }else if(stage===1){
    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.email))throw Error('Informe um e-mail válido.');
@@ -57,7 +56,7 @@ export function showOnboarding({auth,page,esc,link,user=null,profile=null,onDone
    u=result.data.user;user=u;
   }
   if(!u)throw Error('Não foi possível confirmar seu acesso. Entre novamente.');
-  const {error}=await auth.rpc('customer_complete_registration',{p_full_name:v.full_name,p_social_name:v.social_name||null,p_display_name:v.display_name||v.social_name||v.full_name.slice(0,120),p_cpf:digits(v.cpf),p_phone:digits(v.phone),p_accept:v.terms,p_address:{postal_code:digits(v.postal_code),state:v.state,city:v.city,street:v.street,number:v.number,neighborhood:v.neighborhood,complement:v.complement,reference:v.reference}});
+  const {error}=await auth.rpc('customer_complete_registration',{p_full_name:v.name,p_social_name:null,p_display_name:v.name,p_cpf:digits(v.cpf),p_phone:digits(v.phone),p_accept:v.terms,p_address:{postal_code:digits(v.postal_code),state:v.state,city:v.city,street:v.street,number:v.number,neighborhood:v.neighborhood,complement:v.complement,reference:v.reference}});
   if(error)throw Error('Não foi possível salvar seu cadastro e endereço. Confira os dados e tente novamente.');
   v.password='';v.again='';v.cpf='';onDone();
  };
@@ -71,9 +70,8 @@ export function showOnboarding({auth,page,esc,link,user=null,profile=null,onDone
   const titles=['Seus dados','Como podemos falar com você?','Onde você recebe seus pedidos?'];
   const descriptions=['Vamos começar com o básico.','Informe seu contato para os pedidos.','Você poderá adicionar outros endereços depois.'];
   let fields='';
-  if(stage===0)fields=field('Nome completo','full_name','required maxlength="150" autocomplete="name"')
-   +field('Nome social (opcional)','social_name','maxlength="120" autocomplete="nickname"')
-   +field('Nome no pedido (opcional)','display_name','maxlength="120" placeholder="Como deseja ser chamado?"')
+  if(stage===0)fields=field('Nome','name','required minlength="3" maxlength="120" autocomplete="name" placeholder="Como deseja ser chamado?"')
+   +'<small class="iv-client-muted" style="margin-top:-7px">Informe seu nome completo ou social. Esse será o nome exibido nos seus pedidos.</small>'
    +field('CPF','cpf','required inputmode="numeric" maxlength="14" placeholder="000.000.000-00"')
    +(user?'<small class="iv-client-muted">A senha é gerenciada pelo seu método de acesso.</small>':secret('Crie sua senha (mínimo 8 caracteres)','password')+secret('Repita a senha','again'));
   if(stage===1)fields=field('E-mail','email','type="email" maxlength="254" required autocomplete="email" '+(user?'readonly':''))+field('Celular com DDD','phone','required inputmode="tel" maxlength="15" autocomplete="tel" placeholder="(00) 90000-0000"');

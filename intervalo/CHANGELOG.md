@@ -1,5 +1,11 @@
 # Intervalo — CHANGELOG
 
+## 1.1.0-rc.33 — 2026-11-17 · Nome único no cadastro
+
+- Cadastro e edição de perfil usam um único campo Nome, com orientação para nome completo ou social, exibido nos pedidos.
+- Novos perfis enviam o nome informado aos campos internos de identificação e exibição já existentes; edição preserva nomes distintos legados. Sem alteração de schema ou exclusão de dados.
+- Termos/privacidade e cache dos módulos atualizados; demais etapas e checkout visitante preservados. Sintaxe verificada; teste visual e propagação pendentes. Google continua pendente de configuração.
+
 ## 1.1.0-rc.32 — 2026-11-17 · Cadastro do consumidor e endereços
 
 - Onboarding em três etapas: identificação (nome completo/social/no pedido, CPF, senha), contato (e-mail/celular) e endereço/aceite. Senha manual mínima de oito caracteres; não reduz a política do Auth. Google preparado via OAuth; depende de credenciais e redirect allowlist do provedor.

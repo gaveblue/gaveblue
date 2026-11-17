@@ -1,6 +1,6 @@
 import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.50.0/+esm';
 import {icon} from './ui-icons.js?v=1.0.0-rc.1';
-import {showOnboarding,googleLogin,googleButton,onboardingStyle,returnTarget,finishCustomer,clearReturnTarget} from './marketplace-onboarding-rc32.js?v=1.1.0-rc.32a';
+import {showOnboarding,googleLogin,googleButton,onboardingStyle,returnTarget,finishCustomer,clearReturnTarget} from './marketplace-onboarding-rc32.js?v=1.1.0-rc.33';
 
 // Área do consumidor independente do Auth e dos papéis dos funcionários.
 // O checkout visitante não depende desta sessão nem de cadastro.
@@ -71,7 +71,7 @@ export async function renderCustomer({box,esc,link}){
  page('<header class="iv-client-head"><span class="iv-mkt-eyebrow">ÁREA DO CONSUMIDOR</span><h1>Minha conta</h1>'
   +'<p class="iv-client-muted">'+esc(user.email||'')+'</p></header>'
   +'<section class="iv-client-card"><h2>Meu perfil</h2><form id="iv-client-profile" class="iv-client-form">'
-  +'<label>Nome completo<input name="full_name" maxlength="150" required value="'+esc(profile.full_name||'')+'"></label><label>Nome social (opcional)<input name="social_name" maxlength="120" value="'+esc(profile.social_name||'')+'"></label><label>Nome no pedido<input name="name" maxlength="120" required value="'+esc(profile.display_name||'')+'"></label><label>CPF<input readonly value="***.***.***-'+esc(String(profile.cpf||'').slice(-2))+'"></label>'
+  +'<label>Nome<input name="name" minlength="3" maxlength="120" required autocomplete="name" value="'+esc(profile.display_name||profile.social_name||profile.full_name||'')+'"><small class="iv-client-muted">Informe seu nome completo ou social. Esse será o nome exibido nos seus pedidos.</small></label><label>CPF<input readonly value="***.***.***-'+esc(String(profile.cpf||'').slice(-2))+'"></label>'
   +'<label>Celular<input name="phone" inputmode="tel" maxlength="20" value="'+esc(profile?.phone||'')+'"></label>'
   +'<p id="iv-client-profile-status" role="status"></p><div class="iv-client-actions">'
   +'<button class="iv-client-primary" type="submit">Salvar perfil</button>'
@@ -96,10 +96,12 @@ export async function renderCustomer({box,esc,link}){
  const profileForm=document.getElementById('iv-client-profile');
  profileForm.onsubmit=async e=>{
   e.preventDefault();
-  const name=profileForm.elements.name.value.trim(),phone=cleanPhone(profileForm.elements.phone.value),full_name=profileForm.elements.full_name.value.trim(),social_name=profileForm.elements.social_name.value.trim()||null;
-  if(name.length<2||name.length>120||full_name.split(/\s+/).length<2||full_name.length>150||social_name&&social_name.length<2||!/^[1-9]\d9\d{8}$/.test(phone)){setMsg('iv-client-profile-status','Confira nome e celular.',true);return}
+  const name=profileForm.elements.name.value.trim(),phone=cleanPhone(profileForm.elements.phone.value);
+  if(name.length<3||name.length>120||!/^[1-9]\d9\d{8}$/.test(phone)){setMsg('iv-client-profile-status','Confira nome e celular.',true);return}
   const b=profileForm.querySelector('button[type=submit]');b.disabled=true;
-  const payload={display_name:name,phone,full_name,social_name};
+  // Compatibilidade: preservar nomes distintos de perfis antigos.
+  const payload={display_name:name,phone};
+  if(!profile.full_name||(!profile.social_name&&profile.full_name===profile.display_name))payload.full_name=name;
   const {error}=profile
    ?await customerAuth.from('customer_profiles').update({...payload,updated_at:new Date().toISOString()}).eq('id',user.id)
    :await customerAuth.from('customer_profiles').insert({...payload,id:user.id});
