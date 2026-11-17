@@ -57,3 +57,8 @@ dialog.iv-photo-library::backdrop{background:#14253b9a;backdrop-filter:blur(2px)
 .iv-photo-library-foot{background:#fff;padding:11px 17px max(12px,env(safe-area-inset-bottom));font-size:10.5px;color:#8290a1;border-top:1px solid #e8edf2;text-align:center;flex:none}
 @media(max-width:390px){.iv-photo-library-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.iv-photo-library-name{font-size:11px}}
 @media(min-width:700px){dialog.iv-photo-library{inset:0;margin:auto;border-radius:22px;height:min(86dvh,770px)}}
+
+/* Precedência sobre botões genéricos dos formulários operacionais. */
+.iv-photo-picker .iv-photo-actions button{background:#fff;color:#344256;border:1px solid #dbe2ea}
+.iv-photo-picker .iv-photo-actions button.iv-photo-primary,.iv-photo-picker .iv-photo-actions button.iv-photo-library-open{background:#fff1e5;color:#d66200;border-color:#ffd1a8}
+.iv-photo-picker .iv-photo-actions button.iv-photo-remove{background:#fff;color:#a13c35;border-color:#efcfcf}
