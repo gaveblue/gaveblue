@@ -1,5 +1,11 @@
 # Intervalo — CHANGELOG
 
+## 1.2.0-rc.8 — 2026-11-17 · Status do pedido nas mesas do Garçom
+
+- Etiqueta compacta acima do número/ícone da mesa: Livre, Lançando, Enviado, Em preparo, Pronto, Servido ou Ocupada. Pronto recebe destaque verde e tem prioridade entre rodadas simultâneas; ao marcar como servida, mostra a próxima situação pendente. Mantém grade de três colunas no celular e seleção laranja.
+- Reaproveita consulta automática existente (10 s em tela ativa, quando o formulário de atendimento não está aberto), sem novas requisições ou alterações de banco. Status calculado dos dados recebidos, sem prometer atualização instantânea.
+- Sintaxe e cenários de rodadas simulados; teste visual e fluxo real cozinha/garçom pendentes.
+
 ## 1.2.0-rc.7 — 2026-11-17 · Navegação global do restaurante
 
 - Menu lateral compartilhado em Gestão, Caixa, Garçom, Cozinha, Mesas, Produtos, Estoque, Cardápio administrativo, Impressão e Relatórios. Seções, ícones, restaurante selecionado e destaque do destino atual comuns; acesso direto entre módulos do mesmo restaurante. Gestão preserva sidebar desktop e trocas internas de abas; módulos operacionais preservam suas ações locais, incluindo voltar e atualizar.

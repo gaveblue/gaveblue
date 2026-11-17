@@ -400,7 +400,7 @@ async function tenant(user,slug,mod){
  }
  const asset={catalogo:'catalog.js',mesas:'support.js',estoque:'support.js',impressao:'support.js',relatorios:'support.js',garcom:'waiter.js',cozinha:'kitchen.js',caixa:'cash.js'}[mod];
  if(!asset){box('<h1>Módulo não encontrado</h1>');return}
- const {renderPage}=await import('/intervalo/'+asset+'?v=1.2.0-rc.7');
+ const {renderPage}=await import('/intervalo/'+asset+'?v='+(mod==='garcom'?'1.2.0-rc.8':'1.2.0-rc.7'));
  return renderPage({supabase,restaurant:m.restaurants,module:mod,box,esc,link});
 }
 async function account(user){
