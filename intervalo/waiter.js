@@ -1,3 +1,4 @@
+import {groupProducts,chooseVariant} from './product-variants-rc28.js?v=1.1.0-rc.28';
 import {icon} from './ui-icons.js?v=1.0.0-rc.1';
 import {openWaiterDelivery} from './waiter-delivery-rc17.js?v=1.1.0-rc.17';
 // Intervalo 0.9.7 — painel responsivo do garçom; operações reais via restaurant-core.
@@ -41,7 +42,7 @@ export async function renderPage({supabase,restaurant,box,esc,link}){
  }
  function render(){
   if(!snapshot)return;
-  const {tables,orders,items,products,categories,rounds=[]}=snapshot;
+  const {tables,orders,items,products,categories,rounds=[]}=snapshot;const grouped=groupProducts(products);
   const activeTable=selected(),activeOrder=order(),lines=activeOrder?listFor(activeOrder):[];
   const total=lines.reduce((sum,i)=>sum+Number(i.unit_price_cents)*Number(i.quantity),0);
   const occupied=t=>orders.some(o=>o.table_id===t.id&&!['closed','cancelled'].includes(o.status));
@@ -60,16 +61,16 @@ export async function renderPage({supabase,restaurant,box,esc,link}){
     const busy=occupied(t);
     html+='<button type="button" class="wg-table'+(t.id===selectedId?' selected':'')+'" data-w-table="'+esc(t.id)+'" aria-current="'+(t.id===selectedId)+'" aria-label="Mesa '+esc(t.label)+', '+(busy?'ocupada':'livre')+'"><span class="wg-table-name"><span class="wg-table-icon" aria-hidden="true">'+icon('table',24)+'</span><span class="wg-table-label">'+esc(t.label)+'</span></span><span class="wg-table-meta"><span><i class="wg-dot'+(busy?' busy':'')+'"></i>'+(busy?'Ocupada':'Livre')+'</span><span>'+esc(t.area??'Salão')+'</span></span></button>';
   }
-  html+='</div></aside><section class="wg-panel" data-section="cardapio"><div class="wg-catalogue"><div class="wg-catalogue-heading"><div><h2>Cardápio</h2><p class="wg-hint">Escolha um produto para a '+esc(activeTable?.label??'mesa')+'</p></div><div class="wg-catalogue-tools"><span class="wg-counter" id="wg-products-count">'+products.length+' produtos</span><div class="wg-catalogue-layout" role="group" aria-label="Visualização de produtos"><button type="button" data-w-layout="list" aria-label="Exibir produtos em lista" aria-pressed="'+(catalogLayout==='list')+'">'+icon('bars',19)+'</button><button type="button" data-w-layout="grid" aria-label="Exibir produtos em grade" aria-pressed="'+(catalogLayout==='grid')+'">'+icon('dashboard',19)+'</button></div></div></div>'
+  html+='</div></aside><section class="wg-panel" data-section="cardapio"><div class="wg-catalogue"><div class="wg-catalogue-heading"><div><h2>Cardápio</h2><p class="wg-hint">Escolha um produto para a '+esc(activeTable?.label??'mesa')+'</p></div><div class="wg-catalogue-tools"><span class="wg-counter" id="wg-products-count">'+grouped.length+' produtos</span><div class="wg-catalogue-layout" role="group" aria-label="Visualização de produtos"><button type="button" data-w-layout="list" aria-label="Exibir produtos em lista" aria-pressed="'+(catalogLayout==='list')+'">'+icon('bars',19)+'</button><button type="button" data-w-layout="grid" aria-label="Exibir produtos em grade" aria-pressed="'+(catalogLayout==='grid')+'">'+icon('dashboard',19)+'</button></div></div></div>'
    +'<input class="wg-search" id="wg-search" type="search" placeholder="Buscar produtos..." aria-label="Buscar produto" value="'+esc(search)+'" autocomplete="off">'
    +'<div class="wg-cats" role="group" aria-label="Categorias"><button data-w-cat="all" aria-pressed="'+(categoryFilter==='all')+'">Todos</button>'
    +filteredCats.map(c=>'<button type="button" data-w-cat="'+esc(c.id)+'" aria-pressed="'+(categoryFilter===c.id)+'">'+esc(c.name)+'</button>').join('')+'</div><div class="wg-products'+(catalogLayout==='list'?' wg-products--list':'')+'">';
-  for(const p of products){
-    const cat=categories.find(c=>c.id===p.category_id),src=photo(p);
-    html+='<article class="wg-product" data-w-product data-category="'+esc(p.category_id)+'" data-search="'+esc((p.name+' '+(p.description??'')+' '+(cat?.name??'')).toLocaleLowerCase('pt-BR'))+'">'
+  for(const g of grouped){
+    const p=g.product,cat=categories.find(c=>c.id===p.category_id),src=photo(p);
+    html+='<article class="wg-product" data-w-product data-category="'+esc(p.category_id)+'" data-search="'+esc((g.name+' '+g.search+' '+(p.description??'')+' '+(cat?.name??'')).toLocaleLowerCase('pt-BR'))+'">'
       +'<div class="wg-product-photo">'+(src?'<img src="'+esc(src)+'" alt="'+esc(p.name)+'" loading="lazy" decoding="async" referrerpolicy="no-referrer">':'<span aria-hidden="true">'+categoryIcon(cat?.name??'')+'</span>')+'</div>'
-      +'<div class="wg-product-text"><b>'+esc(p.name)+'</b><p>'+esc(p.description??'')+'</p><div class="wg-product-foot"><span class="wg-price">'+money(p.price_cents)+'</span>'
-      +'<button type="button" class="wg-plus" data-w-add="'+esc(p.id)+'" aria-label="Adicionar '+esc(p.name)+'" '+(canAdd?'':'disabled title="Esta mesa não aceita novos itens agora"')+'>'+icon("plus",22)+'</button></div></div></article>';
+      +'<div class="wg-product-text"><b>'+esc(g.name)+'</b><p>'+esc(p.description??'')+'</p><div class="wg-product-foot"><span class="wg-price">'+(g.variants.length>1?'A partir de ':'')+money(g.price)+'</span>'
+      +'<button type="button" class="wg-plus" data-w-add="'+esc(g.key)+'" aria-label="Adicionar '+esc(p.name)+'" '+(canAdd?'':'disabled title="Esta mesa não aceita novos itens agora"')+'>'+icon("plus",22)+'</button></div></div></article>';
   }
   html+='</div>'+(!products.length?'<p class="wg-empty">O restaurante ainda não tem produtos disponíveis no cardápio.</p>':'')+'</div></section>'
    +'<aside class="wg-panel wg-order" data-section="comanda"><div class="wg-selected">Comanda</div><h2>'+(activeTable?esc(activeTable.label):'Selecione uma mesa')+'</h2>'
@@ -140,7 +141,7 @@ export async function renderPage({supabase,restaurant,box,esc,link}){
     if(confirm('Cancelar esta comanda ainda não enviada e liberar a mesa?'))action(cancel,'order_cancel',{order_id:activeOrder.id,reason:reason.trim()});
   };
   document.querySelectorAll('[data-w-serve-round]').forEach(b=>b.onclick=()=>action(b,'round_progress',{order_id:activeOrder.id,round_no:Number(b.dataset.wServeRound),p_next:'served'}));
-  document.querySelectorAll('[data-w-add]').forEach(b=>b.onclick=()=>openProduct(products.find(p=>p.id===b.dataset.wAdd),activeOrder));
+  document.querySelectorAll('[data-w-add]').forEach(b=>b.onclick=()=>chooseVariant(grouped.find(g=>g.key===b.dataset.wAdd),money,p=>openProduct(p,activeOrder)));
  }
 
  function startDelivery(){

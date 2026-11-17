@@ -1,5 +1,12 @@
 # Intervalo — CHANGELOG
 
+## 1.1.0-rc.28 — 2026-11-17 · Variações de produtos
+
+- Cadastro de produtos com variação opcional e atalho para criar outra opção (mesmo nome-base/categoria, preço próprio). Agrupa por restaurante, categoria e nome-base; cada opção mantém ID, nome completo, preço, disponibilidade e ficha técnica independente. Para agrupar um produto já existente, edite-o e preencha sua variação também.
+- Loja e Garçom (mesas): mostram card único por grupo e menor preço; escolha obrigatória em painel antes de abrir a seleção do item. Cardápio de consulta apresenta tamanhos e preços. Delivery interno/checkout continuam operando sobre IDs individuais e nomes completos.
+- Supabase: migration `menu_product_variants_rc28`, colunas opcionais `variant_group_name` e `variant_label`, unicidade por restaurante/categoria/grupo/variação; funções restaurant-core v15, public-menu v6, marketplace-public v4 implantadas. Sem alteração em pedidos já gravados.
+- Cache público inclui somente os metadados públicos novos. Sintaxe e agrupamento simulados; cadastro, pedido completo, fichas técnicas e publicação no domínio pendentes de homologação real.
+
 ## 1.1.0-rc.27 — 2026-11-17 · Miniaturas compactas no cardápio
 
 - Modo lista da loja e do cardápio público: fotos quadradas de 56 px no celular e 64 px em telas maiores, com recorte central e dimensões independentes do arquivo original. Cards compactos, descrição em até duas linhas e preço laranja alinhado à direita.

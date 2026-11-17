@@ -1,5 +1,6 @@
+import {groupProducts,chooseVariant} from './product-variants-rc28.js?v=1.1.0-rc.28';
 import {icon} from './ui-icons.js?v=1.0.0-rc.1';
-import {readCatalog,saveCatalog,forgetCatalog,publicResult} from './public-catalog-cache-rc26.js?v=1.1.0-rc.26';
+import {readCatalog,saveCatalog,forgetCatalog,publicResult} from './public-catalog-cache-rc26.js?v=1.1.0-rc.28';
 import {addCartItem,loadCart,cartCount} from './marketplace-cart-rc4.js?v=1.1.0-rc.4';
 
 // Vitrine prévia real. NÃO cria pedidos e não envia dados pessoais.
@@ -7,7 +8,7 @@ export async function renderMarketplace({supabase,route,box,esc,link}){
  document.body.classList.add('iv-marketplace');
  const originalLink=link;
  link=(target)=>{
-  if(target==='/explorar'||/^\/loja\/[a-z0-9]+(?:-[a-z0-9]+)*$/.test(target))return originalLink('/?intervalo_route='+encodeURIComponent(originalLink(target))+'&iv_release=1.1.0-rc.27');
+  if(target==='/explorar'||/^\/loja\/[a-z0-9]+(?:-[a-z0-9]+)*$/.test(target))return originalLink('/?intervalo_route='+encodeURIComponent(originalLink(target))+'&iv_release=1.1.0-rc.28');
   return originalLink(target);
  };
  const css='<link rel="stylesheet" href="/intervalo/marketplace-preview-rc1.css?v=1.1.0-rc.27"><link rel="stylesheet" href="/intervalo/marketplace-commerce-rc4.css?v=1.1.0-rc.4">';
@@ -73,7 +74,7 @@ export async function renderMarketplace({supabase,route,box,esc,link}){
   const slug=route[1],cached=readCatalog('store',slug);
   const renderStore=(data,checking=false,previous=null)=>{
    const r=data.restaurant,cats=data.categories??[],allowed=new Set(cats.map(x=>x.id));
-   const products=(data.products??[]).filter(x=>allowed.has(x.category_id));
+   const products=(data.products??[]).filter(x=>allowed.has(x.category_id));const grouped=groupProducts(products);
    // RC23 — perfil da loja com capa, avatar sobreposto e metadados compactos.
    const rawName=String(r.name??'').trim();
    const publicName=(!rawName||rawName===r.slug)?String(r.slug??route[1]).replace(/-/g,' ').replace(/(^|\s)\p{L}/gu,x=>x.toLocaleUpperCase('pt-BR')):rawName;
@@ -101,14 +102,14 @@ export async function renderMarketplace({supabase,route,box,esc,link}){
       +'<div class="iv-mkt-filter iv-mkt-store-search" id="iv-mkt-search-panel" hidden><label class="iv-mkt-input">'+icon('search',17)+'<input id="iv-mkt-product-search" type="search" aria-label="Buscar produto" placeholder="Buscar no cardápio"></label></div>'
       +'<div class="iv-mkt-pills" role="group" aria-label="Categorias"><button type="button" data-mkt-cat="all" aria-pressed="true">Todos</button>'
       +cats.map(c=>'<button type="button" data-mkt-cat="'+esc(c.id)+'" aria-pressed="false">'+esc(c.name)+'</button>').join('')+'</div>'
-      +'<div class="iv-mkt-catalog-head"><div><h2 class="iv-mkt-title" style="font-size:21px">Cardápio</h2><p class="iv-mkt-description">'+products.length+' produto(s) disponíveis para consulta</p></div>'
+      +'<div class="iv-mkt-catalog-head"><div><h2 class="iv-mkt-title" style="font-size:21px">Cardápio</h2><p class="iv-mkt-description">'+grouped.length+' produto(s) disponíveis para consulta</p></div>'
       +'<div class="iv-mkt-view" role="group" aria-label="Modo de visualização"><button type="button" data-mkt-view="list" aria-label="Exibir produtos em lista" title="Lista" aria-pressed="false">'+icon('bars',19)+'</button><button type="button" data-mkt-view="grid" aria-label="Exibir produtos em grade" title="Grade" aria-pressed="true">'+icon('dashboard',19)+'</button></div></div><div class="iv-mkt-product-grid">';
-   for(const p of products){
-    const category=cats.find(c=>c.id===p.category_id);
+   for(const g of grouped){
+    const p=g.product,category=cats.find(c=>c.id===p.category_id);
     const picture=safePhoto(p.image_url);
-    out+='<button class="iv-mkt-product" type="button" data-mkt-product="'+esc(p.id)+'" data-category="'+esc(p.category_id)+'" data-search="'+esc([p.name,p.description,category?.name].join(' ').toLocaleLowerCase('pt-BR'))+'" aria-label="Ver detalhes de '+esc(p.name)+'">'
+    out+='<button class="iv-mkt-product" type="button" data-mkt-product="'+esc(g.key)+'" data-category="'+esc(p.category_id)+'" data-search="'+esc([g.name,g.search,p.description,category?.name].join(' ').toLocaleLowerCase('pt-BR'))+'" aria-label="Ver detalhes de '+esc(p.name)+'">'
      +'<span class="iv-mkt-photo">'+(picture?'<img src="'+esc(picture)+'" alt="'+esc(p.name)+'" loading="lazy" decoding="async">':icon('burger',46))+'</span>'
-     +'<span class="iv-mkt-body"><strong>'+esc(p.name)+'</strong><p>'+esc(p.description??'')+'</p><span class="iv-mkt-price">'+money(p.price_cents)+'</span></span></button>';
+     +'<span class="iv-mkt-body"><strong>'+esc(g.name)+'</strong><p>'+esc(p.description??'')+'</p><span class="iv-mkt-price">'+(g.variants.length>1?'A partir de ':'')+money(g.price)+'</span></span></button>';
    }
    if(!products.length)out+=placeholder('Cardápio sem produtos','O restaurante ainda não cadastrou itens disponíveis.');
    out+='</div><div id="iv-mkt-empty" class="iv-mkt-empty" hidden>Nenhum produto encontrado.</div><div id="iv-com-cartbar" class="iv-com-cartbar" hidden></div>';
@@ -193,9 +194,8 @@ export async function renderMarketplace({supabase,route,box,esc,link}){
     if(previous.focused&&!searchPanel.hidden)search.focus({preventScroll:true});
    }
    if(checking)document.querySelectorAll('[data-mkt-product]').forEach(b=>{b.disabled=true;b.setAttribute('aria-disabled','true')});
-   document.querySelectorAll('[data-mkt-product]').forEach(b=>b.onclick=()=>{
-    if(checking)return;
-    const p=products.find(x=>String(x.id)===b.dataset.mktProduct);if(!p)return;
+   const openProduct=p=>{
+    if(checking||!p)return;
     const extras=(data.options??[]).filter(x=>x.product_id===p.id);
     const dialog=document.createElement('dialog');dialog.className='iv-mkt-sheet';dialog.setAttribute('aria-label','Detalhes de '+p.name);
     const detailPhoto=safePhoto(p.image_url);
@@ -232,7 +232,8 @@ export async function renderMarketplace({supabase,route,box,esc,link}){
     dialog.addEventListener('close',()=>dialog.remove(),{once:true});
     dialog.addEventListener('click',e=>{if(e.target===dialog)dialog.close()});
     dialog.showModal();dialog.querySelector('[data-close]')?.focus({preventScroll:true});
-   });
+   };
+   document.querySelectorAll('[data-mkt-product]').forEach(b=>b.onclick=()=>{if(!checking)chooseVariant(grouped.find(g=>String(g.key)===b.dataset.mktProduct),money,openProduct)});
   };
   let shownCache=false;
   if(cached){try{renderStore(cached.data,true);shownCache=true}catch{forgetCatalog('store',slug);loading()}}

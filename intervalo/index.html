@@ -365,7 +365,7 @@ async function waiterHome(user){
 const internalModules=['catalogo','mesas','estoque','impressao','relatorios','vendas-online'];
 async function tenant(user,slug,mod){
  if(mod==='cardapio'){
-  const {renderPublicMenu}=await import('/intervalo/public-menu.js?v=1.1.0-rc.27');
+  const {renderPublicMenu}=await import('/intervalo/public-menu.js?v=1.1.0-rc.28');
   return renderPublicMenu({supabase,slug,box,esc,link});
  }
  if(!user){location.assign(link('/login'));return}
@@ -396,7 +396,7 @@ async function tenant(user,slug,mod){
  }
  const asset={catalogo:'catalog.js',mesas:'support.js',estoque:'support.js',impressao:'support.js',relatorios:'support.js',garcom:'waiter.js',cozinha:'kitchen.js',caixa:'cash.js'}[mod];
  if(!asset){box('<h1>Módulo não encontrado</h1>');return}
- const {renderPage}=await import('/intervalo/'+asset+'?v='+(mod==='garcom'?'1.1.0-rc.17':mod==='estoque'?'1.1.0-rc.22':mod==='catalogo'?'1.1.0-rc.22':mod==='cozinha'||mod==='caixa'||mod==='impressao'?'1.1.0-rc.16':mod==='mesas'?'1.1.0-rc.14':'1.1.0-rc.4'));
+ const {renderPage}=await import('/intervalo/'+asset+'?v='+(mod==='garcom'?'1.1.0-rc.28':mod==='estoque'?'1.1.0-rc.28':mod==='catalogo'?'1.1.0-rc.22':mod==='cozinha'||mod==='caixa'||mod==='impressao'?'1.1.0-rc.16':mod==='mesas'?'1.1.0-rc.14':'1.1.0-rc.4'));
  return renderPage({supabase,restaurant:m.restaurants,module:mod,box,esc,link});
 }
 async function account(user){
@@ -419,7 +419,7 @@ async function start(){
   return renderCustomer({box,esc,link});
  }
  if(['explorar','loja'].includes(paths[0])){
-  const {renderMarketplace}=await import('/intervalo/marketplace-preview-rc1.js?v=1.1.0-rc.27');
+  const {renderMarketplace}=await import('/intervalo/marketplace-preview-rc1.js?v=1.1.0-rc.28');
   return renderMarketplace({supabase,route:paths,box,esc,link});
  }
  const user=await me();if(user?.app_metadata?.intervalo_password_change_required&&!['trocar-senha','login','redefinir','recuperar-senha'].includes(paths[0])){location.assign(link('/trocar-senha'));return}await setupNav(user);if(paths.length===0)return new URLSearchParams(location.search).get('app')==='garcom'

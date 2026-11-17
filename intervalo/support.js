@@ -204,7 +204,7 @@ export async function renderPage({supabase,restaurant,module,box,esc,link}){
       if(!activeCats.length)out+='<section class="x-panel"><p class="x-note">Antes de criar um produto, cadastre uma categoria ativa no módulo Cardápio.</p>'
         +'<a href="'+link('/'+restaurant.slug+'/catalogo')+'" class="iv-btn">'+icon('plus',16)+' Criar categoria</a></section>';
       else out+='<details class="x-panel x-create-panel"><summary><span class="x-create-icon">'+icon('plus',20)+'</span><span>Cadastrar produto<small class="x-create-desc">Nome, foto, preço e exibição</small></span><span class="x-create-arrow">'+icon('chevronRight',19)+'</span></summary>'
-       +'<form class="x-form" id="newprodstock"><label>Nome do produto<input name="name" required minlength="2" maxlength="150" placeholder="Ex.: X-Burger"></label>'
+       +'<form class="x-form" id="newprodstock"><label>Nome do produto<input name="name" required minlength="2" maxlength="150" placeholder="Ex.: Fritas com bacon e cheddar"></label><label>Variação (opcional)<input name="variant_label" maxlength="45" placeholder="Ex.: Pequena, 300 g"></label><p class="x-muted">Para criar outros tamanhos, cadastre o mesmo nome e categoria com outra variação e preço.</p>'
        +'<label>Categoria<select name="category_id" required>'+opts(activeCats,'id','name')+'</select></label>'
        +'<label>Preço de venda (R$)<input name="price" required inputmode="decimal" placeholder="24,90"></label>'
        +'<label>Descrição<input name="description" maxlength="1000" placeholder="Descrição curta"></label>'
@@ -222,13 +222,13 @@ export async function renderPage({supabase,restaurant,module,box,esc,link}){
           +'<label class="x-switch-row"><span class="x-switch-copy">'+icon('receipt',18)+'<span><strong>Exibir no cardápio</strong><small>Vitrine pública</small></span></span><input type="checkbox" class="x-toggle" data-product-flag="'+esc(p.id)+'" data-flag="show_on_menu" aria-label="Exibir '+esc(p.name)+' no cardápio público" '+(visible?'checked':'')+'></label>'
           +'<label class="x-switch-row"><span class="x-switch-copy">'+icon('checkCircle',18)+'<span><strong>Disponível para venda</strong><small>Garçom e pedidos</small></span></span><input type="checkbox" class="x-toggle" data-product-flag="'+esc(p.id)+'" data-flag="available" aria-label="Disponibilizar '+esc(p.name)+' para venda" '+(selling?'checked':'')+'></label>'
           +'<details><summary>'+icon('settings',16)+' Editar produto e preço</summary><form class="x-form" data-edit-product="'+esc(p.id)+'">'
-          +'<label>Nome<input name="name" required minlength="2" maxlength="150" value="'+esc(p.name)+'"></label>'
+          +'<label>Nome<input name="name" required minlength="2" maxlength="150" value="'+esc(p.variant_group_name??p.name)+'"></label><label>Variação (opcional)<input name="variant_label" maxlength="45" value="'+esc(p.variant_label??'')+'" placeholder="Ex.: Grande, 700 g"></label>'
           +'<label>Categoria<select name="category_id" required>'+categories.map(c=>'<option value="'+esc(c.id)+'" '+(c.id===p.category_id?'selected':'')+'>'+esc(c.name)+'</option>').join('')+'</select></label>'
           +'<label>Preço (R$)<input name="price" required inputmode="decimal" value="'+moneyInput(p.price_cents)+'"></label>'
           +'<label>Descrição<input name="description" maxlength="1000" value="'+esc(p.description??'')+'"></label>'
           +'<label>URL da foto<input type="url" name="image_url" maxlength="1200" value="'+esc(p.image_url??'')+'" placeholder="https://..."></label>'
           +'<button type="submit">'+icon('checkCircle',16)+' Salvar alterações</button></form></details>'
-          +'<p class="x-product-note">Ocultar do cardápio não apaga o produto nem sua ficha técnica.</p></article>';
+          +'<button type="button" class="iv-btn secondary" data-new-variant="'+esc(p.id)+'">'+icon('plus',16)+' Adicionar variação</button><p class="x-product-note">Ocultar do cardápio não apaga o produto nem sua ficha técnica.</p></article>';
       }
       if(!products.length)out+='<div class="iv-empty">Cadastre seu primeiro produto para começar.</div>';
       out+='</div><p class="x-product-note">* A vitrine pública também depende da publicação geral do cardápio, da categoria ativa e do produto disponível.</p>';
@@ -295,7 +295,7 @@ export async function renderPage({supabase,restaurant,module,box,esc,link}){
     form('newprodstock',async (v,f)=>{
       const image_url=await resolveProductPhoto(f);
       return call('product_create',{
-       name:v.name,category_id:v.category_id,price_cents:cents(v.price),description:v.description??'',
+       name:v.name,variant_label:v.variant_label??'',category_id:v.category_id,price_cents:cents(v.price),description:v.description??'',
        image_url,sort_order:0,available:v.available==='on',show_on_menu:v.show_on_menu==='on'
       });
     });
@@ -313,7 +313,7 @@ export async function renderPage({supabase,restaurant,module,box,esc,link}){
         const v=Object.fromEntries(new FormData(f).entries());
         const image_url=await resolveProductPhoto(f);
         await call('product_update',{
-          id:p.id,name:v.name,category_id:v.category_id,price_cents:cents(v.price),description:v.description??'',
+          id:p.id,name:v.name,variant_label:v.variant_label??'',category_id:v.category_id,price_cents:cents(v.price),description:v.description??'',
           image_url,sort_order:p.sort_order??0,available:p.available,show_on_menu:p.show_on_menu
         });
         await load();
@@ -325,7 +325,7 @@ export async function renderPage({supabase,restaurant,module,box,esc,link}){
        const p=products.find(p=>p.id===form.dataset.editProduct);
        return {id:form.id,label:'Editar produto',title:'Editar '+(p?.name??'produto'),context:'iv-inventory',replaceDetails:true};
      });
-     sheetifyForms([
+     const productSheets=sheetifyForms([
        {id:'newstock',label:'Novo insumo',title:'Cadastrar insumo',description:'Dados, unidade e saldos iniciais.',context:'iv-inventory'},
        ...stockEditForms.map(f=>({id:f.id,label:'Editar insumo',title:'Editar insumo',description:'Altere nome, unidade e estoque mínimo. Saldo via movimentação.',context:'iv-inventory'})),
        {id:'adjuststock',label:'Registrar movimentação',title:'Movimentar estoque',description:'Registre entrada, perda ou ajuste.',context:'iv-inventory'},
@@ -335,6 +335,16 @@ export async function renderPage({supabase,restaurant,module,box,esc,link}){
        ...editSpecs
      ]);
      initProductPhotoForm({form:document.getElementById('newprodstock'),supabase,restaurant});
+     document.querySelectorAll('[data-new-variant]').forEach(b=>b.onclick=()=>{
+      const p=products.find(x=>x.id===b.dataset.newVariant),sheet=productSheets.find(x=>x.form.id==='newprodstock');
+      if(!p||!sheet)return;
+      const fields=sheet.form.elements;
+      fields.name.value=p.variant_group_name??p.name;fields.category_id.value=p.category_id;fields.variant_label.value='';fields.price.value='';fields.description.value=p.description??'';
+      // Reutilizar foto existente pela URL (sem novo upload); não copiar ficha técnica.
+      const url=fields.image_url;if(url){url.value=p.image_url??'';url.dispatchEvent(new Event('input',{bubbles:true}))}
+      fields.available.checked=!!p.available;fields.show_on_menu.checked=!!p.show_on_menu;
+      sheet.trigger.click();
+     });
      for(const f of productEditForms){
       const p=products.find(p=>p.id===f.dataset.editProduct);
       initProductPhotoForm({form:f,existingUrl:p?.image_url??'',supabase,restaurant});

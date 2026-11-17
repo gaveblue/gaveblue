@@ -1,5 +1,6 @@
+import {groupProducts,chooseVariant} from './product-variants-rc28.js?v=1.1.0-rc.28';
 import {icon} from './ui-icons.js?v=1.0.0-rc.1';
-import {readCatalog,saveCatalog,forgetCatalog,publicResult} from './public-catalog-cache-rc26.js?v=1.1.0-rc.26';
+import {readCatalog,saveCatalog,forgetCatalog,publicResult} from './public-catalog-cache-rc26.js?v=1.1.0-rc.28';
 // Intervalo 0.9.7 — cardápio público somente consulta. Sem pedidos ou cobranças online.
 export async function renderPublicMenu({supabase,slug,box,esc,link}){
  document.body.classList.add('intervalo-menu');
@@ -8,7 +9,7 @@ export async function renderPublicMenu({supabase,slug,box,esc,link}){
  const loading=()=>{box(css+bar+'<div class="iv-loading-inline" role="status" aria-live="polite" aria-busy="true"><div class="iv-loading-inline-label"><span class="iv-load-dot" aria-hidden="true"></span><span>Preparando o cardápio...</span></div><div class="iv-loading-inline-lines" aria-hidden="true"><span class="iv-load-skeleton"></span><span class="iv-load-skeleton"></span></div></div>');};
  const render=(data,checking=false,previous=null)=>{
  const cats=data.categories??[],catIds=new Set(cats.map(c=>c.id));
- const products=(data.products??[]).filter(p=>catIds.has(p.category_id));
+ const products=(data.products??[]).filter(p=>catIds.has(p.category_id));const grouped=groupProducts(products);
  const money=n=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(n??0)/100);
  const categoryIcon=name=>icon(/bebid|sucos|refriger|drink/i.test(name)?'cup':/pizza/i.test(name)?'pizza':/sobremesa|doce/i.test(name)?'cake':/batata|porç|acomp/i.test(name)?'package':/cafe|café/i.test(name)?'coffee':'burger',52);
  const safeImage=p=>typeof p.image_url==='string'&&/^https:\/\/[^\s<>"']+$/.test(p.image_url)?p.image_url:null;
@@ -16,13 +17,14 @@ export async function renderPublicMenu({supabase,slug,box,esc,link}){
  +(checking?'<p id="dm-cache-status" role="status" style="font-size:12px;color:#80644d;margin:12px 0">Atualizando preços e disponibilidade...</p>':'')
  +'<section class="dm-tools"><input type="search" id="dm-search" aria-label="Buscar no cardápio" placeholder="Buscar lanches, bebidas, produtos..." autocomplete="off"><div class="dm-categories" role="group" aria-label="Categorias">'
  +'<button type="button" data-dm-cat="all" aria-pressed="true">Todos</button>'+cats.map(c=>'<button type="button" data-dm-cat="'+esc(c.id)+'" aria-pressed="false">'+esc(c.name)+'</button>').join('')+'</div></section>'
- +'<div class="dm-head"><h2>Nosso cardápio</h2><div class="dm-head-actions"><span id="dm-counter" class="dm-counter">'+products.length+' opções</span>'
+ +'<div class="dm-head"><h2>Nosso cardápio</h2><div class="dm-head-actions"><span id="dm-counter" class="dm-counter">'+grouped.length+' opções</span>'
  +'<div class="dm-view-controls" role="group" aria-label="Modo de visualização"><button type="button" data-dm-view="list" aria-label="Exibir produtos em lista" title="Lista" aria-pressed="false">'+icon('bars',19)+'</button><button type="button" data-dm-view="grid" aria-label="Exibir produtos em grade" title="Grade" aria-pressed="true">'+icon('dashboard',19)+'</button></div></div></div><div class="dm-grid">';
- for(const p of products){
-  const cat=cats.find(c=>c.id===p.category_id),photo=safeImage(p),extras=(data.options??[]).filter(o=>o.product_id===p.id);
-  out+='<article class="dm-card" data-dm-product data-category="'+esc(p.category_id)+'" data-search="'+esc((p.name+' '+(p.description??'')+' '+(cat?.name??'')).toLocaleLowerCase('pt-BR'))+'">'
+ for(const g of grouped){
+  const p=g.product,cat=cats.find(c=>c.id===p.category_id),photo=safeImage(p),extras=g.variants.length?[]:(data.options??[]).filter(o=>o.product_id===p.id);
+  out+='<article class="dm-card" data-dm-product data-category="'+esc(p.category_id)+'" data-search="'+esc((g.name+' '+g.search+' '+(p.description??'')+' '+(cat?.name??'')).toLocaleLowerCase('pt-BR'))+'">'
     +'<div class="dm-photo">'+(photo?'<img src="'+esc(photo)+'" loading="lazy" decoding="async" referrerpolicy="no-referrer" alt="'+esc(p.name)+'">':'<span aria-hidden="true">'+categoryIcon(cat?.name??'')+'</span>')
-    +'<b>'+esc(cat?.name??'Produto')+'</b></div><div class="dm-content"><h3>'+esc(p.name)+'</h3><p>'+esc(p.description??'')+'</p><strong>'+money(p.price_cents)+'</strong>';
+    +'<b>'+esc(cat?.name??'Produto')+'</b></div><div class="dm-content"><h3>'+esc(g.name)+'</h3><p>'+esc(p.description??'')+'</p><strong>'+(g.variants.length>1?'A partir de ':'')+money(g.price)+'</strong>';
+  if(g.variants.length)out+='<details><summary>Tamanhos e preços</summary><ul>'+g.variants.map(v=>'<li>'+esc(v.variant_label)+' · '+money(v.price_cents)+'</li>').join('')+'</ul></details>';
   if(extras.length)out+='<details><summary>Opcionais ('+extras.length+')</summary><ul>'+extras.map(o=>'<li>'+esc(o.name)+' · +'+money(o.price_delta_cents)+'</li>').join('')+'</ul></details>';
   out+='</div></article>';
  }

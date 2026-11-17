@@ -9,7 +9,7 @@ function project(data,slug){
  if(data?.published!==true||data.restaurant?.slug!==slug||!Array.isArray(data.categories)||!Array.isArray(data.products))return null;
  return {published:true,restaurant:{...pick(data.restaurant,['name','slug','description','logo_url','banner_url','city','state'])},
   categories:rows(data.categories,['id','name','sort_order']),
-  products:rows(data.products,['id','category_id','name','description','price_cents','image_url','sort_order']),
+  products:rows(data.products,['id','category_id','name','description','price_cents','image_url','sort_order','variant_group_name','variant_label']),
   options:rows(data.options,['id','product_id','name','price_delta_cents','sort_order']),
   hours:rows(data.hours,['weekday','opens_at','closes_at','delivery_enabled','pickup_enabled']),
   online_settings:pick(data.online_settings,['minimum_order_cents','estimated_prep_minutes','delivery_configured','pickup_configured'])};
