@@ -1,5 +1,11 @@
 # Intervalo — CHANGELOG
 
+## 1.1.0-rc.36 — 2026-11-17 · Cadastro compacto e checkout em etapas
+
+- Corrige margens herdadas do seletor global `form label` no cadastro, pesos de inputs, placeholders e espaçamento; orientação de nome mais curta, foco inicial no botão fechar.
+- Checkout guiado em Bottom Sheets: modalidade, endereço (só entrega), contato, pagamento e revisão. Progresso dinâmico, voltar/continuar fixos, validações por etapa, opcionais recolhíveis. Carrinho editável permanece na página; revisão mostra itens, termos, cotação e confirmação.
+- Reutiliza controles do mesmo formulário; preserva APIs, preço/frete no servidor, consentimento, idempotência, InfinitePay e Pix direto. Não modifica Supabase. Sintaxe verificada; teste real de checkout, Android e propagação pendentes.
+
 ## 1.1.0-rc.35 — 2026-11-17 · Cadastro compacto em quatro etapas
 
 - Cadastro manual: nome/CPF, senha, contato e endereço/aceite. Acesso já autenticado (Google ou conta existente) pula a senha e mostra três etapas. Progresso, voltar e ações fixas mantidos.

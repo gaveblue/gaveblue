@@ -1,14 +1,14 @@
 // Intervalo Marketplace — Checkout mobile-first rc9 · InfinitePay Novo Mundo.
 // Apenas apresentação: cotação, finalização, termos, idempotência e requisições seguem o contrato rc4.
 import {icon} from './ui-icons.js?v=1.0.0-rc.1';
-import {customerAuth} from './marketplace-customer-rc5.js?v=1.1.0-rc.35';
+import {customerAuth} from './marketplace-customer-rc5.js?v=1.1.0-rc.36';
 import {loadCart,setCartItemQuantity,clearCart,formatBRL} from './marketplace-cart-rc4.js?v=1.1.0-rc.4';
 
 export async function renderCheckout({supabase,box,esc,link}){
  document.body.classList.add('iv-marketplace','iv-commerce','iv-checkout-rc7');
  const css='<link rel="stylesheet" href="/intervalo/marketplace-preview-rc1.css?v=1.1.0-rc.4">'
   +'<link rel="stylesheet" href="/intervalo/marketplace-commerce-rc4.css?v=1.1.0-rc.4">'
-  +'<link rel="stylesheet" href="/intervalo/marketplace-checkout-rc7.css?v=1.1.0-rc.7">';
+  +'<link rel="stylesheet" href="/intervalo/marketplace-checkout-rc7.css?v=1.1.0-rc.36">';
  const slug=new URLSearchParams(location.search).get('loja');
  const safe=/^[a-z0-9]+(?:-[a-z0-9]+)*$/;
  const storeHref=slug&&safe.test(slug)?link('/loja/'+slug):link('/explorar');
@@ -72,11 +72,11 @@ export async function renderCheckout({supabase,box,esc,link}){
  const sheet=(key,title,description,content)=>'<dialog class="iv-ck-sheet" id="iv-ck-sheet-'+key+'" aria-labelledby="iv-ck-title-'+key+'">'
   +'<div class="iv-ck-sheet-frame"><div class="iv-ck-sheet-drag" data-ck-drag title="Arraste para expandir ou fechar">'
   +'<span aria-hidden="true"></span></div><header class="iv-ck-sheet-header"><div>'
-  +'<h2 id="iv-ck-title-'+key+'">'+title+'</h2><p>'+description+'</p></div>'
-  +'<button type="button" class="iv-ck-icon-btn" data-ck-close aria-label="Fechar">'+icon('x',19)+'</button></header>'
+  +'<div class="iv-ck-step-meta" data-ck-step-meta></div><h2 id="iv-ck-title-'+key+'">'+title+'</h2><p>'+description+'</p></div>'
+  +'<button type="button" class="iv-ck-icon-btn" data-ck-close autofocus aria-label="Fechar">'+icon('x',19)+'</button></header>'
   +'<p class="iv-ck-sheet-error" id="iv-ck-error-'+key+'" role="alert" hidden></p>'
   +'<div class="iv-ck-sheet-scroll">'+content+'</div>'
-  +'<footer class="iv-ck-sheet-footer"><button type="button" class="iv-ck-button" data-ck-done>Concluir '+icon('check',16)+'</button></footer></div></dialog>';
+  +'<footer class="iv-ck-sheet-footer"><button type="button" class="iv-ck-back" data-ck-back>Voltar</button><button type="button" class="iv-ck-button" data-ck-done>Continuar '+icon('arrowRight',16)+'</button></footer></div></dialog>';
  const details=(iconName,title,description,key)=>'<button type="button" class="iv-ck-edit-card" data-ck-open="'+key+'">'
   +'<span class="iv-ck-icon-wrap">'+icon(iconName,19)+'</span><span class="iv-ck-edit-info"><strong>'+title+'</strong>'
   +'<small id="iv-ck-preview-'+key+'">'+description+'</small></span>'
@@ -87,9 +87,9 @@ export async function renderCheckout({supabase,box,esc,link}){
  if(!canOrder)html+='<div class="iv-com-warning">'+icon('info',18)
   +' O restaurante não está recebendo pedidos neste momento. Você pode conferir os dados, mas não concluir a compra.</div>';
  html+='<form id="iv-checkout-form" novalidate><div class="iv-ck-grid"><main class="iv-ck-column">'
-  +'<section class="iv-ck-card"><div class="iv-ck-title-line"><span class="iv-ck-number">1</span>'
+  +'<section class="iv-ck-card" id="iv-ck-kind-overview"><div class="iv-ck-title-line"><span class="iv-ck-number">1</span>'
   +'<div><h2>Como deseja receber?</h2><p>Escolha a modalidade do pedido.</p></div></div>'
-  +'<div class="iv-ck-kind-options">'
+  +'<div class="iv-ck-kind-options" id="iv-ck-kind-options">'
   +(pickupAllowed?'<label class="iv-ck-kind"><input type="radio" name="kind" value="pickup" '+(defaultKind==='pickup'?'checked':'')+'>'
     +'<span>'+icon('store',20)+'<strong>Retirada</strong><small>Buscar no restaurante</small></span></label>':'')
   +(deliveryAllowed?'<label class="iv-ck-kind"><input type="radio" name="kind" value="delivery" '+(defaultKind==='delivery'?'checked':'')+'>'
@@ -127,6 +127,8 @@ export async function renderCheckout({supabase,box,esc,link}){
   +'<p class="iv-ck-hint">Os valores são confirmados no servidor. No Pix direto, o QR Code e o Copia e Cola aparecem no Intervalo com prazo de 10 minutos para pagar ou avisar o restaurante.</p>'
   +'</aside></div>'
   // Os campos dos dialogs continuam dentro do único form do checkout, inclusive quando o dialog está fechado.
+  +sheet('kind','Como deseja receber?','Escolha entrega ou retirada.','')
+  +sheet('review','Revise seu pedido','Confira os valores e confirme a compra.','<div id="iv-ck-review-items"></div>')
   +sheet('address','Endereço de entrega','Confira a região e onde devemos entregar.',
     (savedAddresses.length?'<label class="iv-com-field">Usar endereço salvo<select id="iv-saved-address"><option value="">Preencher manualmente</option>'
       +savedAddresses.map(a=>'<option value="'+esc(a.id)+'">'+esc(a.label+' · '+a.street+', '+a.number)+'</option>').join('')+'</select></label>':'')
@@ -136,16 +138,16 @@ export async function renderCheckout({supabase,box,esc,link}){
     +'<label class="iv-com-field">UF<input name="state" maxlength="2" autocomplete="address-level1"></label></div>'
     +'<div class="iv-com-dual"><label class="iv-com-field">Cidade<input name="city" maxlength="100" autocomplete="address-level2"></label>'
     +'<label class="iv-com-field">Bairro<input name="neighborhood" maxlength="100"></label></div>'
-    +'<label class="iv-com-field">Rua<input name="street" maxlength="160" autocomplete="street-address"></label>'
-    +'<div class="iv-com-dual"><label class="iv-com-field">Número<input name="number" maxlength="25"></label>'
-    +'<label class="iv-com-field">Complemento<input name="complement" maxlength="120"></label></div>'
-    +'<label class="iv-com-field">Referência<input name="reference" maxlength="160"></label>')
+    +'<div class="iv-com-dual iv-ck-street-grid"><label class="iv-com-field">Rua<input name="street" maxlength="160" autocomplete="street-address"></label>'
+    +'<label class="iv-com-field">Número<input name="number" maxlength="25"></label></div>'
+    +'<details class="iv-ck-optional"><summary>Complemento e referência (opcionais)</summary><label class="iv-com-field">Complemento<input name="complement" maxlength="120"></label>'
+    +'<label class="iv-com-field">Referência<input name="reference" maxlength="160"></label></details>')
   +sheet('contact','Seus dados','Como o restaurante deve identificar e contatar você.',
     '<label class="iv-com-field">Seu nome<input name="name" autocomplete="name" maxlength="120" value="'
     +esc(customerProfile?.display_name||'')+'" placeholder="Nome e sobrenome"></label>'
     +'<label class="iv-com-field">Celular / WhatsApp<input name="phone" autocomplete="tel" inputmode="tel" maxlength="20" value="'
     +esc(customerProfile?.phone||'')+'" placeholder="(00) 00000-0000"></label>'
-    +'<label class="iv-com-field">Observações para o restaurante<textarea name="note" maxlength="500" rows="3" placeholder="Alguma observação sobre seu pedido?"></textarea></label>')
+    +'<details class="iv-ck-optional"><summary>Observações (opcional)</summary><label class="iv-com-field">Observações para o restaurante<textarea name="note" maxlength="500" rows="2" placeholder="Alguma observação sobre seu pedido?"></textarea></label></details>')
   +sheet('payment','Forma de pagamento',manualPixEnabled?'Pix direto com confirmação do restaurante ou outras opções.':onlinePix?'Pagar online ou no recebimento.':'O pagamento será feito na entrega ou retirada.',
     '<div class="iv-ck-payment-list">'
     +(manualPixEnabled?'<label><input type="radio" name="payment" value="manual" checked><span>'+icon('money',20)+'<strong>Pix direto · QR Code</strong><small>10 minutos para pagar ou avisar · restaurante confere antes de aceitar</small></span></label>':'')
@@ -156,7 +158,7 @@ export async function renderCheckout({supabase,box,esc,link}){
   +'<div class="iv-ck-sticky"><div class="iv-ck-sticky-inner"><div class="iv-ck-sticky-price">'
   +'<small>Total do pedido</small><strong id="iv-ck-sticky-total">A calcular</strong></div>'
   +'<div class="iv-ck-sticky-actions"><p class="iv-com-error" id="iv-checkout-error" role="alert" hidden></p>'
-  +'<button type="button" class="iv-ck-button" id="iv-quote" '+(!canOrder?'disabled':'')+'>'
+  +'<button type="button" class="iv-ck-button" id="iv-start-checkout" '+(!canOrder?'disabled':'')+'>Continuar pedido '+icon('arrowRight',17)+'</button><button type="button" class="iv-ck-button" id="iv-quote" '+(!canOrder?'disabled':'')+'>'
   +(canOrder?'Calcular total':'Pedidos indisponíveis')+' '+icon('arrowRight',17)+'</button>'
   +'<button type="button" class="iv-ck-button" id="iv-place" hidden>Confirmar pedido '+icon('checkCircle',17)+'</button></div></div></div>'
   +'</form>';
@@ -166,6 +168,27 @@ export async function renderCheckout({supabase,box,esc,link}){
  const total=document.getElementById('iv-total'),fee=document.getElementById('iv-fee'),stickyTotal=document.getElementById('iv-ck-sticky-total');
  const quoteBtn=document.getElementById('iv-quote'),placeBtn=document.getElementById('iv-place'),errorEl=document.getElementById('iv-checkout-error');
  let quote=null,fingerprint='',busy=false;
+ // Mantém o MESMO formulário e seus controles; apenas muda a apresentação.
+ const review=document.getElementById('iv-ck-sheet-review'),kindSheet=document.getElementById('iv-ck-sheet-kind');
+ const reviewBody=review.querySelector('.iv-ck-sheet-scroll'),reviewFooter=review.querySelector('.iv-ck-sheet-footer');
+ const kindOptions=document.getElementById('iv-ck-kind-options');
+ kindSheet.querySelector('.iv-ck-sheet-scroll').append(kindOptions);
+ const kindOverview=document.getElementById('iv-ck-kind-overview');
+ kindOverview.innerHTML='<div class="iv-ck-edit-list">'+details('bike','Como receber','Escolha entrega ou retirada','kind')+'</div>';
+ const summary=form.querySelector('.iv-ck-summary'),consent=form.querySelector('.iv-ck-consent-panel');
+ reviewBody.append(summary,consent);
+ const reviewItems=document.getElementById('iv-ck-review-items');
+ for(const item of cart.items){
+  const p=products.find(x=>x.id===item.product_id),row=document.createElement('div');row.className='iv-ck-review-item';
+  const name=document.createElement('span'),price=document.createElement('b');
+  name.textContent=item.quantity+' × '+(p?.name??'Produto indisponível');price.textContent=formatBRL(approx(item));row.append(name,price);reviewItems.append(row);
+ }
+ reviewFooter.querySelector('[data-ck-done]').remove();
+ const reviewActions=document.createElement('div');reviewActions.className='iv-ck-review-actions';
+ reviewActions.append(errorEl,quoteBtn,placeBtn);reviewFooter.append(reviewActions);
+ const steps=kind=>kind==='delivery'?['kind','address','contact','payment','review']:['kind','contact','payment','review'];
+ const activeSteps=()=>steps(new FormData(form).get('kind')??defaultKind);
+ const startBtn=document.getElementById('iv-start-checkout');
  const warn=message=>{errorEl.textContent=message;errorEl.hidden=!message;if(message)errorEl.scrollIntoView?.({block:'nearest',behavior:'smooth'})};
  const sheetError=(key,message)=>{
   const el=document.getElementById('iv-ck-error-'+key);
@@ -194,11 +217,12 @@ export async function renderCheckout({supabase,box,esc,link}){
  const reset=()=>{
   quote=null;fingerprint='';placeBtn.hidden=true;quoteBtn.hidden=false;
   fee.textContent='A calcular';total.textContent='—';stickyTotal.textContent='A calcular';warn('');
-  for(const key of ['address','contact','payment'])sheetError(key,'');
+  for(const key of ['kind','address','contact','payment','review'])sheetError(key,'');
  };
  const syncPreviews=()=>{
   const fd=new FormData(form),kind=fd.get('kind')??defaultKind,hasDelivery=kind==='delivery';
   delivery.hidden=!hasDelivery;
+  document.getElementById('iv-ck-preview-kind').textContent=hasDelivery?'Entrega no endereço escolhido':'Retirar no restaurante';
   const name=String(fd.get('name')??'').trim(),phone=String(fd.get('phone')??'').trim();
   const street=String(fd.get('street')??'').trim(),number=String(fd.get('number')??'').trim();
   const district=String(fd.get('neighborhood')??'').trim(),city=String(fd.get('city')??'').trim();
@@ -213,18 +237,44 @@ export async function renderCheckout({supabase,box,esc,link}){
  };
  const dialogs=[...form.querySelectorAll('.iv-ck-sheet')];
  const openSheet=key=>{
-  const dialog=document.getElementById('iv-ck-sheet-'+key);if(!dialog)return;
+  const dialog=document.getElementById('iv-ck-sheet-'+key);if(!dialog||busy)return;
+  const list=activeSteps(),index=list.indexOf(key);if(index<0)return;
+  for(const other of dialogs)if(other!==dialog&&other.open)other.close();
+  const meta=dialog.querySelector('[data-ck-step-meta]');
+  meta.innerHTML='<small>ETAPA '+(index+1)+' DE '+list.length+'</small><div class="iv-ck-step-bars">'+list.map((_,i)=>'<i class="'+(i<=index?'active':'')+'"></i>').join('')+'</div>';
+  dialog.querySelector('[data-ck-back]').textContent=index===0?'Voltar':'Voltar';
   if(!dialog.open)dialog.showModal();
   dialog.__ckAlign?.();
   dialog.classList.remove('iv-ck-expanded');
   dialog.querySelector('.iv-ck-sheet-scroll')?.scrollTo?.(0,0);
   dialog.querySelector('[data-ck-close]')?.focus?.({preventScroll:true});
  };
- const closeSheet=dialog=>{if(dialog?.open)dialog.close();syncPreviews()};
+ const closeSheet=dialog=>{if(busy)return;if(dialog?.open)dialog.close();syncPreviews()};
+ const stepMessage=(key,req)=>{
+  if(key==='kind'&&((req.fulfillment_type==='delivery'&&!deliveryAllowed)||(req.fulfillment_type==='pickup'&&!pickupAllowed)))return 'Escolha uma modalidade disponível.';
+  if(key==='address'&&(!req.zone_id||!req.address?.street||!req.address?.number||!req.address?.neighborhood||!req.address?.city||!req.address?.state||req.address?.postal_code?.length!==8))return 'Informe região, CEP e endereço completo.';
+  if(key==='contact'&&(req.customer_name.length<2||req.customer_phone.replace(/\D/g,'').length<10))return 'Informe nome e celular válidos.';
+  return '';
+ };
+ const nextStep=key=>{
+  if(busy)return;const message=stepMessage(key,getData());
+  if(message){sheetError(key,message);return}
+  const list=activeSteps(),index=list.indexOf(key);if(index<0)return;
+  document.activeElement?.blur();if(index<list.length-1)openSheet(list[index+1]);
+ };
+ const backStep=key=>{
+  if(busy)return;const list=activeSteps(),index=list.indexOf(key);
+  if(index>0)openSheet(list[index-1]);else closeSheet(document.getElementById('iv-ck-sheet-'+key));
+ };
+ startBtn.onclick=()=>openSheet('kind');
  // Bottom sheets arrastáveis, expansíveis, com fechamento pelo grip, backdrop, Escape e botão.
  for(const dialog of dialogs){
   const frame=dialog.querySelector('.iv-ck-sheet-frame'),handle=dialog.querySelector('[data-ck-drag]');
-  dialog.querySelectorAll('[data-ck-close],[data-ck-done]').forEach(button=>button.addEventListener('click',()=>closeSheet(dialog)));
+  const key=dialog.id.slice('iv-ck-sheet-'.length);
+  dialog.querySelector('[data-ck-close]').onclick=()=>closeSheet(dialog);
+  dialog.querySelector('[data-ck-done]')?.addEventListener('click',()=>nextStep(key));
+  dialog.querySelector('[data-ck-back]').onclick=()=>backStep(key);
+  dialog.addEventListener('cancel',e=>{if(busy)e.preventDefault()});
   dialog.addEventListener('click',e=>{if(e.target===dialog)closeSheet(dialog)});
   dialog.addEventListener('close',()=>{dialog.classList.remove('iv-ck-expanded');frame.style.transform=''});
   let start=null,lastDelta=0;
@@ -239,7 +289,7 @@ export async function renderCheckout({supabase,box,esc,link}){
    else if(lastDelta< -40)dialog.classList.add('iv-ck-expanded');
    start=null;lastDelta=0;frame.style.transform='';
   };
-  handle.addEventListener('pointerup',finish);handle.addEventListener('pointercancel',finish);
+  handle.addEventListener('pointerup',finish);handle.addEventListener('pointercancel',()=>{start=null;lastDelta=0;frame.style.transform=''})
   const align=()=>{
    if(!dialog.open)return;
    const vv=window.visualViewport,height=vv?.height??window.innerHeight;
@@ -289,6 +339,7 @@ export async function renderCheckout({supabase,box,esc,link}){
  });
  const validate=req=>{
   if(!req.items.length)throw Error('Seu carrinho está vazio.');
+  const invalidKind=stepMessage('kind',req);if(invalidKind){openSheet('kind');sheetError('kind',invalidKind);throw Error(invalidKind)}
   if(req.fulfillment_type==='delivery'&&(!req.zone_id||!req.address.street||!req.address.number||
    !req.address.neighborhood||!req.address.city||req.address.postal_code.length!==8)){
    sheetError('address','Informe região, CEP e endereço de entrega completo.');
@@ -304,8 +355,10 @@ export async function renderCheckout({supabase,box,esc,link}){
   const req=getData();
   try{
    validate(req);
+   if(!req.accept_terms){warn('Aceite os termos antes de calcular o total.');return}
    busy=true;quoteBtn.disabled=true;quoteBtn.innerHTML=icon('refresh',16)+' Conferindo valores...';
    const result=await call('marketplace-online',{action:'quote',...req});
+   if(JSON.stringify(getData())!==JSON.stringify(req)){reset();throw Error('Dados alterados. Confira o total novamente.')}
    quote=result.quote;fingerprint=JSON.stringify(req);
    fee.textContent=formatBRL(quote.delivery_fee_cents);
    total.textContent=formatBRL(quote.total_cents);
@@ -345,4 +398,5 @@ export async function renderCheckout({supabase,box,esc,link}){
   finally{busy=false;placeBtn.disabled=false;placeBtn.innerHTML=(getData().payment_method==='infinitepay'?'Ir para pagamento ':getData().payment_method==='manual_pix'?'Gerar código Pix ':'Confirmar pedido ')+icon('checkCircle',17)}
  };
  syncPreviews();
+ if(canOrder)openSheet('kind');
 }
