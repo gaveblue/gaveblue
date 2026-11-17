@@ -1,5 +1,10 @@
 # Intervalo — CHANGELOG
 
+## 1.2.0-rc.4 — 2026-11-17 · Carregamento padronizado da impressão
+
+- Substitui texto antigo e skeleton sem dimensões pelo componente visual compartilhado `iv-loading-inline` / `iv-load-skeleton`, com blocos que antecipam a configuração e a prévia da comanda. Rótulo de carregamento acessível e sem texto visível antigo.
+- Atualiza versões dos módulos para evitar cache desatualizado. Sem alterações de modelos, API ou banco. Sintaxe e estrutura verificadas; propagação e teste visual Android pendentes.
+
 ## 1.2.0-rc.3 — 2026-11-17 · Personalização ampla da comanda
 
 - Avisos do documento e da amostra editáveis e opcionais; a interface de teste continua identificando a amostra. Formatos dos itens e dos preços, rótulos e campos automáticos ampliados; escolha de exibição de observações, preços, totais, recebido, saldo, rodadas e separadores em ambos os modelos.
