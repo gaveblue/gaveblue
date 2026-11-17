@@ -1,5 +1,20 @@
 # Intervalo — CHANGELOG
 
+## 1.1.0-rc.20 — 2026-11-16 · Biblioteca de fotos reutilizáveis dos produtos
+
+**Status:** GitHub `main` atualizado; Edge Function Supabase `restaurant-product-photos` v2 ativa e isolada por restaurante. **Pendente:** homologação visual no Android e confirmação da publicação no domínio.
+
+- **Biblioteca** dentro dos formulários de **Cadastrar produto** e **Editar produto** em Gestão → Estoque e Produtos → Produtos, além dos botões Enviar foto, Câmera, Remover e link HTTPS.
+- A biblioteca oferece grade de miniaturas, busca pelo nome dos produtos associados, filtros **Todas / Enviadas / Em produtos**, contador de reutilizações e carregamento paginado.
+- As fotos já enviadas para `intervalo-product-images` e os URLs já utilizados por produtos daquele restaurante passam a aparecer na biblioteca. Assim não é necessário reenviar imagens existentes.
+- Um toque na imagem aplica a **mesma URL** em outro produto; ao Salvar, o sistema reutiliza o mesmo arquivo, sem criar cópias e sem aumentar o uso de Storage. Vários produtos podem referenciar a mesma foto.
+- Remover a foto do produto desassocia apenas o produto editado: **não exclui o arquivo compartilhado**, evitando quebrar outras fichas de produtos.
+- `restaurant-product-photos` recebeu ação `list` após autenticação e validações Master/Gerente + permissão Gestão; lista **somente** o prefixo `{restaurant_id}/` no bucket e produtos do mesmo restaurante. Nenhuma permissão de escrita foi ampliada e a `service_role` continua exclusiva do servidor.
+- Novo módulo `product-image-library-rc20.js` e CSS responsivo; `product-photo-rc19.js`, `support.js` e `index.html` atualizados com cache rc.20.
+- Verificação do Supabase: bucket já possuía **1 foto** e Novo Mundo possuía **1 foto associada a produto**, que passam a alimentar a biblioteca sem migração.
+- QA registrado em `QA-1.1.0-RC20-BIBLIOTECA-DE-FOTOS.md`. Nenhuma tabela de produtos, pedido, estoque ou pagamento foi modificada.
+- Compartilhamento automático entre restaurantes distintos **não** foi ativado; a biblioteca é do restaurante para manter isolamento multiempresa. Nenhum serviço pago/GitHub Actions foi ativado.
+
 ## 1.1.0-rc.19 — 2026-11-16 · Fotos dos produtos por câmera/galeria + armazenamento Supabase
 
 **Status:** GitHub `main` atualizado; bucket Storage e Edge Function implantados; QA sintático, segurança e simulação aprovados. **Pendente:** confirmar propagação no domínio e testar envio real pelo Android antes de homologar.
