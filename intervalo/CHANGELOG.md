@@ -1,5 +1,12 @@
 # Intervalo — CHANGELOG
 
+## 1.2.0-rc.1 — 2026-11-17 · Reorganização da Gestão
+
+- Menu hambúrguer mantido como navegação principal, agrupado por Principal, Operação, Gerenciamento, Canais de venda, Restaurante e Pessoal. Remove barra inferior redundante e mantém ações rápidas no início. Seletor de restaurante por link.
+- Horários, entrega/retirada, formas de pagamento e loja online têm destinos próprios integrados à Gestão; resumo semanal dos horários e edição no Bottom Sheet original. Ativação de pedidos fica na Loja online. Pedidos nesta fase são os de delivery/retirada; comandas presenciais continuam em Mesas/Garçom/Caixa.
+- Produtos e Estoque ganham centrais de acesso aos cadastros existentes. Nesta fase os submódulos mantêm suas rotas; categorias/adicionais ainda compartilham a tela de catálogo. Nenhuma alteração de schema, APIs ou papéis.
+- Sintaxe e verificação estrutural; teste visual, navegação e salvamento reais pendentes. Próximas fases: telas internas, unificação de pedidos e Design System.
+
 ## 1.1.0-rc.37 — 2026-11-17 · Progresso visual sem numeração
 
 - Cadastro e checkout exibem apenas as barras de progresso, sem legendas de contagem de etapas. A informação de progresso permanece disponível a tecnologias assistivas. Fluxos, validações, pagamento e navegação preservados.

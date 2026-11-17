@@ -201,3 +201,6 @@ body.iv-management-v2 #iv-infinite-form .iv-on-hint{font-size:11px;line-height:1
 .iv-on-media-status[data-state="error"]{color:#b42318}
 .iv-on-media-status[data-state="success"]{color:#16804e}
 @media(max-width:550px){.iv-on-media-fields{grid-template-columns:1fr}.iv-on-media-preview.logo{max-width:130px}.iv-on-store-cover{height:130px}}
+
+/* 1.2.0 RC1 — semana e seções independentes */
+.iv-on-week{display:grid;margin:8px 0 14px}.iv-on-week-row{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid #edf0f3;align-items:start;font-size:13px}.iv-on-week-row:last-child{border:0}.iv-on-week-row>span{text-align:right;color:#42536a}.iv-on-week-row small{display:block;font-size:11px;color:#8290a0;margin-top:3px}.is-integrated [data-on-section][hidden]{display:none!important}.is-integrated .iv-on-columns{grid-template-columns:1fr}.is-integrated .iv-on-column:empty{display:none}

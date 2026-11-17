@@ -5,9 +5,9 @@ import {initManualPixSettings} from './marketplace-manual-pix-settings-rc10.js?v
 import {storefrontMediaFields,initStorefrontMedia} from './storefront-media-rc21.js?v=1.1.0-rc.22';
 
 // Gestão > Loja Online. Painel rc6; estado e permissões decididos no backend.
-export async function renderPage({supabase,restaurant,role,box,esc,link,embedded=false,isActive=()=>true,initialSection='pedidos'}){
+export async function renderPage({supabase,restaurant,role,box,esc,link,embedded=false,isActive=()=>true,initialSection='pedidos',externalNavigation=false}){
  if(!embedded)document.body.classList.add('iv-fullwidth','iv-online-admin');
- const css='<link rel="stylesheet" href="/intervalo/online-management-rc1.css?v=1.1.0-rc.22">';
+ const css='<link rel="stylesheet" href="/intervalo/online-management-rc1.css?v=1.2.0-rc.1">';
  const money=n=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(n||0)/100);
  const realToCents=str=>{
   const raw=String(str).trim().replace(/\s/g,'');
@@ -22,7 +22,7 @@ export async function renderPage({supabase,restaurant,role,box,esc,link,embedded
   if(error||data?.error){let message=data?.error??error?.message??'Falha no serviço';try{const body=await error?.context?.json?.();message=body?.error??message}catch{}throw Error(message)}
   return data;
  };
- let activeSection=['pedidos','entregas','vitrine','pagamentos'].includes(initialSection)?initialSection:'pedidos';
+ let activeSection=['pedidos','entregas','vitrine','pagamentos','horarios'].includes(initialSection)?initialSection:'pedidos';
  const base=css+'<div class="iv-on-shell'+(embedded?' is-integrated':'')+'">'+(embedded?'':'<header class="iv-on-header">'
   +'<div class="iv-on-heading"><span class="iv-on-eyebrow">INTERVALO / GESTÃO / VENDAS</span>'
   +'<h1>'+icon('store',25)+' Loja Online</h1><p>'+esc(restaurant.name)+'</p></div>'
@@ -72,10 +72,8 @@ export async function renderPage({supabase,restaurant,role,box,esc,link,embedded
   const state=(ok,label)=>'<span class="iv-on-status '+(ok?'ready':'')+'">'+label+'</span>';
   const value=(label,number,description,ic)=>'<article class="iv-on-stat"><div class="iv-on-stat-top"><span>'+esc(label)+'</span><span class="iv-on-stat-symbol">'+icon(ic,18)+'</span></div><strong>'+number+'</strong><small>'+esc(description)+'</small></article>';
   let out=base+'<main class="iv-on-main">'
-   +'<div class="iv-on-intro"><div><span class="iv-on-eyebrow">OPERAÇÃO DIGITAL</span>'
-   +'<h2>Vendas online</h2><p>Pedidos, entregas, vitrine e recebimentos no mesmo painel do restaurante.</p></div>'
-   +state(salesActive,salesActive?'Recebendo pedidos':online.paused?'Loja pausada':'Pedidos desligados')+'</div>'
-   +(embedded?'<nav class="iv-on-integrated-nav" aria-label="Áreas das vendas online">'+[['pedidos','Pedidos','bag'],['entregas','Entregas','bike'],['vitrine','Vitrine','store'],['pagamentos','Pagamentos','wallet']].map(([key,label,ic])=>'<button type="button" data-on-view="'+key+'" aria-pressed="'+(activeSection===key)+'">'+icon(ic,16)+label+'</button>').join('')+'</nav>':'')
+   +(!externalNavigation?'<div class="iv-on-intro"><div><span class="iv-on-eyebrow">OPERAÇÃO DIGITAL</span><h2>Vendas online</h2></div>'+state(salesActive,salesActive?'Recebendo pedidos':online.paused?'Loja pausada':'Pedidos desligados')+'</div>':'')
+   +(embedded&&!externalNavigation?'<nav class="iv-on-integrated-nav" aria-label="Áreas das vendas online">'+[['pedidos','Pedidos','bag'],['horarios','Horários','clock'],['entregas','Entregas','bike'],['vitrine','Vitrine','store'],['pagamentos','Pagamentos','wallet']].map(([key,label,ic])=>'<button type="button" data-on-view="'+key+'" aria-pressed="'+(activeSection===key)+'">'+icon(ic,16)+label+'</button>').join('')+'</nav>':'')
    +'<p class="iv-on-notice" id="iv-on-notice" role="alert" hidden></p>'
    +'<section class="iv-on-stats" data-on-section="pedidos" aria-label="Situação da loja">'
    +value('Cardápio',published?'Publicado':'Pendente',published?'Pronto para consulta':'Publique o cardápio primeiro','receipt')
@@ -100,17 +98,18 @@ export async function renderPage({supabase,restaurant,role,box,esc,link,embedded
    +icon(visible?'x':'checkCircle',16)+(visible?' Ocultar':' Exibir')+'</button></div>'
    +(!published?'<p class="iv-on-hint">Publique o cardápio para habilitar essa opção.</p>':'')
    +'</section>'
-   +'<section class="iv-on-card" data-on-section="entregas"><div class="iv-on-card-heading"><span class="iv-on-card-icon">'+icon('clock',19)+'</span><div><h2>Operação e entregas</h2>'
-   +'<p>Horários de atendimento e regiões atendidas.</p></div></div>'
-   +'<div class="iv-on-option"><div><strong>Horários dos pedidos</strong><p>'+hours.length+' faixa(s) cadastrada(s)</p></div>'
-   +'<button type="button" id="iv-on-edit-hours" class="iv-on-button secondary">Configurar '+icon('chevronRight',15)+'</button></div>'
+   +'<section class="iv-on-card" data-on-section="horarios"><div class="iv-on-card-heading"><span class="iv-on-card-icon">'+icon('clock',19)+'</span><div><h2>Horários de funcionamento</h2><p>Horários de pedidos online (entrega e retirada).</p></div></div>'
+   +'<div class="iv-on-week">'+[1,2,3,4,5,6,0].map(day=>{const list=hours.filter(h=>h.weekday===day&&h.active!==false);return '<div class="iv-on-week-row"><strong>'+dayNames[day]+'</strong><span>'+(list.length?list.map(h=>esc(String(h.opens_at).slice(0,5)+' – '+String(h.closes_at).slice(0,5))+'<small>'+esc([h.delivery_enabled?'Entrega':'',h.pickup_enabled?'Retirada':''].filter(Boolean).join(' · ')||'Sem modalidade')+'</small>').join('<br>'):'<small>Fechado</small>')+'</span></div>'}).join('')+'</div>'
+   +'<button type="button" id="iv-on-edit-hours" class="iv-on-button iv-on-wide">'+icon('clock',16)+' Editar horários</button></section>'
+   +'<section class="iv-on-card" data-on-section="entregas"><div class="iv-on-card-heading"><span class="iv-on-card-icon">'+icon('bike',19)+'</span><div><h2>Entrega e retirada</h2><p>Modalidades e regiões atendidas.</p></div></div>'
+   +'<div class="iv-on-option"><div><strong>Modalidades de atendimento</strong><p>'+esc([online.delivery_enabled?'Entrega':'',online.pickup_enabled?'Retirada':''].filter(Boolean).join(' · ')||'Nenhuma modalidade ativa')+'</p></div><button type="button" class="iv-on-button secondary" id="iv-on-edit-fulfillment">Configurar</button></div>'
    +'<div class="iv-on-option"><div><strong>Regiões de entrega</strong><p>'+activeZones+' ativa(s) de '+zones.length+' cadastrada(s)</p></div>'
    +'<button type="button" id="iv-on-new-zone" class="iv-on-button secondary">'+icon('plus',15)+' Nova região</button></div>'
    +'<div class="iv-on-zone-list">'+zones.map(z=>'<div class="iv-on-zone-row"><div><strong>'+esc(z.name)+'</strong><small>'+esc(z.city)+' / '+esc(z.state)+' · '+money(z.fee_cents)+' · '+(z.active?'Ativa':'Inativa')+'</small></div>'
       +'<button type="button" class="iv-on-text-action" data-zone-edit="'+esc(z.id)+'">Editar</button></div>').join('')+'</div>'
    +(!zones.length?'<p class="iv-on-hint">Nenhuma região cadastrada. Para entregas, adicione pelo menos uma.</p>':'')
    +'</section></div><div class="iv-on-column">'
-   +'<section class="iv-on-card" data-on-section="pagamentos"><div class="iv-on-card-heading"><span class="iv-on-card-icon">'+icon('receipt',19)+'</span><div><h2>Recebimento online</h2>'
+   +'<section class="iv-on-card" data-on-section="vitrine"><div class="iv-on-card-heading"><span class="iv-on-card-icon">'+icon('receipt',19)+'</span><div><h2>Recebimento de pedidos</h2>'
    +'<p>Controle a abertura de pedidos sem afetar o atendimento presencial.</p></div></div>'
    +'<div class="iv-on-sales-state"><div><small>Estado atual</small><strong>'+(salesActive?'Recebendo pedidos':online.paused?'Pausado':'Pedidos desativados')+'</strong>'
    +'<p>Entrega própria e retirada no local, conforme configuração da vitrine.</p></div>'
@@ -174,8 +173,10 @@ export async function renderPage({supabase,restaurant,role,box,esc,link,embedded
    showSection();
   }
   initialized=true;
-  void initInfinitePaySettings({supabase,restaurant,role,esc});
-  void initManualPixSettings({supabase,restaurant,role,esc});
+  if(!externalNavigation||activeSection==='pagamentos'){
+   void initInfinitePaySettings({supabase,restaurant,role,esc});
+   void initManualPixSettings({supabase,restaurant,role,esc});
+  }
   const form=document.getElementById('iv-online-draft');
   const mediaController=initStorefrontMedia({form,supabase,restaurant});
   form.onsubmit=async e=>{
@@ -208,6 +209,7 @@ export async function renderPage({supabase,restaurant,role,box,esc,link,embedded
    draftSheet.trigger.hidden=true;draftSheet.trigger.style.display='none';
    const openDraft=()=>{if(!draftSheet.dialog.open)draftSheet.trigger.click()};
    document.getElementById('iv-on-configure').onclick=openDraft;
+   document.getElementById('iv-on-edit-fulfillment').onclick=()=>{openDraft();draftSheet.dialog.querySelector('[name="delivery_enabled"]')?.closest('.iv-on-checks')?.scrollIntoView({block:'start'})};
    document.querySelectorAll('[data-on-edit-media]').forEach(button=>button.onclick=()=>{
     openDraft();
     const target=draftSheet.dialog.querySelector('[data-store-media="'+button.dataset.onEditMedia+'"]');
@@ -217,6 +219,7 @@ export async function renderPage({supabase,restaurant,role,box,esc,link,embedded
   }else{
    const failed=()=>alert('Não foi possível abrir a edição da vitrine. Atualize a página e tente novamente.');
    document.getElementById('iv-on-configure').onclick=failed;
+   document.getElementById('iv-on-edit-fulfillment').onclick=failed;
    document.querySelectorAll('[data-on-edit-media]').forEach(b=>b.onclick=failed);
   }
   const hoursForm=document.getElementById('iv-on-hours'),hourList=document.getElementById('iv-on-hour-list');
@@ -349,10 +352,10 @@ export async function renderPage({supabase,restaurant,role,box,esc,link,embedded
    finally{if(refreshButton){refreshButton.disabled=false;refreshButton.removeAttribute('aria-busy')}}
   }
   document.getElementById('iv-on-orders-refresh').onclick=refreshOrders;
-  refreshOrders();
+  if(!externalNavigation||activeSection==='pedidos')refreshOrders();
   const orderPoll=setInterval(()=>{
    if(!ordersArea.isConnected){clearInterval(orderPoll);return}
-   if(document.visibilityState==='visible')void refreshOrders();
+   if(document.visibilityState==='visible'&&(!externalNavigation||activeSection==='pedidos'))void refreshOrders();
   },15000);
   const visibility=document.getElementById('iv-online-visibility');
   if(visibility)visibility.onclick=async()=>{
