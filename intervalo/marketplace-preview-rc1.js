@@ -81,7 +81,8 @@ export async function renderMarketplace({supabase,route,box,esc,link}){
       +'<div class="iv-mkt-filter"><label class="iv-mkt-input">'+icon('search',17)+'<input id="iv-mkt-product-search" type="search" aria-label="Buscar produto" placeholder="Buscar no cardápio"></label></div>'
       +'<div class="iv-mkt-pills" role="group" aria-label="Categorias"><button type="button" data-mkt-cat="all" aria-pressed="true">Todos</button>'
       +cats.map(c=>'<button type="button" data-mkt-cat="'+esc(c.id)+'" aria-pressed="false">'+esc(c.name)+'</button>').join('')+'</div>'
-      +'<h2 class="iv-mkt-title" style="font-size:21px">Cardápio</h2><p class="iv-mkt-description">'+products.length+' produto(s) disponíveis para consulta</p><div class="iv-mkt-product-grid">';
+      +'<div class="iv-mkt-catalog-head"><div><h2 class="iv-mkt-title" style="font-size:21px">Cardápio</h2><p class="iv-mkt-description">'+products.length+' produto(s) disponíveis para consulta</p></div>'
+      +'<div class="iv-mkt-view" role="group" aria-label="Modo de visualização"><button type="button" data-mkt-view="grid" aria-pressed="true">Grade</button><button type="button" data-mkt-view="list" aria-pressed="false">Lista</button></div></div><div class="iv-mkt-product-grid">';
    for(const p of products){
     const category=cats.find(c=>c.id===p.category_id);
     const picture=safePhoto(p.image_url);
@@ -108,6 +109,16 @@ export async function renderMarketplace({supabase,route,box,esc,link}){
    };
    refreshCart();
    const inputs=[...document.querySelectorAll('[data-mkt-product]')];
+   const productGrid=document.querySelector('.iv-mkt-product-grid');
+   const setView=mode=>{
+     productGrid.classList.toggle('is-list',mode==='list');
+     document.querySelectorAll('[data-mkt-view]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mktView===mode)));
+     try{localStorage.setItem('intervalo-market-view:'+route[1],mode)}catch{}
+   };
+   document.querySelectorAll('[data-mkt-view]').forEach(b=>b.onclick=()=>setView(b.dataset.mktView));
+   let preferredView='grid';
+   try{preferredView=localStorage.getItem('intervalo-market-view:'+route[1])==='list'?'list':'grid'}catch{}
+   setView(preferredView);
    const search=document.getElementById('iv-mkt-product-search');
    let activeCat='all';
    const filter=()=>{
