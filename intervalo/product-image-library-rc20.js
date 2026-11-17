@@ -22,7 +22,7 @@ export async function openProductImageLibrary({supabase,restaurant,onSelect}){
   +'<button type="button" class="iv-photo-library-more" hidden>Carregar mais</button></div>'
   +'<footer class="iv-photo-library-foot">A mesma foto pode ser usada em vários produtos sem duplicar arquivos.</footer></div>';
  document.body.append(dialog);
- let filter='all',query='',nextOffset=0,hasMore=false,busy=false,disposed=false;
+ let filter='all',query='',nextOffset=0,hasMore=false,busy=false,disposed=false,loadError='';
  const by=sel=>dialog.querySelector(sel);
  const items=new Map();
  const close=()=>{if(dialog.open)dialog.close()};
@@ -74,18 +74,19 @@ export async function openProductImageLibrary({supabase,restaurant,onSelect}){
   }
   grid.append(frag);
   if(!busy){
-   if(results.length===0){
+   if(loadError)setState(loadError,true);
+   else if(results.length===0){
     if(items.size===0)setState('Nenhuma foto cadastrada ainda. Envie a primeira usando Galeria ou Câmera.');
     else if(filter==='uploaded')setState('Nenhuma foto enviada encontrada.');
     else setState('Nenhuma imagem encontrada neste filtro.');
    }else setState(results.length+' foto(s) encontradas. Toque em uma para reutilizar.');
   }
-  more.hidden=!hasMore;more.disabled=busy;
-  more.textContent=busy?'Carregando...':'Carregar mais fotos';
+  more.hidden=!hasMore&&!loadError;more.disabled=busy;
+  more.textContent=busy?'Carregando...':loadError?'Tentar novamente':'Carregar mais fotos';
  };
  async function fetchPhotos(){
   if(busy||disposed)return;
-  busy=true;more.disabled=true;setState('Carregando fotos...');
+  busy=true;loadError='';more.disabled=true;setState('Carregando fotos...');
   const offset=nextOffset;
   try{
    const {data,error}=await supabase.functions.invoke('restaurant-product-photos',{
@@ -105,7 +106,8 @@ export async function openProductImageLibrary({supabase,restaurant,onSelect}){
   }catch(e){
    if(disposed)return;
    hasMore=false;
-   setState(e.message||'Não foi possível carregar fotos',true);
+   loadError=e.message||'Não foi possível carregar fotos';
+   setState(loadError,true);
   }finally{
    busy=false;
    if(!disposed)render();
