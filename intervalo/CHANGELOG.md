@@ -1,5 +1,11 @@
 # Intervalo — CHANGELOG
 
+## 1.2.0-rc.3 — 2026-11-17 · Personalização ampla da comanda
+
+- Avisos do documento e da amostra editáveis e opcionais; a interface de teste continua identificando a amostra. Formatos dos itens e dos preços, rótulos e campos automáticos ampliados; escolha de exibição de observações, preços, totais, recebido, saldo, rodadas e separadores em ambos os modelos.
+- Dados reais, cálculos e pagamentos inalterados; documento continua não fiscal. API restaurant-core v17, compatível com campos ausentes em modelos antigos. Sem alteração de schema ou custos.
+- Sintaxe e renderização simulada aprovadas; teste autenticado, propagação e impressão física pendentes.
+
 ## 1.2.0-rc.2 — 2026-11-17 · Modelos de impressão personalizáveis
 
 - Dados comerciais e modelos independentes de caixa/cozinha salvos por restaurante; campos automáticos, textos livres, títulos, cabeçalhos, rodapés, labels, separadores e agrupamento por rodada. Totais e itens reais preservados; aviso não fiscal obrigatório.
