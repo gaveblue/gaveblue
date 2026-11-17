@@ -1,5 +1,11 @@
 # Intervalo — CHANGELOG
 
+## 1.2.0-rc.9 — 2026-11-17 · Relógio e alerta para servir
+
+- Ícone de relógio em Em preparo e minutos desde o início real da rodada mais antiga em preparo (se houver horário). Ícone de sino e destaque verde em Pronto. Cronômetro atualizado localmente, sem requisições adicionais.
+- Aviso compacto de pedidos prontos em todas as vistas do Garçom; atalhos por mesa abrem a comanda diretamente. Prioriza rodadas prontas mesmo com outras em preparo e permanece até a rodada ser marcada servida. Anúncio acessível quando surge nova rodada pronta.
+- Reutiliza atualização existente de 10 s em tela ativa; pode aguardar fechamento de formulários e reconexão. Sem notificações push, som, alteração do banco ou dependências. Sintaxe e funções simuladas; teste Android e fluxo real pendentes.
+
 ## 1.2.0-rc.8 — 2026-11-17 · Status do pedido nas mesas do Garçom
 
 - Etiqueta compacta acima do número/ícone da mesa: Livre, Lançando, Enviado, Em preparo, Pronto, Servido ou Ocupada. Pronto recebe destaque verde e tem prioridade entre rodadas simultâneas; ao marcar como servida, mostra a próxima situação pendente. Mantém grade de três colunas no celular e seleção laranja.

@@ -4,12 +4,35 @@ import {menuButtonMarkup} from './global-navigation-rc7.js?v=1.2.0-rc.7';
 import {openWaiterDelivery} from './waiter-delivery-rc17.js?v=1.1.0-rc.29';
 // Intervalo 0.9.7 — painel responsivo do garçom; operações reais via restaurant-core.
 // A mesa pode ter várias rodadas em estágios diferentes. Uma pronta para servir tem prioridade.
+export function preparationMinutes(start,now=Date.now()){
+ if(!start)return null;
+ const time=Date.parse(start);return Number.isFinite(time)?Math.max(0,Math.floor((now-time)/60000)):null;
+}
+export function readyTableAlerts(tables,orders,rounds){
+ const byTable=new Map();
+ for(const o of orders)if(o.table_id&&!['closed','cancelled'].includes(o.status)&&!byTable.has(o.table_id))byTable.set(o.table_id,o);
+ const byOrder=new Map();
+ for(const round of rounds)if(round.status==='ready'){
+  if(!byOrder.has(round.order_id))byOrder.set(round.order_id,[]);
+  byOrder.get(round.order_id).push(round);
+ }
+ return tables.filter(t=>t.active!==false).flatMap(t=>{
+  const o=byTable.get(t.id);if(!o)return [];
+  const ready=byOrder.get(o.id)??[];
+  if(!ready.length&&!(o.status==='ready'&&!rounds.some(r=>r.order_id===o.id)))return [];
+  return [{tableId:t.id,label:t.label,count:ready.length||1,keys:ready.length?ready.map(r=>o.id+':'+r.round_no+':'+(r.ready_at??'')):[o.id+':ready']}];
+ });
+}
 export function tableOrderProgress(order,rounds=[]){
  if(!order||['closed','cancelled'].includes(order.status))return {key:'free',label:'Livre'};
  const active=rounds.filter(r=>r.order_id===order.id&&r.status!=='cancelled');
  const ready=active.filter(r=>r.status==='ready').length;
  if(ready)return {key:'ready',label:'Pronto',detail:ready+' rodada(s) pronta(s) para servir'};
- if(active.some(r=>r.status==='preparing'))return {key:'preparing',label:'Em preparo'};
+ const preparing=active.filter(r=>r.status==='preparing');
+ if(preparing.length){
+  const starts=preparing.map(r=>r.started_at).filter(t=>t&&Number.isFinite(Date.parse(t))).sort((a,b)=>Date.parse(a)-Date.parse(b));
+  return {key:'preparing',label:'Em preparo',startedAt:starts[0]??null};
+ }
  if(active.some(r=>r.status==='submitted'))return {key:'submitted',label:'Enviado'};
  if(active.some(r=>r.status==='draft'))return {key:'draft',label:'Lançando'};
  if(active.length&&active.every(r=>r.status==='served'))return {key:'served',label:'Servido'};
@@ -36,9 +59,10 @@ export async function renderPage({supabase,restaurant,box,esc,link}){
  let selectedId=null,tableFilter='all',categoryFilter='all',search='',view='mesas';
  let catalogLayout=(()=>{try{return localStorage.getItem('intervalo.waiter.catalog.layout.v1')==='grid'?'grid':'list'}catch{return 'list'}})();
  let fetching=false,lastSignature='',snapshot=null,alive=true;
+ let knownReady=new Set();
  const viewCss="<style>\n.wg-catalogue-heading{gap:8px}.wg-catalogue-heading>div{min-width:0}\n.wg-catalogue-tools{display:flex;align-items:center;gap:8px;flex:none}\n.wg-catalogue-layout{display:flex;align-items:center;gap:2px;padding:3px;border:1px solid #e7eaf0;border-radius:12px;background:#f5f7fa}\n.wg-catalogue-layout button{width:34px;height:33px;border:0;border-radius:9px;background:transparent;color:#7f8a9c;cursor:pointer;display:grid;place-items:center}\n.wg-catalogue-layout button[aria-pressed=true]{background:#fff;color:#ef7000;box-shadow:0 1px 5px #0b253016}\n.wg-catalogue-layout button:focus-visible{outline:2px solid #fb923c;outline-offset:1px}\n.wg-products.wg-products--list{display:flex!important;flex-direction:column;gap:9px}\n.wg-products.wg-products--list .wg-product{display:flex;align-items:center;min-height:84px;padding:10px;gap:12px;box-sizing:border-box;border-radius:13px}\n.wg-products.wg-products--list .wg-product-photo{flex:0 0 64px;width:64px;height:64px!important;min-height:0;max-height:64px;aspect-ratio:1/1;border-radius:9px;align-self:center}\n.wg-products.wg-products--list .wg-product-photo img{position:absolute;inset:0;height:100%;width:100%;object-fit:cover;object-position:center}\n.wg-products.wg-products--list .wg-product-photo span{display:grid;place-items:center;height:100%}\n.wg-products.wg-products--list .wg-product-photo .iv-icon{width:31px;height:31px}\n.wg-products.wg-products--list .wg-product-text{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;padding:0}\n.wg-products.wg-products--list .wg-product-text>b{min-height:0!important;margin:0;font-size:13px;line-height:1.25}\n.wg-products.wg-products--list .wg-product-text>p{min-height:0!important;margin:4px 0 6px;font-size:11px;line-height:1.3;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}\n.wg-products.wg-products--list .wg-product-foot{margin-top:0;gap:8px;justify-content:flex-end}.wg-products.wg-products--list .wg-price{font-size:13px}\n.wg-products.wg-products--list .wg-plus{flex:0 0 37px;width:37px;height:37px}\n.wg-sheet-preview{margin:0 auto 12px;text-align:center}.wg-sheet-preview>div{width:min(100%,150px);aspect-ratio:1/1;background:#f6f7f9;border-radius:12px;overflow:hidden;margin:auto}.wg-sheet-preview img{width:100%;height:100%;object-fit:contain;display:block}.wg-sheet-preview figcaption{font-size:10px;color:#8190a4;margin-top:5px}.wg-sheet-description{font-size:12px;color:#738196;margin:0 0 10px;overflow-wrap:anywhere}\n@media(max-width:640px){.wg-products.wg-products--list .wg-product{min-height:76px;padding:9px;gap:10px}.wg-products.wg-products--list .wg-product-photo{width:56px;height:56px!important;flex-basis:56px;max-height:56px}}\n@media(max-width:390px){.wg-catalogue-tools .wg-counter{display:none}.wg-products.wg-products--list .wg-product{min-height:76px;padding:9px;gap:10px}.wg-products.wg-products--list .wg-product-photo{width:56px;height:56px!important;flex-basis:56px;min-height:0;max-height:56px}.wg-products.wg-products--list .wg-product-text{padding:0}.wg-products.wg-products--list .wg-product-text>b{font-size:12px}}\n</style>";
  const deliveryCss='<style>.wg-delivery-shortcut{display:flex;align-items:center;justify-content:space-between;gap:10px;width:calc(100% - 24px);margin:7px 12px 13px;border:1px solid #ffcf9f;background:#fff2e7;border-radius:12px;min-height:46px;padding:10px 12px;font-size:12px;font-weight:850;color:#c65b00;cursor:pointer}.wg-delivery-shortcut .iv-icon:first-child{flex:none}.wg-delivery-shortcut span{flex:1;text-align:left}@media(max-width:700px){.wg-delivery-shortcut{margin-top:10px}}</style>';
- const progressCss="<style>\nbody.intervalo-garcom .wg-table{position:relative;gap:4px;padding:6px 4px;justify-content:center}\nbody.intervalo-garcom .wg-table .wg-table-progress{display:inline-flex;align-items:center;justify-content:center;gap:4px;max-width:100%;box-sizing:border-box;border-radius:7px;padding:3px 6px;font-size:10px;font-weight:750;line-height:1.15;white-space:nowrap;background:#f1f4f7;color:#768597}\n.wg-table-progress:before{content:\"\";width:5px;height:5px;flex:none;border-radius:50%;background:currentColor}\nbody.intervalo-garcom .wg-table .wg-table-progress[data-stage=\"ready\"]{background:#dcfce7;color:#166534}\nbody.intervalo-garcom .wg-table[data-stage=\"ready\"]:not(.selected){border-color:#86cfa1;background:#f5fdf7}\nbody.intervalo-garcom .wg-table .wg-table-progress[data-stage=\"preparing\"]{background:#fff0d9;color:#a65300}\nbody.intervalo-garcom .wg-table .wg-table-progress[data-stage=\"submitted\"]{background:#e5efff;color:#245aa7}\nbody.intervalo-garcom .wg-table .wg-table-progress[data-stage=\"draft\"],body.intervalo-garcom .wg-table .wg-table-progress[data-stage=\"busy\"]{background:#f1eefb;color:#66549a}\nbody.intervalo-garcom .wg-table .wg-table-progress[data-stage=\"served\"]{background:#e9edf2;color:#556478}\nbody.intervalo-garcom .wg-table .wg-table-name{gap:2px}\nbody.intervalo-garcom .wg-table .wg-table-meta{gap:0;font-size:10px;margin:0}\nbody.intervalo-garcom .wg-table .wg-table-meta>span:last-child{width:100%;border:0;padding:0}\n@media(max-width:350px){body.intervalo-garcom .wg-table .wg-table-progress{font-size:9px;padding:3px 4px;gap:3px}body.intervalo-garcom .wg-table .wg-table-icon svg{width:21px;height:21px}}\n</style>";
+ const progressCss="<style>\nbody.intervalo-garcom .wg-table{position:relative;gap:4px;padding:6px 4px;justify-content:center}\nbody.intervalo-garcom .wg-table .wg-table-progress{display:inline-flex;align-items:center;justify-content:center;gap:4px;max-width:100%;box-sizing:border-box;border-radius:7px;padding:3px 6px;font-size:10px;font-weight:750;line-height:1.15;white-space:nowrap;background:#f1f4f7;color:#768597}\n.wg-table-progress:before{content:\"\";width:5px;height:5px;flex:none;border-radius:50%;background:currentColor}\nbody.intervalo-garcom .wg-table .wg-table-progress[data-stage=\"ready\"]{background:#dcfce7;color:#166534}\nbody.intervalo-garcom .wg-table[data-stage=\"ready\"]:not(.selected){border-color:#86cfa1;background:#f5fdf7}\nbody.intervalo-garcom .wg-table .wg-table-progress[data-stage=\"preparing\"]{background:#fff0d9;color:#a65300}\nbody.intervalo-garcom .wg-table .wg-table-progress[data-stage=\"submitted\"]{background:#e5efff;color:#245aa7}\nbody.intervalo-garcom .wg-table .wg-table-progress[data-stage=\"draft\"],body.intervalo-garcom .wg-table .wg-table-progress[data-stage=\"busy\"]{background:#f1eefb;color:#66549a}\nbody.intervalo-garcom .wg-table .wg-table-progress[data-stage=\"served\"]{background:#e9edf2;color:#556478}\nbody.intervalo-garcom .wg-table .wg-table-name{gap:2px}\nbody.intervalo-garcom .wg-table .wg-table-meta{gap:0;font-size:10px;margin:0}\nbody.intervalo-garcom .wg-table .wg-table-meta>span:last-child{width:100%;border:0;padding:0}\n@media(max-width:350px){body.intervalo-garcom .wg-table .wg-table-progress{font-size:9px;padding:3px 4px;gap:3px}body.intervalo-garcom .wg-table .wg-table-icon svg{width:21px;height:21px}}\nbody.intervalo-garcom .wg-table .wg-table-progress[data-stage=\"preparing\"]:before,body.intervalo-garcom .wg-table .wg-table-progress[data-stage=\"ready\"]:before{display:none}\nbody.intervalo-garcom .wg-table-progress svg{width:12px;height:12px;flex:none}\nbody.intervalo-garcom .wg-table .wg-prep-time{font-size:10px;color:#a65300;font-weight:650;line-height:1.15;font-variant-numeric:tabular-nums}\nbody.intervalo-garcom .wg-table.selected .wg-prep-time{color:inherit}\n.wg-ready-alert{display:flex;align-items:center;gap:10px;border:1px solid #a7dec0;border-radius:13px;background:#effbf3;color:#17623b;padding:9px 11px;margin:0 0 12px;min-width:0}\n.wg-ready-alert>.wg-ready-bell{display:grid;place-items:center;flex:0 0 32px;width:32px;height:32px;border-radius:10px;background:#d8f4e3;color:#16834a}\n.wg-ready-content{min-width:0;flex:1;display:grid;gap:5px}\n.wg-ready-content strong{font-size:13px;line-height:1.25;font-weight:750}\n.wg-ready-tables{display:flex;align-items:center;gap:5px;overflow-x:auto;scrollbar-width:thin}\n.wg-ready-tables button{display:inline-flex;align-items:center;gap:4px;flex:none;border:1px solid #a7dec0;background:#fff;color:#17623b;border-radius:8px;font-size:11px;font-weight:650;padding:6px 8px;min-height:32px;cursor:pointer;white-space:nowrap}\n.wg-ready-tables button:focus-visible{outline:2px solid #16834a}\n.wg-ready-live{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}\n@media(max-width:350px){.wg-ready-alert{gap:7px;padding:8px}.wg-ready-content strong{font-size:12px}}\n\n</style>";
  const header=css+viewCss+deliveryCss+progressCss+'<div class="wg-top"><div class="wg-brand">'+menuButtonMarkup()+'<div><div class="wg-logo">Intervalo</div><div class="wg-sub">'+esc(restaurant.name)+'</div></div><span class="wg-role">Garçom</span></div><button type="button" id="wg-desktop-more" class="wg-desktop-more" aria-label="Abrir mais opções">'+icon('more',22)+'</button></div>';
  const selected=()=>snapshot?.tables?.find(t=>t.id===selectedId);
  const order=()=>snapshot?.orders?.find(o=>o.table_id===selectedId&&!['closed','cancelled'].includes(o.status));
@@ -73,14 +97,16 @@ export async function renderPage({supabase,restaurant,box,esc,link}){
    const draftRound=activeRounds.find(r=>r.status==='draft');
    const readyRounds=activeRounds.filter(r=>r.status==='ready');
    const roundNames={draft:'Em lançamento',submitted:'Enviado',preparing:'Em preparo',ready:'Pronto',served:'Servido',cancelled:'Cancelado'};
-  let html=header+(navigator.onLine===false?'<div class="wg-offline">Sem internet. Não é possível enviar comandas até a conexão voltar.</div>':'')
+  const readyAlerts=readyTableAlerts(tables,orders,rounds);
+  const readyMarkup=readyAlerts.length?'<section class="wg-ready-alert" aria-label="Pedidos prontos para servir"><span class="wg-ready-bell" aria-hidden="true">'+icon('bell',18)+'</span><div class="wg-ready-content"><strong>Pronto para servir</strong><div class="wg-ready-tables">'+readyAlerts.map(a=>'<button type="button" data-w-ready-table="'+esc(a.tableId)+'" aria-label="'+esc((/^mesa\b/i.test(String(a.label))?a.label:'Mesa '+a.label)+', '+a.count+' rodada(s) pronta(s). Abrir pedido')+'">'+esc(/^mesa\b/i.test(String(a.label))?a.label:'Mesa '+a.label)+(a.count>1?' · '+a.count:'')+icon('chevronRight',12)+'</button>').join('')+'</div></div></section>':'';
+  let html=header+(navigator.onLine===false?'<div class="wg-offline">Sem internet. Não é possível enviar comandas até a conexão voltar.</div>':'')+readyMarkup
   +'<div id="wg-root" class="wg-app" data-view="'+esc(view)+'">'
   +'<aside class="wg-panel" data-section="mesas"><div class="wg-panel-head"><div><h2>Mesas</h2><p class="wg-hint">Selecione para atender</p></div><span class="wg-counter">'+tables.filter(occupied).length+' ocupadas</span></div>'
   +'<div class="wg-table-filters" role="group" aria-label="Filtro de mesas">'+[['all','Todas'],['busy','Ocupadas'],['free','Livres']].map(([k,l])=>'<button type="button" data-w-filter="'+k+'" aria-pressed="'+(tableFilter===k)+'">'+l+'</button>').join('')+'</div><button type="button" class="wg-delivery-shortcut" id="wg-delivery-shortcut">'+icon('bike',20)+'<span>Novo delivery ou retirada</span>'+icon('chevronRight',16)+'</button><div class="wg-tables">';
   for(const t of visibleTables){
     const tableOrder=ordersByTable.get(t.id),progress=tableOrderProgress(tableOrder,roundsByOrder.get(tableOrder?.id)??[]);
     const description='Mesa '+t.label+', '+(tableOrder?'ocupada, ':'')+progress.label+(progress.detail?', '+progress.detail:'');
-    html+='<button type="button" class="wg-table'+(t.id===selectedId?' selected':'')+'" data-w-table="'+esc(t.id)+'" data-stage="'+esc(progress.key)+'" aria-current="'+(t.id===selectedId)+'" aria-label="'+esc(description)+'"><span class="wg-table-progress" data-stage="'+esc(progress.key)+'"'+(progress.detail?' title="'+esc(progress.detail)+'"':'')+'>'+esc(progress.label)+'</span><span class="wg-table-name"><span class="wg-table-icon" aria-hidden="true">'+icon('table',24)+'</span><span class="wg-table-label">'+esc(t.label)+'</span></span><span class="wg-table-meta"><span>'+esc(t.area??'Salão')+'</span></span></button>';
+    html+='<button type="button" class="wg-table'+(t.id===selectedId?' selected':'')+'" data-w-table="'+esc(t.id)+'" data-stage="'+esc(progress.key)+'" aria-current="'+(t.id===selectedId)+'" aria-label="'+esc(description)+'"><span class="wg-table-progress" data-stage="'+esc(progress.key)+'"'+(progress.detail?' title="'+esc(progress.detail)+'"':'')+'>'+(progress.key==='preparing'?icon('clock',12):progress.key==='ready'?icon('bell',12):'')+esc(progress.label)+'</span><span class="wg-table-name"><span class="wg-table-icon" aria-hidden="true">'+icon('table',24)+'</span><span class="wg-table-label">'+esc(t.label)+'</span></span>'+(progress.startedAt?'<span class="wg-prep-time" data-w-prep-time="'+esc(progress.startedAt)+'">'+esc(preparationMinutes(progress.startedAt))+' min</span>':'')+'<span class="wg-table-meta"><span>'+esc(t.area??'Salão')+'</span></span></button>';
   }
   html+='</div></aside><section class="wg-panel" data-section="cardapio"><div class="wg-catalogue"><div class="wg-catalogue-heading"><div><h2>Cardápio</h2><p class="wg-hint">Escolha um produto para a '+esc(activeTable?.label??'mesa')+'</p></div><div class="wg-catalogue-tools"><span class="wg-counter" id="wg-products-count">'+grouped.length+' produtos</span><div class="wg-catalogue-layout" role="group" aria-label="Visualização de produtos"><button type="button" data-w-layout="list" aria-label="Exibir produtos em lista" aria-pressed="'+(catalogLayout==='list')+'">'+icon('bars',19)+'</button><button type="button" data-w-layout="grid" aria-label="Exibir produtos em grade" aria-pressed="'+(catalogLayout==='grid')+'">'+icon('dashboard',19)+'</button></div></div></div>'
    +'<input class="wg-search" id="wg-search" type="search" placeholder="Buscar produtos..." aria-label="Buscar produto" value="'+esc(search)+'" autocomplete="off">'
@@ -132,6 +158,7 @@ export async function renderPage({supabase,restaurant,box,esc,link}){
   document.getElementById('wg-desktop-more')?.addEventListener('click',()=>openMenu('more'));
   document.querySelectorAll('[data-w-filter]').forEach(b=>b.onclick=()=>{tableFilter=b.dataset.wFilter;render()});
   document.querySelectorAll('[data-w-table]').forEach(b=>b.onclick=()=>{selectedId=b.dataset.wTable;categoryFilter='all';search='';view='cardapio';render()});
+  document.querySelectorAll('[data-w-ready-table]').forEach(b=>b.onclick=()=>{selectedId=b.dataset.wReadyTable;categoryFilter='all';search='';view='comanda';render()});
   document.querySelectorAll('[data-w-view]').forEach(b=>b.onclick=()=>showView(b.dataset.wView));
   document.querySelectorAll('[data-w-layout]').forEach(b=>b.onclick=()=>{
    catalogLayout=b.dataset.wLayout==='grid'?'grid':'list';
@@ -336,16 +363,26 @@ export async function renderPage({supabase,restaurant,box,esc,link}){
     const tables=(t.tables??[]).filter(x=>x.active!==false),orders=o.orders??[],items=o.items??[],rounds=o.rounds??[],options=c.options??[];
     const sig=JSON.stringify({tables,orders,items,products,categories,options,rounds});
     if(silent&&sig===lastSignature)return;
+    const alerts=readyTableAlerts(tables,orders,rounds),nextReady=new Set(alerts.flatMap(a=>a.keys));
+    const newlyReady=alerts.filter(a=>a.keys.some(key=>!knownReady.has(key)));
+    knownReady=nextReady;
     snapshot={tables,orders,items,products,categories,options,rounds};lastSignature=sig;
     if(!tables.some(t=>t.id===selectedId))selectedId=tables[0]?.id??null;
     render();
+    // One accessible announcement per newly ready round; visual notice persists until served.
+    if(newlyReady.length){
+     let live=document.getElementById('wg-ready-live');
+     if(!live){live=document.createElement('div');live.id='wg-ready-live';live.className='wg-ready-live';live.setAttribute('role','status');live.setAttribute('aria-live','polite');document.body.append(live)}
+     live.textContent='Pronto para servir: '+newlyReady.map(a=>a.label).join(', ');
+    }
   }catch(err){if(!silent)box(header+'<section class="wg-panel wg-empty"><h2>Não foi possível carregar o atendimento</h2><p>'+esc(err.message)+'</p><button class="wg-action" id="wg-retry">Tentar novamente</button></section>');
     document.getElementById('wg-retry')?.addEventListener('click',()=>reload())}
   finally{fetching=false}
  }
  const poll=setInterval(()=>{if(document.visibilityState==='visible'&&document.getElementById('wg-root'))reload(true)},10000);
+ const clock=setInterval(()=>{if(document.visibilityState!=='visible')return;document.querySelectorAll('[data-w-prep-time]').forEach(el=>{const minutes=preparationMinutes(el.dataset.wPrepTime);if(minutes!==null)el.textContent=minutes+' min'})},30000);
  const visibility=()=>{if(document.visibilityState==='visible')reload(true)};
  document.addEventListener('visibilitychange',visibility);
- window.addEventListener('pagehide',()=>{alive=false;clearInterval(poll);document.removeEventListener('visibilitychange',visibility)},{once:true});
+ window.addEventListener('pagehide',()=>{alive=false;clearInterval(poll);clearInterval(clock);document.removeEventListener('visibilitychange',visibility)},{once:true});
  return reload();
 }
