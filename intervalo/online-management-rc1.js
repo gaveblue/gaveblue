@@ -2,11 +2,12 @@ import {icon} from './ui-icons.js?v=1.0.0-rc.1';
 import {sheetifyForms,showFormSheetError} from './operational-sheets-rc15.js?v=1.0.0-rc.15';
 import {initInfinitePaySettings} from './marketplace-infinitepay-settings-rc8.js?v=1.1.0-rc.9';
 import {initManualPixSettings} from './marketplace-manual-pix-settings-rc10.js?v=1.1.0-rc.10';
+import {storefrontMediaFields,initStorefrontMedia} from './storefront-media-rc21.js?v=1.1.0-rc.21';
 
 // Gestão > Loja Online. Painel rc6; estado e permissões decididos no backend.
 export async function renderPage({supabase,restaurant,role,box,esc,link,embedded=false,isActive=()=>true,initialSection='pedidos'}){
  if(!embedded)document.body.classList.add('iv-fullwidth','iv-online-admin');
- const css='<link rel="stylesheet" href="/intervalo/online-management-rc1.css?v=1.1.0-rc.18">';
+ const css='<link rel="stylesheet" href="/intervalo/online-management-rc1.css?v=1.1.0-rc.21">';
  const money=n=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(n||0)/100);
  const realToCents=str=>{
   const raw=String(str).trim().replace(/\s/g,'');
@@ -84,7 +85,8 @@ export async function renderPage({supabase,restaurant,role,box,esc,link,embedded
    +'<div class="iv-on-columns"><div class="iv-on-column">'
    +'<section class="iv-on-card" data-on-section="vitrine"><div class="iv-on-card-heading"><span class="iv-on-card-icon">'+icon('store',19)+'</span>'
    +'<div><h2>Minha vitrine</h2><p>Como o cliente encontra e conhece seu restaurante.</p></div></div>'
-   +'<div class="iv-on-store-preview"><div class="iv-on-store-avatar">'+icon('store',24)+'</div><div><strong>'+esc(store.display_name||restaurant.name)+'</strong>'
+   +'<div class="iv-on-store-cover">'+(typeof store.banner_url==='string'&&/^https:\/\/[^\s<>"']+$/i.test(store.banner_url)?'<img src="'+esc(store.banner_url)+'" alt="Capa do restaurante" loading="lazy">':'<span>Imagem de capa</span>')+'</div>'
+   +'<div class="iv-on-store-preview"><div class="iv-on-store-avatar">'+(typeof store.logo_url==='string'&&/^https:\/\/[^\s<>"']+$/i.test(store.logo_url)?'<img src="'+esc(store.logo_url)+'" alt="Logo do restaurante" loading="lazy">':icon('store',24))+'</div><div><strong>'+esc(store.display_name||restaurant.name)+'</strong>'
    +'<small>'+esc(store.description||'Adicione uma descrição para a sua loja.')+'</small></div></div>'
    +'<div class="iv-on-detail"><span>Categorias</span><strong>'+esc(tags||'Não informadas')+'</strong></div>'
    +'<div class="iv-on-detail"><span>Exibição na busca</span>'+state(visible&&published,visible&&published?'Visível':'Oculta')+'</div>'
@@ -128,6 +130,7 @@ export async function renderPage({supabase,restaurant,role,box,esc,link,embedded
    +'<div class="iv-on-form-host" aria-hidden="true">'
    +'<form id="iv-online-draft" autocomplete="off">'
    +'<label class="iv-on-field">Nome comercial<input name="display_name" required minlength="2" maxlength="120" value="'+esc(store.display_name||restaurant.name)+'" placeholder="Nome do restaurante"></label>'
+   +storefrontMediaFields(store)
    +'<label class="iv-on-field">Descrição<textarea name="description" maxlength="1000" placeholder="Conte aos clientes sobre seu restaurante">'+esc(store.description??'')+'</textarea></label>'
    +'<label class="iv-on-field">Categorias culinárias<input name="cuisine_tags" maxlength="350" placeholder="Lanches, bebidas, pizzaria" value="'+esc(tags)+'"><span class="iv-on-help">Separe por vírgula. Até 12 categorias.</span></label>'
    +'<div class="iv-on-checks"><label><input type="checkbox" name="delivery_enabled" '+(online.delivery_enabled!==false?'checked':'')+'> Entrega própria</label><label><input type="checkbox" name="pickup_enabled" '+(online.pickup_enabled!==false?'checked':'')+'> Retirada no local</label></div>'
@@ -172,6 +175,7 @@ export async function renderPage({supabase,restaurant,role,box,esc,link,embedded
   void initInfinitePaySettings({supabase,restaurant,role,esc});
   void initManualPixSettings({supabase,restaurant,role,esc});
   const form=document.getElementById('iv-online-draft');
+  const mediaController=initStorefrontMedia({form,supabase,restaurant});
   form.onsubmit=async e=>{
    e.preventDefault();
    const button=form.querySelector('button[type="submit"]');if(button.disabled)return;
@@ -182,7 +186,9 @@ export async function renderPage({supabase,restaurant,role,box,esc,link,embedded
     if(tags.length>12||tags.some(t=>t.length>40))throw Error('Informe até 12 categorias com no máximo 40 caracteres cada.');
     const mins=Number(v.estimated_prep_minutes);
     if(!Number.isSafeInteger(mins)||mins<5||mins>240)throw Error('O preparo deve ser entre 5 e 240 minutos.');
+    const media=await mediaController.resolve();
     await request('save_draft',{
+     ...media,
      display_name:String(v.display_name??'').trim(),
      description:String(v.description??'').trim(),
      cuisine_tags:tags,
