@@ -105,10 +105,10 @@ Deno.serve(async(req:Request)=>{
   const model=(v:unknown,kind:"cash"|"kitchen")=>{
    if(!obj(v)||typeof v.show_rounds!=="boolean"||typeof v.separators!=="boolean")throw Error("Modelo inválido");
    // Novos campos opcionais para manter compatibilidade com clientes RC2.
-   const defaults={notice:kind==="cash"?"DOCUMENTO NÃO FISCAL · Não substitui nota fiscal ou comprovante bancário.":"PEDIDO INTERNO · NÃO FISCAL",sample_notice:"AMOSTRA · Sem pedido real",item_format:"{qtd} × {produto}",price_format:"{valor_item}",receipt_title:"RECIBO DE PAGAMENTO",receipt_details:"Recebimento: {forma_pagamento}\nValor pago: {valor_pagamento}\nRegistro: {registro_pagamento}\nData: {data_pagamento}",pix_title:"PAGAMENTO PIX",pix_details:"Valor a pagar: {valor_pagamento}\nRecebedor: {recebedor_pix}\nEscaneie o QR Code. Aguardando confirmação."};
+   const defaults={notice:kind==="cash"?"DOCUMENTO NÃO FISCAL · Não substitui nota fiscal ou comprovante bancário.":"PEDIDO INTERNO · NÃO FISCAL",sample_notice:"AMOSTRA · Sem pedido real",item_format:"{qtd} × {produto}",price_format:"{valor_item}",receipt_title:"RECIBO DE PAGAMENTO",receipt_details:"Recebimento: {forma_pagamento}\nValor pago: {valor_pagamento}\nRegistro: {registro_pagamento}\nData: {data_pagamento}",delivery_title:kind==="cash"?"PEDIDO · {modalidade}":"PEDIDO · {modalidade}",delivery_details:kind==="cash"?"Cliente: {cliente}\nTelefone: {telefone_cliente}\nEndereço: {endereco_entrega}\nObservação: {observacao_pedido}\nTaxa: {taxa_entrega}\nDesconto: {desconto}":"Observação: {observacao_pedido}",pix_title:"PAGAMENTO PIX",pix_details:"Valor a pagar: {valor_pagamento}\nRecebedor: {recebedor_pix}\nEscaneie o QR Code. Aguardando confirmação."};
    const extended:Record<string,string>={};
    for(const [k,initial] of Object.entries(defaults)){
-    const val=v[k]===undefined?initial:v[k],max=["notice","sample_notice","receipt_details","pix_details"].includes(k)?500:200;
+    const val=v[k]===undefined?initial:v[k],max=["notice","sample_notice","receipt_details","pix_details","delivery_details"].includes(k)?500:200;
     if(typeof val!=="string"||val.length>max)throw Error("Confira o tamanho dos textos do modelo.");
     extended[k]=val.trim();
    }
@@ -314,6 +314,35 @@ Deno.serve(async(req:Request)=>{
   const {data,error:e}=await db.rpc(op.fn,args);
   if(e)return error("Operação não concluída: "+(e.message??"Tente novamente").slice(0,180),409);
   return reply({success:true,result:data});
+ }
+ if(action==="cash_session_detail"){
+  if(!allowed("caixa"))return fail();
+  const sid=body.session_id;if(!isId(sid))return error("Sessão inválida");
+  const session=await db.from("cash_sessions").select("id,status,starting_cash_cents,counted_cash_cents,opened_at,closed_at").eq("restaurant_id",tenant).eq("id",sid).maybeSingle();
+  if(session.error)return error("Falha ao consultar sessão",503);
+  if(!session.data)return error("Sessão não encontrada",404);
+  const totals:Record<string,number>={},online:Record<string,number>={};
+  // Page exact per-session payments; no global 1000-record truncation. Fail instead of reporting a partial total.
+  for(const [table,target] of [["payments",totals],["online_order_payments",online]] as const){
+   let complete=false;
+   for(let offset=0;offset<20000;offset+=500){
+    let q=db.from(table).select("method,amount_cents").eq("restaurant_id",tenant).eq("cash_session_id",sid).order("id").range(offset,offset+499);
+    if(table==="online_order_payments")q=q.eq("status","confirmed");
+    const {data,error:e}=await q;
+    if(e)return error("Falha ao conferir recebimentos",503);
+    for(const p of data??[])target[p.method]=(target[p.method]??0)+Number(p.amount_cents);
+    if((data??[]).length<500){complete=true;break}
+   }
+   if(!complete)return error("Sessão excede o limite de conferência. Não foi calculado um total parcial.",422);
+  }
+  let expected=Number(session.data.starting_cash_cents)+(totals.cash??0),official=false;
+  if(session.data.status==="closed"){
+   const {data:a,error:e}=await db.from("audit_logs").select("details").eq("restaurant_id",tenant).eq("event","cash_session_closed").contains("details",{session_id:sid}).order("created_at",{ascending:false}).limit(1).maybeSingle();
+   if(e)return error("Falha ao consultar fechamento",503);
+   const v=a?.details?.expected_cash_cents;
+   if(typeof v==="number"&&Number.isFinite(v)){expected=v;official=true}
+  }
+  return reply({session:session.data,totals,online,expected_cash_cents:expected,official, difference_cents:session.data.counted_cash_cents==null?null:Number(session.data.counted_cash_cents)-expected});
  }
  if(action==="cash_summary"){
   if(!allowed("caixa"))return fail();
