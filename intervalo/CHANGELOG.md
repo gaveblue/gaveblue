@@ -1,5 +1,11 @@
 # Intervalo — CHANGELOG
 
+## 1.2.0-rc.12 — 2026-11-18 · Cozinha e modelos de pedidos externos
+
+- Cronômetros MM:SS por rodada/pedido, com alerta vermelho a partir de 20 min (preparo a partir do início real; fila a partir do envio/aceite). Sem horário confiável apresenta Sem horário. Atualização local sem aumentar frequência da consulta.
+- Impressão de pedido externo na cozinha; modelos editáveis de delivery/retirada, novos campos automáticos, prévias de pedido e recibo, arraste no editor. Adicionais e total de linha usam registros reais. Edge marketplace-operations v4 e restaurant-core v19, novos detalhes autorizados para Caixa e sessões, sem mudanças de esquema.
+- Testes de sintaxe e funções simuladas; validação real e impressão física pendentes.
+
 ## 1.2.0-rc.11 — 2026-11-17 · Seleção de mesa sem deslocar a tela
 
 - Primeiro toque na mesa apenas seleciona e conserva grade/rolagem; segundo toque na mesma abre a comanda. Acesso ao cardápio ou comanda também marca a seleção como visitada; ao retornar às mesas, tocar na mesma limpa a seleção, sem botão extra. Outra mesa inicia novo ciclo. Mantém lançamento bloqueado sem mesa.
