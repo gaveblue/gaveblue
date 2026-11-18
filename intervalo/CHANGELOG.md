@@ -1,5 +1,12 @@
 # Intervalo — CHANGELOG
 
+## 1.2.0-rc.14 — 2026-11-18 · Gestão, central de pedidos e padronização
+
+- Gestão compacta e indicadores de pedidos presenciais, mesas, prontos para servir, a receber, externos, estoque e equipe, com base no recorte disponível. Formulários de dados e equipe em Bottom Sheets com ações no rodapé e validação preservada.
+- Central de pedidos externos com filtros de modalidade, etapa, origem e busca; detalhes de itens, dados e horários de acompanhamento; confirmação de recebimento em folha (apenas para acesso Caixa). Preserva aceite Pix existente e transições protegidas. Evita redesenhar lista idêntica em consulta automática e pausa quando folha/detalhe aberto.
+- Tema compartilhado: skeleton sem texto antigo visível, rodapé de folhas, campos e cabeçalhos responsivos, respeito a movimento reduzido. Garçom consulta pedidos a cada 10 s, catálogo/mesas a cada 60 s em atualização silenciosa (manual e alterações buscam imediatamente), sem cache persistente de dados privados.
+- Verificações de sintaxe e estrutura. Revisão visual em aparelhos e migração de todos os painéis especializados ainda não concluídas; sem novas dependências ou custos.
+
 ## 1.2.0-rc.13 — 2026-11-18 · Sessões e recibos de delivery
 
 - Conferência presencial com total por meio, diferença durante digitação e confirmação explícita; valores online vinculados exibidos separadamente. Histórico das últimas 40 sessões e detalhe consultado sob demanda com registros do fechamento original quando disponíveis. Regras financeiras originais mantidas (dinheiro online não compõe a conferência presencial).

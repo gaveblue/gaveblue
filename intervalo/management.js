@@ -1,5 +1,6 @@
 // Intervalo 0.7.0 — Gestao de restaurante e equipe; apenas UI, servidor decide permissões.
 import {icon} from './ui-icons.js?v=1.0.0-rc.1';
+import {sheetifyForms,showFormSheetError} from './operational-sheets-rc15.js?v=1.2.0-rc.14';
 import {sidebarMarkup} from './global-navigation-rc7.js?v=1.2.0-rc.7';
 export async function renderManagement({supabase,restaurant,role,box,esc,link,navContext}) {
  const modules=["gestao","garcom","cozinha","caixa","cardapio"];
@@ -13,7 +14,7 @@ export async function renderManagement({supabase,restaurant,role,box,esc,link,na
  const requested=params.get('tab');
  let state={tab:allowedTabs.includes(requested)&&(requested!=='acessos'||role==='master')?requested:'visao',area:onlineAreas.includes(params.get('area'))?params.get('area'):'pedidos',data:null,overview:null};
  const onlineTitles={pedidos:'Pedidos',vitrine:'Loja online',horarios:'Horários de funcionamento',entregas:'Entrega e retirada',pagamentos:'Formas de pagamento'};
- const sty='<link rel="stylesheet" href="/intervalo/management-design-rc11.css?v=1.2.0-rc.1"><style>.mtabs{display:flex;gap:8px;overflow:auto;margin:23px 0}.mtabs button{border:1px solid #dbe2e8;background:white;padding:11px 16px;border-radius:10px;font-size:13px;font-weight:700;color:#334155;white-space:nowrap}.mtabs button.selected{color:white;background:#0f766e;border-color:#0f766e}.mg{display:grid;grid-template-columns:1fr 1fr;gap:14px}.mg .full{grid-column:1/-1}.mg label{display:block;font-size:12px;font-weight:700;color:#475569;margin-bottom:7px}.mg input,.mg select{padding:11px;width:100%;border:1px solid #cbd5e1;border-radius:9px;background:white;color:#0f172a}.mg input:focus,.mg select:focus{outline:2px solid #99f6e4}.team-card{background:#fff;border:1px solid #dce4ec;border-radius:13px;padding:17px;margin:12px 0}.team-top{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center}.team-actions{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin-top:13px}.team-actions select{border-radius:8px;padding:9px;border:1px solid #cbd5e1}.smallbtn{border:1px solid #cbd5e1;background:#fff;color:#334155;border-radius:8px;padding:9px 12px;font-weight:700;font-size:12px}.smallbtn.danger{color:#b91c1c;border-color:#fecaca}.status{font-size:11px;border-radius:50px;background:#f1f5f9;padding:6px 10px;font-weight:750;color:#475569}.pgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:10px}.pitem{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:13px}.pitem strong{display:block;margin:0 0 8px}.pitem span{font-size:12px;color:#64748b}.pitem button{margin-top:9px}.onboarding-note{font-size:13px;padding:12px;background:#ecfdf5;border:1px solid #ccfbf1;border-radius:10px;color:#115e59}.muted-sm{font-size:12px;color:#64748b;line-height:1.6}@media(max-width:650px){.mg{grid-template-columns:1fr}.mg .full{grid-column:auto}.team-actions{align-items:stretch}}</style>';
+ const sty='<link rel="stylesheet" href="/intervalo/management-design-rc11.css?v=1.2.0-rc.14"><style>.mtabs{display:flex;gap:8px;overflow:auto;margin:23px 0}.mtabs button{border:1px solid #dbe2e8;background:white;padding:11px 16px;border-radius:10px;font-size:13px;font-weight:700;color:#334155;white-space:nowrap}.mtabs button.selected{color:white;background:#0f766e;border-color:#0f766e}.mg{display:grid;grid-template-columns:1fr 1fr;gap:14px}.mg .full{grid-column:1/-1}.mg label{display:block;font-size:12px;font-weight:700;color:#475569;margin-bottom:7px}.mg input,.mg select{padding:11px;width:100%;border:1px solid #cbd5e1;border-radius:9px;background:white;color:#0f172a}.mg input:focus,.mg select:focus{outline:2px solid #99f6e4}.team-card{background:#fff;border:1px solid #dce4ec;border-radius:13px;padding:17px;margin:12px 0}.team-top{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center}.team-actions{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin-top:13px}.team-actions select{border-radius:8px;padding:9px;border:1px solid #cbd5e1}.smallbtn{border:1px solid #cbd5e1;background:#fff;color:#334155;border-radius:8px;padding:9px 12px;font-weight:700;font-size:12px}.smallbtn.danger{color:#b91c1c;border-color:#fecaca}.status{font-size:11px;border-radius:50px;background:#f1f5f9;padding:6px 10px;font-weight:750;color:#475569}.pgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:10px}.pitem{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:13px}.pitem strong{display:block;margin:0 0 8px}.pitem span{font-size:12px;color:#64748b}.pitem button{margin-top:9px}.onboarding-note{font-size:13px;padding:12px;background:#ecfdf5;border:1px solid #ccfbf1;border-radius:10px;color:#115e59}.muted-sm{font-size:12px;color:#64748b;line-height:1.6}@media(max-width:650px){.mg{grid-template-columns:1fr}.mg .full{grid-column:auto}.team-actions{align-items:stretch}}</style>';
  function renderLoading(){
   const line=(size="")=>'<span class="mg-v2-skel mg-v2-skel-line '+size+'"></span>';
   const kp=Array.from({length:4},()=>'<div class="mg-v2-skel-card">'+line("long")+'<span class="mg-v2-skel mg-v2-skel-num"></span>'+line("tiny")+'</div>').join("");
@@ -85,8 +86,8 @@ export async function renderManagement({supabase,restaurant,role,box,esc,link,na
    const moduleLinks=accessible.map(([path,label])=>'<a class="mg-v2-module" href="'+link("/"+d.restaurant.slug+"/"+path)+'"><span class="mg-v2-module-icon">'+icon(modIcons[path]??"layers",20)+'</span>'+esc(label)+'</a>').join("");
    const storeName=String(d.restaurant.name||d.restaurant.slug).replace(/(^|[-\s])\p{L}/gu,x=>x.replace('-',' ').toLocaleUpperCase('pt-BR'));
    const pageTitle=state.tab==='vendas'?onlineTitles[state.area]:({visao:"Visão geral",dados:"Dados do restaurante",equipe:"Equipe do restaurante",acessos:"Permissões da equipe",produtos:"Produtos",estoque:"Estoque"}[state.tab]??"Gestão");
-   const topTitle=state.tab==="visao"?"Olá, gestor!":pageTitle;
-   const topSubtitle=state.tab==="visao"?"Tudo o que importa para sua operação.":state.tab==="vendas"?({pedidos:'Acompanhe os pedidos e o atendimento.',vitrine:'Gerencie a presença digital do restaurante.',horarios:'Defina os horários de recebimento online.',entregas:'Configure modalidades, regiões e taxas.',pagamentos:'Configure os meios de recebimento.'}[state.area]):state.tab==="produtos"?"Organize o que seu restaurante vende.":state.tab==="estoque"?"Controle insumos, fichas técnicas e movimentações.":state.tab==="dados"?"Informações do estabelecimento.":"Gerencie esta área.";
+   const topTitle=state.tab==="visao"?"Visão geral":pageTitle;
+   const topSubtitle=state.tab==="visao"?"Acompanhe a operação do restaurante.":state.tab==="vendas"?({pedidos:'Acompanhe os pedidos e o atendimento.',vitrine:'Gerencie a presença digital do restaurante.',horarios:'Defina os horários de recebimento online.',entregas:'Configure modalidades, regiões e taxas.',pagamentos:'Configure os meios de recebimento.'}[state.area]):state.tab==="produtos"?"Organize o que seu restaurante vende.":state.tab==="estoque"?"Controle insumos, fichas técnicas e movimentações.":state.tab==="dados"?"Informações do estabelecimento.":"Gerencie esta área.";
    const roleText=roles[d.actor_role]??d.actor_role;
    const mainLink=link("/inicio");
    const quickLinks='<section class="mg-v2-section"><div class="mg-v2-section-head"><h2>Operação</h2></div><div class="mg-v2-modules">'+accessible.filter(([p])=>['garcom','cozinha','caixa','mesas'].includes(p)).map(([p,label])=>'<a class="mg-v2-module" href="'+link('/'+d.restaurant.slug+'/'+p)+'"><span class="mg-v2-module-icon">'+icon(modIcons[p],20)+'</span>'+esc(label)+'</a>').join('')+'</div></section>';
@@ -108,13 +109,19 @@ export async function renderManagement({supabase,restaurant,role,box,esc,link,na
     const activeTables=new Set(active.map(o=>o.table_id).filter(Boolean)).size;
     const stock=state.overview?.stock?.items,low=Array.isArray(stock)?stock.filter(i=>i.active&&Number(i.quantity)<=Number(i.min_quantity)):[];
     const team=(d.members??[]).filter(m=>m.status==="active").length;
+    const orderData=state.overview?.orders,online=state.overview?.online,activeIds=new Set(active.map(x=>x.id));
+    const readyOrders=new Set((orderData?.rounds??[]).filter(r=>r.status==='ready'&&activeIds.has(r.order_id)).map(r=>r.order_id));
+    const queue=active.filter(o=>o.status==='served').length;
     const cards=[
-     ["clipboard","Pedidos em andamento",state.overview?.orders?active.length:"—","Comandas não encerradas"],
-     ["table","Mesas em uso",state.overview?.orders?activeTables:"—","Mesas com comanda ativa"],
-     ["users","Equipe ativa",team,"Vínculos habilitados"],
-     ["alert","Estoque em alerta",Array.isArray(stock)?low.length:"—","Insumos no mínimo ou abaixo"]
+     ["clipboard","Pedidos presenciais",orderData?active.length:"—","Em andamento"],
+     ["table","Mesas em uso",orderData?activeTables:"—","Em atendimento"],
+     ["checkCircle","Prontos para servir",orderData?readyOrders.size:"—","Pedidos com rodada pronta"],
+     ["wallet","A receber",orderData?queue:"—","Pedidos servidos"],
+     ["bag","Pedidos externos",online?Number(online.pending??0)+Number(online.preparing??0):"—","Aguardando ou em andamento"],
+     ["alert","Estoque em alerta",Array.isArray(stock)?low.length:"—","Insumos no mínimo"],
+     ["users","Equipe ativa",team,"Vínculos habilitados"]
     ];
-    const kpiColors=["orange","","green","red"];
+    const kpiColors=["orange","","green","orange","","red","green"];
     inner='<div class="mg-v2-kpis">'+cards.map(([ic,label,number,detail],i)=>'<article class="mg-v2-kpi"><div class="mg-v2-kpi-top"><div class="mg-v2-kpi-label">'+esc(label)+'</div><span class="mg-v2-kpi-icon '+kpiColors[i]+'">'+icon(ic,19)+'</span></div><div class="mg-v2-kpi-val">'+value(number)+'</div><div class="mg-v2-kpi-note">'+esc(detail)+'</div></article>').join('')+'</div>'
       +'<section class="mg-v2-sales-entry"><span class="mg-v2-sales-icon">'+icon("bag",22)+'</span>'
       +'<div class="mg-v2-sales-copy"><strong>Vendas online</strong><small>'+(
@@ -126,7 +133,7 @@ export async function renderManagement({supabase,restaurant,role,box,esc,link,na
       +'<div class="mg-v2-dual"><section class="mg-v2-panel"><h3>Fluxo de atendimento</h3><p>Do lançamento do pedido ao recebimento no caixa.</p>'
       +'<div class="mg-v2-process"><span>Garçom</span>'+icon("chevronRight",14)+'<span>Cozinha</span>'+icon("chevronRight",14)+'<span>Caixa</span></div>'
       +'<p>'+(state.overview?.orders?active.length+' comanda(s) em andamento nesta consulta.':'Pedidos indisponíveis nesta consulta.')+'</p>'
-      +(active.length?active.slice(0,3).map(o=>'<div class="mg-v2-alert-row">'+icon("receipt",17)+'<div><strong>Comanda #'+value(String(o.id).replace(/-/g,"").slice(-5).toUpperCase())+'</strong><small>Status: '+value(o.status)+'</small></div></div>').join(''):"")
+      +(active.length?active.slice(0,3).map(o=>'<div class="mg-v2-alert-row">'+icon("receipt",17)+'<div><strong>Comanda #'+value(String(o.id).replace(/-/g,"").slice(-5).toUpperCase())+'</strong><small>Status: '+value(({open:'Em atendimento',submitted:'Enviado',preparing:'Em preparo',ready:'Pronto',served:'A receber'})[o.status]??o.status)+'</small></div></div>').join(''):"")
       +(accessible.some(([path])=>path==="mesas")?'<a class="mg-v2-panel-link" href="'+link("/"+d.restaurant.slug+"/mesas")+'">Visualizar mesas '+icon("arrowRight",13)+'</a>':"")
       +'</section><section class="mg-v2-panel"><h3>Estoque e alertas</h3><p>Acompanhe os itens que precisam de reposição.</p>'
       +(Array.isArray(stock)?low.length?low.slice(0,5).map(i=>'<div class="mg-v2-alert-row">'+icon("alert",17)+'<div><strong>'+value(i.name)+'</strong><small>Saldo: '+value(i.quantity)+' '+value(i.unit)+' · mínimo: '+value(i.min_quantity)+'</small></div></div>').join(''):'<div class="mg-v2-alert-row">'+icon("checkCircle",17)+'<div><strong>Nenhum alerta no momento</strong><small>Consulta de estoque concluída.</small></div></div>':'<div class="mg-v2-alert-row">'+icon("info",17)+'<div><strong>Consulta indisponível</strong><small>Atualize a página para tentar novamente.</small></div></div>')
@@ -141,7 +148,7 @@ export async function renderManagement({supabase,restaurant,role,box,esc,link,na
     inner='<section class="mg-v2-panel mg-v2-hub">'+entries.map(([path,title,note,ic])=>'<a class="mg-v2-hub-row" href="'+link('/'+d.restaurant.slug+'/'+path)+'"><span class="mg-v2-module-icon">'+icon(ic,20)+'</span><span><strong>'+esc(title)+'</strong><small>'+esc(note)+'</small></span>'+icon('chevronRight',17)+'</a>').join('')+'</section>';
    }else if(state.tab==="vendas"){
     inner='<section class="mg-v2-online-host" id="mg-v2-online-host" aria-label="Vendas online">'
-      +'<div class="iv-loading-inline" role="status" aria-live="polite"><span class="iv-load-dot" aria-hidden="true"></span> Carregando pedidos e configurações...</div></section>';
+      +'<div class="iv-loading-inline" role="status" aria-label="Carregando pedidos e configurações" aria-busy="true"><div class="iv-loading-inline-lines" aria-hidden="true"><span class="iv-load-skeleton"></span><span class="iv-load-skeleton"></span></div></div></section>';
    }else if(state.tab==="dados"){
      inner='<section class="panel"><h2>Informações do estabelecimento</h2><p class="onboarding-note">'+note+'</p><form id="restaurant-settings" class="mg">'+input("Telefone","phone",s.phone,'inputmode="tel" maxlength="30"')+input("CEP (somente números)","postal_code",s.postal_code,'inputmode="numeric" maxlength="8"')+input("Rua / Avenida","street",s.street,'maxlength="150"')+input("Número","address_number",s.address_number,'maxlength="30"')+input("Bairro","neighborhood",s.neighborhood,'maxlength="100"')+input("Cidade","city",s.city,'maxlength="120"')+input("UF","state",s.state,'maxlength="2" style="text-transform:uppercase"')+'<div><label for="m-timezone">Fuso horário</label><select id="m-timezone" name="timezone">'+["America/Sao_Paulo","America/Manaus","America/Cuiaba","America/Rio_Branco","America/Belem","America/Fortaleza","America/Recife","America/Noronha"].map(t=>'<option value="'+t+'" '+((s.timezone??"America/Sao_Paulo")===t?"selected":"")+'>'+t.replace("America/","")+'</option>').join("")+'</select></div><div class="full team-actions"><button class="btn" type="submit">Salvar dados</button>'+(!s.onboarding_completed_at?'<button class="btn alt" name="finish" type="button" id="mg-finish">Concluir cadastro</button>':'')+'</div></form><p class="muted-sm">Cadastros e alterações ficam vinculados ao estabelecimento e registrados para auditoria.</p></section>';
    }else if(state.tab==="equipe"){
@@ -182,10 +189,10 @@ export async function renderManagement({supabase,restaurant,role,box,esc,link,na
    if(state.tab==="vendas"){
     const host=document.getElementById('mg-v2-online-host');
     const isActive=()=>!!host?.isConnected&&state.tab==='vendas';
-    void import('/intervalo/online-management-rc1.js?v=1.2.0-rc.1').then(({renderPage})=>{
+    void import('/intervalo/online-management-rc1.js?v=1.2.0-rc.14').then(({renderPage})=>{
      if(!isActive())return;
      return renderPage({supabase,restaurant,role,esc,link,embedded:true,isActive,
-      initialSection:state.area,externalNavigation:true,
+      initialSection:state.area,externalNavigation:true,canPay:navContext.can('caixa'),
       box:html=>{if(isActive())host.innerHTML=html}});
     }).catch(e=>{if(isActive())host.innerHTML='<div class="mg-v2-panel" role="alert">Não foi possível abrir Vendas: '+esc(e.message)+'</div>'});
    }
@@ -250,7 +257,7 @@ export async function renderManagement({supabase,restaurant,role,box,esc,link,na
    const settingForm=document.getElementById("restaurant-settings");
    if(settingForm){
      async function save(complete){
-       const button=complete?document.getElementById("mg-finish"):settingForm.querySelector('button[type="submit"]');
+       const button=complete?document.getElementById("mg-finish"):(settingForm.querySelector('button[type="submit"]')??document.querySelector('button[type="submit"][form="restaurant-settings"]'));
        if(button?.disabled)return;
        const previous=button?.textContent;
        if(button){button.disabled=true;button.textContent=complete?"Concluindo...":"Salvando...";button.setAttribute("aria-busy","true")}
@@ -259,7 +266,7 @@ export async function renderManagement({supabase,restaurant,role,box,esc,link,na
          settings.state=(settings.state??"").trim().toUpperCase();
          settings.postal_code=(settings.postal_code??"").replace(/\D/g,"");
          await call("save_settings",{settings,complete});await refresh();message(complete?"Cadastro concluído.":"Dados salvos.");
-       }catch(e){message(e.message,"error")}
+       }catch(e){if(!showFormSheetError(settingForm,e.message))message(e.message,"error")}
        finally{
          if(button?.isConnected){button.disabled=false;button.textContent=previous;button.removeAttribute("aria-busy")}
        }
@@ -271,8 +278,8 @@ export async function renderManagement({supabase,restaurant,role,box,esc,link,na
    if(manualStaffForm)manualStaffForm.onsubmit=async e=>{
      e.preventDefault();
      const raw=Object.fromEntries(new FormData(manualStaffForm).entries());
-     if(raw.temporary_password!==raw.repeat_password){message("As senhas provisórias não coincidem.","error");return}
-     const button=manualStaffForm.querySelector('button[type="submit"]');button.disabled=true;
+     if(raw.temporary_password!==raw.repeat_password){if(!showFormSheetError(manualStaffForm,"As senhas provisórias não coincidem."))message("As senhas provisórias não coincidem.","error");return}
+     const button=manualStaffForm.querySelector('button[type="submit"]')??document.querySelector('button[type="submit"][form="manual-staff"]');button.disabled=true;
      const temp=raw.temporary_password,email=raw.email.trim().toLowerCase();
      try{
        await call("create_staff_with_password",{
@@ -281,13 +288,14 @@ export async function renderManagement({supabase,restaurant,role,box,esc,link,na
        });
        state.tab="equipe";await refresh();message("Funcionário criado. A senha será exigida para o primeiro acesso.");
        showTemporaryPassword(temp,email);
-     }catch(err){message(err.message,"error");button.disabled=false}
+     }catch(err){if(!showFormSheetError(manualStaffForm,err.message))message(err.message,"error");button.disabled=false}
    };
    const inviteForm=document.getElementById("invite-team");
    if(inviteForm)inviteForm.onsubmit=async e=>{
-     e.preventDefault();const values=Object.fromEntries(new FormData(inviteForm).entries());
-     try{const out=await call("invite",values);await refresh();state.tab="equipe";draw();message("Vínculo criado sem envio de e-mail. A pessoa pode entrar na conta existente e aceitar o convite.")}catch(err){message(err.message,"error")}
+     e.preventDefault();const values=Object.fromEntries(new FormData(inviteForm).entries()),button=inviteForm.querySelector('button[type=submit]')??document.querySelector('button[form="invite-team"]');if(button?.disabled)return;if(button)button.disabled=true;
+     try{const out=await call("invite",values);await refresh();state.tab="equipe";draw();message("Vínculo criado sem envio de e-mail. A pessoa pode entrar na conta existente e aceitar o convite.")}catch(err){if(!showFormSheetError(inviteForm,err.message))message(err.message,"error");if(button)button.disabled=false}
    };
+   sheetifyForms([{id:'restaurant-settings',label:'Editar dados',title:'Dados do restaurante',description:'Atualize as informações do estabelecimento.',fixedAction:true,extraClass:'iv-management-form-sheet'},{id:'manual-staff',label:'Cadastrar funcionário',title:'Novo funcionário',description:'Cadastre o acesso e a senha provisória.',fixedAction:true,extraClass:'iv-management-form-sheet'},{id:'invite-team',label:'Vincular conta',title:'Vincular funcionário',description:'Use uma conta já cadastrada no Intervalo.',fixedAction:true,extraClass:'iv-management-form-sheet'}]);
    document.querySelectorAll("[data-setrole]").forEach(b=>b.onclick=async()=>{
       const id=b.dataset.setrole,role=document.querySelector('[data-role="'+id+'"]')?.value;
       try{await call("set_role",{user_id:id,role});await refresh();state.tab="equipe";draw();message("Função atualizada.")}catch(err){message(err.message,"error")}

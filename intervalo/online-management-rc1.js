@@ -1,13 +1,13 @@
 import {icon} from './ui-icons.js?v=1.0.0-rc.1';
-import {sheetifyForms,showFormSheetError} from './operational-sheets-rc15.js?v=1.0.0-rc.15';
+import {sheetifyForms,showFormSheetError} from './operational-sheets-rc15.js?v=1.2.0-rc.14';
 import {initInfinitePaySettings} from './marketplace-infinitepay-settings-rc8.js?v=1.1.0-rc.9';
 import {initManualPixSettings} from './marketplace-manual-pix-settings-rc10.js?v=1.1.0-rc.10';
 import {storefrontMediaFields,initStorefrontMedia} from './storefront-media-rc21.js?v=1.1.0-rc.22';
 
 // Gestão > Loja Online. Painel rc6; estado e permissões decididos no backend.
-export async function renderPage({supabase,restaurant,role,box,esc,link,embedded=false,isActive=()=>true,initialSection='pedidos',externalNavigation=false}){
+export async function renderPage({supabase,restaurant,role,box,esc,link,embedded=false,isActive=()=>true,initialSection='pedidos',externalNavigation=false,canPay=true}){
  if(!embedded)document.body.classList.add('iv-fullwidth','iv-online-admin');
- const css='<link rel="stylesheet" href="/intervalo/online-management-rc1.css?v=1.2.0-rc.1">';
+ const css='<link rel="stylesheet" href="/intervalo/online-management-rc1.css?v=1.2.0-rc.1"><style>.iv-on-order-filters{display:grid;gap:7px;margin:10px 0}.iv-on-filter-row{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:7px}.iv-on-filter-row input,.iv-on-filter-row select{width:100%;min-width:0;min-height:42px;font-size:13px;padding:8px;border:1px solid #dce3ea;border-radius:10px;background:white}.iv-on-order{padding:12px!important;overflow-wrap:anywhere}.iv-on-order[hidden]{display:none!important}.iv-on-order details{margin:8px 0;color:#536478;font-size:12px}.iv-on-order summary{cursor:pointer;font-weight:650;color:#637287}.iv-on-order-actions{flex-wrap:wrap}.iv-on-order-actions button{white-space:normal}.iv-on-order p{margin:5px 0!important}.iv-on-order-filters select{max-width:100%}</style>';
  const money=n=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(n||0)/100);
  const realToCents=str=>{
   const raw=String(str).trim().replace(/\s/g,'');
@@ -125,7 +125,7 @@ export async function renderPage({supabase,restaurant,role,box,esc,link,embedded
    +'<section class="iv-on-card" data-on-section="pedidos"><div class="iv-on-card-heading"><span class="iv-on-card-icon">'+icon('bag',19)+'</span>'
    +'<div><h2>Pedidos recebidos</h2><p>Acompanhe os pedidos de delivery e retirada.</p></div>'
    +'<button type="button" class="iv-on-icon-action" id="iv-on-orders-refresh" aria-label="Atualizar pedidos" title="Atualizar pedidos">'+icon('refresh',17)+'</button></div>'
-   +'<div id="iv-on-orders-list" class="iv-on-orders" role="status" aria-live="polite">'
+   +'<div class="iv-on-order-filters"><div class="iv-on-filter-row"><input id="iv-on-search-orders" type="search" placeholder="Buscar pedido ou cliente" aria-label="Buscar pedido"><select id="iv-on-order-mode" aria-label="Modalidade"><option value="all">Todos</option><option value="delivery">Delivery</option><option value="pickup">Retirada</option></select></div><div class="iv-on-filter-row"><select id="iv-on-order-stage" aria-label="Etapa"><option value="active">Em andamento</option><option value="all">Todos os pedidos</option><option value="dispatch">Prontos / em entrega</option><option value="finished">Finalizados</option></select><select id="iv-on-order-source" aria-label="Origem"><option value="all">Todas as origens</option><option value="staff">Atendimento</option><option value="other">Loja e outros canais</option></select></div></div><div id="iv-on-orders-list" class="iv-on-orders" role="status" aria-live="polite">'
    +'<div class="iv-on-orders-loading"><span class="iv-on-skeleton iv-on-skel-title"></span><span class="iv-on-skeleton iv-on-skel-sub"></span></div></div>'
    +'</section></div></div>'
    +'<div class="iv-on-form-host" aria-hidden="true">'
@@ -303,18 +303,27 @@ export async function renderPage({supabase,restaurant,role,box,esc,link,embedded
   };
   const statuses={pending_acceptance:'Aguardando aceite',accepted:'Aceito',preparing:'Em preparo',ready:'Pronto',ready_for_pickup:'Pronto para retirada',out_for_delivery:'Saiu para entrega',delivered:'Entregue',picked_up:'Retirado',rejected:'Recusado',cancelled:'Cancelado',expired:'Expirado'};
   const availableActions=o=>o.status==='pending_acceptance'?(o.payment_method==='manual_pix'?['rejected']:['accepted','rejected']):o.status==='accepted'?['preparing','cancelled']:o.status==='preparing'?[o.fulfillment_type==='pickup'?'ready_for_pickup':'ready']:o.status==='ready'?['out_for_delivery']:o.status==='out_for_delivery'?['delivered']:o.status==='ready_for_pickup'?['picked_up']:[];
-  async function refreshOrders(){
+  let orderBusy=false,orderSignature='',orderChanging=false;
+  const norm=v=>String(v??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-BR');
+  const filters=()=>{const search=norm(document.getElementById('iv-on-search-orders')?.value),mode=document.getElementById('iv-on-order-mode')?.value??'all',stage=document.getElementById('iv-on-order-stage')?.value??'active',source=document.getElementById('iv-on-order-source')?.value??'all';let visible=0;ordersArea.querySelectorAll('[data-on-filter]').forEach(row=>{const terminal=['delivered','picked_up','cancelled','rejected','expired'].includes(row.dataset.stage),dispatch=['ready','ready_for_pickup','out_for_delivery'].includes(row.dataset.stage);row.hidden=!(row.dataset.onFilter.includes(search)&&(mode==='all'||row.dataset.mode===mode)&&(stage==='all'||stage==='active'&&!terminal||stage==='finished'&&terminal||stage==='dispatch'&&dispatch)&&(source==='all'||(source==='staff')===(row.dataset.source==='staff')));if(!row.hidden)visible++});const empty=ordersArea.querySelector('[data-on-filter-empty]');if(empty)empty.hidden=visible!==0};
+  for(const id of ['iv-on-search-orders','iv-on-order-mode','iv-on-order-stage','iv-on-order-source'])document.getElementById(id)?.addEventListener('input',filters);
+  async function refreshOrders(silent=false){
+   if(!ordersArea?.isConnected||orderBusy||silent&&(orderChanging||document.querySelector('dialog[open]')||ordersArea.querySelector('details[open]')))return;
+   orderBusy=true;
    const refreshButton=document.getElementById('iv-on-orders-refresh');
    if(refreshButton){refreshButton.disabled=true;refreshButton.setAttribute('aria-busy','true')}
    try{
     const result=await ops('list'),orders=result.orders??[],items=result.items??[];
+    const signature=JSON.stringify(result);if(silent&&signature===orderSignature)return;orderSignature=signature;
     const charges=new Map((result.manual_pix_charges??[]).map(x=>[x.order_id,x]));
     let html='';
     for(const o of orders){
      const rows=items.filter(i=>i.order_id===o.id);
-     html+='<div class="iv-on-order"><div class="iv-on-row"><strong>'+esc(o.public_code)+'</strong><span class="iv-on-status">'+esc(statuses[o.status]??o.status)+'</span></div>';
-     html+='<p>'+esc(o.customer_name)+' · '+esc(o.customer_phone)+' · '+(o.fulfillment_type==='delivery'?'DELIVERY':'RETIRADA')+'</p>';
-     html+=rows.map(i=>'<p>'+esc(i.quantity)+'× '+esc(i.product_name)+(i.note?' · '+esc(i.note):'')+'</p>').join('');
+     html+='<div class="iv-on-order" data-on-filter="'+esc(norm([o.public_code,o.customer_name,o.customer_phone,statuses[o.status]].join(' ')))+'" data-mode="'+esc(o.fulfillment_type)+'" data-stage="'+esc(o.status)+'" data-source="'+(String(o.source).includes('staff')?'staff':'other')+'"><div class="iv-on-row"><strong>'+esc(o.public_code)+'</strong><span class="iv-on-status">'+esc(statuses[o.status]??o.status)+'</span></div>';
+     html+='<p>'+esc(o.customer_name)+' · '+(o.fulfillment_type==='delivery'?'Delivery':'Retirada')+' · '+(String(o.source).includes('staff')?'Atendimento':'Loja / outro canal')+'</p>';
+     const address=o.delivery_address,addr=typeof address==='string'?address:address&&typeof address==='object'?[address.street??address.address,address.number??address.address_number,address.complement,address.neighborhood,address.city,address.state,address.reference].filter(v=>typeof v==='string'||typeof v==='number').join(', '):'';
+     const fmt=v=>{try{return new Intl.DateTimeFormat('pt-BR',{dateStyle:'short',timeStyle:'short'}).format(new Date(v))}catch{return '—'}};
+     html+='<details><summary>Itens e acompanhamento · '+rows.length+'</summary><p>Telefone: '+esc(o.customer_phone??'—')+'</p>'+(addr?'<p>Endereço: '+esc(addr)+'</p>':'')+(o.customer_note?'<p>Obs.: '+esc(o.customer_note)+'</p>':'')+rows.map(i=>'<p>'+esc(i.quantity)+'× '+esc(i.product_name)+(i.note?' · '+esc(i.note):'')+'</p>').join('')+[['Recebido',o.created_at],['Aceito',o.accepted_at],['Pronto',o.prepared_at],['Saiu para entrega',o.dispatched_at],['Finalizado',o.fulfilled_at]].filter(([,v])=>v).map(([label,v])=>'<p>'+label+': '+esc(fmt(v))+'</p>').join('')+'</details>';
      const manualCharge=charges.get(o.id);
      html+='<div class="iv-on-row"><strong>'+money(o.total_cents)+'</strong><span>'+(o.payment_status==='paid'?'Pago':o.payment_method==='manual_pix'?(manualCharge?.reported_at?'Pix informado · conferir no banco':'Aguardando Pix · 10 min'):'Pagamento pendente')+'</span></div>';
      html+='<div class="iv-on-order-actions">';
@@ -323,39 +332,42 @@ export async function renderPage({supabase,restaurant,role,box,esc,link,embedded
       else html+='<span class="iv-on-hint">Aguardando cliente informar pagamento (limite 10 minutos)</span>';
      }
      html+=availableActions(o).map(state=>'<button type="button" class="iv-on-button" data-order-id="'+esc(o.id)+'" data-status="'+state+'">'+esc(statuses[state]??state)+'</button>').join('');
-     if(o.payment_status!=='paid'&&!['rejected','cancelled','expired','pending_acceptance'].includes(o.status))
+     if(canPay&&o.payment_status==='unpaid'&&!['rejected','cancelled','expired','pending_acceptance'].includes(o.status))
       html+='<button type="button" class="iv-on-button secondary" data-online-pay="'+esc(o.id)+'">Registrar recebimento</button>';
      html+='</div></div>';
     }
-    ordersArea.innerHTML=html||'<div class="iv-on-empty">'+icon('bag',24)+'<strong>Nenhum pedido por enquanto</strong><p>Os novos pedidos aparecerão aqui quando a loja começar a receber.</p></div>';
+    ordersArea.innerHTML=html?html+'<div class="iv-on-empty" data-on-filter-empty hidden>Nenhum pedido neste filtro.</div>':'<div class="iv-on-empty">'+icon('bag',24)+'<strong>Nenhum pedido por enquanto</strong><p>Os novos pedidos aparecerão aqui quando a loja começar a receber.</p></div>';filters();
     ordersArea.querySelectorAll('[data-status]').forEach(b=>b.onclick=async()=>{
      if(['rejected','cancelled','delivered','picked_up'].includes(b.dataset.status)&&!confirm('Confirma esta alteração?'))return;
-     b.disabled=true;
+     if(orderChanging)return;orderChanging=true;b.disabled=true;
      try{await ops('transition',{order_id:b.dataset.orderId,target:b.dataset.status});await refreshOrders()}
-     catch(e){alert(e.message);b.disabled=false}
+     catch(e){alert(e.message);b.disabled=false}finally{orderChanging=false}
     });
     ordersArea.querySelectorAll('[data-manual-pix-accept]').forEach(b=>b.onclick=async()=>{
      if(!confirm('Você conferiu no EXTRATO da conta que recebeu exatamente '+b.dataset.amount+'? O comprovante ou botão Já paguei não bastam. Ao confirmar, o pedido será ACEITO.'))return;
-     b.disabled=true;
+     if(orderChanging)return;orderChanging=true;b.disabled=true;
      try{await ops('accept_manual_pix',{order_id:b.dataset.manualPixAccept});await refreshOrders()}
-     catch(e){alert(e.message);b.disabled=false}
+     catch(e){alert(e.message);b.disabled=false}finally{orderChanging=false}
     });
-    ordersArea.querySelectorAll('[data-online-pay]').forEach(b=>b.onclick=async()=>{
-     const method=prompt('Pagamento recebido: digite pix, cash (dinheiro) ou card (cartão)');
-     if(!['pix','cash','card'].includes(method??''))return;
-     if(!confirm('Confirma que recebeu este pagamento?'))return;
-     b.disabled=true;
-     try{await ops('pay',{order_id:b.dataset.onlinePay,method});await refreshOrders()}
-     catch(e){alert(e.message);b.disabled=false}
+    ordersArea.querySelectorAll('[data-online-pay]').forEach(b=>b.onclick=()=>{
+     if(orderChanging||document.getElementById('iv-online-confirm-pay'))return;
+     const host=document.createElement('div');ordersArea.append(host);host.innerHTML='<form id="iv-online-confirm-pay"><label>Forma de pagamento<select name="method" required><option value="pix">Pix</option><option value="cash">Dinheiro</option><option value="card">Cartão</option></select></label><p class="iv-on-hint">Confirme apenas o recebimento efetivamente realizado.</p><button type="submit">Registrar recebimento</button></form>';
+     const form=host.querySelector('form'),entry=sheetifyForms([{id:form.id,label:'Registrar recebimento',title:'Pagamento',description:'Escolha a forma de recebimento.',fixedAction:true}])[0];if(!entry){host.remove();return}
+     entry.trigger.hidden=true;const submit=entry.dialog.querySelector('[type=submit]');
+     entry.dialog.addEventListener('close',()=>{entry.dispose();host.remove()},{once:true});
+     form.onsubmit=async e=>{e.preventDefault();if(orderChanging)return;if(!confirm('Confirma que recebeu este pagamento?'))return;orderChanging=true;submit.disabled=true;
+      try{await ops('pay',{order_id:b.dataset.onlinePay,method:new FormData(form).get('method')});submit.disabled=false;entry.close();await refreshOrders()}
+      catch(err){showFormSheetError(form,err.message);submit.disabled=false}finally{orderChanging=false}
+     };entry.trigger.click();
     });
    }catch(e){ordersArea.textContent='Não foi possível consultar os pedidos: '+e.message}
-   finally{if(refreshButton){refreshButton.disabled=false;refreshButton.removeAttribute('aria-busy')}}
+   finally{orderBusy=false;if(refreshButton){refreshButton.disabled=false;refreshButton.removeAttribute('aria-busy')}}
   }
-  document.getElementById('iv-on-orders-refresh').onclick=refreshOrders;
+  document.getElementById('iv-on-orders-refresh').onclick=()=>refreshOrders(false);
   if(!externalNavigation||activeSection==='pedidos')refreshOrders();
   const orderPoll=setInterval(()=>{
    if(!ordersArea.isConnected){clearInterval(orderPoll);return}
-   if(document.visibilityState==='visible'&&(!externalNavigation||activeSection==='pedidos'))void refreshOrders();
+   if(document.visibilityState==='visible'&&(!externalNavigation||activeSection==='pedidos'))void refreshOrders(true);
   },15000);
   const visibility=document.getElementById('iv-online-visibility');
   if(visibility)visibility.onclick=async()=>{

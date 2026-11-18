@@ -1,0 +1,15 @@
+/* RC14 — visual compartilhado. Mantém componentes especializados e dados existentes. */
+body.iv-unified .iv-loading-inline-label,body.iv-unified .iv-boot-status{position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;clip-path:inset(50%);padding:0!important;margin:0!important}
+body.iv-unified .iv-loading-inline{min-width:0;max-width:100%;padding:15px!important}
+body.iv-unified .iv-loading-inline-lines{min-width:0;width:100%}
+body.iv-unified dialog.iv-op-sheet .iv-op-footer{display:flex;align-items:center;gap:8px;padding-top:10px;border-top:1px solid #edf0f3;flex:none}
+body.iv-unified dialog.iv-op-sheet:has(.iv-op-footer>.iv-op-submit) .iv-op-footer>.iv-op-cancel{flex:0 0 auto;width:auto;padding:11px 14px;min-height:44px}
+body.iv-unified .iv-op-footer>.iv-op-submit{flex:1;width:auto;min-width:0;border:0;border-radius:11px;min-height:44px;color:white;background:#ff7900;font-size:13px;font-weight:750;white-space:normal}
+body.iv-unified .iv-op-footer>.iv-op-submit:disabled{opacity:.5}
+body.iv-unified .iv-op-body{padding:13px 16px}
+body.iv-unified .iv-op-body form{gap:9px}
+body.iv-unified .iv-op-body input:not([type=checkbox]):not([type=radio]),body.iv-unified .iv-op-body select,body.iv-unified .iv-op-body textarea{max-width:100%;box-sizing:border-box}
+body.iv-unified .iv-global-title{min-width:0}
+body.iv-unified .iv-global-title>div{min-width:0;overflow-wrap:anywhere}
+@media(max-width:480px){body.iv-unified .iv-header{flex-wrap:wrap;gap:8px!important}body.iv-unified .iv-header>div{min-width:0}body.iv-unified .iv-header .iv-actions{flex-wrap:wrap;min-width:0}body.iv-unified .iv-op-body input:not([type=radio]):not([type=checkbox]),body.iv-unified .iv-op-body select,body.iv-unified .iv-op-body textarea{font-size:16px}body.iv-unified .iv-op-heading h2{font-size:17px}}
+@media(prefers-reduced-motion:reduce){body.iv-unified .iv-load-skeleton,body.iv-unified .iv-boot-card,body.iv-unified .iv-on-skeleton,body.iv-unified .mg-v2-skel{animation:none!important}body.iv-unified .iv-global-nav-dialog,body.iv-unified dialog.iv-op-sheet{animation:none!important}}

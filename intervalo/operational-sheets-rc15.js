@@ -48,7 +48,7 @@ export function sheetifyForms(specs=[],root=document){
   const cancel=document.createElement('button');cancel.type='button';cancel.className='iv-op-cancel';cancel.textContent='Cancelar';footer.append(cancel);
   // Botão original permanece no formulário e mantém onsubmit, sem duplicar operação.
   const originalSubmit=form.querySelector('[type="submit"],button:not([type])');
-  if(originalSubmit)originalSubmit.classList.add('iv-op-submit');
+  if(originalSubmit){originalSubmit.classList.add('iv-op-submit');if(spec.fixedAction&&form.id){originalSubmit.setAttribute('form',form.id);footer.append(originalSubmit)}}
   const content=document.createElement('div');content.className='iv-op-content';content.append(head,body,footer);dialog.append(content);
   document.body.append(dialog);
   const closeSheet=()=>{if(!dialog.open)return;if(originalSubmit?.disabled)return;dialog.close()};
@@ -92,12 +92,13 @@ export function sheetifyForms(specs=[],root=document){
   handle.addEventListener('pointerdown',e=>{dragStart=e.clientY;dy=0;handle.setPointerCapture?.(e.pointerId)});
   handle.addEventListener('pointermove',e=>{if(dragStart===null)return;dy=e.clientY-dragStart;if(dy>0)content.style.transform='translateY('+Math.min(dy,120)+'px)'});
   const release=()=>{if(dragStart===null)return;dragStart=null;content.style.transform='';if(dy>80)closeSheet();else if(dy< -45)dialog.classList.add('iv-op-expanded');dy=0};
-  handle.addEventListener('pointerup',release);handle.addEventListener('pointercancel',release);
-  const onOpen=()=>{clear();dialog.showModal();align();close.focus({preventScroll:true})};
+  handle.addEventListener('pointerup',release);handle.addEventListener('pointercancel',()=>{dragStart=null;dy=0;content.style.transform='' });
+  const onOpen=()=>{clear();dialog.classList.remove('iv-op-expanded');dialog.showModal();align();close.focus({preventScroll:true})};
   trigger.addEventListener('click',onOpen);
-  window.visualViewport?.addEventListener('resize',align);
-  window.visualViewport?.addEventListener('scroll',align);
-  window.addEventListener('resize',align);
+  const attachViewport=()=>{window.visualViewport?.addEventListener('resize',align);window.visualViewport?.addEventListener('scroll',align);window.addEventListener('resize',align)};
+  const detachViewport=()=>{window.visualViewport?.removeEventListener('resize',align);window.visualViewport?.removeEventListener('scroll',align);window.removeEventListener('resize',align)};
+  trigger.addEventListener('click',attachViewport);
+  dialog.addEventListener('close',detachViewport);
   const detach=()=>{
    if(dialog.open)dialog.close();
    dialog.remove();
