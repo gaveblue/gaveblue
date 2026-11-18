@@ -1,5 +1,11 @@
 # Intervalo — CHANGELOG
 
+## 1.2.0-rc.13 — 2026-11-18 · Sessões e recibos de delivery
+
+- Conferência presencial com total por meio, diferença durante digitação e confirmação explícita; valores online vinculados exibidos separadamente. Histórico das últimas 40 sessões e detalhe consultado sob demanda com registros do fechamento original quando disponíveis. Regras financeiras originais mantidas (dinheiro online não compõe a conferência presencial).
+- Caixa externo com filtro Entrega/Retirada, detalhe de itens, dados do cliente, taxa e desconto, impressão do pedido completo e recibo por registro confirmado. Não emite recibo fictício sem registro nem cria cobrança. Recebimentos online seguem confirmação manual e regras do servidor.
+- Sintaxe e verificações estruturais; fluxo autenticado e impressora pendentes.
+
 ## 1.2.0-rc.12 — 2026-11-18 · Cozinha e modelos de pedidos externos
 
 - Cronômetros MM:SS por rodada/pedido, com alerta vermelho a partir de 20 min (preparo a partir do início real; fila a partir do envio/aceite). Sem horário confiável apresenta Sem horário. Atualização local sem aumentar frequência da consulta.
