@@ -189,7 +189,7 @@ export async function renderManagement({supabase,restaurant,role,box,esc,link,na
    if(state.tab==="vendas"){
     const host=document.getElementById('mg-v2-online-host');
     const isActive=()=>!!host?.isConnected&&state.tab==='vendas';
-    void import('/intervalo/online-management-rc1.js?v=1.2.0-rc.14').then(({renderPage})=>{
+    void import('/intervalo/online-management-rc1.js?v=1.2.0-rc.14a').then(({renderPage})=>{
      if(!isActive())return;
      return renderPage({supabase,restaurant,role,esc,link,embedded:true,isActive,
       initialSection:state.area,externalNavigation:true,canPay:navContext.can('caixa'),

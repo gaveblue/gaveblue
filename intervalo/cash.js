@@ -1,7 +1,7 @@
 // Intervalo — caixa: apenas registros de recebimentos externos, sem integração com adquirentes.
 import {icon} from './ui-icons.js?v=1.0.0-rc.1';
 import {menuButtonMarkup} from './global-navigation-rc7.js?v=1.2.0-rc.7';
-import {sheetifyForms,showFormSheetError} from './operational-sheets-rc15.js?v=1.0.0-rc.15';
+import {sheetifyForms,showFormSheetError} from './operational-sheets-rc15.js?v=1.2.0-rc.14';
 import {printConfigured,onlineReceiptData} from './print-template-rc2.js?v=1.2.0-rc.12';
 export async function renderPage({supabase,restaurant,box,esc,link}){
  document.body.classList.add('iv-fullwidth','iv-pos','iv-cash-v2');
@@ -77,7 +77,7 @@ export async function renderPage({supabase,restaurant,box,esc,link}){
   if(selected&&screen==='queue'&&selected.status!=='served'&&selected.status!=='closed'){screen='open'}
   let title='Caixa',out='';
   if(screen==='home'){
-   out='<section class="iv-cash-card"><div class="iv-cash-session-top"><h2>Sessão de caixa</h2><span class="iv-cash-status '+(open?'good':'')+'">'+(open?'Aberta':'Fechada')+'</span></div><div class="iv-cash-session-value"><p class="iv-cash-caption">Recebimentos da sessão · presencial</p><span class="iv-cash-big">'+(open?money(sessionTotal):'—')+'</span></div><div class="iv-cash-session-metrics"><div><p class="iv-cash-caption">Dinheiro esperado</p><b>'+ (open?money(expected):'—')+'</b></div><div><p class="iv-cash-caption">Troco inicial</p><b>'+(open?money(open.starting_cash_cents):'—')+'</b></div></div><button type="button" class="iv-cash-manage" data-cash-screen="session">'+(open?'Gerenciar sessão':'Abrir sessão')+icon('chevronRight',16)+'</button></section><h2>Operação</h2><div class="iv-cash-tiles">'+menus.map(([id,name,ico,desc])=>'<button type="button" class="iv-cash-tile" data-cash-screen="'+id+'"><span class="iv-cash-tile-top"><span class="iv-cash-tile-icon">'+icon(ico,22)+'</span><span class="iv-cash-tile-count">'+(id==='delivery'&&onlineError?'—':orderGroups[id].length)+'</span></span><span><strong>'+name+'</strong><small>'+desc+'</small></span></button>').join('')+'</div>';
+   out='<section class="iv-cash-card"><div class="iv-cash-session-top"><h2>Sessão de caixa</h2><span class="iv-cash-status '+(open?'good':'')+'">'+(open?'Aberta':'Fechada')+'</span></div><div class="iv-cash-session-value"><p class="iv-cash-caption">Recebimentos da sessão · presencial'+((cashData.payments??[]).length>=1000?' · recorte':'')+'</p><span class="iv-cash-big">'+(open?money(sessionTotal):'—')+'</span></div><div class="iv-cash-session-metrics"><div><p class="iv-cash-caption">Dinheiro esperado</p><b>'+ (open?money(expected):'—')+'</b></div><div><p class="iv-cash-caption">Troco inicial</p><b>'+(open?money(open.starting_cash_cents):'—')+'</b></div></div><button type="button" class="iv-cash-manage" data-cash-screen="session">'+(open?'Gerenciar sessão':'Abrir sessão')+icon('chevronRight',16)+'</button></section><h2>Operação</h2><div class="iv-cash-tiles">'+menus.map(([id,name,ico,desc])=>'<button type="button" class="iv-cash-tile" data-cash-screen="'+id+'"><span class="iv-cash-tile-top"><span class="iv-cash-tile-icon">'+icon(ico,22)+'</span><span class="iv-cash-tile-count">'+(id==='delivery'&&onlineError?'—':orderGroups[id].length)+'</span></span><span><strong>'+name+'</strong><small>'+desc+'</small></span></button>').join('')+'</div>';
   }else if(screen==='history'){
    title='Histórico de sessões';
    if(selectedSessionId){
@@ -118,7 +118,7 @@ export async function renderPage({supabase,restaurant,box,esc,link}){
     }
    }
   }else if(onlineSelected){
-   const o=onlineSelected;title='Pedido #'+str(o.public_code).replace(/^ON-/,'');
+   const o=detail?.data?.order??onlineSelected;title='Pedido #'+str(o.public_code).replace(/^ON-/,'');
    out='<section class="iv-cash-card"><p class="iv-cash-caption">'+(o.fulfillment_type==='delivery'?'Delivery':'Retirada')+'</p><span class="iv-cash-big">'+money(o.total_cents)+'</span><div class="iv-cash-summary-lines">'+line('Pedido',o.public_code)+line('Situação',states[o.status]??o.status)+line('Pagamento',o.payment_status==='paid'?'Pago':(['rejected','cancelled','expired'].includes(o.status)?'Não recebido':'Pendente'))+line('Forma de pagamento',methodNames[o.payment_method]??o.payment_method??'—')+line('Data',date(o.created_at))+'</div></section>';
    if(detail?.error)out+=detailError(detail.error);
    else if(detail?.data){

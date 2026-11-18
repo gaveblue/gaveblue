@@ -305,7 +305,7 @@ export async function renderPage({supabase,restaurant,role,box,esc,link,embedded
   const availableActions=o=>o.status==='pending_acceptance'?(o.payment_method==='manual_pix'?['rejected']:['accepted','rejected']):o.status==='accepted'?['preparing','cancelled']:o.status==='preparing'?[o.fulfillment_type==='pickup'?'ready_for_pickup':'ready']:o.status==='ready'?['out_for_delivery']:o.status==='out_for_delivery'?['delivered']:o.status==='ready_for_pickup'?['picked_up']:[];
   let orderBusy=false,orderSignature='',orderChanging=false;
   const norm=v=>String(v??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-BR');
-  const filters=()=>{const search=norm(document.getElementById('iv-on-search-orders')?.value),mode=document.getElementById('iv-on-order-mode')?.value??'all',stage=document.getElementById('iv-on-order-stage')?.value??'active',source=document.getElementById('iv-on-order-source')?.value??'all';let visible=0;ordersArea.querySelectorAll('[data-on-filter]').forEach(row=>{const terminal=['delivered','picked_up','cancelled','rejected','expired'].includes(row.dataset.stage),dispatch=['ready','ready_for_pickup','out_for_delivery'].includes(row.dataset.stage);row.hidden=!(row.dataset.onFilter.includes(search)&&(mode==='all'||row.dataset.mode===mode)&&(stage==='all'||stage==='active'&&!terminal||stage==='finished'&&terminal||stage==='dispatch'&&dispatch)&&(source==='all'||(source==='staff')===(row.dataset.source==='staff')));if(!row.hidden)visible++});const empty=ordersArea.querySelector('[data-on-filter-empty]');if(empty)empty.hidden=visible!==0};
+  const filters=()=>{const search=norm(document.getElementById('iv-on-search-orders')?.value),mode=document.getElementById('iv-on-order-mode')?.value??'all',stage=document.getElementById('iv-on-order-stage')?.value??'active',source=document.getElementById('iv-on-order-source')?.value??'all';let visible=0;ordersArea.querySelectorAll('[data-on-filter]').forEach(row=>{const terminal=['delivered','picked_up','cancelled','rejected','expired'].includes(row.dataset.stage),dispatch=['ready','ready_for_pickup','out_for_delivery'].includes(row.dataset.stage);row.hidden=!(row.dataset.onFilter.includes(search)&&(mode==='all'||row.dataset.mode===mode)&&(stage==='all'||stage==='active'&&!terminal||stage==='finished'&&terminal||stage==='dispatch'&&dispatch)&&(source==='all'||source===row.dataset.source));if(!row.hidden)visible++});const empty=ordersArea.querySelector('[data-on-filter-empty]');if(empty)empty.hidden=visible!==0};
   for(const id of ['iv-on-search-orders','iv-on-order-mode','iv-on-order-stage','iv-on-order-source'])document.getElementById(id)?.addEventListener('input',filters);
   async function refreshOrders(silent=false){
    if(!ordersArea?.isConnected||orderBusy||silent&&(orderChanging||document.querySelector('dialog[open]')||ordersArea.querySelector('details[open]')))return;
@@ -315,12 +315,12 @@ export async function renderPage({supabase,restaurant,role,box,esc,link,embedded
    try{
     const result=await ops('list'),orders=result.orders??[],items=result.items??[];
     const signature=JSON.stringify(result);if(silent&&signature===orderSignature)return;orderSignature=signature;
-    const charges=new Map((result.manual_pix_charges??[]).map(x=>[x.order_id,x]));
+    const charges=new Map((result.manual_pix_charges??[]).map(x=>[x.order_id,x]));const staff=new Set(result.staff_order_ids??[]),originAvailable=result.origin_available===true;const sourceLabel=o=>staff.has(o.id)?'Atendimento':originAvailable?'Loja / outro canal':'Origem indisponível';
     let html='';
     for(const o of orders){
      const rows=items.filter(i=>i.order_id===o.id);
-     html+='<div class="iv-on-order" data-on-filter="'+esc(norm([o.public_code,o.customer_name,o.customer_phone,statuses[o.status]].join(' ')))+'" data-mode="'+esc(o.fulfillment_type)+'" data-stage="'+esc(o.status)+'" data-source="'+(String(o.source).includes('staff')?'staff':'other')+'"><div class="iv-on-row"><strong>'+esc(o.public_code)+'</strong><span class="iv-on-status">'+esc(statuses[o.status]??o.status)+'</span></div>';
-     html+='<p>'+esc(o.customer_name)+' · '+(o.fulfillment_type==='delivery'?'Delivery':'Retirada')+' · '+(String(o.source).includes('staff')?'Atendimento':'Loja / outro canal')+'</p>';
+     html+='<div class="iv-on-order" data-on-filter="'+esc(norm([o.public_code,o.customer_name,o.customer_phone,statuses[o.status]].join(' ')))+'" data-mode="'+esc(o.fulfillment_type)+'" data-stage="'+esc(o.status)+'" data-source="'+(staff.has(o.id)?'staff':originAvailable?'other':'unknown')+'"><div class="iv-on-row"><strong>'+esc(o.public_code)+'</strong><span class="iv-on-status">'+esc(statuses[o.status]??o.status)+'</span></div>';
+     html+='<p>'+esc(o.customer_name)+' · '+(o.fulfillment_type==='delivery'?'Delivery':'Retirada')+' · '+(sourceLabel(o))+'</p>';
      const address=o.delivery_address,addr=typeof address==='string'?address:address&&typeof address==='object'?[address.street??address.address,address.number??address.address_number,address.complement,address.neighborhood,address.city,address.state,address.reference].filter(v=>typeof v==='string'||typeof v==='number').join(', '):'';
      const fmt=v=>{try{return new Intl.DateTimeFormat('pt-BR',{dateStyle:'short',timeStyle:'short'}).format(new Date(v))}catch{return '—'}};
      html+='<details><summary>Itens e acompanhamento · '+rows.length+'</summary><p>Telefone: '+esc(o.customer_phone??'—')+'</p>'+(addr?'<p>Endereço: '+esc(addr)+'</p>':'')+(o.customer_note?'<p>Obs.: '+esc(o.customer_note)+'</p>':'')+rows.map(i=>'<p>'+esc(i.quantity)+'× '+esc(i.product_name)+(i.note?' · '+esc(i.note):'')+'</p>').join('')+[['Recebido',o.created_at],['Aceito',o.accepted_at],['Pronto',o.prepared_at],['Saiu para entrega',o.dispatched_at],['Finalizado',o.fulfilled_at]].filter(([,v])=>v).map(([label,v])=>'<p>'+label+': '+esc(fmt(v))+'</p>').join('')+'</details>';
@@ -339,18 +339,18 @@ export async function renderPage({supabase,restaurant,role,box,esc,link,embedded
     ordersArea.innerHTML=html?html+'<div class="iv-on-empty" data-on-filter-empty hidden>Nenhum pedido neste filtro.</div>':'<div class="iv-on-empty">'+icon('bag',24)+'<strong>Nenhum pedido por enquanto</strong><p>Os novos pedidos aparecerão aqui quando a loja começar a receber.</p></div>';filters();
     ordersArea.querySelectorAll('[data-status]').forEach(b=>b.onclick=async()=>{
      if(['rejected','cancelled','delivered','picked_up'].includes(b.dataset.status)&&!confirm('Confirma esta alteração?'))return;
-     if(orderChanging)return;orderChanging=true;b.disabled=true;
+     if(orderChanging||orderBusy)return;orderChanging=true;b.disabled=true;
      try{await ops('transition',{order_id:b.dataset.orderId,target:b.dataset.status});await refreshOrders()}
      catch(e){alert(e.message);b.disabled=false}finally{orderChanging=false}
     });
     ordersArea.querySelectorAll('[data-manual-pix-accept]').forEach(b=>b.onclick=async()=>{
      if(!confirm('Você conferiu no EXTRATO da conta que recebeu exatamente '+b.dataset.amount+'? O comprovante ou botão Já paguei não bastam. Ao confirmar, o pedido será ACEITO.'))return;
-     if(orderChanging)return;orderChanging=true;b.disabled=true;
+     if(orderChanging||orderBusy)return;orderChanging=true;b.disabled=true;
      try{await ops('accept_manual_pix',{order_id:b.dataset.manualPixAccept});await refreshOrders()}
      catch(e){alert(e.message);b.disabled=false}finally{orderChanging=false}
     });
     ordersArea.querySelectorAll('[data-online-pay]').forEach(b=>b.onclick=()=>{
-     if(orderChanging||document.getElementById('iv-online-confirm-pay'))return;
+     if(orderChanging||orderBusy||document.getElementById('iv-online-confirm-pay'))return;
      const host=document.createElement('div');ordersArea.append(host);host.innerHTML='<form id="iv-online-confirm-pay"><label>Forma de pagamento<select name="method" required><option value="pix">Pix</option><option value="cash">Dinheiro</option><option value="card">Cartão</option></select></label><p class="iv-on-hint">Confirme apenas o recebimento efetivamente realizado.</p><button type="submit">Registrar recebimento</button></form>';
      const form=host.querySelector('form'),entry=sheetifyForms([{id:form.id,label:'Registrar recebimento',title:'Pagamento',description:'Escolha a forma de recebimento.',fixedAction:true}])[0];if(!entry){host.remove();return}
      entry.trigger.hidden=true;const submit=entry.dialog.querySelector('[type=submit]');
@@ -360,7 +360,7 @@ export async function renderPage({supabase,restaurant,role,box,esc,link,embedded
       catch(err){showFormSheetError(form,err.message);submit.disabled=false}finally{orderChanging=false}
      };entry.trigger.click();
     });
-   }catch(e){ordersArea.textContent='Não foi possível consultar os pedidos: '+e.message}
+   }catch(e){orderSignature='';ordersArea.textContent='Não foi possível consultar os pedidos: '+e.message}
    finally{orderBusy=false;if(refreshButton){refreshButton.disabled=false;refreshButton.removeAttribute('aria-busy')}}
   }
   document.getElementById('iv-on-orders-refresh').onclick=()=>refreshOrders(false);

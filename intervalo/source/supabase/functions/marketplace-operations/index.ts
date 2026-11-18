@@ -115,11 +115,17 @@ Deno.serve(async req=>{
    }
    return answer({orders:orders??[],session,payments});
   }
+  let staff_order_ids:string[]=[];
+  let origin_available=true;
+  if(action==="list"&&ids.length){
+   const {data:events,error:originError}=await db.from("online_order_events").select("order_id").eq("restaurant_id",restaurant_id).eq("event","created").contains("details",{origin:"garcom"}).in("order_id",ids).limit(500);
+   if(originError)origin_available=false;else staff_order_ids=[...new Set((events??[]).map(e=>String(e.order_id)))];
+  }
   let manual_pix_charges:unknown[]=[];
   if(action==="list"&&ids.length){
    const {data:charges}=await db.from("online_manual_pix_charges").select("order_id,expires_at,reported_at,state").eq("restaurant_id",restaurant_id).in("order_id",ids);
    manual_pix_charges=charges??[];
   }
-  return answer({orders:orders??[],items,manual_pix_charges,preparing_since});
+  return answer({orders:orders??[],items,manual_pix_charges,preparing_since,staff_order_ids,origin_available});
  }catch{return fail("Serviço temporariamente indisponível",503)}
 });
