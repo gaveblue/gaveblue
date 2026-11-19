@@ -1,5 +1,11 @@
 # Intervalo — CHANGELOG
 
+## 1.2.0-rc.15 — 2026-11-19 · Cupom térmico monocromático
+
+- Identidade Intervalo em preto e branco, colunas de itens e valores, observações com hierarquia, total em destaque, QR Pix real junto ao pagamento quando disponível; sem fotos de produtos.
+- Aplicado ao HTML e PNG de impressão; preservados modelos personalizados, papel 58/80 mm e cálculos existentes. Sem mudanças de banco ou pagamentos.
+- Revisão estrutural das alterações; teste de navegador e impressão física pendentes.
+
 ## 1.2.0-rc.14 — 2026-11-18 · Gestão, central de pedidos e padronização
 
 - Gestão compacta e indicadores de pedidos presenciais, mesas, prontos para servir, a receber, externos, estoque e equipe, com base no recorte disponível. Formulários de dados e equipe em Bottom Sheets com ações no rodapé e validação preservada.

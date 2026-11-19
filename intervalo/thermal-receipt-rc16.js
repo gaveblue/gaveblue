@@ -43,6 +43,8 @@ export function extractThermalRows(root){
  if(!root)return rows;
  for(const el of Array.from(root.children)){
   const tag=el.tagName;
+  if(el.classList?.contains('iv-ticket-brand')){rows.push({kind:'brand',text:'Intervalo',bold:true});continue}
+  if(el.classList?.contains('iv-ticket-qr')){rows.push({kind:'qr-slot'});continue}
   if(tag==='HR'){rows.push({kind:'rule'});continue}
   if(tag==='H1'||tag==='H2'){rows.push({kind:'center',bold:true,title:true,text:normalizeText(textWithLines(el))});continue}
   if(tag==='TABLE'){
@@ -50,13 +52,14 @@ export function extractThermalRows(root){
     const cells=Array.from(tr.querySelectorAll('td,th'));
     if(!cells.length)continue;
     if(cells.length===1)rows.push({kind:'heading',text:normalizeText(textWithLines(cells[0]))});
-    else rows.push({kind:'pair',left:normalizeText(textWithLines(cells[0])),right:normalizeText(textWithLines(cells[1]))});
+    else if(tr.classList.contains('iv-ticket-labels'))rows.push({kind:'pair',bold:true,left:normalizeText(textWithLines(cells[0])),right:normalizeText(textWithLines(cells[1]))});
+    else {const left=normalizeText(textWithLines(cells[0])).split('\n');rows.push({kind:'product',bold:true,left:left.shift()||'',notes:left,right:normalizeText(textWithLines(cells[1]))});}
    }
    continue;
   }
   if(el.classList?.contains('totals')){
    for(const p of Array.from(el.querySelectorAll('p'))){
-    rows.push({kind:'right',bold:!!p.querySelector('b,strong'),text:normalizeText(textWithLines(p))});
+    const spans=p.querySelectorAll(':scope > span');if(spans.length===2)rows.push({kind:p.classList.contains('iv-total-major')?'major':'pair',bold:p.classList.contains('iv-total-major'),left:normalizeText(textWithLines(spans[0])),right:normalizeText(textWithLines(spans[1]))});else rows.push({kind:'right',bold:!!p.querySelector('b,strong'),text:normalizeText(textWithLines(p))});
    }
    continue;
   }
@@ -108,6 +111,11 @@ function buildCanvas(doc,rows,profile){
  const fontHeight=(kind)=>kind==='small'?Math.max(19,Math.round(base*.91)):kind==='center'?Math.round((base+1)*1.35):Math.round(base*1.32);
  function processRow(row,y,paint){
   const kind=row.kind;
+  if(kind==='qr-slot')return 0;
+  if(kind==='brand'){
+   const size=Math.min(Math.round(base*1.9),Math.floor(contentWidth/4.5));ctx.font='italic 900 '+size+'px Arial,Helvetica,sans-serif';ctx.textBaseline='top';const w=ctx.measureText(row.text).width,x=(width-w)/2;
+   if(paint){ctx.fillStyle='#000';ctx.fillText(row.text,x,y);ctx.beginPath();ctx.lineWidth=3;ctx.moveTo(x+w*.24,y+size+1);ctx.quadraticCurveTo(x+w*.52,y+size+9,x+w*.86,y+size-1);ctx.strokeStyle='#000';ctx.stroke();ctx.lineWidth=1}return size+15;
+  }
   if(kind==='qr'){
    const n=row.matrix.length,unit=Math.max(1,Math.floor(Math.min(contentWidth,profile.paper===80?360:300)/(n+8))),size=(n+8)*unit,x=Math.floor((width-size)/2),top=y+6;
    if(paint){ctx.fillStyle='#fff';ctx.fillRect(x,top,size,size);ctx.fillStyle='#000';for(let r=0;r<n;r++)for(let col=0;col<n;col++)if(row.matrix[r][col])ctx.fillRect(x+(col+4)*unit,top+(r+4)*unit,unit,unit)}
@@ -123,6 +131,14 @@ function buildCanvas(doc,rows,profile){
   ctx.fillStyle='#111';
   const lh=fontHeight(kind);
   const split=String(row.text||'').split('\n');
+  if(kind==='major'){
+   ctx.font='700 '+Math.round(base*1.20)+'px Arial,Helvetica,sans-serif';const inner=contentWidth-12,amount=wrapLine(ctx,row.right,inner),available=inner-ctx.measureText(amount[0]).width-8,stacked=available<=60||amount.length>1;const left=wrapLine(ctx,row.left,stacked?inner:available);const h=Math.round(base*1.55),count=stacked?left.length+amount.length:Math.max(left.length,amount.length);
+   if(paint){ctx.strokeStyle='#000';ctx.strokeRect(side,y+1,contentWidth,count*h+12);left.forEach((v,i)=>ctx.fillText(v,side+5,y+7+i*h));amount.forEach((v,i)=>ctx.fillText(v,width-side-5-ctx.measureText(v).width,y+7+(stacked?left.length+i:i)*h));}return count*h+20;
+  }
+  if(kind==='product'){
+   const rw=Math.round(contentWidth*.43),lw=contentWidth-rw-8;const left=wrapLine(ctx,row.left,lw),right=String(row.right||'').split('\n').flatMap(v=>wrapLine(ctx,v,rw));const main=Math.max(left.length,right.length);const nf=cssFont('small',false);ctx.font=nf;const notes=(row.notes||[]).flatMap(v=>wrapLine(ctx,v,contentWidth-12));const nh=fontHeight('small');
+   if(paint){ctx.font=font;left.forEach((v,i)=>ctx.fillText(v,side,y+i*lh));right.forEach((v,i)=>ctx.fillText(v,width-side-ctx.measureText(v).width,y+i*lh));ctx.font=nf;notes.forEach((v,i)=>ctx.fillText(v,side+10,y+main*lh+i*nh));ctx.beginPath();ctx.setLineDash([2,4]);ctx.strokeStyle='#000';ctx.moveTo(side,y+main*lh+notes.length*nh+4);ctx.lineTo(width-side,y+main*lh+notes.length*nh+4);ctx.stroke();ctx.setLineDash([]);}return main*lh+notes.length*nh+12;
+  }
   if(kind==='pair'){
    const rightWidth=Math.round(contentWidth*.38);
    const leftWidth=contentWidth-rightWidth-8;
@@ -184,10 +200,11 @@ export function openThermalReceipt({title,content,popup:existingPopup,warning=''
  '#iv-receipt-paper{position:absolute;left:-9999px;top:0;visibility:hidden;width:58mm;margin:0;padding:3mm 4.5mm;color:#111;background:#fff;font:12px/1.3 Arial,sans-serif}',
  '#iv-receipt-paper h1{font-size:16px;text-align:center;margin:1mm 0}#iv-receipt-paper p{margin:1.5mm 0}#iv-receipt-paper hr{border:0;border-top:1px dashed #555;margin:2mm 0}',
  '#iv-receipt-paper .item{font-weight:700;margin:2mm 0}#iv-receipt-paper .note{font-weight:400;display:block}#iv-receipt-paper table{width:100%;border-collapse:collapse;table-layout:fixed}',
- '#iv-receipt-paper td{padding:1mm .4mm;border-bottom:1px dotted #bbb;overflow-wrap:anywhere}#iv-receipt-paper td:last-child{text-align:right}#iv-receipt-paper .totals{text-align:right}',
+ '#iv-receipt-paper td{padding:1mm .4mm;border-bottom:1px dotted #bbb;overflow-wrap:anywhere}#iv-receipt-paper td:last-child{text-align:right;width:43%;font-weight:700}#iv-receipt-paper td:first-child{font-weight:700}#iv-receipt-paper td small{font-weight:400}#iv-receipt-paper td[colspan]{width:auto;text-align:left}#iv-receipt-paper .totals{text-align:right}',
  '@media print{body{background:#fff!important;margin:0!important;padding:0!important;width:var(--iv-pr-width,58mm)!important;height:auto!important}',
  'body>*:not(#iv-receipt-paper){display:none!important}#iv-receipt-paper{display:block!important;position:static!important;left:auto!important;visibility:visible!important;width:var(--iv-pr-width,58mm)!important;max-width:var(--iv-pr-width,58mm)!important;padding:3mm 4.5mm!important;margin:0!important;height:auto!important}',
  '@page{margin:0}}'
+, ".iv-ticket-brand{font-size:2em;font-weight:900;font-style:italic;letter-spacing:-.05em;text-align:center;color:#000;line-height:1.2;margin:0 auto 8px}.iv-ticket-brand:after{content:\"\";display:block;width:42%;height:4px;margin:0 auto;border-bottom:3px solid #000;border-radius:0 0 65% 45%}.iv-ticket-labels th{font-weight:700;text-align:left;border-bottom:1px solid #000}.iv-ticket-labels th:last-child{text-align:right;width:43%}.iv-total-line,.iv-total-major{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:4px;text-align:left}.iv-total-major{border:1px solid #000;padding:4px;font-size:1.2em;font-weight:800}.iv-ticket-qr:empty{display:none}"
  ].join('');
  const html='<!doctype html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+escapeText(title||'Cupom Intervalo')+'</title><style>'+css+'</style><style id="iv-page-size"></style></head><body>'
   +'<header class="iv-pr-header"><div><b>Impressão térmica</b><small>Intervalo · Cupom configurável</small></div><small id="iv-pr-paper-label">58 mm</small></header>'
@@ -207,12 +224,12 @@ export function openThermalReceipt({title,content,popup:existingPopup,warning=''
  const byId=id=>doc.getElementById(id);
  const rows=extractThermalRows(byId('iv-receipt-paper'));
  if(Array.isArray(qrMatrix)&&qrMatrix.length>=21&&qrMatrix.length<=177&&qrMatrix.every(row=>Array.isArray(row)&&row.length===qrMatrix.length&&row.every(v=>typeof v==='boolean'))){
-  rows.push({kind:'qr',matrix:qrMatrix});
+  const slot=rows.findIndex(row=>row.kind==='qr-slot');if(slot>=0)rows.splice(slot,1,{kind:'qr',matrix:qrMatrix});else rows.push({kind:'qr',matrix:qrMatrix});
   const ns='http://www.w3.org/2000/svg',svg=doc.createElementNS(ns,'svg'),n=qrMatrix.length,background=doc.createElementNS(ns,'rect'),pixels=doc.createElementNS(ns,'path');
   svg.setAttribute('viewBox','0 0 '+(n+8)+' '+(n+8));svg.setAttribute('role','img');svg.setAttribute('aria-label','QR Code Pix');svg.setAttribute('shape-rendering','crispEdges');svg.setAttribute('style','display:block;width:36mm;max-width:100%;height:auto;margin:2mm auto');
   background.setAttribute('width',String(n+8));background.setAttribute('height',String(n+8));background.setAttribute('fill','white');
   let d='';for(let r=0;r<n;r++)for(let col=0;col<n;col++)if(qrMatrix[r][col])d+='M'+(col+4)+' '+(r+4)+'h1v1h-1z';
-  pixels.setAttribute('d',d);pixels.setAttribute('fill','black');svg.append(background,pixels);byId('iv-receipt-paper').append(svg);
+  pixels.setAttribute('d',d);pixels.setAttribute('fill','black');svg.append(background,pixels);const target=byId('iv-receipt-paper');const qrSlot=target.querySelector('.iv-ticket-qr');if(qrSlot)qrSlot.replaceWith(svg);else target.append(svg);
  }
  let profile=getThermalProfile();
  const names={paper:'iv-pr-paper',scale:'iv-pr-scale',margin:'iv-pr-margin',feed:'iv-pr-feed'};
