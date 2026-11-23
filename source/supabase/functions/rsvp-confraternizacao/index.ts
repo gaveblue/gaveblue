@@ -96,7 +96,7 @@ Deno.serve(async (req: Request) => {
     if (action === "search") {
       const key = norm(body.query);
       const terms=key.split(" ").filter(Boolean);
-      if (terms.length<2 || terms[0].length<2 || terms.slice(1).join(" ").length<3) {
+      if (terms.length<2 || terms[0].length<2 || terms[terms.length-1].length<3) {
         return json({ok:true,results:[]},200,origin);
       }
       const {data,error}=await db.rpc("rsvp_busca_rapida",{
