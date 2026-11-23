@@ -35,6 +35,42 @@ function initGuest() {
   const searchWrap = $("guest-search-wrap");
   const boot = $("invite-boot");
 
+  // In mobile in-app browsers the virtual keyboard may overlay position:fixed.
+  // Anchor the sheet to the *visible* viewport instead of the layout viewport.
+  let viewportFrame = 0;
+  function syncSheetViewport() {
+    const viewport = window.visualViewport;
+    const visibleHeight = Math.max(160, Math.round(viewport?.height || window.innerHeight));
+    const visibleTop = Math.max(0, Math.round(viewport?.offsetTop || 0));
+    sheet.style.setProperty("--rsvp-visible-height", visibleHeight + "px");
+    sheet.style.setProperty("--rsvp-visible-top", visibleTop + "px");
+    if (!sheet.classList.contains("hidden")) {
+      const active = document.activeElement;
+      if (active && sheet.contains(active) && (active.tagName === "INPUT" || active.tagName === "TEXTAREA")) {
+        active.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "instant" });
+      }
+    }
+  }
+  function requestViewportSync() {
+    if (viewportFrame) cancelAnimationFrame(viewportFrame);
+    viewportFrame = requestAnimationFrame(() => {
+      viewportFrame = 0;
+      syncSheetViewport();
+    });
+  }
+  window.visualViewport?.addEventListener("resize", requestViewportSync);
+  window.visualViewport?.addEventListener("scroll", requestViewportSync);
+  window.addEventListener("resize", requestViewportSync);
+  document.addEventListener("focusin", event => {
+    if (!sheet.contains(event.target)) return;
+    requestViewportSync();
+    if (event.target.tagName === "INPUT" || event.target.tagName === "TEXTAREA") {
+      setTimeout(requestViewportSync, 120);
+      setTimeout(requestViewportSync, 320);
+    }
+  });
+  requestViewportSync();
+
   function toggleStage(stage) {
     show("guest-identify", stage === "identify");
     show("guest-companion", stage === "companion");
@@ -51,6 +87,7 @@ function initGuest() {
     toggleStage(stage);
     input.blur();
     show("rsvp-sheet", true);
+    syncSheetViewport();
     sheet.setAttribute("aria-hidden", "false");
     document.body.classList.add("rsvp-sheet-open");
     requestAnimationFrame(() => {
