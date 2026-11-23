@@ -1,6 +1,6 @@
 import {groupProducts,chooseVariant} from './product-variants-rc28.js?v=1.1.0-rc.28';
 import {icon} from './ui-icons.js?v=1.0.0-rc.1';
-import {menuButtonMarkup} from './global-navigation-rc7.js?v=1.2.0-rc.7';
+import {menuButtonMarkup} from './global-navigation-rc7.js?v=1.2.0-rc.17';
 import {openWaiterDelivery} from './waiter-delivery-rc17.js?v=1.1.0-rc.29';
 // Intervalo 0.9.7 — painel responsivo do garçom; operações reais via restaurant-core.
 // A mesa pode ter várias rodadas em estágios diferentes. Uma pronta para servir tem prioridade.
