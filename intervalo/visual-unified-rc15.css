@@ -10,7 +10,7 @@ body.iv-unified .op-btn:not(.alt),
 body.iv-unified .p-btn:not(.alt):not(.danger),
 body.iv-unified .k-reload,
 body.iv-unified .k-card button:not(.secondary),
-body.iv-unified .c-confirm{background:linear-gradient(112deg,#ff920b,#ff6900);color:#fff;border:0;border-radius:12px;box-shadow:none}
+body.iv-unified .c-confirm{background:var(--iv-action,#c2410c);color:#fff;border:0;border-radius:12px;box-shadow:none}
 body.iv-unified .iv-btn.secondary,
 body.iv-unified .op-btn.alt,
 body.iv-unified .p-btn.alt{background:#fff;color:#39495d;border:1px solid #e3e8ee;border-radius:12px}
@@ -45,7 +45,7 @@ body.iv-unified .c-session,body.iv-unified .c-details,body.iv-unified .c-payment
 body.iv-unified .c-queue-item{border-radius:11px}
 body.iv-unified .c-total-main strong{color:#ed7100}
 body.iv-unified .iv-kds-ticket{border-radius:15px;border-color:#e8edf3}
-body.iv-unified .iv-kds-next{background:linear-gradient(110deg,#ff920b,#ff7100);color:#fff;border-radius:10px}
+body.iv-unified .iv-kds-next{background:var(--iv-action,#c2410c);color:#fff;border-radius:10px}
 body.iv-unified .iv-kds-lanehead{border-radius:12px}
 body.iv-unified .iv-kds-item{border-color:#edf0f5}
 /* Relatórios: indicadores reais, mantendo valores vindos da API */
@@ -61,7 +61,7 @@ body.iv-unified .iv-restaurants .links>a:first-child{background:#fff0e4;border-c
 /* Perfis e formulários de entrada */
 body.iv-unified .formbox.panel{border-radius:19px;box-shadow:0 9px 28px #26364a0b;max-width:480px;margin:5vh auto 30px;padding:clamp(20px,3vw,31px)}
 body.iv-unified .formbox h1{letter-spacing:-.7px}
-body.iv-unified .formbox .formbtn{background:linear-gradient(110deg,#ff920b,#ff6900);border-radius:12px}
+body.iv-unified .formbox .formbtn{background:var(--iv-action,#c2410c);border-radius:12px}
 body.iv-unified .account-layout{max-width:680px;margin:auto}
 body.iv-unified .account-layout .securehint{background:#fff5e9;border-color:#ffe0bd;color:#91531b}
 body.iv-unified .account-layout .actionrow{gap:8px}
@@ -136,3 +136,7 @@ body.iv-unified .iv-restaurants .iv-rest-module-list>a{display:flex;align-items:
 body.iv-unified .iv-restaurants .iv-rest-no-modules{font-size:12px;color:#5f6e80}
 body.iv-unified .iv-restaurants .iv-rest-primary:focus-visible,body.iv-unified .iv-restaurants summary:focus-visible,body.iv-unified .iv-restaurants .iv-rest-module-list>a:focus-visible{outline:3px solid #b94b07;outline-offset:2px}
 @media(max-width:390px){body.iv-unified .iv-restaurants .iv-rest-module-list{grid-template-columns:1fr}}
+
+/* RC16: contraste das ações prioritárias nos painéis especializados. */
+body.iv-unified .iv-cash-primary,body.iv-unified .iv-cash-app .iv-cash-payment-trigger .iv-op-open{background:var(--iv-action,#c2410c);color:#fff}
+body.iv-unified .iv-cash-primary:hover,body.iv-unified .iv-cash-app .iv-cash-payment-trigger .iv-op-open:hover{background:var(--iv-action-hover,#9a3412)}
