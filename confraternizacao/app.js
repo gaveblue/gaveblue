@@ -11,10 +11,10 @@ const show = (id, visible) => $(id)?.classList.toggle("hidden", !visible);
 const fail = (element, message) => { const node = $(element); if (node) { node.textContent = message || ""; node.classList.toggle("hidden", !message); } };
 const datestr = (day) => { if (!day) return "A definir"; try { return new Intl.DateTimeFormat("pt-BR",{day:"2-digit",month:"long",year:"numeric"}).format(new Date(day + "T12:00:00")); } catch (_) { return day; } };
 const stamp = (iso) => iso ? new Intl.DateTimeFormat("pt-BR",{dateStyle:"short",timeStyle:"short",timeZone:"America/Sao_Paulo"}).format(new Date(iso)) : "—";
-async function request(action, data = {}, token = "") {
+async function request(action, data = {}, token = "", options = {}) {
   const resp = await fetch(ENDPOINT, { method: "POST", headers: {
     "Content-Type": "application/json", "apikey": KEY, ...(token ? { "Authorization": "Bearer " + token } : {})
-  }, body: JSON.stringify({ action, ...data }), cache: "no-store" });
+  }, body: JSON.stringify({ action, ...data }), cache: "no-store", signal: options.signal });
   const payload = await resp.json().catch(() => ({}));
   if (!resp.ok || !payload.ok) throw new Error(payload.error || "O serviço está indisponível. Tente novamente.");
   return payload;
@@ -25,7 +25,8 @@ function validSearch(s) {
 }
 function validFullName(s) { const words = String(s || "").trim().split(/\s+/).filter(Boolean); return words.length >= 2 && String(s).trim().length >= 5; }
 function initGuest() {
-  let event = null, selected = null, typedQuery = "", timer = null, searchSeq = 0, loading = false;
+  let event = null, selected = null, typedQuery = "", timer = null, searchSeq = 0, loading = false, searchAbort = null;
+  const searchCache = new Map();
   const input = $("employee-search");
   async function load() {
     try {
@@ -46,7 +47,15 @@ function initGuest() {
     }
   }
   const results = $("employee-results");
+  const searchWrap = $("guest-search-wrap");
   function clearResults() { results.innerHTML = ""; }
+  function setSearching(active) {
+    show("search-spinner", active);
+    searchWrap.classList.toggle("is-loading",active);
+    input.setAttribute("aria-busy",active ? "true" : "false");
+    results.classList.toggle("is-loading",active);
+    if (active) results.innerHTML = Array.from({length:2},()=>'<div class="search-placeholder" aria-hidden="true"><span class="placeholder-avatar"></span><span class="placeholder-lines"><span></span><span></span></span></div>').join("");
+  }
   function drawResults(items) {
     clearResults();
     if (!items.length) { results.innerHTML = '<div class="result-empty">Nenhum colaborador encontrado. Confira a grafia do nome.</div>'; return; }
@@ -77,26 +86,48 @@ function initGuest() {
   }
   input.addEventListener("input", () => {
     clearTimeout(timer);
+    if (searchAbort) { searchAbort.abort(); searchAbort = null; }
     searchSeq++;
     const current = input.value.trim();
     show("clear-search", !!current);
     clearResults();
+    setSearching(false);
     if (!validSearch(current)) {
       $("search-hint").textContent = "Digite seu nome e pelo menos 3 letras do sobrenome.";
       return;
     }
-    $("search-hint").textContent = "Buscando colaboradores...";
+    const key = norm(current);
+    if (searchCache.has(key)) {
+      $("search-hint").textContent = "Selecione seu nome para continuar.";
+      drawResults(searchCache.get(key));
+      return;
+    }
+    $("search-hint").textContent = "Buscando seu nome na lista...";
+    setSearching(true);
     const version = searchSeq;
     timer = setTimeout(async () => {
+      const controller = new AbortController();
+      searchAbort = controller;
       try {
-        const resp = await request("search", { query: current });
+        const resp = await request("search", { query: current }, "", { signal: controller.signal });
         if (version !== searchSeq) return;
-        $("search-hint").textContent = "Selecione seu nome para continuar.";
-        drawResults(resp.results || []);
+        const people = resp.results || [];
+        searchCache.set(key, people);
+        if (searchCache.size > 32) searchCache.delete(searchCache.keys().next().value);
+        setSearching(false);
+        $("search-hint").textContent = people.length
+          ? "Nome encontrado! Toque para continuar."
+          : "Não encontrou seu nome? Confira a grafia ou fale com a organização.";
+        drawResults(people);
       } catch (err) {
-        if (version === searchSeq) { $("search-hint").textContent = err.message; clearResults(); }
+        if (err.name === "AbortError" || version !== searchSeq) return;
+        setSearching(false);
+        clearResults();
+        $("search-hint").textContent = err.message || "Falha na busca. Tente novamente.";
+      } finally {
+        if (searchAbort === controller) searchAbort = null;
       }
-    }, 320);
+    }, 175);
   });
   $("clear-search").addEventListener("click", () => { input.value = ""; input.dispatchEvent(new Event("input")); input.focus(); });
   $("change-person").addEventListener("click", () => {
@@ -120,7 +151,8 @@ function initGuest() {
   $("confirm-button").addEventListener("click", async () => {
     if (!selected || !typedQuery || !choice() || loading) return;
     loading = true; updateButton(); fail("guest-error", "");
-    $("confirm-button").textContent = "Salvando sua confirmação...";
+    $("confirm-button").classList.add("is-loading");
+    $("confirm-button").innerHTML = '<span class="spinner" aria-hidden="true"></span> Registrando sua presença...';
     try {
       const resp = await request("confirm", {
         colaborador_id: selected.id, query: typedQuery, acompanhante: choice() === "yes", acompanhante_nome: $("companion-name").value.trim()
@@ -134,7 +166,7 @@ function initGuest() {
     } catch (err) {
       fail("guest-error", err.message);
       $("confirm-button").innerHTML = 'Confirmar presença <i data-lucide="arrow-up-right"></i>'; icons();
-    } finally { loading = false; updateButton(); }
+    } finally { loading = false; updateButton(); $("confirm-button").classList.remove("is-loading"); }
   });
   load(); icons();
 }
