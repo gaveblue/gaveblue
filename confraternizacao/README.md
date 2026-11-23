@@ -96,3 +96,11 @@ Implementação isolada do convite corporativo GaveBlue, sem alterações nos ap
 - A data agora tem affordance e link de adicionar lembrete ao Google Agenda. O lembrete começa no horário oficial 15h00 em America/Sao_Paulo e tem janela técnica de 15 minutos, com descrição explícita de que o horário de encerramento não foi informado. O evento não tem sua duração presumida.
 - Nova folha de estilo `guest-v10.css?v=10` carregada somente na página do convidado; `app.js?v=10`. Painel administrativo não alterado.
 - QA estático: JS sintaticamente válido; HTML balanceado; IDs únicos, correspondência das referências; CSS equilibrado; banco conferido com evento aberto, 83 cadastrados e 1 presença preservada. Navegador externo não verificado.
+
+## Versão visual v15 — 23/11/2026
+- Título em duas linhas exatas: "Você foi convocado para nossa" e "Confraternização 2026", com tamanho adaptativo no celular; mantém oscilação verde/dourado discreta na segunda linha.
+- Cronômetro em cartão verde com 4 divisões em fundo verde-escuro: dias, horas, minutos, segundos. Números atualizados a cada segundo calculados da data/hora do evento (12/12/2026, 15h00, UTC-03:00); ao chegar a zero muda para "O grande dia chegou!" e para de contar. Sem números estáticos e sem acréscimo de backend/planos pagos.
+- Ficha do evento menor: data/hora lado a lado, localização em grupo centralizado horizontalmente com link do mapa. Nenhum botão/integração de calendário foi reintroduzido.
+- Animação, marcas, descrição institucional, prazo RSVP 30/11 e confirmação em bottom sheet preservados.
+- Cache-busting assets v15, atualização do caminho padrão e de convite-atualizado.html; também URL única convite-v15.html para evitar cache de HTML antigo.
+- Verificações estáticas: HTML balanceado, IDs únicos, referências do JS presentes, sintaxe JS válida, CSS com chaves equilibradas; teste de fórmula 23/11 às 20h BRT → 18 dias e 19 horas para 12/12 às 15h.
