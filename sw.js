@@ -21,7 +21,13 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys()
-      .then((keys) => Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))))
+      // Esta SW pertence ao site raiz: não apagar caches de outros aplicativos.
+      .then((keys) => Promise.all(keys.filter((key) => key.startsWith('central-registros-static-') && key !== CACHE_NAME).map((key) => caches.delete(key))))
+      .then(async () => {
+        const cache = await caches.open(CACHE_NAME);
+        const stored = await cache.keys();
+        await Promise.all(stored.filter((r) => new URL(r.url).pathname.startsWith('/confraternizacao/')).map((r) => cache.delete(r)));
+      })
       .then(() => self.clients.claim())
   );
 });
@@ -35,6 +41,13 @@ self.addEventListener('fetch', (event) => {
 
   const requestUrl = new URL(request.url);
   if (requestUrl.origin !== self.location.origin) {
+    return;
+  }
+
+  // RSVP tem dados mutáveis e não é PWA: jamais usar cópias antigas ou fallback
+  // do site principal para esta pasta. Isso não altera os demais módulos.
+  if (requestUrl.pathname.startsWith('/confraternizacao/')) {
+    event.respondWith(fetch(request, { cache: 'no-store' }));
     return;
   }
 
