@@ -197,3 +197,37 @@
   .guest-page .guest-hero h1 .animated-event-title{animation:none;color:#0c7138}
   .guest-page .event-calendar-link{transition:none}
 }
+
+/* v11 — mensagem centralizada, unificada e com ritmo vertical compacto */
+.guest-page .guest-hero {
+  padding-top: 15px;
+  padding-bottom: 12px;
+}
+.guest-page .guest-hero h1 {
+  margin: 9px auto 5px;
+}
+.guest-page .guest-hero .guest-message {
+  display: block;
+  max-width: 465px;
+  padding: 0 9px;
+  margin: 0 auto;
+  text-align: center;
+}
+.guest-page .guest-hero .guest-message p {
+  margin: 0;
+  color: #526b58;
+  font-size: 12.5px;
+  line-height: 1.48;
+  font-weight: 450;
+  text-wrap: pretty;
+}
+.guest-page .guest-hero .guest-message p:first-child {
+  color: #526b58;
+  font-weight: 450;
+}
+@media (max-width: 700px) {
+  .guest-page .guest-hero { padding-top: 13px; padding-bottom: 10px; }
+  .guest-page .guest-hero h1 { margin: 7px auto 5px; }
+  .guest-page .guest-hero .guest-message { max-width: 410px; padding: 0 6px; }
+  .guest-page .guest-hero .guest-message p { font-size: 12px; line-height: 1.45; }
+}
