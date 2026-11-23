@@ -86,3 +86,13 @@ Implementação isolada do convite corporativo GaveBlue, sem alterações nos ap
 - Corrigido posicionamento do bottom sheet ao abrir teclado Android: usa `window.visualViewport.height` e `offsetTop`, recalcula em resize/scroll/foco e limita altura do painel à área visível, permitindo rolagem interna da busca.
 - Assets com cache-busting `?v=9`; sem alteração nos cadastros, confirmados ou backend.
 - Conferência: assets presentes na árvore do GitHub, URL do Maps correta, JavaScript compilado, identificadores HTML consistentes e CSS sem desequilíbrio de chaves. O comportamento específico do teclado deverá ser validado no aparelho, pois não há teste Android real disponível neste ambiente.
+
+## Convite v10 · 23/11/2026
+- Pesquisa de inspiração em convites digitais mobile e páginas RSVP minimalistas: The Details, Avenly Arc e documentação de interação do Google Calendar.
+- O texto “Confraternização 2026” no título oscila discretamente entre verde institucional e amarelo-ocre legível (9 s); `prefers-reduced-motion` desativa a animação.
+- Subtítulo exato com dois parágrafos institucionais: “Convidamos vocês colaboradores, parceiros e amigos para a nossa confraternização.” e “Será um momento especial para celebrarmos as conquistas, fortalecer os laços e renovar as energias para novos desafios.” 
+- A descrição foi atualizada na tabela `rsvp_eventos` e renderizada com parágrafos por `textContent`, sem perder a edição pelo painel administrativo.
+- Faixas decorativas reposicionadas para cantos controlados; removidas faixas inferiores que atravessavam o rodapé, substituídas por pequeno traço verde/amarelo no rodapé.
+- A data agora tem affordance e link de adicionar lembrete ao Google Agenda. O lembrete começa no horário oficial 15h00 em America/Sao_Paulo e tem janela técnica de 15 minutos, com descrição explícita de que o horário de encerramento não foi informado. O evento não tem sua duração presumida.
+- Nova folha de estilo `guest-v10.css?v=10` carregada somente na página do convidado; `app.js?v=10`. Painel administrativo não alterado.
+- QA estático: JS sintaticamente válido; HTML balanceado; IDs únicos, correspondência das referências; CSS equilibrado; banco conferido com evento aberto, 83 cadastrados e 1 presença preservada. Navegador externo não verificado.
