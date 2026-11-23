@@ -15,40 +15,44 @@ const route=(id,label,symbol,required=id,path=id)=>({id,label,symbol,required,ro
 export function menuGroups(ctx){
  const can=ctx.can,manage=can('gestao');
  const groups=[
- ['Principal',[management('visao','Visão geral','dashboard'),management('pedidos','Pedidos','bag','vendas','pedidos')]],
- ['Operação',[route('mesas','Mesas','table','gestao'),route('garcom','Garçom','utensils'),route('cozinha','Cozinha','chef'),route('caixa','Caixa','register')]],
- ['Gerenciamento',[management('produtos','Produtos','package','produtos'),management('estoque','Estoque','layers','estoque'),route('relatorios','Relatórios','chart','gestao')]],
- ['Canais de venda',[route('catalogo','Cardápio digital','receipt','gestao','catalogo?aba=publicacao'),management('vitrine','Loja online','store','vendas','vitrine'),...(!manage?[route('cardapio','Consultar cardápio','receipt','cardapio')]:[])]],
- ['Restaurante',[management('dados','Dados do restaurante','store','dados'),management('horarios','Horários de funcionamento','clock','vendas','horarios'),management('entregas','Entrega e retirada','bike','vendas','entregas'),management('pagamentos','Formas de pagamento','wallet','vendas','pagamentos'),route('impressao','Impressão','printer','gestao'),management('equipe','Equipe','users','equipe'),...(ctx.role==='master'?[management('acessos','Permissões','shield','acessos')]:[])]]
+ ['Acesso rápido',[management('visao','Início','dashboard'),management('pedidos','Pedidos online','bag','vendas','pedidos'),route('relatorios','Relatórios','chart','gestao')],false],
+ ['Operação',[route('garcom','Garçom','utensils'),route('cozinha','Cozinha','chef'),route('caixa','Caixa','register'),route('mesas','Administrar mesas','table','gestao'),...(!manage?[route('cardapio','Consultar cardápio','receipt','cardapio')]:[])],true],
+ ['Produtos e cardápio',[management('produtos','Produtos','package','produtos'),route('categorias','Categorias','layers','gestao','catalogo?aba=categorias'),route('adicionais','Adicionais','plus','gestao','catalogo?aba=adicionais'),route('catalogo','Cardápio digital','receipt','gestao','catalogo?aba=publicacao')],true],
+ ['Estoque',[management('estoque','Insumos','layers','estoque'),route('fichas','Fichas técnicas','clipboard','gestao','estoque?aba=fichas'),route('historico','Movimentações','clock','gestao','estoque?aba=historico')],true],
+ ['Loja online',[management('vitrine','Vitrine','store','vendas','vitrine'),management('entregas','Entrega e retirada','bike','vendas','entregas'),management('horarios','Horários','clock','vendas','horarios'),management('pagamentos','Pagamentos online','wallet','vendas','pagamentos')],true],
+ ['Configurações',[management('dados','Dados do restaurante','store','dados'),management('equipe','Equipe','users','equipe'),...(ctx.role==='master'?[management('acessos','Permissões','shield','acessos')]:[]),route('impressao','Impressão','printer','gestao')],true]
  ];
- return groups.map(([label,rows])=>[label,rows.filter(x=>can(x.required))]).filter(([,rows])=>rows.length);
+ return groups.map(([name,items,fold])=>[name,items.filter(x=>can(x.required)),fold]).filter(([,items])=>items.length);
 }
 export function currentMenuId(module,params){
  const get=k=>params?.get(k);
  if(module==='gestao'){const tab=get('tab')||'visao';return tab==='vendas'?(get('area')||'pedidos'):tab}
- if(module==='estoque')return get('aba')==='produtos'?'produtos':'estoque';
- if(module==='catalogo')return ['categorias','adicionais'].includes(get('aba'))?'produtos':'catalogo';
+ if(module==='estoque'){const a=get('aba');return ['produtos','fichas','historico'].includes(a)?a:'estoque'}
+ if(module==='catalogo'){const a=get('aba');return ['categorias','adicionais'].includes(a)?a:'catalogo'}
  return module;
 }
 export function sidebarMarkup(ctx,{active='',local=false}={}){
  const name=String(ctx.restaurant.name||ctx.restaurant.slug||'Restaurante').replace(/(^|[-\s])\p{L}/gu,x=>x.replace('-',' ').toLocaleUpperCase('pt-BR'));
- const section=(label,items)=>'<div class="mg-v2-nav-title">'+esc(label)+'</div><nav class="mg-v2-nav" aria-label="'+esc(label)+'">'+items+'</nav>';
  const row=item=>{
   const selected=item.id===active,cls='mg-v2-navlink'+(selected?' active':''),inner=icon(item.symbol,18)+esc(item.label),current=selected?' aria-current="page"':'';
   if(local&&item.tab)return '<button type="button" class="'+cls+'" data-tab="'+esc(item.tab)+'"'+(item.area?' data-area="'+esc(item.area)+'"':'')+current+'>'+inner+'</button>';
   return '<a class="'+cls+'" href="'+esc(ctx.link('/'+ctx.restaurant.slug+'/'+item.route))+'"'+current+(item.id==='cardapio'?' target="_blank" rel="noopener"':'')+'>'+inner+'</a>';
  };
+ const section=(title,items,fold,selected)=>{
+  const content='<nav class="mg-v2-nav" aria-label="'+esc(title)+'">'+items+'</nav>';
+  return fold?'<details class="mg-v2-nav-group"'+(selected?' open':'')+'><summary class="mg-v2-nav-group-toggle"><span>'+esc(title)+'</span>'+icon('chevronDown',16)+'</summary>'+content+'</details>':'<div class="mg-v2-nav-title">'+esc(title)+'</div>'+content;
+ };
  return '<div class="mg-v2-brand">Intervalo</div><a class="mg-v2-restaurant" href="'+esc(ctx.link('/inicio'))+'" aria-label="Trocar restaurante"><span class="mg-rest-icon">'+icon('store',19)+'</span><span class="mg-rest-text">'+esc(name)+'<small>Trocar restaurante</small></span>'+icon('chevronRight',14)+'</a>'
-  +menuGroups(ctx).map(([label,items])=>section(label,items.map(row).join(''))).join('')
-  +section('Pessoal','<a class="mg-v2-navlink" href="'+esc(ctx.link('/minha-conta'))+'">'+icon('user',18)+'Minha conta</a><button type="button" class="mg-v2-navlink" data-iv-global-logout>'+icon('logout',18)+'Sair</button>')
+  +menuGroups(ctx).map(([title,items,fold])=>section(title,items.map(row).join(''),fold,items.some(x=>x.id===active))).join('')
+  +section('Conta','<a class="mg-v2-navlink" href="'+esc(ctx.link('/minha-conta'))+'">'+icon('user',18)+'Minha conta</a><button type="button" class="mg-v2-navlink" data-iv-global-logout>'+icon('logout',18)+'Sair</button>',false,false)
   +'<div class="mg-v2-side-spacer"></div><div class="mg-v2-side-user"><span class="mg-v2-avatar">'+esc(name.slice(0,2).toUpperCase())+'</span><span><strong>'+esc(name)+'</strong><small>'+esc(roleNames[ctx.role]??ctx.role)+'</small></span></div>';
 }
 export function menuButtonMarkup(){return '<button class="iv-global-menu-button" type="button" data-iv-global-menu aria-label="Abrir menu do restaurante" aria-haspopup="dialog">'+icon('menu',23)+'</button>'}
 export function installGlobalNavigation(ctx){
  // One drawer per document; remains intact while operational views redraw.
  if(document.getElementById('iv-global-nav-style'))return;
- const css=document.createElement('link');css.id='iv-global-nav-style';css.rel='stylesheet';css.href='/intervalo/global-navigation-rc7.css?v=1.2.0-rc.7';document.head.append(css);
- const managementStyle=document.createElement('link');managementStyle.rel='stylesheet';managementStyle.href='/intervalo/management-design-rc11.css?v=1.2.0-rc.1';document.head.append(managementStyle);
+ const css=document.createElement('link');css.id='iv-global-nav-style';css.rel='stylesheet';css.href='/intervalo/global-navigation-rc7.css?v=1.2.0-rc.16';document.head.append(css);
+ const managementStyle=document.createElement('link');managementStyle.rel='stylesheet';managementStyle.href='/intervalo/management-design-rc11.css?v=1.2.0-rc.16';document.head.append(managementStyle);
  let drawer=null,launcher=null,signingOut=false;
  const show=trigger=>{
   if(drawer?.open)return;
