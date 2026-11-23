@@ -1,6 +1,6 @@
 /* Intervalo Design System — 1.0.0 RC | todo o produto usa tokens compartilhados */
 :root{
- --iv-orange:#ff7600;--iv-orange-deep:#ed6100;--iv-orange-soft:#fff2e8;--iv-orange-border:#ffd8b8;
+ --iv-orange:#ff7600;--iv-orange-deep:#ed6100;--iv-action:#c2410c;--iv-action-hover:#9a3412;--iv-orange-soft:#fff2e8;--iv-orange-border:#ffd8b8;
  --iv-ink:#101827;--iv-muted:#728095;--iv-bg:#f7f8fb;--iv-card:#fff;--iv-border:#e9edf3;
  --iv-success:#16804c;--iv-success-soft:#eaf9f0;--iv-danger:#c53037;--iv-danger-soft:#fff0f0;
  --iv-radius:16px;--iv-shadow:0 5px 18px rgba(24,38,58,.045);
@@ -23,8 +23,8 @@ button:disabled{cursor:not-allowed!important;opacity:.55}
 .iv-header p{color:var(--iv-muted);font-size:13px;margin:0;line-height:1.6}
 .iv-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .iv-btn,.btn,.smallbtn,.p-btn,.op-btn,.x-btn,.c-preview{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:11px;padding:11px 15px;font-weight:750;font-size:12px;line-height:1.35;text-decoration:none;cursor:pointer}
-.iv-btn{border:1px solid var(--iv-orange);background:var(--iv-orange);color:#fff}
-.iv-btn:hover,.btn:hover{background:var(--iv-orange-deep);border-color:var(--iv-orange-deep)}
+.iv-btn{border:1px solid var(--iv-action);background:var(--iv-action);color:#fff}
+.iv-btn:hover,.btn:hover{background:var(--iv-action-hover);border-color:var(--iv-action-hover)}
 .iv-btn.secondary{border:1px solid var(--iv-border);background:#fff;color:var(--iv-ink)}
 .iv-btn.secondary:hover{border-color:var(--iv-orange-border);color:var(--iv-orange-deep);background:var(--iv-orange-soft)}
 .iv-btn.danger{background:#fff;color:var(--iv-danger);border-color:#f9c8cb}
