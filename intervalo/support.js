@@ -1,5 +1,5 @@
 import {icon} from './ui-icons.js?v=1.0.0-rc.1';
-import {menuButtonMarkup} from './global-navigation-rc7.js?v=1.2.0-rc.7';
+import {menuButtonMarkup} from './global-navigation-rc7.js?v=1.2.0-rc.17';
 import {sheetifyForms,showFormSheetError} from './operational-sheets-rc15.js?v=1.0.0-rc.15';
 import {mountPrintSettings} from './print-settings-rc2.js?v=1.2.0-rc.15';
 import {initProductPhotoForm,resolveProductPhoto} from './product-photo-rc19.js?v=1.1.0-rc.20';
