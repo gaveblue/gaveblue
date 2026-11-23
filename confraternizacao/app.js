@@ -25,117 +25,165 @@ function validSearch(s) {
 }
 function validFullName(s) { const words = String(s || "").trim().split(/\s+/).filter(Boolean); return words.length >= 2 && String(s).trim().length >= 5; }
 function initGuest() {
-  let event = null, selected = null, typedQuery = "", timer = null, searchSeq = 0, loading = false, searchAbort = null;
+  let event = null, selected = null, typedQuery = "", timer = null, searchSeq = 0;
+  let loading = false, searchAbort = null, sheetTimer = null, finished = false;
+  let lastTrigger = null, touchStartY = null;
   const searchCache = new Map();
   const input = $("employee-search");
+  const results = $("employee-results");
   const sheet = $("rsvp-sheet");
-  let sheetTimer = null;
-  let lastTrigger = null;
-  let finished = false;
-  const openSheet = (isReceipt = false, opener = null) => {
-    if (opener) lastTrigger = opener;
-    if (sheetTimer) clearTimeout(sheetTimer);
-    $("sheet-title").textContent = isReceipt ? "Sua confirmação" : "Confirmar presença";
-    show("guest-companion", !isReceipt);
-    show("guest-done", isReceipt);
+  const searchWrap = $("guest-search-wrap");
+  const boot = $("invite-boot");
+
+  function toggleStage(stage) {
+    show("guest-identify", stage === "identify");
+    show("guest-companion", stage === "companion");
+    show("guest-done", stage === "done");
+    $("sheet-title").textContent = stage === "identify"
+      ? "Encontre seu nome" : stage === "companion" ? "Sua presença" : "Sua confirmação";
+    $("rsvp-sheet-scroll").scrollTop = 0;
     fail("sheet-error", "");
+  }
+
+  function openSheet(stage, opener) {
+    if (opener) lastTrigger = opener;
+    clearTimeout(sheetTimer);
+    toggleStage(stage);
     input.blur();
     show("rsvp-sheet", true);
-    document.body.classList.add("rsvp-sheet-open");
     sheet.setAttribute("aria-hidden", "false");
+    document.body.classList.add("rsvp-sheet-open");
     requestAnimationFrame(() => {
       sheet.classList.add("is-open");
-      $("sheet-close").focus({preventScroll:true});
+      $("sheet-close").focus({ preventScroll: true });
     });
     icons();
-  };
-  const closeSheet = () => {
+  }
+
+  function closeSheet() {
     if (loading || sheet.classList.contains("hidden")) return;
     sheet.classList.remove("is-open");
-    document.body.classList.remove("rsvp-sheet-open");
     sheet.setAttribute("aria-hidden", "true");
-    if (sheetTimer) clearTimeout(sheetTimer);
-    sheetTimer = setTimeout(() => show("rsvp-sheet", false), 220);
-    const button = finished ? $("open-receipt") : lastTrigger;
-    if (button?.isConnected) button.focus({preventScroll:true});
-  };
+    document.body.classList.remove("rsvp-sheet-open");
+    clearTimeout(sheetTimer);
+    sheetTimer = setTimeout(() => show("rsvp-sheet", false), 300);
+    const backTo = finished ? $("open-receipt") : $("start-confirm");
+    (backTo || lastTrigger)?.focus({ preventScroll: true });
+  }
+
+  $("start-confirm").addEventListener("click", e => {
+    if (event?.status !== "aberto") return;
+    openSheet("identify", e.currentTarget);
+  });
+  $("open-receipt").addEventListener("click", e => {
+    if (finished) openSheet("done", e.currentTarget);
+  });
   $("sheet-close").addEventListener("click", closeSheet);
   $("sheet-backdrop").addEventListener("click", closeSheet);
   $("sheet-handle").addEventListener("click", closeSheet);
-  let touchStartY = null;
   $("sheet-handle").addEventListener("touchstart", e => {
     touchStartY = e.touches[0]?.clientY ?? null;
-  }, {passive:true});
+  }, { passive: true });
   $("sheet-handle").addEventListener("touchend", e => {
     if (touchStartY !== null && (e.changedTouches[0]?.clientY ?? 0) - touchStartY > 60) closeSheet();
     touchStartY = null;
-  }, {passive:true});
+  }, { passive: true });
+
   document.addEventListener("keydown", e => {
     if (sheet.classList.contains("hidden")) return;
     if (e.key === "Escape") { e.preventDefault(); closeSheet(); return; }
     if (e.key !== "Tab") return;
-    const focusables = [...sheet.querySelectorAll("button:not(:disabled),input:not(:disabled),a[href],select:not(:disabled),textarea:not(:disabled)")]
-      .filter(el => el.getClientRects().length && getComputedStyle(el).visibility !== "hidden");
-    if (!focusables.length) return;
-    const first = focusables[0], last = focusables[focusables.length - 1];
+    const focusable = [...sheet.querySelectorAll("button:not(:disabled),input:not(:disabled),a[href],select:not(:disabled),textarea:not(:disabled)")]
+      .filter(el => !el.closest(".hidden") && el.getClientRects().length && getComputedStyle(el).visibility !== "hidden");
+    if (!focusable.length) return;
+    const first = focusable[0], last = focusable[focusable.length - 1];
     if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
     else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
   });
-  $("open-receipt").addEventListener("click", e => {
-    if (finished) openSheet(true,e.currentTarget);
-  });
+
+  function updateEvent(data) {
+    event = data;
+    $("guest-description").textContent = event.descricao || "Vamos celebrar juntos!";
+    const day = event.data_evento ? String(event.data_evento).split("-") : null;
+    $("event-date").textContent = day && day.length === 3 ? day[2] + "/" + day[1] : "A definir";
+    $("event-time").textContent = event.horario ? String(event.horario).replace(":", "h") : "A definir";
+    $("event-place").textContent = event.local_evento || "Local a definir";
+    show("guest-cta", event.status === "aberto" && !finished);
+    show("guest-locked", event.status !== "aberto");
+  }
+
   async function load() {
+    show("boot-retry", false);
+    $("boot-title").textContent = "Carregando seu convite";
+    $("boot-message").textContent = "Preparando tudo para você...";
+    show("boot-progress", true);
+    boot.classList.remove("has-error");
+    const began = Date.now();
     try {
       const resp = await request("event");
-      event = resp.event;
-      $("guest-description").textContent = event.descricao || "Vamos celebrar juntos nossas conquistas!";
-      $("event-date").textContent = datestr(event.data_evento);
-      $("event-time").textContent = event.horario ? event.horario.replace(":", "h") : "A definir";
-      $("event-place").textContent = event.local_evento || "A definir";
-      show("guest-loading", false);
-      show("guest-locked", event.status !== "aberto");
-      show("guest-identify", event.status === "aberto");
+      updateEvent(resp.event);
+      const remaining = Math.max(0, 350 - (Date.now() - began));
+      if (remaining) await new Promise(resolve => setTimeout(resolve, remaining));
+      document.body.classList.remove("invite-booting");
+      boot.classList.add("is-finished");
+      setTimeout(() => show("invite-boot", false), 370);
       icons();
     } catch (err) {
-      show("guest-loading", false);
-      show("guest-locked", true);
-      fail("guest-error", err.message);
+      $("boot-title").textContent = "Não foi possível abrir o convite";
+      $("boot-message").textContent = "Verifique sua conexão e tente novamente.";
+      show("boot-progress", false);
+      show("boot-retry", true);
+      boot.classList.add("has-error");
+      icons();
     }
   }
-  const results = $("employee-results");
-  const searchWrap = $("guest-search-wrap");
-  function clearResults() { results.innerHTML = ""; }
+  $("boot-retry").addEventListener("click", load);
+
   function setSearching(active) {
     show("search-spinner", active);
-    searchWrap.classList.toggle("is-loading",active);
-    input.setAttribute("aria-busy",active ? "true" : "false");
-    results.classList.toggle("is-loading",active);
-    if (active) results.innerHTML = Array.from({length:2},()=>'<div class="search-placeholder" aria-hidden="true"><span class="placeholder-avatar"></span><span class="placeholder-lines"><span></span><span></span></span></div>').join("");
+    searchWrap.classList.toggle("is-loading", active);
+    input.setAttribute("aria-busy", active ? "true" : "false");
+    results.classList.toggle("is-loading", active);
+    if (active) {
+      results.innerHTML = Array.from({ length: 2 }, () => '<div class="search-placeholder" aria-hidden="true"><span class="placeholder-avatar"></span><span class="placeholder-lines"><span></span><span></span></span></div>').join("");
+    }
   }
+  function clearResults() { results.innerHTML = ""; }
+  function updateButton() {
+    const checked = document.querySelector('input[name="plus"]:checked')?.value || "";
+    show("companion-field", checked === "yes");
+    $("confirm-button").disabled = loading || !checked || (checked === "yes" && !validFullName($("companion-name").value));
+  }
+
   function drawResults(items) {
     clearResults();
-    if (!items.length) { results.innerHTML = '<div class="result-empty">Nenhum colaborador encontrado. Confira a grafia do nome.</div>'; return; }
-    items.forEach((person) => {
+    if (!items.length) {
+      results.innerHTML = '<div class="result-empty">Nenhum colaborador encontrado. Confira o nome e sobrenome.</div>';
+      return;
+    }
+    items.forEach(person => {
       const button = document.createElement("button");
       button.type = "button";
       button.className = "result-item";
-      button.setAttribute("role","option");
+      button.setAttribute("role", "option");
       button.innerHTML = '<span class="result-avatar"><i data-lucide="user-round"></i></span><strong></strong><i data-lucide="chevron-right"></i>';
       button.querySelector("strong").textContent = person.nome_completo;
       button.addEventListener("click", () => {
         selected = person;
         typedQuery = input.value.trim();
         $("selected-name").textContent = person.nome_completo;
-        document.querySelectorAll('input[name="plus"]').forEach(el => el.checked = false);
+        input.blur();
+        document.querySelectorAll('input[name="plus"]').forEach(r => { r.checked = false; });
         $("companion-name").value = "";
-        document.querySelectorAll('.option:has(input[value="yes"])').forEach(node => node.classList.remove("hidden"));
         $("confirm-button").innerHTML = 'Confirmar presença <i data-lucide="check"></i>';
+        document.querySelectorAll('.option:has(input[value="yes"])').forEach(node => node.classList.remove("hidden"));
         if (event && !event.permite_acompanhante) {
           document.querySelector('input[name="plus"][value="no"]').checked = true;
           document.querySelectorAll('.option:has(input[value="yes"])').forEach(node => node.classList.add("hidden"));
         }
         updateButton();
-        openSheet(false, button);
+        toggleStage("companion");
+        icons();
       });
       results.appendChild(button);
     });
@@ -145,15 +193,15 @@ function initGuest() {
     clearTimeout(timer);
     if (searchAbort) { searchAbort.abort(); searchAbort = null; }
     searchSeq++;
-    const current = input.value.trim();
-    show("clear-search", !!current);
+    const query = input.value.trim();
+    show("clear-search", !!query);
     clearResults();
     setSearching(false);
-    if (!validSearch(current)) {
+    if (!validSearch(query)) {
       $("search-hint").textContent = "Digite seu nome e pelo menos 3 letras do sobrenome.";
       return;
     }
-    const key = norm(current);
+    const key = norm(query);
     if (searchCache.has(key)) {
       $("search-hint").textContent = "Selecione seu nome para continuar.";
       drawResults(searchCache.get(key));
@@ -166,7 +214,7 @@ function initGuest() {
       const controller = new AbortController();
       searchAbort = controller;
       try {
-        const resp = await request("search", { query: current }, "", { signal: controller.signal });
+        const resp = await request("search", { query }, "", { signal: controller.signal });
         if (version !== searchSeq) return;
         const people = resp.results || [];
         searchCache.set(key, people);
@@ -174,58 +222,69 @@ function initGuest() {
         setSearching(false);
         $("search-hint").textContent = people.length
           ? "Nome encontrado! Toque para continuar."
-          : "Não encontrou seu nome? Confira a grafia ou fale com a organização.";
+          : "Não encontrou seu nome? Confira a grafia ou procure a organização.";
         drawResults(people);
       } catch (err) {
         if (err.name === "AbortError" || version !== searchSeq) return;
         setSearching(false);
         clearResults();
-        $("search-hint").textContent = err.message || "Falha na busca. Tente novamente.";
+        $("search-hint").textContent = err.message || "Não foi possível buscar. Tente novamente.";
       } finally {
         if (searchAbort === controller) searchAbort = null;
       }
     }, 175);
   });
-  $("clear-search").addEventListener("click", () => { input.value = ""; input.dispatchEvent(new Event("input")); input.focus(); });
+  $("clear-search").addEventListener("click", () => {
+    input.value = "";
+    input.dispatchEvent(new Event("input"));
+    input.focus();
+  });
   $("change-person").addEventListener("click", () => {
     selected = null;
     typedQuery = "";
-    closeSheet();
+    toggleStage("identify");
+    icons();
   });
-  function choice() { return document.querySelector('input[name="plus"]:checked')?.value || ""; }
-  function updateButton() {
-    const value = choice();
-    show("companion-field", value === "yes");
-    $("confirm-button").disabled = loading || !value || (value === "yes" && !validFullName($("companion-name").value));
-  }
-  document.querySelectorAll('input[name="plus"]').forEach(el => el.addEventListener("change", updateButton));
+  document.querySelectorAll('input[name="plus"]').forEach(r => r.addEventListener("change", updateButton));
   $("companion-name").addEventListener("input", updateButton);
+
   $("confirm-button").addEventListener("click", async () => {
-    if (!selected || !typedQuery || !choice() || loading) return;
-    loading = true; updateButton(); fail("sheet-error", "");
+    const choice = document.querySelector('input[name="plus"]:checked')?.value || "";
+    if (!selected || !typedQuery || !choice || loading || (choice === "yes" && !validFullName($("companion-name").value))) return;
+    loading = true;
+    updateButton();
+    fail("sheet-error", "");
     $("confirm-button").classList.add("is-loading");
     $("confirm-button").innerHTML = '<span class="spinner" aria-hidden="true"></span> Registrando sua presença...';
     try {
       const resp = await request("confirm", {
-        colaborador_id: selected.id, query: typedQuery, acompanhante: choice() === "yes", acompanhante_nome: $("companion-name").value.trim()
+        colaborador_id: selected.id,
+        query: typedQuery,
+        acompanhante: choice === "yes",
+        acompanhante_nome: $("companion-name").value.trim()
       });
       $("done-person-name").textContent = resp.colaborador || selected.nome_completo;
-      $("done-companion-name").textContent = choice() === "yes" ? $("companion-name").value.trim() : "Não levará";
+      $("done-companion-name").textContent = choice === "yes" ? $("companion-name").value.trim() : "Não levará";
+      $("whatsapp-fallback").href = resp.whatsapp_url;
       finished = true;
-      show("guest-identify", false);
+      show("guest-cta", false);
       show("guest-saved", true);
-      show("guest-companion", false);
-      show("guest-done", true);
-      $("sheet-title").textContent = "Sua confirmação";
-      const link = $("whatsapp-fallback"); link.href = resp.whatsapp_url;
+      toggleStage("done");
       icons();
       window.location.assign(resp.whatsapp_url);
     } catch (err) {
       fail("sheet-error", err.message);
-      $("confirm-button").innerHTML = 'Confirmar presença <i data-lucide="check"></i>'; icons();
-    } finally { loading = false; updateButton(); $("confirm-button").classList.remove("is-loading"); }
+      $("confirm-button").innerHTML = 'Confirmar presença <i data-lucide="check"></i>';
+      icons();
+    } finally {
+      loading = false;
+      updateButton();
+      $("confirm-button").classList.remove("is-loading");
+    }
   });
-  load(); icons();
+
+  icons();
+  load();
 }
 function initAdmin() {
   const storageKey = "rsvp-admin-session-v2";
