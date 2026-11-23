@@ -155,3 +155,267 @@
  .guest-page .result-item,.search-spinner,.search-placeholder .placeholder-avatar,
  .search-placeholder .placeholder-lines span,.skeleton-line{animation:none!important}
 }
+
+
+/* ===== RSVP v6 · convite mais compacto, editorial e responsivo ===== */
+.guest-page{
+  background:
+    radial-gradient(ellipse 88% 28% at 84% 6%,rgba(236,244,215,.8),transparent),
+    linear-gradient(180deg,#fcfdf8 0%,#f8faf4 58%,#f4f8f1 100%);
+}
+.guest-page .ambient{opacity:.12}
+.guest-page .guest-shell{max-width:560px;padding-top:17px;padding-bottom:23px}
+.guest-page .guest-header{
+  border:0;
+  border-bottom:1px solid #e5ece1;
+  border-radius:0;
+  box-shadow:none;
+  background:transparent;
+  padding:0 6px 15px;
+}
+.guest-page .company-logos{gap:12px}
+.guest-page .company-logo img{height:56px;max-width:188px}
+.guest-page .company-logo-agricola img{max-width:119px}
+.guest-page .company-logo-cia img{max-width:181px}
+.guest-page .brand-divider{height:38px;background:#d8e3d3}
+.guest-page .guest-hero{padding:29px 3px 19px}
+.guest-page .guest-hero .eyebrow{
+  font-size:10px;
+  letter-spacing:.16em;
+  color:#356c44;
+  gap:9px;
+}
+.guest-page .eyebrow-year{font-weight:750;letter-spacing:.02em;color:#a39450}
+.guest-page .guest-hero h1{
+  font-size:clamp(29px,6.8vw,37px);
+  letter-spacing:-.05em;
+  line-height:1.17;
+  margin:13px 0 10px;
+  max-width:540px;
+  font-weight:800;
+}
+.guest-page .guest-hero h1 em{color:#11703c}
+.guest-page .guest-hero p{
+  font-size:13px;
+  line-height:1.55;
+  color:#708070;
+  margin:0;
+  max-width:470px;
+}
+.guest-page .deadline-chip{
+  background:#fff9dc;
+  border:1px solid #f0df94;
+  color:#53683b;
+  border-radius:10px;
+  margin-top:16px;
+  min-height:35px;
+  padding:8px 12px;
+  box-shadow:none;
+  font-size:11px;
+}
+.guest-page .deadline-chip svg{color:#b38e06}
+.guest-page .deadline-chip strong{color:#154c2c}
+.guest-page .guest-details{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:0;
+  background:#fff;
+  border:1px solid #e3eadd;
+  border-radius:18px;
+  box-shadow:0 5px 24px rgba(25,65,34,.045);
+  margin:0 0 16px;
+  padding:10px 16px;
+}
+.guest-page .detail{
+  background:transparent;
+  border:0;
+  border-radius:0;
+  padding:10px 3px;
+  gap:9px;
+  box-shadow:none;
+  min-height:60px;
+}
+.guest-page .detail:nth-child(2){border-left:1px solid #e9efe5;padding-left:15px}
+.guest-page .detail:last-child{
+  grid-column:1/-1;
+  border-top:1px solid #e9efe5;
+  margin-top:4px;
+  padding-top:13px;
+}
+.guest-page .detail-icon{
+  width:35px;height:35px;border-radius:11px;
+  background:#eaf5e9;color:#156d39;
+}
+.guest-page .detail-icon svg{width:17px;height:17px}
+.guest-page .detail small{font-size:9px;letter-spacing:.13em;color:#7d9581;margin-bottom:4px}
+.guest-page .detail strong{font-size:12px;font-weight:750;line-height:1.38;color:#21432e}
+.guest-page .invite-card{
+  border:1px solid #e4eadf;
+  border-top:3px solid #eac832;
+  border-radius:19px;
+  box-shadow:0 14px 37px rgba(16,54,25,.064);
+  min-height:0;
+  padding:22px 23px 21px;
+}
+.guest-page .invite-heading{margin-bottom:19px}
+.guest-page .steps{gap:6px}
+.guest-page .step{
+  width:25px;height:25px;
+  font-size:11px;
+}
+.guest-page .step-line{width:27px}
+.guest-page .step-caption{font-size:9px;letter-spacing:.1em}
+.guest-page .invite-card h2{
+  font-size:21px;
+  letter-spacing:-.045em;
+  margin:0 0 7px;
+}
+.guest-page .support{font-size:12px;line-height:1.53;margin-bottom:19px}
+.guest-page .invite-card label:not(.option){font-size:12px}
+.guest-page .search-wrap{border-radius:12px;min-height:50px}
+.guest-page .search-wrap input{height:48px;font-size:14px}
+.guest-page .field-help{font-size:11px;line-height:1.6}
+.guest-page .privacy{
+  margin-top:19px;
+  line-height:1.5;
+  font-size:10px;
+}
+.guest-page .selected-person{border:1px solid #e3eedf;margin-bottom:20px}
+.guest-page .companion-options{margin-bottom:16px}
+.guest-page .option{min-height:60px}
+.guest-page #guest-identify,
+.guest-page #guest-companion,
+.guest-page #guest-done{animation:rsvp-card-in .26s ease-out both}
+@keyframes rsvp-card-in{
+  from{opacity:0;transform:translateY(5px)}
+  to{opacity:1;transform:translateY(0)}
+}
+.guest-page .invite-card.is-complete{
+  border-top:3px solid #c9a82d;
+  background:linear-gradient(180deg,#fffefa 0%,#ffffff 24%);
+}
+.guest-page .invite-card.is-complete .invite-heading{display:none}
+.guest-page .done-panel{
+  padding:3px 0 0;
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+  text-align:center;
+}
+.guest-page .success-mark{
+  display:grid;
+  place-items:center;
+  margin:0 auto 10px;
+  width:51px;height:51px;
+  border-radius:16px;
+  color:#116c3c;
+  background:linear-gradient(140deg,#d8f4db,#ebf8e9);
+  border:1px solid #cbead1;
+  box-shadow:0 8px 21px rgba(9,87,38,.075);
+}
+.guest-page .success-mark svg{width:27px;height:27px;stroke-width:2.6}
+.guest-page .done-eyebrow{
+  display:block;
+  color:#2a8b54;
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:.18em;
+  margin-bottom:5px;
+}
+.guest-page .done-panel h2{
+  font-size:25px;
+  margin:0 0 7px;
+  letter-spacing:-.055em;
+  color:#1b4129;
+}
+.guest-page .done-panel .done-lead{
+  margin:0 auto 16px;
+  font-size:12px;
+  line-height:1.58;
+  color:#708171;
+  max-width:360px;
+}
+.guest-page .confirmation-receipt{
+  display:grid;
+  background:#f7faf5;
+  border:1px solid #e3ecdf;
+  border-radius:13px;
+  padding:3px 13px;
+  width:100%;
+  text-align:left;
+  margin-bottom:15px;
+}
+.guest-page .receipt-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:14px;
+  padding:10px 0;
+  font-size:12px;
+}
+.guest-page .receipt-row+.receipt-row{border-top:1px solid #e2ebdf}
+.guest-page .receipt-row>span{
+  display:flex;align-items:center;gap:6px;
+  flex:0 0 auto;color:#718570;font-size:11px;
+}
+.guest-page .receipt-row>span svg{width:15px;height:15px;color:#4d8b63}
+.guest-page .receipt-row strong{
+  font-size:12px;
+  font-weight:750;
+  color:#264831;
+  min-width:0;
+  text-align:right;
+  overflow-wrap:anywhere;
+}
+.guest-page #whatsapp-fallback{
+  min-height:49px;
+  font-size:13px;
+  padding:12px 9px;
+  gap:9px;
+  border-radius:11px;
+  box-shadow:0 9px 20px rgba(8,95,44,.17);
+}
+.guest-page #whatsapp-fallback svg{width:17px;height:17px}
+.guest-page .done-note{
+  display:flex;align-items:flex-start;justify-content:center;
+  gap:7px;text-align:left;max-width:390px;
+  font-size:10px;line-height:1.55;
+  color:#849083;margin:13px auto 0;
+}
+.guest-page .done-note svg{width:14px;height:14px;flex:0 0 auto;margin-top:1px}
+.guest-page .done-note strong{color:#46664c}
+.guest-page .guest-footer{margin-top:16px;font-size:9px}
+@media(max-width:700px){
+ .guest-page .guest-shell{width:min(100% - 32px,500px);padding-top:14px}
+ .guest-page .guest-header{padding:0 3px 12px}
+ .guest-page .company-logo img{height:48px;max-width:167px}
+ .guest-page .company-logo-agricola img{max-width:113px}
+ .guest-page .company-logo-cia img{max-width:169px}
+ .guest-page .brand-divider{height:34px}
+ .guest-page .guest-hero{padding:22px 0 17px}
+ .guest-page .guest-hero h1{font-size:clamp(27px,7.5vw,32px);line-height:1.13;margin:12px 0 10px}
+ .guest-page .guest-hero p{font-size:12px}
+ .guest-page .deadline-chip{margin-top:13px}
+ .guest-page .guest-details{margin-bottom:13px;border-radius:16px;padding:7px 12px}
+ .guest-page .detail{padding:9px 2px;gap:7px}
+ .guest-page .detail:nth-child(2){padding-left:11px}
+ .guest-page .detail:last-child{padding-top:11px}
+ .guest-page .detail-icon{width:32px;height:32px;border-radius:9px}
+ .guest-page .detail strong{font-size:11px}
+ .guest-page .invite-card{padding:20px 19px 19px;border-radius:17px}
+ .guest-page .invite-heading{margin-bottom:16px}
+ .guest-page .invite-card h2{font-size:20px}
+ .guest-page .done-panel h2{font-size:24px}
+ .guest-page .receipt-row{gap:8px}
+ .guest-page .receipt-row>span{font-size:10px}
+ .guest-page .receipt-row strong{font-size:11px}
+}
+@media(max-width:350px){
+ .guest-page .guest-shell{width:calc(100% - 24px)}
+ .guest-page .guest-hero h1{font-size:26px}
+ .guest-page .company-logo img{height:42px}
+ .guest-page .detail-icon{width:28px;height:28px}
+}
+@media(prefers-reduced-motion:reduce){
+ .guest-page #guest-identify,.guest-page #guest-companion,.guest-page #guest-done{animation:none}
+}
