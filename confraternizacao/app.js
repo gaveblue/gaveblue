@@ -28,6 +28,62 @@ function initGuest() {
   let event = null, selected = null, typedQuery = "", timer = null, searchSeq = 0, loading = false, searchAbort = null;
   const searchCache = new Map();
   const input = $("employee-search");
+  const sheet = $("rsvp-sheet");
+  let sheetTimer = null;
+  let lastTrigger = null;
+  let finished = false;
+  const openSheet = (isReceipt = false, opener = null) => {
+    if (opener) lastTrigger = opener;
+    if (sheetTimer) clearTimeout(sheetTimer);
+    $("sheet-title").textContent = isReceipt ? "Sua confirmação" : "Confirmar presença";
+    show("guest-companion", !isReceipt);
+    show("guest-done", isReceipt);
+    fail("sheet-error", "");
+    input.blur();
+    show("rsvp-sheet", true);
+    document.body.classList.add("rsvp-sheet-open");
+    sheet.setAttribute("aria-hidden", "false");
+    requestAnimationFrame(() => {
+      sheet.classList.add("is-open");
+      $("sheet-close").focus({preventScroll:true});
+    });
+    icons();
+  };
+  const closeSheet = () => {
+    if (loading || sheet.classList.contains("hidden")) return;
+    sheet.classList.remove("is-open");
+    document.body.classList.remove("rsvp-sheet-open");
+    sheet.setAttribute("aria-hidden", "true");
+    if (sheetTimer) clearTimeout(sheetTimer);
+    sheetTimer = setTimeout(() => show("rsvp-sheet", false), 220);
+    const button = finished ? $("open-receipt") : lastTrigger;
+    if (button?.isConnected) button.focus({preventScroll:true});
+  };
+  $("sheet-close").addEventListener("click", closeSheet);
+  $("sheet-backdrop").addEventListener("click", closeSheet);
+  $("sheet-handle").addEventListener("click", closeSheet);
+  let touchStartY = null;
+  $("sheet-handle").addEventListener("touchstart", e => {
+    touchStartY = e.touches[0]?.clientY ?? null;
+  }, {passive:true});
+  $("sheet-handle").addEventListener("touchend", e => {
+    if (touchStartY !== null && (e.changedTouches[0]?.clientY ?? 0) - touchStartY > 60) closeSheet();
+    touchStartY = null;
+  }, {passive:true});
+  document.addEventListener("keydown", e => {
+    if (sheet.classList.contains("hidden")) return;
+    if (e.key === "Escape") { e.preventDefault(); closeSheet(); return; }
+    if (e.key !== "Tab") return;
+    const focusables = [...sheet.querySelectorAll("button:not(:disabled),input:not(:disabled),a[href],select:not(:disabled),textarea:not(:disabled)")]
+      .filter(el => el.getClientRects().length && getComputedStyle(el).visibility !== "hidden");
+    if (!focusables.length) return;
+    const first = focusables[0], last = focusables[focusables.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  });
+  $("open-receipt").addEventListener("click", e => {
+    if (finished) openSheet(true,e.currentTarget);
+  });
   async function load() {
     try {
       const resp = await request("event");
@@ -67,18 +123,19 @@ function initGuest() {
       button.innerHTML = '<span class="result-avatar"><i data-lucide="user-round"></i></span><strong></strong><i data-lucide="chevron-right"></i>';
       button.querySelector("strong").textContent = person.nome_completo;
       button.addEventListener("click", () => {
-        selected = person; typedQuery = input.value.trim();
+        selected = person;
+        typedQuery = input.value.trim();
         $("selected-name").textContent = person.nome_completo;
-        show("guest-identify", false);
-        show("guest-companion", true);
-        $("step-one").className = "step complete";
-        $("step-two").className = "step active";
-        $("step-caption").textContent = "PASSO 2 DE 2";
+        document.querySelectorAll('input[name="plus"]').forEach(el => el.checked = false);
+        $("companion-name").value = "";
+        document.querySelectorAll('.option:has(input[value="yes"])').forEach(node => node.classList.remove("hidden"));
+        $("confirm-button").innerHTML = 'Confirmar presença <i data-lucide="check"></i>';
         if (event && !event.permite_acompanhante) {
           document.querySelector('input[name="plus"][value="no"]').checked = true;
           document.querySelectorAll('.option:has(input[value="yes"])').forEach(node => node.classList.add("hidden"));
         }
-        updateButton(); fail("guest-error", ""); icons();
+        updateButton();
+        openSheet(false, button);
       });
       results.appendChild(button);
     });
@@ -131,14 +188,9 @@ function initGuest() {
   });
   $("clear-search").addEventListener("click", () => { input.value = ""; input.dispatchEvent(new Event("input")); input.focus(); });
   $("change-person").addEventListener("click", () => {
-    selected = null; typedQuery = "";
-    show("guest-companion", false); show("guest-identify", true);
-    $("step-one").className = "step active"; $("step-two").className = "step";
-    $("step-caption").textContent = "PASSO 1 DE 2";
-    document.querySelectorAll('input[name="plus"]').forEach(el => el.checked = false);
-    show("companion-field", false);
-    $("companion-name").value = "";
-    document.querySelectorAll('.option:has(input[value="yes"])').forEach(node => node.classList.remove("hidden"));
+    selected = null;
+    typedQuery = "";
+    closeSheet();
   });
   function choice() { return document.querySelector('input[name="plus"]:checked')?.value || ""; }
   function updateButton() {
@@ -150,7 +202,7 @@ function initGuest() {
   $("companion-name").addEventListener("input", updateButton);
   $("confirm-button").addEventListener("click", async () => {
     if (!selected || !typedQuery || !choice() || loading) return;
-    loading = true; updateButton(); fail("guest-error", "");
+    loading = true; updateButton(); fail("sheet-error", "");
     $("confirm-button").classList.add("is-loading");
     $("confirm-button").innerHTML = '<span class="spinner" aria-hidden="true"></span> Registrando sua presença...';
     try {
@@ -159,16 +211,18 @@ function initGuest() {
       });
       $("done-person-name").textContent = resp.colaborador || selected.nome_completo;
       $("done-companion-name").textContent = choice() === "yes" ? $("companion-name").value.trim() : "Não levará";
-      $("invite-card").classList.add("is-complete");
-      show("guest-companion", false); show("guest-done", true);
+      finished = true;
+      show("guest-identify", false);
+      show("guest-saved", true);
+      show("guest-companion", false);
+      show("guest-done", true);
+      $("sheet-title").textContent = "Sua confirmação";
       const link = $("whatsapp-fallback"); link.href = resp.whatsapp_url;
-      $("step-two").className = "step complete";
-      $("step-caption").textContent = "PRESENÇA REGISTRADA";
       icons();
       window.location.assign(resp.whatsapp_url);
     } catch (err) {
-      fail("guest-error", err.message);
-      $("confirm-button").innerHTML = 'Confirmar presença <i data-lucide="arrow-up-right"></i>'; icons();
+      fail("sheet-error", err.message);
+      $("confirm-button").innerHTML = 'Confirmar presença <i data-lucide="check"></i>'; icons();
     } finally { loading = false; updateButton(); $("confirm-button").classList.remove("is-loading"); }
   });
   load(); icons();
