@@ -1,0 +1,199 @@
+/* Convite Covre 2026 — refinamento visual v10.
+   Somente na interface pública, preservando o painel administrativo.
+   Direção: leitura editorial, espaço negativo e ornamentos contidos nas extremidades. */
+
+.guest-page{
+  --invite-green:#0b6e37;
+  --invite-gold:#e8c337;
+  background:
+    radial-gradient(ellipse 82% 22% at 3% 1%,rgba(235,245,226,.78),transparent 79%),
+    linear-gradient(180deg,#fcfdf8 0%,#f9fbf5 63%,#f6faf3 100%);
+}
+/* Decoração contida: evitar a faixa diagonal sobre título e rodapé. */
+.guest-page .invite-ribbons{
+  position:absolute;inset:0;
+  pointer-events:none;z-index:0;
+  overflow:hidden;
+}
+.guest-page .ribbon-top-green{
+  position:absolute;
+  top:-48px;right:-88px;left:auto;bottom:auto;
+  width:225px;height:112px;
+  border-radius:30% 0 0 82%;
+  background:linear-gradient(110deg,#0b853c,#075328);
+  transform:rotate(-7deg);
+  box-shadow:none;
+}
+.guest-page .ribbon-top-gold{
+  position:absolute;
+  top:45px;right:-37px;left:auto;bottom:auto;
+  width:116px;height:10px;
+  border-radius:999px;
+  background:linear-gradient(90deg,#f5d95c,#d9b022);
+  transform:rotate(-7deg);
+  box-shadow:none;
+}
+/* A faixa inferior extensa era a causa de o amarelo cortar o rodapé. */
+.guest-page .ribbon-bottom-green,
+.guest-page .ribbon-bottom-gold{
+  display:none;
+}
+.guest-page .guest-shell{padding:17px 0 25px;max-width:540px}
+.guest-page .guest-header{
+  padding:9px 12px;
+  border-radius:17px;
+}
+.guest-page .guest-hero{
+  padding:22px 6px 19px;
+  max-width:100%;
+}
+.guest-page .guest-hero .eyebrow{font-size:9px;letter-spacing:.16em}
+.guest-page .guest-hero h1{
+  margin:12px 0 10px;
+  max-width:510px;
+  font-size:clamp(28px,6.65vw,37px);
+  line-height:1.16;
+  text-wrap:balance;
+  letter-spacing:-.045em;
+}
+.guest-page .guest-hero h1 .animated-event-title{
+  color:#0b793b;
+  display:inline;
+  animation:rsvp-title-tone 9s ease-in-out infinite;
+}
+@keyframes rsvp-title-tone{
+  0%,100%{color:#0b793b}
+  48%,55%{color:#a57e0b}
+}
+.guest-page .guest-hero .guest-message{
+  display:grid;
+  gap:9px;
+  max-width:470px;
+  margin:5px auto 0;
+  padding:0 8px;
+  text-align:center;
+}
+.guest-page .guest-hero .guest-message p{
+  max-width:none;
+  margin:0;
+  font-size:12.5px;
+  line-height:1.65;
+  font-weight:450;
+  letter-spacing:0;
+  color:#677b6a;
+  text-wrap:pretty;
+}
+.guest-page .guest-hero .guest-message p:first-child{
+  color:#435f4a;
+  font-weight:560;
+}
+.guest-page .guest-details{margin-bottom:13px}
+.guest-page .event-calendar-link{
+  display:flex;align-items:center;gap:9px;
+  width:100%;min-width:0;
+  padding:5px 8px;
+  margin:-5px -8px;
+  border:1px solid transparent;
+  border-radius:11px;
+  color:inherit;
+  text-decoration:none;
+  transition:background-color .2s ease,border-color .2s ease,transform .2s ease;
+  -webkit-tap-highlight-color:rgba(10,111,55,.13);
+}
+.guest-page .event-calendar-link:focus-visible{
+  outline:2px solid #388b58;outline-offset:2px;
+}
+.guest-page .event-calendar-link:hover,
+.guest-page .event-calendar-link:focus-visible{
+  background:#f1f9ef;
+  border-color:#dfeee0;
+}
+.guest-page .event-calendar-link:active{transform:scale(.985)}
+.guest-page .event-calendar-link.is-disabled{
+  pointer-events:none;opacity:.55;
+}
+.guest-page .event-calendar-copy{display:block;min-width:0}
+.guest-page .event-calendar-copy small{
+  display:flex;align-items:center;gap:6px;
+  margin-bottom:2px;
+}
+.guest-page .event-calendar-copy small svg{
+  width:12px;height:12px;
+  color:#448c61;
+}
+.guest-page .event-calendar-hint{
+  display:inline-block;
+  margin-top:3px;
+  font-size:9px;
+  font-weight:700;
+  letter-spacing:0;
+  color:#3b8558;
+  white-space:nowrap;
+  border-bottom:1px solid #bfd7c2;
+}
+.guest-page .event-when-cell{overflow:visible}
+.guest-page .event-when-cell:nth-child(3){padding-left:12px}
+.guest-page .event-location{min-height:70px}
+.guest-page .event-map-link{
+  color:#829586;font-size:10px;
+}
+.guest-page .deadline-chip{
+  margin-bottom:16px;
+  border-radius:9px;
+}
+.guest-page .invite-card{
+  box-shadow:0 13px 30px rgba(6,70,31,.14);
+}
+.guest-page .guest-footer{
+  position:relative;
+  margin-top:16px;
+  padding:0 5px 17px;
+  color:#799480;
+  font-size:10px;
+}
+.guest-page .guest-footer::after{
+  content:"";position:absolute;
+  bottom:0;left:calc(50% - 34px);
+  width:68px;height:3px;
+  border-radius:999px;
+  background:linear-gradient(90deg,#17814a 0 61%,#e8c534 61% 100%);
+}
+
+@media(max-width:700px){
+  .guest-page .guest-shell{width:min(calc(100% - 30px),500px);padding-top:15px}
+  .guest-page .guest-header{padding:8px 10px}
+  .guest-page .guest-hero{padding:18px 3px 16px}
+  .guest-page .guest-hero h1{
+    font-size:clamp(26px,7.2vw,33px);
+    line-height:1.155;
+    margin:10px 0 9px;
+  }
+  .guest-page .guest-hero .guest-message{
+    gap:8px;margin-top:4px;padding:0 5px;
+  }
+  .guest-page .guest-hero .guest-message p{
+    font-size:12px;
+    line-height:1.56;
+  }
+  .guest-page .ribbon-top-green{
+    top:-46px;right:-91px;width:185px;height:98px;transform:rotate(-7deg);
+  }
+  .guest-page .ribbon-top-gold{
+    top:38px;right:-33px;width:100px;height:8px;transform:rotate(-7deg);
+  }
+  .guest-page .event-calendar-link{gap:7px}
+  .guest-page .event-calendar-copy small{font-size:9px;letter-spacing:.07em}
+  .guest-page .event-calendar-hint{font-size:8.5px}
+  .guest-page .event-when-cell:nth-child(3){padding-left:9px}
+  .guest-page .deadline-chip{margin-bottom:13px}
+}
+@media(max-width:350px){
+  .guest-page .guest-hero h1{font-size:25px}
+  .guest-page .guest-hero .guest-message p{font-size:11.4px}
+  .guest-page .event-when-cell .detail-icon{width:29px;min-width:29px;height:29px}
+  .guest-page .event-calendar-hint{font-size:8px}
+}
+@media(prefers-reduced-motion:reduce){
+  .guest-page .guest-hero h1 .animated-event-title{animation:none;color:#0c7138}
+  .guest-page .event-calendar-link{transition:none}
+}
