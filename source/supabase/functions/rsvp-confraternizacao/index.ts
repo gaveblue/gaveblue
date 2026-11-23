@@ -71,13 +71,18 @@ async function loginCode(raw: unknown) {
   return token;
 }
 
-async function rate(req: Request, action: string, max: number) {
+async function ipHash(req: Request) {
   const ip = (req.headers.get("cf-connecting-ip") || req.headers.get("x-real-ip") || req.headers.get("x-forwarded-for")?.split(",")[0] || "desconhecido").trim();
   const bytes = new TextEncoder().encode(ip + "|" + SLUG);
-  const hash = Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", bytes))).map(v => v.toString(16).padStart(2,"0")).join("");
+  return Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256",bytes)))
+    .map(v=>v.toString(16).padStart(2,"0")).join("");
+}
+async function rate(req: Request, action: string, max: number) {
+  const hash=await ipHash(req);
   const { data, error } = await db.rpc("rsvp_limit_request", { p_action: action, p_ip_hash: hash, p_max: max, p_seconds: 600 });
   assert(!error && data === true, "Muitas tentativas. Tente novamente mais tarde.");
 }
+
 Deno.serve(async (req: Request) => {
   const origin = req.headers.get("Origin") || "";
   if (req.method === "OPTIONS") return json({ ok: true }, 200, origin);
@@ -88,19 +93,21 @@ Deno.serve(async (req: Request) => {
     assert(raw.length <= 150000, "Requisição muito grande.");
     const body = JSON.parse(raw || "{}");
     const action = clean(body.action, 40);
+    if (action === "search") {
+      const key = norm(body.query);
+      const terms=key.split(" ").filter(Boolean);
+      if (terms.length<2 || terms[0].length<2 || terms.slice(1).join(" ").length<3) {
+        return json({ok:true,results:[]},200,origin);
+      }
+      const {data,error}=await db.rpc("rsvp_busca_rapida",{
+        p_slug:SLUG,p_busca:key,p_ip_hash:await ipHash(req)
+      });
+      assert(!error, error?.message?.includes("Muitas tentativas") ? "Muitas tentativas. Tente novamente mais tarde." : error?.message?.includes("ainda não estão abertas") ? "As confirmações ainda não estão abertas." : "Não foi possível buscar colaboradores.");
+      return json({ok:true,results:data||[]},200,origin);
+    }
     const ev = await event();
     if (action === "event") {
       return json({ ok: true, event: { titulo: ev.titulo, descricao: ev.descricao, data_evento: ev.data_evento, horario: ev.horario, local_evento: ev.local_evento, status: ev.status, permite_acompanhante: ev.permite_acompanhante } }, 200, origin);
-    }
-    if (action === "search") {
-      await rate(req, "search", 30);
-      assert(ev.status === "aberto", "As confirmações ainda não estão abertas.");
-      const key = norm(body.query);
-      const terms = key.split(" ");
-      if (terms.length < 2 || terms[0].length < 2 || terms[terms.length - 1].length < 3) return json({ ok: true, results: [] }, 200, origin);
-      const { data, error } = await db.from("rsvp_colaboradores").select("id,nome_completo").eq("evento_id", ev.id).eq("ativo", true).like("nome_chave", terms[0] + "%").order("nome_completo").limit(300);
-      assert(!error, "Falha na busca.");
-      return json({ ok: true, results: (data || []).filter((item) => matchesSearch(item.nome_completo, key)).slice(0, 8) }, 200, origin);
     }
     if (action === "confirm") {
       await rate(req, "confirm", 15);
