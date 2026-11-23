@@ -3,27 +3,31 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#f7f8fb">
+<meta name="theme-color" content="#0a5727">
 <meta name="description" content="Confirmação de presença na confraternização da empresa.">
 <meta name="robots" content="noindex,nofollow">
 <title>Confraternização · Confirme sua presença</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link href="./style.css?v=2" rel="stylesheet">
+<link href="./style.css?v=5" rel="stylesheet">
 <script defer src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
-<script defer src="./app.js?v=2"></script>
+<script defer src="./app.js?v=5"></script>
 </head>
 <body class="guest-page">
 <div class="ambient ambient-a"></div><div class="ambient ambient-b"></div>
 <main class="guest-shell">
-  <header class="guest-header">
-    <div class="brand-mark"><i data-lucide="sparkles"></i></div>
-    <div><strong>Confraternização</strong><span>Um momento para celebrar</span></div>
+  <header class="guest-header" aria-label="Empresas organizadoras">
+    <div class="company-logos">
+      <div class="company-logo company-logo-agricola"><img src="https://i.imgur.com/kXwEnSs.png" alt="Covre Agrícola" loading="eager" decoding="async" referrerpolicy="no-referrer"></div>
+      <span class="brand-divider" aria-hidden="true"></span>
+      <div class="company-logo company-logo-cia"><img src="../postoscredenciados-covreecia/assets/brand/covre-e-cia.png" alt="Covre &amp; Cia — Insumos Agrícolas" loading="eager" decoding="async"></div>
+    </div>
   </header>
   <section class="guest-hero">
     <div class="eyebrow"><span class="eyebrow-dot"></span> UM CONVITE ESPECIAL</div>
-    <h1>As melhores conquistas<br> são <em>compartilhadas.</em></h1>
-    <p id="guest-description">Vamos celebrar juntos tudo o que construímos neste ano.</p>
+    <h1>Você foi convocado para nossa <em>Confraternização 2026</em></h1>
+    <p id="guest-description">Vamos celebrar juntos as conquistas, fortalecer nossos laços e renovar as energias para novos desafios.</p>
+    <div class="deadline-chip"><i data-lucide="calendar-check-2"></i> Confirme sua presença até <strong>30/11</strong></div>
   </section>
   <section class="guest-details">
     <div class="detail"><span class="detail-icon"><i data-lucide="calendar-days"></i></span><div><small>DATA</small><strong id="event-date">A definir</strong></div></div>
@@ -34,12 +38,16 @@
     <div class="invite-heading"><div class="steps"><span class="step active" id="step-one">1</span><span class="step-line"></span><span class="step" id="step-two">2</span></div><span class="step-caption" id="step-caption">PASSO 1 DE 2</span></div>
     <div id="guest-error" class="notice error hidden" role="alert"></div>
     <div id="guest-locked" class="locked hidden"><span class="big-icon"><i data-lucide="calendar-clock"></i></span><h2>Estamos preparando tudo!</h2><p>As confirmações ainda não foram abertas. Volte em breve.</p></div>
-    <div id="guest-loading" class="loading-row"><span class="spinner"></span> Carregando informações...</div>
+    <div id="guest-loading" class="guest-skeleton" role="status" aria-live="polite">
+      <div class="skeleton-line skeleton-title"></div><div class="skeleton-line skeleton-subtitle"></div>
+      <div class="skeleton-line skeleton-input"></div>
+      <div class="skeleton-footer"><span class="spinner"></span> Preparando seu convite...</div>
+    </div>
     <div id="guest-identify" class="hidden">
       <h2>Vamos confirmar sua presença?</h2><p class="support">Primeiro, encontre seu nome na lista de colaboradores.</p>
       <label for="employee-search">Seu nome e sobrenome</label>
-      <div class="search-wrap"><i data-lucide="search"></i><input id="employee-search" autocomplete="name" spellcheck="false" placeholder="Ex.: Marina Santos" maxlength="160"><button type="button" id="clear-search" class="clear-search hidden" aria-label="Limpar busca"><i data-lucide="x"></i></button></div>
-      <p class="field-help" id="search-hint">Digite seu nome e pelo menos 3 letras do sobrenome.</p>
+      <div class="search-wrap" id="guest-search-wrap"><i data-lucide="search" id="search-icon"></i><input id="employee-search" autocomplete="name" autocapitalize="words" enterkeyhint="search" spellcheck="false" placeholder="Ex.: Marina Santos" maxlength="160" aria-describedby="search-hint" aria-autocomplete="list"><span class="search-spinner hidden" id="search-spinner" aria-hidden="true"></span><button type="button" id="clear-search" class="clear-search hidden" aria-label="Limpar busca"><i data-lucide="x"></i></button></div>
+      <p class="field-help" id="search-hint" role="status" aria-live="polite">Digite seu nome e pelo menos 3 letras do sobrenome.</p>
       <div id="employee-results" class="result-list" role="listbox" aria-label="Colaboradores encontrados"></div>
       <p class="privacy"><i data-lucide="lock-keyhole"></i> Sua confirmação será utilizada apenas para organizar o evento.</p>
     </div>
