@@ -107,7 +107,7 @@ body.iv-fullwidth>header,body.iv-fullwidth>.foot{display:none}
 .mtabs button.selected{background:var(--iv-orange)!important;border-color:var(--iv-orange)!important;color:white}
 .manage-modules a{background:#fff5ec!important;border:1px solid #ffd9bb!important;color:#d96100!important;display:inline-flex;align-items:center;gap:8px}
 .onboarding-note{background:#fff4e9!important;border:1px solid #ffddbe!important;color:#9a521a!important}
-.x-form button,.c-form button,.k-card button,.k-reload{background:var(--iv-orange)!important;color:#fff!important;border-color:transparent}
+.x-form button,.c-form button,.k-card button,.k-reload{background:var(--iv-action)!important;color:#fff!important;border-color:transparent}
 .c-warning{background:#fff7ef;border-color:#ffdfc2;color:#9a5e25}
 .c-money{color:var(--iv-orange-deep)!important}
 .c-preview{background:#fff3e8!important;color:var(--iv-orange-deep)!important;border:1px solid var(--iv-orange-border)!important}
@@ -138,7 +138,7 @@ body.intervalo-menu #app .wrap{max-width:1250px}
 .iv-kds-table{display:flex;align-items:center;gap:7px;margin:14px 0 8px;font-size:13px;font-weight:850}
 .iv-kds-item{display:flex;gap:9px;align-items:start;padding:9px 0;border-top:1px solid #eff2f5;font-size:12px}
 .iv-kds-item>span{color:#e87000;font-weight:900}.iv-kds-item p{background:#fff3e7;border-radius:8px;padding:8px;margin:6px 0 0;color:#875b32;display:flex;gap:6px;line-height:1.35;font-size:11px}
-.iv-kds-actions{display:flex;gap:8px;margin-top:13px}.iv-kds-next{display:flex;align-items:center;justify-content:center;gap:7px;flex:1;border-radius:10px;background:var(--iv-orange);border:1px solid var(--iv-orange);color:#fff;font-weight:850;padding:12px;font-size:12px}
+.iv-kds-actions{display:flex;gap:8px;margin-top:13px}.iv-kds-next{display:flex;align-items:center;justify-content:center;gap:7px;flex:1;border-radius:10px;background:var(--iv-action);border:1px solid var(--iv-action);color:#fff;font-weight:850;padding:12px;font-size:12px}
 .iv-kds-lane.preparing .iv-kds-next{border-color:#86cda1;color:#167844;background:#fff}.iv-kds-print{display:grid;place-items:center;width:43px;border:1px solid #e0e5eb;border-radius:10px;background:#fff;color:#49586b}
 .iv-kds-board .iv-empty{margin:11px 0 0}
 @media(max-width:1000px){.iv-kds-board{grid-template-columns:repeat(2,minmax(0,1fr))}.iv-kds-lane.ready{grid-column:1/-1}.iv-kds-lane.ready .iv-kds-stack{grid-template-columns:repeat(auto-fill,minmax(270px,1fr))}}
