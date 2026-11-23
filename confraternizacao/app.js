@@ -139,19 +139,17 @@ function initGuest() {
   load(); icons();
 }
 function initAdmin() {
-  if (!window.supabase?.createClient) { fail("login-error","Não foi possível carregar a autenticação."); return; }
-  const client = window.supabase.createClient(URL, KEY, {auth:{persistSession:true,autoRefreshToken:true}});
-  let session = null, dataset = null, editingId = null, currentView = "overview", lastLoad = 0;
+  const storageKey = "rsvp-admin-session-v2";
+  let session = sessionStorage.getItem(storageKey) || null;
+  let dataset = null, editingId = null, currentView = "overview", lastLoad = 0;
   function notify(message, error = false) {
     const node = $("admin-notice"); node.textContent = message; node.classList.remove("hidden");
     node.classList.toggle("error", error);
     clearTimeout(notify.t); notify.t = setTimeout(() => node.classList.add("hidden"), 5000);
   }
   async function admin(action, body = {}) {
-    const {data} = await client.auth.getSession();
-    const token = data.session?.access_token;
-    if (!token) throw new Error("Sessão expirada. Entre novamente.");
-    return request(action, body, token);
+    if (!session) throw new Error("Entre com o código de acesso do evento.");
+    return request(action, body, session);
   }
   async function bootstrap(quiet = false) {
     try {
@@ -161,7 +159,11 @@ function initAdmin() {
       fail("login-error","");
       render(); icons();
     } catch (err) {
-      if (!quiet) { show("admin-app", false); show("admin-login", true); fail("login-error", err.message); }
+      if (/Acesso expirado|Entre com o código|Código de acesso/i.test(err.message)) {
+        session = null; sessionStorage.removeItem(storageKey);
+        show("admin-app", false); show("admin-login", true);
+        fail("login-error", "Sua sessão expirou. Digite o código novamente.");
+      } else if (!quiet) { show("admin-app", false); show("admin-login", true); fail("login-error", err.message); }
       else notify("Não foi possível atualizar o painel: " + err.message, true);
     }
   }
@@ -299,21 +301,25 @@ function initAdmin() {
     const link=location.origin+"/confraternizacao/";
     try { await navigator.clipboard.writeText(link);notify("Link copiado!"); } catch(_) { notify("Copie o link: "+link); }
   });
-  $("logout-button").addEventListener("click",async()=>{await client.auth.signOut();session=null;show("admin-app",false);show("admin-login",true);});
+  $("logout-button").addEventListener("click",async()=>{
+    try { if (session) await request("admin-logout", {}, session); } catch (_) {}
+    session = null; sessionStorage.removeItem(storageKey);
+    show("admin-app",false); show("admin-login",true); fail("login-error","");
+  });
   $("login-form").addEventListener("submit",async e => {
     e.preventDefault();
     const button=e.currentTarget.querySelector('button[type="submit"]');button.disabled=true;
     fail("login-error","");
     try {
-      const {data,error}=await client.auth.signInWithPassword({email:$("admin-email").value.trim(),password:$("admin-password").value});
-      if(error)throw error;
-      session=data.session;await bootstrap(false);
-    } catch(err) {fail("login-error",err.message||"Não foi possível entrar.");}finally{button.disabled=false;}
+      const response=await request("admin-login",{access_code:$("admin-code").value.trim()});
+      session=response.access_token;
+      sessionStorage.setItem(storageKey,session);
+      $("admin-code").value="";
+      await bootstrap(false);
+    } catch(err) {fail("login-error",err.message||"Não foi possível entrar.");}
+    finally{button.disabled=false;}
   });
-  client.auth.getSession().then(({data}) => {
-    session=data.session;
-    if(session)bootstrap(false);
-  }).catch(err=>fail("login-error",err.message));
+  if (session) bootstrap(false);
   setInterval(()=>{if(session && !document.hidden && Date.now()-lastLoad>=30000)bootstrap(true);},30000);
   icons();
 }
