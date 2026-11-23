@@ -1,5 +1,15 @@
 # Intervalo — CHANGELOG
 
+## 1.2.0-rc.17 — 2026-11-23 · Polimento visual e consistência do Intervalo
+
+- Após feedback visual da RC16, reformulado o acabamento do menu lateral e do menu móvel: identidade e contexto do restaurante, grupos com ícones e descrição, itens selecionados destacados, rodapé de conta e controles com espaçamento uniforme. Mantida a hierarquia de módulos aprovada e a filtragem por permissões.
+- Gestão com cabeçalho e seleção de restaurante mais claros, contexto de página, cartões de indicadores e atalhos operacionais com hierarquia de título, ícone e ação; responsivo em mobile.
+- Meus restaurantes com cartões de estabelecimento, função e status em destaque, uma ação principal e módulos adicionais recolhíveis.
+- CSS de navegação e Gestão revisado para substituir as regras de acabamento anteriores, sem adicionar nova biblioteca.
+- Atualizadas as referências de cache do menu e do JS em Garçom, Cozinha, Caixa, Cardápio, Estoque, Mesas, Impressão e Relatórios para manter a aparência coerente.
+- Alterações apenas em interface: sem mudanças em Supabase, RLS, dados, permissões, comandas, pagamentos ou impressão.
+- Sintaxe de sete módulos JS, oito scripts inline do index, equilíbrio de chaves de três folhas CSS, menus por perfil e rotas ativas verificados estaticamente. Inspeção visual autenticada em Android/desktop e confirmação de propagação no domínio permanecem pendentes.
+
 ## 1.2.0-rc.16 — 2026-11-23 · Auditoria UX: organização, navegação e hierarquia
 
 - Menu compartilhado da Gestão e módulos operacionais agora possui acesso rápido e seções recolhíveis para Operação, Produtos e cardápio, Estoque, Loja online e Configurações; a seção corrente abre automaticamente e os links continuam sujeitos às permissões.
