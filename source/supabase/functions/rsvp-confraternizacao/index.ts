@@ -117,7 +117,7 @@ Deno.serve(async (req: Request) => {
       assert(!companion || validName(companionName || ""), "Informe o nome completo do acompanhante.");
       const { error } = await db.from("rsvp_confirmacoes").upsert({
         evento_id: ev.id, colaborador_id: employee.id, acompanhante: companion,
-        acompanhante_nome: companionName, confirmado_em: new Date().toISOString()
+        acompanhante_nome: companionName, origem: "link", confirmado_em: new Date().toISOString()
       }, { onConflict: "evento_id,colaborador_id" });
       assert(!error, "Não foi possível salvar a confirmação.");
       const message = "Olá! Confirmo minha presença na " + ev.titulo + ".\n\nColaborador: " + employee.nome_completo +
@@ -138,8 +138,8 @@ Deno.serve(async (req: Request) => {
     }
     if (action === "admin-bootstrap") {
       const [employees, confirmations] = await Promise.all([
-        db.from("rsvp_colaboradores").select("id,nome_completo,grupo,ativo,criado_em").eq("evento_id", ev.id).order("nome_completo"),
-        db.from("rsvp_confirmacoes").select("colaborador_id,acompanhante,acompanhante_nome,confirmado_em").eq("evento_id", ev.id)
+        db.from("rsvp_colaboradores").select("id,nome_completo,grupo,setor,ativo,criado_em").eq("evento_id", ev.id).order("nome_completo"),
+        db.from("rsvp_confirmacoes").select("colaborador_id,acompanhante,acompanhante_nome,confirmado_em,origem").eq("evento_id", ev.id)
       ]);
       assert(!employees.error && !confirmations.error, "Falha ao carregar os dados.");
       return json({ ok: true, event: ev, collaborators: employees.data || [], confirmations: confirmations.data || [] }, 200, origin);
@@ -165,20 +165,25 @@ Deno.serve(async (req: Request) => {
       return json({ ok: true }, 200, origin);
     }
     if (action === "admin-add" || action === "admin-update") {
+      const id = action === "admin-update" ? clean(body.id, 48) : null;
       const name = clean(body.nome_completo);
-      assert(validName(name), "Informe nome e sobrenome válidos.");
-      const values = { nome_completo: name, nome_chave: norm(name) };
-      if (action === "admin-add") {
-        const { error } = await db.from("rsvp_colaboradores").insert({ evento_id: ev.id, ...values });
-        assert(!error, error?.code === "23505" ? "Este nome já existe na lista." : "Não foi possível cadastrar.");
-      } else {
-        const id = clean(body.id, 48);
-        assert(/^[0-9a-f-]{36}$/i.test(id), "Registro inválido.");
-        const { error } = await db.from("rsvp_colaboradores").update({ ...values, ativo: body.ativo !== false }).eq("id", id).eq("evento_id", ev.id);
-        assert(!error, error?.code === "23505" ? "Já existe outro colaborador com este nome." : "Não foi possível atualizar.");
-      }
-      return json({ ok: true }, 200, origin);
+      const sector = clean(body.setor, 90);
+      const validFull = validName(name);
+      assert(name.length >= 2 && name.length <= 150 && /^[\p{L}\s'.-]+$/u.test(name), "Nome inválido.");
+      assert(action !== "admin-add" || validFull, "Informe nome e sobrenome do novo colaborador.");
+      assert(id === null || /^[0-9a-f-]{36}$/i.test(id), "Registro inválido.");
+      assert(sector.length <= 90, "Setor muito longo.");
+      const active = body.ativo !== false;
+      assert(!active || validFull, "Complete o sobrenome antes de ativar o colaborador na busca.");
+      assert(typeof body.confirmado === "boolean", "Informe o status da confirmação.");
+      const { data, error } = await db.rpc("rsvp_admin_save_person", {
+        p_evento: ev.id, p_id: id, p_nome: name, p_nome_chave: norm(name),
+        p_setor: sector, p_ativo: active, p_confirmado: body.confirmado
+      });
+      assert(!error && data, error?.code === "23505" ? "Este colaborador já está na lista." : "Falha ao salvar o cadastro e a confirmação.");
+      return json({ ok: true, colaborador_id: data }, 200, origin);
     }
+
     if (action === "admin-import") {
       const names = Array.isArray(body.names) ? body.names : [];
       assert(names.length > 0 && names.length <= 500, "A lista deve conter de 1 a 500 nomes.");
