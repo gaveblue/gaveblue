@@ -48,3 +48,11 @@ Implementação isolada do convite corporativo GaveBlue, sem alterações nos ap
 - Testes HTTP na API v5: retorno 200 e um registro para busca válida, nenhum resultado com menos de 3 letras, e resultado para sobrenome posterior. Sem alteração nos convidados e confirmações.
 - Os assets públicos foram versionados com ?v=5 para forçar atualização do CSS/JS nos navegadores.
 - A renderização no domínio não pôde ser conferida por navegador automatizado neste ambiente.
+
+## Ajuste visual v6 · 23/11/2026
+- Layout público mais enxuto: logos sem caixa gigante, título menor com melhor hierarquia, cores oficiais e menos espaço vazio.
+- Data/horário/local agrupados em um único cartão responsivo; busca e formulário mantidos com identidade Covre.
+- Tela de sucesso refatorada: cabeçalho discreto, resumo com colaborador e acompanhante, botão do WhatsApp em evidência e instrução explícita de que é necessário enviar a mensagem.
+- Dados de presença e banco não alterados; preservada a confirmação por busca e o redirecionamento.
+- Confirmações de código: JS analisado sem erro de sintaxe, IDs referenciados existentes no HTML e assets versionados com ?v=6.
+- Limite de QA: não foi possível abrir a página pública pelo navegador automatizado deste ambiente (rede/DNS); confirmar aparência e integração no aparelho.
