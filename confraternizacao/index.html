@@ -11,8 +11,9 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link href="./style.css?v=8" rel="stylesheet">
 <link href="./guest-v8.css?v=9" rel="stylesheet">
+<link href="./guest-v10.css?v=10" rel="stylesheet">
 <script defer src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
-<script defer src="./app.js?v=9"></script>
+<script defer src="./app.js?v=10"></script>
 </head>
 <body class="guest-page invite-booting">
 <div id="invite-boot" class="invite-boot" role="status" aria-live="polite">
@@ -39,12 +40,20 @@
   </header>
   <section class="guest-hero">
     <div class="eyebrow"><span class="eyebrow-dot"></span> UM CONVITE ESPECIAL <span class="eyebrow-year">• 2026</span></div>
-    <h1>Você foi convocado para nossa <em>Confraternização 2026</em></h1>
-    <p id="guest-description">Vamos celebrar juntos!</p>
+    <h1>Você foi convocado para nossa <em class="animated-event-title">Confraternização 2026</em></h1>
+    <div id="guest-description" class="guest-message">
+      <p>Convidamos vocês colaboradores, parceiros e amigos para a nossa confraternização.</p>
+      <p>Será um momento especial para celebrarmos as conquistas, fortalecer os laços e renovar as energias para novos desafios.</p>
+    </div>
   </section>
   <section class="guest-details" aria-label="Informações do evento">
     <div class="event-when">
-      <div class="event-when-cell"><span class="detail-icon"><i data-lucide="calendar-days"></i></span><div><small>DATA</small><strong id="event-date">12/12</strong></div></div>
+      <div class="event-when-cell event-date-cell">
+        <a id="event-calendar-link" class="event-calendar-link" href="https://calendar.google.com/calendar/" target="_blank" rel="noopener noreferrer" aria-label="Adicionar lembrete do início da confraternização ao Google Agenda" title="Adicionar lembrete do início ao calendário">
+          <span class="detail-icon"><i data-lucide="calendar-days"></i></span>
+          <span class="event-calendar-copy"><small>DATA <i data-lucide="calendar-plus-2" aria-hidden="true"></i></small><strong id="event-date">12/12</strong><span class="event-calendar-hint">Adicionar à agenda</span></span>
+        </a>
+      </div>
       <span class="event-when-divider" aria-hidden="true"></span>
       <div class="event-when-cell"><span class="detail-icon"><i data-lucide="clock-3"></i></span><div><small>HORÁRIO</small><strong id="event-time">15h00</strong></div></div>
     </div>
