@@ -1,26 +1,26 @@
 BEGIN:VCALENDAR
 VERSION:2.0
-PRODID:-//Gaveblue//Convite Confraternizacao 2026//PT-BR
+PRODID:-//Gaveblue//Confraternização Covre 2026//PT-BR
 CALSCALE:GREGORIAN
 METHOD:PUBLISH
-X-WR-CALNAME:Confraternizacao 2026
+X-WR-CALNAME:Confraternização 2026
 BEGIN:VEVENT
 UID:confraternizacao-2026-rsvp@gaveblue.com.br
 DTSTAMP:20261123T230000Z
 DTSTART:20261212T180000Z
 DTEND:20261212T181500Z
-SUMMARY:Inicio - Confraternizacao 2026
-LOCATION:Loja Maconica Fenelon Barbosa
-DESCRIPTION:Lembrete do inicio da Confraternizacao 2026 das empresas C
- ovre Agricola e Covre & Cia. Inicio as 15h00 (horario de Brasilia). D
- uracao final do evento nao informada. Esta marcacao de 15 minutos e a
- penas para lembrar o inicio. Mapa: https://maps.app.goo.gl/YYeyFWafrc
- beTBfd8?g_st=ac
+SUMMARY:Lembrete de início - Confraternização 2026
+LOCATION:Loja Maçônica Fenelon Barbosa
+DESCRIPTION:Confraternização 2026 das empresas Covre Agrícola e C
+ ovre & Cia. O início será às 15h00 (horário de Brasília). O en
+ cerramento não foi informado. Este lembrete ocupa apenas 15 minuto
+ s na agenda e NÃO representa a duração do evento. Localização:
+  https://maps.app.goo.gl/YYeyFWafrcbeTBfd8?g_st=ac
 URL:https://gaveblue.com.br/confraternizacao/
 BEGIN:VALARM
 TRIGGER:-PT60M
 ACTION:DISPLAY
-DESCRIPTION:Confraternizacao 2026 comeca as 15h
+DESCRIPTION:Confraternização 2026 começa às 15h00
 END:VALARM
 END:VEVENT
 END:VCALENDAR
