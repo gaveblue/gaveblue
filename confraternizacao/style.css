@@ -7,3 +7,17 @@
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
 
 .name-stack{display:flex;flex-direction:column;gap:3px;white-space:normal}.name-stack strong{font-weight:750;color:#1d2940}.name-stack small{color:#9aa5b5;font-weight:500;font-size:10px}
+
+/* RSVP v4: analytics and manual-confirmation form */
+.admin-page .stats-grid{grid-template-columns:repeat(auto-fit,minmax(162px,1fr))}
+.manual-confirm-box{border:1px solid #e2e7f0;border-radius:12px;background:#fafbfd;padding:14px;margin-top:3px}
+.manual-confirm-box .checkbox-line{margin:0!important;display:flex;align-items:center;gap:10px}
+.manual-confirm-box .checkbox-line strong{font-weight:750;color:#273449}
+.manual-confirm-box p{font-size:11px;color:#79869c;line-height:1.55;margin:8px 0 0 25px}
+.manual-confirm-box input[type=checkbox]{accent-color:#1a9b74}
+.origin-label{display:inline-block;margin-left:5px;font-size:10px;font-weight:700;color:#70809a}
+.stat-icon.violet{color:#705da6;background:#f2eff9}
+.table-toolbar #sector-filter{width:190px;max-width:100%}
+.modal-card .standard-input{min-height:45px}
+@media(max-width:960px){.admin-page .stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:700px){.table-toolbar #sector-filter{width:100%;flex:1}.manual-confirm-box{padding:12px}}
