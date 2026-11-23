@@ -35,6 +35,55 @@ function initGuest() {
   const searchWrap = $("guest-search-wrap");
   const boot = $("invite-boot");
 
+  let countdownTimer = null;
+  let countdownTick = null;
+  function startCountdown() {
+    if (countdownTimer !== null) {
+      clearInterval(countdownTimer);
+      countdownTimer = null;
+    }
+    const date = String(event?.data_evento || "");
+    const time = String(event?.horario || "").replace("h", ":").slice(0, 5);
+    // O evento é em 2026 no horário de Brasília (UTC−03, sem horário de verão).
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !/^\d{2}:\d{2}$/.test(time)) {
+      show("event-countdown", false);
+      return;
+    }
+    const target = new Date(date + "T" + time + ":00-03:00").getTime();
+    if (!Number.isFinite(target)) {
+      show("event-countdown", false);
+      return;
+    }
+    show("event-countdown", true);
+    const fields = ["countdown-days", "countdown-hours", "countdown-minutes", "countdown-seconds"];
+    const tick = () => {
+      const remaining = Math.max(0, Math.ceil((target - Date.now()) / 1000));
+      const values = [
+        Math.floor(remaining / 86400),
+        Math.floor((remaining % 86400) / 3600),
+        Math.floor((remaining % 3600) / 60),
+        remaining % 60
+      ];
+      fields.forEach((id, i) => { $(id).textContent = String(values[i]).padStart(2, "0"); });
+      const started = remaining === 0;
+      $("countdown-title").textContent = started ? "O grande dia chegou!" : "Falta pouco para celebrarmos!";
+      if (started) {
+        $("countdown-status").textContent = "Hoje é dia de confraternizar!";
+        show("countdown-status", true);
+        if (countdownTimer !== null) { clearInterval(countdownTimer); countdownTimer = null; }
+      } else {
+        show("countdown-status", false);
+      }
+    };
+    countdownTick = tick;
+    tick();
+    if (target > Date.now()) countdownTimer = setInterval(tick, 1000);
+  }
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden && countdownTick) countdownTick();
+  });
+
+
   // In mobile in-app browsers the virtual keyboard may overlay position:fixed.
   // Anchor the sheet to the *visible* viewport instead of the layout viewport.
   let viewportFrame = 0;
@@ -154,6 +203,7 @@ function initGuest() {
     $("event-date").textContent = day && day.length === 3 ? day[2] + "/" + day[1] : "A definir";
     $("event-time").textContent = event.horario ? String(event.horario).replace(":", "h") : "A definir";
     $("event-place").textContent = event.local_evento || "Local a definir";
+    startCountdown();
     show("guest-cta", event.status === "aberto" && !finished);
     show("guest-locked", event.status !== "aberto");
   }
