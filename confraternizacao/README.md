@@ -78,3 +78,11 @@ Implementação isolada do convite corporativo GaveBlue, sem alterações nos ap
 - Abertura agora usa tela de carregamento integral "Carregando seu convite"; conteúdo principal fica oculto até a API do evento responder. Em caso de erro, exibe botão "Tentar novamente" na abertura em vez de tela aparentemente travada.
 - Folha de estilos específica guest-v8.css carregada após style.css para não modificar o painel administrativo. Arquivos cache-busted com v=8.
 - Testes estáticos: HTML balanceado e sem IDs duplicados, nenhum identificador da etapa pública sem elemento, JS com sintaxe válida e CSS com chaves balanceadas. Não houve alteração no banco nem nas regras de confirmação. O domínio não foi acessível para teste visual automatizado.
+
+## Convite v9 · 23/11/2026
+- Incluído link externo de Google Maps fornecido pela organização abaixo do endereço: “Não sabe onde fica? Clique aqui”, abrindo em nova aba com rel=noopener noreferrer.
+- Substituída a imagem Covre & Cia por logotipo enviado pelo usuário em 328456.png, sem recriar a arte. Versão publicada comprimida em PNG transparente, 440×394 px, com recorte das margens transparentes e redução para web. Arquivo: `confraternizacao/assets/covre-e-cia-oficial.png` (16.521 bytes).
+- Ajustado dimensionamento do logotipo vertical para manter proporções no cabeçalho.
+- Corrigido posicionamento do bottom sheet ao abrir teclado Android: usa `window.visualViewport.height` e `offsetTop`, recalcula em resize/scroll/foco e limita altura do painel à área visível, permitindo rolagem interna da busca.
+- Assets com cache-busting `?v=9`; sem alteração nos cadastros, confirmados ou backend.
+- Conferência: assets presentes na árvore do GitHub, URL do Maps correta, JavaScript compilado, identificadores HTML consistentes e CSS sem desequilíbrio de chaves. O comportamento específico do teclado deverá ser validado no aparelho, pois não há teste Android real disponível neste ambiente.
