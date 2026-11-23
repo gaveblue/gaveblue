@@ -6,10 +6,10 @@
 <title>Gestão da confraternização</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link href="../style.css?v=2" rel="stylesheet">
+<link href="../style.css?v=4" rel="stylesheet">
 
 <script defer src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
-<script defer src="../app.js?v=3"></script>
+<script defer src="../app.js?v=4"></script>
 </head>
 <body class="admin-page">
 <div id="admin-login" class="auth-shell">
@@ -42,12 +42,13 @@
     <div class="mobile-nav"><button data-view="overview" class="mobile-tab active"><i data-lucide="layout-dashboard"></i> Geral</button><button data-view="people" class="mobile-tab"><i data-lucide="users"></i> Lista</button><button data-view="settings" class="mobile-tab"><i data-lucide="settings"></i> Evento</button></div>
     <div id="admin-notice" class="notice hidden" role="status"></div>
     <div id="view-overview" class="admin-content">
-      <div class="section-intro"><h2>Visão geral</h2><p>Acompanhe em tempo real as respostas dos convidados.</p></div>
+      <div class="section-intro action-intro"><div><h2>Visão geral</h2><p>Acompanhe as respostas e os cadastros do evento.</p></div><button id="refresh-dashboard" class="secondary-button" type="button"><i data-lucide="refresh-cw"></i> Atualizar dados</button></div>
       <div class="stats-grid">
-        <article class="stat-card"><span class="stat-icon"><i data-lucide="users"></i></span><small>Colaboradores</small><strong id="stat-invited">0</strong><span>convidados ativos</span></article>
+        <article class="stat-card"><span class="stat-icon"><i data-lucide="users"></i></span><small>Cadastrados</small><strong id="stat-invited">0</strong><span id="stat-eligible">0 aptos à busca</span></article>
         <article class="stat-card"><span class="stat-icon green"><i data-lucide="check-circle-2"></i></span><small>Confirmados</small><strong id="stat-confirmed">0</strong><span>presenças confirmadas</span></article>
         <article class="stat-card"><span class="stat-icon amber"><i data-lucide="clock-3"></i></span><small>Pendentes</small><strong id="stat-pending">0</strong><span>aguardando resposta</span></article>
-        <article class="stat-card"><span class="stat-icon purple"><i data-lucide="user-round-plus"></i></span><small>Total de pessoas</small><strong id="stat-total">0</strong><span id="stat-plus">incluindo 0 acompanhantes</span></article>
+        <article class="stat-card"><span class="stat-icon violet"><i data-lucide="user-round-x"></i></span><small>Sem sobrenome</small><strong id="stat-incomplete">0</strong><span>completar cadastros</span></article>
+        <article class="stat-card"><span class="stat-icon purple"><i data-lucide="user-round-plus"></i></span><small>Total esperado</small><strong id="stat-total">0</strong><span id="stat-plus">incluindo 0 acompanhantes</span></article>
       </div>
       <div class="two-panels"><section class="admin-panel"><div class="panel-heading"><div><h3>Participação</h3><p>Progresso das confirmações</p></div><span id="participation-rate" class="rate-pill">0%</span></div><div class="progress-track"><span id="participation-bar"></span></div><p class="muted" id="participation-text">Aguardando colaboradores.</p></section>
       <section class="admin-panel"><div class="panel-heading"><div><h3>Link do convite</h3><p>Compartilhe um único link com a equipe</p></div><i data-lucide="link-2"></i></div><div class="share-url" id="share-url">gaveblue.com.br/confraternizacao/</div><button id="copy-link" class="secondary-button"><i data-lucide="copy"></i> Copiar link</button></section></div>
@@ -55,7 +56,7 @@
     </div>
     <div id="view-people" class="admin-content hidden">
       <div class="section-intro action-intro"><div><h2>Colaboradores</h2><p>Cadastre, importe e acompanhe quem vai participar.</p></div><div class="button-row"><button id="import-button" class="secondary-button"><i data-lucide="upload"></i> Importar lista</button><button id="export-button" class="secondary-button"><i data-lucide="download"></i> Exportar CSV</button></div></div>
-      <section class="admin-panel"><div class="table-toolbar"><div class="search-wrap"><i data-lucide="search"></i><input id="people-search" placeholder="Buscar colaborador..." autocomplete="off"></div><select id="status-filter" class="standard-input"><option value="all">Todos</option><option value="confirmed">Confirmados</option><option value="pending">Pendentes</option><option value="inactive">Inativos</option></select><span id="people-count" class="count-label">0 resultados</span></div><div class="table-scroll"><table class="people-table"><thead><tr><th>COLABORADOR</th><th>ACOMPANHANTE</th><th>STATUS</th><th>CONFIRMADO EM</th><th></th></tr></thead><tbody id="people-body"></tbody></table></div></section>
+      <section class="admin-panel"><div class="table-toolbar"><div class="search-wrap"><i data-lucide="search"></i><input id="people-search" placeholder="Buscar colaborador..." autocomplete="off"></div><select id="status-filter" class="standard-input"><option value="all">Todos</option><option value="confirmed">Confirmados</option><option value="pending">Pendentes</option><option value="incomplete">Sem sobrenome</option><option value="inactive">Inativos</option></select><select id="sector-filter" class="standard-input" aria-label="Filtrar por setor"><option value="all">Todos os setores</option></select><span id="people-count" class="count-label">0 resultados</span></div><div class="table-scroll"><table class="people-table"><thead><tr><th>COLABORADOR</th><th>SETOR</th><th>ACOMPANHANTE</th><th>STATUS</th><th>CONFIRMADO EM</th><th></th></tr></thead><tbody id="people-body"></tbody></table></div></section>
     </div>
     <div id="view-settings" class="admin-content hidden">
       <div class="section-intro"><h2>Configurações do evento</h2><p>Personalize o convite, o WhatsApp e o período de confirmação.</p></div>
@@ -79,7 +80,10 @@
   <div class="modal-backdrop" data-close-modal></div><form id="person-form" class="modal-card">
     <div class="modal-head"><div><span class="eyebrow">LISTA DE CONVIDADOS</span><h2 id="modal-title">Novo colaborador</h2></div><button type="button" class="icon-btn" data-close-modal aria-label="Fechar"><i data-lucide="x"></i></button></div>
     <label for="person-name">Nome completo do colaborador</label><input id="person-name" class="standard-input" placeholder="Nome e sobrenome" maxlength="150" required>
-    <label class="checkbox-line" id="person-active-wrap"><input id="person-active" type="checkbox" checked> Colaborador ativo na lista</label>
+    <label for="person-sector">Setor / grupo</label><input id="person-sector" class="standard-input" list="sector-suggestions" placeholder="Ex.: Covre e Cia" maxlength="90" autocomplete="off">
+    <datalist id="sector-suggestions"></datalist>
+    <label class="checkbox-line" id="person-active-wrap"><input id="person-active" type="checkbox" checked> Disponível na busca pública</label>
+    <div class="manual-confirm-box"><label class="checkbox-line" for="person-confirmed"><input id="person-confirmed" type="checkbox"> <strong>Presença confirmada</strong></label><p id="person-confirm-help">Marque para confirmar manualmente, sem WhatsApp. Desmarque para retirar a confirmação.</p></div>
     <button type="submit" class="main-button">Salvar colaborador <i data-lucide="check"></i></button>
   </form>
 </div>
