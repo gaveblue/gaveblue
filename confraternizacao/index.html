@@ -11,9 +11,9 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link href="./style.css?v=8" rel="stylesheet">
 <link href="./guest-v8.css?v=9" rel="stylesheet">
-<link href="./guest-v10.css?v=11" rel="stylesheet">
+<link href="./guest-v10.css?v=12" rel="stylesheet">
 <script defer src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
-<script defer src="./app.js?v=11"></script>
+<script defer src="./app.js?v=12"></script>
 </head>
 <body class="guest-page invite-booting">
 <div id="invite-boot" class="invite-boot" role="status" aria-live="polite">
@@ -48,10 +48,10 @@
   <section class="guest-details" aria-label="Informações do evento">
     <div class="event-when">
       <div class="event-when-cell event-date-cell">
-        <a id="event-calendar-link" class="event-calendar-link" href="./confraternizacao-2026.ics" download="confraternizacao-2026.ics" type="text/calendar" aria-label="Salvar lembrete da confraternização no calendário do celular" title="Baixar lembrete para usar no calendário de sua preferência">
+        <button id="event-calendar-link" class="event-calendar-link" type="button" aria-haspopup="dialog" aria-controls="calendar-options" aria-label="Ver opções para salvar a data da confraternização" title="Opções de calendário">
           <span class="detail-icon"><i data-lucide="calendar-days"></i></span>
-          <span class="event-calendar-copy"><small>DATA <i data-lucide="calendar-plus-2" aria-hidden="true"></i></small><strong id="event-date">12/12</strong><span class="event-calendar-hint">Salvar no calendário</span></span>
-        </a>
+          <span class="event-calendar-copy"><small>DATA <i data-lucide="calendar-plus-2" aria-hidden="true"></i></small><strong id="event-date">12/12</strong><span class="event-calendar-hint">Ver opções de calendário</span></span>
+        </button>
       </div>
       <span class="event-when-divider" aria-hidden="true"></span>
       <div class="event-when-cell"><span class="detail-icon"><i data-lucide="clock-3"></i></span><div><small>HORÁRIO</small><strong id="event-time">15h00</strong></div></div>
@@ -114,6 +114,31 @@
       </div>
     </div>
   </div>
+</div>
+
+<div id="calendar-options" class="calendar-options hidden" role="dialog" aria-modal="true" aria-labelledby="calendar-options-title" aria-hidden="true">
+  <div id="calendar-options-backdrop" class="calendar-options-backdrop"></div>
+  <section class="calendar-options-panel">
+    <div class="calendar-options-top">
+      <span class="calendar-options-icon"><i data-lucide="calendar-days"></i></span>
+      <button id="calendar-options-close" type="button" class="calendar-options-close" aria-label="Fechar opções de calendário"><i data-lucide="x"></i></button>
+    </div>
+    <h2 id="calendar-options-title">Salvar a data do evento</h2>
+    <p class="calendar-options-lead">12/12/2026, às 15h00, na Loja Maçônica Fenelon Barbosa.</p>
+    <div class="calendar-options-actions">
+      <button id="calendar-copy" type="button" class="calendar-option calendar-option-main">
+        <i data-lucide="copy"></i><span><strong>Copiar informações</strong><small>Para adicionar manualmente no calendário que você usa.</small></span><i data-lucide="chevron-right"></i>
+      </button>
+      <button id="calendar-share" type="button" class="calendar-option">
+        <i data-lucide="share-2"></i><span><strong>Compartilhar lembrete</strong><small>Escolher um aplicativo disponível no celular.</small></span><i data-lucide="chevron-right"></i>
+      </button>
+      <a id="calendar-file" class="calendar-option" href="./confraternizacao-2026.ics" download="confraternizacao-2026.ics" type="text/calendar">
+        <i data-lucide="download"></i><span><strong>Baixar arquivo de calendário (.ics)</strong><small>Importar depois no aplicativo de sua preferência.</small></span><i data-lucide="chevron-right"></i>
+      </a>
+    </div>
+    <p id="calendar-options-feedback" class="calendar-options-feedback hidden" role="status" aria-live="polite"></p>
+    <p class="calendar-options-note">Ao tocar na data, nenhum aplicativo será aberto automaticamente. A escolha é sua.</p>
+  </section>
 </div>
 </body>
 </html>
