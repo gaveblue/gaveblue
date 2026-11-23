@@ -1,0 +1,87 @@
+/* RSVP v13 — tipografia respirada, data sem ações e localização centralizada */
+.guest-page .guest-hero {
+  padding-top: 16px;
+  padding-bottom: 13px;
+}
+.guest-page .guest-hero h1 {
+  max-width: 100%;
+  font-size: clamp(25px, 5.8vw, 34px);
+  line-height: 1.17;
+  letter-spacing: -.038em;
+  text-align: center;
+  margin: 11px auto 10px;
+  text-wrap: balance;
+}
+.guest-page .guest-hero h1 .heading-prefix {
+  display: block;
+  font-size: .83em;
+  white-space: nowrap;
+  letter-spacing: -.042em;
+}
+.guest-page .guest-hero h1 .heading-rest {
+  display: block;
+  margin-top: 2px;
+}
+.guest-page .event-date-cell,
+.guest-page .event-date-cell .event-calendar-copy {
+  cursor: default;
+}
+.guest-page .event-location {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 6px;
+  padding: 13px 12px 14px;
+  min-height: 0;
+}
+.guest-page .event-location .detail-icon {
+  margin: 0;
+}
+.guest-page .event-location .event-location-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+}
+.guest-page .event-location small { margin-bottom: 5px; }
+.guest-page .event-location strong {
+  font-size: 12px;
+  max-width: 100%;
+  line-height: 1.35;
+  text-wrap: balance;
+}
+.guest-page .event-location .event-map-link {
+  display: inline-flex;
+  width: fit-content;
+  max-width: 100%;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  margin: 5px 0 0;
+  padding: 3px 5px;
+}
+@media (max-width: 700px) {
+  .guest-page .guest-hero {
+    padding-top: 14px;
+    padding-bottom: 12px;
+  }
+  .guest-page .guest-hero h1 {
+    font-size: clamp(24px, 6.15vw, 30px);
+    line-height: 1.16;
+    margin: 9px auto 9px;
+  }
+  .guest-page .guest-hero h1 .heading-prefix {
+    font-size: .86em;
+  }
+  .guest-page .event-location {
+    padding: 12px 10px 13px;
+  }
+}
+@media (max-width: 360px) {
+  .guest-page .guest-hero h1 { font-size: 23px; }
+  .guest-page .guest-hero h1 .heading-prefix { font-size: .88em; }
+  .guest-page .event-location strong { font-size: 11px; }
+}
