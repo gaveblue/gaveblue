@@ -15,6 +15,14 @@ const json = (data: unknown, status = 200, origin = "") => new Response(JSON.str
 });
 const clean = (value: unknown, max = 150) => String(value ?? "").replace(/\s+/g, " ").trim().slice(0, max);
 const norm = (v: unknown) => clean(v, 160).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z\s'-]/g, "").replace(/\s+/g, " ").trim();
+const matchesSearch = (full: string, query: string) => {
+  const words = norm(full).split(" ").filter(Boolean);
+  const terms = norm(query).split(" ").filter(Boolean);
+  if (words.length < 2 || terms.length < 2 || terms[0].length < 2 || terms[terms.length - 1].length < 3) return false;
+  if (!words[0].startsWith(terms[0])) return false;
+  const surname = terms.slice(1).join(" ");
+  return words.slice(1).some((_, index) => words.slice(index + 1).join(" ").startsWith(surname));
+};
 const validName = (v: string) => v.length >= 5 && v.length <= 150 && v.split(" ").filter(Boolean).length >= 2 && /^[\p{L}\s'-]+$/u.test(v);
 const errorText = (e: unknown) => e instanceof Error ? e.message : "Não foi possível concluir a solicitação.";
 function assert(ok: unknown, message: string): asserts ok { if (!ok) throw new Error(message); }
@@ -59,9 +67,9 @@ Deno.serve(async (req: Request) => {
       const key = norm(body.query);
       const terms = key.split(" ");
       if (terms.length < 2 || terms[0].length < 2 || terms[terms.length - 1].length < 3) return json({ ok: true, results: [] }, 200, origin);
-      const { data, error } = await db.from("rsvp_colaboradores").select("id,nome_completo").eq("evento_id", ev.id).eq("ativo", true).like("nome_chave", key + "%").order("nome_completo").limit(8);
+      const { data, error } = await db.from("rsvp_colaboradores").select("id,nome_completo").eq("evento_id", ev.id).eq("ativo", true).like("nome_chave", terms[0] + "%").order("nome_completo").limit(300);
       assert(!error, "Falha na busca.");
-      return json({ ok: true, results: data || [] }, 200, origin);
+      return json({ ok: true, results: (data || []).filter((item) => matchesSearch(item.nome_completo, key)).slice(0, 8) }, 200, origin);
     }
     if (action === "confirm") {
       await rate(req, "confirm", 15);
@@ -71,7 +79,7 @@ Deno.serve(async (req: Request) => {
       const terms = key.split(" ");
       assert(/^[0-9a-f-]{36}$/i.test(id) && terms.length >= 2 && terms[0].length >= 2 && terms[terms.length - 1].length >= 3, "Identificação incompleta.");
       const { data: employee } = await db.from("rsvp_colaboradores").select("id,nome_completo,nome_chave").eq("id", id).eq("evento_id", ev.id).eq("ativo", true).maybeSingle();
-      assert(employee && employee.nome_chave.startsWith(key), "Colaborador não encontrado. Faça a busca novamente.");
+      assert(employee && matchesSearch(employee.nome_completo, key), "Colaborador não encontrado. Faça a busca novamente.");
       const companion = body.acompanhante === true;
       assert(!companion || ev.permite_acompanhante, "Acompanhante não permitido neste evento.");
       const companionName = companion ? clean(body.acompanhante_nome) : null;
@@ -90,7 +98,7 @@ Deno.serve(async (req: Request) => {
     await isAdmin(req);
     if (action === "admin-bootstrap") {
       const [employees, confirmations] = await Promise.all([
-        db.from("rsvp_colaboradores").select("id,nome_completo,ativo,criado_em").eq("evento_id", ev.id).order("nome_completo"),
+        db.from("rsvp_colaboradores").select("id,nome_completo,grupo,ativo,criado_em").eq("evento_id", ev.id).order("nome_completo"),
         db.from("rsvp_confirmacoes").select("colaborador_id,acompanhante,acompanhante_nome,confirmado_em").eq("evento_id", ev.id)
       ]);
       assert(!employees.error && !confirmations.error, "Falha ao carregar os dados.");
