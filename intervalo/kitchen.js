@@ -1,6 +1,6 @@
 // Intervalo — cozinha com consulta automática em intervalos de 15s, sem alegar Realtime ou impressão.
 import {icon} from './ui-icons.js?v=1.0.0-rc.1';
-import {menuButtonMarkup} from './global-navigation-rc7.js?v=1.2.0-rc.7';
+import {menuButtonMarkup} from './global-navigation-rc7.js?v=1.2.0-rc.17';
 import {printConfigured,onlineReceiptData} from './print-template-rc2.js?v=1.2.0-rc.15';
 export function kitchenClock(start,stage,now=Date.now()){
  const ts=Date.parse(start??'');if(!Number.isFinite(ts)||stage==='ready')return {text:stage==='ready'?'Pronto':'Sem horário',late:false};
