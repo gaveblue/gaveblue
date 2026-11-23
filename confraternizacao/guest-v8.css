@@ -408,3 +408,28 @@
   .guest-page .event-map-link{font-size:10px;margin-top:4px}
   .guest-page #rsvp-sheet .rsvp-sheet-panel{border-radius:22px 22px 0 0}
 }
+
+
+/* Covre & Cia v9: arquivo original fornecido, proporção vertical preservada. */
+.guest-page .company-logo-cia img{
+  width:auto;
+  height:77px;
+  max-height:none;
+  max-width:145px;
+  object-fit:contain;
+  object-position:center;
+}
+.guest-page .company-logo-agricola img{
+  height:61px;
+  max-width:132px;
+}
+.guest-page .brand-divider{height:48px}
+@media(max-width:700px){
+  .guest-page .company-logo-cia img{height:72px;max-width:124px}
+  .guest-page .company-logo-agricola img{height:58px;max-width:124px}
+  .guest-page .brand-divider{height:42px}
+}
+@media(max-width:370px){
+  .guest-page .company-logo-cia img{height:65px;max-width:100px}
+  .guest-page .company-logo-agricola img{height:51px;max-width:104px}
+}
