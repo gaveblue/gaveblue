@@ -183,44 +183,72 @@ function initAdmin() {
     const ev = dataset.event;
     $("admin-title").textContent = ev.titulo;
     $("share-url").textContent = location.origin + "/confraternizacao/";
-    const actives = dataset.collaborators.filter(p => p.ativo);
+    const employees = dataset.collaborators;
+    const actives = employees.filter(p => p.ativo);
+    const incomplete = employees.filter(p => !validFullName(p.nome_completo));
     const confirmations = conMap();
-    const confirmed = actives.filter(p => confirmations.has(p.id));
+    const confirmed = employees.filter(p => confirmations.has(p.id));
+    const pending = actives.filter(p => !confirmations.has(p.id));
     const plus = confirmed.filter(p => confirmations.get(p.id)?.acompanhante).length;
-    const pct = actives.length ? Math.round(100 * confirmed.length / actives.length) : 0;
-    $("stat-invited").textContent = actives.length;
+    const pct = employees.length ? Math.round(100 * confirmed.length / employees.length) : 0;
+    $("stat-invited").textContent = employees.length;
+    $("stat-eligible").textContent = actives.length + " aptos à busca";
     $("stat-confirmed").textContent = confirmed.length;
-    $("stat-pending").textContent = actives.length - confirmed.length;
+    $("stat-pending").textContent = pending.length;
+    $("stat-incomplete").textContent = incomplete.length;
     $("stat-total").textContent = confirmed.length + plus;
-    $("stat-plus").textContent = "incluindo " + plus + " acompanhantes";
+    $("stat-plus").textContent = "incluindo " + plus + " acompanhante" + (plus === 1 ? "" : "s");
     $("participation-rate").textContent = pct + "%";
     $("participation-bar").style.width = pct + "%";
-    $("participation-text").textContent = confirmed.length + " de " + actives.length + " colaboradores confirmaram presença.";
-    const recent = confirmed.map(p => ({ ...p, reply: confirmations.get(p.id) })).sort((a,b) => String(b.reply.confirmado_em).localeCompare(String(a.reply.confirmado_em))).slice(0,5);
-    $("recent-list").innerHTML = recent.length ? recent.map(p => '<div class="recent-item"><div><strong>' + escapeHtml(p.nome_completo) + '</strong><small>' + escapeHtml(stamp(p.reply.confirmado_em)) + (p.reply.acompanhante ? " · Com acompanhante" : "") + '</small></div><span class="status-chip confirmed">Confirmado</span></div>').join("") : '<p class="muted">Nenhuma confirmação até o momento.</p>';
-    renderPeople(); renderSettings(); icons();
+    $("participation-text").textContent = confirmed.length + " de " + employees.length + " cadastrados confirmaram. " + incomplete.length + " cadastro(s) ainda sem sobrenome.";
+    const recent = confirmed.map(p => ({ ...p, reply: confirmations.get(p.id) }))
+      .sort((a,b) => String(b.reply.confirmado_em).localeCompare(String(a.reply.confirmado_em))).slice(0,5);
+    $("recent-list").innerHTML = recent.length ? recent.map(p => '<div class="recent-item"><div><strong>' + escapeHtml(p.nome_completo) + '</strong><small>' + escapeHtml(stamp(p.reply.confirmado_em)) + (p.reply.acompanhante ? " · Com acompanhante" : "") + (p.reply.origem === "manual" ? " · Confirmação manual" : "") + '</small></div><span class="status-chip confirmed">Confirmado</span></div>').join("") : '<p class="muted">Nenhuma confirmação até o momento.</p>';
+    renderPeople();
+    if (currentView !== "settings") renderSettings();
+    icons();
   }
   function renderPeople() {
     if (!dataset) return;
-    const term = norm($("people-search").value), filter = $("status-filter").value;
-    const confirmationMap = conMap();
+    const term = norm($("people-search").value), filter = $("status-filter").value, map = conMap();
+    const sectors = [...new Set(dataset.collaborators.map(p => (p.setor || "").trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"pt-BR"));
+    const selector = $("sector-filter"), selected = selector.value;
+    selector.innerHTML = '<option value="all">Todos os setores</option>' + sectors.map(x => '<option value="' + escapeHtml(x) + '">' + escapeHtml(x) + '</option>').join("");
+    selector.value = selected === "all" || sectors.includes(selected) ? selected : "all";
+    $("sector-suggestions").innerHTML = sectors.map(x => '<option value="' + escapeHtml(x) + '"></option>').join("");
+    const sector = selector.value;
     const list = dataset.collaborators.filter(p => {
-      if (term && !norm(p.nome_completo).includes(term)) return false;
-      const has = confirmationMap.has(p.id);
-      return filter === "all" || (filter === "inactive" && !p.ativo) || (filter === "confirmed" && has && p.ativo) || (filter === "pending" && !has && p.ativo);
+      if (term && !norm(p.nome_completo + " " + (p.setor || "") + " " + (p.grupo || "")).includes(term)) return false;
+      if (sector !== "all" && (p.setor || "") !== sector) return false;
+      const has = map.has(p.id);
+      if (filter === "confirmed") return has;
+      if (filter === "pending") return p.ativo && !has;
+      if (filter === "inactive") return !p.ativo;
+      if (filter === "incomplete") return !validFullName(p.nome_completo);
+      return true;
     });
-    $("people-count").textContent = list.length + " resultados";
+    $("people-count").textContent = list.length + " resultado" + (list.length === 1 ? "" : "s");
     $("people-body").innerHTML = list.length ? list.map(p => {
-      const c = confirmationMap.get(p.id);
-      const badge = !p.ativo ? (norm(p.nome_completo).split(" ").length < 2 ? '<span class="status-chip inactive">Completar sobrenome</span>' : '<span class="status-chip inactive">Inativo</span>') : c ? '<span class="status-chip confirmed">Confirmado</span>' : '<span class="status-chip">Pendente</span>';
-      const initials = p.nome_completo.split(/\s+/).slice(0,2).map(n=>n[0]).join("").toUpperCase();
-      return '<tr><td><div class="name-cell"><span class="initial-badge">' + escapeHtml(initials) + '</span><span class="name-stack"><strong>' + escapeHtml(p.nome_completo) + '</strong><small>' + escapeHtml(p.grupo || "") + '</small></span></div></td><td>' + escapeHtml(c?.acompanhante ? c.acompanhante_nome : "—") + '</td><td>' + badge + '</td><td>' + escapeHtml(stamp(c?.confirmado_em)) + '</td><td><button class="icon-btn edit-person" type="button" data-id="' + escapeHtml(p.id) + '" aria-label="Editar colaborador"><i data-lucide="pencil"></i></button></td></tr>';
-    }).join("") : '<tr><td colspan="5" style="padding:26px;text-align:center;color:#97a2b0">Nenhum colaborador encontrado.</td></tr>';
+      const c = map.get(p.id);
+      const originLabel = c?.origem === "manual" ? '<span class="origin-label">Manual</span>' : "";
+      const badge = c ? '<span class="status-chip confirmed">Confirmado</span>' + originLabel :
+        !validFullName(p.nome_completo) ? '<span class="status-chip inactive">Sem sobrenome</span>' :
+        !p.ativo ? '<span class="status-chip inactive">Inativo</span>' : '<span class="status-chip">Pendente</span>';
+      const initials = p.nome_completo.split(/\s+/).slice(0,2).map(n => n[0]).join("").toUpperCase();
+      return '<tr><td><div class="name-cell"><span class="initial-badge">' + escapeHtml(initials) + '</span><span class="name-stack"><strong>' + escapeHtml(p.nome_completo) + '</strong><small>Lista: ' + escapeHtml(p.grupo || "Sem grupo") + '</small></span></div></td><td>' + escapeHtml(p.setor || "Não informado") + '</td><td>' + escapeHtml(c?.acompanhante ? c.acompanhante_nome : "—") + '</td><td>' + badge + '</td><td>' + escapeHtml(stamp(c?.confirmado_em)) + '</td><td><button class="icon-btn edit-person" type="button" data-id="' + escapeHtml(p.id) + '" aria-label="Editar ' + escapeHtml(p.nome_completo) + '"><i data-lucide="pencil"></i></button></td></tr>';
+    }).join("") : '<tr><td colspan="6" style="padding:26px;text-align:center;color:#97a2b0">Nenhum colaborador encontrado.</td></tr>';
     document.querySelectorAll(".edit-person").forEach(b => b.addEventListener("click", () => openPerson(b.dataset.id)));
     icons();
   }
   $("people-search").addEventListener("input",renderPeople);
   $("status-filter").addEventListener("change",renderPeople);
+  $("sector-filter").addEventListener("change",renderPeople);
+  $("refresh-dashboard").addEventListener("click",async () => {
+    const button = $("refresh-dashboard"); button.disabled = true;
+    try { await bootstrap(true); notify("Indicadores e lista atualizados."); }
+    finally { button.disabled = false; }
+  });
+
   function renderSettings() {
     if (!dataset) return;
     const ev = dataset.event;
@@ -253,23 +281,38 @@ function initAdmin() {
   }));
   function openPerson(id = null) {
     editingId = id;
-    const person = (dataset?.collaborators || []).find(p=>p.id===id);
+    const person = (dataset?.collaborators || []).find(p => p.id === id);
+    const confirmation = person ? conMap().get(person.id) : null;
     $("modal-title").textContent = person ? "Editar colaborador" : "Novo colaborador";
     $("person-name").value = person?.nome_completo || "";
+    $("person-sector").value = person?.setor || "";
     $("person-active").checked = person?.ativo !== false;
-    show("person-active-wrap",!!person);
+    $("person-confirmed").checked = !!confirmation;
+    $("person-confirm-help").textContent = confirmation
+      ? "Já confirmado " + (confirmation.origem === "manual" ? "manualmente" : "pelo link") + ". Desmarcar remove a confirmação; salvar marcado preserva a resposta e o acompanhante existentes."
+      : "Marque para confirmar a presença manualmente, sem WhatsApp. A confirmação será contabilizada no dashboard.";
+    show("person-active-wrap", !!person);
     modal("edit-modal",true);
   }
   $("top-add").addEventListener("click",()=>openPerson());
   $("person-form").addEventListener("submit",async e => {
     e.preventDefault();
     const name = $("person-name").value.trim();
-    if (!validFullName(name)) { notify("Informe o nome e sobrenome do colaborador.",true); return; }
-    const button = e.currentTarget.querySelector('button[type="submit"]');button.disabled = true;
+    const active = $("person-active").checked;
+    if (!name || (active && !validFullName(name)) || (!editingId && !validFullName(name))) {
+      notify("Informe nome e sobrenome para disponibilizar o cadastro na busca.",true); return;
+    }
+    const button = e.currentTarget.querySelector('button[type="submit"]'); button.disabled = true;
     try {
-      await admin(editingId ? "admin-update" : "admin-add", { id:editingId, nome_completo:name, ativo:$("person-active").checked });
-      modal("edit-modal",false);await bootstrap(true);notify("Colaborador salvo na lista.");
-    } catch(err) { notify(err.message,true); } finally { button.disabled = false; }
+      await admin(editingId ? "admin-update" : "admin-add", {
+        id: editingId, nome_completo: name, setor: $("person-sector").value.trim(),
+        ativo: active, confirmado: $("person-confirmed").checked
+      });
+      modal("edit-modal",false);
+      await bootstrap(true);
+      notify(editingId ? "Cadastro e presença atualizados." : "Colaborador cadastrado.");
+    } catch(err) { notify(err.message,true); }
+    finally { button.disabled = false; }
   });
   $("import-button").addEventListener("click",()=>{ $("import-file").value = ""; $("import-names").value = ""; modal("import-modal",true); });
   $("import-file").addEventListener("change",async e => {
@@ -291,8 +334,8 @@ function initAdmin() {
   $("export-button").addEventListener("click",()=> {
     if(!dataset)return;
     const map=conMap();
-    const rows=[["Colaborador","Status","Acompanhante","Nome do acompanhante","Data da confirmacao"]];
-    dataset.collaborators.forEach(p => {const c=map.get(p.id);rows.push([p.nome_completo,!p.ativo?"Inativo":c?"Confirmado":"Pendente",c?.acompanhante?"Sim":"Nao",c?.acompanhante_nome||"",stamp(c?.confirmado_em)]);});
+    const rows=[["Colaborador","Setor","Grupo original","Status","Origem da confirmacao","Acompanhante","Nome do acompanhante","Data da confirmacao"]];
+    dataset.collaborators.forEach(p => {const c=map.get(p.id);rows.push([p.nome_completo,p.setor||"",p.grupo||"",c?"Confirmado":!validFullName(p.nome_completo)?"Sem sobrenome":!p.ativo?"Inativo":"Pendente",c?.origem==="manual"?"Manual":c?"Link":"",c?.acompanhante?"Sim":"Nao",c?.acompanhante_nome||"",stamp(c?.confirmado_em)]);});
     const csv="\uFEFF"+rows.map(row=>row.map(v=>'"'+String(v??"").replace(/"/g,'""')+'"').join(";")).join("\r\n");
     const url=window.URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"})); // replaced below to avoid shadowing global URL
     const a=document.createElement("a");a.href=url;a.download="confirmacoes-confraternizacao.csv";a.click();setTimeout(()=>window.URL.revokeObjectURL(url),1000);
@@ -320,7 +363,7 @@ function initAdmin() {
     finally{button.disabled=false;}
   });
   if (session) bootstrap(false);
-  setInterval(()=>{if(session && !document.hidden && Date.now()-lastLoad>=30000)bootstrap(true);},30000);
+  setInterval(()=>{if(session && !document.hidden && currentView !== "settings" && $("edit-modal").classList.contains("hidden") && $("import-modal").classList.contains("hidden") && Date.now()-lastLoad>=30000)bootstrap(true);},30000);
   icons();
 }
 document.addEventListener("DOMContentLoaded", () => {
