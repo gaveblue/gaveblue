@@ -9,9 +9,9 @@
 <title>Confraternização · Confirme sua presença</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link href="./style.css?v=6" rel="stylesheet">
+<link href="./style.css?v=7" rel="stylesheet">
 <script defer src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
-<script defer src="./app.js?v=6"></script>
+<script defer src="./app.js?v=7"></script>
 </head>
 <body class="guest-page">
 <div class="ambient ambient-a"></div><div class="ambient ambient-b"></div>
@@ -27,7 +27,7 @@
     <div class="eyebrow"><span class="eyebrow-dot"></span> UM CONVITE ESPECIAL <span class="eyebrow-year">• 2026</span></div>
     <h1>Você foi convocado para nossa <em>Confraternização 2026</em></h1>
     <p id="guest-description">Vamos celebrar juntos as conquistas, fortalecer nossos laços e renovar as energias para novos desafios.</p>
-    <div class="deadline-chip"><i data-lucide="calendar-check-2"></i> Confirme sua presença até <strong>30/11</strong></div>
+    <div class="deadline-chip" role="note"><i data-lucide="alert-circle" aria-hidden="true"></i><span><strong>Atenção:</strong> confirme sua presença até <strong>30/11</strong>.</span></div>
   </section>
   <section class="guest-details" aria-label="Informações do evento">
     <div class="detail"><span class="detail-icon"><i data-lucide="calendar-days"></i></span><div><small>DATA</small><strong id="event-date">A definir</strong></div></div>
@@ -35,7 +35,6 @@
     <div class="detail"><span class="detail-icon"><i data-lucide="map-pin"></i></span><div><small>LOCAL</small><strong id="event-place">A definir</strong></div></div>
   </section>
   <section class="invite-card" id="invite-card">
-    <div class="invite-heading"><div class="steps"><span class="step active" id="step-one">1</span><span class="step-line"></span><span class="step" id="step-two">2</span></div><span class="step-caption" id="step-caption">PASSO 1 DE 2</span></div>
     <div id="guest-error" class="notice error hidden" role="alert"></div>
     <div id="guest-locked" class="locked hidden"><span class="big-icon"><i data-lucide="calendar-clock"></i></span><h2>Estamos preparando tudo!</h2><p>As confirmações ainda não foram abertas. Volte em breve.</p></div>
     <div id="guest-loading" class="guest-skeleton" role="status" aria-live="polite">
@@ -44,13 +43,30 @@
       <div class="skeleton-footer"><span class="spinner"></span> Preparando seu convite...</div>
     </div>
     <div id="guest-identify" class="hidden">
-      <h2>Vamos confirmar sua presença?</h2><p class="support">Primeiro, encontre seu nome na lista de colaboradores.</p>
+      <h2>Confirme sua presença</h2><p class="support">Encontre seu nome e toque para continuar.</p>
       <label for="employee-search">Seu nome e sobrenome</label>
       <div class="search-wrap" id="guest-search-wrap"><i data-lucide="search" id="search-icon"></i><input id="employee-search" autocomplete="name" autocapitalize="words" enterkeyhint="search" spellcheck="false" placeholder="Ex.: Marina Santos" maxlength="160" aria-describedby="search-hint" aria-autocomplete="list"><span class="search-spinner hidden" id="search-spinner" aria-hidden="true"></span><button type="button" id="clear-search" class="clear-search hidden" aria-label="Limpar busca"><i data-lucide="x"></i></button></div>
       <p class="field-help" id="search-hint" role="status" aria-live="polite">Digite seu nome e pelo menos 3 letras do sobrenome.</p>
       <div id="employee-results" class="result-list" role="listbox" aria-label="Colaboradores encontrados"></div>
-      <p class="privacy"><i data-lucide="lock-keyhole"></i> Sua confirmação será utilizada apenas para organizar o evento.</p>
+      <p class="privacy"><i data-lucide="lock-keyhole"></i> Seus dados serão usados apenas na organização do evento.</p>
     </div>
+    <div id="guest-saved" class="hidden guest-saved">
+      <span class="guest-saved-icon"><i data-lucide="check-circle-2"></i></span>
+      <div><strong>Presença registrada!</strong><small>Consulte sua confirmação e o WhatsApp.</small></div>
+      <button id="open-receipt" class="guest-receipt-button" type="button">Ver <i data-lucide="chevron-right"></i></button>
+    </div>
+  </section>
+  <footer class="guest-footer">Feito com carinho para um momento especial. <span>© 2026</span></footer>
+</main>
+<div id="rsvp-sheet" class="rsvp-sheet hidden" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+  <div class="rsvp-sheet-backdrop" id="sheet-backdrop"></div>
+  <div class="rsvp-sheet-panel">
+    <button class="rsvp-sheet-handle" id="sheet-handle" type="button" aria-label="Deslize para baixo para fechar"><span></span></button>
+    <div class="rsvp-sheet-head"><div><span class="rsvp-sheet-kicker">CONFRATERNIZAÇÃO 2026</span><h2 id="sheet-title" tabindex="-1">Confirmar presença</h2></div>
+      <button id="sheet-close" class="rsvp-sheet-close" type="button" aria-label="Fechar"><i data-lucide="x"></i></button>
+    </div>
+    <div id="sheet-error" class="notice error hidden" role="alert"></div>
+    <div id="rsvp-sheet-scroll" class="rsvp-sheet-scroll">
     <div id="guest-companion" class="hidden">
       <div class="selected-person"><span class="selected-avatar"><i data-lucide="user-round-check"></i></span><div><small>COLABORADOR</small><strong id="selected-name"></strong></div><button id="change-person" class="text-btn" type="button">Alterar</button></div>
       <h2>Falta só um detalhe.</h2><p class="support">Você vai levar acompanhante?</p>
@@ -59,10 +75,10 @@
         <label class="option"><input type="radio" name="plus" value="no"><span class="option-symbol"><i data-lucide="user-round"></i></span><span>Não, irei sozinho(a)</span><i data-lucide="circle" class="option-check"></i></label>
       </div>
       <div id="companion-field" class="hidden"><label for="companion-name">Nome completo do acompanhante</label><input id="companion-name" class="standard-input" placeholder="Nome e sobrenome" autocomplete="off" maxlength="150"><p class="field-help">Informe como o nome deve aparecer na lista do evento.</p></div>
-      <button class="main-button" type="button" id="confirm-button" disabled>Confirmar presença <i data-lucide="arrow-up-right"></i></button>
-      <p class="confirm-note">Ao confirmar, seus dados serão salvos e você será direcionado ao WhatsApp para enviar a mensagem à organização.</p>
+      <p class="confirm-note">A confirmação será registrada antes de abrir o WhatsApp. Toque em Enviar na conversa.</p>
+      <div class="rsvp-sheet-action"><button class="main-button" type="button" id="confirm-button" disabled>Confirmar presença <i data-lucide="check"></i></button></div>
     </div>
-    <div id="guest-done" class="hidden done-panel">
+    <div id="guest-done" class="hidden done-panel" aria-live="polite">
       <div class="success-mark"><i data-lucide="check"></i></div>
       <span class="done-eyebrow">TUDO CERTO!</span>
       <h2>Presença confirmada.</h2>
@@ -74,8 +90,8 @@
       <a id="whatsapp-fallback" class="main-button whatsapp-button" target="_self" rel="noopener"><i data-lucide="message-circle"></i> Enviar mensagem no WhatsApp <i data-lucide="arrow-up-right"></i></a>
       <p class="done-note"><i data-lucide="info"></i> O WhatsApp abrirá com a mensagem pronta. Toque em <strong>Enviar</strong> para concluir o contato.</p>
     </div>
-  </section>
-  <footer class="guest-footer">Feito com carinho para um momento especial. <span>© 2026</span></footer>
-</main>
+    </div>
+  </div>
+</div>
 </body>
 </html>
