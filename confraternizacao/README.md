@@ -56,3 +56,14 @@ Implementação isolada do convite corporativo GaveBlue, sem alterações nos ap
 - Dados de presença e banco não alterados; preservada a confirmação por busca e o redirecionamento.
 - Confirmações de código: JS analisado sem erro de sintaxe, IDs referenciados existentes no HTML e assets versionados com ?v=6.
 - Limite de QA: não foi possível abrir a página pública pelo navegador automatizado deste ambiente (rede/DNS); confirmar aparência e integração no aparelho.
+
+## Convite v7 · 23/11/2026
+- Página pública mais compacta: títulos e logos menores, informações do evento organizadas verticalmente (data, horário, local).
+- Prazo de 30/11 destacado como alerta compacto vermelho com ícone de atenção.
+- Removido o stepper de 2 etapas da página principal; busca permanece no card inicial.
+- Após escolher colaborador, bottom sheet abre a partir de baixo com sobreposição, alça, fechar, clique no backdrop, Escape e gestos de arrastar para baixo na alça.
+- Acompanhante sim/não e campo de nome condicional ficam no bottom sheet; botão de confirmação fica destacado no rodapé do conteúdo e continua salvando antes de direcionar ao WhatsApp.
+- Sucesso também dentro do sheet, com resumo de colaborador e acompanhante; após fechar há cartão compacto para reabrir o comprovante.
+- Altura adaptada à viewport dinâmica no celular, scroll interno e bloqueio de rolagem do fundo, sem focar automaticamente no campo de texto.
+- HTML com tags balanceadas e IDs únicos; JS passa em verificação de sintaxe, referências de sheet conferidas, CSS com chaves equilibradas; assets versionados com ?v=7.
+- O teste visual em navegador externo ainda depende de validação no dispositivo do usuário, pois este ambiente não resolve o domínio gaveblue.com.br.
