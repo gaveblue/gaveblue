@@ -33,7 +33,7 @@ function initGuest() {
       event = resp.event;
       $("guest-description").textContent = event.descricao || "Vamos celebrar juntos nossas conquistas!";
       $("event-date").textContent = datestr(event.data_evento);
-      $("event-time").textContent = event.horario || "A definir";
+      $("event-time").textContent = event.horario ? event.horario.replace(":", "h") : "A definir";
       $("event-place").textContent = event.local_evento || "A definir";
       show("guest-loading", false);
       show("guest-locked", event.status !== "aberto");
@@ -210,9 +210,9 @@ function initAdmin() {
     $("people-count").textContent = list.length + " resultados";
     $("people-body").innerHTML = list.length ? list.map(p => {
       const c = confirmationMap.get(p.id);
-      const badge = !p.ativo ? '<span class="status-chip inactive">Inativo</span>' : c ? '<span class="status-chip confirmed">Confirmado</span>' : '<span class="status-chip">Pendente</span>';
+      const badge = !p.ativo ? (norm(p.nome_completo).split(" ").length < 2 ? '<span class="status-chip inactive">Completar sobrenome</span>' : '<span class="status-chip inactive">Inativo</span>') : c ? '<span class="status-chip confirmed">Confirmado</span>' : '<span class="status-chip">Pendente</span>';
       const initials = p.nome_completo.split(/\s+/).slice(0,2).map(n=>n[0]).join("").toUpperCase();
-      return '<tr><td><div class="name-cell"><span class="initial-badge">' + escapeHtml(initials) + '</span>' + escapeHtml(p.nome_completo) + '</div></td><td>' + escapeHtml(c?.acompanhante ? c.acompanhante_nome : "—") + '</td><td>' + badge + '</td><td>' + escapeHtml(stamp(c?.confirmado_em)) + '</td><td><button class="icon-btn edit-person" type="button" data-id="' + escapeHtml(p.id) + '" aria-label="Editar colaborador"><i data-lucide="pencil"></i></button></td></tr>';
+      return '<tr><td><div class="name-cell"><span class="initial-badge">' + escapeHtml(initials) + '</span><span class="name-stack"><strong>' + escapeHtml(p.nome_completo) + '</strong><small>' + escapeHtml(p.grupo || "") + '</small></span></div></td><td>' + escapeHtml(c?.acompanhante ? c.acompanhante_nome : "—") + '</td><td>' + badge + '</td><td>' + escapeHtml(stamp(c?.confirmado_em)) + '</td><td><button class="icon-btn edit-person" type="button" data-id="' + escapeHtml(p.id) + '" aria-label="Editar colaborador"><i data-lucide="pencil"></i></button></td></tr>';
     }).join("") : '<tr><td colspan="5" style="padding:26px;text-align:center;color:#97a2b0">Nenhum colaborador encontrado.</td></tr>';
     document.querySelectorAll(".edit-person").forEach(b => b.addEventListener("click", () => openPerson(b.dataset.id)));
     icons();
