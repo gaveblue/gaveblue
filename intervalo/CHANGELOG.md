@@ -1,5 +1,15 @@
 # Intervalo — CHANGELOG
 
+## 1.2.0-rc.16 — 2026-11-23 · Auditoria UX: organização, navegação e hierarquia
+
+- Menu compartilhado da Gestão e módulos operacionais agora possui acesso rápido e seções recolhíveis para Operação, Produtos e cardápio, Estoque, Loja online e Configurações; a seção corrente abre automaticamente e os links continuam sujeitos às permissões.
+- Pedidos passa a se chamar Pedidos online para não confundir com comandas presenciais. Atalhos diretos contextualizam Categorias, Adicionais, Fichas técnicas, Movimentações e Vitrine, sem alterar as rotas originais.
+- Link do nome do restaurante no cabeçalho da Gestão agora leva à seleção Meus restaurantes. Cada restaurante exibe uma ação principal e módulos alternativos recolhidos.
+- Trocas de abas da Gestão geram histórico navegável; Voltar/Avançar restaura a seção. O menu móvel suporta Escape, foco e atributo aria-expanded.
+- Visão geral mantém quatro indicadores operacionais prioritários e transfere os demais para Mais indicadores.
+- Cores das ações principais passam a usar laranja escuro acessível com texto branco; melhorados toques e hierarquia da navegação, mantendo o laranja da identidade.
+- Mudanças exclusivamente no frontend: sem modificação no banco, Supabase, permissões, pedidos, pagamentos ou impressão. Testes de sintaxe e navegação estática; testes de dispositivo e confirmação no domínio ainda pendentes.
+
 ## 1.2.0-rc.15 — 2026-11-19 · Cupom térmico monocromático
 
 - Identidade Intervalo em preto e branco, colunas de itens e valores, observações com hierarquia, total em destaque, QR Pix real junto ao pagamento quando disponível; sem fotos de produtos.
