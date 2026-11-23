@@ -21,3 +21,137 @@
 .modal-card .standard-input{min-height:45px}
 @media(max-width:960px){.admin-page .stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:700px){.table-toolbar #sector-filter{width:100%;flex:1}.manual-confirm-box{padding:12px}}
+
+/* ===== Covre Agrícola + Covre & Cia · convite oficial 2026 ===== */
+.guest-page{
+  --ink:#153b23;--muted:#647664;--line:#e0eadf;--brand:#08612d;--brand2:#064720;
+  --green:#0a6735;--gold:#f1c928;--soft:#f3f8f1;
+  --shadow:0 20px 62px rgba(16,63,31,.085);
+  background:radial-gradient(ellipse at 12% 4%,#e3f3dc 0%,transparent 44%),
+             radial-gradient(ellipse at 98% 40%,#fff5d5 0%,transparent 39%),
+             linear-gradient(165deg,#fbfdf8 0%,#f7fbf4 60%,#f5f9f0 100%);
+  color:var(--ink);
+  min-height:100vh;
+  overflow-x:hidden;
+}
+.guest-page::before{
+  content:"";position:absolute;top:0;left:0;right:0;height:6px;
+  background:linear-gradient(95deg,#0a642e 0%,#2a8a47 34%,#fed63b 35%,#fed63b 56%,#066126 57%,#086b30 100%);
+}
+.guest-page .ambient-a{background:#bce6b5;opacity:.36}
+.guest-page .ambient-b{background:#ffdc7c;opacity:.27}
+.guest-page .guest-shell{max-width:690px;padding-top:27px}
+.guest-page .guest-header{
+  display:block;background:#fff;border:1px solid #e2ebdb;border-radius:19px;
+  box-shadow:0 7px 26px rgba(25,78,33,.052);padding:10px 18px;
+}
+.company-logos{display:flex;align-items:center;justify-content:space-around;gap:17px;width:100%}
+.company-logo{flex:1 1 0;min-width:0;display:flex;align-items:center;justify-content:center}
+.company-logo img{width:100%;height:78px;max-width:240px;object-fit:contain;object-position:center;display:block}
+.company-logo-agricola img{max-width:160px}
+.company-logo-cia img{max-width:200px}
+.brand-divider{height:56px;width:1px;flex:0 0 1px;background:#d6e5d2}
+.guest-page .guest-hero{padding-top:39px;padding-bottom:25px}
+.guest-page .guest-hero .eyebrow{color:#226c3e}
+.guest-page .eyebrow-dot{background:#efc529;box-shadow:0 0 0 5px rgba(239,197,41,.14)}
+.guest-page .guest-hero h1{
+  font-size:clamp(31px,5.75vw,47px);line-height:1.15;
+  margin:15px 0 13px;letter-spacing:-.048em;
+  color:#103c20;font-weight:800
+}
+.guest-page .guest-hero h1 em{font-style:normal;color:#148040}
+.guest-page .guest-hero p{color:#647864;line-height:1.62;max-width:600px;font-size:14px}
+.deadline-chip{
+  margin-top:19px;display:inline-flex;align-items:center;gap:8px;
+  color:#23652c;background:#f9f8e4;border:1px solid #eddda0;
+  padding:9px 13px;border-radius:999px;font-size:12px;font-weight:650
+}
+.deadline-chip strong{color:#104c20}
+.deadline-chip svg{height:16px;width:16px;color:#118047}
+.guest-page .detail{border-color:#e3ebdc;box-shadow:0 3px 12px rgba(24,77,34,.028)}
+.guest-page .detail-icon{background:#edf6e9;color:#18793a}
+.guest-page .detail small{color:#79907a}
+.guest-page .detail strong{color:#183d25}
+.guest-page .invite-card{border-color:#dfe9da;border-top:4px solid #eac52c;box-shadow:var(--shadow)}
+.guest-page .step.active{background:var(--brand);color:#fff;box-shadow:0 4px 14px rgba(15,95,39,.16)}
+.guest-page .step.complete{background:#e2f4e5;color:#166a34}
+.guest-page .step:not(.active):not(.complete){background:#edf1e8;color:#86a087}
+.guest-page .step-line{background:#d7e6d0}
+.guest-page .step-caption{color:#829580}
+.guest-page .invite-card h2{color:#193c25}
+.guest-page .support{color:#748471}
+.guest-page .search-wrap{border-color:#d5e0d2;transition:border .2s,box-shadow .2s,background .2s}
+.guest-page .search-wrap:focus-within,
+.guest-page .search-wrap.is-loading{border-color:#74ad77;box-shadow:0 0 0 4px rgba(26,123,52,.085)}
+.guest-page .search-wrap>svg{color:#5b9366}
+.guest-page .field-help{color:#728472}
+.guest-page .privacy{color:#8a9e89}
+.guest-page input:focus,.guest-page textarea:focus,.guest-page select:focus{border-color:#62a874!important;box-shadow:0 0 0 3px rgba(23,123,56,.09)}
+.guest-page .result-list{border-color:#dce8d6}
+.guest-page .result-item{border-bottom-color:#eaf1e5}
+.guest-page .result-item:hover,.guest-page .result-item:focus-visible{background:#f4faf3}
+.guest-page .result-avatar{background:#eaf6e6;color:#187a3c}
+.guest-page .result-item>svg{color:#4e9360}
+.guest-page .selected-person{background:#f0f8ed}
+.guest-page .selected-avatar{background:#e0f1dc;color:#0f7136}
+.guest-page .option:has(input:checked){background:#f1f9ee;border-color:#69a775}
+.guest-page .option-symbol{background:#eff5ec;color:#397c44}
+.guest-page .option:has(input:checked) .option-check{color:#08733a;fill:#d7f0d9}
+.guest-page .main-button{background:linear-gradient(135deg,#0d6c35,#0a4e26);color:white;box-shadow:0 7px 18px rgba(10,91,43,.17)}
+.guest-page .main-button:hover:not(:disabled){background:#095126}
+.guest-page .text-btn{color:#0c7136}
+.guest-page .big-icon.success{background:#e2f5df;color:#177941}
+.guest-page .guest-footer{color:#88a187}
+.guest-page .spinner{border-color:#cde8d1;border-top-color:#0d7238}
+.guest-page .notice.error{background:#fff3ee;color:#9a3e34;border-color:#f7d5ca}
+
+.search-spinner{
+  flex:0 0 auto;width:18px;height:18px;border-radius:50%;
+  border:2px solid #dcebdd;border-top-color:#0d7c3a;
+  animation:search-turn .68s linear infinite
+}
+@keyframes search-turn{to{transform:rotate(360deg)}}
+.guest-page .result-list.is-loading{border:0;display:grid;gap:9px;overflow:visible}
+.guest-page .result-list .search-placeholder{
+  padding:12px 14px;display:flex;gap:12px;align-items:center;border-radius:12px;
+  border:1px solid #dbe8d5;background:#fff;min-height:57px
+}
+.search-placeholder .placeholder-avatar{width:34px;height:34px;border-radius:50%;flex:0 0 auto}
+.search-placeholder .placeholder-lines{flex:1;display:flex;flex-direction:column;gap:7px}
+.search-placeholder .placeholder-lines span{display:block;height:8px;width:52%;border-radius:6px}
+.search-placeholder .placeholder-lines span:last-child{width:29%}
+.search-placeholder .placeholder-avatar,.search-placeholder .placeholder-lines span,.skeleton-line{
+  background:linear-gradient(110deg,#edf3e8 12%,#fdfdf9 32%,#edf3e8 54%);
+  background-size:210% 100%;animation:search-shimmer 1.2s linear infinite
+}
+@keyframes search-shimmer{to{background-position-x:-210%}}
+.guest-skeleton{display:grid;gap:18px;padding:7px 0}
+.guest-skeleton .skeleton-line{height:20px;border-radius:8px;width:100%}
+.guest-skeleton .skeleton-title{width:64%;height:25px}
+.guest-skeleton .skeleton-subtitle{width:86%;height:12px}
+.guest-skeleton .skeleton-input{height:52px;margin-top:12px;border-radius:12px}
+.guest-skeleton .skeleton-footer{display:flex;align-items:center;gap:10px;font-size:12px;color:#6d866e;padding-top:5px}
+.guest-page .result-item{animation:search-appear .22s ease-out both}
+@keyframes search-appear{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.guest-page .result-item:nth-child(2){animation-delay:35ms}
+.guest-page .result-item:nth-child(3){animation-delay:70ms}
+.guest-page #confirm-button.is-loading{opacity:.85;cursor:progress}
+.guest-page #confirm-button .spinner{width:16px;height:16px;border-color:#ffffff80;border-top-color:#fff;flex:none}
+@media(max-width:700px){
+ .guest-page .guest-header{padding:9px 11px;border-radius:15px}
+ .company-logos{gap:9px}
+ .company-logo img{height:61px}
+ .company-logo-agricola img{max-width:135px}
+ .company-logo-cia img{max-width:155px}
+ .brand-divider{height:42px}
+ .guest-page .guest-hero{padding:30px 2px 20px}
+ .guest-page .guest-hero h1{font-size:clamp(28px,7.2vw,38px);line-height:1.17}
+ .guest-page .guest-hero p{font-size:12px}
+ .deadline-chip{font-size:11px;margin-top:15px}
+ .guest-page .invite-card{padding:24px 20px}
+}
+@media(max-width:370px){.company-logo img{height:52px}.guest-page .guest-hero h1{font-size:28px}}
+@media(prefers-reduced-motion:reduce){
+ .guest-page .result-item,.search-spinner,.search-placeholder .placeholder-avatar,
+ .search-placeholder .placeholder-lines span,.skeleton-line{animation:none!important}
+}
