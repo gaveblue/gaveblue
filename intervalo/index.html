@@ -83,8 +83,8 @@ body.iv-initializing #app{min-height:100dvh;display:block}
 @media(max-width:620px){.iv-boot{padding-top:clamp(44px,11vh,88px)}.iv-boot-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.iv-boot-card{min-height:104px;padding:13px}.iv-boot-row{margin-top:10px}}
 @media(prefers-reduced-motion:reduce){.iv-load-dot,.iv-load-skeleton:after{animation:none!important}.iv-load-skeleton:after{display:none}}
 </style>
-<link rel="stylesheet" href="/intervalo/design-system.css?v=1.2.0-rc.16">
-<link rel="stylesheet" href="/intervalo/visual-unified-rc15.css?v=1.2.0-rc.16">
+<link rel="stylesheet" href="/intervalo/design-system.css?v=1.2.0-rc.17">
+<link rel="stylesheet" href="/intervalo/visual-unified-rc15.css?v=1.2.0-rc.17">
 <link rel="stylesheet" href="/intervalo/polish-rc14.css?v=1.2.0-rc.14">
 <link rel="stylesheet" href="/intervalo/form-enhancements-rc14.css?v=1.1.0-rc.14">
 <script>
@@ -294,12 +294,16 @@ async function choose(user){
    supabase.from('restaurant_member_module_access').select('restaurant_id,module,allowed').eq('user_id',user.id)
  ]);
  if(error||fe||oe){box(err(error??fe??oe));return}
- let out='<div class="iv-header"><div><span class="iv-section-caption">SEU ESPAÇO</span><h1>Meus restaurantes</h1><p>Selecione um estabelecimento para continuar.</p></div><a class="iv-btn secondary" href="'+link('/?app=garcom')+'">'+icon('phone',17)+' PWA do Garçom</a></div>';
+ let out='<div class="iv-rest-page"><div class="iv-header iv-rest-page-head"><div><span class="iv-section-caption">SEU ESPAÇO DE TRABALHO</span><h1>Meus restaurantes</h1><p>Escolha um restaurante para acessar a operação.</p></div><a class="iv-btn secondary" href="'+link('/?app=garcom')+'">'+icon('phone',17)+' PWA do Garçom</a></div>';
  if(!data?.length)out+='<section class="panel"><h2>Nenhum restaurante vinculado</h2><p>Aguarde o convite do responsável ou abra o painel Super Admin, se sua conta tiver autorização.</p><a class="btn" href="'+link('/admin')+'">Painel administrativo</a></section>';
  if(data?.length)out+='<div class="iv-restaurants" aria-label="Restaurantes disponíveis">';
  for(const m of data??[]){
    const r=m.restaurants;if(!r)continue;
-   out+='<article class="item"><span class="iv-chip orange">'+icon('shield',14)+esc(m.role)+'</span><h3>'+icon('store',20)+' '+esc(r.name)+'</h3><p>/'+esc(r.slug)+' · '+(m.status==='active'?'Ativo':m.status==='pending'?'Convite pendente':'Acesso revogado')+'</p><div class="links">';
+   const isActive=m.status==='active'&&r.status==='active';
+   const readableRole={master:'Responsável',manager:'Gerente',waiter:'Garçom',kitchen:'Cozinha',cashier:'Caixa'}[m.role]??m.role;
+   const status=isActive?'Ativo':m.status==='pending'?'Convite pendente':r.status!=='active'?'Indisponível':'Acesso revogado';
+   out+='<article class="item iv-rest-card"><div class="iv-rest-card-top"><span class="iv-rest-card-icon">'+icon('store',23)+'</span><span class="iv-rest-card-status'+(isActive?' is-active':'')+'">'+(isActive?icon('checkCircle',13):icon('info',13))+esc(status)+'</span></div>'
+     +'<h3>'+esc(r.name)+'</h3><p class="iv-rest-card-sub">'+esc(readableRole)+' <span aria-hidden="true">·</span> '+esc(r.slug)+'</p><div class="links">';
    if(m.status==='active'&&r.status==='active'){
      const available=modules.filter(mod=>{
        const enabled=(flags??[]).find(f=>f.restaurant_id===m.restaurant_id&&f.module===mod)?.enabled;
@@ -321,6 +325,7 @@ async function choose(user){
    out+='</div></article>';
  }
  if(data?.length)out+='</div>';
+ out+='</div>';
  box(out);
  document.querySelectorAll('form[data-master-activate]').forEach(form=>form.onsubmit=async e=>{
     e.preventDefault();
@@ -391,14 +396,14 @@ async function tenant(user,slug,mod){
   supabase.from('restaurant_member_module_access').select('module,allowed').eq('restaurant_id',m.restaurant_id).eq('user_id',user.id)
  ]);
  if(modErr||overrideErr){box(err(modErr??overrideErr));return}
- const {moduleAllowed,installGlobalNavigation}=await import('/intervalo/global-navigation-rc7.js?v=1.2.0-rc.16');
+ const {moduleAllowed,installGlobalNavigation}=await import('/intervalo/global-navigation-rc7.js?v=1.2.0-rc.17');
  const can=module=>moduleAllowed(m.role,moduleRows??[],overrides??[],module);
  if(!(moduleRows??[]).some(r=>r.module===requiredModule&&r.enabled===true)){box('<section class="panel"><h1>Módulo ainda não habilitado</h1><p>O Super Admin precisa habilitar este recurso para o estabelecimento.</p>'+btn('Meus restaurantes','/inicio')+'</section>');return}
  if(!can(requiredModule)){box('<section class="panel"><h1>Sem permissão</h1><p>Seu papel neste restaurante não permite abrir este módulo.</p></section>');return}
  const navContext={supabase,restaurant:m.restaurants,role:m.role,can,module:mod,link};
  installGlobalNavigation(navContext);
  if(mod==='gestao'){
-  const {renderManagement}=await import('/intervalo/management.js?v=1.2.0-rc.16');
+  const {renderManagement}=await import('/intervalo/management.js?v=1.2.0-rc.17');
   return renderManagement({supabase,restaurant:m.restaurants,role:m.role,box,esc,link,navContext});
  }
  if(mod==='vendas-online'){
