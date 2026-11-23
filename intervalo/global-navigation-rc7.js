@@ -33,26 +33,48 @@ export function currentMenuId(module,params){
 }
 export function sidebarMarkup(ctx,{active='',local=false}={}){
  const name=String(ctx.restaurant.name||ctx.restaurant.slug||'Restaurante').replace(/(^|[-\s])\p{L}/gu,x=>x.replace('-',' ').toLocaleUpperCase('pt-BR'));
+ const sections={
+  'Operação':['utensils','Atendimento e produção'],
+  'Produtos e cardápio':['package','Itens disponíveis para venda'],
+  'Estoque':['layers','Insumos e movimentações'],
+  'Loja online':['store','Vitrine e entregas'],
+  'Configurações':['settings','Equipe e estabelecimento']
+ };
  const row=item=>{
-  const selected=item.id===active,cls='mg-v2-navlink'+(selected?' active':''),inner=icon(item.symbol,18)+esc(item.label),current=selected?' aria-current="page"':'';
+  const selected=item.id===active,cls='mg-v2-navlink'+(selected?' active':''),
+   inner='<span class="mg-v2-navlink-icon">'+icon(item.symbol,17)+'</span><span class="mg-v2-navlink-label">'+esc(item.label)+'</span>'+(selected?'<span class="mg-v2-navlink-current" aria-hidden="true"></span>':''),
+   current=selected?' aria-current="page"':'';
   if(local&&item.tab)return '<button type="button" class="'+cls+'" data-tab="'+esc(item.tab)+'"'+(item.area?' data-area="'+esc(item.area)+'"':'')+current+'>'+inner+'</button>';
   return '<a class="'+cls+'" href="'+esc(ctx.link('/'+ctx.restaurant.slug+'/'+item.route))+'"'+current+(item.id==='cardapio'?' target="_blank" rel="noopener"':'')+'>'+inner+'</a>';
  };
  const section=(title,items,fold,selected)=>{
-  const content='<nav class="mg-v2-nav" aria-label="'+esc(title)+'">'+items+'</nav>';
-  return fold?'<details class="mg-v2-nav-group"'+(selected?' open':'')+'><summary class="mg-v2-nav-group-toggle"><span>'+esc(title)+'</span>'+icon('chevronDown',16)+'</summary>'+content+'</details>':'<div class="mg-v2-nav-title">'+esc(title)+'</div>'+content;
+  const nav='<nav class="mg-v2-nav" aria-label="'+esc(title)+'">'+items+'</nav>';
+  if(!fold)return '<div class="mg-v2-nav-title">'+esc(title)+'</div>'+nav;
+  const [symbol,subtitle]=sections[title]||['layers',''];
+  return '<details class="mg-v2-nav-group"'+(selected?' open':'')+'><summary class="mg-v2-nav-group-toggle">'
+   +'<span class="mg-v2-group-icon">'+icon(symbol,18)+'</span>'
+   +'<span class="mg-v2-group-copy"><strong>'+esc(title)+'</strong><small>'+esc(subtitle)+'</small></span>'
+   +'<span class="mg-v2-group-chevron">'+icon('chevronDown',16)+'</span>'
+   +'</summary><div class="mg-v2-nav-group-panel">'+nav+'</div></details>';
  };
- return '<div class="mg-v2-brand">Intervalo</div><a class="mg-v2-restaurant" href="'+esc(ctx.link('/inicio'))+'" aria-label="Trocar restaurante"><span class="mg-rest-icon">'+icon('store',19)+'</span><span class="mg-rest-text">'+esc(name)+'<small>Trocar restaurante</small></span>'+icon('chevronRight',14)+'</a>'
+ return '<div class="mg-v2-brandbar"><span class="mg-v2-brand-sign" aria-hidden="true">i<span></span></span>'
+  +'<div class="mg-v2-brand"><strong>Intervalo</strong><small>Gestão de restaurantes</small></div></div>'
+  +'<a class="mg-v2-restaurant" href="'+esc(ctx.link('/inicio'))+'" aria-label="Trocar restaurante">'
+  +'<span class="mg-rest-icon">'+icon('store',20)+'</span><span class="mg-rest-text">'+esc(name)+'<small>Trocar restaurante</small></span><span class="mg-rest-arrow">'+icon('chevronDown',16)+'</span></a>'
+  +'<div class="mg-v2-menu-caption">ÁREA DE TRABALHO</div>'
   +menuGroups(ctx).map(([title,items,fold])=>section(title,items.map(row).join(''),fold,items.some(x=>x.id===active))).join('')
-  +section('Conta','<a class="mg-v2-navlink" href="'+esc(ctx.link('/minha-conta'))+'">'+icon('user',18)+'Minha conta</a><button type="button" class="mg-v2-navlink" data-iv-global-logout>'+icon('logout',18)+'Sair</button>',false,false)
-  +'<div class="mg-v2-side-spacer"></div><div class="mg-v2-side-user"><span class="mg-v2-avatar">'+esc(name.slice(0,2).toUpperCase())+'</span><span><strong>'+esc(name)+'</strong><small>'+esc(roleNames[ctx.role]??ctx.role)+'</small></span></div>';
+  +'<div class="mg-v2-side-spacer"></div>'
+  +'<div class="mg-v2-personal-actions">'
+  +section('Conta','<a class="mg-v2-navlink" href="'+esc(ctx.link('/minha-conta'))+'"><span class="mg-v2-navlink-icon">'+icon('user',17)+'</span><span class="mg-v2-navlink-label">Minha conta</span></a>'
+  +'<button type="button" class="mg-v2-navlink" data-iv-global-logout><span class="mg-v2-navlink-icon">'+icon('logout',17)+'</span><span class="mg-v2-navlink-label">Sair</span></button>',false,false)
+  +'<div class="mg-v2-side-user"><span class="mg-v2-avatar">'+esc(name.slice(0,2).toUpperCase())+'</span><span><strong>'+esc(name)+'</strong><small>'+esc(roleNames[ctx.role]??ctx.role)+'</small></span></div></div>';
 }
 export function menuButtonMarkup(){return '<button class="iv-global-menu-button" type="button" data-iv-global-menu aria-label="Abrir menu do restaurante" aria-haspopup="dialog">'+icon('menu',23)+'</button>'}
 export function installGlobalNavigation(ctx){
  // One drawer per document; remains intact while operational views redraw.
  if(document.getElementById('iv-global-nav-style'))return;
- const css=document.createElement('link');css.id='iv-global-nav-style';css.rel='stylesheet';css.href='/intervalo/global-navigation-rc7.css?v=1.2.0-rc.16';document.head.append(css);
- const managementStyle=document.createElement('link');managementStyle.rel='stylesheet';managementStyle.href='/intervalo/management-design-rc11.css?v=1.2.0-rc.16';document.head.append(managementStyle);
+ const css=document.createElement('link');css.id='iv-global-nav-style';css.rel='stylesheet';css.href='/intervalo/global-navigation-rc7.css?v=1.2.0-rc.17';document.head.append(css);
+ const managementStyle=document.createElement('link');managementStyle.rel='stylesheet';managementStyle.href='/intervalo/management-design-rc11.css?v=1.2.0-rc.17';document.head.append(managementStyle);
  let drawer=null,launcher=null,signingOut=false;
  const show=trigger=>{
   if(drawer?.open)return;
