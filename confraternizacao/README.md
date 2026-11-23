@@ -67,3 +67,14 @@ Implementação isolada do convite corporativo GaveBlue, sem alterações nos ap
 - Altura adaptada à viewport dinâmica no celular, scroll interno e bloqueio de rolagem do fundo, sem focar automaticamente no campo de texto.
 - HTML com tags balanceadas e IDs únicos; JS passa em verificação de sintaxe, referências de sheet conferidas, CSS com chaves equilibradas; assets versionados com ?v=7.
 - O teste visual em navegador externo ainda depende de validação no dispositivo do usuário, pois este ambiente não resolve o domínio gaveblue.com.br.
+
+## Convite v8 · 23/11/2026
+- Visual de fundo reconstruído com faixas decorativas curvas verde e amarelo, sem downloads de imagens ou dependências adicionais.
+- Identidade Covre Agrícola + Covre & Cia preservada; título centralizado e composição reduzida para caber melhor no celular.
+- Data e horário unidos na mesma linha (12/12 e 15h00), local logo abaixo.
+- Alerta de presença até 30/11 centralizado, compacto e vermelho.
+- Página pública exibe apenas botão destacado "Confirmar presença"; ao tocar, o bottom sheet abre com a busca única por nome e sobrenome.
+- Identificação, acompanhante e comprovante usam as etapas do mesmo bottom sheet, com mensagens de erro, indicador de pesquisa, fechar, gesto na alça e suporte ao teclado.
+- Abertura agora usa tela de carregamento integral "Carregando seu convite"; conteúdo principal fica oculto até a API do evento responder. Em caso de erro, exibe botão "Tentar novamente" na abertura em vez de tela aparentemente travada.
+- Folha de estilos específica guest-v8.css carregada após style.css para não modificar o painel administrativo. Arquivos cache-busted com v=8.
+- Testes estáticos: HTML balanceado e sem IDs duplicados, nenhum identificador da etapa pública sem elemento, JS com sintaxe válida e CSS com chaves balanceadas. Não houve alteração no banco nem nas regras de confirmação. O domínio não foi acessível para teste visual automatizado.
