@@ -1,0 +1,265 @@
+/* Confraternização 2026 — identidade de convite v15.
+   Compacta o título e os dados, adiciona cronômetro responsivo sem imagens. */
+.guest-page .guest-hero{
+  padding: 15px 2px 14px;
+}
+.guest-page .guest-hero h1{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  max-width:100%;
+  margin:10px auto 10px;
+  gap:3px;
+  line-height:1.1;
+  text-align:center;
+  letter-spacing:-.04em;
+}
+.guest-page .guest-hero h1 .heading-prefix{
+  display:block;
+  width:100%;
+  white-space:nowrap;
+  font-size:clamp(16px, 4.45vw, 24px);
+  line-height:1.2;
+  letter-spacing:-.045em;
+  font-weight:750;
+  color:#11452d;
+}
+.guest-page .guest-hero h1 .heading-rest{
+  display:block;
+  width:100%;
+  margin:0;
+  white-space:nowrap;
+  line-height:1.1;
+  letter-spacing:-.055em;
+  font-size:clamp(23px, 6.5vw, 39px);
+  font-weight:850;
+}
+.guest-page .guest-hero h1 .heading-rest::after{
+  content:"";
+  display:block;
+  width:min(40%,136px);height:3px;
+  border-radius:99px;
+  margin:7px auto 0;
+  background:linear-gradient(90deg,#e4ba17,#f3d954,#e4ba17);
+  transform:rotate(-1deg);
+}
+.guest-page .guest-hero .guest-message{
+  max-width:480px;margin:1px auto 0;
+  padding:0 3px;
+}
+.guest-page .guest-hero .guest-message p{
+  font-size:12px;line-height:1.52;
+  color:#4f6756;text-align:center;
+}
+.guest-page .event-countdown{
+  position:relative;
+  isolation:isolate;
+  overflow:hidden;
+  margin:2px 0 13px;
+  padding:17px 17px 18px;
+  border-radius:17px;
+  color:#fff;
+  background:
+    radial-gradient(ellipse at 93% 0%,rgba(37,156,72,.43),transparent 49%),
+    linear-gradient(125deg,#0b763c 0%,#07582e 48%,#064b27 100%);
+  border:1px solid rgba(9,95,43,.32);
+  box-shadow:0 10px 24px rgba(5,70,29,.15);
+  text-align:center;
+}
+.guest-page .event-countdown::before{
+  content:"";position:absolute;
+  top:-115px;right:-70px;
+  width:210px;height:180px;
+  border:19px solid rgba(243,214,65,.08);
+  border-radius:50%;
+  transform:rotate(24deg);
+  pointer-events:none;
+}
+.guest-page .event-countdown-kicker{
+  display:flex;align-items:center;justify-content:center;
+  gap:7px;
+  color:#e7f5dd;
+  font:800 10px/1.2 Manrope,sans-serif;
+  letter-spacing:.15em;
+}
+.guest-page .event-countdown-kicker svg{
+  width:17px;height:17px;color:#f2d64a;stroke-width:2;
+}
+.guest-page .event-countdown h2{
+  position:relative;
+  font:800 clamp(15px,3.9vw,20px)/1.2 Manrope,sans-serif;
+  letter-spacing:-.035em;
+  margin:7px auto 13px;
+  color:white;
+}
+.guest-page .event-countdown-grid{
+  position:relative;
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:8px;
+  margin:0;
+  font-variant-numeric:tabular-nums;
+}
+.guest-page .countdown-tile{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-width:0;min-height:71px;
+  padding:8px 2px 7px;
+  border-radius:12px;
+  background:rgba(1,50,25,.46);
+  border:1px solid rgba(206,242,184,.12);
+  box-shadow:0 3px 7px rgba(4,41,19,.13);
+}
+.guest-page .countdown-number{
+  display:block;
+  font:850 clamp(25px,7.2vw,40px)/1 Manrope,sans-serif;
+  letter-spacing:-.06em;
+  color:#fff;
+  margin-bottom:6px;
+}
+.guest-page .countdown-tile span{
+  display:block;
+  color:#f3da4b;
+  font:800 10px/1.15 Manrope,sans-serif;
+  letter-spacing:.06em;
+}
+.guest-page .countdown-status{
+  margin:11px 0 0;
+  font-size:12px;line-height:1.45;
+  color:#f6e79c;font-weight:700;
+}
+.guest-page .guest-details{
+  margin:0 0 12px;
+  padding:3px 13px;
+  border-radius:16px;
+  box-shadow:0 6px 19px rgba(16,60,28,.07);
+}
+.guest-page .event-when{min-height:56px}
+.guest-page .event-when-cell{
+  min-height:0;
+  padding:8px 2px;
+  gap:10px;
+}
+.guest-page .event-when-cell:nth-child(3){padding-left:13px}
+.guest-page .event-when-cell .detail-icon,
+.guest-page .event-location .detail-icon{
+  width:32px;height:32px;min-width:32px;
+  border-radius:9px;
+}
+.guest-page .event-when-cell .detail-icon svg,
+.guest-page .event-location .detail-icon svg{
+  width:17px;height:17px;
+}
+.guest-page .event-when-cell small,
+.guest-page .event-location small{
+  margin:0 0 3px;
+  font-size:9px;
+  letter-spacing:.1em;
+  line-height:1.2;
+}
+.guest-page .event-when-cell strong{
+  font-size:14px;
+  line-height:1.2;
+}
+.guest-page .event-when-divider{height:30px}
+.guest-page .event-location{
+  display:flex;
+  flex-direction:row;
+  align-items:center;
+  justify-content:center;
+  text-align:left;
+  gap:10px;
+  min-height:63px;
+  padding:10px 8px 9px;
+  border-top:1px solid #edf0e9;
+}
+.guest-page .event-location .detail-icon{
+  align-self:center;
+  flex:0 0 32px;
+  margin:0;
+}
+.guest-page .event-location .event-location-copy{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  justify-content:center;
+  text-align:left;
+  width:auto;
+  min-width:0;
+}
+.guest-page .event-location strong{
+  max-width:100%;
+  font-size:11.5px;
+  line-height:1.28;
+}
+.guest-page .event-location .event-map-link{
+  display:inline-flex;
+  text-align:left;
+  justify-content:flex-start;
+  margin:3px 0 0;
+  padding:3px 0;
+  font-size:9.5px;
+}
+.guest-page .deadline-chip{margin-bottom:13px}
+@media(max-width:700px){
+  .guest-page .guest-hero{padding:12px 0 13px}
+  .guest-page .guest-hero h1{margin:9px auto 8px;gap:3px}
+  .guest-page .guest-hero h1 .heading-prefix{
+    font-size:clamp(15px,4.35vw,20px);
+    letter-spacing:-.05em;
+  }
+  .guest-page .guest-hero h1 .heading-rest{
+    font-size:clamp(21px,6.45vw,31px);
+  }
+  .guest-page .guest-hero h1 .heading-rest::after{
+    height:3px;margin-top:6px;
+  }
+  .guest-page .guest-hero .guest-message p{
+    font-size:11.7px;line-height:1.48;
+  }
+  .guest-page .event-countdown{
+    padding:14px 12px 14px;
+    border-radius:15px;
+    margin:2px 0 12px;
+  }
+  .guest-page .event-countdown-kicker{
+    font-size:9px;
+    letter-spacing:.12em;
+  }
+  .guest-page .event-countdown-kicker svg{width:15px;height:15px}
+  .guest-page .event-countdown h2{
+    font-size:15px;margin:6px auto 11px;
+  }
+  .guest-page .event-countdown-grid{gap:6px}
+  .guest-page .countdown-tile{
+    min-height:64px;
+    padding:8px 1px 7px;
+    border-radius:10px;
+  }
+  .guest-page .countdown-number{
+    font-size:clamp(22px,7vw,31px);
+    margin-bottom:5px;
+  }
+  .guest-page .countdown-tile span{font-size:9px}
+  .guest-page .guest-details{padding:1px 11px}
+  .guest-page .event-when{min-height:54px}
+  .guest-page .event-when-cell{padding:8px 0;gap:8px}
+  .guest-page .event-when-cell:nth-child(3){padding-left:10px}
+  .guest-page .event-location{
+    min-height:57px;
+    padding:9px 3px;
+    gap:9px;
+  }
+  .guest-page .event-location strong{font-size:11px}
+  .guest-page .event-location .event-map-link{font-size:9px}
+}
+@media(max-width:355px){
+  .guest-page .guest-hero h1 .heading-prefix{font-size:14.2px}
+  .guest-page .guest-hero h1 .heading-rest{font-size:20px}
+  .guest-page .countdown-tile{min-height:58px}
+  .guest-page .countdown-tile span{font-size:8px}
+}
+@media(prefers-reduced-motion:reduce){
+  .guest-page .event-countdown{
+    scroll-behavior:auto;
+  }
+}
