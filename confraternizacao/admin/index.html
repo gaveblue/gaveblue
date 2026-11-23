@@ -7,18 +7,17 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link href="../style.css?v=2" rel="stylesheet">
-<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.95.0/dist/umd/supabase.min.js"></script>
+
 <script defer src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
-<script defer src="../app.js?v=2"></script>
+<script defer src="../app.js?v=3"></script>
 </head>
 <body class="admin-page">
 <div id="admin-login" class="auth-shell">
   <div class="auth-card">
     <div class="auth-logo"><i data-lucide="sparkles"></i></div>
     <div class="eyebrow">ACESSO ADMINISTRATIVO</div>
-    <h1>Gestão da confraternização</h1><p>Entre com sua conta administrativa da GaveBlue para gerenciar os convidados.</p>
-    <form id="login-form"><label for="admin-email">E-mail</label><input id="admin-email" type="email" autocomplete="username" required placeholder="email@empresa.com">
-    <label for="admin-password">Senha</label><input id="admin-password" type="password" autocomplete="current-password" required placeholder="Sua senha">
+    <h1>Gestão da confraternização</h1><p>Acesso exclusivo da organização. Use o código administrativo da confraternização, sem precisar de conta ou e-mail.</p>
+    <form id="login-form"><label for="admin-code">Código de acesso</label><input id="admin-code" type="password" autocomplete="off" required placeholder="Informe o código da organização" minlength="16" autocapitalize="characters" spellcheck="false">
     <button type="submit" class="main-button">Entrar no painel <i data-lucide="arrow-right"></i></button></form>
     <div id="login-error" class="notice error hidden" role="alert"></div>
     <a class="back-link" href="../"><i data-lucide="arrow-left"></i> Voltar ao convite</a>
