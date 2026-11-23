@@ -525,8 +525,8 @@ body.rsvp-sheet-open{overflow:hidden;overscroll-behavior:none}
   isolation:isolate;
   width:100%;max-width:560px;
   display:flex;flex-direction:column;
-  max-height:calc(100dvh - 12px);
   max-height:calc(100svh - 12px);
+  max-height:calc(100dvh - 12px);
   background:#fff;
   border:1px solid #e7eee4;
   border-bottom:none;
