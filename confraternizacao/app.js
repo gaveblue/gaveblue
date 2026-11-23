@@ -150,39 +150,22 @@ function initGuest() {
         return paragraph;
       }));
     }
+    // Link universal .ics: não exige conta Google nem aplicativo específico.
+    // A configuração atual do evento é 12/12/2026 às 15h (BRT).
     const calendarLink = $("event-calendar-link");
-    const dateParts = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(event.data_evento || ""));
-    const timeParts = /^(\d{1,2})[:h](\d{2})$/.exec(String(event.horario || ""));
-    if (dateParts && timeParts && Number(timeParts[1]) < 24 && Number(timeParts[2]) < 60) {
-      const start = new Date(Date.UTC(
-        Number(dateParts[1]),Number(dateParts[2])-1,Number(dateParts[3]),
-        Number(timeParts[1]),Number(timeParts[2])
-      ));
-      const reminderEnd = new Date(start.getTime() + 15 * 60 * 1000);
-      const formatCalendarDate = d =>
-        d.getUTCFullYear().toString() +
-        String(d.getUTCMonth()+1).padStart(2,"0") +
-        String(d.getUTCDate()).padStart(2,"0") + "T" +
-        String(d.getUTCHours()).padStart(2,"0") +
-        String(d.getUTCMinutes()).padStart(2,"0") + "00";
-      const params = new URLSearchParams({
-        action:"TEMPLATE",
-        text:"Início · Confraternização 2026",
-        dates:formatCalendarDate(start) + "/" + formatCalendarDate(reminderEnd),
-        ctz:"America/Sao_Paulo",
-        location:event.local_evento || "Loja Maçônica Fenelon Barbosa",
-        details:"Lembrete de início da confraternização Covre Agrícola e Covre & Cia. O evento começa às " +
-          String(event.horario).replace(":","h") +
-          ". O horário de encerramento ainda não foi informado; este registro de 15 minutos é apenas um lembrete de início.\n" +
-          "Localização: https://maps.app.goo.gl/YYeyFWafrcbeTBfd8?g_st=ac"
-      });
-      calendarLink.href = "https://calendar.google.com/calendar/render?" + params.toString();
+    const isOriginalEvent = event.data_evento === "2026-12-12" &&
+      /^15[:h]00$/.test(String(event.horario || ""));
+    if (isOriginalEvent) {
+      calendarLink.setAttribute("href", "./confraternizacao-2026.ics");
+      calendarLink.setAttribute("download", "confraternizacao-2026.ics");
       calendarLink.classList.remove("is-disabled");
       calendarLink.removeAttribute("aria-disabled");
     } else {
+      // Se a data for editada no painel, não oferecer arquivo com data antiga.
       calendarLink.removeAttribute("href");
+      calendarLink.removeAttribute("download");
       calendarLink.classList.add("is-disabled");
-      calendarLink.setAttribute("aria-disabled","true");
+      calendarLink.setAttribute("aria-disabled", "true");
     }
     const day = event.data_evento ? String(event.data_evento).split("-") : null;
     $("event-date").textContent = day && day.length === 3 ? day[2] + "/" + day[1] : "A definir";
