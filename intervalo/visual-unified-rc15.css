@@ -123,19 +123,46 @@ body.iv-unified .iv-platform .p-grid>.p-card{border-radius:16px}
 @media(max-width:375px){body.iv-unified .op-cards,body.iv-unified .x-grid{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){dialog.iv-op-sheet,.iv-op-open{animation:none;transition:none}}
 
-/* RC16: um acesso claro por restaurante, módulos secundários recolhíveis. */
-body.iv-unified .iv-restaurants .links{display:block}
-body.iv-unified .iv-restaurants .links>a.iv-rest-primary{display:flex;width:100%;align-items:center;gap:9px;justify-content:flex-start;min-height:46px;border:0;border-radius:11px;padding:12px 13px;background:#c2410c;color:#fff;font-size:13px;font-weight:800}
+/* RC17 · Seleção de restaurantes: cartões de acesso com hierarquia. */
+body.iv-unified .iv-rest-page{width:100%;max-width:1110px;margin:0 auto;padding:12px 0 40px}
+body.iv-unified .iv-rest-page-head{gap:16px;margin:8px 0 23px;align-items:flex-end}
+body.iv-unified .iv-rest-page-head .iv-section-caption{color:#cc691d;letter-spacing:1.1px;font-size:10px}
+body.iv-unified .iv-rest-page-head h1{font-size:clamp(26px,3vw,33px);font-weight:830;letter-spacing:-1px;margin:8px 0}
+body.iv-unified .iv-rest-page-head p{color:#77869a;font-size:13px}
+body.iv-unified .iv-rest-page-head .iv-btn.secondary{min-height:44px;border:1px solid #e7ebf1;color:#42546a;font-size:12px;font-weight:700;border-radius:12px;padding:11px 14px}
+body.iv-unified .iv-restaurants{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:15px}
+body.iv-unified .iv-restaurants>.iv-rest-card{position:relative;display:flex;flex-direction:column;gap:0;margin:0;min-width:0;min-height:245px;padding:21px;border:1px solid #e6ebf1;border-radius:20px;background:#fff;box-shadow:0 6px 24px #26374b0a;transition:border-color .18s,box-shadow .18s}
+body.iv-unified .iv-restaurants>.iv-rest-card:hover{border-color:#f2c9a3;box-shadow:0 8px 28px #26374b13}
+body.iv-unified .iv-restaurants .iv-rest-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin:0 0 17px}
+body.iv-unified .iv-restaurants .iv-rest-card-icon{display:grid;place-items:center;width:48px;height:48px;flex:none;color:#dc6b0e;background:#fff0e3;border-radius:15px}
+body.iv-unified .iv-restaurants .iv-rest-card-status{display:inline-flex;align-items:center;gap:5px;color:#617185;font-size:11px;font-weight:750;background:#f2f5f8;padding:7px 9px;border-radius:30px;max-width:62%;text-align:right}
+body.iv-unified .iv-restaurants .iv-rest-card-status.is-active{background:#edf9f2;color:#177c4a}
+body.iv-unified .iv-restaurants .iv-rest-card h3{margin:0 0 6px;padding:0;color:#25364c;font-size:19px;font-weight:820;letter-spacing:-.5px;line-height:1.3}
+body.iv-unified .iv-restaurants .iv-rest-card-sub{margin:0 0 18px;font-size:12px;line-height:1.4;color:#7c899b}
+body.iv-unified .iv-restaurants .iv-rest-card-sub span{padding:0 4px;color:#b7c0cb}
+body.iv-unified .iv-restaurants .links{display:block;margin-top:auto;width:100%}
+body.iv-unified .iv-restaurants .links>a.iv-rest-primary{display:flex;align-items:center;justify-content:flex-start;gap:10px;min-height:48px;width:100%;border:1px solid #bf480e;border-radius:12px;padding:12px 14px;background:#bf480e;color:#fff;font-size:13px;font-weight:780;box-shadow:0 5px 12px #bf480e20}
+body.iv-unified .iv-restaurants .links>a.iv-rest-primary:hover{background:#9a3412;border-color:#9a3412}
 body.iv-unified .iv-restaurants .iv-rest-primary .iv-icon:last-child{margin-left:auto}
-body.iv-unified .iv-restaurants .iv-rest-more{margin-top:9px;width:100%}
-body.iv-unified .iv-restaurants .iv-rest-more>summary{display:flex;align-items:center;justify-content:space-between;min-height:44px;padding:10px 12px;background:#f5f7fa;border-radius:11px;font-size:12px;font-weight:700;color:#42536b;cursor:pointer;list-style:none}
+body.iv-unified .iv-restaurants .iv-rest-more{margin-top:9px}
+body.iv-unified .iv-restaurants .iv-rest-more>summary{display:flex;align-items:center;gap:8px;justify-content:center;min-height:44px;padding:9px 12px;border:1px solid #e6ebf0;border-radius:11px;background:#f8fafc;color:#526278;font-size:12px;font-weight:720;list-style:none;cursor:pointer}
 body.iv-unified .iv-restaurants .iv-rest-more>summary::-webkit-details-marker{display:none}
-body.iv-unified .iv-restaurants .iv-rest-more[open]>summary>.iv-icon{transform:rotate(180deg)}
-body.iv-unified .iv-restaurants .iv-rest-module-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;padding:9px 0 0}
-body.iv-unified .iv-restaurants .iv-rest-module-list>a{display:flex;align-items:center;gap:7px;min-height:44px;padding:9px 10px;border:1px solid #e7ebf1;border-radius:10px;background:#fff;color:#38495f;font-size:12px;font-weight:650;text-decoration:none}
-body.iv-unified .iv-restaurants .iv-rest-no-modules{font-size:12px;color:#5f6e80}
-body.iv-unified .iv-restaurants .iv-rest-primary:focus-visible,body.iv-unified .iv-restaurants summary:focus-visible,body.iv-unified .iv-restaurants .iv-rest-module-list>a:focus-visible{outline:3px solid #b94b07;outline-offset:2px}
+body.iv-unified .iv-restaurants .iv-rest-more>summary .iv-icon{color:#8494a6;transition:transform .15s}
+body.iv-unified .iv-restaurants .iv-rest-more[open]>summary .iv-icon{transform:rotate(180deg)}
+body.iv-unified .iv-restaurants .iv-rest-module-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:11px 0 1px}
+body.iv-unified .iv-restaurants .iv-rest-module-list>a{display:flex;align-items:center;gap:8px;min-height:44px;padding:10px 11px;border:1px solid #e8edf2;border-radius:11px;background:#fff;color:#3e5066;font-size:12px;font-weight:700;text-decoration:none;line-height:1.3}
+body.iv-unified .iv-restaurants .iv-rest-module-list>a .iv-icon{flex:none;color:#de761e}
+body.iv-unified .iv-restaurants .iv-rest-module-list>a:hover{background:#fff9f4;border-color:#f5d4b5}
+body.iv-unified .iv-restaurants .iv-rest-no-modules{color:#637287;font-size:12px}
+body.iv-unified .iv-restaurants .iv-rest-primary:focus-visible,body.iv-unified .iv-restaurants summary:focus-visible,body.iv-unified .iv-restaurants .iv-rest-module-list>a:focus-visible{outline:3px solid #e59a5b;outline-offset:2px}
+@media(max-width:700px){
+ body.iv-unified .iv-rest-page{padding:0 0 38px}
+ body.iv-unified .iv-rest-page-head{margin:6px 0 17px}
+ body.iv-unified .iv-restaurants{grid-template-columns:1fr;gap:12px}
+ body.iv-unified .iv-restaurants>.iv-rest-card{padding:18px;min-height:225px}
+}
 @media(max-width:390px){body.iv-unified .iv-restaurants .iv-rest-module-list{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){body.iv-unified .iv-restaurants>.iv-rest-card,body.iv-unified .iv-restaurants .iv-rest-more>summary .iv-icon{transition:none}}
 
 /* RC16: contraste das ações prioritárias nos painéis especializados. */
 body.iv-unified .iv-cash-primary,body.iv-unified .iv-cash-app .iv-cash-payment-trigger .iv-op-open{background:var(--iv-action,#c2410c);color:#fff}
