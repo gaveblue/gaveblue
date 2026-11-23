@@ -29,3 +29,13 @@ Implementação isolada do convite corporativo GaveBlue, sem alterações nos ap
 - Importação binária .xlsx não está habilitada; é possível colar nomes ou importar CSV/TXT.
 - O servidor valida autorização administrativa, mas a página pública usa apenas identificação por nome/sobrenome, adequada somente se este risco for aceito.
 - Checagens realizadas: JS analisado sintaticamente, Edge Function v3 ativa, login válido respondeu HTTP 200, código errado HTTP 401 e sessão autenticada retornou 46 colaboradores no bootstrap. Teste ponta a ponta com navegador e mensagens reais ainda pendente.
+
+## Painel v4 · 23/11/2026
+- O card de Cadastrados considera **todos** os convidados importados (83), não apenas os aptos à busca (66).
+- O dashboard separa Pendentes de confirmação (entre os aptos) de Sem sobrenome (17), e inclui confirmações manuais no total esperado.
+- O cadastro administrativo permite editar nome, setor/grupo, disponibilidade na busca e flag de presença confirmada. Desmarcar presença remove a confirmação, inclusive a efetuada pelo link; a tela informa essa consequência.
+- Novo campo `rsvp_colaboradores.setor`, inicialmente preenchido com o grupo original; `grupo` permanece como histórico da lista de origem.
+- Novo campo `rsvp_confirmacoes.origem`, que distingue `link` e `manual`.
+- RPC `rsvp_admin_save_person` atômica, liberada apenas para service_role, para salvar dados e presença juntos.
+- Os 83 cadastros foram preservados; teste transacional de criação, edição, confirmação e desmarcação passou e não deixou dados de QA.
+- Edge Function v4 implantada; JS validado sintaticamente e referências a IDs HTML conferidas. Publicação no GitHub main realizada. Validação visual do site externo não concluída no ambiente.
