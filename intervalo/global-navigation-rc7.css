@@ -1,5 +1,5 @@
 /* Shared restaurant menu. Scoped: no changes to layouts or public storefronts. */
-.iv-global-menu-button{display:inline-grid!important;place-items:center;flex:0 0 40px;width:40px;height:40px;border:0;background:transparent;color:#263247;border-radius:10px;padding:0;cursor:pointer;vertical-align:middle}
+.iv-global-menu-button{display:inline-grid!important;place-items:center;flex:0 0 44px;width:44px;height:44px;border:0;background:transparent;color:#263247;border-radius:10px;padding:0;cursor:pointer;vertical-align:middle}
 .iv-global-menu-button:active,.iv-global-menu-button:hover{background:#eef1f5}
 .iv-global-menu-button:focus-visible,.iv-global-nav-close:focus-visible{outline:2px solid #ff9d4c;outline-offset:2px}
 .iv-global-title{display:flex;align-items:center;gap:8px;min-width:0}
@@ -13,8 +13,21 @@
 .iv-global-nav-dialog .mg-v2-nav-title{font-size:10px}
 .iv-global-nav-dialog .mg-v2-navlink[aria-current=page]{background:#fff1e6;color:#ec7000}
 .iv-global-nav-dialog .mg-v2-navlink:focus-visible{outline:2px solid #fb923c;outline-offset:-2px}
-.iv-global-nav-close{position:absolute;right:12px;top:17px;display:grid;place-items:center;width:34px;height:34px;border:0;background:#f4f6f8;color:#78879a;border-radius:10px;cursor:pointer;z-index:2}
+.iv-global-nav-close{position:absolute;right:12px;top:17px;display:grid;place-items:center;width:44px;height:44px;border:0;background:#f4f6f8;color:#78879a;border-radius:10px;cursor:pointer;z-index:2}
 .iv-global-nav-dialog .mg-v2-side-user{margin-top:10px}.iv-global-nav-dialog .mg-v2-avatar{flex:none}
 .iv-global-nav-dialog[open]{animation:iv-global-slide .18s ease-out}
 @keyframes iv-global-slide{from{transform:translateX(-100%)}to{transform:translateX(0)}}
 @media(prefers-reduced-motion:reduce){.iv-global-nav-dialog[open]{animation:none}}
+
+/* RC16: seções compactas e recolhíveis em todos os módulos. */
+.mg-v2-nav-group{margin:3px 0 5px;border-radius:12px}
+.mg-v2-nav-group-toggle{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:46px;padding:11px 13px;color:#34445a;font-size:13px;font-weight:780;border-radius:11px;cursor:pointer;list-style:none;user-select:none}
+.mg-v2-nav-group-toggle::-webkit-details-marker{display:none}
+.mg-v2-nav-group-toggle:hover,.mg-v2-nav-group[open]>.mg-v2-nav-group-toggle{background:#f5f7f9}
+.mg-v2-nav-group-toggle .iv-icon{color:#758398;transition:transform .16s ease}
+.mg-v2-nav-group[open]>.mg-v2-nav-group-toggle .iv-icon{transform:rotate(180deg)}
+.mg-v2-nav-group .mg-v2-nav{margin:3px 0 6px 16px;padding:2px 0 2px 9px;border-left:1px solid #e5eaf0}
+.mg-v2-nav-group .mg-v2-navlink{font-size:13px;min-height:44px;white-space:normal}
+.mg-v2-nav-group-toggle:focus-visible,.mg-v2-navlink:focus-visible,.mg-v2-restaurant:focus-visible{outline:3px solid #dc6408;outline-offset:2px}
+.iv-global-nav-dialog .mg-v2-nav-title{font-size:11px;color:#526176}
+@media(prefers-reduced-motion:reduce){.mg-v2-nav-group-toggle .iv-icon{transition:none}}
