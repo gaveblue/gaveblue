@@ -140,8 +140,16 @@ function initGuest() {
 
   function updateEvent(data) {
     event = data;
-    // A copy do convite é editorial e permanece igual ao layout aprovado, sem
-    // substituir os parágrafos por descrições antigas salvas no banco.
+    // A descrição continua editável pelo painel: preservar parágrafos com segurança.
+    const description = $("guest-description");
+    if (description && String(event.descricao || "").trim()) {
+      const paragraphs = String(event.descricao).trim().split(/\n\s*\n/).filter(Boolean);
+      description.replaceChildren(...paragraphs.map(value => {
+        const paragraph = document.createElement("p");
+        paragraph.textContent = value.trim();
+        return paragraph;
+      }));
+    }
     const calendarLink = $("event-calendar-link");
     const dateParts = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(event.data_evento || ""));
     const timeParts = /^(\d{1,2})[:h](\d{2})$/.exec(String(event.horario || ""));
