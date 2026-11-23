@@ -39,3 +39,12 @@ Implementação isolada do convite corporativo GaveBlue, sem alterações nos ap
 - RPC `rsvp_admin_save_person` atômica, liberada apenas para service_role, para salvar dados e presença juntos.
 - Os 83 cadastros foram preservados; teste transacional de criação, edição, confirmação e desmarcação passou e não deixou dados de QA.
 - Edge Function v4 implantada; JS validado sintaticamente e referências a IDs HTML conferidas. Publicação no GitHub main realizada. Validação visual do site externo não concluída no ambiente.
+
+## Convite v5 · 23/11/2026
+- Página pública com verde-escuro, verde-folha e amarelo do convite, título “Você foi convocado para nossa Confraternização 2026” e destaque visual do prazo de resposta até 30/11.
+- Duas marcas na abertura: Covre Agrícola (imagem já referenciada pelo site da própria empresa, em i.imgur.com/kXwEnSs.png) e Covre & Cia (arquivo existente do próprio repositório em postoscredenciados-covreecia/assets/brand/covre-e-cia.png). A primeira imagem é externa; avaliar armazenamento local se o host externo falhar.
+- Skeleton no carregamento inicial e na lista, indicador giratório de pesquisa e animação suave de aparecimento, respeitando prefers-reduced-motion.
+- Otimização na busca: debounce reduzido de 320ms para 175ms, abort de requisições obsoletas, cache por consulta no navegador (até 32 chaves) e RPC rsvp_busca_rapida com filtro/limite/rate limit no banco em uma consulta; somente service_role pode executar a RPC.
+- Testes HTTP na API v5: retorno 200 e um registro para busca válida, nenhum resultado com menos de 3 letras, e resultado para sobrenome posterior. Sem alteração nos convidados e confirmações.
+- Os assets públicos foram versionados com ?v=5 para forçar atualização do CSS/JS nos navegadores.
+- A renderização no domínio não pôde ser conferida por navegador automatizado neste ambiente.
