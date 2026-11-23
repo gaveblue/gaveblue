@@ -31,15 +31,46 @@ async function event() {
   if (error || !data) throw new Error("Evento ainda não configurado.");
   return data;
 }
+
+const enc = new TextEncoder();
+const hex = (data: Uint8Array) => Array.from(data).map(v => v.toString(16).padStart(2, "0")).join("");
+const unhex = (value: string) => new Uint8Array((value.match(/.{2}/g) || []).map(v => parseInt(v, 16)));
+async function sha256(value: string) {
+  return hex(new Uint8Array(await crypto.subtle.digest("SHA-256", enc.encode(value))));
+}
 async function isAdmin(req: Request) {
   const token = (req.headers.get("Authorization") || "").replace(/^Bearer\s+/i, "");
-  assert(token.split(".").length === 3, "Faça login como administrador.");
-  const { data: auth, error: authError } = await db.auth.getUser(token);
-  assert(!authError && auth?.user?.id, "Sessão expirada. Entre novamente.");
-  const { data, error } = await db.from("platform_admins").select("user_id").eq("user_id", auth.user.id).eq("active", true).maybeSingle();
-  assert(!error && data, "Este usuário não possui permissão administrativa.");
-  return auth.user;
+  assert(/^[a-f0-9]{64}$/i.test(token), "Entre com o código de acesso do evento.");
+  const digest = await sha256(token);
+  const { data, error } = await db.from("rsvp_admin_sessions")
+    .select("token_sha256").eq("token_sha256", digest)
+    .gt("expires_at", new Date().toISOString()).maybeSingle();
+  assert(!error && data, "Acesso expirado. Entre novamente.");
+  return digest;
 }
+async function loginCode(raw: unknown) {
+  const value = clean(raw, 80).replace(/[^A-Za-z0-9]/g, "").toUpperCase();
+  assert(value.length >= 16 && value.length <= 40, "Código de acesso inválido.");
+  const { data: credentials, error } = await db.from("rsvp_admin_access")
+    .select("salt_hex,verifier_hex,iterations").eq("id", 1).single();
+  assert(!error && credentials, "Acesso administrativo não configurado.");
+  const imported = await crypto.subtle.importKey("raw",enc.encode(value),"PBKDF2",false,["deriveBits"]);
+  const derived = new Uint8Array(await crypto.subtle.deriveBits({
+    name:"PBKDF2",hash:"SHA-256",salt:unhex(credentials.salt_hex),iterations:credentials.iterations
+  }, imported,256));
+  const expected=unhex(credentials.verifier_hex);
+  let difference=derived.length ^ expected.length;
+  for(let i=0;i<derived.length;i++) difference |= derived[i] ^ (expected[i] || 0);
+  assert(difference === 0, "Código de acesso incorreto.");
+  const token=hex(crypto.getRandomValues(new Uint8Array(32)));
+  const token_sha256=await sha256(token);
+  const { error:insertError }=await db.from("rsvp_admin_sessions").insert({
+    token_sha256, expires_at:new Date(Date.now()+8*3600*1000).toISOString()
+  });
+  assert(!insertError, "Não foi possível iniciar o acesso.");
+  return token;
+}
+
 async function rate(req: Request, action: string, max: number) {
   const ip = (req.headers.get("cf-connecting-ip") || req.headers.get("x-real-ip") || req.headers.get("x-forwarded-for")?.split(",")[0] || "desconhecido").trim();
   const bytes = new TextEncoder().encode(ip + "|" + SLUG);
@@ -94,8 +125,17 @@ Deno.serve(async (req: Request) => {
         "\nQuantidade de pessoas: " + (companion ? "2" : "1") + ".";
       return json({ ok: true, colaborador: employee.nome_completo, whatsapp_url: "https://wa.me/" + ev.whatsapp + "?text=" + encodeURIComponent(message) }, 200, origin);
     }
+    if (action === "admin-login") {
+      await rate(req, "admin-login", 6);
+      const token = await loginCode(body.access_code);
+      return json({ ok: true, access_token: token, expires_in: 28800 }, 200, origin);
+    }
     if (!action.startsWith("admin-")) return json({ ok: false, error: "Ação inválida." }, 400, origin);
-    await isAdmin(req);
+    const adminTokenDigest = await isAdmin(req);
+    if (action === "admin-logout") {
+      await db.from("rsvp_admin_sessions").delete().eq("token_sha256",adminTokenDigest);
+      return json({ ok:true },200,origin);
+    }
     if (action === "admin-bootstrap") {
       const [employees, confirmations] = await Promise.all([
         db.from("rsvp_colaboradores").select("id,nome_completo,grupo,ativo,criado_em").eq("evento_id", ev.id).order("nome_completo"),
@@ -156,7 +196,7 @@ Deno.serve(async (req: Request) => {
     return json({ ok: false, error: "Ação não reconhecida." }, 400, origin);
   } catch (e) {
     const message = errorText(e);
-    const status = /Muitas tentativas/.test(message) ? 429 : /Faça login|Sessão expirada|permissão administrativa/.test(message) ? 401 : /não configurado/.test(message) ? 503 : 400;
+    const status = /Muitas tentativas/.test(message) ? 429 : /Código de acesso|Acesso expirado|Entre com o código/.test(message) ? 401 : /não configurado/.test(message) ? 503 : 400;
     return json({ ok: false, error: message }, status, origin);
   }
 });
