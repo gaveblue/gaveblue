@@ -35,6 +35,116 @@ function initGuest() {
   const searchWrap = $("guest-search-wrap");
   const boot = $("invite-boot");
 
+  const calendarDialog = $("calendar-options");
+  const calendarTrigger = $("event-calendar-link");
+  const calendarFeedback = $("calendar-options-feedback");
+  function eventCalendarText() {
+    const [year,month,day] = String(event?.data_evento || "2026-12-12").split("-");
+    const displayDate = day && month && year ? day + "/" + month + "/" + year : "12/12/2026";
+    const displayTime = String(event?.horario || "15:00").replace(":", "h");
+    return "Confraternização 2026 — Covre Agrícola e Covre & Cia\n" +
+      "Data: " + displayDate + "\n" +
+      "Início: " + displayTime + "\n" +
+      "Local: " + (event?.local_evento || "Loja Maçônica Fenelon Barbosa") + "\n" +
+      "Mapa: https://maps.app.goo.gl/YYeyFWafrcbeTBfd8?g_st=ac\n" +
+      "Convite: https://gaveblue.com.br/confraternizacao/";
+  }
+  function calendarMessage(message) {
+    calendarFeedback.textContent = message;
+    show("calendar-options-feedback", !!message);
+  }
+  function openCalendarOptions() {
+    if (calendarDialog.classList.contains("hidden")) {
+      calendarMessage("");
+      show("calendar-options", true);
+      calendarDialog.setAttribute("aria-hidden", "false");
+      document.body.classList.add("calendar-modal-open");
+      $("calendar-options-close").focus({preventScroll:true});
+      icons();
+    }
+  }
+  function closeCalendarOptions() {
+    if (calendarDialog.classList.contains("hidden")) return;
+    show("calendar-options", false);
+    calendarDialog.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("calendar-modal-open");
+    calendarTrigger.focus({preventScroll:true});
+  }
+  calendarTrigger.addEventListener("click", openCalendarOptions);
+  $("calendar-options-close").addEventListener("click", closeCalendarOptions);
+  $("calendar-options-backdrop").addEventListener("click", closeCalendarOptions);
+  document.addEventListener("keydown", (e) => {
+    if (calendarDialog.classList.contains("hidden")) return;
+    if (e.key === "Escape") {
+      e.preventDefault();
+      closeCalendarOptions();
+      return;
+    }
+    if (e.key !== "Tab") return;
+    const elements = [...calendarDialog.querySelectorAll('button:not(:disabled),a[href]')].filter(el => !el.classList.contains("hidden"));
+    if (!elements.length) return;
+    const first = elements[0], last = elements[elements.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  });
+  $("calendar-copy").addEventListener("click", async () => {
+    const details = eventCalendarText();
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(details);
+      } else {
+        const box = document.createElement("textarea");
+        box.value = details; box.setAttribute("readonly","");
+        box.style.cssText = "position:fixed;left:-9999px;top:0";
+        document.body.appendChild(box); box.select();
+        const copied = document.execCommand("copy"); box.remove();
+        if (!copied) throw Error("Clipboard indisponível");
+      }
+      calendarMessage("Dados copiados! Cole no calendário que você usa.");
+    } catch (_) {
+      calendarMessage("Seu navegador não permitiu copiar. Use Compartilhar ou Baixar arquivo.");
+    }
+  });
+  $("calendar-share").addEventListener("click", async () => {
+    try {
+      if (typeof navigator.share !== "function") {
+        calendarMessage("O compartilhamento não está disponível neste navegador. Use Copiar ou Baixar arquivo.");
+        return;
+      }
+      await navigator.share({
+        title:"Confraternização 2026",
+        text:eventCalendarText(),
+        url:"https://gaveblue.com.br/confraternizacao/"
+      });
+      calendarMessage("");
+    } catch (err) {
+      if (err.name !== "AbortError") calendarMessage("Não foi possível compartilhar. Use Copiar ou Baixar arquivo.");
+    }
+  });
+  $("calendar-file").addEventListener("click", async (e) => {
+    e.preventDefault();
+    const link = e.currentTarget;
+    try {
+      const response = await fetch(link.getAttribute("href"), {cache:"no-store"});
+      if (!response.ok) throw Error("Arquivo não disponível");
+      // Baixar o arquivo sem navegar para a URL, que alguns Androids
+      // abrem automaticamente no aplicativo Google Agenda padrão.
+      const blob = new Blob([await response.arrayBuffer()], {type:"application/octet-stream"});
+      const objectUrl = URL.createObjectURL(blob);
+      const download = document.createElement("a");
+      download.href = objectUrl;
+      download.download = "confraternizacao-2026.ics";
+      download.style.display = "none";
+      document.body.appendChild(download);
+      download.click();
+      download.remove();
+      setTimeout(() => URL.revokeObjectURL(objectUrl), 12000);
+      calendarMessage("Arquivo preparado. Procure em Downloads e importe no calendário que preferir.");
+    } catch (_) {
+      calendarMessage("Não foi possível baixar aqui. Use Copiar informações ou Compartilhar.");
+    }
+  });
+
   // In mobile in-app browsers the virtual keyboard may overlay position:fixed.
   // Anchor the sheet to the *visible* viewport instead of the layout viewport.
   let viewportFrame = 0;
@@ -150,23 +260,15 @@ function initGuest() {
         return paragraph;
       }));
     }
-    // Link universal .ics: não exige conta Google nem aplicativo específico.
-    // A configuração atual do evento é 12/12/2026 às 15h (BRT).
-    const calendarLink = $("event-calendar-link");
+    // A data apenas abre as opções locais: nunca redireciona para outro site.
     const isOriginalEvent = event.data_evento === "2026-12-12" &&
       /^15[:h]00$/.test(String(event.horario || ""));
-    if (isOriginalEvent) {
-      calendarLink.setAttribute("href", "./confraternizacao-2026.ics");
-      calendarLink.setAttribute("download", "confraternizacao-2026.ics");
-      calendarLink.classList.remove("is-disabled");
-      calendarLink.removeAttribute("aria-disabled");
-    } else {
-      // Se a data for editada no painel, não oferecer arquivo com data antiga.
-      calendarLink.removeAttribute("href");
-      calendarLink.removeAttribute("download");
-      calendarLink.classList.add("is-disabled");
-      calendarLink.setAttribute("aria-disabled", "true");
-    }
+    show("calendar-file", isOriginalEvent);
+    const [yyyy,mm,dd] = String(event.data_evento || "").split("-");
+    const dateLabel = dd && mm && yyyy ? dd + "/" + mm + "/" + yyyy : "A definir";
+    const timeLabel = String(event.horario || "A definir").replace(":", "h");
+    calendarDialog.querySelector(".calendar-options-lead").textContent =
+      dateLabel + ", às " + timeLabel + ", na " + (event.local_evento || "local a definir") + ".";
     const day = event.data_evento ? String(event.data_evento).split("-") : null;
     $("event-date").textContent = day && day.length === 3 ? day[2] + "/" + day[1] : "A definir";
     $("event-time").textContent = event.horario ? String(event.horario).replace(":", "h") : "A definir";
