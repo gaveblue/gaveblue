@@ -419,3 +419,247 @@
 @media(prefers-reduced-motion:reduce){
  .guest-page #guest-identify,.guest-page #guest-companion,.guest-page #guest-done{animation:none}
 }
+
+
+/* ===== RSVP v7 · Layout vertical + alerta + Bottom Sheet ===== */
+.guest-page .guest-shell{padding-top:12px}
+.guest-page .guest-header{padding-bottom:9px}
+.guest-page .company-logo img{height:45px}
+.guest-page .company-logo-agricola img{max-width:109px}
+.guest-page .company-logo-cia img{max-width:162px}
+.guest-page .brand-divider{height:32px}
+.guest-page .guest-hero{padding:20px 1px 14px}
+.guest-page .guest-hero .eyebrow{font-size:9px}
+.guest-page .guest-hero h1{
+  margin:10px 0 7px;
+  font-size:clamp(27px,6.7vw,34px);
+  line-height:1.13;
+}
+.guest-page .guest-hero p{font-size:12px;line-height:1.5}
+.guest-page .deadline-chip{
+  display:flex;align-items:center;gap:9px;
+  width:fit-content;max-width:100%;
+  margin-top:12px;
+  border:1px solid #f3c8c8;
+  background:#fff3f2;
+  color:#a33c39;
+  border-radius:10px;
+  padding:8px 10px;
+  min-height:0;
+  font-size:11px;line-height:1.35;
+  box-shadow:none;
+  font-weight:500;
+}
+.guest-page .deadline-chip strong{color:#a12e31;font-weight:800}
+.guest-page .deadline-chip svg{color:#d54b4d;width:16px;height:16px;flex-shrink:0}
+.guest-page .guest-details{
+  display:flex;
+  flex-direction:column;
+  gap:0;
+  margin:0 0 12px;
+  padding:4px 14px;
+  border-radius:15px;
+}
+.guest-page .detail,.guest-page .detail:nth-child(2),.guest-page .detail:last-child{
+  border:0;
+  border-radius:0;
+  box-shadow:none;
+  margin:0;
+  padding:9px 2px;
+  min-height:52px;
+  flex:0 0 auto;
+  align-items:center;
+  gap:12px;
+}
+.guest-page .detail:not(:last-child){border-bottom:1px solid #ecf0e9}
+.guest-page .detail-icon{
+  width:35px;height:35px;min-width:35px;
+  border-radius:10px;
+}
+.guest-page .detail strong{font-size:12px;line-height:1.35}
+.guest-page .detail small{font-size:9px}
+.guest-page .invite-card{
+  padding:19px 19px 18px;
+  border-radius:16px;
+  border-top:2px solid #e2c03a;
+}
+.guest-page .invite-card h2{font-size:19px;line-height:1.24;margin:0 0 5px}
+.guest-page .invite-card .support{margin:0 0 15px;font-size:12px}
+.guest-page .invite-card .privacy{margin-top:16px}
+.guest-page .guest-footer{margin-top:13px}
+.guest-saved{display:flex;align-items:center;gap:10px;padding:5px 0}
+.guest-saved-icon{
+  width:39px;height:39px;flex:0 0 auto;display:grid;place-items:center;
+  background:#e8f6eb;border-radius:12px;color:#198047
+}
+.guest-saved-icon svg{width:22px;height:22px}
+.guest-saved>div{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.guest-saved strong{font-size:13px;color:#205332}
+.guest-saved small{font-size:11px;color:#758678}
+.guest-receipt-button{
+  background:#f3f8f1;border:1px solid #e0ebdc;color:#126736;
+  display:flex;align-items:center;gap:2px;border-radius:10px;
+  font-weight:750;font-size:11px;padding:9px
+}
+.guest-receipt-button svg{width:15px;height:15px}
+
+/* Bottom sheet is a true modal independent of the in-page search card. */
+body.rsvp-sheet-open{overflow:hidden;overscroll-behavior:none}
+.rsvp-sheet{
+  position:fixed;inset:0;z-index:1000;
+  display:flex;align-items:flex-end;justify-content:center;
+  pointer-events:none;
+}
+.rsvp-sheet:not(.hidden){pointer-events:auto}
+.rsvp-sheet-backdrop{
+  position:absolute;inset:0;
+  background:rgba(10,28,16,.45);
+  opacity:0;
+  transition:opacity .23s ease;
+  -webkit-tap-highlight-color:transparent;
+}
+.rsvp-sheet.is-open .rsvp-sheet-backdrop{opacity:1}
+.rsvp-sheet-panel{
+  --sheet-padding:22px;
+  position:relative;
+  isolation:isolate;
+  width:100%;max-width:560px;
+  display:flex;flex-direction:column;
+  max-height:calc(100dvh - 12px);
+  max-height:calc(100svh - 12px);
+  background:#fff;
+  border:1px solid #e7eee4;
+  border-bottom:none;
+  border-radius:25px 25px 0 0;
+  box-shadow:0 -17px 70px rgba(6,31,13,.18);
+  transform:translateY(104%);
+  transition:transform .3s cubic-bezier(.2,.88,.22,1);
+  padding-bottom:env(safe-area-inset-bottom, 0px);
+}
+.rsvp-sheet.is-open .rsvp-sheet-panel{transform:translateY(0)}
+.rsvp-sheet-handle{
+  border:0;background:transparent;min-height:29px;
+  display:grid;place-items:center;cursor:grab;touch-action:pan-y;
+  width:100%;padding:0;flex:0 0 auto;
+}
+.rsvp-sheet-handle span{
+  width:39px;height:5px;border-radius:99px;background:#d8e2d6;
+}
+.rsvp-sheet-head{
+  display:flex;justify-content:space-between;align-items:center;gap:16px;
+  padding:0 var(--sheet-padding) 16px;
+  border-bottom:1px solid #edf1eb;
+  flex:0 0 auto;
+}
+.rsvp-sheet-kicker{
+  color:#4f8a58;font-size:10px;font-weight:800;letter-spacing:.12em
+}
+.rsvp-sheet-head h2{
+  font:800 21px/1.3 Manrope,sans-serif;
+  color:#183e26;letter-spacing:-.04em;margin:4px 0 0;
+}
+.rsvp-sheet-close{
+  display:grid;place-items:center;width:35px;height:35px;flex:0 0 auto;
+  border:0;border-radius:50%;background:#f3f6f1;color:#5e7963;
+}
+.rsvp-sheet-close svg{width:19px;height:19px}
+.rsvp-sheet .notice.error{
+  margin:12px var(--sheet-padding) 0;
+  flex:0 0 auto;font-size:12px;color:#a93c38;
+  background:#fff3f1;border:1px solid #f3d1c9;
+}
+.rsvp-sheet-scroll{
+  overflow-y:auto;overflow-x:hidden;
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
+  min-height:0;
+  padding:17px var(--sheet-padding) 14px;
+}
+.rsvp-sheet .selected-person{
+  border:1px solid #e2eddf;
+  background:#f3f9f1;
+  border-radius:13px;
+  padding:11px;
+  margin:0 0 18px;
+}
+.rsvp-sheet .selected-person strong{font-size:13px}
+.rsvp-sheet .selected-person small{font-size:9px}
+.rsvp-sheet #guest-companion h2{
+  font:800 20px/1.25 Manrope,sans-serif;
+  margin:0 0 5px;
+  color:#183f27;letter-spacing:-.04em
+}
+.rsvp-sheet #guest-companion>.support{
+  color:#758476;font-size:12px;line-height:1.5;margin:0 0 16px
+}
+.rsvp-sheet .companion-options{display:grid;gap:9px;margin:0 0 16px}
+.rsvp-sheet .option{
+  display:flex;align-items:center;gap:10px;
+  border:1px solid #e0e8de;border-radius:12px;
+  background:#fff;padding:12px;min-height:57px;
+  font-size:12px;font-weight:650;line-height:1.4;
+}
+.rsvp-sheet .option-symbol{width:33px;height:33px;border-radius:9px;flex:0 0 33px}
+.rsvp-sheet .option:has(input:checked){
+  border-color:#66a475;background:#f3faf2;
+  box-shadow:inset 0 0 0 1px #e2f4dd;
+}
+.rsvp-sheet #companion-field{margin:0 0 12px}
+.rsvp-sheet #companion-field>label{
+  display:block;margin:0 0 8px;font-size:12px;font-weight:750;color:#254c33
+}
+.rsvp-sheet #companion-name{border:1px solid #d8e5d7;border-radius:11px}
+.rsvp-sheet .confirm-note{
+  margin:0 0 12px;text-align:left;
+  color:#859284;font-size:10px;line-height:1.55
+}
+.rsvp-sheet-action{
+  position:sticky;bottom:-14px;z-index:2;
+  background:linear-gradient(180deg,rgba(255,255,255,0),#fff 18%);
+  padding:12px 0 14px;
+}
+.rsvp-sheet-action .main-button{
+  display:flex;width:100%;min-height:50px;
+  background:linear-gradient(120deg,#11733c,#0a572a);
+  box-shadow:0 8px 18px rgba(17,107,55,.16);
+  border-radius:12px;font-size:13px
+}
+.rsvp-sheet-action .main-button:disabled{box-shadow:none;opacity:.48}
+.rsvp-sheet #guest-done{
+  padding:3px 0 10px;
+}
+.rsvp-sheet .success-mark{margin-top:0}
+.rsvp-sheet .done-panel h2{font-size:23px}
+.rsvp-sheet .confirmation-receipt{margin-top:0}
+.rsvp-sheet #whatsapp-fallback{width:100%}
+@media(min-width:650px){
+  .rsvp-sheet{align-items:flex-end}
+  .rsvp-sheet-panel{border-radius:24px 24px 0 0}
+}
+@media(max-width:700px){
+  .guest-page .guest-shell{padding-top:11px}
+  .guest-page .guest-header{padding-bottom:8px}
+  .guest-page .company-logo img{height:41px}
+  .guest-page .brand-divider{height:29px}
+  .guest-page .guest-hero{padding:16px 1px 12px}
+  .guest-page .guest-hero h1{font-size:clamp(25px,7.1vw,30px);line-height:1.14;margin:9px 0 6px}
+  .guest-page .guest-hero p{font-size:11px}
+  .guest-page .deadline-chip{margin-top:11px;font-size:10px;padding:8px 10px}
+  .guest-page .guest-details{padding:3px 13px;margin-bottom:11px}
+  .guest-page .detail,.guest-page .detail:nth-child(2),.guest-page .detail:last-child{min-height:48px;padding:7px 1px}
+  .guest-page .detail strong{font-size:11px}
+  .guest-page .invite-card{padding:16px 17px}
+  .guest-page .invite-card h2{font-size:18px}
+  .guest-page .invite-card .support{margin-bottom:13px}
+  .guest-page .invite-card .privacy{margin-top:13px}
+  .rsvp-sheet-panel{--sheet-padding:19px;border-radius:23px 23px 0 0}
+  .rsvp-sheet-head{padding-bottom:13px}
+  .rsvp-sheet-scroll{padding-top:13px}
+}
+@media(max-height:590px){
+  .rsvp-sheet-panel{max-height:calc(100dvh - 4px)}
+  .rsvp-sheet-scroll{padding-top:10px}
+}
+@media(prefers-reduced-motion:reduce){
+  .rsvp-sheet-backdrop,.rsvp-sheet-panel{transition:none!important}
+}
