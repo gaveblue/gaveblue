@@ -232,3 +232,22 @@ dialog.mg-v2-sheet .mg-v2-sheet-item .mg-right-icon .iv-icon{color:inherit}
 .mg-v2-main{padding:clamp(12px,1.8vw,22px)!important}.mg-v2-hero{margin:0 0 13px;align-items:center}.mg-v2-overline{font-size:10px}.mg-v2-hero h1{margin:3px 0;font-size:clamp(21px,2.2vw,28px)}.mg-v2-kpis{gap:8px;margin-bottom:13px;grid-template-columns:repeat(auto-fit,minmax(145px,1fr))}.mg-v2-kpi{gap:6px;padding:12px;border-radius:13px}.mg-v2-kpi-val{font-size:24px}.mg-v2-kpi-icon{width:30px;height:30px;border-radius:9px}.mg-v2-panel{padding:13px}.mg-v2-section{margin-bottom:12px}.mg-v2-content .panel{padding:15px;margin:0 0 12px}.mg-v2-content .panel h2{font-size:16px;margin:0 0 8px}.mg-v2-content .team-card{padding:12px;margin:8px 0}.mg-v2-content .team-actions{gap:6px}.mg-v2-content .muted-sm{font-size:11px;line-height:1.45}.mg-v2-loading-note{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
 dialog.iv-management-form-sheet .mg>div{min-width:0}dialog.iv-management-form-sheet .mg input,dialog.iv-management-form-sheet .mg select{width:100%;min-height:44px;border:1px solid #dbe2eb;border-radius:10px;padding:10px;font-size:16px;margin-top:4px;background:#fff}dialog.iv-management-form-sheet .mg .team-actions{display:flex;gap:8px}dialog.iv-management-form-sheet .mg .team-actions:empty{display:none}dialog.iv-management-form-sheet #mg-finish{min-height:44px}
 @media(max-width:650px){.mg-v2-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.mg-v2-hero{align-items:flex-start}.mg-v2-kpi-val{font-size:23px}.mg-v2-kpi-label{overflow-wrap:anywhere}.mg-v2-main{padding:13px!important}.mg-v2-content .team-actions>*{max-width:100%}}
+
+/* RC16: hierarquia dos indicadores, contraste e toque confortável. */
+.mg-v2-shell .mg-v2-navlink{font-size:13px;min-height:44px}
+.mg-v2-shell .mg-v2-nav-title{font-size:11px;color:#526176}
+.mg-v2-shell .mg-v2-restaurant{min-height:53px}
+.mg-v2-top-store{min-height:44px;font-size:12px;background:#fff;display:inline-flex}
+.mg-v2-primary{background:#c2410c;color:#fff;min-height:44px}
+.mg-v2-primary:hover,.mg-v2-sales-entry button:hover{background:#9a3412}
+.mg-v2-sales-entry button{background:#c2410c;min-height:44px}
+.mg-v2-kpi-note{font-size:11px;color:#5e6c7e}
+.mg-v2-more-stats{margin:-2px 0 14px}
+.mg-v2-more-stats>summary{display:flex;align-items:center;gap:9px;width:max-content;max-width:100%;padding:10px 12px;border:1px solid #e6eaf0;background:#fff;color:#44556b;border-radius:11px;font-size:12px;font-weight:760;list-style:none;cursor:pointer;min-height:44px}
+.mg-v2-more-stats>summary::-webkit-details-marker{display:none}
+.mg-v2-more-stats>summary>.iv-icon:last-child{transition:transform .16s}
+.mg-v2-more-stats[open]>summary>.iv-icon:last-child{transform:rotate(180deg)}
+.mg-v2-more-stats .mg-v2-kpis{margin:11px 0 0}
+.mg-v2-more-stats>summary:focus-visible,.mg-v2-top-store:focus-visible{outline:3px solid #d65b0a;outline-offset:2px}
+@media(max-width:480px){.mg-v2-top-store{max-width:152px}}
+@media(prefers-reduced-motion:reduce){.mg-v2-more-stats>summary>.iv-icon:last-child{transition:none}}
