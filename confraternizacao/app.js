@@ -140,7 +140,42 @@ function initGuest() {
 
   function updateEvent(data) {
     event = data;
-    $("guest-description").textContent = event.descricao || "Vamos celebrar juntos!";
+    // A copy do convite é editorial e permanece igual ao layout aprovado, sem
+    // substituir os parágrafos por descrições antigas salvas no banco.
+    const calendarLink = $("event-calendar-link");
+    const dateParts = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(event.data_evento || ""));
+    const timeParts = /^(\d{1,2})[:h](\d{2})$/.exec(String(event.horario || ""));
+    if (dateParts && timeParts && Number(timeParts[1]) < 24 && Number(timeParts[2]) < 60) {
+      const start = new Date(Date.UTC(
+        Number(dateParts[1]),Number(dateParts[2])-1,Number(dateParts[3]),
+        Number(timeParts[1]),Number(timeParts[2])
+      ));
+      const reminderEnd = new Date(start.getTime() + 15 * 60 * 1000);
+      const formatCalendarDate = d =>
+        d.getUTCFullYear().toString() +
+        String(d.getUTCMonth()+1).padStart(2,"0") +
+        String(d.getUTCDate()).padStart(2,"0") + "T" +
+        String(d.getUTCHours()).padStart(2,"0") +
+        String(d.getUTCMinutes()).padStart(2,"0") + "00";
+      const params = new URLSearchParams({
+        action:"TEMPLATE",
+        text:"Início · Confraternização 2026",
+        dates:formatCalendarDate(start) + "/" + formatCalendarDate(reminderEnd),
+        ctz:"America/Sao_Paulo",
+        location:event.local_evento || "Loja Maçônica Fenelon Barbosa",
+        details:"Lembrete de início da confraternização Covre Agrícola e Covre & Cia. O evento começa às " +
+          String(event.horario).replace(":","h") +
+          ". O horário de encerramento ainda não foi informado; este registro de 15 minutos é apenas um lembrete de início.\n" +
+          "Localização: https://maps.app.goo.gl/YYeyFWafrcbeTBfd8?g_st=ac"
+      });
+      calendarLink.href = "https://calendar.google.com/calendar/render?" + params.toString();
+      calendarLink.classList.remove("is-disabled");
+      calendarLink.removeAttribute("aria-disabled");
+    } else {
+      calendarLink.removeAttribute("href");
+      calendarLink.classList.add("is-disabled");
+      calendarLink.setAttribute("aria-disabled","true");
+    }
     const day = event.data_evento ? String(event.data_evento).split("-") : null;
     $("event-date").textContent = day && day.length === 3 ? day[2] + "/" + day[1] : "A definir";
     $("event-time").textContent = event.horario ? String(event.horario).replace(":", "h") : "A definir";
