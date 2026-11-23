@@ -157,6 +157,9 @@ function initGuest() {
       const resp = await request("confirm", {
         colaborador_id: selected.id, query: typedQuery, acompanhante: choice() === "yes", acompanhante_nome: $("companion-name").value.trim()
       });
+      $("done-person-name").textContent = resp.colaborador || selected.nome_completo;
+      $("done-companion-name").textContent = choice() === "yes" ? $("companion-name").value.trim() : "Não levará";
+      $("invite-card").classList.add("is-complete");
       show("guest-companion", false); show("guest-done", true);
       const link = $("whatsapp-fallback"); link.href = resp.whatsapp_url;
       $("step-two").className = "step complete";
