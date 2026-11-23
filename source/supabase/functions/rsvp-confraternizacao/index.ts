@@ -23,7 +23,7 @@ const matchesSearch = (full: string, query: string) => {
   const surname = terms.slice(1).join(" ");
   return words.slice(1).some((_, index) => words.slice(index + 1).join(" ").startsWith(surname));
 };
-const validName = (v: string) => v.length >= 5 && v.length <= 150 && v.split(" ").filter(Boolean).length >= 2 && /^[\p{L}\s'-]+$/u.test(v);
+const validName = (v: string) => v.length >= 5 && v.length <= 150 && v.split(" ").filter(Boolean).length >= 2 && /^[\p{L}\s'.-]+$/u.test(v);
 const errorText = (e: unknown) => e instanceof Error ? e.message : "Não foi possível concluir a solicitação.";
 function assert(ok: unknown, message: string): asserts ok { if (!ok) throw new Error(message); }
 async function event() {
