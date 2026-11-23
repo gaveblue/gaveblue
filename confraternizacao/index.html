@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f7f8fb">
+<meta name="description" content="Confirmação de presença na confraternização da empresa.">
+<meta name="robots" content="noindex,nofollow">
+<title>Confraternização · Confirme sua presença</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="./style.css?v=1" rel="stylesheet">
+<script defer src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+<script defer src="./app.js?v=1"></script>
+</head>
+<body class="guest-page">
+<div class="ambient ambient-a"></div><div class="ambient ambient-b"></div>
+<main class="guest-shell">
+  <header class="guest-header">
+    <div class="brand-mark"><i data-lucide="sparkles"></i></div>
+    <div><strong>Confraternização</strong><span>Um momento para celebrar</span></div>
+  </header>
+  <section class="guest-hero">
+    <div class="eyebrow"><span class="eyebrow-dot"></span> UM CONVITE ESPECIAL</div>
+    <h1>As melhores conquistas<br> são <em>compartilhadas.</em></h1>
+    <p id="guest-description">Vamos celebrar juntos tudo o que construímos neste ano.</p>
+  </section>
+  <section class="guest-details">
+    <div class="detail"><span class="detail-icon"><i data-lucide="calendar-days"></i></span><div><small>DATA</small><strong id="event-date">A definir</strong></div></div>
+    <div class="detail"><span class="detail-icon"><i data-lucide="clock-3"></i></span><div><small>HORÁRIO</small><strong id="event-time">A definir</strong></div></div>
+    <div class="detail"><span class="detail-icon"><i data-lucide="map-pin"></i></span><div><small>LOCAL</small><strong id="event-place">A definir</strong></div></div>
+  </section>
+  <section class="invite-card">
+    <div class="invite-heading"><div class="steps"><span class="step active" id="step-one">1</span><span class="step-line"></span><span class="step" id="step-two">2</span></div><span class="step-caption" id="step-caption">PASSO 1 DE 2</span></div>
+    <div id="guest-error" class="notice error hidden" role="alert"></div>
+    <div id="guest-locked" class="locked hidden"><span class="big-icon"><i data-lucide="calendar-clock"></i></span><h2>Estamos preparando tudo!</h2><p>As confirmações ainda não foram abertas. Volte em breve.</p></div>
+    <div id="guest-loading" class="loading-row"><span class="spinner"></span> Carregando informações...</div>
+    <div id="guest-identify" class="hidden">
+      <h2>Vamos confirmar sua presença?</h2><p class="support">Primeiro, encontre seu nome na lista de colaboradores.</p>
+      <label for="employee-search">Seu nome e sobrenome</label>
+      <div class="search-wrap"><i data-lucide="search"></i><input id="employee-search" autocomplete="name" spellcheck="false" placeholder="Ex.: Marina Santos" maxlength="160"><button type="button" id="clear-search" class="clear-search hidden" aria-label="Limpar busca"><i data-lucide="x"></i></button></div>
+      <p class="field-help" id="search-hint">Digite seu nome e pelo menos 3 letras do sobrenome.</p>
+      <div id="employee-results" class="result-list" role="listbox" aria-label="Colaboradores encontrados"></div>
+      <p class="privacy"><i data-lucide="lock-keyhole"></i> Sua confirmação será utilizada apenas para organizar o evento.</p>
+    </div>
+    <div id="guest-companion" class="hidden">
+      <div class="selected-person"><span class="selected-avatar"><i data-lucide="user-round-check"></i></span><div><small>COLABORADOR</small><strong id="selected-name"></strong></div><button id="change-person" class="text-btn" type="button">Alterar</button></div>
+      <h2>Falta só um detalhe.</h2><p class="support">Você vai levar acompanhante?</p>
+      <div class="companion-options">
+        <label class="option"><input type="radio" name="plus" value="yes"><span class="option-symbol"><i data-lucide="users"></i></span><span>Sim, vou levar acompanhante</span><i data-lucide="circle" class="option-check"></i></label>
+        <label class="option"><input type="radio" name="plus" value="no"><span class="option-symbol"><i data-lucide="user-round"></i></span><span>Não, irei sozinho(a)</span><i data-lucide="circle" class="option-check"></i></label>
+      </div>
+      <div id="companion-field" class="hidden"><label for="companion-name">Nome completo do acompanhante</label><input id="companion-name" class="standard-input" placeholder="Nome e sobrenome" autocomplete="off" maxlength="150"><p class="field-help">Informe como o nome deve aparecer na lista do evento.</p></div>
+      <button class="main-button" type="button" id="confirm-button" disabled>Confirmar presença <i data-lucide="arrow-up-right"></i></button>
+      <p class="confirm-note">Ao confirmar, seus dados serão salvos e você será direcionado ao WhatsApp para enviar a mensagem à organização.</p>
+    </div>
+    <div id="guest-done" class="hidden done-panel"><span class="big-icon success"><i data-lucide="check"></i></span><h2>Presença registrada!</h2><p>Estamos abrindo o WhatsApp com sua mensagem pronta para enviar.</p><a id="whatsapp-fallback" class="main-button" target="_self" rel="noopener">Abrir WhatsApp <i data-lucide="arrow-up-right"></i></a></div>
+  </section>
+  <footer class="guest-footer">Feito com carinho para um momento especial. <span>© 2026</span></footer>
+</main>
+</body>
+</html>
