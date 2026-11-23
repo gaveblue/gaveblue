@@ -122,3 +122,17 @@ body.iv-unified .iv-platform .p-grid>.p-card{border-radius:16px}
 }
 @media(max-width:375px){body.iv-unified .op-cards,body.iv-unified .x-grid{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){dialog.iv-op-sheet,.iv-op-open{animation:none;transition:none}}
+
+/* RC16: um acesso claro por restaurante, módulos secundários recolhíveis. */
+body.iv-unified .iv-restaurants .links{display:block}
+body.iv-unified .iv-restaurants .links>a.iv-rest-primary{display:flex;width:100%;align-items:center;gap:9px;justify-content:flex-start;min-height:46px;border:0;border-radius:11px;padding:12px 13px;background:#c2410c;color:#fff;font-size:13px;font-weight:800}
+body.iv-unified .iv-restaurants .iv-rest-primary .iv-icon:last-child{margin-left:auto}
+body.iv-unified .iv-restaurants .iv-rest-more{margin-top:9px;width:100%}
+body.iv-unified .iv-restaurants .iv-rest-more>summary{display:flex;align-items:center;justify-content:space-between;min-height:44px;padding:10px 12px;background:#f5f7fa;border-radius:11px;font-size:12px;font-weight:700;color:#42536b;cursor:pointer;list-style:none}
+body.iv-unified .iv-restaurants .iv-rest-more>summary::-webkit-details-marker{display:none}
+body.iv-unified .iv-restaurants .iv-rest-more[open]>summary>.iv-icon{transform:rotate(180deg)}
+body.iv-unified .iv-restaurants .iv-rest-module-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;padding:9px 0 0}
+body.iv-unified .iv-restaurants .iv-rest-module-list>a{display:flex;align-items:center;gap:7px;min-height:44px;padding:9px 10px;border:1px solid #e7ebf1;border-radius:10px;background:#fff;color:#38495f;font-size:12px;font-weight:650;text-decoration:none}
+body.iv-unified .iv-restaurants .iv-rest-no-modules{font-size:12px;color:#5f6e80}
+body.iv-unified .iv-restaurants .iv-rest-primary:focus-visible,body.iv-unified .iv-restaurants summary:focus-visible,body.iv-unified .iv-restaurants .iv-rest-module-list>a:focus-visible{outline:3px solid #b94b07;outline-offset:2px}
+@media(max-width:390px){body.iv-unified .iv-restaurants .iv-rest-module-list{grid-template-columns:1fr}}
