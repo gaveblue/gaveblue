@@ -179,3 +179,14 @@ Implementação isolada do convite corporativo GaveBlue, sem alterações nos ap
 - Primeiro acesso, atualizações por botão `Atualizar dados` e gravação/reabertura pelo admin continuam funcionando; se outro administrador reabrir o evento, clicar `Atualizar dados` para retomar.
 - A Visão Geral informa quando o ciclo está ativo (5 segundos) ou pausado.
 - Reutilizado `app.js?v=28` com cache bust em todas as versões de URL do admin, sem tocar no convite público, dados SQL ou Supabase.
+
+## Admin v11 — cabeçalho corrigido e confirmação mais ágil (24/11/2026)
+- Removido **Configurações** do cabeçalho. Permanece apenas na navegação lateral/aba de menu; preservado o hambúrguer.
+- Logos originais da **Covre Agrícola** e **Covre & Cia** ampliados e centralizados no cabeçalho desktop; ocultos na versão mobile.
+- Título do evento em negrito com transição suave verde/amarelo/laranja; dez partículas/confetes discretos inspirados na animação original do convite. Respeitado `prefers-reduced-motion`.
+- O título continua atualizado dinamicamente do registro do evento; o JavaScript escreve em `admin-title-text`, preservando as partículas decorativas.
+- Ao salvar confirmação/desconfirmação manual, após a **resposta positiva do servidor**, atualiza colaboradores, confirmação, contadores e lista na memória sem aguardar novo `admin-bootstrap` completo. A consulta automática de 5 segundos permanece para reconciliar estado quando o evento estiver aberto.
+- Confirmação manual preserva dados preexistentes do acompanhante quando continua confirmada; retirar confirmação reflete sua exclusão somente após gravação bem-sucedida. Status de salvamento/antiduplo-clique existentes mantidos.
+- Proteção para não sobrescrever a atualização local com respostas antigas de bootstrap usando `mutationEpoch`; o fluxo público e Supabase não foram modificados.
+- Novos arquivos: `admin-v11.css`, `admin/painel-v11.html`, `app.js?v=29`; caminhos legados do admin sincronizados para evitar incompatibilidade de DOM.
+- Verificações: validação de sintaxe JS, integridade de IDs/HTML, CSS equilibrado, testes de cálculo e renderização local sem alterar dados de produção.
