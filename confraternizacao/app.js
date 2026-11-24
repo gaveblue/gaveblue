@@ -942,9 +942,9 @@ function initAdmin() {
         (disabled?' disabled':'')+'><span class="rsvp-confirm-thumb" aria-hidden="true"></span></button>';
       const guestName=c?.acompanhante?String(c.acompanhante_nome||"Nome não informado"):"—";
       return '<tr><td><div class="name-cell"><span class="initial-badge">'+escapeHtml(initials)+
-      '</span><span class="name-stack"><strong>'+escapeHtml(p.nome_completo)+
+      '</span><span class="name-stack"><strong title="'+escapeHtml(p.nome_completo)+'">'+escapeHtml(p.nome_completo)+
       '</strong><small>'+escapeHtml(sectorText)+'</small></span></div></td>'+
-      '<td class="companion-cell">'+escapeHtml(guestName)+'</td>'+
+      '<td class="companion-cell" title="'+escapeHtml(guestName)+'">'+escapeHtml(guestName)+'</td>'+
       '<td><div class="people-status-cell"><div class="people-status-description">'+badge+
       '</div>'+toggle+'</div></td>'+
       '<td>'+escapeHtml(stamp(c?.confirmado_em))+'</td>'+
@@ -1066,7 +1066,7 @@ function initAdmin() {
     const ev = dataset.event;
     $("event-title").value = ev.titulo || "";
     $("event-description").value = ev.descricao || "";
-    renderRsvpMessage($("event-description-preview"), $("event-description").value);
+    updateMessagePreview();
     $("event-date-input").value = ev.data_evento || "";
     $("event-time-input").value = ev.horario || "";
     $("event-place-input").value = ev.local_evento || "";
