@@ -16,10 +16,12 @@
 <link href="./guest-v10.css?v=14" rel="stylesheet">
 <script defer src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
 <link href="./guest-v13.css?v=15" rel="stylesheet">
-<link href="./guest-v15.css?v=15" rel="stylesheet">
-<script defer src="./app.js?v=15"></script>
+<link href="./guest-v15.css?v=16" rel="stylesheet">
+<link href="./guest-v16.css?v=16" rel="stylesheet">
+<script defer src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.4/dist/confetti.browser.min.js"></script>
+<script defer src="./app.js?v=16"></script>
 </head>
-<body class="guest-page invite-booting" data-invite-version="15">
+<body class="guest-page invite-booting" data-invite-version="16">
 <div id="invite-boot" class="invite-boot" role="status" aria-live="polite">
   <div class="invite-boot-inner">
     <span class="invite-boot-symbol" aria-hidden="true"><i data-lucide="calendar-heart"></i></span>
@@ -59,16 +61,24 @@
       <div class="countdown-tile"><strong id="countdown-seconds" class="countdown-number" aria-label="segundos">--</strong><span>SEG</span></div>
     </div>
     <p id="countdown-status" class="countdown-status hidden" role="status" aria-live="polite"></p>
+    <p class="event-countdown-datetime"><i data-lucide="calendar-days" aria-hidden="true"></i><span>Dia <strong id="event-date-long">12 de dezembro</strong>, a partir das <strong id="event-time-inline">15h</strong></span></p>
   </section>
-  <section class="guest-details" aria-label="Informações do evento">
-    <div class="event-when">
-      <div class="event-when-cell event-date-cell"><span class="detail-icon"><i data-lucide="calendar-days"></i></span><div class="event-calendar-copy"><small>DATA</small><strong id="event-date">12/12</strong></div></div>
-      <span class="event-when-divider" aria-hidden="true"></span>
-      <div class="event-when-cell"><span class="detail-icon"><i data-lucide="clock-3"></i></span><div><small>HORÁRIO</small><strong id="event-time">15h00</strong></div></div>
-    </div>
+  <section class="guest-details guest-location-only" aria-label="Local do evento">
     <div class="event-location"><span class="detail-icon"><i data-lucide="map-pin"></i></span><div class="event-location-copy"><small>LOCAL</small><strong id="event-place">Loja Maçônica Fenelon Barbosa</strong><a class="event-map-link" href="https://maps.app.goo.gl/YYeyFWafrcbeTBfd8?g_st=ac" target="_blank" rel="noopener noreferrer">Não sabe onde fica? <span>Clique aqui</span><i data-lucide="arrow-up-right" aria-hidden="true"></i></a></div></div>
   </section>
-  <div class="deadline-chip" role="note"><i data-lucide="alert-circle" aria-hidden="true"></i><span><strong>Atenção:</strong> confirme sua presença até <strong>30/11</strong>.</span></div>
+  <section class="rsvp-urgency" id="rsvp-urgency" aria-label="Prazo para confirmar presença">
+    <div class="rsvp-urgency-head"><i data-lucide="alert-circle" aria-hidden="true"></i><div><strong>Confirme sua presença até 25/11</strong><small id="rsvp-urgency-caption">O prazo está acabando — não deixe para depois!</small></div></div>
+    <div class="rsvp-urgency-grid" id="rsvp-urgency-grid" role="timer" aria-live="off" aria-label="Tempo restante para confirmar presença">
+      <div class="rsvp-urgency-unit"><strong id="rsvp-hours">--</strong><span>HORAS</span></div>
+      <span class="rsvp-urgency-separator" aria-hidden="true">:</span>
+      <div class="rsvp-urgency-unit"><strong id="rsvp-minutes">--</strong><span>MIN</span></div>
+      <span class="rsvp-urgency-separator" aria-hidden="true">:</span>
+      <div class="rsvp-urgency-unit"><strong id="rsvp-seconds">--</strong><span>SEG</span></div>
+      <span class="rsvp-urgency-separator" aria-hidden="true">.</span>
+      <div class="rsvp-urgency-unit rsvp-urgency-ms"><strong id="rsvp-millis">---</strong><span>MS</span></div>
+    </div>
+    <p id="rsvp-urgency-expired" class="rsvp-urgency-expired hidden" role="status">O prazo de confirmação terminou em 25/11.</p>
+  </section>
   <section class="invite-card" id="invite-card">
     <div id="guest-locked" class="locked hidden"><span class="big-icon"><i data-lucide="calendar-clock"></i></span><h2>Confirmações indisponíveis</h2><p>As confirmações ainda não estão abertas. Fale com a organização.</p></div>
     <div id="guest-cta" class="guest-cta hidden">
@@ -113,8 +123,9 @@
         <div class="rsvp-sheet-action"><button class="main-button" type="button" id="confirm-button" disabled>Confirmar presença <i data-lucide="check"></i></button></div>
       </div>
       <div id="guest-done" class="hidden done-panel" aria-live="polite">
+        <div class="success-celebration" aria-hidden="true"><span class="clink-glass clink-glass-left"><i data-lucide="wine"></i></span><span class="clink-glass clink-glass-right"><i data-lucide="wine"></i></span><span class="celebration-star celebration-star-a"></span><span class="celebration-star celebration-star-b"></span><span class="celebration-star celebration-star-c"></span></div>
         <div class="success-mark"><i data-lucide="check"></i></div><span class="done-eyebrow">TUDO CERTO!</span>
-        <h2>Presença confirmada.</h2><p class="done-lead">Sua participação foi registrada. Agora é só enviar a mensagem para a organização.</p>
+        <h2>Presença confirmada!</h2><p class="done-lead">Estamos felizes com sua participação! Seu WhatsApp será aberto em instantes para avisar a organização.</p>
         <div class="confirmation-receipt">
           <div class="receipt-row"><span><i data-lucide="user-round"></i> Colaborador</span><strong id="done-person-name">—</strong></div>
           <div class="receipt-row"><span><i data-lucide="users-round"></i> Acompanhante</span><strong id="done-companion-name">—</strong></div>
