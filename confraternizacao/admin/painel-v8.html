@@ -13,11 +13,12 @@
 <link href="../admin-v6.css?v=6" rel="stylesheet">
 <link href="../admin-v7.css?v=7" rel="stylesheet">
 <link href="../admin-v8.css?v=8" rel="stylesheet">
+<link href="../admin-v9.css?v=9" rel="stylesheet">
 
 <script defer src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
-<script defer src="../app.js?v=25"></script>
+<script defer src="../app.js?v=26"></script>
 </head>
-<body class="admin-page" data-admin-version="8">
+<body class="admin-page" data-admin-version="9">
 <div id="admin-loading" class="admin-loading" role="status" aria-live="polite" aria-atomic="true">
   <div class="admin-loading-inner">
     <div class="admin-loading-symbol" aria-hidden="true"><span class="admin-loading-orbit"></span><i data-lucide="sparkles"></i></div>
@@ -43,7 +44,7 @@
   </div>
 </div>
 <div id="admin-app" class="admin-layout hidden">
-  <aside class="admin-sidebar">
+  <aside class="admin-sidebar" id="admin-sidebar" aria-label="Navegação administrativa">
     <a href="../" class="sidebar-logo"><span class="brand-mark"><i data-lucide="sparkles"></i></span><div><strong>Confraternização</strong><small>PAINEL DE GESTÃO</small></div></a>
     <div class="nav-group-label">GERENCIAMENTO</div>
     <nav class="admin-nav">
@@ -55,13 +56,23 @@
   </aside>
   <div class="admin-main">
     <header class="admin-top">
-      <div><span class="eyebrow">ORGANIZAÇÃO DO EVENTO</span><h1 id="admin-title">Confraternização 2026</h1><p>Gerencie confirmações e acompanhantes em um só lugar.</p></div>
+      <div class="admin-top-left">
+        <button id="admin-nav-toggle" class="admin-nav-toggle" type="button" aria-label="Ocultar navegação" aria-expanded="true" aria-controls="admin-sidebar mobile-nav" title="Ocultar navegação"><i data-lucide="menu"></i></button>
+        <div class="admin-top-intro"><span class="eyebrow">ORGANIZAÇÃO DO EVENTO</span><h1 id="admin-title">Confraternização 2026</h1><p>Gerencie confirmações e acompanhantes em um só lugar.</p></div>
+      </div>
       <div class="admin-top-actions">
+        <div class="admin-header-desktop">
+          <button class="admin-settings-shortcut" type="button" data-view="settings"><i data-lucide="settings-2"></i> Configurações</button>
+          <span class="admin-header-divider" aria-hidden="true"></span>
+          <div class="admin-header-logos" aria-label="Covre Agrícola e Covre &amp; Cia">
+            <img src="https://i.imgur.com/kXwEnSs.png" alt="Covre Agrícola" loading="lazy" decoding="async" referrerpolicy="no-referrer">
+            <img src="../assets/covre-e-cia-oficial.png?v=9" alt="Covre &amp; Cia" loading="lazy" decoding="async">
+          </div>
+        </div>
         <button id="mobile-logout" class="admin-mobile-logout" type="button" aria-label="Sair do painel" title="Sair do painel"><i data-lucide="log-out"></i></button>
-        <button id="top-add" class="main-button compact" type="button" aria-label="Adicionar colaborador"><i data-lucide="user-plus"></i> Novo colaborador</button>
       </div>
     </header>
-    <div class="mobile-nav"><button data-view="overview" class="mobile-tab active"><i data-lucide="layout-dashboard"></i> Geral</button><button data-view="people" class="mobile-tab"><i data-lucide="users"></i> Lista</button><button data-view="settings" class="mobile-tab"><i data-lucide="settings"></i> Evento</button></div>
+    <div id="mobile-nav" class="mobile-nav" aria-label="Navegação rápida"><button data-view="overview" class="mobile-tab active"><i data-lucide="layout-dashboard"></i> Geral</button><button data-view="people" class="mobile-tab"><i data-lucide="users"></i> Lista</button><button data-view="settings" class="mobile-tab"><i data-lucide="settings"></i> Evento</button></div>
     <div id="admin-notice" class="notice hidden" role="status"></div>
     <div id="view-overview" class="admin-content">
       <div class="section-intro action-intro"><div><h2>Visão geral</h2><p>Acompanhe as respostas e os cadastros do evento.</p></div><button id="refresh-dashboard" class="secondary-button" type="button"><i data-lucide="refresh-cw"></i> Atualizar dados</button></div>
@@ -82,7 +93,7 @@
       <section class="admin-panel"><div class="panel-heading"><div><h3>Confirmações recentes</h3><p>Últimos colaboradores que responderam</p></div><button class="text-btn" data-view="people">Ver todos</button></div><div id="recent-list" class="recent-list"></div></section>
     </div>
     <div id="view-people" class="admin-content hidden">
-      <div class="section-intro action-intro"><div><h2>Colaboradores</h2><p>Cadastre, importe e acompanhe quem vai participar.</p></div><div class="button-row"><button id="import-button" class="secondary-button"><i data-lucide="upload"></i> Importar lista</button><button id="export-button" class="secondary-button"><i data-lucide="download"></i> Exportar CSV</button></div></div>
+      <div class="section-intro action-intro"><div><h2>Colaboradores</h2><p>Cadastre, importe e acompanhe quem vai participar.</p></div><div class="button-row people-actions"><button id="people-add" class="main-button compact" type="button"><i data-lucide="user-plus"></i> Novo colaborador</button><button id="import-button" class="secondary-button"><i data-lucide="upload"></i> Importar lista</button><button id="export-button" class="secondary-button"><i data-lucide="download"></i> Exportar CSV</button></div></div>
       <section class="admin-panel">
       <div class="people-filter-panel">
         <div class="people-filter-controls">
@@ -98,7 +109,7 @@
           <button class="people-status-tab" type="button" data-status="incomplete" aria-pressed="false">Sem sobrenome <span data-count-for="incomplete">0</span></button>
         </div>
         <div class="people-results-line"><span id="people-count" class="count-label" role="status">0 resultados</span></div>
-      </div><div class="table-scroll"><table class="people-table"><thead><tr><th>COLABORADOR</th><th>SETOR</th><th>ACOMPANHANTE</th><th>STATUS / CONFIRMAÇÃO</th><th>CONFIRMADO EM</th><th></th></tr></thead><tbody id="people-body"></tbody></table></div></section>
+      </div><div class="table-scroll"><table class="people-table"><thead><tr><th>COLABORADOR / SETOR</th><th>ACOMPANHANTE</th><th>STATUS / CONFIRMAÇÃO</th><th>CONFIRMADO EM</th><th></th></tr></thead><tbody id="people-body"></tbody></table></div></section>
     </div>
     <div id="view-settings" class="admin-content hidden">
       <div class="section-intro"><h2>Configurações do evento</h2><p>Edite os dados do convite, o WhatsApp e o status das confirmações.</p></div>
@@ -166,6 +177,14 @@
     <h2 id="rsvp-confirm-title">Confirmar alteração?</h2>
     <p id="rsvp-confirm-message">Confirme a alteração do status de presença.</p>
     <div class="rsvp-confirm-buttons"><button type="button" id="rsvp-confirm-cancel" class="secondary-button">Cancelar</button><button type="button" id="rsvp-confirm-accept" class="main-button">Confirmar</button></div>
+  </div>
+</div>
+<div id="admin-action-loading" class="admin-action-loading hidden" role="status" aria-live="polite" aria-busy="true" aria-atomic="true">
+  <div class="admin-action-loading-inner">
+    <span class="admin-action-loading-symbol" aria-hidden="true"><i data-lucide="loader-circle"></i></span>
+    <h2 id="admin-action-loading-title">Salvando alteração...</h2>
+    <p>Atualizando a confirmação com segurança. Não feche esta página.</p>
+    <div class="admin-action-progress" aria-hidden="true"><span></span></div>
   </div>
 </div>
 <div id="admin-toast-stack" class="admin-toast-stack" role="status" aria-live="polite" aria-atomic="false"></div>
