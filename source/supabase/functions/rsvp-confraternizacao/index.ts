@@ -36,12 +36,17 @@ const norm = (v: unknown) => clean(v, 160).normalize("NFD").replace(/[\u0300-\u0
 const matchesSearch = (full: string, query: string) => {
   const words = norm(full).split(" ").filter(Boolean);
   const terms = norm(query).split(" ").filter(Boolean);
+  if (words.length === 1 || terms.length === 1) {
+    return words.length === 1 && terms.length === 1
+      && words[0].length >= 3 && words[0] === terms[0];
+  }
   if (words.length < 2 || terms.length < 2 || terms[0].length < 2 || terms[terms.length - 1].length < 3) return false;
   if (!words[0].startsWith(terms[0])) return false;
   const surname = terms.slice(1).join(" ");
   return words.slice(1).some((_, index) => words.slice(index + 1).join(" ").startsWith(surname));
 };
 const validName = (v: string) => v.length >= 5 && v.length <= 150 && v.split(" ").filter(Boolean).length >= 2 && /^[\p{L}\s'.-]+$/u.test(v);
+const validColaboradorName = (v: string) => v.length >= 3 && v.length <= 150 && /^[\p{L}\s'.-]+$/u.test(v);
 const errorText = (e: unknown) => e instanceof Error ? e.message : "Não foi possível concluir a solicitação.";
 function assert(ok: unknown, message: string): asserts ok { if (!ok) throw new Error(message); }
 async function event() {
@@ -117,7 +122,8 @@ Deno.serve(async (req: Request) => {
       assert(currentState === "aberto", stateError(currentState));
       const key = norm(body.query);
       const terms=key.split(" ").filter(Boolean);
-      if (terms.length<2 || terms[0].length<2 || terms[terms.length-1].length<3) {
+      if (!((terms.length === 1 && terms[0].length >= 3)
+        || (terms.length >= 2 && terms[0].length >= 2 && terms[terms.length - 1].length >= 3))) {
         return json({ok:true,results:[]},200,origin);
       }
       const {data,error}=await db.rpc("rsvp_busca_rapida",{
@@ -147,7 +153,9 @@ Deno.serve(async (req: Request) => {
       const id = clean(body.colaborador_id, 48);
       const key = norm(body.query);
       const terms = key.split(" ");
-      assert(/^[0-9a-f-]{36}$/i.test(id) && terms.length >= 2 && terms[0].length >= 2 && terms[terms.length - 1].length >= 3, "Identificação incompleta.");
+      const validQuery = (terms.length === 1 && terms[0].length >= 3)
+        || (terms.length >= 2 && terms[0].length >= 2 && terms[terms.length - 1].length >= 3);
+      assert(/^[0-9a-f-]{36}$/i.test(id) && validQuery, "Identificação incompleta.");
       const { data: employee } = await db.from("rsvp_colaboradores").select("id,nome_completo,nome_chave").eq("id", id).eq("evento_id", ev.id).eq("ativo", true).maybeSingle();
       assert(employee && matchesSearch(employee.nome_completo, key), "Colaborador não encontrado. Faça a busca novamente.");
       const companion = body.acompanhante === true;
@@ -186,7 +194,8 @@ Deno.serve(async (req: Request) => {
     }
     if (action === "admin-save-event") {
       const title = clean(body.titulo, 100);
-      const description = clean(body.descricao, 500);
+      const description = String(body.descricao ?? "").replace(/\r\n?/g, "\n")
+        .replace(/[^\S\n]+/g, " ").replace(/\n{3,}/g, "\n\n").trim().slice(0, 500);
       const place = clean(body.local_evento, 180);
       const wa = clean(body.whatsapp, 20).replace(/\D/g, "");
       const date = clean(body.data_evento, 10);
@@ -218,13 +227,13 @@ Deno.serve(async (req: Request) => {
       const id = action === "admin-update" ? clean(body.id, 48) : null;
       const name = clean(body.nome_completo);
       const sector = clean(body.setor, 90);
-      const validFull = validName(name);
-      assert(name.length >= 2 && name.length <= 150 && /^[\p{L}\s'.-]+$/u.test(name), "Nome inválido.");
-      assert(action !== "admin-add" || validFull, "Informe nome e sobrenome do novo colaborador.");
+      const validFull = validColaboradorName(name);
+      assert(validFull, "Informe um nome com pelo menos 3 letras.");
+      assert(action !== "admin-add" || validFull, "Informe um nome válido.");
       assert(id === null || /^[0-9a-f-]{36}$/i.test(id), "Registro inválido.");
       assert(sector.length <= 90, "Setor muito longo.");
       const active = body.ativo !== false;
-      assert(!active || validFull, "Complete o sobrenome antes de ativar o colaborador na busca.");
+      assert(!active || validFull, "Informe um nome válido para disponibilizar o colaborador.");
       assert(typeof body.confirmado === "boolean", "Informe o status da confirmação.");
       const { data, error } = await db.rpc("rsvp_admin_save_person", {
         p_evento: ev.id, p_id: id, p_nome: name, p_nome_chave: norm(name),
@@ -240,7 +249,7 @@ Deno.serve(async (req: Request) => {
       const unique = new Map<string, string>();
       for (const item of names) {
         const name = clean(item);
-        assert(validName(name), "Há um nome inválido na lista: " + name.slice(0, 50));
+        assert(validColaboradorName(name), "Há um nome inválido na lista: " + name.slice(0, 50));
         unique.set(norm(name), name);
       }
       const rows = [...unique.entries()].map(([key, name]) => ({ evento_id: ev.id, nome_chave: key, nome_completo: name }));
