@@ -127,3 +127,13 @@ Implementação isolada do convite corporativo GaveBlue, sem alterações nos ap
 - Rodapé novo em duas linhas centralizadas: `Desenvolvido com ❤️ por gaveblue.com.br` (link oficial) e `© Copyright 2026 - Todos os direitos reservados`.
 - Tipografia pequena, cores discretas, sem alterar fluxos de RSVP nem demais conteúdos.
 - Atualizadas rotas existentes e novo acesso `convite-v22.html`; estilo isolado em `guest-v22.css`.
+
+## Admin visual v5 — 23/11/2026
+- Primeira reorganização visual do painel administrativo, **sem modificar banco de dados, Supabase ou lógica das confirmações**.
+- Paleta verde/branco com detalhes leves em dourado para se alinhar ao convite.
+- Indicadores compactos, painéis com hierarquia mais clara e maior equilíbrio entre espaços.
+- Navegação móvel fixa no rodapé com abas Geral/Lista/Evento e botão acessível de sair no topo.
+- Lista móvel dos colaboradores reformatada em linhas-cartões com nome, status, setor, acompanhante, data e edição, sem rolagem horizontal obrigatória; tabela desktop preservada.
+- Formulários de inclusão/importação em bottom sheets no celular e sem alteração dos fluxos existentes.
+- No texto das configurações, substituída menção indevida a "período de confirmação" por "status das confirmações"; a data limite pública continua controlada pela API e **ainda não pode ser alterada pelo admin**.
+- Carregamento: `admin/index.html` agora usa `admin-v5.css?v=5` e `app.js?v=5` para invalidação de cache; `app.js` alterado apenas para disponibilizar sair no celular.

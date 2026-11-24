@@ -683,11 +683,13 @@ function initAdmin() {
     const link=location.origin+"/confraternizacao/";
     try { await navigator.clipboard.writeText(link);notify("Link copiado!"); } catch(_) { notify("Copie o link: "+link); }
   });
-  $("logout-button").addEventListener("click",async()=>{
+  const signOut = async () => {
     try { if (session) await request("admin-logout", {}, session); } catch (_) {}
     session = null; sessionStorage.removeItem(storageKey);
     show("admin-app",false); show("admin-login",true); fail("login-error","");
-  });
+  };
+  $("logout-button").addEventListener("click",signOut);
+  $("mobile-logout").addEventListener("click",signOut);
   $("login-form").addEventListener("submit",async e => {
     e.preventDefault();
     const button=e.currentTarget.querySelector('button[type="submit"]');button.disabled=true;

@@ -7,11 +7,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link href="../style.css?v=4" rel="stylesheet">
+<link href="../admin-v5.css?v=5" rel="stylesheet">
 
 <script defer src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
-<script defer src="../app.js?v=4"></script>
+<script defer src="../app.js?v=5"></script>
 </head>
-<body class="admin-page">
+<body class="admin-page" data-admin-version="5">
 <div id="admin-login" class="auth-shell">
   <div class="auth-card">
     <div class="auth-logo"><i data-lucide="sparkles"></i></div>
@@ -37,7 +38,10 @@
   <div class="admin-main">
     <header class="admin-top">
       <div><span class="eyebrow">ORGANIZAÇÃO DO EVENTO</span><h1 id="admin-title">Confraternização 2026</h1><p>Gerencie confirmações e acompanhantes em um só lugar.</p></div>
-      <button id="top-add" class="main-button compact"><i data-lucide="user-plus"></i> Novo colaborador</button>
+      <div class="admin-top-actions">
+        <button id="mobile-logout" class="admin-mobile-logout" type="button" aria-label="Sair do painel" title="Sair do painel"><i data-lucide="log-out"></i></button>
+        <button id="top-add" class="main-button compact" type="button" aria-label="Adicionar colaborador"><i data-lucide="user-plus"></i> Novo colaborador</button>
+      </div>
     </header>
     <div class="mobile-nav"><button data-view="overview" class="mobile-tab active"><i data-lucide="layout-dashboard"></i> Geral</button><button data-view="people" class="mobile-tab"><i data-lucide="users"></i> Lista</button><button data-view="settings" class="mobile-tab"><i data-lucide="settings"></i> Evento</button></div>
     <div id="admin-notice" class="notice hidden" role="status"></div>
@@ -59,7 +63,7 @@
       <section class="admin-panel"><div class="table-toolbar"><div class="search-wrap"><i data-lucide="search"></i><input id="people-search" placeholder="Buscar colaborador..." autocomplete="off"></div><select id="status-filter" class="standard-input"><option value="all">Todos</option><option value="confirmed">Confirmados</option><option value="pending">Pendentes</option><option value="incomplete">Sem sobrenome</option><option value="inactive">Inativos</option></select><select id="sector-filter" class="standard-input" aria-label="Filtrar por setor"><option value="all">Todos os setores</option></select><span id="people-count" class="count-label">0 resultados</span></div><div class="table-scroll"><table class="people-table"><thead><tr><th>COLABORADOR</th><th>SETOR</th><th>ACOMPANHANTE</th><th>STATUS</th><th>CONFIRMADO EM</th><th></th></tr></thead><tbody id="people-body"></tbody></table></div></section>
     </div>
     <div id="view-settings" class="admin-content hidden">
-      <div class="section-intro"><h2>Configurações do evento</h2><p>Personalize o convite, o WhatsApp e o período de confirmação.</p></div>
+      <div class="section-intro"><h2>Configurações do evento</h2><p>Edite os dados do convite, o WhatsApp e o status das confirmações.</p></div>
       <form id="event-form" class="admin-panel settings-form">
         <div class="form-grid">
           <div class="full"><label for="event-title">Título do evento</label><input id="event-title" required maxlength="100" class="standard-input" placeholder="Confraternização 2026"></div>
