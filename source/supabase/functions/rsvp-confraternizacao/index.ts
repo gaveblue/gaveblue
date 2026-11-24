@@ -5,6 +5,8 @@ const URL = Deno.env.get("SUPABASE_URL") || "";
 const SECRET = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
 const db = createClient(URL, SECRET, { auth: { persistSession: false, autoRefreshToken: false } });
 const SLUG = "confraternizacao-2026";
+const DEADLINE_ISO = "2026-11-25T23:59:59.999-03:00";
+const deadlineExpired = () => Date.now() > Date.parse(DEADLINE_ISO);
 const allowed = new Set(["https://gaveblue.com.br", "https://www.gaveblue.com.br"]);
 const json = (data: unknown, status = 200, origin = "") => new Response(JSON.stringify(data), {
   status,
@@ -94,6 +96,7 @@ Deno.serve(async (req: Request) => {
     const body = JSON.parse(raw || "{}");
     const action = clean(body.action, 40);
     if (action === "search") {
+      assert(!deadlineExpired(), "O prazo de confirmação terminou em 25/11.");
       const key = norm(body.query);
       const terms=key.split(" ").filter(Boolean);
       if (terms.length<2 || terms[0].length<2 || terms[terms.length-1].length<3) {
@@ -107,10 +110,11 @@ Deno.serve(async (req: Request) => {
     }
     const ev = await event();
     if (action === "event") {
-      return json({ ok: true, event: { titulo: ev.titulo, descricao: ev.descricao, data_evento: ev.data_evento, horario: ev.horario, local_evento: ev.local_evento, status: ev.status, permite_acompanhante: ev.permite_acompanhante } }, 200, origin);
+      return json({ ok: true, event: { titulo: ev.titulo, descricao: ev.descricao, data_evento: ev.data_evento, horario: ev.horario, local_evento: ev.local_evento, status: ev.status === "aberto" && deadlineExpired() ? "encerrado" : ev.status, prazo_confirmacao: DEADLINE_ISO, permite_acompanhante: ev.permite_acompanhante } }, 200, origin);
     }
     if (action === "confirm") {
       await rate(req, "confirm", 15);
+      assert(!deadlineExpired(), "O prazo de confirmação terminou em 25/11.");
       assert(ev.status === "aberto" && ev.whatsapp, "As confirmações ainda não estão abertas.");
       const id = clean(body.colaborador_id, 48);
       const key = norm(body.query);
