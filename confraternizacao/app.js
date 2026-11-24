@@ -537,30 +537,88 @@ function initAdmin() {
   const storageKey = "rsvp-admin-session-v2";
   let session = sessionStorage.getItem(storageKey) || null;
   let dataset = null, editingId = null, currentView = "overview", lastLoad = 0;
+  let authGeneration = 0, pendingBootstrap = null;
+
   function notify(message, error = false) {
     const node = $("admin-notice"); node.textContent = message; node.classList.remove("hidden");
     node.classList.toggle("error", error);
     clearTimeout(notify.t); notify.t = setTimeout(() => node.classList.add("hidden"), 5000);
   }
-  async function admin(action, body = {}) {
-    if (!session) throw new Error("Entre com o código de acesso do evento.");
-    return request(action, body, session);
+  function showLogin(message = "") {
+    show("admin-loading",false);
+    show("admin-app",false);
+    show("admin-login",true);
+    fail("login-error",message);
+    icons();
   }
-  async function bootstrap(quiet = false) {
-    try {
-      dataset = await admin("admin-bootstrap");
-      lastLoad = Date.now();
-      show("admin-login", false); show("admin-app", true);
-      fail("login-error","");
-      render(); icons();
-    } catch (err) {
-      if (/Acesso expirado|Entre com o código|Código de acesso/i.test(err.message)) {
-        session = null; sessionStorage.removeItem(storageKey);
-        show("admin-app", false); show("admin-login", true);
-        fail("login-error", "Sua sessão expirou. Digite o código novamente.");
-      } else if (!quiet) { show("admin-app", false); show("admin-login", true); fail("login-error", err.message); }
-      else notify("Não foi possível atualizar o painel: " + err.message, true);
-    }
+  function showLoading(title = "Preparando seu painel",message = "Verificando a sessão e carregando as informações...") {
+    show("admin-login",false);
+    show("admin-app",false);
+    $("admin-loading").classList.remove("has-error");
+    $("admin-loading-title").textContent = title;
+    $("admin-loading-message").textContent = message;
+    show("admin-loading-retry",false);
+    show("admin-loading-switch",false);
+    show("admin-loading",true);
+    icons();
+  }
+  function showLoadError(error) {
+    $("admin-loading").classList.add("has-error");
+    $("admin-loading-title").textContent = "Não foi possível carregar";
+    $("admin-loading-message").textContent = error?.name === "AbortError"
+      ? "A conexão demorou mais que o esperado. Tente novamente."
+      : "Houve uma falha temporária de conexão. Seu acesso foi mantido.";
+    show("admin-loading-retry",true);
+    show("admin-loading-switch",true);
+    show("admin-loading",true);
+    show("admin-login",false);
+    show("admin-app",false);
+    icons();
+  }
+  function invalidSessionError(err) {
+    return /^(?:Acesso expirado\b|Entre com o código de acesso do evento\b)/i.test(String(err?.message || ""));
+  }
+  async function admin(action, body = {}, options = {}) {
+    if (!session) throw new Error("Entre com o código de acesso do evento.");
+    return request(action, body, session, options);
+  }
+  function bootstrap(quiet = false) {
+    if (pendingBootstrap) return pendingBootstrap;
+    const generation = authGeneration;
+    const firstLoad = !dataset;
+    if (firstLoad && !quiet) showLoading();
+    pendingBootstrap = (async () => {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 15000);
+      try {
+        const response = await admin("admin-bootstrap", {}, {signal:controller.signal});
+        if (generation !== authGeneration || !session) return;
+        dataset = response;
+        lastLoad = Date.now();
+        show("admin-loading",false);
+        show("admin-login",false);
+        show("admin-app",true);
+        fail("login-error","");
+        render(); icons();
+      } catch (err) {
+        if (generation !== authGeneration) return;
+        if (invalidSessionError(err)) {
+          session = null; dataset = null; lastLoad = 0;
+          sessionStorage.removeItem(storageKey);
+          authGeneration++;
+          showLogin("Sua sessão expirou. Informe o código para entrar novamente.");
+        } else if (!quiet || !dataset) {
+          // Rede instável não significa sessão expirada: preservar token e oferecer repetição.
+          showLoadError(err);
+        } else {
+          notify("Não foi possível atualizar os dados. Você continua conectado. Tente novamente.", true);
+          lastLoad = Date.now();
+        }
+      } finally {
+        clearTimeout(timeout);
+      }
+    })().finally(() => { pendingBootstrap = null; });
+    return pendingBootstrap;
   }
   function setView(name) {
     currentView = name;
@@ -839,27 +897,60 @@ function initAdmin() {
     try { await navigator.clipboard.writeText(link);notify("Link copiado!"); } catch(_) { notify("Copie o link: "+link); }
   });
   const signOut = async () => {
-    try { if (session) await request("admin-logout", {}, session); } catch (_) {}
-    session = null; sessionStorage.removeItem(storageKey);
-    show("admin-app",false); show("admin-login",true); fail("login-error","");
+    const oldSession = session;
+    authGeneration++;
+    session = null; dataset = null; lastLoad = 0;
+    sessionStorage.removeItem(storageKey);
+    showLogin();
+    if (oldSession) {
+      try { await request("admin-logout", {}, oldSession); } catch (_) {}
+    }
   };
   $("logout-button").addEventListener("click",signOut);
   $("mobile-logout").addEventListener("click",signOut);
+  $("admin-loading-retry").addEventListener("click",() => {
+    if (session) bootstrap(false);
+    else showLogin();
+  });
+  $("admin-loading-switch").addEventListener("click",() => {
+    authGeneration++;
+    session = null; dataset = null; lastLoad = 0;
+    sessionStorage.removeItem(storageKey);
+    showLogin();
+  });
   $("login-form").addEventListener("submit",async e => {
     e.preventDefault();
-    const button=e.currentTarget.querySelector('button[type="submit"]');button.disabled=true;
+    const button = $("admin-login-submit");
+    const label = $("admin-login-button-text");
+    if (button.disabled) return;
+    button.disabled = true;
+    button.classList.add("is-pending");
+    label.textContent = "Verificando acesso...";
     fail("login-error","");
     try {
-      const response=await request("admin-login",{access_code:$("admin-code").value.trim()});
-      session=response.access_token;
+      const response = await request("admin-login",{access_code:$("admin-code").value.trim()});
+      authGeneration++;
+      session = response.access_token;
       sessionStorage.setItem(storageKey,session);
       $("admin-code").value="";
       await bootstrap(false);
-    } catch(err) {fail("login-error",err.message||"Não foi possível entrar.");}
-    finally{button.disabled=false;}
+    } catch(err) {
+      showLogin();
+      fail("login-error",err.message || "Não foi possível entrar.");
+    } finally {
+      button.disabled = false;
+      button.classList.remove("is-pending");
+      label.textContent = "Entrar no painel";
+    }
   });
   if (session) bootstrap(false);
-  setInterval(()=>{if(session && !document.hidden && currentView !== "settings" && $("edit-modal").classList.contains("hidden") && $("import-modal").classList.contains("hidden") && Date.now()-lastLoad>=30000)bootstrap(true);},30000);
+  else showLogin();
+  setInterval(() => {
+    if (session && dataset && !pendingBootstrap && !document.hidden && currentView !== "settings"
+      && $("edit-modal").classList.contains("hidden")
+      && $("import-modal").classList.contains("hidden")
+      && Date.now()-lastLoad>=30000) bootstrap(true);
+  },30000);
   icons();
 }
 document.addEventListener("DOMContentLoaded", () => {

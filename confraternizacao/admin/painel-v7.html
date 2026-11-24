@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#f7f8fb">
+<title>Gestão da confraternização</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="../style.css?v=4" rel="stylesheet">
+<link href="../admin-v5.css?v=5" rel="stylesheet">
+<link href="../admin-v6.css?v=6" rel="stylesheet">
+<link href="../admin-v7.css?v=7" rel="stylesheet">
+
+<script defer src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+<script defer src="../app.js?v=24"></script>
+</head>
+<body class="admin-page" data-admin-version="7">
+<div id="admin-loading" class="admin-loading" role="status" aria-live="polite" aria-atomic="true">
+  <div class="admin-loading-inner">
+    <div class="admin-loading-symbol" aria-hidden="true"><span class="admin-loading-orbit"></span><i data-lucide="sparkles"></i></div>
+    <div class="admin-loading-overline">CONFRATERNIZAÇÃO 2026</div>
+    <h2 id="admin-loading-title">Preparando seu painel</h2>
+    <p id="admin-loading-message">Verificando a sessão e carregando as informações...</p>
+    <div class="admin-loading-track" aria-hidden="true"><span></span></div>
+    <div class="admin-loading-actions">
+      <button id="admin-loading-retry" class="secondary-button hidden" type="button"><i data-lucide="refresh-cw"></i> Tentar novamente</button>
+      <button id="admin-loading-switch" class="admin-loading-switch hidden" type="button">Entrar com outro código</button>
+    </div>
+  </div>
+</div>
+<div id="admin-login" class="auth-shell hidden">
+  <div class="auth-card">
+    <div class="auth-logo"><i data-lucide="sparkles"></i></div>
+    <div class="eyebrow">ACESSO ADMINISTRATIVO</div>
+    <h1>Gestão da confraternização</h1><p>Acesso exclusivo da organização. Use o código administrativo da confraternização, sem precisar de conta ou e-mail.</p>
+    <form id="login-form"><label for="admin-code">Código de acesso</label><input id="admin-code" type="password" autocomplete="off" required placeholder="Informe o código da organização" minlength="16" autocapitalize="characters" spellcheck="false">
+    <button id="admin-login-submit" type="submit" class="main-button"><span id="admin-login-button-text">Entrar no painel</span><i data-lucide="arrow-right"></i></button></form>
+    <div id="login-error" class="notice error hidden" role="alert"></div>
+    <a class="back-link" href="../"><i data-lucide="arrow-left"></i> Voltar ao convite</a>
+  </div>
+</div>
+<div id="admin-app" class="admin-layout hidden">
+  <aside class="admin-sidebar">
+    <a href="../" class="sidebar-logo"><span class="brand-mark"><i data-lucide="sparkles"></i></span><div><strong>Confraternização</strong><small>PAINEL DE GESTÃO</small></div></a>
+    <div class="nav-group-label">GERENCIAMENTO</div>
+    <nav class="admin-nav">
+      <button data-view="overview" class="nav-link active"><i data-lucide="layout-dashboard"></i> Visão geral</button>
+      <button data-view="people" class="nav-link"><i data-lucide="users-round"></i> Colaboradores</button>
+      <button data-view="settings" class="nav-link"><i data-lucide="settings-2"></i> Configurações</button>
+    </nav>
+    <div class="sidebar-bottom"><small>CONVITE PÚBLICO</small><a href="../" target="_blank" rel="noopener" class="sidebar-guest-link">Visualizar convite <i data-lucide="external-link"></i></a><button id="logout-button" class="nav-link"><i data-lucide="log-out"></i> Sair da conta</button></div>
+  </aside>
+  <div class="admin-main">
+    <header class="admin-top">
+      <div><span class="eyebrow">ORGANIZAÇÃO DO EVENTO</span><h1 id="admin-title">Confraternização 2026</h1><p>Gerencie confirmações e acompanhantes em um só lugar.</p></div>
+      <div class="admin-top-actions">
+        <button id="mobile-logout" class="admin-mobile-logout" type="button" aria-label="Sair do painel" title="Sair do painel"><i data-lucide="log-out"></i></button>
+        <button id="top-add" class="main-button compact" type="button" aria-label="Adicionar colaborador"><i data-lucide="user-plus"></i> Novo colaborador</button>
+      </div>
+    </header>
+    <div class="mobile-nav"><button data-view="overview" class="mobile-tab active"><i data-lucide="layout-dashboard"></i> Geral</button><button data-view="people" class="mobile-tab"><i data-lucide="users"></i> Lista</button><button data-view="settings" class="mobile-tab"><i data-lucide="settings"></i> Evento</button></div>
+    <div id="admin-notice" class="notice hidden" role="status"></div>
+    <div id="view-overview" class="admin-content">
+      <div class="section-intro action-intro"><div><h2>Visão geral</h2><p>Acompanhe as respostas e os cadastros do evento.</p></div><button id="refresh-dashboard" class="secondary-button" type="button"><i data-lucide="refresh-cw"></i> Atualizar dados</button></div>
+      <section class="admin-panel rsvp-state-panel" aria-label="Situação do RSVP">
+        <div class="rsvp-state-icon"><i data-lucide="calendar-check"></i></div>
+        <div class="rsvp-state-copy"><small>STATUS DAS CONFIRMAÇÕES</small><strong id="rsvp-state-title">Carregando situação...</strong><p id="rsvp-state-detail">O prazo e a situação do evento aparecerão aqui.</p></div>
+        <button type="button" class="secondary-button rsvp-state-manage" data-view="settings"><i data-lucide="sliders-horizontal"></i> Gerenciar</button>
+      </section>
+      <div class="stats-grid">
+        <article class="stat-card"><span class="stat-icon"><i data-lucide="users"></i></span><small>Cadastrados</small><strong id="stat-invited">0</strong><span id="stat-eligible">0 aptos à busca</span></article>
+        <article class="stat-card"><span class="stat-icon green"><i data-lucide="check-circle-2"></i></span><small>Confirmados</small><strong id="stat-confirmed">0</strong><span>presenças confirmadas</span></article>
+        <article class="stat-card"><span class="stat-icon amber"><i data-lucide="clock-3"></i></span><small>Pendentes</small><strong id="stat-pending">0</strong><span>aguardando resposta</span></article>
+        <article class="stat-card"><span class="stat-icon violet"><i data-lucide="user-round-x"></i></span><small>Sem sobrenome</small><strong id="stat-incomplete">0</strong><span>completar cadastros</span></article>
+        <article class="stat-card"><span class="stat-icon purple"><i data-lucide="user-round-plus"></i></span><small>Total esperado</small><strong id="stat-total">0</strong><span id="stat-plus">incluindo 0 acompanhantes</span></article>
+      </div>
+      <div class="two-panels"><section class="admin-panel"><div class="panel-heading"><div><h3>Participação</h3><p>Progresso das confirmações</p></div><span id="participation-rate" class="rate-pill">0%</span></div><div class="progress-track"><span id="participation-bar"></span></div><p class="muted" id="participation-text">Aguardando colaboradores.</p></section>
+      <section class="admin-panel"><div class="panel-heading"><div><h3>Link do convite</h3><p>Compartilhe um único link com a equipe</p></div><i data-lucide="link-2"></i></div><div class="share-url" id="share-url">gaveblue.com.br/confraternizacao/</div><button id="copy-link" class="secondary-button"><i data-lucide="copy"></i> Copiar link</button></section></div>
+      <section class="admin-panel"><div class="panel-heading"><div><h3>Confirmações recentes</h3><p>Últimos colaboradores que responderam</p></div><button class="text-btn" data-view="people">Ver todos</button></div><div id="recent-list" class="recent-list"></div></section>
+    </div>
+    <div id="view-people" class="admin-content hidden">
+      <div class="section-intro action-intro"><div><h2>Colaboradores</h2><p>Cadastre, importe e acompanhe quem vai participar.</p></div><div class="button-row"><button id="import-button" class="secondary-button"><i data-lucide="upload"></i> Importar lista</button><button id="export-button" class="secondary-button"><i data-lucide="download"></i> Exportar CSV</button></div></div>
+      <section class="admin-panel"><div class="table-toolbar"><div class="search-wrap"><i data-lucide="search"></i><input id="people-search" placeholder="Buscar colaborador..." autocomplete="off"></div><select id="status-filter" class="standard-input"><option value="all">Todos</option><option value="confirmed">Confirmados</option><option value="pending">Pendentes</option><option value="incomplete">Sem sobrenome</option><option value="inactive">Inativos</option></select><select id="sector-filter" class="standard-input" aria-label="Filtrar por setor"><option value="all">Todos os setores</option></select><span id="people-count" class="count-label">0 resultados</span></div><div class="table-scroll"><table class="people-table"><thead><tr><th>COLABORADOR</th><th>SETOR</th><th>ACOMPANHANTE</th><th>STATUS</th><th>CONFIRMADO EM</th><th></th></tr></thead><tbody id="people-body"></tbody></table></div></section>
+    </div>
+    <div id="view-settings" class="admin-content hidden">
+      <div class="section-intro"><h2>Configurações do evento</h2><p>Edite os dados do convite, o WhatsApp e o status das confirmações.</p></div>
+      <form id="event-form" class="admin-panel settings-form">
+        <div class="form-grid">
+          <div class="full"><label for="event-title">Título do evento</label><input id="event-title" required maxlength="100" class="standard-input" placeholder="Confraternização 2026"></div>
+          <div class="full"><label for="event-description">Mensagem do convite</label><textarea id="event-description" class="standard-input" rows="3" maxlength="500"></textarea></div>
+          <div><label for="event-date-input">Data</label><input id="event-date-input" type="date" class="standard-input"></div>
+          <div><label for="event-time-input">Horário</label><input id="event-time-input" type="time" class="standard-input"></div>
+          <div class="full"><label for="event-place-input">Local</label><input id="event-place-input" maxlength="180" class="standard-input" placeholder="Nome do local e endereço"></div>
+          <div class="full"><label for="event-whatsapp">WhatsApp da organização</label><input id="event-whatsapp" inputmode="tel" class="standard-input" placeholder="5527999999999"><p class="field-help">Informe DDI + DDD + número. Ex.: 55 27 99999-9999.</p></div>
+          
+          <div class="full deadline-form-group">
+            <div class="deadline-form-head"><div><strong>Prazo final de confirmação</strong><p>Horário de Brasília (GMT-3). Após esse instante, novas confirmações são bloqueadas automaticamente.</p></div><i data-lucide="calendar-clock"></i></div>
+            <div class="deadline-form-grid">
+              <div><label for="event-deadline-date">Data limite</label><input id="event-deadline-date" type="date" class="standard-input" required></div>
+              <div><label for="event-deadline-time">Horário limite</label><input id="event-deadline-time" type="time" class="standard-input" required step="60"></div>
+            </div>
+          </div>
+          <div class="full"><label for="event-close-message">Mensagem de encerramento (opcional)</label><textarea id="event-close-message" class="standard-input" rows="3" maxlength="320" placeholder="Ex.: As confirmações foram encerradas. Obrigado pela participação!"></textarea><p class="field-help">Se ficar em branco, o convite mostra uma mensagem padrão adequada ao tipo de encerramento.</p></div>
+          <div><label for="event-status">Status das confirmações</label><select id="event-status" class="standard-input"><option value="rascunho">Rascunho · fechado</option><option value="aberto">Aberto · recebendo confirmações</option><option value="encerrado">Encerrado</option></select></div>
+          <div class="full rsvp-controls">
+            <div class="rsvp-controls-head"><span class="rsvp-controls-label">Ações rápidas</span><strong id="settings-rsvp-state">Situação atual</strong></div>
+            <p id="settings-rsvp-help" class="muted">Abra, encerre ou reabra conforme necessário. As respostas já recebidas são preservadas.</p>
+            <div class="rsvp-control-actions">
+              <button type="button" class="secondary-button" id="rsvp-open" data-rsvp-action="open"><i data-lucide="door-open"></i> Abrir confirmações</button>
+              <button type="button" class="secondary-button rsvp-danger-button" id="rsvp-close" data-rsvp-action="close"><i data-lucide="lock-keyhole"></i> Encerrar agora</button>
+              <button type="button" class="secondary-button" id="rsvp-reopen" data-rsvp-action="reopen"><i data-lucide="refresh-cw"></i> Reabrir confirmações</button>
+            </div>
+          </div>
+          <div class="check-field"><label class="checkbox-line"><input id="event-plus" type="checkbox" checked> Permitir 1 acompanhante por colaborador</label></div>
+        </div>
+        <div class="form-footer"><p>Alterações atualizadas no convite após salvar.</p><button type="submit" class="main-button compact"><i data-lucide="save"></i> Salvar configurações</button></div>
+      </form>
+    </div>
+  </div>
+</div>
+<div id="edit-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div class="modal-backdrop" data-close-modal></div><form id="person-form" class="modal-card">
+    <div class="modal-head"><div><span class="eyebrow">LISTA DE CONVIDADOS</span><h2 id="modal-title">Novo colaborador</h2></div><button type="button" class="icon-btn" data-close-modal aria-label="Fechar"><i data-lucide="x"></i></button></div>
+    <label for="person-name">Nome completo do colaborador</label><input id="person-name" class="standard-input" placeholder="Nome e sobrenome" maxlength="150" required>
+    <label for="person-sector">Setor / grupo</label><input id="person-sector" class="standard-input" list="sector-suggestions" placeholder="Ex.: Covre e Cia" maxlength="90" autocomplete="off">
+    <datalist id="sector-suggestions"></datalist>
+    <label class="checkbox-line" id="person-active-wrap"><input id="person-active" type="checkbox" checked> Disponível na busca pública</label>
+    <div class="manual-confirm-box"><label class="checkbox-line" for="person-confirmed"><input id="person-confirmed" type="checkbox"> <strong>Presença confirmada</strong></label><p id="person-confirm-help">Marque para confirmar manualmente, sem WhatsApp. Desmarque para retirar a confirmação.</p></div>
+    <button type="submit" class="main-button">Salvar colaborador <i data-lucide="check"></i></button>
+  </form>
+</div>
+<div id="import-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="import-title">
+  <div class="modal-backdrop" data-close-modal></div><form id="import-form" class="modal-card">
+    <div class="modal-head"><div><span class="eyebrow">CADASTRO EM LOTE</span><h2 id="import-title">Importar colaboradores</h2></div><button type="button" class="icon-btn" data-close-modal aria-label="Fechar"><i data-lucide="x"></i></button></div>
+    <p class="muted">Cole um nome completo por linha, ou selecione um arquivo CSV/TXT com os nomes na primeira coluna. Nomes repetidos serão ignorados.</p>
+    <label for="import-file">Arquivo CSV ou TXT</label><input id="import-file" type="file" accept=".csv,.txt,text/csv,text/plain" class="standard-input">
+    <label for="import-names">Lista de nomes</label><textarea id="import-names" class="standard-input" rows="7" placeholder="Marina Santos&#10;Rafael Oliveira&#10;Camila Ferreira"></textarea>
+    <button type="submit" class="main-button">Importar lista <i data-lucide="upload"></i></button>
+  </form>
+</div>
+</body></html>

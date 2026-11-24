@@ -149,3 +149,13 @@ Implementação isolada do convite corporativo GaveBlue, sem alterações nos ap
 - QA estático: HTML equilibrado e sem IDs duplicados, CSS equilibrado, JS sintaticamente válido; 6 cenários de status no convidado, 3 mensagens e 6 estados do admin verificados via funções reais do JS. API real não testada com código de acesso privado; não manipular dados reais para testes.
 - Seguranças preexistentes: RPC `rsvp_busca_rapida` não concedida a `anon`/`authenticated`; Edge Function mantém validação de sessão admin com token do evento e `verify_jwt=false` já configurado originalmente.
 - Para verificação manual: entrar no admin com código existente, conferir status e prazo, testar `rascunho`, `encerrado` e `aberto` (em janela segura de homologação), confirmar que a lista histórica se mantém.
+
+## Admin v7 — loader animado e sessão preservada
+- Login inicial oculto até decidir se existe sessão em `sessionStorage`; evita piscar a tela de login antes do dashboard.
+- Tela de carregamento com ícone, halo/anel em movimento, barra de progresso e textos de estado; efeitos acessíveis e desativados sob `prefers-reduced-motion`.
+- Botão Entrar apresenta estado `Verificando acesso...` com indicador giratório.
+- Reconexão: se `admin-bootstrap` falhar por rede ou tempo esgotado, mantém a sessão e mostra `Tentar novamente` e `Entrar com outro código`, sem expulsar o usuário automaticamente.
+- Sai para login apenas com resposta de sessão inválida/expirada do servidor, logout explícito ou ausência de sessão.
+- Previne chamadas simultâneas de bootstrap; as respostas de pedidos antigos não reabrem a sessão após logout. Timeout de 15 s evita spinner infinito.
+- Atualização silenciosa só ocorre se painel e dados já estiverem carregados.
+- Isolado ao admin, sem alteração no RSVP, banco, backend, convite público ou outras aplicações.
