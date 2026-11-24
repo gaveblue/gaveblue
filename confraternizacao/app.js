@@ -60,8 +60,8 @@ function initGuest() {
     show("rsvp-urgency-expired", elapsed);
     if (elapsed) {
       if (urgencyTimer !== null) { clearInterval(urgencyTimer); urgencyTimer = null; }
-      if (event && event.status === "aberto") {
-        event.status = "encerrado";
+      if (event) event.status = "encerrado";
+      if (!finished) {
         show("guest-cta", false);
         show("guest-locked", true);
         $("guest-locked").querySelector("h2").textContent = "Prazo de confirmação encerrado";
