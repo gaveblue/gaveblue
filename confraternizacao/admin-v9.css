@@ -1,0 +1,223 @@
+/* Confraternização 2026 • Admin v9
+   Navegação recolhível, logos no desktop, rodapé fixo no mobile,
+   mais espaço para acompanhantes, toasts superiores e carregamento de ações. */
+
+.admin-page .admin-layout{transition:grid-template-columns .22s ease}
+.admin-page .admin-sidebar{min-width:0;transition:opacity .18s ease,padding .2s ease}
+.admin-page.admin-nav-collapsed .admin-layout{grid-template-columns:0 minmax(0,1fr)}
+.admin-page.admin-nav-collapsed .admin-sidebar{
+  visibility:hidden;opacity:0;pointer-events:none;overflow:hidden;
+  padding-left:0;padding-right:0;border-right:0
+}
+.admin-page .admin-main{min-width:0}
+.admin-page .admin-top-left{display:flex;align-items:center;gap:17px;min-width:0;flex:1}
+.admin-page .admin-top-intro{min-width:0}
+.admin-page .admin-top-intro h1{overflow-wrap:anywhere}
+.admin-page .admin-nav-toggle{
+  flex:0 0 40px;width:40px;height:40px;
+  display:grid;place-items:center;border:1px solid #dce9da;
+  border-radius:11px;color:#24623d;background:#f8fbf7;
+  transition:background .15s,border-color .15s
+}
+.admin-page .admin-nav-toggle:hover{background:#ebf6ec;border-color:#c5ddc9}
+.admin-page .admin-nav-toggle:focus-visible{outline:3px solid #b1dcb8;outline-offset:2px}
+.admin-page .admin-nav-toggle svg{width:19px;height:19px}
+.admin-page .admin-top-actions{display:flex;align-items:center;gap:9px}
+.admin-page .admin-header-desktop{
+  display:flex;align-items:center;gap:15px;flex:0 0 auto
+}
+.admin-page .admin-settings-shortcut{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:10px 12px;border-radius:11px;border:1px solid #e1e9df;
+  background:#fff;color:#2c6745;font-size:11px;font-weight:800
+}
+.admin-page .admin-settings-shortcut svg{width:16px;height:16px}
+.admin-page .admin-settings-shortcut:hover{background:#f2f9f1}
+.admin-page .admin-header-divider{width:1px;height:32px;background:#e1e9df}
+.admin-page .admin-header-logos{display:flex;align-items:center;gap:11px}
+.admin-page .admin-header-logos img{
+  display:block;object-fit:contain;max-height:43px;
+  width:91px;max-width:91px;filter:none
+}
+.admin-page .admin-header-logos img:first-child{width:93px;max-width:93px;transform:scale(1.09)}
+.admin-page .admin-header-logos img:last-child{width:99px;max-width:99px}
+
+.admin-page .people-actions{display:flex;flex-wrap:wrap;align-items:center;gap:7px}
+.admin-page .people-actions .main-button.compact{min-height:39px;padding:9px 11px;font-size:11px}
+.admin-page .people-actions .main-button.compact svg{width:15px;height:15px}
+.admin-page .people-table{table-layout:fixed;min-width:0;width:100%}
+.admin-page .people-table th:first-child{width:30%}
+.admin-page .people-table th:nth-child(2){width:28%}
+.admin-page .people-table th:nth-child(3){width:23%}
+.admin-page .people-table th:nth-child(4){width:14%}
+.admin-page .people-table th:nth-child(5){width:5%}
+.admin-page .people-table th,.admin-page .people-table td{
+  padding:12px 8px;box-sizing:border-box
+}
+.admin-page .people-table th:last-child,
+.admin-page .people-table td:last-child{padding-left:3px;padding-right:3px;text-align:center}
+.admin-page .people-table .name-stack small{font-size:10px;color:#7d927f;font-weight:600}
+.admin-page .people-table .companion-cell{
+  color:#335c43;font-weight:600;white-space:normal;
+  overflow-wrap:anywhere;line-height:1.45;min-width:0
+}
+.admin-page .people-table .people-status-cell{gap:7px}
+.admin-page .people-table .people-status-description{min-width:0}
+.admin-page .people-table td:nth-child(4){white-space:normal;font-size:10px;line-height:1.4}
+.admin-page .people-table .people-empty{padding:22px!important}
+
+.admin-page .admin-toast-stack{
+  top:18px!important;bottom:auto!important;right:20px;
+  z-index:85;max-height:calc(100dvh - 30px);
+  overflow-y:auto;overscroll-behavior:contain
+}
+.admin-page .admin-toast{box-shadow:0 11px 36px rgba(11,63,36,.16)}
+.admin-page .admin-action-loading{
+  position:fixed;inset:0;z-index:105;
+  display:grid;place-items:center;padding:23px;
+  background:rgba(249,253,248,.88);
+  backdrop-filter:blur(8px)
+}
+.admin-page .admin-action-loading-inner{
+  text-align:center;width:min(100%,340px);
+  display:flex;flex-direction:column;align-items:center;
+  gap:10px;padding:29px 23px;border:1px solid #e0ebdf;
+  border-radius:21px;background:#fff;
+  box-shadow:0 17px 65px rgba(23,68,34,.12)
+}
+.admin-page .admin-action-loading-symbol{
+  width:51px;height:51px;display:grid;place-items:center;
+  border-radius:16px;background:#ecf8ed;color:#167845;margin-bottom:4px
+}
+.admin-page .admin-action-loading-symbol svg{width:24px;height:24px}
+.admin-page .admin-action-loading h2{
+  font:800 17px/1.35 Manrope,sans-serif;margin:0;
+  letter-spacing:-.035em;color:#1e4e31
+}
+.admin-page .admin-action-loading p{
+  color:#7d937f;font-size:11px;line-height:1.5;margin:0
+}
+.admin-page .admin-action-progress{position:relative;height:4px;width:128px;
+  overflow:hidden;border-radius:99px;background:#e7eee5;margin-top:11px}
+.admin-page .admin-action-progress span{position:absolute;left:0;top:0;height:100%;
+  width:38%;border-radius:99px;background:linear-gradient(90deg,#49aa6c,#0d793d);
+  animation:rsvp-action-progress 1s ease-in-out infinite}
+.admin-page.admin-confirm-saving .rsvp-confirm-toggle{pointer-events:none}
+@keyframes rsvp-action-progress{
+  0%{transform:translateX(-115%)}100%{transform:translateX(370%)}
+}
+
+@media(max-width:1080px){
+ .admin-page .admin-header-desktop{gap:9px}
+ .admin-page .admin-header-logos{gap:5px}
+ .admin-page .admin-header-logos img{max-width:72px;width:72px}
+ .admin-page .admin-header-logos img:first-child{max-width:74px;width:74px}
+ .admin-page .admin-header-logos img:last-child{max-width:76px;width:76px}
+ .admin-page .admin-top-left{gap:10px}
+}
+@media(max-width:960px){
+ .admin-page .admin-header-desktop{display:none}
+ .admin-page .people-actions{gap:6px}
+ .admin-page .people-table{table-layout:auto}
+ .admin-page .people-table th:first-child{width:auto}
+}
+@media(max-width:700px){
+ .admin-page .admin-layout{display:block}
+ .admin-page.admin-nav-collapsed .admin-layout{display:block}
+ .admin-page .admin-sidebar{display:none}
+ .admin-page .admin-top{padding:15px 14px 13px;gap:8px}
+ .admin-page .admin-top-left{gap:9px}
+ .admin-page .admin-top-intro h1{font-size:19px}
+ .admin-page .admin-top-intro p{font-size:10px;line-height:1.4}
+ .admin-page .admin-nav-toggle{
+   width:38px;height:38px;flex-basis:38px;border-radius:10px
+ }
+ .admin-page .admin-nav-toggle svg{width:18px;height:18px}
+ .admin-page .mobile-nav{
+   display:grid!important;position:fixed!important;
+   top:auto!important;bottom:0!important;left:0!important;right:0!important;
+   width:100%!important;z-index:48!important;
+   padding:8px 10px calc(8px + env(safe-area-inset-bottom,0px))!important;
+   border-bottom:0!important;border-top:1px solid #dde9dd!important;
+   background:rgba(255,255,255,.97)!important;
+   box-shadow:0 -4px 18px rgba(14,59,26,.08);
+   transform:translateY(0);opacity:1;visibility:visible;
+   transition:transform .22s ease,opacity .22s ease,visibility .22s
+ }
+ .admin-page.admin-nav-collapsed .mobile-nav{
+   transform:translateY(calc(100% + 8px));
+   opacity:0;visibility:hidden;pointer-events:none
+ }
+ .admin-page .admin-main{
+   padding-bottom:calc(76px + env(safe-area-inset-bottom,0px));
+   min-height:100dvh
+ }
+ .admin-page .people-actions{
+   width:100%;display:grid;grid-template-columns:1fr 1fr;gap:7px
+ }
+ .admin-page .people-actions #people-add{
+   grid-column:1/-1;display:flex;align-items:center;
+   justify-content:center;height:40px;width:100%
+ }
+ .admin-page .people-actions .secondary-button{justify-content:center;min-width:0}
+ .admin-page .people-table,
+ .admin-page .people-table tbody{display:block;min-width:0;width:100%;table-layout:auto}
+ .admin-page .people-table tbody{display:grid}
+ .admin-page .people-table tbody tr{
+   display:grid;grid-template-columns:minmax(0,1fr) auto;
+   gap:9px 8px
+ }
+ .admin-page .people-table td{
+   display:block!important;box-sizing:border-box;
+   padding:0!important;white-space:normal;min-width:0;
+   text-align:left!important;justify-self:stretch!important
+ }
+ .admin-page .people-table td:nth-child(1){
+   grid-column:1;grid-row:1;align-self:center
+ }
+ .admin-page .people-table td:nth-child(5){
+   grid-column:2;grid-row:1;align-self:start;
+   justify-self:end!important
+ }
+ .admin-page .people-table td:nth-child(3){
+   grid-column:1/-1;grid-row:2;align-self:center
+ }
+ .admin-page .people-table td:nth-child(2){
+   grid-column:1/-1;grid-row:3;color:#315e40;font-size:11px
+ }
+ .admin-page .people-table td:nth-child(2):before{
+   content:"Acompanhante: ";font-weight:600;
+   color:#93a695
+ }
+ .admin-page .people-table td:nth-child(3):before{content:none}
+ .admin-page .people-table td:nth-child(4){
+   grid-column:1/-1;grid-row:4;color:#87998a;
+   font-size:9px;align-self:center
+ }
+ .admin-page .people-table td:nth-child(4):before{
+   content:"Confirmado em: ";color:#a3b1a4
+ }
+ .admin-page .people-table tbody tr:has(td[colspan="5"]){display:block}
+ .admin-page .people-table .people-status-cell{
+   justify-content:space-between;gap:8px
+ }
+ .admin-page .people-table .companion-cell{line-height:1.4}
+ .admin-page .people-table .name-stack small{font-size:9px}
+ .admin-page .admin-toast-stack{
+   left:12px!important;right:12px!important;top:calc(11px + env(safe-area-inset-top,0px))!important;
+   bottom:auto!important;max-width:none!important;width:auto!important;
+   z-index:85
+ }
+ .admin-page .admin-action-loading{
+   padding:15px;z-index:105
+ }
+ .admin-page .admin-action-loading-inner{padding:24px 18px}
+}
+@media(prefers-reduced-motion:reduce){
+ .admin-page .mobile-nav,
+ .admin-page .admin-sidebar,
+ .admin-page .admin-layout,
+ .admin-page .admin-action-progress span{
+   animation:none!important;transition:none!important
+ }
+}
