@@ -20,9 +20,7 @@ async function request(action, data = {}, token = "", options = {}) {
   return payload;
 }
 function validSearch(s) {
-  const parts = norm(s).split(" ").filter(Boolean);
-  return (parts.length === 1 && parts[0].length >= 3)
-    || (parts.length >= 2 && parts[0].length >= 2 && parts[parts.length - 1].length >= 3);
+  return norm(s).replace(/\s/g,"").length >= 5;
 }
 function validFullName(s) { const words = String(s || "").trim().split(/\s+/).filter(Boolean); return words.length >= 2 && String(s).trim().length >= 5; }
 // A mensagem é guardada como texto com marcadores, nunca como HTML enviado ao servidor.
@@ -427,8 +425,13 @@ function initGuest() {
       button.type = "button";
       button.className = "result-item";
       button.setAttribute("role", "option");
-      button.innerHTML = '<span class="result-avatar"><i data-lucide="user-round"></i></span><strong></strong><i data-lucide="chevron-right"></i>';
+      button.innerHTML = '<span class="result-avatar"><i data-lucide="user-round"></i></span><span class="result-person-details"><strong></strong><small class="result-person-alias hidden"></small></span><i data-lucide="chevron-right"></i>';
       button.querySelector("strong").textContent = person.nome_completo;
+      if (person.apelido) {
+        const subtitle = button.querySelector(".result-person-alias");
+        subtitle.textContent = "Apelido: " + person.apelido;
+        subtitle.classList.remove("hidden");
+      }
       button.addEventListener("click", () => {
         selected = person;
         typedQuery = input.value.trim();
@@ -459,7 +462,7 @@ function initGuest() {
     clearResults();
     setSearching(false);
     if (!validSearch(query)) {
-      $("search-hint").textContent = "Digite ao menos 3 letras do seu nome. Para nome e sobrenome, informe também 3 letras do sobrenome.";
+      $("search-hint").textContent = "Digite pelo menos 5 letras do seu nome ou apelido para começar a buscar.";
       return;
     }
     const key = norm(query);
@@ -919,7 +922,7 @@ function initAdmin() {
       n.classList.toggle("active",active);n.setAttribute("aria-pressed",String(active));
     });
     const list=dataset.collaborators.filter(p=>{
-      if(query&&!norm(p.nome_completo+" "+(p.setor||"")+" "+(p.grupo||"")).includes(query))return false;
+      if(query&&!norm(p.nome_completo+" "+(p.apelido||"")+" "+(p.setor||"")+" "+(p.grupo||"")).includes(query))return false;
       if(selector.value!=="all"&&(p.setor||"")!==selector.value)return false;
       const confirmed=map.has(p.id);
       if(status==="confirmed")return confirmed;
@@ -935,6 +938,7 @@ function initAdmin() {
         !p.ativo?'<span class="status-chip inactive">Inativo</span>':'<span class="status-chip">Não confirmado</span>';
       const initials=p.nome_completo.split(/\s+/).slice(0,2).map(n=>n[0]).join("").toUpperCase();
       const sectorText=(p.setor||p.grupo||"Setor não informado").trim();
+      const nicknameText=p.apelido ? " · Apelido: " + p.apelido : "";
       const disabled=statusBusy||!validPersonName(p.nome_completo);
       const toggle='<button type="button" role="switch" class="rsvp-confirm-toggle'+(statusBusy?' is-busy':'')+
         '" data-confirm-id="'+escapeHtml(p.id)+'" aria-checked="'+confirmed+'" aria-label="'+
@@ -943,7 +947,7 @@ function initAdmin() {
       const guestName=c?.acompanhante?String(c.acompanhante_nome||"Nome não informado"):"—";
       return '<tr><td><div class="name-cell"><span class="initial-badge">'+escapeHtml(initials)+
       '</span><span class="name-stack"><strong title="'+escapeHtml(p.nome_completo)+'">'+escapeHtml(p.nome_completo)+
-      '</strong><small>'+escapeHtml(sectorText)+'</small></span></div></td>'+
+      '</strong><small title="'+escapeHtml(sectorText+nicknameText)+'">'+escapeHtml(sectorText+nicknameText)+'</small></span></div></td>'+
       '<td class="companion-cell" title="'+escapeHtml(guestName)+'">'+escapeHtml(guestName)+'</td>'+
       '<td><div class="people-status-cell"><div class="people-status-description">'+badge+
       '</div>'+toggle+'</div></td>'+
@@ -971,12 +975,12 @@ function initAdmin() {
   // Atualiza a lista somente após o servidor confirmar a gravação.
   // Não aguarda uma segunda consulta completa de 83+ registros para destravar a interface.
   // O polling periódico faz a reconciliação posterior.
-  function applySavedPerson(id,name,sector,active,confirmed) {
+  function applySavedPerson(id,name,sector,active,confirmed,nickname="") {
     if (!dataset || !id) return;
     const prev = dataset.collaborators.find(p => p.id === id);
     const current = prev
-      ? {...prev,nome_completo:name,setor:sector,ativo:active}
-      : {id,nome_completo:name,setor:sector,grupo:sector || "Sem setor",ativo:active,
+      ? {...prev,nome_completo:name,apelido:nickname,setor:sector,ativo:active}
+      : {id,nome_completo:name,apelido:nickname,setor:sector,grupo:sector || "Sem setor",ativo:active,
          criado_em:new Date().toISOString()};
     dataset.collaborators = [
       ...dataset.collaborators.filter(p => p.id !== id),current
@@ -1009,10 +1013,10 @@ function initAdmin() {
       loadingStarted=true;
       const generation=authGeneration;
       mutedConfirmationIds.add(id);
-      await admin("admin-update",{id:p.id,nome_completo:p.nome_completo,setor:p.setor||"",
+      await admin("admin-update",{id:p.id,nome_completo:p.nome_completo,apelido:p.apelido||"",setor:p.setor||"",
         ativo:p.ativo!==false,confirmado:next});
       if(generation!==authGeneration)return;
-      applySavedPerson(p.id,p.nome_completo,p.setor||"",p.ativo!==false,next);
+      applySavedPerson(p.id,p.nome_completo,p.setor||"",p.ativo!==false,next,p.apelido||"");
       if(next)celebrateManualConfirmation();
       toast(next?"Presença de "+p.nome_completo+" confirmada.":"Confirmação de "+p.nome_completo+" retirada.");
     }catch(err){toast(err.message||"Não foi possível salvar.","error");}
@@ -1143,6 +1147,7 @@ function initAdmin() {
     manualConfirmed=!!c;
     $("modal-title").textContent=p?"Editar colaborador":"Novo colaborador";
     $("person-name").value=p?.nome_completo||"";
+    $("person-nickname").value=p?.apelido||"";
     $("person-sector").value=p?.setor||"";
     $("person-active").checked=p?.ativo!==false;
     setManualSwitch();
@@ -1165,6 +1170,10 @@ function initAdmin() {
     e.preventDefault();
     if(statusBusy)return;
     const name=$("person-name").value.trim(),active=$("person-active").checked;
+    const nickname=$("person-nickname").value.trim();
+    if(nickname && !/^[\p{L}\p{N}\s'.-]{1,60}$/u.test(nickname)) {
+      notify("O apelido deve ter até 60 caracteres, com letras e números.",true);return;
+    }
     if(!validPersonName(name)){
       notify("Informe um nome com pelo menos 3 letras.",true);return;
     }
@@ -1179,12 +1188,12 @@ function initAdmin() {
       const savedSector=$("person-sector").value.trim();
       const generation=authGeneration;
       const reply=await admin(editingId?"admin-update":"admin-add",{
-        id:editingId,nome_completo:name,setor:savedSector,
+        id:editingId,nome_completo:name,apelido:nickname,setor:savedSector,
         ativo:active,confirmado:manualConfirmed
       });
       if(generation!==authGeneration)return;
       if(reply?.colaborador_id)mutedConfirmationIds.add(reply.colaborador_id);
-      applySavedPerson(reply?.colaborador_id || editingId,name,savedSector,active,manualConfirmed);
+      applySavedPerson(reply?.colaborador_id || editingId,name,savedSector,active,manualConfirmed,nickname);
       modal("edit-modal",false);
       if(!wasConfirmed && manualConfirmed)celebrateManualConfirmation();
       if(wasConfirmed!==manualConfirmed){
@@ -1220,8 +1229,8 @@ function initAdmin() {
   $("export-button").addEventListener("click",()=> {
     if(!dataset)return;
     const map=conMap();
-    const rows=[["Colaborador","Setor","Grupo original","Status","Origem da confirmacao","Acompanhante","Nome do acompanhante","Data da confirmacao"]];
-    dataset.collaborators.forEach(p => {const c=map.get(p.id);rows.push([p.nome_completo,p.setor||"",p.grupo||"",c?"Confirmado":!p.ativo?"Inativo":"Pendente",c?.origem==="manual"?"Manual":c?"Link":"",c?.acompanhante?"Sim":"Nao",c?.acompanhante_nome||"",stamp(c?.confirmado_em)]);});
+    const rows=[["Colaborador","Apelido","Setor","Grupo original","Status","Origem da confirmacao","Acompanhante","Nome do acompanhante","Data da confirmacao"]];
+    dataset.collaborators.forEach(p => {const c=map.get(p.id);rows.push([p.nome_completo,p.apelido||"",p.setor||"",p.grupo||"",c?"Confirmado":!p.ativo?"Inativo":"Pendente",c?.origem==="manual"?"Manual":c?"Link":"",c?.acompanhante?"Sim":"Nao",c?.acompanhante_nome||"",stamp(c?.confirmado_em)]);});
     const csv="\uFEFF"+rows.map(row=>row.map(v=>'"'+String(v??"").replace(/"/g,'""')+'"').join(";")).join("\r\n");
     const url=window.URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"})); // replaced below to avoid shadowing global URL
     const a=document.createElement("a");a.href=url;a.download="confirmacoes-confraternizacao.csv";a.click();setTimeout(()=>window.URL.revokeObjectURL(url),1000);
