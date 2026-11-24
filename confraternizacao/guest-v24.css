@@ -1,0 +1,16 @@
+/* Convite v24: formatação segura e legível da mensagem editada no admin */
+.guest-page .guest-message p {white-space:pre-line}
+.guest-page .guest-message strong {
+ color:#185d38;font-weight:850
+}
+.guest-page .guest-message em {
+ font-style:italic;
+ color:inherit
+}
+.guest-page .guest-message s {
+ text-decoration:line-through;
+ text-decoration-thickness:1.5px;
+ text-decoration-color:#ad9474;
+ opacity:.8
+}
+.guest-page .guest-message {overflow-wrap:anywhere}
