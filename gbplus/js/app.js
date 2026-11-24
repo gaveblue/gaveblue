@@ -2108,10 +2108,14 @@ function startupRecovery(message){
  gate.hidden=false;
  gate.innerHTML='<section class="auth-page"><div class="auth-card"><header class="auth-brand"><div class="auth-wordmark">GB<span>+</span></div><p>Gestão Financeira</p></header>'+
  '<p class="auth-description" role="alert"></p>'+
- '<a class="auth-primary" href="./recuperar.html" style="display:flex;align-items:center;justify-content:center;text-decoration:none;min-height:48px">Recuperar abertura do GB+</a>'+
- '<button type="button" id="gbplus-try-again" class="auth-forgot" style="margin-top:16px">Tentar novamente</button>'+
- '<p class="auth-description" style="margin-top:16px">Nenhum título, conta ou dado financeiro foi excluído.</p></div></section>';
- gate.querySelector('[role="alert"]').textContent=message||'Não foi possível concluir o carregamento. Confira sua conexão.';
+ '<button type="button" id="gbplus-try-again" class="auth-primary" style="min-height:48px;width:100%">Tentar abrir novamente</button>'+
+ '<a class="auth-forgot" href="./recuperar.html" style="display:flex;align-items:center;justify-content:center;text-decoration:underline;min-height:48px;margin-top:12px">Recuperar arquivos do aplicativo</a>'+
+ '<p class="auth-description" style="margin-top:16px">Nenhum título, conta ou dado financeiro foi excluído. A recuperação de arquivos não reinicia o serviço de dados.</p></div></section>';
+ const timedOut=message==='O acesso está demorando além do esperado. Seus registros não foram alterados.';
+ gate.querySelector('[role="alert"]').textContent=navigator.onLine===false?
+  'Sem conexão com a internet. Conecte-se para acessar seus dados online.':
+  timedOut?'O servidor de acesso do GB+ não respondeu a tempo. Tente novamente daqui a pouco.':
+  message||'Não foi possível concluir o carregamento. Confira sua conexão.';
  gate.querySelector('#gbplus-try-again').addEventListener('click',()=>location.reload());
 }
 async function init(){

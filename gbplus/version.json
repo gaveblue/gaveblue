@@ -1,16 +1,13 @@
 {
-  "version": "3.0.9",
-  "build": 3009,
-  "published_at": "2026-11-11T02:24:30Z",
-  "title": "Importação de pendentes, parceiros em grade e origem Via importação",
+  "version": "3.0.10",
+  "build": 3010,
+  "published_at": "2026-11-24T01:54:06.279Z",
+  "title": "Correção emergencial de abertura e recuperação de acesso",
   "notes": [
-    "Em Relatórios → Movimentação financeira Sankhya, foram adicionados Selecionar somente pendentes e filtros Todos/Pendentes de baixa/Baixados/Somente novos/Conflitos/Já importados; seleção de pendentes inclui somente títulos novos ainda sem baixa efetivada.",
-    "Registros com Data Baixa futura continuam pendentes na data da consulta, sem afetar saldo até a baixa confirmada. Seleções novas, pendentes e baixadas são mutuamente substitutivas.",
-    "Parceiros agora aparecem em grade compacta com código Sankhya, nome, CPF/CNPJ, classificação, situação e ações; 75 registros por página, pesquisa por nome, documento ou código e comportamento responsivo.",
-    "Categorias de movimentação usam automaticamente Outras receitas e Outras despesas, existentes nas categorias padrão do GB+. Categoria continua editável pelo usuário para classificação futura.",
-    "Via importação virou marcador de origem independente da categoria, visível na lista de lançamentos, cartões, tabela e detalhes; reconhecimento também para títulos Sankhya importados antes da 3.0.9.",
-    "Importador diário continua identificando por Empresa+Nro Único; notas repetidas com parcelas não são deduplicadas. Novo título é criado uma vez, baixa posterior é aplicada ao existente e alterações conflitantes exigem conferência.",
-    "A atualização é apenas de interface, seleção e metadados das novas importações. Nenhum dado financeiro foi alterado ou importado automaticamente."
+    "Solicitada a reativação do projeto GB+ no Supabase, anteriormente inativo, que bloqueava autenticação e leitura dos dados online.",
+    "A tela de falha na abertura prioriza tentar novamente e diferencia falta de internet e demora do servidor.",
+    "A recuperação de arquivos do PWA continua disponível separadamente, sem limpar registros, sessões ou armazenamento financeiro.",
+    "Nenhum dado financeiro, saldo, tabela ou permissão foi alterado no aplicativo por esta atualização."
   ],
   "assets": [
     "./splash.css",
