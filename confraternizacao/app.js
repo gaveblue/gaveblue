@@ -539,8 +539,55 @@ function initAdmin() {
   let dataset = null, editingId = null, currentView = "overview", lastLoad = 0;
   let authGeneration = 0, pendingBootstrap = null;
   let manualConfirmed = false, statusBusy = false, actionResolve = null;
+  let navCollapsed = false, notifyAudio = null;
   const mutedConfirmationIds = new Set();
 
+  function refreshNav() {
+    document.body.classList.toggle("admin-nav-collapsed",navCollapsed);
+    const button=$("admin-nav-toggle");
+    button.setAttribute("aria-expanded",String(!navCollapsed));
+    button.setAttribute("aria-label",navCollapsed?"Mostrar navegação":"Ocultar navegação");
+    button.setAttribute("title",navCollapsed?"Mostrar navegação":"Ocultar navegação");
+  }
+  $("admin-nav-toggle").addEventListener("click",()=>{
+    navCollapsed=!navCollapsed;refreshNav();
+  });
+  refreshNav();
+  function setActionLoading(visible,title) {
+    const loading=$("admin-action-loading");
+    if(!loading)return;
+    if(visible) $("admin-action-loading-title").textContent=title||"Salvando alteração...";
+    show("admin-action-loading",visible);
+    document.body.classList.toggle("admin-confirm-saving",visible);
+  }
+  // Tom curto original, criado localmente sem arquivo externo.
+  // Navegadores só permitem áudio depois de uma interação do administrador.
+  function unlockNotificationSound() {
+    const Audio=window.AudioContext||window.webkitAudioContext;
+    if(!Audio)return;
+    try {
+      if(!notifyAudio) notifyAudio=new Audio();
+      if(notifyAudio.state==="suspended") notifyAudio.resume().catch(()=>{});
+    } catch(_) {}
+  }
+  document.addEventListener("pointerdown",unlockNotificationSound,{passive:true});
+  document.addEventListener("keydown",unlockNotificationSound);
+  function playConfirmationSound() {
+    if(!notifyAudio||notifyAudio.state!=="running"||document.hidden)return;
+    try {
+      const t=notifyAudio.currentTime;
+      [[0,660],[.14,880]].forEach(([delay,freq])=>{
+        const oscillator=notifyAudio.createOscillator();
+        const volume=notifyAudio.createGain();
+        oscillator.type="sine";oscillator.frequency.setValueAtTime(freq,t+delay);
+        volume.gain.setValueAtTime(.0001,t+delay);
+        volume.gain.exponentialRampToValueAtTime(.045,t+delay+.014);
+        volume.gain.exponentialRampToValueAtTime(.0001,t+delay+.2);
+        oscillator.connect(volume);volume.connect(notifyAudio.destination);
+        oscillator.start(t+delay);oscillator.stop(t+delay+.205);
+      });
+    } catch(_) {}
+  }
   function notify(message, error = false) {
     const node = $("admin-notice"); node.textContent = message; node.classList.remove("hidden");
     node.classList.toggle("error", error);
@@ -580,6 +627,7 @@ function initAdmin() {
       toast(first+" confirmou sua presença!");
     });
     if(entries.length>2) toast("Mais "+(entries.length-2)+" colaboradores confirmaram presença.");
+    if(entries.length) playConfirmationSound();
   }
   function setManualSwitch() {
     $("person-confirmed").setAttribute("aria-checked",String(manualConfirmed));
@@ -832,20 +880,23 @@ function initAdmin() {
         !validFullName(p.nome_completo)?'<span class="status-chip inactive">Sem sobrenome</span>':
         !p.ativo?'<span class="status-chip inactive">Inativo</span>':'<span class="status-chip">Não confirmado</span>';
       const initials=p.nome_completo.split(/\s+/).slice(0,2).map(n=>n[0]).join("").toUpperCase();
+      const sectorText=(p.setor||p.grupo||"Setor não informado").trim();
       const disabled=statusBusy||!validFullName(p.nome_completo);
       const toggle='<button type="button" role="switch" class="rsvp-confirm-toggle'+(statusBusy?' is-busy':'')+
         '" data-confirm-id="'+escapeHtml(p.id)+'" aria-checked="'+confirmed+'" aria-label="'+
         escapeHtml((confirmed?"Retirar confirmação de ":"Confirmar presença de ")+p.nome_completo)+'"'+
         (disabled?' disabled':'')+'><span class="rsvp-confirm-thumb" aria-hidden="true"></span></button>';
+      const guestName=c?.acompanhante?String(c.acompanhante_nome||"Nome não informado"):"—";
       return '<tr><td><div class="name-cell"><span class="initial-badge">'+escapeHtml(initials)+
       '</span><span class="name-stack"><strong>'+escapeHtml(p.nome_completo)+
-      '</strong><small>Lista: '+escapeHtml(p.grupo||"Sem grupo")+'</small></span></div></td><td>'+
-      escapeHtml(p.setor||"Não informado")+'</td><td>'+escapeHtml(c?.acompanhante?c.acompanhante_nome:"—")+
-      '</td><td><div class="people-status-cell"><div class="people-status-description">'+badge+
-      '</div>'+toggle+'</div></td><td>'+escapeHtml(stamp(c?.confirmado_em))+
-      '</td><td><button class="icon-btn edit-person" type="button" data-id="'+escapeHtml(p.id)+
+      '</strong><small>'+escapeHtml(sectorText)+'</small></span></div></td>'+
+      '<td class="companion-cell">'+escapeHtml(guestName)+'</td>'+
+      '<td><div class="people-status-cell"><div class="people-status-description">'+badge+
+      '</div>'+toggle+'</div></td>'+
+      '<td>'+escapeHtml(stamp(c?.confirmado_em))+'</td>'+
+      '<td><button class="icon-btn edit-person" type="button" data-id="'+escapeHtml(p.id)+
       '" aria-label="Editar '+escapeHtml(p.nome_completo)+'"><i data-lucide="pencil"></i></button></td></tr>';
-    }).join(""):'<tr><td colspan="6" class="people-empty">Nenhum colaborador encontrado.</td></tr>';
+    }).join(""):'<tr><td colspan="5" class="people-empty">Nenhum colaborador encontrado.</td></tr>';
     icons();
   }
   $("people-search").addEventListener("input",renderPeople);
@@ -869,9 +920,12 @@ function initAdmin() {
     if(!p||!validFullName(p.nome_completo))return;
     const next=!conMap().has(id);
     statusBusy=true;renderPeople();
+    let loadingStarted=false;
     try {
       const approved=await confirmStatus({name:p.nome_completo,turningOn:next});
       if(!approved)return;
+      setActionLoading(true,next?"Confirmando presença...":"Retirando confirmação...");
+      loadingStarted=true;
       const generation=authGeneration;
       mutedConfirmationIds.add(id);
       await admin("admin-update",{id:p.id,nome_completo:p.nome_completo,setor:p.setor||"",
@@ -880,7 +934,7 @@ function initAdmin() {
       await bootstrap(true);
       toast(next?"Presença de "+p.nome_completo+" confirmada.":"Confirmação de "+p.nome_completo+" retirada.");
     }catch(err){toast(err.message||"Não foi possível salvar.","error");}
-    finally{mutedConfirmationIds.delete(id);statusBusy=false;renderPeople();}
+    finally{if(loadingStarted)setActionLoading(false);mutedConfirmationIds.delete(id);statusBusy=false;renderPeople();}
   }
   $("refresh-dashboard").addEventListener("click",async () => {
     const button = $("refresh-dashboard"); button.disabled = true;
@@ -978,7 +1032,7 @@ function initAdmin() {
     show("person-active-wrap",!!p);
     modal("edit-modal",true);
   }
-  $("top-add").addEventListener("click",()=>openPerson());
+  $("people-add").addEventListener("click",()=>openPerson());
   $("person-confirmed").addEventListener("click",async()=>{
     if(statusBusy||actionResolve)return;
     const next=!manualConfirmed;
@@ -996,6 +1050,7 @@ function initAdmin() {
     }
     const wasConfirmed=!!(editingId&&conMap().has(editingId));
     statusBusy=true;
+    setActionLoading(true,"Salvando colaborador...");
     const button=$("person-save");
     button.disabled=true;button.classList.add("is-saving");
     $("person-save-label").textContent="Salvando...";
@@ -1016,6 +1071,7 @@ function initAdmin() {
     } catch(err){toast(err.message||"Não foi possível salvar.","error");}
     finally{
       if(editingId)mutedConfirmationIds.delete(editingId);
+      setActionLoading(false);
       statusBusy=false;button.disabled=false;button.classList.remove("is-saving");
       $("person-save-label").textContent="Salvar colaborador";renderPeople();
     }
