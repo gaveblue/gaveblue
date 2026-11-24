@@ -168,9 +168,13 @@ Deno.serve(async (req: Request) => {
         acompanhante_nome: companionName, origem: "link", confirmado_em: new Date().toISOString()
       }, { onConflict: "evento_id,colaborador_id" });
       assert(!error, "Não foi possível salvar a confirmação.");
-      const message = "Olá! Confirmo minha presença na " + ev.titulo + ".\n\nColaborador: " + employee.nome_completo +
-        "\nAcompanhante: " + (companion ? companionName : "Não levarei acompanhante") +
-        "\nQuantidade de pessoas: " + (companion ? "2" : "1") + ".";
+      // Mensagem compacta aprovada: negrito com asterisco simples, padrão do WhatsApp.
+      const message = "✅ *Presença confirmada!*\n\n" +
+        "🥂 *" + ev.titulo + "*\n\n" +
+        "*Nome:* " + employee.nome_completo + "\n" +
+        "*Acompanhante:* " + (companion ? companionName : "Não levarei") + "\n" +
+        "*Total:* " + (companion ? "2 pessoas" : "1 pessoa") + "\n\n" +
+        "Até lá! ✨";
       return json({ ok: true, colaborador: employee.nome_completo, whatsapp_url: "https://wa.me/" + ev.whatsapp + "?text=" + encodeURIComponent(message) }, 200, origin);
     }
     if (action === "admin-login") {
