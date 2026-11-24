@@ -539,7 +539,7 @@ function initAdmin() {
   let dataset = null, editingId = null, currentView = "overview", lastLoad = 0;
   let authGeneration = 0, pendingBootstrap = null;
   let manualConfirmed = false, statusBusy = false, actionResolve = null;
-  let navCollapsed = false, notifyAudio = null;
+  let navCollapsed = false, notifyAudio = null, mutationEpoch = 0;
   const mutedConfirmationIds = new Set();
 
   function refreshNav() {
@@ -708,6 +708,7 @@ function initAdmin() {
   function bootstrap(quiet = false) {
     if (pendingBootstrap) return pendingBootstrap;
     const generation = authGeneration;
+    const requestEpoch = mutationEpoch;
     const firstLoad = !dataset;
     if (firstLoad && !quiet) showLoading();
     pendingBootstrap = (async () => {
@@ -715,7 +716,7 @@ function initAdmin() {
       const timeout = setTimeout(() => controller.abort(), 15000);
       try {
         const response = await admin("admin-bootstrap", {}, {signal:controller.signal});
-        if (generation !== authGeneration || !session) return;
+        if (generation !== authGeneration || !session || requestEpoch !== mutationEpoch) return;
         announceConfirmations(dataset,response);
         dataset = response;
         lastLoad = Date.now();
@@ -816,7 +817,7 @@ function initAdmin() {
   function render() {
     if (!dataset) return;
     const ev = dataset.event;
-    $("admin-title").textContent = ev.titulo;
+    $("admin-title-text").textContent = ev.titulo;
     renderRsvpState();
     $("share-url").textContent = location.origin + "/confraternizacao/";
     const employees = dataset.collaborators;
@@ -916,6 +917,33 @@ function initAdmin() {
     const toggle=e.target.closest("[data-confirm-id]");
     if(toggle)toggleListConfirmation(toggle.dataset.confirmId);
   });
+  // Atualiza a lista somente após o servidor confirmar a gravação.
+  // Não aguarda uma segunda consulta completa de 83+ registros para destravar a interface.
+  // O polling periódico faz a reconciliação posterior.
+  function applySavedPerson(id,name,sector,active,confirmed) {
+    if (!dataset || !id) return;
+    const prev = dataset.collaborators.find(p => p.id === id);
+    const current = prev
+      ? {...prev,nome_completo:name,setor:sector,ativo:active}
+      : {id,nome_completo:name,setor:sector,grupo:sector || "Sem setor",ativo:active,
+         criado_em:new Date().toISOString()};
+    dataset.collaborators = [
+      ...dataset.collaborators.filter(p => p.id !== id),current
+    ].sort((a,b)=>a.nome_completo.localeCompare(b.nome_completo,"pt-BR"));
+    const hadReply = (dataset.confirmations || []).find(c => c.colaborador_id === id);
+    if (confirmed && !hadReply) {
+      dataset.confirmations = [
+        ...(dataset.confirmations || []),
+        {colaborador_id:id,acompanhante:false,acompanhante_nome:null,
+         confirmado_em:new Date().toISOString(),origem:"manual"}
+      ];
+    } else if (!confirmed && hadReply) {
+      dataset.confirmations = dataset.confirmations.filter(c => c.colaborador_id !== id);
+    }
+    mutationEpoch++;
+    lastLoad = Date.now();
+    render();
+  }
   async function toggleListConfirmation(id) {
     if(statusBusy||!dataset||actionResolve)return;
     const p=dataset.collaborators.find(x=>x.id===id);
@@ -933,7 +961,7 @@ function initAdmin() {
       await admin("admin-update",{id:p.id,nome_completo:p.nome_completo,setor:p.setor||"",
         ativo:p.ativo!==false,confirmado:next});
       if(generation!==authGeneration)return;
-      await bootstrap(true);
+      applySavedPerson(p.id,p.nome_completo,p.setor||"",p.ativo!==false,next);
       toast(next?"Presença de "+p.nome_completo+" confirmada.":"Confirmação de "+p.nome_completo+" retirada.");
     }catch(err){toast(err.message||"Não foi possível salvar.","error");}
     finally{if(loadingStarted)setActionLoading(false);mutedConfirmationIds.delete(id);statusBusy=false;renderPeople();}
@@ -1058,13 +1086,16 @@ function initAdmin() {
     $("person-save-label").textContent="Salvando...";
     if(editingId)mutedConfirmationIds.add(editingId);
     try {
+      const savedSector=$("person-sector").value.trim();
+      const generation=authGeneration;
       const reply=await admin(editingId?"admin-update":"admin-add",{
-        id:editingId,nome_completo:name,setor:$("person-sector").value.trim(),
+        id:editingId,nome_completo:name,setor:savedSector,
         ativo:active,confirmado:manualConfirmed
       });
+      if(generation!==authGeneration)return;
       if(reply?.colaborador_id)mutedConfirmationIds.add(reply.colaborador_id);
+      applySavedPerson(reply?.colaborador_id || editingId,name,savedSector,active,manualConfirmed);
       modal("edit-modal",false);
-      await bootstrap(true);
       if(wasConfirmed!==manualConfirmed){
         toast(manualConfirmed?"Presença de "+name+" confirmada.":"Confirmação de "+name+" retirada.");
       } else if(!editingId) toast(name+" cadastrado com sucesso.");
