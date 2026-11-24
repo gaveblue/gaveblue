@@ -35,6 +35,88 @@ function initGuest() {
   const searchWrap = $("guest-search-wrap");
   const boot = $("invite-boot");
 
+  const RSVP_DEADLINE_DEFAULT = "2026-11-25T23:59:59.999-03:00";
+  let urgencyTimer = null;
+  let whatsappRedirectTimer = null;
+
+  function updateUrgency() {
+    const deadline = Date.parse(event?.prazo_confirmacao || RSVP_DEADLINE_DEFAULT);
+    if (!Number.isFinite(deadline)) { show("rsvp-urgency", false); return; }
+    show("rsvp-urgency", true);
+    const remaining = Math.max(0, deadline - Date.now());
+    const elapsed = remaining <= 0;
+    const clock = [
+      Math.floor(remaining / 3600000),
+      Math.floor((remaining % 3600000) / 60000),
+      Math.floor((remaining % 60000) / 1000),
+      Math.floor(remaining % 1000)
+    ];
+    ["rsvp-hours","rsvp-minutes","rsvp-seconds","rsvp-millis"].forEach((id,index) => {
+      const value = String(clock[index]).padStart(index === 3 ? 3 : 2, "0");
+      const el = $(id);
+      if (el && el.textContent !== value) el.textContent = value;
+    });
+    $("rsvp-urgency").classList.toggle("is-expired", elapsed);
+    show("rsvp-urgency-expired", elapsed);
+    if (elapsed) {
+      if (urgencyTimer !== null) { clearInterval(urgencyTimer); urgencyTimer = null; }
+      if (event && event.status === "aberto") {
+        event.status = "encerrado";
+        show("guest-cta", false);
+        show("guest-locked", true);
+        $("guest-locked").querySelector("h2").textContent = "Prazo de confirmação encerrado";
+        $("guest-locked").querySelector("p").textContent = "As confirmações se encerraram em 25/11. Fale com a organização.";
+      }
+    }
+  }
+  function startUrgency() {
+    if (urgencyTimer !== null) { clearInterval(urgencyTimer); urgencyTimer = null; }
+    updateUrgency();
+    if (Date.now() < Date.parse(event?.prazo_confirmacao || RSVP_DEADLINE_DEFAULT)) {
+      urgencyTimer = setInterval(() => {
+        if (!document.hidden) updateUrgency();
+      }, 50);
+    }
+  }
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) {
+      updateUrgency();
+    }
+  });
+  function fireCelebration() {
+    const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches === true;
+    if (reduced || document.hidden || typeof window.confetti !== "function") return;
+    const colors = ["#0C7137","#136A3B","#E9C53B","#F6DB6C","#FFFFFF"];
+    const shoot = (origin, angle, count) => {
+      try {
+        window.confetti({
+          particleCount: count,
+          angle,
+          spread: 62,
+          startVelocity: 28,
+          gravity: 1.1,
+          drift: 0,
+          ticks: 125,
+          scalar: .82,
+          origin,
+          colors,
+          zIndex: 1600,
+          disableForReducedMotion: true
+        });
+      } catch (_) { /* o sucesso não depende da animação */ }
+    };
+    shoot({x:.14,y:.88},63,28);
+    shoot({x:.86,y:.88},117,28);
+    setTimeout(() => shoot({x:.50,y:.58},90,15),260);
+  }
+  $("whatsapp-fallback").addEventListener("click", () => {
+    if (whatsappRedirectTimer !== null) {
+      clearTimeout(whatsappRedirectTimer);
+      whatsappRedirectTimer = null;
+    }
+  });
+
+
   let countdownTimer = null;
   let countdownTick = null;
   function startCountdown() {
@@ -199,11 +281,14 @@ function initGuest() {
         return paragraph;
       }));
     }
-    const day = event.data_evento ? String(event.data_evento).split("-") : null;
-    $("event-date").textContent = day && day.length === 3 ? day[2] + "/" + day[1] : "A definir";
-    $("event-time").textContent = event.horario ? String(event.horario).replace(":", "h") : "A definir";
+    const parts = /^\d{4}-\d{2}-\d{2}$/.test(String(event.data_evento || "")) ? event.data_evento.split("-") : null;
+    const dateDisplay = parts ? new Intl.DateTimeFormat("pt-BR",{day:"numeric",month:"long",timeZone:"UTC"}).format(new Date(event.data_evento+"T12:00:00Z")) : "data a definir";
+    const timeDisplay = event.horario ? String(event.horario).replace(/^(\d{1,2}):(\d{2})$/, (_,hour,minutes) => minutes === "00" ? hour+"h" : hour+"h"+minutes) : "horário a definir";
+    $("event-date-long").textContent = dateDisplay;
+    $("event-time-inline").textContent = timeDisplay;
     $("event-place").textContent = event.local_evento || "Local a definir";
     startCountdown();
+    startUrgency();
     show("guest-cta", event.status === "aberto" && !finished);
     show("guest-locked", event.status !== "aberto");
   }
@@ -367,7 +452,17 @@ function initGuest() {
       show("guest-saved", true);
       toggleStage("done");
       icons();
-      window.location.assign(resp.whatsapp_url);
+      const successPanel = $("guest-done");
+      successPanel.classList.remove("celebrating");
+      void successPanel.offsetWidth;
+      successPanel.classList.add("celebrating");
+      fireCelebration();
+      // Uma pequena pausa torna a celebração visível antes de abrir o WhatsApp.
+      const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches === true;
+      whatsappRedirectTimer = setTimeout(() => {
+        whatsappRedirectTimer = null;
+        window.location.assign(resp.whatsapp_url);
+      }, reducedMotion ? 300 : 2300);
     } catch (err) {
       fail("sheet-error", err.message);
       $("confirm-button").innerHTML = 'Confirmar presença <i data-lucide="check"></i>';
