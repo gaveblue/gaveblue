@@ -19,10 +19,11 @@
 <link href="./guest-v15.css?v=16" rel="stylesheet">
 <link href="./guest-v16.css?v=16" rel="stylesheet">
 <link href="./guest-v17.css?v=17" rel="stylesheet">
+<link href="./guest-v18.css?v=18" rel="stylesheet">
 <script defer src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.4/dist/confetti.browser.min.js"></script>
 <script defer src="./app.js?v=16"></script>
 </head>
-<body class="guest-page invite-booting" data-invite-version="17">
+<body class="guest-page invite-booting" data-invite-version="18">
 <div id="invite-boot" class="invite-boot" role="status" aria-live="polite">
   <div class="invite-boot-inner">
     <span class="invite-boot-symbol" aria-hidden="true"><i data-lucide="calendar-heart"></i></span>
@@ -64,11 +65,12 @@
     <p id="countdown-status" class="countdown-status hidden" role="status" aria-live="polite"></p>
     <p class="event-countdown-datetime"><i data-lucide="calendar-days" aria-hidden="true"></i><span>Dia <strong id="event-date-long">12 de dezembro</strong>, a partir das <strong id="event-time-inline">15h</strong></span></p>
   </section>
+  <div class="rsvp-info-row" aria-label="Local e prazo de confirmação">
   <section class="guest-details guest-location-only" aria-label="Local do evento">
     <div class="event-location"><span class="detail-icon"><i data-lucide="map-pin"></i></span><div class="event-location-copy"><small>LOCAL</small><strong id="event-place">Loja Maçônica Fenelon Barbosa</strong><a class="event-map-link" href="https://maps.app.goo.gl/YYeyFWafrcbeTBfd8?g_st=ac" target="_blank" rel="noopener noreferrer">Não sabe onde fica? <span>Clique aqui</span><i data-lucide="arrow-up-right" aria-hidden="true"></i></a></div></div>
   </section>
   <section class="rsvp-urgency" id="rsvp-urgency" aria-label="Prazo para confirmar presença">
-    <div class="rsvp-urgency-head"><i data-lucide="alert-circle" aria-hidden="true"></i><div><strong>Confirme sua presença até 25/11</strong><small id="rsvp-urgency-caption">O prazo está acabando — não deixe para depois!</small></div></div>
+    <div class="rsvp-urgency-head"><i data-lucide="alert-circle" aria-hidden="true"></i><div><strong>Confirme até 25/11</strong><small id="rsvp-urgency-caption">O prazo está acabando — não deixe para depois!</small></div></div>
     <div class="rsvp-urgency-grid" id="rsvp-urgency-grid" role="timer" aria-live="off" aria-label="Tempo restante para confirmar presença">
       <div class="rsvp-urgency-unit"><strong id="rsvp-hours">--</strong><span>HORAS</span></div>
       <span class="rsvp-urgency-separator" aria-hidden="true">:</span>
@@ -80,6 +82,7 @@
     </div>
     <p id="rsvp-urgency-expired" class="rsvp-urgency-expired hidden" role="status">O prazo de confirmação terminou em 25/11.</p>
   </section>
+  </div>
   <section class="invite-card" id="invite-card">
     <div id="guest-locked" class="locked hidden"><span class="big-icon"><i data-lucide="calendar-clock"></i></span><h2>Confirmações indisponíveis</h2><p>As confirmações ainda não estão abertas. Fale com a organização.</p></div>
     <div id="guest-cta" class="guest-cta hidden">
