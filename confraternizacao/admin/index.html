@@ -8,11 +8,12 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link href="../style.css?v=4" rel="stylesheet">
 <link href="../admin-v5.css?v=5" rel="stylesheet">
+<link href="../admin-v6.css?v=6" rel="stylesheet">
 
 <script defer src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
-<script defer src="../app.js?v=5"></script>
+<script defer src="../app.js?v=23"></script>
 </head>
-<body class="admin-page" data-admin-version="5">
+<body class="admin-page" data-admin-version="6">
 <div id="admin-login" class="auth-shell">
   <div class="auth-card">
     <div class="auth-logo"><i data-lucide="sparkles"></i></div>
@@ -47,6 +48,11 @@
     <div id="admin-notice" class="notice hidden" role="status"></div>
     <div id="view-overview" class="admin-content">
       <div class="section-intro action-intro"><div><h2>Visão geral</h2><p>Acompanhe as respostas e os cadastros do evento.</p></div><button id="refresh-dashboard" class="secondary-button" type="button"><i data-lucide="refresh-cw"></i> Atualizar dados</button></div>
+      <section class="admin-panel rsvp-state-panel" aria-label="Situação do RSVP">
+        <div class="rsvp-state-icon"><i data-lucide="calendar-check"></i></div>
+        <div class="rsvp-state-copy"><small>STATUS DAS CONFIRMAÇÕES</small><strong id="rsvp-state-title">Carregando situação...</strong><p id="rsvp-state-detail">O prazo e a situação do evento aparecerão aqui.</p></div>
+        <button type="button" class="secondary-button rsvp-state-manage" data-view="settings"><i data-lucide="sliders-horizontal"></i> Gerenciar</button>
+      </section>
       <div class="stats-grid">
         <article class="stat-card"><span class="stat-icon"><i data-lucide="users"></i></span><small>Cadastrados</small><strong id="stat-invited">0</strong><span id="stat-eligible">0 aptos à busca</span></article>
         <article class="stat-card"><span class="stat-icon green"><i data-lucide="check-circle-2"></i></span><small>Confirmados</small><strong id="stat-confirmed">0</strong><span>presenças confirmadas</span></article>
@@ -72,7 +78,25 @@
           <div><label for="event-time-input">Horário</label><input id="event-time-input" type="time" class="standard-input"></div>
           <div class="full"><label for="event-place-input">Local</label><input id="event-place-input" maxlength="180" class="standard-input" placeholder="Nome do local e endereço"></div>
           <div class="full"><label for="event-whatsapp">WhatsApp da organização</label><input id="event-whatsapp" inputmode="tel" class="standard-input" placeholder="5527999999999"><p class="field-help">Informe DDI + DDD + número. Ex.: 55 27 99999-9999.</p></div>
+          
+          <div class="full deadline-form-group">
+            <div class="deadline-form-head"><div><strong>Prazo final de confirmação</strong><p>Horário de Brasília (GMT-3). Após esse instante, novas confirmações são bloqueadas automaticamente.</p></div><i data-lucide="calendar-clock"></i></div>
+            <div class="deadline-form-grid">
+              <div><label for="event-deadline-date">Data limite</label><input id="event-deadline-date" type="date" class="standard-input" required></div>
+              <div><label for="event-deadline-time">Horário limite</label><input id="event-deadline-time" type="time" class="standard-input" required step="60"></div>
+            </div>
+          </div>
+          <div class="full"><label for="event-close-message">Mensagem de encerramento (opcional)</label><textarea id="event-close-message" class="standard-input" rows="3" maxlength="320" placeholder="Ex.: As confirmações foram encerradas. Obrigado pela participação!"></textarea><p class="field-help">Se ficar em branco, o convite mostra uma mensagem padrão adequada ao tipo de encerramento.</p></div>
           <div><label for="event-status">Status das confirmações</label><select id="event-status" class="standard-input"><option value="rascunho">Rascunho · fechado</option><option value="aberto">Aberto · recebendo confirmações</option><option value="encerrado">Encerrado</option></select></div>
+          <div class="full rsvp-controls">
+            <div class="rsvp-controls-head"><span class="rsvp-controls-label">Ações rápidas</span><strong id="settings-rsvp-state">Situação atual</strong></div>
+            <p id="settings-rsvp-help" class="muted">Abra, encerre ou reabra conforme necessário. As respostas já recebidas são preservadas.</p>
+            <div class="rsvp-control-actions">
+              <button type="button" class="secondary-button" id="rsvp-open" data-rsvp-action="open"><i data-lucide="door-open"></i> Abrir confirmações</button>
+              <button type="button" class="secondary-button rsvp-danger-button" id="rsvp-close" data-rsvp-action="close"><i data-lucide="lock-keyhole"></i> Encerrar agora</button>
+              <button type="button" class="secondary-button" id="rsvp-reopen" data-rsvp-action="reopen"><i data-lucide="refresh-cw"></i> Reabrir confirmações</button>
+            </div>
+          </div>
           <div class="check-field"><label class="checkbox-line"><input id="event-plus" type="checkbox" checked> Permitir 1 acompanhante por colaborador</label></div>
         </div>
         <div class="form-footer"><p>Alterações atualizadas no convite após salvar.</p><button type="submit" class="main-button compact"><i data-lucide="save"></i> Salvar configurações</button></div>
