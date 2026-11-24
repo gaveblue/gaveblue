@@ -589,9 +589,8 @@ function initAdmin() {
     } catch(_) {}
   }
   function notify(message, error = false) {
-    const node = $("admin-notice"); node.textContent = message; node.classList.remove("hidden");
-    node.classList.toggle("error", error);
-    clearTimeout(notify.t); notify.t = setTimeout(() => node.classList.add("hidden"), 5000);
+    // O admin usa um único padrão de notificação, sempre no topo.
+    toast(message, error);
   }
 
   function toast(message, error = false) {
