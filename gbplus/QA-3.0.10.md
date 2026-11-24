@@ -13,9 +13,13 @@
 - Versão de HTML, `version.json` e cache do Service Worker unificada em `3.0.10 / 3010`.
 - Lista de assets da versão anterior conservada.
 
+## Verificação do serviço concluída
+- Projeto GB+ confirmado como `ACTIVE_HEALTHY` após restaurar.
+- Consulta SQL somente leitura retornou `database_responding=1` e `documents_table_present=true`.
+- Nenhuma consulta com escrita ou modificação de registros financeiros foi executada.
+
 ## Pendências de homologação
-- Confirmar Supabase `ACTIVE_HEALTHY` e consulta SQL somente leitura.
 - Realizar login real em um navegador autorizado e confirmar leitura das contas/lançamentos e sincronização.
 - Reabrir o PWA instalado no Android e verificar transição da splash para login ou painel.
 
-**Status:** hotfix de interface validado estaticamente; homologação de ponta a ponta não concluída nesta etapa. Não confundir reativação do banco com validação de login de usuário.
+**Status:** hotfix publicado, backend restaurado e banco respondendo. Homologação de login e da experiência no dispositivo ainda pendente.
