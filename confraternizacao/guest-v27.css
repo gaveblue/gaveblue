@@ -1,0 +1,9 @@
+/* Convite v27: recusa discreta, etapa própria. */
+.guest-page #rsvp-sheet .decline-invite{display:block;margin:20px auto 0;padding:9px 12px;border:0;background:transparent;color:#a64c4b;font:650 13px/1.4 DM Sans,sans-serif;cursor:pointer}
+.guest-page #rsvp-sheet .decline-invite:hover{text-decoration:underline}
+.guest-page #rsvp-sheet .decline-optional{font-weight:400;color:#839085}
+.guest-page #rsvp-sheet #decline-reason{display:block;width:100%;min-height:88px;resize:vertical;font-size:16px;line-height:1.4;border:1px solid #d8e5d7;border-radius:12px;padding:13px}
+.guest-page #rsvp-sheet .rsvp-sheet-action .decline-submit{background:#a65c58;box-shadow:none}
+.guest-page #rsvp-sheet .decline-mark{display:grid;place-items:center;width:60px;height:60px;border-radius:50%;background:#eef5ed;color:#41764d;margin:10px auto 16px}
+.guest-page #rsvp-sheet .decline-mark svg{width:30px;height:30px}
+.guest-page #rsvp-sheet #decline-close{width:100%;margin-top:16px}

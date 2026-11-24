@@ -29,9 +29,10 @@
 <link href="./guest-v25.css?v=25" rel="stylesheet">
 <script defer src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.4/dist/confetti.browser.min.js"></script>
 <link href="./guest-v26.css?v=26" rel="stylesheet">
-<script defer src="./guest-app-v26.js?v=26"></script>
+<link href="./guest-v27.css?v=27" rel="stylesheet">
+<script defer src="./guest-app-v27.js?v=27"></script>
 </head>
-<body class="guest-page invite-booting" data-invite-version="26">
+<body class="guest-page invite-booting" data-invite-version="27">
 <div id="invite-boot" class="invite-boot" role="status" aria-live="polite">
   <div class="invite-boot-inner">
     <span class="invite-boot-symbol" aria-hidden="true"><i data-lucide="calendar-heart"></i></span>
@@ -100,7 +101,7 @@
     </div>
     <div id="guest-saved" class="hidden guest-saved">
       <span class="guest-saved-icon"><i data-lucide="check-circle-2"></i></span>
-      <div><strong>Presença registrada!</strong><small>Confira sua confirmação.</small></div>
+      <div><strong id="saved-title">Presença registrada!</strong><small id="saved-subtitle">Confira sua confirmação.</small></div>
       <button id="open-receipt" class="guest-receipt-button" type="button">Ver <i data-lucide="chevron-right"></i></button>
     </div>
   </section>
@@ -131,9 +132,18 @@
           <label class="option"><input type="radio" name="plus" value="yes"><span class="option-symbol"><i data-lucide="users"></i></span><span>Sim, vou levar acompanhante</span><i data-lucide="circle" class="option-check"></i></label>
           <label class="option"><input type="radio" name="plus" value="no"><span class="option-symbol"><i data-lucide="user-round"></i></span><span>Não, irei sozinho(a)</span><i data-lucide="circle" class="option-check"></i></label>
         </div>
+        <button id="decline-invite" class="decline-invite" type="button">Infelizmente não posso ir :(</button>
       </div>
       <div id="guest-companion-name" class="hidden">
         <div id="companion-field"><label for="companion-name" class="sheet-field-label">Nome completo do acompanhante</label><input id="companion-name" class="standard-input" placeholder="Nome e sobrenome" autocomplete="off" autocapitalize="words" enterkeyhint="done" maxlength="150"></div>
+      </div>
+      <div id="guest-decline" class="hidden">
+        <label for="decline-reason" class="sheet-field-label">Motivo <span class="decline-optional">(opcional)</span></label>
+        <textarea id="decline-reason" class="standard-input" rows="3" maxlength="500" placeholder="Se quiser, conte por que não poderá participar."></textarea>
+      </div>
+      <div id="guest-declined" class="hidden done-panel" aria-live="polite">
+        <div class="decline-mark"><i data-lucide="heart-handshake"></i></div><h2>Resposta registrada</h2><p class="done-lead">Sentiremos sua falta! Obrigado por nos avisar.</p>
+        <button id="decline-close" type="button" class="main-button">Concluir <i data-lucide="check"></i></button>
       </div>
       <div id="guest-done" class="hidden done-panel" aria-live="polite">
         <div class="success-celebration" aria-hidden="true"><span class="clink-glass clink-glass-left"><i data-lucide="wine"></i></span><span class="clink-glass clink-glass-right"><i data-lucide="wine"></i></span><span class="celebration-star celebration-star-a"></span><span class="celebration-star celebration-star-b"></span><span class="celebration-star celebration-star-c"></span></div>
