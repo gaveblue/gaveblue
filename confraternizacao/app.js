@@ -568,6 +568,7 @@ function initAdmin() {
   let manualConfirmed = false, statusBusy = false, actionResolve = null;
   let navCollapsed = false, notifyAudio = null, mutationEpoch = 0;
   const mutedConfirmationIds = new Set();
+  const selectedPersonIds = new Set();
 
   function refreshNav() {
     document.body.classList.toggle("admin-nav-collapsed",navCollapsed);
@@ -900,6 +901,53 @@ function initAdmin() {
     if (currentView !== "settings") renderSettings();
     icons();
   }
+  // A seleção permanece ao trocar os filtros; só os registros visíveis são adicionados pelo "Selecionar visíveis".
+  function getFilteredPeople(map=conMap()) {
+    const query=norm($("people-search").value);
+    const status=$("status-filter").value;
+    const sector=$("sector-filter").value;
+    const group=$("group-filter").value;
+    return (dataset?.collaborators||[]).filter(p=>{
+      if(query&&!norm(p.nome_completo+" "+(p.apelido||"")+" "+(p.setor||"")+" "+(p.grupo||"")).includes(query))return false;
+      if(sector!=="all"&&(p.setor||"")!==sector)return false;
+      if(group!=="all"&&(p.grupo||"")!==group)return false;
+      const confirmed=map.has(p.id);
+      if(status==="confirmed")return confirmed;
+      if(status==="pending")return !confirmed;
+      if(status==="inactive")return !p.ativo;
+      if(status==="incomplete")return p.nome_completo.trim().split(/\s+/).length===1;
+      return true;
+    });
+  }
+  function updateSelectionUI(visible) {
+    if(!dataset)return;
+    const validIds=new Set(dataset.collaborators.map(p=>p.id));
+    for(const id of selectedPersonIds)if(!validIds.has(id))selectedPersonIds.delete(id);
+    const list=visible||getFilteredPeople();
+    const checked=list.filter(p=>selectedPersonIds.has(p.id)).length;
+    const all=$("people-select-all");
+    all.checked=Boolean(list.length&&checked===list.length);
+    all.indeterminate=checked>0&&checked<list.length;
+    all.disabled=statusBusy||list.length===0;
+    $("select-visible").disabled=statusBusy||list.length===0;
+    $("clear-selection").disabled=statusBusy;
+    $("bulk-edit-button").disabled=statusBusy||!selectedPersonIds.size;
+    $("bulk-selection-count").textContent=selectedPersonIds.size+" selecionado"+(selectedPersonIds.size===1?"":"s");
+    $("bulk-edit-button").setAttribute("aria-label","Editar setor e grupo de "+selectedPersonIds.size+" colaboradores");
+    show("bulk-selection-bar",selectedPersonIds.size>0);
+    show("clear-selection",selectedPersonIds.size>0);
+  }
+  function updateVisibleSelection(checked) {
+    if(statusBusy||!dataset)return;
+    const visible=getFilteredPeople();
+    const added=visible.filter(p=>!selectedPersonIds.has(p.id));
+    if(checked && selectedPersonIds.size+added.length>200) {
+      toast("Selecione até 200 colaboradores por alteração em lote.",true);
+      renderPeople();return;
+    }
+    visible.forEach(p=>checked?selectedPersonIds.add(p.id):selectedPersonIds.delete(p.id));
+    renderPeople();
+  }
   function renderPeople() {
     if(!dataset)return;
     const query=norm($("people-search").value),status=$("status-filter").value,map=conMap();
@@ -909,6 +957,11 @@ function initAdmin() {
     selector.innerHTML='<option value="all">Todos os setores</option>'+sectors.map(x=>'<option value="'+escapeHtml(x)+'">'+escapeHtml(x)+'</option>').join("");
     selector.value=selected==="all"||sectors.includes(selected)?selected:"all";
     $("sector-suggestions").innerHTML=sectors.map(x=>'<option value="'+escapeHtml(x)+'"></option>').join("");
+    const groups=[...new Set(dataset.collaborators.map(p=>(p.grupo||"").trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"pt-BR"));
+    const groupFilter=$("group-filter"),currentGroup=groupFilter.value;
+    groupFilter.innerHTML='<option value="all">Todos os grupos</option>'+groups.map(x=>'<option value="'+escapeHtml(x)+'">'+escapeHtml(x)+'</option>').join("");
+    groupFilter.value=currentGroup==="all"||groups.includes(currentGroup)?currentGroup:"all";
+    $("group-suggestions").innerHTML=groups.map(x=>'<option value="'+escapeHtml(x)+'"></option>').join("");
     const byStatus={
       all:dataset.collaborators.length,
       confirmed:dataset.collaborators.filter(p=>map.has(p.id)).length,
@@ -921,23 +974,14 @@ function initAdmin() {
       const active=n.dataset.status===status;
       n.classList.toggle("active",active);n.setAttribute("aria-pressed",String(active));
     });
-    const list=dataset.collaborators.filter(p=>{
-      if(query&&!norm(p.nome_completo+" "+(p.apelido||"")+" "+(p.setor||"")+" "+(p.grupo||"")).includes(query))return false;
-      if(selector.value!=="all"&&(p.setor||"")!==selector.value)return false;
-      const confirmed=map.has(p.id);
-      if(status==="confirmed")return confirmed;
-      if(status==="pending")return !confirmed;
-      if(status==="inactive")return !p.ativo;
-      if(status==="incomplete")return p.nome_completo.trim().split(/\s+/).length===1;
-      return true;
-    });
+    const list=getFilteredPeople(map);
     $("people-count").textContent=list.length+" resultado"+(list.length===1?"":"s");
     $("people-body").innerHTML=list.length?list.map(p=>{
       const c=map.get(p.id),confirmed=!!c;
       const badge=confirmed?'<span class="status-chip confirmed">Confirmado</span>':
         !p.ativo?'<span class="status-chip inactive">Inativo</span>':'<span class="status-chip">Não confirmado</span>';
       const initials=p.nome_completo.split(/\s+/).slice(0,2).map(n=>n[0]).join("").toUpperCase();
-      const sectorText=(p.setor||p.grupo||"Setor não informado").trim();
+      const sectorText=(p.setor?"Setor: "+p.setor:"Sem setor")+" · Grupo: "+(p.grupo||"Sem grupo");
       const nicknameText=p.apelido ? " · Apelido: " + p.apelido : "";
       const disabled=statusBusy||!validPersonName(p.nome_completo);
       const toggle='<button type="button" role="switch" class="rsvp-confirm-toggle'+(statusBusy?' is-busy':'')+
@@ -945,7 +989,9 @@ function initAdmin() {
         escapeHtml((confirmed?"Retirar confirmação de ":"Confirmar presença de ")+p.nome_completo)+'"'+
         (disabled?' disabled':'')+'><span class="rsvp-confirm-thumb" aria-hidden="true"></span></button>';
       const guestName=c?.acompanhante?String(c.acompanhante_nome||"Nome não informado"):"—";
-      return '<tr><td><div class="name-cell"><span class="initial-badge">'+escapeHtml(initials)+
+      return '<tr class="'+(selectedPersonIds.has(p.id)?'is-selected':'')+'"><td><div class="name-cell">'+
+      '<label class="people-row-select" title="Selecionar '+escapeHtml(p.nome_completo)+'"><input type="checkbox" class="people-row-checkbox" data-select-id="'+escapeHtml(p.id)+'" aria-label="Selecionar '+escapeHtml(p.nome_completo)+'"'+(selectedPersonIds.has(p.id)?' checked':'')+(statusBusy?' disabled':'')+'><span aria-hidden="true"></span></label>'+
+      '<span class="initial-badge">'+escapeHtml(initials)+
       '</span><span class="name-stack"><strong title="'+escapeHtml(p.nome_completo)+'">'+escapeHtml(p.nome_completo)+
       '</strong><small title="'+escapeHtml(sectorText+nicknameText)+'">'+escapeHtml(sectorText+nicknameText)+'</small></span></div></td>'+
       '<td class="companion-cell" title="'+escapeHtml(guestName)+'">'+escapeHtml(guestName)+'</td>'+
@@ -955,6 +1001,7 @@ function initAdmin() {
       '<td><button class="icon-btn edit-person" type="button" data-id="'+escapeHtml(p.id)+
       '" aria-label="Editar '+escapeHtml(p.nome_completo)+'"><i data-lucide="pencil"></i></button></td></tr>';
     }).join(""):'<tr><td colspan="5" class="people-empty">Nenhum colaborador encontrado.</td></tr>';
+    updateSelectionUI(list);
     icons();
   }
   $("people-search").addEventListener("input",renderPeople);
@@ -963,24 +1010,132 @@ function initAdmin() {
   });
   $("status-filter").addEventListener("change",renderPeople);
   $("sector-filter").addEventListener("change",renderPeople);
+  $("group-filter").addEventListener("change",renderPeople);
   document.querySelectorAll(".people-status-tab").forEach(n=>n.addEventListener("click",()=>{
     $("status-filter").value=n.dataset.status;renderPeople();
   }));
+  $("people-select-all").addEventListener("change",e=>updateVisibleSelection(e.target.checked));
+  $("select-visible").addEventListener("click",()=>updateVisibleSelection(true));
+  $("clear-selection").addEventListener("click",()=>{
+    if(statusBusy)return;
+    selectedPersonIds.clear();renderPeople();
+  });
+  $("people-body").addEventListener("change",e=>{
+    const checkbox=e.target.closest("[data-select-id]");
+    if(!checkbox||statusBusy)return;
+    const id=checkbox.dataset.selectId;
+    if(checkbox.checked&&selectedPersonIds.size>=200&&!selectedPersonIds.has(id)){
+      toast("Selecione até 200 colaboradores por vez.",true);checkbox.checked=false;return;
+    }
+    if(checkbox.checked)selectedPersonIds.add(id);else selectedPersonIds.delete(id);
+    renderPeople();
+  });
   $("people-body").addEventListener("click",e=>{
     const edit=e.target.closest(".edit-person");
     if(edit){openPerson(edit.dataset.id);return;}
     const toggle=e.target.closest("[data-confirm-id]");
     if(toggle)toggleListConfirmation(toggle.dataset.confirmId);
   });
+
+  function confirmBulkUpdate(count,sector,group) {
+    if(actionResolve)return Promise.resolve(false);
+    const changes=[];
+    if(sector!==null)changes.push("Setor: "+(sector||"Sem setor"));
+    if(group!==null)changes.push("Grupo: "+group);
+    $("rsvp-confirm-title").textContent="Salvar alterações em lote?";
+    $("rsvp-confirm-message").textContent="Aplicar em "+count+" colaborador"+(count===1?"":"es")+
+      ": "+changes.join(" • ")+". Nomes, apelidos e confirmações serão preservados.";
+    $("rsvp-confirm-accept").textContent="Sim, salvar alterações";
+    $("rsvp-confirm-accept").classList.remove("is-destructive");
+    const focused=document.activeElement;
+    show("rsvp-confirm-modal",true);icons();
+    return new Promise(resolve=>{
+      actionResolve=value=>{
+        if(!actionResolve)return;
+        actionResolve=null;show("rsvp-confirm-modal",false);
+        if(focused?.isConnected)focused.focus();
+        resolve(value);
+      };
+      $("rsvp-confirm-cancel").focus();
+    });
+  }
+  $("bulk-edit-button").addEventListener("click",()=>{
+    if(statusBusy||!dataset||!selectedPersonIds.size)return;
+    $("bulk-modal-count").textContent=selectedPersonIds.size+" colaborador"+(selectedPersonIds.size===1?"":"es")+" selecionado"+(selectedPersonIds.size===1?"":"s");
+    $("bulk-apply-sector").checked=false;
+    $("bulk-apply-group").checked=false;
+    $("bulk-sector").value="";
+    $("bulk-group").value="";
+    $("bulk-sector").disabled=true;
+    $("bulk-group").disabled=true;
+    modal("bulk-modal",true);
+  });
+  ["sector","group"].forEach(kind=>{
+    $("bulk-apply-"+kind).addEventListener("change",()=>{
+      const active=$("bulk-apply-"+kind).checked;
+      $("bulk-"+kind).disabled=!active;
+      if(active)$("bulk-"+kind).focus();
+    });
+  });
+  $("bulk-form").addEventListener("submit",async e=>{
+    e.preventDefault();
+    if(statusBusy||actionResolve||!dataset)return;
+    const ids=[...selectedPersonIds];
+    if(!ids.length){toast("Selecione ao menos um colaborador.",true);return;}
+    if(ids.length>200){toast("Selecione até 200 colaboradores.",true);return;}
+    const sector=$("bulk-apply-sector").checked?$("bulk-sector").value.trim():null;
+    const group=$("bulk-apply-group").checked?$("bulk-group").value.trim():null;
+    if(sector===null&&group===null){
+      toast("Marque Alterar setor e/ou Alterar grupo.",true);return;
+    }
+    if(group!==null&&!group){
+      toast("Informe o nome do grupo para os selecionados.",true);
+      $("bulk-group").focus();return;
+    }
+    if((sector!==null&&sector.length>90)||(group!==null&&group.length>90)){
+      toast("Setor e grupo devem ter até 90 caracteres.",true);return;
+    }
+    const approved=await confirmBulkUpdate(ids.length,sector,group);
+    if(!approved)return;
+    statusBusy=true;
+    setActionLoading(true,"Atualizando setor e grupo...");
+    $("bulk-submit").disabled=true;
+    try{
+      const generation=authGeneration;
+      const response=await admin("admin-bulk-update",{ids,
+        ...(sector!==null?{setor:sector}:{}),
+        ...(group!==null?{grupo:group}:{})});
+      if(generation!==authGeneration)return;
+      if(response.updated!==ids.length)throw new Error("O servidor não confirmou todos os registros.");
+      const changed=new Set(ids);
+      dataset.collaborators=dataset.collaborators.map(p=>changed.has(p.id)
+        ? {...p,...(sector!==null?{setor:sector}:{}),...(group!==null?{grupo:group}:{})}
+        : p);
+      mutationEpoch++;
+      lastLoad=Date.now();
+      selectedPersonIds.clear();
+      modal("bulk-modal",false);
+      render();
+      toast(response.updated+" colaborador"+(response.updated===1?"":"es")+" atualizado"+(response.updated===1?"":"s")+" com sucesso.");
+    }catch(error){
+      toast(error.message||"Não foi possível atualizar os colaboradores.",true);
+    }finally{
+      setActionLoading(false);
+      statusBusy=false;
+      $("bulk-submit").disabled=false;
+      renderPeople();
+    }
+  });
+
   // Atualiza a lista somente após o servidor confirmar a gravação.
   // Não aguarda uma segunda consulta completa de 83+ registros para destravar a interface.
   // O polling periódico faz a reconciliação posterior.
-  function applySavedPerson(id,name,sector,active,confirmed,nickname="") {
+  function applySavedPerson(id,name,sector,active,confirmed,nickname="",group=null) {
     if (!dataset || !id) return;
     const prev = dataset.collaborators.find(p => p.id === id);
     const current = prev
-      ? {...prev,nome_completo:name,apelido:nickname,setor:sector,ativo:active}
-      : {id,nome_completo:name,apelido:nickname,setor:sector,grupo:sector || "Sem setor",ativo:active,
+      ? {...prev,nome_completo:name,apelido:nickname,setor:sector,grupo:group===null?prev.grupo:(group||"Sem grupo"),ativo:active}
+      : {id,nome_completo:name,apelido:nickname,setor:sector,grupo:group||"Sem grupo",ativo:active,
          criado_em:new Date().toISOString()};
     dataset.collaborators = [
       ...dataset.collaborators.filter(p => p.id !== id),current
@@ -1137,7 +1292,8 @@ function initAdmin() {
   setInterval(() => {if (dataset && !document.hidden) renderRsvpState();},30000);
   function modal(id,open) { show(id,open); document.body.style.overflow = open ? "hidden" : ""; if (open) setTimeout(()=>$(id).querySelector("input:not([type=checkbox]),textarea")?.focus(),30); }
   document.querySelectorAll("[data-close-modal]").forEach(btn => btn.addEventListener("click", () => {
-    modal("edit-modal",false); modal("import-modal",false);
+    if(statusBusy||actionResolve)return;
+    modal("edit-modal",false); modal("import-modal",false); modal("bulk-modal",false);
   }));
   function openPerson(id=null) {
     if(statusBusy)return;
@@ -1149,6 +1305,7 @@ function initAdmin() {
     $("person-name").value=p?.nome_completo||"";
     $("person-nickname").value=p?.apelido||"";
     $("person-sector").value=p?.setor||"";
+    $("person-group").value=p?.grupo||"";
     $("person-active").checked=p?.ativo!==false;
     setManualSwitch();
     $("person-confirm-help").textContent=c
@@ -1186,14 +1343,15 @@ function initAdmin() {
     if(editingId)mutedConfirmationIds.add(editingId);
     try {
       const savedSector=$("person-sector").value.trim();
+      const savedGroup=$("person-group").value.trim();
       const generation=authGeneration;
       const reply=await admin(editingId?"admin-update":"admin-add",{
-        id:editingId,nome_completo:name,apelido:nickname,setor:savedSector,
+        id:editingId,nome_completo:name,apelido:nickname,setor:savedSector,grupo:savedGroup,
         ativo:active,confirmado:manualConfirmed
       });
       if(generation!==authGeneration)return;
       if(reply?.colaborador_id)mutedConfirmationIds.add(reply.colaborador_id);
-      applySavedPerson(reply?.colaborador_id || editingId,name,savedSector,active,manualConfirmed,nickname);
+      applySavedPerson(reply?.colaborador_id || editingId,name,savedSector,active,manualConfirmed,nickname,savedGroup);
       modal("edit-modal",false);
       if(!wasConfirmed && manualConfirmed)celebrateManualConfirmation();
       if(wasConfirmed!==manualConfirmed){
@@ -1229,7 +1387,7 @@ function initAdmin() {
   $("export-button").addEventListener("click",()=> {
     if(!dataset)return;
     const map=conMap();
-    const rows=[["Colaborador","Apelido","Setor","Grupo original","Status","Origem da confirmacao","Acompanhante","Nome do acompanhante","Data da confirmacao"]];
+    const rows=[["Colaborador","Apelido","Setor","Grupo","Status","Origem da confirmacao","Acompanhante","Nome do acompanhante","Data da confirmacao"]];
     dataset.collaborators.forEach(p => {const c=map.get(p.id);rows.push([p.nome_completo,p.apelido||"",p.setor||"",p.grupo||"",c?"Confirmado":!p.ativo?"Inativo":"Pendente",c?.origem==="manual"?"Manual":c?"Link":"",c?.acompanhante?"Sim":"Nao",c?.acompanhante_nome||"",stamp(c?.confirmado_em)]);});
     const csv="\uFEFF"+rows.map(row=>row.map(v=>'"'+String(v??"").replace(/"/g,'""')+'"').join(";")).join("\r\n");
     const url=window.URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"})); // replaced below to avoid shadowing global URL
@@ -1296,6 +1454,7 @@ function initAdmin() {
       && !pendingBootstrap && !statusBusy && !document.hidden
       && $("edit-modal").classList.contains("hidden")
       && $("import-modal").classList.contains("hidden")
+      && $("bulk-modal").classList.contains("hidden")
       && Date.now()-lastLoad>=5000) bootstrap(true);
   },1000);
   icons();
