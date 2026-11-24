@@ -1,0 +1,24 @@
+/* Admin v15 — seleção discreta e card inteiro clicável. */
+.admin-page .people-table tbody tr.people-selectable:not(.selection-disabled){cursor:pointer}
+.admin-page .people-row-select{width:24px;height:30px;flex:0 0 24px}
+.admin-page .people-row-checkbox,.admin-page .people-select-heading input{
+ appearance:none;-webkit-appearance:none;
+ display:inline-grid;place-content:center;
+ width:15px;height:15px;min-width:15px;flex:0 0 15px;
+ padding:0;margin:0;border:1px solid #b7c9ba;border-radius:4px;
+ background:#fff;box-shadow:none;vertical-align:middle;cursor:pointer;
+}
+.admin-page .people-row-checkbox:checked,.admin-page .people-select-heading input:checked,
+.admin-page .people-select-heading input:indeterminate{background:#397b50;border-color:#397b50}
+.admin-page .people-row-checkbox:checked::after,.admin-page .people-select-heading input:checked::after{
+ content:"";width:4px;height:7px;border:solid white;border-width:0 1.5px 1.5px 0;transform:rotate(45deg) translate(-1px,-1px)
+}
+.admin-page .people-select-heading input:indeterminate::after{content:"";width:7px;height:1.5px;background:white}
+.admin-page .people-row-checkbox:disabled,.admin-page .people-select-heading input:disabled{opacity:.5;cursor:default}
+.admin-page .people-table tbody tr.is-selected td{background:#f3f9f3}
+.admin-page .people-table tbody tr.is-selected td:first-child{box-shadow:none}
+.admin-page .people-table tbody tr.is-selected:hover td{background:#edf6ee}
+@media(max-width:700px){
+ .admin-page .people-row-select{width:23px;flex-basis:23px}
+ .admin-page .people-table tbody tr.people-selectable.is-selected{background:#f3f9f3;border-color:#b8d4bd}
+}

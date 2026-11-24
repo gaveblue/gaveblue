@@ -225,3 +225,8 @@ Implementação isolada do convite corporativo GaveBlue, sem alterações nos ap
 - No Supabase: funções novas rsvp_admin_bulk_classify (atômica por evento, validação de IDs e atualização de campos opcionais) e rsvp_admin_save_person_v3 (edição individual de grupo). Permissão apenas para service_role; nenhuma leitura ou gravação pública de classificação. A Edge Function rsvp-confraternizacao v11 exige sessão de administrador antes da ação admin-bulk-update.
 - Mudanças no banco foram apenas de definição de funções: nenhuma pessoa existente foi alterada pela migração. Testes de consultas, grupos, apelidos e filtros foram realizados com dados simulados, sem salvar alterações de teste em produção.
 - Visual novo: admin-v14.css; app.js?v=32; atalho da versão em confraternizacao/admin/painel-v14.html; aliases antigos sincronizados.
+
+
+## Painel v15 · 24/11/2026
+- Checkbox de seleção menor, contorno discreto e realce suave. Toque em qualquer área não interativa do card/linha para selecionar ou desmarcar; editar e confirmar presença continuam ações independentes.
+- Seleção individual atualiza o card e contador sem recriar a lista, preservando foco e limite de 200. Sem mudanças no banco ou convite público. Sintaxe JS verificada; teste em aparelho real pendente.

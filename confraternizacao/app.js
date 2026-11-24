@@ -989,7 +989,7 @@ function initAdmin() {
         escapeHtml((confirmed?"Retirar confirmação de ":"Confirmar presença de ")+p.nome_completo)+'"'+
         (disabled?' disabled':'')+'><span class="rsvp-confirm-thumb" aria-hidden="true"></span></button>';
       const guestName=c?.acompanhante?String(c.acompanhante_nome||"Nome não informado"):"—";
-      return '<tr class="'+(selectedPersonIds.has(p.id)?'is-selected':'')+'"><td><div class="name-cell">'+
+      return '<tr class="people-selectable'+(selectedPersonIds.has(p.id)?' is-selected':'')+(statusBusy?' selection-disabled':'')+'"><td><div class="name-cell">'+
       '<label class="people-row-select" title="Selecionar '+escapeHtml(p.nome_completo)+'"><input type="checkbox" class="people-row-checkbox" data-select-id="'+escapeHtml(p.id)+'" aria-label="Selecionar '+escapeHtml(p.nome_completo)+'"'+(selectedPersonIds.has(p.id)?' checked':'')+(statusBusy?' disabled':'')+'><span aria-hidden="true"></span></label>'+
       '<span class="initial-badge">'+escapeHtml(initials)+
       '</span><span class="name-stack"><strong title="'+escapeHtml(p.nome_completo)+'">'+escapeHtml(p.nome_completo)+
@@ -1028,13 +1028,19 @@ function initAdmin() {
       toast("Selecione até 200 colaboradores por vez.",true);checkbox.checked=false;return;
     }
     if(checkbox.checked)selectedPersonIds.add(id);else selectedPersonIds.delete(id);
-    renderPeople();
+    checkbox.closest("tr")?.classList.toggle("is-selected",checkbox.checked);
+    updateSelectionUI();
   });
   $("people-body").addEventListener("click",e=>{
     const edit=e.target.closest(".edit-person");
     if(edit){openPerson(edit.dataset.id);return;}
     const toggle=e.target.closest("[data-confirm-id]");
-    if(toggle)toggleListConfirmation(toggle.dataset.confirmId);
+    if(toggle){toggleListConfirmation(toggle.dataset.confirmId);return;}
+    // Native label/checkbox clicks already fire change; never toggle them twice.
+    if(statusBusy||e.target.closest("button,input,label,a,select,textarea,[role=button]"))return;
+    if(window.getSelection?.()?.toString())return;
+    const checkbox=e.target.closest("tr.people-selectable")?.querySelector(".people-row-checkbox");
+    if(checkbox&&!checkbox.disabled)checkbox.click();
   });
 
   function confirmBulkUpdate(count,sector,group) {
