@@ -1,0 +1,168 @@
+/* Admin v6 — prazo, situação e ações centralizadas no convite */
+.admin-page .rsvp-state-panel{
+  display:flex;
+  align-items:center;
+  gap:13px;
+  padding:15px 17px;
+  margin-bottom:15px;
+  border-color:#d5e8d8;
+  background:linear-gradient(110deg,#f9fdf9,#fff 75%);
+}
+.admin-page .rsvp-state-icon{
+  display:grid;
+  place-items:center;
+  background:#e0f4e7;
+  color:#117143;
+  border-radius:13px;
+  width:42px;height:42px;
+  flex:0 0 42px;
+}
+.admin-page .rsvp-state-icon svg{width:21px;height:21px}
+.admin-page .rsvp-state-copy{
+  min-width:0;
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  gap:3px;
+}
+.admin-page .rsvp-state-copy small{
+  font-size:9px;
+  letter-spacing:.11em;
+  font-weight:850;
+  color:#688574;
+}
+.admin-page .rsvp-state-copy strong{
+  font:800 16px/1.2 Manrope,sans-serif;
+  color:#13582f;
+}
+.admin-page .rsvp-state-copy p{
+  font-size:10.5px;
+  line-height:1.55;
+  color:#779382;
+  margin:0;
+}
+.admin-page .rsvp-state-manage{
+  align-self:center;
+  flex:0 0 auto;
+}
+.admin-page .rsvp-state-panel[data-state="nao_iniciadas"] .rsvp-state-icon{
+  color:#8d7946;background:#fbf5e5;
+}
+.admin-page .rsvp-state-panel[data-state="nao_iniciadas"] .rsvp-state-copy strong{color:#8a6b23}
+.admin-page .rsvp-state-panel[data-state="encerrado_manual"] .rsvp-state-icon,
+.admin-page .rsvp-state-panel[data-state="prazo_expirado"] .rsvp-state-icon{
+  color:#a44d41;background:#fff0ec;
+}
+.admin-page .rsvp-state-panel[data-state="encerrado_manual"] .rsvp-state-copy strong,
+.admin-page .rsvp-state-panel[data-state="prazo_expirado"] .rsvp-state-copy strong{
+  color:#954c3e;
+}
+.admin-page .deadline-form-group{
+  border:1px solid #dbe9d8;
+  border-radius:13px;
+  padding:14px;
+  background:#f9fcf8;
+}
+.admin-page .deadline-form-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:start;
+  gap:10px;
+  margin-bottom:13px;
+}
+.admin-page .deadline-form-head strong{
+  display:block;
+  font:800 13px/1.3 Manrope,sans-serif;
+  color:#235131;
+}
+.admin-page .deadline-form-head p{
+  font-size:11px;
+  line-height:1.48;
+  margin:4px 0 0;
+  color:#778c7c;
+}
+.admin-page .deadline-form-head svg{color:#2c8552;width:20px;height:20px;flex:0 0 20px}
+.admin-page .deadline-form-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:11px;
+}
+.admin-page .deadline-form-grid label{
+  font-size:11px;
+  font-weight:750;
+  margin-bottom:6px;
+}
+.admin-page .rsvp-controls{
+  background:#f7fbf5;
+  border:1px solid #dfeade;
+  border-radius:13px;
+  padding:14px;
+}
+.admin-page .rsvp-controls-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:7px;
+}
+.admin-page .rsvp-controls-label{
+  font-size:11px;font-weight:850;color:#28613f
+}
+.admin-page #settings-rsvp-state{
+  font-size:10px;font-weight:800;color:#27764b;
+  padding:5px 9px;border-radius:9px;
+  background:#e5f5e7;
+}
+.admin-page #settings-rsvp-help{
+  font-size:10px;
+  line-height:1.5;
+  margin:7px 0 11px;
+}
+.admin-page .rsvp-control-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+.admin-page .rsvp-control-actions .secondary-button{
+  font-size:11px;
+  display:inline-flex;
+  justify-content:center;
+  gap:7px;
+  min-height:42px;
+}
+.admin-page .rsvp-control-actions .secondary-button svg{width:15px;height:15px}
+.admin-page .rsvp-controls .rsvp-danger-button{
+  color:#9f4139;
+  border-color:#edc8c0;
+  background:#fff9f7;
+}
+.admin-page .rsvp-controls .rsvp-danger-button:hover{background:#fff0ed}
+@media(max-width:700px){
+  .admin-page .rsvp-state-panel{
+    padding:12px;
+    gap:9px;
+    margin-bottom:12px;
+  }
+  .admin-page .rsvp-state-icon{
+    width:34px;height:34px;flex-basis:34px;
+    border-radius:10px;
+  }
+  .admin-page .rsvp-state-icon svg{width:17px;height:17px}
+  .admin-page .rsvp-state-copy strong{font-size:13px}
+  .admin-page .rsvp-state-copy small{font-size:8px}
+  .admin-page .rsvp-state-copy p{font-size:9px;line-height:1.35}
+  .admin-page .rsvp-state-manage{
+    font-size:0;min-width:37px;width:37px;justify-content:center;padding:8px;
+  }
+  .admin-page .rsvp-state-manage svg{width:17px;height:17px}
+  .admin-page .deadline-form-group,
+  .admin-page .rsvp-controls{padding:12px}
+  .admin-page .deadline-form-grid{gap:8px}
+  .admin-page .deadline-form-grid input{max-width:100%;min-width:0}
+  .admin-page .rsvp-control-actions{display:grid;grid-template-columns:1fr}
+  .admin-page .rsvp-control-actions .secondary-button{width:100%}
+  .admin-page #settings-rsvp-help{font-size:10px}
+}
+@media(max-width:350px){
+  .admin-page .deadline-form-grid{grid-template-columns:1fr}
+}
