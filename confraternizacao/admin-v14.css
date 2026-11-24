@@ -1,0 +1,142 @@
+/* Confraternização admin v14 — seleção em lote e categorias organizadas */
+.admin-page .people-filter-controls{
+ grid-template-columns:minmax(180px,1fr) minmax(130px,155px) minmax(135px,155px) minmax(135px,155px);
+}
+.admin-page .people-results-actions{
+ display:flex;align-items:center;justify-content:space-between;
+ flex-wrap:wrap;gap:8px;margin:3px 0 11px;text-align:left;
+}
+.admin-page .people-select-actions{display:flex;align-items:center;gap:10px}
+.admin-page .people-select-visible,
+.admin-page .people-clear-selection{
+ display:inline-flex;align-items:center;gap:5px;background:transparent;
+ border:0;color:#287143;font:750 10px/1.3 Manrope,sans-serif;
+ padding:7px 3px;cursor:pointer
+}
+.admin-page .people-clear-selection{color:#788d7f}
+.admin-page .people-select-visible:hover,
+.admin-page .people-clear-selection:hover{text-decoration:underline}
+.admin-page .people-select-visible:disabled,
+.admin-page .people-clear-selection:disabled{opacity:.5;pointer-events:none}
+.admin-page .people-select-visible svg{width:14px;height:14px}
+.admin-page .people-select-heading{display:flex!important;align-items:center;gap:9px;cursor:pointer;
+ font-size:9px!important;font-weight:800!important;line-height:1.3;
+ margin:0!important;letter-spacing:inherit
+}
+.admin-page .people-select-heading input,
+.admin-page .people-row-checkbox,
+.admin-page .bulk-field-check input{
+ width:17px;height:17px;accent-color:#187a46;cursor:pointer;
+ flex:0 0 17px
+}
+.admin-page .people-select-heading input:focus-visible,
+.admin-page .people-row-checkbox:focus-visible,
+.admin-page .bulk-field-check input:focus-visible{
+ outline:2px solid #85bb97;outline-offset:3px
+}
+.admin-page .people-row-select{
+ width:20px;height:28px;flex:0 0 20px;
+ display:inline-grid!important;place-items:center;cursor:pointer;
+ margin:0!important
+}
+.admin-page .people-row-select span{display:none}
+.admin-page .people-table .name-cell{
+ display:flex;align-items:center;gap:7px;min-width:0
+}
+.admin-page .people-table .initial-badge{
+ flex:0 0 30px;width:30px;height:30px;
+ border-radius:9px
+}
+.admin-page .people-table .name-stack{min-width:0}
+.admin-page .people-table th:first-child{width:35%}
+.admin-page .people-table th:nth-child(2){width:23%}
+.admin-page .people-table th:nth-child(3){width:23%}
+.admin-page .people-table th:nth-child(4){width:13%}
+.admin-page .people-table th:nth-child(5){width:6%}
+.admin-page .people-table tbody tr.is-selected td{background:#f1faf2}
+.admin-page .people-table tbody tr.is-selected td:first-child{box-shadow:inset 3px 0 #2d9b5a}
+.admin-page .people-table tbody tr.is-selected:hover td{background:#eaf6ec}
+.admin-page .people-bulk-bar{
+ position:sticky;top:8px;z-index:16;
+ display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;
+ padding:12px 13px;margin:6px 0 13px;
+ border-radius:14px;border:1px solid #c4dec9;background:#f1f9f1;
+ box-shadow:0 7px 26px rgba(29,103,51,.08)
+}
+.admin-page .people-bulk-bar.hidden{display:none!important}
+.admin-page .people-bulk-info{display:flex;align-items:center;gap:10px;min-width:0}
+.admin-page .people-bulk-info>div{display:flex;flex-direction:column;gap:3px;min-width:0}
+.admin-page .people-bulk-info strong{font:800 12px/1.3 Manrope,sans-serif;color:#1e6940}
+.admin-page .people-bulk-info small{font-size:10px;color:#7a9984}
+.admin-page .people-bulk-icon{
+ width:32px;height:32px;display:grid;place-items:center;
+ border-radius:10px;background:#daefdf;color:#167340
+}
+.admin-page .people-bulk-icon svg{width:16px;height:16px}
+.admin-page .people-bulk-bar .main-button{font-size:11px;min-height:38px;padding:9px 12px}
+.admin-page .people-bulk-bar .main-button svg{width:15px;height:15px}
+.admin-page .people-bulk-modal-card{width:min(100%,480px);gap:14px;padding:24px}
+.admin-page .people-bulk-modal-card .modal-head{margin-bottom:0}
+.admin-page .people-bulk-modal-card .modal-head h2{font-size:19px}
+.admin-page .bulk-selected-summary{
+ display:flex;align-items:center;gap:8px;padding:12px 13px;
+ background:#eaf6ec;color:#276d43;border-radius:12px;
+ font:750 12px/1.4 Manrope,sans-serif
+}
+.admin-page .bulk-selected-summary svg{width:18px;height:18px}
+.admin-page .bulk-modal-help{font-size:11px;color:#728c78;line-height:1.6;margin:0}
+.admin-page .bulk-field{display:flex;flex-direction:column;gap:9px;
+ padding:14px;border:1px solid #e3eee2;border-radius:13px;background:#fbfdfb}
+.admin-page .bulk-field .bulk-field-check{
+ display:flex!important;gap:11px;align-items:center;
+ cursor:pointer;margin:0!important;
+}
+.admin-page .bulk-field .bulk-field-check span{
+ display:flex;flex-direction:column;gap:3px;flex:1;min-width:0
+}
+.admin-page .bulk-field .bulk-field-check strong{font-size:12px;font-weight:800;color:#245b3c}
+.admin-page .bulk-field .bulk-field-check small{font-size:10px;font-weight:500;color:#829986}
+.admin-page .bulk-field .standard-input{width:100%;min-height:43px}
+.admin-page .bulk-field input:disabled{background:#f4f7f4;color:#8d9b8e;cursor:not-allowed;opacity:.7}
+.admin-page .bulk-field-note{font-size:10px;color:#839585;line-height:1.4}
+.admin-page .bulk-modal-footer{
+ position:sticky;bottom:-24px;display:grid;grid-template-columns:1fr 1.4fr;
+ gap:9px;padding:12px 0 0;background:#fff;z-index:2;margin-top:4px
+}
+.admin-page .bulk-modal-footer button{
+ justify-content:center;display:inline-flex;align-items:center;gap:8px;
+ min-height:43px
+}
+.admin-page .bulk-modal-footer svg{width:16px;height:16px}
+@media(max-width:1080px){
+ .admin-page .people-filter-controls{
+  grid-template-columns:minmax(0,1fr) minmax(130px,1fr);
+ }
+ .admin-page .people-filter-controls .people-search{grid-column:1/-1}
+ .admin-page .people-filter-controls #sector-filter{grid-column:auto}
+ .admin-page .people-filter-controls #group-filter{grid-column:auto}
+}
+@media(max-width:700px){
+ .admin-page .people-filter-controls{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .admin-page .people-filter-controls .people-search{grid-column:1/-1}
+ .admin-page .people-filter-controls #sector-filter,
+ .admin-page .people-filter-controls #group-filter{grid-column:auto}
+ .admin-page .people-results-actions{align-items:center;gap:5px}
+ .admin-page .people-select-actions{gap:8px}
+ .admin-page .people-select-visible,
+ .admin-page .people-clear-selection{font-size:10px}
+ .admin-page .people-bulk-bar{position:sticky;top:8px;gap:10px}
+ .admin-page .people-bulk-bar .main-button{min-height:38px;flex:1;justify-content:center}
+ .admin-page .people-table .name-cell{gap:6px}
+ .admin-page .people-table .initial-badge{width:29px;flex-basis:29px}
+ .admin-page .people-row-select{flex-basis:20px}
+ .admin-page .people-bulk-modal{padding:8px;align-items:end}
+ .admin-page .people-bulk-modal-card{
+  width:100%;border-radius:20px 20px 0 0;max-height:calc(95dvh - env(safe-area-inset-bottom,0px));
+  padding:21px 18px calc(19px + env(safe-area-inset-bottom,0px))
+ }
+ .admin-page .bulk-modal-footer{bottom:-20px;grid-template-columns:1fr 1.35fr}
+}
+@media(prefers-reduced-motion:reduce){
+ .admin-page .people-bulk-bar{transition:none!important}
+}
