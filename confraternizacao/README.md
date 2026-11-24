@@ -259,3 +259,7 @@ Implementação isolada do convite corporativo GaveBlue, sem alterações nos ap
 ## Convite v29
 - Comunicado obrigatório após carregamento, com X desabilitado por no mínimo cinco segundos de exibição visível. Modal nativo bloqueia interações anteriores, não fecha ao tocar fora e aguarda a leitura antes de liberar Escape. Reaparece a cada abertura da página.
 - Arte HTML baseada na imagem enviada, com texto integral. Limitação: PNG original não foi transferido ao repositório. Sem mudanças no backend, confirmações ou painel administrativo.
+
+
+## Convite v30
+- Atualização do texto do comunicado inicial: cônjuge (esposo(a), namorado(a)) ou filhos; parentes de outro grau, amigos e conhecidos não permitidos. Mantém o bloqueio de cinco segundos.
