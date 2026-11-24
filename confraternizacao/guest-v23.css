@@ -1,0 +1,43 @@
+/* Confraternização v23 — status do convite controlado pelo servidor */
+.guest-page #guest-locked{
+  margin:0 auto;
+  padding:20px 10px 17px;
+  text-align:center;
+  max-width:410px;
+}
+.guest-page #guest-locked h2{
+  font:800 clamp(17px,4.8vw,23px)/1.22 Manrope,sans-serif;
+  margin:10px 0 8px;
+  color:#19462b;
+  letter-spacing:-.04em;
+}
+.guest-page #guest-locked p{
+  font-size:12px;
+  line-height:1.65;
+  color:#66816b;
+  margin:0 auto;
+  max-width:340px;
+  overflow-wrap:break-word;
+}
+.guest-page #guest-locked .big-icon{
+  background:#eef5e9;
+  color:#226f40;
+  border-radius:14px;
+}
+.guest-page .rsvp-urgency.is-expired .rsvp-urgency-grid{
+  display:none;
+}
+.guest-page .rsvp-urgency.is-expired .rsvp-urgency-expired{
+  text-align:center;
+  margin:7px 0 3px;
+  font-size:10px;
+  line-height:1.4;
+}
+.guest-page .rsvp-urgency.is-expired .rsvp-urgency-head{
+  margin:0 auto;
+}
+@media(max-width:700px){
+  .guest-page #guest-locked{padding:15px 7px 11px}
+  .guest-page #guest-locked h2{font-size:18px}
+  .guest-page #guest-locked p{font-size:11px;line-height:1.55}
+}
