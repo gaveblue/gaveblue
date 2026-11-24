@@ -220,10 +220,35 @@ Deno.serve(async (req: Request) => {
       assert(!error, "Não foi possível salvar o evento.");
       return json({ ok: true }, 200, origin);
     }
+    if (action === "admin-bulk-update") {
+      const ids = body.ids;
+      assert(Array.isArray(ids) && ids.length >= 1 && ids.length <= 200,
+        "Selecione de 1 a 200 colaboradores.");
+      assert(ids.every((id: unknown) => typeof id === "string" &&
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)),
+        "Lista de colaboradores inválida.");
+      assert(new Set(ids).size === ids.length,"Não envie colaboradores duplicados.");
+      const sector = typeof body.setor === "string" ? clean(body.setor, 100) : null;
+      const group = typeof body.grupo === "string" ? clean(body.grupo, 100) : null;
+      assert(sector !== null || group !== null,
+        "Escolha pelo menos um campo para alterar.");
+      assert(sector === null || sector.length <= 90,
+        "Setor muito longo (máximo 90 caracteres).");
+      assert(group === null || (group.length >= 1 && group.length <= 90),
+        "Informe um grupo com até 90 caracteres.");
+      const {data,error} = await db.rpc("rsvp_admin_bulk_classify",{
+        p_evento:ev.id,p_ids:ids,p_setor:sector,p_grupo:group
+      });
+      assert(!error && data === ids.length,
+        error?.message || "Não foi possível atualizar os colaboradores selecionados.");
+      return json({ok:true,updated:data},200,origin);
+    }
     if (action === "admin-add" || action === "admin-update") {
       const id = action === "admin-update" ? clean(body.id, 48) : null;
       const name = clean(body.nome_completo);
       const sector = clean(body.setor, 90);
+      const group = body.grupo === undefined ? null : clean(body.grupo, 100);
+      assert(group === null || group.length <= 90,"Grupo muito longo (máximo 90 caracteres).");
       const nickname = clean(body.apelido, 60);
       assert(!nickname || /^[\p{L}\p{N}\s'.-]+$/u.test(nickname),
         "Apelido inválido. Use apenas letras, números e espaços.");
@@ -235,10 +260,10 @@ Deno.serve(async (req: Request) => {
       const active = body.ativo !== false;
       assert(!active || validFull, "Informe um nome válido para disponibilizar o colaborador.");
       assert(typeof body.confirmado === "boolean", "Informe o status da confirmação.");
-      const { data, error } = await db.rpc("rsvp_admin_save_person_v2", {
+      const { data, error } = await db.rpc("rsvp_admin_save_person_v3", {
         p_evento: ev.id, p_id: id, p_nome: name, p_nome_chave: norm(name),
         p_setor: sector, p_ativo: active, p_confirmado: body.confirmado,
-        p_apelido: nickname, p_apelido_chave: norm(nickname)
+        p_apelido: nickname, p_apelido_chave: norm(nickname), p_grupo:group
       });
       assert(!error && data, error?.code === "23505" ? "Este colaborador já está na lista." : "Falha ao salvar o cadastro e a confirmação.");
       return json({ ok: true, colaborador_id: data }, 200, origin);
