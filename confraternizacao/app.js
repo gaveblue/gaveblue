@@ -98,7 +98,7 @@ function initGuest() {
     const until = Math.max(0,deadline - Date.now());
     const elapsed = state === "prazo_expirado";
     const heading = $("rsvp-deadline-title");
-    const label = "Confirme até " + deadlineLabel();
+    const label = elapsed ? "Prazo encerrado" : "Confirme até " + deadlineLabel();
     if (heading && heading.textContent !== label) heading.textContent = label;
     const ended = $("rsvp-urgency-expired");
     const endedMessage = "O prazo de confirmação terminou em " + deadlineLabel(true) + ".";
@@ -115,7 +115,7 @@ function initGuest() {
     $("rsvp-urgency").classList.toggle("is-expired",elapsed);
     show("rsvp-urgency-expired",elapsed);
     syncPublicState(state);
-    if (until <= 0 && urgencyTimer !== null) {
+    if (elapsed && urgencyTimer !== null) {
       clearInterval(urgencyTimer); urgencyTimer = null;
     }
   }
