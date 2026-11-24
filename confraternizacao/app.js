@@ -1158,7 +1158,7 @@ function initAdmin() {
     if (session && dataset && !pendingBootstrap && !statusBusy && !document.hidden
       && $("edit-modal").classList.contains("hidden")
       && $("import-modal").classList.contains("hidden")
-      && Date.now()-lastLoad>=20000) bootstrap(true);
+      && Date.now()-lastLoad>=10000) bootstrap(true);
   },5000);
   icons();
 }
