@@ -12,11 +12,12 @@
 <link href="../admin-v5.css?v=5" rel="stylesheet">
 <link href="../admin-v6.css?v=6" rel="stylesheet">
 <link href="../admin-v7.css?v=7" rel="stylesheet">
+<link href="../admin-v8.css?v=8" rel="stylesheet">
 
 <script defer src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
-<script defer src="../app.js?v=24"></script>
+<script defer src="../app.js?v=25"></script>
 </head>
-<body class="admin-page" data-admin-version="7">
+<body class="admin-page" data-admin-version="8">
 <div id="admin-loading" class="admin-loading" role="status" aria-live="polite" aria-atomic="true">
   <div class="admin-loading-inner">
     <div class="admin-loading-symbol" aria-hidden="true"><span class="admin-loading-orbit"></span><i data-lucide="sparkles"></i></div>
@@ -82,7 +83,22 @@
     </div>
     <div id="view-people" class="admin-content hidden">
       <div class="section-intro action-intro"><div><h2>Colaboradores</h2><p>Cadastre, importe e acompanhe quem vai participar.</p></div><div class="button-row"><button id="import-button" class="secondary-button"><i data-lucide="upload"></i> Importar lista</button><button id="export-button" class="secondary-button"><i data-lucide="download"></i> Exportar CSV</button></div></div>
-      <section class="admin-panel"><div class="table-toolbar"><div class="search-wrap"><i data-lucide="search"></i><input id="people-search" placeholder="Buscar colaborador..." autocomplete="off"></div><select id="status-filter" class="standard-input"><option value="all">Todos</option><option value="confirmed">Confirmados</option><option value="pending">Pendentes</option><option value="incomplete">Sem sobrenome</option><option value="inactive">Inativos</option></select><select id="sector-filter" class="standard-input" aria-label="Filtrar por setor"><option value="all">Todos os setores</option></select><span id="people-count" class="count-label">0 resultados</span></div><div class="table-scroll"><table class="people-table"><thead><tr><th>COLABORADOR</th><th>SETOR</th><th>ACOMPANHANTE</th><th>STATUS</th><th>CONFIRMADO EM</th><th></th></tr></thead><tbody id="people-body"></tbody></table></div></section>
+      <section class="admin-panel">
+      <div class="people-filter-panel">
+        <div class="people-filter-controls">
+          <div class="search-wrap people-search"><i data-lucide="search"></i><input id="people-search" type="search" placeholder="Pesquisar por nome ou setor..." aria-label="Pesquisar colaboradores" autocomplete="off"><button id="clear-people-search" class="people-search-clear hidden" type="button" aria-label="Limpar pesquisa"><i data-lucide="x"></i></button></div>
+          <select id="status-filter" class="standard-input" aria-label="Filtrar por status"><option value="all">Todos os status</option><option value="confirmed">Confirmados</option><option value="pending">Não confirmados</option><option value="incomplete">Sem sobrenome</option><option value="inactive">Inativos</option></select>
+          <select id="sector-filter" class="standard-input" aria-label="Filtrar por setor"><option value="all">Todos os setores</option></select>
+        </div>
+        <div class="people-status-tabs" role="group" aria-label="Filtrar rapidamente por status">
+          <button class="people-status-tab active" type="button" data-status="all" aria-pressed="true">Todos <span data-count-for="all">0</span></button>
+          <button class="people-status-tab" type="button" data-status="confirmed" aria-pressed="false">Confirmados <span data-count-for="confirmed">0</span></button>
+          <button class="people-status-tab" type="button" data-status="pending" aria-pressed="false">Não confirmados <span data-count-for="pending">0</span></button>
+          <button class="people-status-tab" type="button" data-status="inactive" aria-pressed="false">Inativos <span data-count-for="inactive">0</span></button>
+          <button class="people-status-tab" type="button" data-status="incomplete" aria-pressed="false">Sem sobrenome <span data-count-for="incomplete">0</span></button>
+        </div>
+        <div class="people-results-line"><span id="people-count" class="count-label" role="status">0 resultados</span></div>
+      </div><div class="table-scroll"><table class="people-table"><thead><tr><th>COLABORADOR</th><th>SETOR</th><th>ACOMPANHANTE</th><th>STATUS / CONFIRMAÇÃO</th><th>CONFIRMADO EM</th><th></th></tr></thead><tbody id="people-body"></tbody></table></div></section>
     </div>
     <div id="view-settings" class="admin-content hidden">
       <div class="section-intro"><h2>Configurações do evento</h2><p>Edite os dados do convite, o WhatsApp e o status das confirmações.</p></div>
@@ -127,8 +143,11 @@
     <label for="person-sector">Setor / grupo</label><input id="person-sector" class="standard-input" list="sector-suggestions" placeholder="Ex.: Covre e Cia" maxlength="90" autocomplete="off">
     <datalist id="sector-suggestions"></datalist>
     <label class="checkbox-line" id="person-active-wrap"><input id="person-active" type="checkbox" checked> Disponível na busca pública</label>
-    <div class="manual-confirm-box"><label class="checkbox-line" for="person-confirmed"><input id="person-confirmed" type="checkbox"> <strong>Presença confirmada</strong></label><p id="person-confirm-help">Marque para confirmar manualmente, sem WhatsApp. Desmarque para retirar a confirmação.</p></div>
-    <button type="submit" class="main-button">Salvar colaborador <i data-lucide="check"></i></button>
+    <div class="manual-confirm-box manual-confirm-switch">
+    <div class="manual-confirm-header"><div><strong>Status da presença</strong><small id="person-confirm-status">Não confirmado</small></div><button id="person-confirmed" type="button" class="rsvp-confirm-toggle" role="switch" aria-checked="false" aria-label="Ativar confirmação manual"><span class="rsvp-confirm-thumb" aria-hidden="true"></span></button></div>
+    <p id="person-confirm-help">Ative para confirmar manualmente. Salve para aplicar a alteração.</p>
+  </div>
+    <button id="person-save" type="submit" class="main-button"><span id="person-save-label">Salvar colaborador</span><i data-lucide="check"></i></button>
   </form>
 </div>
 <div id="import-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="import-title">
@@ -140,4 +159,14 @@
     <button type="submit" class="main-button">Importar lista <i data-lucide="upload"></i></button>
   </form>
 </div>
+<div id="rsvp-confirm-modal" class="rsvp-confirm-modal hidden" role="dialog" aria-modal="true" aria-labelledby="rsvp-confirm-title" aria-describedby="rsvp-confirm-message">
+  <div class="rsvp-confirm-backdrop" id="rsvp-confirm-backdrop"></div>
+  <div class="rsvp-confirm-card">
+    <div class="rsvp-confirm-icon"><i data-lucide="shield-question"></i></div>
+    <h2 id="rsvp-confirm-title">Confirmar alteração?</h2>
+    <p id="rsvp-confirm-message">Confirme a alteração do status de presença.</p>
+    <div class="rsvp-confirm-buttons"><button type="button" id="rsvp-confirm-cancel" class="secondary-button">Cancelar</button><button type="button" id="rsvp-confirm-accept" class="main-button">Confirmar</button></div>
+  </div>
+</div>
+<div id="admin-toast-stack" class="admin-toast-stack" role="status" aria-live="polite" aria-atomic="false"></div>
 </body></html>
