@@ -538,12 +538,88 @@ function initAdmin() {
   let session = sessionStorage.getItem(storageKey) || null;
   let dataset = null, editingId = null, currentView = "overview", lastLoad = 0;
   let authGeneration = 0, pendingBootstrap = null;
+  let manualConfirmed = false, statusBusy = false, actionResolve = null;
+  const mutedConfirmationIds = new Set();
 
   function notify(message, error = false) {
     const node = $("admin-notice"); node.textContent = message; node.classList.remove("hidden");
     node.classList.toggle("error", error);
     clearTimeout(notify.t); notify.t = setTimeout(() => node.classList.add("hidden"), 5000);
   }
+
+  function toast(message, error = false) {
+    const root = $("admin-toast-stack");
+    if (!root) return;
+    const box = document.createElement("div");
+    box.className = "admin-toast" + (error ? " admin-toast-error" : "");
+    const dot = document.createElement("span");
+    dot.className = "admin-toast-icon"; dot.textContent = error ? "!" : "✓";
+    const text = document.createElement("span");
+    text.className = "admin-toast-copy"; text.textContent = message;
+    const close = document.createElement("button");
+    close.className = "admin-toast-close"; close.type = "button";
+    close.setAttribute("aria-label","Fechar aviso"); close.textContent = "×";
+    const remove = () => {
+      if (!box.isConnected) return;
+      box.classList.add("is-dismissing");
+      setTimeout(() => box.remove(),220);
+    };
+    close.addEventListener("click",remove);
+    box.append(dot,text,close); root.prepend(box);
+    while(root.children.length>3)root.lastElementChild.remove();
+    setTimeout(remove,6500);
+  }
+  function announceConfirmations(oldData,newData) {
+    if (!oldData) return; // nunca mostrar confirmacoes antigas ao entrar
+    const before = new Set((oldData.confirmations||[]).map(x=>x.colaborador_id));
+    const entries = (newData.confirmations||[]).filter(x=>
+      !before.has(x.colaborador_id) && x.origem!=="manual" && !mutedConfirmationIds.has(x.colaborador_id));
+    const names = new Map((newData.collaborators||[]).map(p=>[p.id,p.nome_completo]));
+    entries.slice(0,2).forEach(x=>{
+      const first=String(names.get(x.colaborador_id)||"Alguém").trim().split(/\s+/)[0];
+      toast(first+" confirmou sua presença!");
+    });
+    if(entries.length>2) toast("Mais "+(entries.length-2)+" colaboradores confirmaram presença.");
+  }
+  function setManualSwitch() {
+    $("person-confirmed").setAttribute("aria-checked",String(manualConfirmed));
+    $("person-confirmed").setAttribute("aria-label",manualConfirmed
+      ? "Desativar confirmação de presença" : "Ativar confirmação de presença");
+    $("person-confirm-status").textContent=manualConfirmed ? "Confirmado" : "Não confirmado";
+    $("person-confirm-status").classList.toggle("is-confirmed",manualConfirmed);
+  }
+  function confirmStatus({name,turningOn,inModal=false}) {
+    if(actionResolve) return Promise.resolve(false);
+    $("rsvp-confirm-title").textContent=turningOn?"Confirmar presença?":"Retirar confirmação?";
+    $("rsvp-confirm-message").textContent=turningOn
+      ? "Deseja confirmar a presença de "+name+"? "+(inModal?"A alteração será aplicada ao salvar.":"O registro será salvo agora, sem enviar WhatsApp.")
+      : "Deseja retirar a confirmação de "+name+"? "+(inModal?"Ao salvar,":"Ao confirmar,")+
+        " a resposta e o acompanhante serão removidos. O cadastro será mantido.";
+    $("rsvp-confirm-accept").textContent=turningOn?"Sim, confirmar":"Sim, retirar";
+    $("rsvp-confirm-accept").classList.toggle("is-destructive",!turningOn);
+    const previousFocus=document.activeElement;
+    show("rsvp-confirm-modal",true);icons();
+    return new Promise(resolve=>{
+      actionResolve=value=>{
+        if(!actionResolve)return;
+        actionResolve=null;show("rsvp-confirm-modal",false);
+        if(previousFocus?.isConnected)previousFocus.focus();
+        resolve(value);
+      };
+      $("rsvp-confirm-cancel").focus();
+    });
+  }
+  $("rsvp-confirm-cancel").addEventListener("click",()=>actionResolve?.(false));
+  $("rsvp-confirm-backdrop").addEventListener("click",()=>actionResolve?.(false));
+  $("rsvp-confirm-accept").addEventListener("click",()=>actionResolve?.(true));
+  document.addEventListener("keydown",e=>{
+    if(!actionResolve)return;
+    if(e.key==="Escape"){e.preventDefault();actionResolve(false);return;}
+    if(e.key!=="Tab")return;
+    const first=$("rsvp-confirm-cancel"),last=$("rsvp-confirm-accept");
+    if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}
+    else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}
+  });
   function showLogin(message = "") {
     show("admin-loading",false);
     show("admin-app",false);
@@ -593,6 +669,7 @@ function initAdmin() {
       try {
         const response = await admin("admin-bootstrap", {}, {signal:controller.signal});
         if (generation !== authGeneration || !session) return;
+        announceConfirmations(dataset,response);
         dataset = response;
         lastLoad = Date.now();
         show("admin-loading",false);
@@ -718,40 +795,93 @@ function initAdmin() {
     icons();
   }
   function renderPeople() {
-    if (!dataset) return;
-    const term = norm($("people-search").value), filter = $("status-filter").value, map = conMap();
-    const sectors = [...new Set(dataset.collaborators.map(p => (p.setor || "").trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"pt-BR"));
-    const selector = $("sector-filter"), selected = selector.value;
-    selector.innerHTML = '<option value="all">Todos os setores</option>' + sectors.map(x => '<option value="' + escapeHtml(x) + '">' + escapeHtml(x) + '</option>').join("");
-    selector.value = selected === "all" || sectors.includes(selected) ? selected : "all";
-    $("sector-suggestions").innerHTML = sectors.map(x => '<option value="' + escapeHtml(x) + '"></option>').join("");
-    const sector = selector.value;
-    const list = dataset.collaborators.filter(p => {
-      if (term && !norm(p.nome_completo + " " + (p.setor || "") + " " + (p.grupo || "")).includes(term)) return false;
-      if (sector !== "all" && (p.setor || "") !== sector) return false;
-      const has = map.has(p.id);
-      if (filter === "confirmed") return has;
-      if (filter === "pending") return p.ativo && !has;
-      if (filter === "inactive") return !p.ativo;
-      if (filter === "incomplete") return !validFullName(p.nome_completo);
+    if(!dataset)return;
+    const query=norm($("people-search").value),status=$("status-filter").value,map=conMap();
+    show("clear-people-search",Boolean($("people-search").value));
+    const sectors=[...new Set(dataset.collaborators.map(p=>(p.setor||"").trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"pt-BR"));
+    const selector=$("sector-filter"),selected=selector.value;
+    selector.innerHTML='<option value="all">Todos os setores</option>'+sectors.map(x=>'<option value="'+escapeHtml(x)+'">'+escapeHtml(x)+'</option>').join("");
+    selector.value=selected==="all"||sectors.includes(selected)?selected:"all";
+    $("sector-suggestions").innerHTML=sectors.map(x=>'<option value="'+escapeHtml(x)+'"></option>').join("");
+    const byStatus={
+      all:dataset.collaborators.length,
+      confirmed:dataset.collaborators.filter(p=>map.has(p.id)).length,
+      pending:dataset.collaborators.filter(p=>!map.has(p.id)).length,
+      inactive:dataset.collaborators.filter(p=>!p.ativo).length,
+      incomplete:dataset.collaborators.filter(p=>!validFullName(p.nome_completo)).length
+    };
+    document.querySelectorAll("[data-count-for]").forEach(n=>n.textContent=byStatus[n.dataset.countFor]??0);
+    document.querySelectorAll(".people-status-tab").forEach(n=>{
+      const active=n.dataset.status===status;
+      n.classList.toggle("active",active);n.setAttribute("aria-pressed",String(active));
+    });
+    const list=dataset.collaborators.filter(p=>{
+      if(query&&!norm(p.nome_completo+" "+(p.setor||"")+" "+(p.grupo||"")).includes(query))return false;
+      if(selector.value!=="all"&&(p.setor||"")!==selector.value)return false;
+      const confirmed=map.has(p.id);
+      if(status==="confirmed")return confirmed;
+      if(status==="pending")return !confirmed;
+      if(status==="inactive")return !p.ativo;
+      if(status==="incomplete")return !validFullName(p.nome_completo);
       return true;
     });
-    $("people-count").textContent = list.length + " resultado" + (list.length === 1 ? "" : "s");
-    $("people-body").innerHTML = list.length ? list.map(p => {
-      const c = map.get(p.id);
-      const originLabel = c?.origem === "manual" ? '<span class="origin-label">Manual</span>' : "";
-      const badge = c ? '<span class="status-chip confirmed">Confirmado</span>' + originLabel :
-        !validFullName(p.nome_completo) ? '<span class="status-chip inactive">Sem sobrenome</span>' :
-        !p.ativo ? '<span class="status-chip inactive">Inativo</span>' : '<span class="status-chip">Pendente</span>';
-      const initials = p.nome_completo.split(/\s+/).slice(0,2).map(n => n[0]).join("").toUpperCase();
-      return '<tr><td><div class="name-cell"><span class="initial-badge">' + escapeHtml(initials) + '</span><span class="name-stack"><strong>' + escapeHtml(p.nome_completo) + '</strong><small>Lista: ' + escapeHtml(p.grupo || "Sem grupo") + '</small></span></div></td><td>' + escapeHtml(p.setor || "Não informado") + '</td><td>' + escapeHtml(c?.acompanhante ? c.acompanhante_nome : "—") + '</td><td>' + badge + '</td><td>' + escapeHtml(stamp(c?.confirmado_em)) + '</td><td><button class="icon-btn edit-person" type="button" data-id="' + escapeHtml(p.id) + '" aria-label="Editar ' + escapeHtml(p.nome_completo) + '"><i data-lucide="pencil"></i></button></td></tr>';
-    }).join("") : '<tr><td colspan="6" style="padding:26px;text-align:center;color:#97a2b0">Nenhum colaborador encontrado.</td></tr>';
-    document.querySelectorAll(".edit-person").forEach(b => b.addEventListener("click", () => openPerson(b.dataset.id)));
+    $("people-count").textContent=list.length+" resultado"+(list.length===1?"":"s");
+    $("people-body").innerHTML=list.length?list.map(p=>{
+      const c=map.get(p.id),confirmed=!!c;
+      const badge=confirmed?'<span class="status-chip confirmed">Confirmado</span>'+(c.origem==="manual"?'<span class="origin-label">Manual</span>':""):
+        !validFullName(p.nome_completo)?'<span class="status-chip inactive">Sem sobrenome</span>':
+        !p.ativo?'<span class="status-chip inactive">Inativo</span>':'<span class="status-chip">Não confirmado</span>';
+      const initials=p.nome_completo.split(/\s+/).slice(0,2).map(n=>n[0]).join("").toUpperCase();
+      const disabled=statusBusy||!validFullName(p.nome_completo);
+      const toggle='<button type="button" role="switch" class="rsvp-confirm-toggle'+(statusBusy?' is-busy':'')+
+        '" data-confirm-id="'+escapeHtml(p.id)+'" aria-checked="'+confirmed+'" aria-label="'+
+        escapeHtml((confirmed?"Retirar confirmação de ":"Confirmar presença de ")+p.nome_completo)+'"'+
+        (disabled?' disabled':'')+'><span class="rsvp-confirm-thumb" aria-hidden="true"></span></button>';
+      return '<tr><td><div class="name-cell"><span class="initial-badge">'+escapeHtml(initials)+
+      '</span><span class="name-stack"><strong>'+escapeHtml(p.nome_completo)+
+      '</strong><small>Lista: '+escapeHtml(p.grupo||"Sem grupo")+'</small></span></div></td><td>'+
+      escapeHtml(p.setor||"Não informado")+'</td><td>'+escapeHtml(c?.acompanhante?c.acompanhante_nome:"—")+
+      '</td><td><div class="people-status-cell"><div class="people-status-description">'+badge+
+      '</div>'+toggle+'</div></td><td>'+escapeHtml(stamp(c?.confirmado_em))+
+      '</td><td><button class="icon-btn edit-person" type="button" data-id="'+escapeHtml(p.id)+
+      '" aria-label="Editar '+escapeHtml(p.nome_completo)+'"><i data-lucide="pencil"></i></button></td></tr>';
+    }).join(""):'<tr><td colspan="6" class="people-empty">Nenhum colaborador encontrado.</td></tr>';
     icons();
   }
   $("people-search").addEventListener("input",renderPeople);
+  $("clear-people-search").addEventListener("click",()=>{
+    $("people-search").value="";renderPeople();$("people-search").focus();
+  });
   $("status-filter").addEventListener("change",renderPeople);
   $("sector-filter").addEventListener("change",renderPeople);
+  document.querySelectorAll(".people-status-tab").forEach(n=>n.addEventListener("click",()=>{
+    $("status-filter").value=n.dataset.status;renderPeople();
+  }));
+  $("people-body").addEventListener("click",e=>{
+    const edit=e.target.closest(".edit-person");
+    if(edit){openPerson(edit.dataset.id);return;}
+    const toggle=e.target.closest("[data-confirm-id]");
+    if(toggle)toggleListConfirmation(toggle.dataset.confirmId);
+  });
+  async function toggleListConfirmation(id) {
+    if(statusBusy||!dataset||actionResolve)return;
+    const p=dataset.collaborators.find(x=>x.id===id);
+    if(!p||!validFullName(p.nome_completo))return;
+    const next=!conMap().has(id);
+    statusBusy=true;renderPeople();
+    try {
+      const approved=await confirmStatus({name:p.nome_completo,turningOn:next});
+      if(!approved)return;
+      const generation=authGeneration;
+      mutedConfirmationIds.add(id);
+      await admin("admin-update",{id:p.id,nome_completo:p.nome_completo,setor:p.setor||"",
+        ativo:p.ativo!==false,confirmado:next});
+      if(generation!==authGeneration)return;
+      await bootstrap(true);
+      toast(next?"Presença de "+p.nome_completo+" confirmada.":"Confirmação de "+p.nome_completo+" retirada.");
+    }catch(err){toast(err.message||"Não foi possível salvar.","error");}
+    finally{mutedConfirmationIds.delete(id);statusBusy=false;renderPeople();}
+  }
   $("refresh-dashboard").addEventListener("click",async () => {
     const button = $("refresh-dashboard"); button.disabled = true;
     try { await bootstrap(true); notify("Indicadores e lista atualizados."); }
@@ -831,40 +961,64 @@ function initAdmin() {
   document.querySelectorAll("[data-close-modal]").forEach(btn => btn.addEventListener("click", () => {
     modal("edit-modal",false); modal("import-modal",false);
   }));
-  function openPerson(id = null) {
-    editingId = id;
-    const person = (dataset?.collaborators || []).find(p => p.id === id);
-    const confirmation = person ? conMap().get(person.id) : null;
-    $("modal-title").textContent = person ? "Editar colaborador" : "Novo colaborador";
-    $("person-name").value = person?.nome_completo || "";
-    $("person-sector").value = person?.setor || "";
-    $("person-active").checked = person?.ativo !== false;
-    $("person-confirmed").checked = !!confirmation;
-    $("person-confirm-help").textContent = confirmation
-      ? "Já confirmado " + (confirmation.origem === "manual" ? "manualmente" : "pelo link") + ". Desmarcar remove a confirmação; salvar marcado preserva a resposta e o acompanhante existentes."
-      : "Marque para confirmar a presença manualmente, sem WhatsApp. A confirmação será contabilizada no dashboard.";
-    show("person-active-wrap", !!person);
+  function openPerson(id=null) {
+    if(statusBusy)return;
+    editingId=id;
+    const p=(dataset?.collaborators||[]).find(x=>x.id===id);
+    const c=p?conMap().get(p.id):null;
+    manualConfirmed=!!c;
+    $("modal-title").textContent=p?"Editar colaborador":"Novo colaborador";
+    $("person-name").value=p?.nome_completo||"";
+    $("person-sector").value=p?.setor||"";
+    $("person-active").checked=p?.ativo!==false;
+    setManualSwitch();
+    $("person-confirm-help").textContent=c
+      ? "Já confirmado "+(c.origem==="manual"?"manualmente":"pelo convite")+". Desativar retira a resposta e o acompanhante após salvar."
+      : "Ative para confirmar manualmente. Salve para aplicar a alteração.";
+    show("person-active-wrap",!!p);
     modal("edit-modal",true);
   }
   $("top-add").addEventListener("click",()=>openPerson());
-  $("person-form").addEventListener("submit",async e => {
+  $("person-confirmed").addEventListener("click",async()=>{
+    if(statusBusy||actionResolve)return;
+    const next=!manualConfirmed;
+    const ok=await confirmStatus({name:$("person-name").value.trim()||"este colaborador",turningOn:next,inModal:true});
+    if(!ok)return;
+    manualConfirmed=next;setManualSwitch();
+    $("person-confirm-help").textContent="Status alterado. Clique em Salvar colaborador para gravar.";
+  });
+  $("person-form").addEventListener("submit",async e=>{
     e.preventDefault();
-    const name = $("person-name").value.trim();
-    const active = $("person-active").checked;
-    if (!name || (active && !validFullName(name)) || (!editingId && !validFullName(name))) {
-      notify("Informe nome e sobrenome para disponibilizar o cadastro na busca.",true); return;
+    if(statusBusy)return;
+    const name=$("person-name").value.trim(),active=$("person-active").checked;
+    if(!name||(active&&!validFullName(name))||(!editingId&&!validFullName(name))){
+      notify("Informe nome e sobrenome para disponibilizar o cadastro na busca.",true);return;
     }
-    const button = e.currentTarget.querySelector('button[type="submit"]'); button.disabled = true;
+    const wasConfirmed=!!(editingId&&conMap().has(editingId));
+    statusBusy=true;
+    const button=$("person-save");
+    button.disabled=true;button.classList.add("is-saving");
+    $("person-save-label").textContent="Salvando...";
+    if(editingId)mutedConfirmationIds.add(editingId);
     try {
-      await admin(editingId ? "admin-update" : "admin-add", {
-        id: editingId, nome_completo: name, setor: $("person-sector").value.trim(),
-        ativo: active, confirmado: $("person-confirmed").checked
+      const reply=await admin(editingId?"admin-update":"admin-add",{
+        id:editingId,nome_completo:name,setor:$("person-sector").value.trim(),
+        ativo:active,confirmado:manualConfirmed
       });
+      if(reply?.colaborador_id)mutedConfirmationIds.add(reply.colaborador_id);
       modal("edit-modal",false);
       await bootstrap(true);
-      notify(editingId ? "Cadastro e presença atualizados." : "Colaborador cadastrado.");
-    } catch(err) { notify(err.message,true); }
-    finally { button.disabled = false; }
+      if(wasConfirmed!==manualConfirmed){
+        toast(manualConfirmed?"Presença de "+name+" confirmada.":"Confirmação de "+name+" retirada.");
+      } else if(!editingId) toast(name+" cadastrado com sucesso.");
+      else notify("Cadastro atualizado com sucesso.");
+      if(reply?.colaborador_id)mutedConfirmationIds.delete(reply.colaborador_id);
+    } catch(err){toast(err.message||"Não foi possível salvar.","error");}
+    finally{
+      if(editingId)mutedConfirmationIds.delete(editingId);
+      statusBusy=false;button.disabled=false;button.classList.remove("is-saving");
+      $("person-save-label").textContent="Salvar colaborador";renderPeople();
+    }
   });
   $("import-button").addEventListener("click",()=>{ $("import-file").value = ""; $("import-names").value = ""; modal("import-modal",true); });
   $("import-file").addEventListener("change",async e => {
@@ -946,11 +1100,11 @@ function initAdmin() {
   if (session) bootstrap(false);
   else showLogin();
   setInterval(() => {
-    if (session && dataset && !pendingBootstrap && !document.hidden && currentView !== "settings"
+    if (session && dataset && !pendingBootstrap && !statusBusy && !document.hidden
       && $("edit-modal").classList.contains("hidden")
       && $("import-modal").classList.contains("hidden")
-      && Date.now()-lastLoad>=30000) bootstrap(true);
-  },30000);
+      && Date.now()-lastLoad>=20000) bootstrap(true);
+  },5000);
   icons();
 }
 document.addEventListener("DOMContentLoaded", () => {
