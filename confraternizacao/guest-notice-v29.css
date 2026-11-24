@@ -1,0 +1,23 @@
+/* Aviso inicial v29. A arte HTML é a alternativa ao PNG original. */
+.guest-page .opening-notice{border:0;background:transparent;color:#0a2e19;padding:0;margin:auto;width:min(92vw,560px);max-width:92vw;max-height:92dvh;overflow:auto;box-shadow:none}
+.guest-page .opening-notice::backdrop{background:rgba(8,28,16,.74);backdrop-filter:blur(4px)}
+.guest-page .opening-notice-frame{position:relative;border-radius:24px;overflow:hidden;background:#fff;box-shadow:0 24px 75px #0004}
+.guest-page .opening-notice-art{position:relative;isolation:isolate;padding:clamp(27px,5.8vw,49px) clamp(16px,4.8vw,32px) clamp(26px,5.6vw,46px);text-align:center;background:#fafbf9}
+.guest-page .opening-notice-art::before,.guest-page .opening-notice-art::after{content:"";position:absolute;z-index:-1;background:#17643c;border-bottom:7px solid #f1c343;pointer-events:none}
+.guest-page .opening-notice-art::before{top:-52px;left:-37px;width:48%;height:94px;transform:rotate(-13deg);border-bottom-right-radius:100%}
+.guest-page .opening-notice-art::after{bottom:-52px;right:-37px;width:48%;height:90px;transform:rotate(167deg);border-bottom-right-radius:100%}
+.guest-page .opening-notice-icon{display:grid;place-items:center;width:clamp(54px,15vw,89px);height:clamp(54px,15vw,89px);margin:0 auto 12px;background:#ffedb6;border-radius:26%;color:#145036}
+.guest-page .opening-notice-icon svg{width:65%;height:65%}
+.guest-page .opening-notice h2{font:800 clamp(27px,7vw,48px)/1.04 Manrope,Arial,sans-serif;letter-spacing:-.045em;margin:0;color:#092f19}
+.guest-page .opening-notice-rule{width:40%;height:4px;background:#efb600;border-radius:9px;margin:15px auto}
+.guest-page .opening-notice p{font:600 clamp(13px,3.7vw,20px)/1.45 DM Sans,Arial,sans-serif;margin:8px 0;color:#102b19}
+.guest-page .opening-notice p.opening-notice-highlight{background:#ffe39a;padding:10px 12px;border-radius:16px;font-weight:800}
+.guest-page .opening-notice-warning{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:18px;background:#f9e5e5;color:#9c2020;padding:15px 12px;border-radius:17px;font:750 clamp(13px,3.5vw,19px)/1.3 DM Sans,Arial,sans-serif}
+.guest-page .opening-notice-warning svg{width:38px;height:38px;flex:0 0 38px}
+.guest-page .opening-notice-warning strong{max-width:300px}
+.guest-page .opening-notice-close{position:absolute;z-index:3;top:10px;right:10px;display:flex;align-items:center;justify-content:center;gap:5px;border:1px solid #dde5dd;background:#fff;color:#1d4c30;border-radius:999px;min-width:39px;height:39px;padding:0 9px;font:700 12px/1 DM Sans,Arial,sans-serif;box-shadow:0 3px 12px #14391f15;cursor:pointer}
+.guest-page .opening-notice-close svg{width:20px;height:20px}
+.guest-page .opening-notice-close:disabled{color:#6a786e;cursor:not-allowed;background:#f5f6f4}
+.guest-page .opening-notice-close span[hidden]{display:none}
+.guest-page.notice-open{overflow:hidden!important}
+@media(max-height:480px){.guest-page .opening-notice-art{padding:16px 18px}.guest-page .opening-notice-icon{width:40px;height:40px;margin-bottom:6px}.guest-page .opening-notice h2{font-size:25px}.guest-page .opening-notice-rule{margin:8px auto}.guest-page .opening-notice-warning{margin-top:8px;padding:8px}.guest-page .opening-notice p{margin:5px 0;font-size:13px}}
