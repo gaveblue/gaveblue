@@ -28,9 +28,10 @@
 <link href="./guest-v24.css?v=24" rel="stylesheet">
 <link href="./guest-v25.css?v=25" rel="stylesheet">
 <script defer src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.4/dist/confetti.browser.min.js"></script>
-<script defer src="./app.js?v=31"></script>
+<link href="./guest-v26.css?v=26" rel="stylesheet">
+<script defer src="./guest-app-v26.js?v=26"></script>
 </head>
-<body class="guest-page invite-booting" data-invite-version="25">
+<body class="guest-page invite-booting" data-invite-version="26">
 <div id="invite-boot" class="invite-boot" role="status" aria-live="polite">
   <div class="invite-boot-inner">
     <span class="invite-boot-symbol" aria-hidden="true"><i data-lucide="calendar-heart"></i></span>
@@ -118,23 +119,21 @@
     <div id="sheet-error" class="notice error hidden" role="alert"></div>
     <div id="rsvp-sheet-scroll" class="rsvp-sheet-scroll">
       <div id="guest-identify" class="hidden">
-        <p class="sheet-intro">Digite pelo menos 5 letras do seu nome ou apelido. Escolha seu cadastro entre os resultados, mesmo que existam nomes parecidos.</p>
         <label for="employee-search" class="sheet-field-label">Nome ou apelido</label>
-        <div class="search-wrap" id="guest-search-wrap"><i data-lucide="search" id="search-icon"></i><input id="employee-search" autocomplete="name" autocapitalize="words" enterkeyhint="search" spellcheck="false" placeholder="Ex.: Lucas ou apelido" maxlength="160" aria-describedby="search-hint" aria-autocomplete="list"><span class="search-spinner hidden" id="search-spinner" aria-hidden="true"></span><button type="button" id="clear-search" class="clear-search hidden" aria-label="Limpar busca"><i data-lucide="x"></i></button></div>
-        <p class="field-help" id="search-hint" role="status" aria-live="polite">A pesquisa começa a partir de 5 letras. Se houver nomes repetidos, selecione o seu.</p>
+        <div class="search-wrap" id="guest-search-wrap"><i data-lucide="search" id="search-icon"></i><input id="employee-search" autocomplete="name" autocapitalize="words" enterkeyhint="search" spellcheck="false" placeholder="Digite seu nome ou apelido" maxlength="160" aria-describedby="search-hint" aria-autocomplete="list"><span class="search-spinner hidden" id="search-spinner" aria-hidden="true"></span><button type="button" id="clear-search" class="clear-search hidden" aria-label="Limpar busca"><i data-lucide="x"></i></button></div>
+        <p class="field-help search-status-sr" id="search-hint" role="status" aria-live="polite"></p>
         <div id="employee-results" class="result-list" role="listbox" aria-label="Colaboradores encontrados"></div>
-        <p class="sheet-privacy"><i data-lucide="shield-check"></i> Sua identificação é usada somente nesta confirmação.</p>
       </div>
       <div id="guest-companion" class="hidden">
         <div class="selected-person"><span class="selected-avatar"><i data-lucide="user-round-check"></i></span><div><small>COLABORADOR</small><strong id="selected-name"></strong></div><button id="change-person" class="text-btn" type="button">Alterar</button></div>
-        <h2>Falta só um detalhe.</h2><p class="support">Você vai levar acompanhante?</p>
+        <h2>Você vai levar acompanhante?</h2>
         <div class="companion-options">
           <label class="option"><input type="radio" name="plus" value="yes"><span class="option-symbol"><i data-lucide="users"></i></span><span>Sim, vou levar acompanhante</span><i data-lucide="circle" class="option-check"></i></label>
           <label class="option"><input type="radio" name="plus" value="no"><span class="option-symbol"><i data-lucide="user-round"></i></span><span>Não, irei sozinho(a)</span><i data-lucide="circle" class="option-check"></i></label>
         </div>
-        <div id="companion-field" class="hidden"><label for="companion-name">Nome completo do acompanhante</label><input id="companion-name" class="standard-input" placeholder="Nome e sobrenome" autocomplete="off" maxlength="150"><p class="field-help">Informe o nome completo para a lista do evento.</p></div>
-        <p class="confirm-note">A presença será salva antes de abrir o WhatsApp.</p>
-        <div class="rsvp-sheet-action"><button class="main-button" type="button" id="confirm-button" disabled>Confirmar presença <i data-lucide="check"></i></button></div>
+      </div>
+      <div id="guest-companion-name" class="hidden">
+        <div id="companion-field"><label for="companion-name" class="sheet-field-label">Nome completo do acompanhante</label><input id="companion-name" class="standard-input" placeholder="Nome e sobrenome" autocomplete="off" autocapitalize="words" enterkeyhint="done" maxlength="150"></div>
       </div>
       <div id="guest-done" class="hidden done-panel" aria-live="polite">
         <div class="success-celebration" aria-hidden="true"><span class="clink-glass clink-glass-left"><i data-lucide="wine"></i></span><span class="clink-glass clink-glass-right"><i data-lucide="wine"></i></span><span class="celebration-star celebration-star-a"></span><span class="celebration-star celebration-star-b"></span><span class="celebration-star celebration-star-c"></span></div>
@@ -148,6 +147,13 @@
         <p class="done-note"><i data-lucide="info"></i> O WhatsApp abrirá com a mensagem pronta. Toque em <strong>Enviar</strong> para concluir o contato.</p>
       </div>
     </div>
+    <footer id="sheet-footer" class="rsvp-sheet-footer">
+      <p id="sheet-privacy" class="sheet-privacy"><i data-lucide="shield-check"></i><span>Sua identificação é usada somente nesta confirmação.</span></p>
+      <div id="sheet-actions" class="rsvp-sheet-action hidden">
+        <button id="companion-back" class="sheet-back-button hidden" type="button"><i data-lucide="arrow-left"></i> Voltar</button>
+        <button class="main-button" type="button" id="confirm-button" disabled>Confirmar presença <i data-lucide="check"></i></button>
+      </div>
+    </footer>
   </div>
 </div>
 

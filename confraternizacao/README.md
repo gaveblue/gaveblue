@@ -208,3 +208,10 @@ Implementação isolada do convite corporativo GaveBlue, sem alterações nos ap
 - O backend revalida que o registro selecionado corresponde à busca, mantendo limite de tentativas, verificação de evento aberto e confirmação por ID.
 - Novas colunas `apelido`/`apelido_chave` com valor padrão vazio; função `rsvp_admin_save_person_v2` atualiza cadastro e confirmação atomicamente; `rsvp_busca_rapida` preserva limite de requisições e aplica pesquisa parcial com 5 letras.
 - HTML e CSS do admin v13 e convite v25 sincronizados entre links principais e aliases. Sem alterações aos colaboradores existentes na migração.
+
+
+## Convite v26 · 24/11/2026
+- Identificação simplificada, mantendo a busca a partir de cinco letras sem instruções repetidas. Rodapé de privacidade centralizado.
+- Bottom sheet com altura preferencial de 80% da área visível em repouso, redução da altura quando o teclado aparece e rolagem restrita ao conteúdo; ações no rodapé.
+- Escolha de acompanhante separada do preenchimento do nome. Continuar abre a etapa adicional, Voltar preserva a seleção, e somente a ação final registra a presença. Sem alterações de backend ou de outros aplicativos.
+- Script público isolado em guest-app-v26.js; painel administrativo e versões anteriores preservados. Referências a IDs HTML verificadas; validação visual em aparelho real pendente.

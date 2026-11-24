@@ -1,0 +1,27 @@
+/* RSVP v26: formulário alto, etapas independentes e rodapé fora da rolagem. */
+.guest-page #rsvp-sheet:not([data-stage="done"]) .rsvp-sheet-panel{
+  height:var(--rsvp-form-height,80dvh);
+  max-height:calc(var(--rsvp-visible-height,100dvh) - 8px);
+}
+.guest-page #rsvp-sheet .rsvp-sheet-scroll{flex:1 1 auto;min-height:0;padding-top:20px;scroll-padding:8px}
+.guest-page #rsvp-sheet #guest-identify .result-list{max-height:none;overflow:visible;margin-top:12px}
+.guest-page #rsvp-sheet #guest-identify .result-list:empty{margin:0}
+.guest-page #rsvp-sheet .search-status-sr{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip-path:inset(50%);white-space:nowrap}
+.guest-page #rsvp-sheet .rsvp-sheet-footer{flex:0 0 auto;padding:10px var(--sheet-padding) 14px;background:#fff;border-top:1px solid #edf2e8}
+.guest-page #rsvp-sheet .sheet-privacy{margin:0;text-align:center;justify-content:center;align-items:center;font-size:10px;line-height:1.45}
+.guest-page #rsvp-sheet .sheet-privacy svg{flex:0 0 15px}
+.guest-page #rsvp-sheet .rsvp-sheet-action{position:static;display:flex;align-items:stretch;gap:9px;padding:0;background:none}
+.guest-page #rsvp-sheet .rsvp-sheet-action .main-button{flex:1;min-width:0;width:auto}
+.guest-page #rsvp-sheet .sheet-back-button{flex:0 0 auto;display:flex;align-items:center;justify-content:center;gap:6px;min-height:50px;padding:0 13px;border:1px solid #dce7da;border-radius:12px;background:#fff;color:#285438;font:700 13px/1.2 DM Sans,sans-serif}
+.guest-page #rsvp-sheet .sheet-back-button svg{width:16px;height:16px}
+.guest-page #rsvp-sheet .sheet-back-button:disabled{opacity:.5}
+.guest-page #rsvp-sheet #guest-companion h2{margin-bottom:16px}
+.guest-page #rsvp-sheet #companion-name{font-size:16px;width:100%;min-height:51px}
+.guest-page #rsvp-sheet #employee-search{font-size:16px}
+.guest-page #rsvp-sheet.keyboard-open .rsvp-sheet-handle{min-height:20px}
+.guest-page #rsvp-sheet.keyboard-open .rsvp-sheet-head{padding-bottom:8px}
+.guest-page #rsvp-sheet.keyboard-open .rsvp-sheet-scroll{padding-top:12px;padding-bottom:8px}
+.guest-page #rsvp-sheet.keyboard-open .rsvp-sheet-footer{padding-top:7px;padding-bottom:8px}
+.guest-page #rsvp-sheet.keyboard-open .rsvp-sheet-panel{padding-bottom:0}
+.guest-page #rsvp-sheet[data-stage="done"] .rsvp-sheet-scroll{flex:0 1 auto}
+.guest-page #rsvp-sheet .hidden{display:none!important}
