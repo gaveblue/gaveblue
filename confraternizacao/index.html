@@ -33,9 +33,10 @@
 <link href="./guest-v28.css?v=28" rel="stylesheet">
 <script defer src="./guest-app-v28.js?v=28"></script>
 <link href="./guest-notice-v29.css?v=29" rel="stylesheet">
+<link href="./guest-notice-v31.css?v=31" rel="stylesheet">
 <script defer src="./guest-notice-v29.js?v=29"></script>
 </head>
-<body class="guest-page invite-booting" data-invite-version="30">
+<body class="guest-page invite-booting" data-invite-version="31">
 <div id="invite-boot" class="invite-boot" role="status" aria-live="polite">
   <div class="invite-boot-inner">
     <span class="invite-boot-symbol" aria-hidden="true"><i data-lucide="calendar-heart"></i></span>
@@ -176,9 +177,9 @@
     <button id="opening-notice-close" class="opening-notice-close" type="button" disabled aria-label="Aguarde 5 segundos para fechar"><span id="opening-notice-counter" aria-hidden="true">5s</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     <div class="opening-notice-art">
       <div class="opening-notice-icon" aria-hidden="true"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 26c13 0 24-5 35-16l7 31c-14-4-25-5-37-1C6 43 4 29 12 26Z"/><path d="m20 40 5 12a4 4 0 0 0 7-3l-4-12M45 10l7 31M55 10l5-5M57 23l6-2M57 35l6 3"/></svg></div>
-      <h2 id="opening-notice-title" tabindex="-1">Comunicado<br>Importante</h2>
+      <h2 id="opening-notice-title" tabindex="-1">Comunicado Importante</h2>
       <div class="opening-notice-rule"></div>
-      <div id="opening-notice-description"><p>Informamos que os acompanhantes deverão ser, obrigatoriamente,</p><p class="opening-notice-highlight">cônjuge (esposo(a), namorado(a)) ou filhos.</p><div class="opening-notice-warning"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="12" r="7"/><path d="M5 35v-3c0-7 5-12 13-12 4 0 7 1 9 3M30 18a5.5 5.5 0 1 0-3-10"/><circle cx="34" cy="34" r="11"/><path d="m26 42 16-16"/></svg><strong>Parentes de outro grau, amigos, conhecidos e etc... não estão permitidos.</strong></div></div>
+      <div id="opening-notice-description"><p class="opening-notice-intro">O acompanhante deve ser exclusivamente:</p><div class="opening-notice-allowed"><span class="notice-section-label">QUEM PODE ACOMPANHAR</span><div class="notice-allowed-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg><span>Esposo(a) / cônjuge</span></div><div class="notice-allowed-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg><span>Namorado(a)</span></div><div class="notice-allowed-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg><span>Filho(a)</span></div></div><div class="opening-notice-warning"><span class="notice-section-label">NÃO PERMITIDOS</span><p>Outros parentes, amigos, conhecidos e demais pessoas.</p></div></div>
     </div>
   </div>
 </dialog>
