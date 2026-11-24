@@ -35,54 +35,112 @@ function initGuest() {
   const searchWrap = $("guest-search-wrap");
   const boot = $("invite-boot");
 
-  const RSVP_DEADLINE_DEFAULT = "2026-11-25T23:59:59.999-03:00";
+  const RSVP_DEADLINE_DEFAULT = "2026-11-25T23:59:59.999-03:00"; // registro legado
   let urgencyTimer = null;
   let whatsappRedirectTimer = null;
+  let publicRefreshRunning = false;
 
+  function deadlineTime() {
+    return Date.parse(event?.prazo_confirmacao || RSVP_DEADLINE_DEFAULT);
+  }
+  function deadlineLabel(withTime = false) {
+    const date = new Date(deadlineTime());
+    if (Number.isNaN(date.getTime())) return "data a definir";
+    const opts = {timeZone:"America/Sao_Paulo",day:"2-digit",month:"2-digit"};
+    const short = new Intl.DateTimeFormat("pt-BR",opts).format(date);
+    if (!withTime) return short;
+    const hour = new Intl.DateTimeFormat("pt-BR",{
+      timeZone:"America/Sao_Paulo",hour:"2-digit",minute:"2-digit",hourCycle:"h23"
+    }).format(date);
+    return short + " às " + hour.replace(":","h");
+  }
+  function publicState() {
+    if (!event) return "nao_iniciadas";
+    if (event.status === "rascunho" || event.estado_confirmacoes === "nao_iniciadas") return "nao_iniciadas";
+    if (event.estado_confirmacoes === "encerrado_manual") return "encerrado_manual";
+    if (event.status === "encerrado" && event.estado_confirmacoes !== "prazo_expirado") return "encerrado_manual";
+    if (Date.now() > deadlineTime() || event.estado_confirmacoes === "prazo_expirado") return "prazo_expirado";
+    return event.status === "aberto" ? "aberto" : "encerrado_manual";
+  }
+  function lockedContent(state) {
+    if (state === "nao_iniciadas") return {
+      title:"Confirmações ainda não abertas",
+      message:"As confirmações de presença ainda não começaram. Aguarde a abertura pela organização."
+    };
+    const custom = String(event?.mensagem_encerramento || "").trim();
+    if (state === "encerrado_manual") return {
+      title:"Confirmações encerradas",
+      message:custom || "As confirmações de presença foram encerradas pela organização. Agradecemos seu interesse!"
+    };
+    return {
+      title:"Prazo de confirmação encerrado",
+      message:custom || "O prazo para confirmar presença terminou em " + deadlineLabel(true) + ". Em caso de dúvidas, entre em contato com a organização."
+    };
+  }
+  function syncPublicState(state) {
+    if (!event) return;
+    const opened = state === "aberto";
+    show("guest-cta", opened && !finished);
+    show("guest-locked", !opened && !finished);
+    if (!opened && !finished) {
+      const info = lockedContent(state);
+      const title = $("guest-locked-title"), body = $("guest-locked-message");
+      if (title && title.textContent !== info.title) title.textContent = info.title;
+      if (body && body.textContent !== info.message) body.textContent = info.message;
+    }
+    // Um prazo encerrado é diferente de um fechamento manual ou do rascunho.
+    show("rsvp-urgency", state === "aberto" || state === "prazo_expirado");
+  }
   function updateUrgency() {
-    const deadline = Date.parse(event?.prazo_confirmacao || RSVP_DEADLINE_DEFAULT);
-    if (!Number.isFinite(deadline)) { show("rsvp-urgency", false); return; }
-    show("rsvp-urgency", true);
-    const remaining = Math.max(0, deadline - Date.now());
-    const elapsed = remaining <= 0;
+    if (!event) return;
+    const state = publicState();
+    const deadline = deadlineTime();
+    const until = Math.max(0,deadline - Date.now());
+    const elapsed = state === "prazo_expirado";
+    const heading = $("rsvp-deadline-title");
+    const label = "Confirme até " + deadlineLabel();
+    if (heading && heading.textContent !== label) heading.textContent = label;
+    const ended = $("rsvp-urgency-expired");
+    const endedMessage = "O prazo de confirmação terminou em " + deadlineLabel(true) + ".";
+    if (ended && ended.textContent !== endedMessage) ended.textContent = endedMessage;
     const clock = [
-      Math.floor(remaining / 3600000),
-      Math.floor((remaining % 3600000) / 60000),
-      Math.floor((remaining % 60000) / 1000),
-      Math.floor(remaining % 1000)
+      Math.floor(until / 3600000),Math.floor((until % 3600000) / 60000),
+      Math.floor((until % 60000) / 1000),Math.floor(until % 1000)
     ];
     ["rsvp-hours","rsvp-minutes","rsvp-seconds","rsvp-millis"].forEach((id,index) => {
-      const value = String(clock[index]).padStart(index === 3 ? 3 : 2, "0");
-      const el = $(id);
-      if (el && el.textContent !== value) el.textContent = value;
+      const val = String(clock[index]).padStart(index === 3 ? 3 : 2,"0");
+      const node = $(id);
+      if (node && node.textContent !== val) node.textContent = val;
     });
-    $("rsvp-urgency").classList.toggle("is-expired", elapsed);
-    show("rsvp-urgency-expired", elapsed);
-    if (elapsed) {
-      if (urgencyTimer !== null) { clearInterval(urgencyTimer); urgencyTimer = null; }
-      if (event) event.status = "encerrado";
-      if (!finished) {
-        show("guest-cta", false);
-        show("guest-locked", true);
-        $("guest-locked").querySelector("h2").textContent = "Prazo de confirmação encerrado";
-        $("guest-locked").querySelector("p").textContent = "As confirmações se encerraram em 25/11. Fale com a organização.";
-      }
+    $("rsvp-urgency").classList.toggle("is-expired",elapsed);
+    show("rsvp-urgency-expired",elapsed);
+    syncPublicState(state);
+    if (until <= 0 && urgencyTimer !== null) {
+      clearInterval(urgencyTimer); urgencyTimer = null;
     }
   }
   function startUrgency() {
     if (urgencyTimer !== null) { clearInterval(urgencyTimer); urgencyTimer = null; }
     updateUrgency();
-    if (Date.now() < Date.parse(event?.prazo_confirmacao || RSVP_DEADLINE_DEFAULT)) {
+    if (publicState() === "aberto" && Date.now() <= deadlineTime()) {
       urgencyTimer = setInterval(() => {
         if (!document.hidden) updateUrgency();
-      }, 50);
+      },50);
     }
   }
+  async function refreshPublicState() {
+    if (!event || publicRefreshRunning || document.hidden) return;
+    publicRefreshRunning = true;
+    try {
+      const response = await request("event");
+      if (response?.event) updateEvent(response.event);
+    } catch (_) { updateUrgency(); }
+    finally { publicRefreshRunning = false; }
+  }
   document.addEventListener("visibilitychange", () => {
-    if (!document.hidden) {
-      updateUrgency();
-    }
+    if (!document.hidden) refreshPublicState();
   });
+  setInterval(refreshPublicState,60000);
   function fireCelebration() {
     const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches === true;
     if (reduced || document.hidden || typeof window.confetti !== "function") return;
@@ -289,8 +347,6 @@ function initGuest() {
     $("event-place").textContent = event.local_evento || "Local a definir";
     startCountdown();
     startUrgency();
-    show("guest-cta", event.status === "aberto" && !finished);
-    show("guest-locked", event.status !== "aberto");
   }
 
   async function load() {
@@ -517,10 +573,66 @@ function initAdmin() {
   }
   document.querySelectorAll("[data-view]").forEach(button => button.addEventListener("click", () => setView(button.dataset.view)));
   const conMap = () => new Map((dataset?.confirmations || []).map(c => [c.colaborador_id,c]));
+
+  const dateTimeOf = ev => Date.parse(ev?.prazo_confirmacao || "2026-11-25T23:59:59.999-03:00");
+  const localDeadlineParts = value => {
+    const parsed = new Date(value || "2026-11-25T23:59:59.999-03:00");
+    if (Number.isNaN(parsed.getTime())) return {date:"2026-11-25",time:"23:59"};
+    const dt = new Intl.DateTimeFormat("en-GB",{
+      timeZone:"America/Sao_Paulo",year:"numeric",month:"2-digit",day:"2-digit",
+      hour:"2-digit",minute:"2-digit",hourCycle:"h23"
+    }).formatToParts(parsed);
+    const get = key => dt.find(x => x.type === key)?.value || "";
+    return {date:get("year")+"-"+get("month")+"-"+get("day"),time:get("hour")+":"+get("minute")};
+  };
+  const displayDeadline = ev => {
+    const d = new Date(dateTimeOf(ev));
+    if (Number.isNaN(d.getTime())) return "Data não definida";
+    return new Intl.DateTimeFormat("pt-BR",{timeZone:"America/Sao_Paulo",day:"2-digit",
+      month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit",hourCycle:"h23"}).format(d);
+  };
+  const effectiveAdminState = ev => {
+    if (!ev || ev.status === "rascunho") return "nao_iniciadas";
+    if (ev.status === "encerrado") return "encerrado_manual";
+    return Date.now() > dateTimeOf(ev) ? "prazo_expirado" : "aberto";
+  };
+  const adminStateText = state => ({
+    nao_iniciadas:"Confirmações não iniciadas",
+    aberto:"Confirmações abertas",
+    encerrado_manual:"Encerradas pela organização",
+    prazo_expirado:"Prazo expirado"
+  }[state] || "Situação indefinida");
+  function renderRsvpState() {
+    if (!dataset) return;
+    const ev = dataset.event;
+    const state = effectiveAdminState(ev);
+    const title = $("rsvp-state-title"), detail = $("rsvp-state-detail");
+    if (title) title.textContent = adminStateText(state);
+    if (detail) detail.textContent = "Prazo: " + displayDeadline(ev) + " (Brasília). " +
+      (state === "prazo_expirado" ? "Novas confirmações bloqueadas. Prorrogue o prazo para reabrir." :
+       state === "encerrado_manual" ? "Encerramento manual. O histórico está preservado." :
+       state === "nao_iniciadas" ? "O convite aguarda a abertura pela organização." :
+       "Recebendo confirmações até o horário configurado.");
+    const panel = document.querySelector(".rsvp-state-panel");
+    if (panel) panel.dataset.state = state;
+    const status = $("settings-rsvp-state");
+    if (status) status.textContent = adminStateText(state);
+    const help = $("settings-rsvp-help");
+    if (help) help.textContent = state === "prazo_expirado"
+      ? "Para reabrir, escolha uma data limite futura e use o botão Reabrir confirmações."
+      : state === "encerrado_manual"
+        ? "É possível reabrir sem apagar as respostas já recebidas."
+        : "As mudanças no status e no prazo são refletidas no convite ao salvar.";
+    show("rsvp-open",state === "nao_iniciadas");
+    show("rsvp-close",state === "aberto");
+    show("rsvp-reopen",state === "encerrado_manual" || state === "prazo_expirado");
+  }
+
   function render() {
     if (!dataset) return;
     const ev = dataset.event;
     $("admin-title").textContent = ev.titulo;
+    renderRsvpState();
     $("share-url").textContent = location.origin + "/confraternizacao/";
     const employees = dataset.collaborators;
     const actives = employees.filter(p => p.ativo);
@@ -598,22 +710,65 @@ function initAdmin() {
     $("event-place-input").value = ev.local_evento || "";
     $("event-whatsapp").value = ev.whatsapp || "";
     $("event-status").value = ev.status || "rascunho";
+    const p = localDeadlineParts(ev.prazo_confirmacao);
+    $("event-deadline-date").value = p.date;
+    $("event-deadline-time").value = p.time;
+    $("event-close-message").value = ev.mensagem_encerramento || "";
     $("event-plus").checked = ev.permite_acompanhante !== false;
+    renderRsvpState();
   }
   $("event-form").addEventListener("submit",async(e) => {
     e.preventDefault();
-    const button = e.currentTarget.querySelector('button[type="submit"]'); button.disabled = true;
+    const button = e.currentTarget.querySelector('button[type="submit"]');
+    const chosenStatus = $("event-status").value;
+    const currentStatus = dataset?.event?.status || "rascunho";
+    const date = $("event-deadline-date").value;
+    const time = $("event-deadline-time").value;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !/^\d{2}:\d{2}$/.test(time)) {
+      notify("Preencha a data e o horário limite das confirmações.",true);
+      return;
+    }
+    const closingDate = date + "T" + time + ":59.999-03:00";
+    if (!Number.isFinite(Date.parse(closingDate))) {
+      notify("A data limite informada é inválida.",true);
+      return;
+    }
+    if (chosenStatus === "aberto" && Date.parse(closingDate) <= Date.now()) {
+      notify("Para abrir ou reabrir, escolha um prazo futuro.",true);
+      $("event-deadline-date").focus();
+      return;
+    }
+    if (chosenStatus === "encerrado" && currentStatus !== "encerrado" &&
+        !window.confirm("Encerrar as confirmações agora? Novos participantes não poderão confirmar, mas todos os registros existentes serão mantidos.")) {
+      $("event-status").value = currentStatus;
+      return;
+    }
+    button.disabled = true;
     try {
       await admin("admin-save-event", {
         titulo:$("event-title").value,descricao:$("event-description").value,
-        data_evento:$("event-date-input").value, horario:$("event-time-input").value,
-        local_evento:$("event-place-input").value, whatsapp:$("event-whatsapp").value,
-        status:$("event-status").value, permite_acompanhante:$("event-plus").checked
+        data_evento:$("event-date-input").value,horario:$("event-time-input").value,
+        local_evento:$("event-place-input").value,whatsapp:$("event-whatsapp").value,
+        status:chosenStatus,permite_acompanhante:$("event-plus").checked,
+        prazo_confirmacao:new Date(closingDate).toISOString(),
+        mensagem_encerramento:$("event-close-message").value
       });
-      await bootstrap(true); notify("Configurações salvas com sucesso.");
-    } catch(err) { notify(err.message,true); }
-    finally { button.disabled = false; }
+      await bootstrap(true);
+      notify("Configurações e prazo salvos com sucesso.");
+    } catch(err) {notify(err.message,true);}
+    finally {button.disabled=false;}
   });
+  document.querySelectorAll("[data-rsvp-action]").forEach(button => {
+    button.addEventListener("click",() => {
+      const action = button.dataset.rsvpAction;
+      if (action === "reopen" &&
+          !window.confirm("Reabrir as confirmações? Confira antes se a data limite é futura. As respostas anteriores serão preservadas.")) return;
+      $("event-status").value = action === "close" ? "encerrado" : "aberto";
+      $("event-form").requestSubmit();
+    });
+  });
+  // Mantém o indicador atualizado ao chegar ao prazo mesmo com o admin aberto.
+  setInterval(() => {if (dataset && !document.hidden) renderRsvpState();},30000);
   function modal(id,open) { show(id,open); document.body.style.overflow = open ? "hidden" : ""; if (open) setTimeout(()=>$(id).querySelector("input:not([type=checkbox]),textarea")?.focus(),30); }
   document.querySelectorAll("[data-close-modal]").forEach(btn => btn.addEventListener("click", () => {
     modal("edit-modal",false); modal("import-modal",false);
