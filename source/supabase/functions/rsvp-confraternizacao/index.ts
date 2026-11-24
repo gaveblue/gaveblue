@@ -243,6 +243,32 @@ Deno.serve(async (req: Request) => {
         error?.message || "Não foi possível atualizar os colaboradores selecionados.");
       return json({ok:true,updated:data},200,origin);
     }
+    if (action === "admin-delete") {
+      const id = clean(body.id, 48);
+      assert(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id), "Registro inválido.");
+      // O FK ON DELETE CASCADE remove a confirmação de forma atômica.
+      const {data,error} = await db.from("rsvp_colaboradores").delete().eq("evento_id",ev.id).eq("id",id).select("id").maybeSingle();
+      assert(!error && data, "Não foi possível excluir o colaborador deste evento.");
+      return json({ok:true},200,origin);
+    }
+    if (action === "admin-save-profile") {
+      const id = body.id == null ? null : clean(body.id,48);
+      assert(id === null || /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id),"Registro inválido.");
+      const name=clean(body.nome_completo), nickname=clean(body.apelido,60);
+      assert(validColaboradorName(name),"Informe um nome válido.");
+      assert(!nickname || /^[\p{L}\p{N}\s'.-]+$/u.test(nickname),"Apelido inválido.");
+      const category=body.categoria === undefined ? null : clean(body.categoria,100);
+      assert(category===null || category.length<=90,"Categoria muito longa.");
+      const values={nome_completo:name,nome_chave:norm(name),apelido:nickname,apelido_chave:norm(nickname),ativo:body.ativo!==false,
+        ...(category!==null||id===null?{setor:category||"",grupo:category||"Sem grupo"}:{})};
+      // Não toca em rsvp_confirmacoes: editar perfil nunca altera a presença.
+      const cols="id,nome_completo,apelido,grupo,setor,ativo,criado_em";
+      const query=id===null ? db.from("rsvp_colaboradores").insert({...values,evento_id:ev.id}) :
+        db.from("rsvp_colaboradores").update(values).eq("evento_id",ev.id).eq("id",id);
+      const {data,error}=await query.select(cols).maybeSingle();
+      assert(!error && data,error?.code==="23505"?"Este colaborador já está na lista.":"Não foi possível salvar o cadastro.");
+      return json({ok:true,person:data},200,origin);
+    }
     if (action === "admin-add" || action === "admin-update") {
       const id = action === "admin-update" ? clean(body.id, 48) : null;
       const name = clean(body.nome_completo);

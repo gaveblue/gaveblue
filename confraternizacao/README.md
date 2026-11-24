@@ -230,3 +230,10 @@ Implementação isolada do convite corporativo GaveBlue, sem alterações nos ap
 ## Painel v15 · 24/11/2026
 - Checkbox de seleção menor, contorno discreto e realce suave. Toque em qualquer área não interativa do card/linha para selecionar ou desmarcar; editar e confirmar presença continuam ações independentes.
 - Seleção individual atualiza o card e contador sem recriar a lista, preservando foco e limite de 200. Sem mudanças no banco ou convite público. Sintaxe JS verificada; teste em aparelho real pendente.
+
+
+## Painel v16 · 24/11/2026
+- Cadastro e edição em lote com um campo Categoria, filtro unificado e classificação anterior preservada quando não modificada; alterações explícitas sincronizam setor/grupo. Exportação legada preservada.
+- Cadastro separado da confirmação de presença (admin-save-profile); editar perfil não altera confirmação nem acompanhante. A ação de presença continua na tabela.
+- Exclusão individual com aviso de remoção definitiva da confirmação e acompanhante; admin-delete autentica sessão, restringe ao evento e usa FK CASCADE existente. Nenhum cadastro excluído durante a publicação.
+- Sintaxe JS e referências HTML verificadas; teste visual pendente.

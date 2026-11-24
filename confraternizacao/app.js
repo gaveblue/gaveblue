@@ -565,7 +565,7 @@ function initAdmin() {
   let session = sessionStorage.getItem(storageKey) || null;
   let dataset = null, editingId = null, currentView = "overview", lastLoad = 0;
   let authGeneration = 0, pendingBootstrap = null;
-  let manualConfirmed = false, statusBusy = false, actionResolve = null;
+  let originalCategory = "", statusBusy = false, actionResolve = null;
   let navCollapsed = false, notifyAudio = null, mutationEpoch = 0;
   const mutedConfirmationIds = new Set();
   const selectedPersonIds = new Set();
@@ -683,13 +683,6 @@ function initAdmin() {
     });
     if(entries.length>2) toast("Mais "+(entries.length-2)+" colaboradores confirmaram presença.");
     if(entries.length) playConfirmationSound();
-  }
-  function setManualSwitch() {
-    $("person-confirmed").setAttribute("aria-checked",String(manualConfirmed));
-    $("person-confirmed").setAttribute("aria-label",manualConfirmed
-      ? "Desativar confirmação de presença" : "Ativar confirmação de presença");
-    $("person-confirm-status").textContent=manualConfirmed ? "Confirmado" : "Não confirmado";
-    $("person-confirm-status").classList.toggle("is-confirmed",manualConfirmed);
   }
   function confirmStatus({name,turningOn,inModal=false}) {
     if(actionResolve) return Promise.resolve(false);
@@ -906,11 +899,10 @@ function initAdmin() {
     const query=norm($("people-search").value);
     const status=$("status-filter").value;
     const sector=$("sector-filter").value;
-    const group=$("group-filter").value;
+
     return (dataset?.collaborators||[]).filter(p=>{
       if(query&&!norm(p.nome_completo+" "+(p.apelido||"")+" "+(p.setor||"")+" "+(p.grupo||"")).includes(query))return false;
-      if(sector!=="all"&&(p.setor||"")!==sector)return false;
-      if(group!=="all"&&(p.grupo||"")!==group)return false;
+      if(sector!=="all"&&!personCategories(p).includes(sector))return false;
       const confirmed=map.has(p.id);
       if(status==="confirmed")return confirmed;
       if(status==="pending")return !confirmed;
@@ -918,6 +910,9 @@ function initAdmin() {
       if(status==="incomplete")return p.nome_completo.trim().split(/\s+/).length===1;
       return true;
     });
+  }
+  function personCategories(p) {
+    return [...new Set([p?.setor,p?.grupo].map(v=>String(v||"").trim()).filter(v=>v&&v!=="Sem grupo"))];
   }
   function updateSelectionUI(visible) {
     if(!dataset)return;
@@ -933,7 +928,7 @@ function initAdmin() {
     $("clear-selection").disabled=statusBusy;
     $("bulk-edit-button").disabled=statusBusy||!selectedPersonIds.size;
     $("bulk-selection-count").textContent=selectedPersonIds.size+" selecionado"+(selectedPersonIds.size===1?"":"s");
-    $("bulk-edit-button").setAttribute("aria-label","Editar setor e grupo de "+selectedPersonIds.size+" colaboradores");
+    $("bulk-edit-button").setAttribute("aria-label","Editar categoria de "+selectedPersonIds.size+" colaboradores");
     show("bulk-selection-bar",selectedPersonIds.size>0);
     show("clear-selection",selectedPersonIds.size>0);
   }
@@ -952,16 +947,11 @@ function initAdmin() {
     if(!dataset)return;
     const query=norm($("people-search").value),status=$("status-filter").value,map=conMap();
     show("clear-people-search",Boolean($("people-search").value));
-    const sectors=[...new Set(dataset.collaborators.map(p=>(p.setor||"").trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"pt-BR"));
+    const sectors=[...new Set(dataset.collaborators.flatMap(personCategories))].sort((a,b)=>a.localeCompare(b,"pt-BR"));
     const selector=$("sector-filter"),selected=selector.value;
-    selector.innerHTML='<option value="all">Todos os setores</option>'+sectors.map(x=>'<option value="'+escapeHtml(x)+'">'+escapeHtml(x)+'</option>').join("");
+    selector.innerHTML='<option value="all">Todas as categorias</option>'+sectors.map(x=>'<option value="'+escapeHtml(x)+'">'+escapeHtml(x)+'</option>').join("");
     selector.value=selected==="all"||sectors.includes(selected)?selected:"all";
     $("sector-suggestions").innerHTML=sectors.map(x=>'<option value="'+escapeHtml(x)+'"></option>').join("");
-    const groups=[...new Set(dataset.collaborators.map(p=>(p.grupo||"").trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"pt-BR"));
-    const groupFilter=$("group-filter"),currentGroup=groupFilter.value;
-    groupFilter.innerHTML='<option value="all">Todos os grupos</option>'+groups.map(x=>'<option value="'+escapeHtml(x)+'">'+escapeHtml(x)+'</option>').join("");
-    groupFilter.value=currentGroup==="all"||groups.includes(currentGroup)?currentGroup:"all";
-    $("group-suggestions").innerHTML=groups.map(x=>'<option value="'+escapeHtml(x)+'"></option>').join("");
     const byStatus={
       all:dataset.collaborators.length,
       confirmed:dataset.collaborators.filter(p=>map.has(p.id)).length,
@@ -981,7 +971,7 @@ function initAdmin() {
       const badge=confirmed?'<span class="status-chip confirmed">Confirmado</span>':
         !p.ativo?'<span class="status-chip inactive">Inativo</span>':'<span class="status-chip">Não confirmado</span>';
       const initials=p.nome_completo.split(/\s+/).slice(0,2).map(n=>n[0]).join("").toUpperCase();
-      const sectorText=(p.setor?"Setor: "+p.setor:"Sem setor")+" · Grupo: "+(p.grupo||"Sem grupo");
+      const sectorText=personCategories(p).join(" · ")||"Sem categoria";
       const nicknameText=p.apelido ? " · Apelido: " + p.apelido : "";
       const disabled=statusBusy||!validPersonName(p.nome_completo);
       const toggle='<button type="button" role="switch" class="rsvp-confirm-toggle'+(statusBusy?' is-busy':'')+
@@ -1010,7 +1000,6 @@ function initAdmin() {
   });
   $("status-filter").addEventListener("change",renderPeople);
   $("sector-filter").addEventListener("change",renderPeople);
-  $("group-filter").addEventListener("change",renderPeople);
   document.querySelectorAll(".people-status-tab").forEach(n=>n.addEventListener("click",()=>{
     $("status-filter").value=n.dataset.status;renderPeople();
   }));
@@ -1043,11 +1032,10 @@ function initAdmin() {
     if(checkbox&&!checkbox.disabled)checkbox.click();
   });
 
-  function confirmBulkUpdate(count,sector,group) {
+  function confirmBulkUpdate(count,sector) {
     if(actionResolve)return Promise.resolve(false);
     const changes=[];
-    if(sector!==null)changes.push("Setor: "+(sector||"Sem setor"));
-    if(group!==null)changes.push("Grupo: "+group);
+    changes.push("Categoria: "+(sector||"Sem categoria"));
     $("rsvp-confirm-title").textContent="Salvar alterações em lote?";
     $("rsvp-confirm-message").textContent="Aplicar em "+count+" colaborador"+(count===1?"":"es")+
       ": "+changes.join(" • ")+". Nomes, apelidos e confirmações serão preservados.";
@@ -1068,20 +1056,8 @@ function initAdmin() {
   $("bulk-edit-button").addEventListener("click",()=>{
     if(statusBusy||!dataset||!selectedPersonIds.size)return;
     $("bulk-modal-count").textContent=selectedPersonIds.size+" colaborador"+(selectedPersonIds.size===1?"":"es")+" selecionado"+(selectedPersonIds.size===1?"":"s");
-    $("bulk-apply-sector").checked=false;
-    $("bulk-apply-group").checked=false;
     $("bulk-sector").value="";
-    $("bulk-group").value="";
-    $("bulk-sector").disabled=true;
-    $("bulk-group").disabled=true;
     modal("bulk-modal",true);
-  });
-  ["sector","group"].forEach(kind=>{
-    $("bulk-apply-"+kind).addEventListener("change",()=>{
-      const active=$("bulk-apply-"+kind).checked;
-      $("bulk-"+kind).disabled=!active;
-      if(active)$("bulk-"+kind).focus();
-    });
   });
   $("bulk-form").addEventListener("submit",async e=>{
     e.preventDefault();
@@ -1089,22 +1065,13 @@ function initAdmin() {
     const ids=[...selectedPersonIds];
     if(!ids.length){toast("Selecione ao menos um colaborador.",true);return;}
     if(ids.length>200){toast("Selecione até 200 colaboradores.",true);return;}
-    const sector=$("bulk-apply-sector").checked?$("bulk-sector").value.trim():null;
-    const group=$("bulk-apply-group").checked?$("bulk-group").value.trim():null;
-    if(sector===null&&group===null){
-      toast("Marque Alterar setor e/ou Alterar grupo.",true);return;
-    }
-    if(group!==null&&!group){
-      toast("Informe o nome do grupo para os selecionados.",true);
-      $("bulk-group").focus();return;
-    }
-    if((sector!==null&&sector.length>90)||(group!==null&&group.length>90)){
-      toast("Setor e grupo devem ter até 90 caracteres.",true);return;
-    }
-    const approved=await confirmBulkUpdate(ids.length,sector,group);
+    const sector=$("bulk-sector").value.trim();
+    const group=sector||"Sem grupo";
+    if(sector.length>90){toast("A categoria deve ter até 90 caracteres.",true);return;}
+    const approved=await confirmBulkUpdate(ids.length,sector);
     if(!approved)return;
     statusBusy=true;
-    setActionLoading(true,"Atualizando setor e grupo...");
+    setActionLoading(true,"Atualizando categoria...");
     $("bulk-submit").disabled=true;
     try{
       const generation=authGeneration;
@@ -1305,72 +1272,78 @@ function initAdmin() {
     if(statusBusy)return;
     editingId=id;
     const p=(dataset?.collaborators||[]).find(x=>x.id===id);
-    const c=p?conMap().get(p.id):null;
-    manualConfirmed=!!c;
+    if(id&&!p)return;
+    const categories=personCategories(p);
+    originalCategory=categories[0]||"";
     $("modal-title").textContent=p?"Editar colaborador":"Novo colaborador";
     $("person-name").value=p?.nome_completo||"";
     $("person-nickname").value=p?.apelido||"";
-    $("person-sector").value=p?.setor||"";
-    $("person-group").value=p?.grupo||"";
+    $("person-sector").value=originalCategory;
     $("person-active").checked=p?.ativo!==false;
-    setManualSwitch();
-    $("person-confirm-help").textContent=c
-      ? "Já confirmado "+(c.origem==="manual"?"manualmente":"pelo convite")+". Desativar retira a resposta e o acompanhante após salvar."
-      : "Ative para confirmar manualmente. Salve para aplicar a alteração.";
+    $("legacy-category-note").textContent=categories.length>1?"Classificação anterior adicional: "+categories.slice(1).join(", ")+". Será preservada se você não alterar a categoria.":"";
+    show("legacy-category-note",categories.length>1);
     show("person-active-wrap",!!p);
+    show("person-delete",!!p);
     modal("edit-modal",true);
   }
   $("people-add").addEventListener("click",()=>openPerson());
-  $("person-confirmed").addEventListener("click",async()=>{
-    if(statusBusy||actionResolve)return;
-    const next=!manualConfirmed;
-    const ok=await confirmStatus({name:$("person-name").value.trim()||"este colaborador",turningOn:next,inModal:true});
-    if(!ok)return;
-    manualConfirmed=next;setManualSwitch();
-    $("person-confirm-help").textContent="Status alterado. Clique em Salvar colaborador para gravar.";
+  $("person-delete").addEventListener("click",async()=>{
+    if(statusBusy||actionResolve||!editingId||!dataset)return;
+    const p=dataset.collaborators.find(x=>x.id===editingId);
+    if(!p)return;
+    const id=p.id;
+    if(!window.confirm("Excluir "+p.nome_completo+" definitivamente? O cadastro, a confirmação de presença e o acompanhante, se houver, serão removidos. Esta ação não pode ser desfeita."))return;
+    statusBusy=true;
+    $("person-delete").disabled=true;
+    $("person-save").disabled=true;
+    setActionLoading(true,"Excluindo colaborador...");
+    try {
+      const generation=authGeneration;
+      await admin("admin-delete",{id});
+      if(generation!==authGeneration)return;
+      dataset.collaborators=dataset.collaborators.filter(x=>x.id!==id);
+      dataset.confirmations=dataset.confirmations.filter(x=>x.colaborador_id!==id);
+      selectedPersonIds.delete(id);
+      mutationEpoch++;lastLoad=Date.now();
+      modal("edit-modal",false);
+      render();toast("Colaborador excluído.");
+    }catch(err){toast(err.message||"Não foi possível excluir.",true);}
+    finally{
+      statusBusy=false;setActionLoading(false);
+      $("person-delete").disabled=false;$("person-save").disabled=false;renderPeople();
+    }
   });
   $("person-form").addEventListener("submit",async e=>{
     e.preventDefault();
     if(statusBusy)return;
     const name=$("person-name").value.trim(),active=$("person-active").checked;
-    const nickname=$("person-nickname").value.trim();
+    const nickname=$("person-nickname").value.trim(),category=$("person-sector").value.trim();
     if(nickname && !/^[\p{L}\p{N}\s'.-]{1,60}$/u.test(nickname)) {
       notify("O apelido deve ter até 60 caracteres, com letras e números.",true);return;
     }
-    if(!validPersonName(name)){
-      notify("Informe um nome com pelo menos 3 letras.",true);return;
-    }
-    const wasConfirmed=!!(editingId&&conMap().has(editingId));
+    if(!validPersonName(name)){notify("Informe um nome com pelo menos 3 letras.",true);return;}
+    if(category.length>90){notify("A categoria deve ter até 90 caracteres.",true);return;}
     statusBusy=true;
-    setActionLoading(true,wasConfirmed && !manualConfirmed?"Removendo confirmação...":"Validando dados do colaborador...");
-    const button=$("person-save");
-    button.disabled=true;button.classList.add("is-saving");
+    setActionLoading(true,"Salvando cadastro...");
+    const button=$("person-save"),id=editingId;
+    button.disabled=true;button.classList.add("is-saving");$("person-delete").disabled=true;
     $("person-save-label").textContent="Salvando...";
-    if(editingId)mutedConfirmationIds.add(editingId);
     try {
-      const savedSector=$("person-sector").value.trim();
-      const savedGroup=$("person-group").value.trim();
       const generation=authGeneration;
-      const reply=await admin(editingId?"admin-update":"admin-add",{
-        id:editingId,nome_completo:name,apelido:nickname,setor:savedSector,grupo:savedGroup,
-        ativo:active,confirmado:manualConfirmed
+      const reply=await admin("admin-save-profile",{
+        id,nome_completo:name,apelido:nickname,ativo:active,
+        ...(!id||category!==originalCategory?{categoria:category}:{})
       });
       if(generation!==authGeneration)return;
-      if(reply?.colaborador_id)mutedConfirmationIds.add(reply.colaborador_id);
-      applySavedPerson(reply?.colaborador_id || editingId,name,savedSector,active,manualConfirmed,nickname,savedGroup);
+      if(!reply.person?.id)throw new Error("O servidor não retornou o cadastro.");
+      dataset.collaborators=[...dataset.collaborators.filter(p=>p.id!==reply.person.id),reply.person].sort((a,b)=>a.nome_completo.localeCompare(b.nome_completo,"pt-BR"));
+      mutationEpoch++;lastLoad=Date.now();
       modal("edit-modal",false);
-      if(!wasConfirmed && manualConfirmed)celebrateManualConfirmation();
-      if(wasConfirmed!==manualConfirmed){
-        toast(manualConfirmed?"Presença de "+name+" confirmada.":"Confirmação de "+name+" retirada.");
-      } else if(!editingId) toast(name+" cadastrado com sucesso.");
-      else notify("Cadastro atualizado com sucesso.");
-      if(reply?.colaborador_id)mutedConfirmationIds.delete(reply.colaborador_id);
-    } catch(err){toast(err.message||"Não foi possível salvar.","error");}
+      render();toast(id?"Cadastro atualizado com sucesso.":name+" cadastrado com sucesso.");
+    }catch(err){toast(err.message||"Não foi possível salvar.",true);}
     finally{
-      if(editingId)mutedConfirmationIds.delete(editingId);
-      setActionLoading(false);
-      statusBusy=false;button.disabled=false;button.classList.remove("is-saving");
-      $("person-save-label").textContent="Salvar colaborador";renderPeople();
+      setActionLoading(false);statusBusy=false;button.disabled=false;button.classList.remove("is-saving");
+      $("person-delete").disabled=false;$("person-save-label").textContent="Salvar colaborador";renderPeople();
     }
   });
   $("import-button").addEventListener("click",()=>{ $("import-file").value = ""; $("import-names").value = ""; modal("import-modal",true); });
