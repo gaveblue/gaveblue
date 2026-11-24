@@ -33,17 +33,11 @@ const json = (data: unknown, status = 200, origin = "") => new Response(JSON.str
 });
 const clean = (value: unknown, max = 150) => String(value ?? "").replace(/\s+/g, " ").trim().slice(0, max);
 const norm = (v: unknown) => clean(v, 160).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z\s'-]/g, "").replace(/\s+/g, " ").trim();
-const matchesSearch = (full: string, query: string) => {
-  const words = norm(full).split(" ").filter(Boolean);
-  const terms = norm(query).split(" ").filter(Boolean);
-  if (words.length === 1 || terms.length === 1) {
-    return words.length === 1 && terms.length === 1
-      && words[0].length >= 3 && words[0] === terms[0];
-  }
-  if (words.length < 2 || terms.length < 2 || terms[0].length < 2 || terms[terms.length - 1].length < 3) return false;
-  if (!words[0].startsWith(terms[0])) return false;
-  const surname = terms.slice(1).join(" ");
-  return words.slice(1).some((_, index) => words.slice(index + 1).join(" ").startsWith(surname));
+const matchesSearch = (full: string, alias: string, query: string) => {
+  const key = norm(query);
+  if (key.replace(/\s/g, "").length < 5) return false;
+  return [norm(full),norm(alias)].some(value => value &&
+    (value.startsWith(key) || (" " + value).includes(" " + key)));
 };
 const validName = (v: string) => v.length >= 5 && v.length <= 150 && v.split(" ").filter(Boolean).length >= 2 && /^[\p{L}\s'.-]+$/u.test(v);
 const validColaboradorName = (v: string) => v.length >= 3 && v.length <= 150 && /^[\p{L}\s'.-]+$/u.test(v);
@@ -121,9 +115,7 @@ Deno.serve(async (req: Request) => {
       const currentState = stateOf(current);
       assert(currentState === "aberto", stateError(currentState));
       const key = norm(body.query);
-      const terms=key.split(" ").filter(Boolean);
-      if (!((terms.length === 1 && terms[0].length >= 3)
-        || (terms.length >= 2 && terms[0].length >= 2 && terms[terms.length - 1].length >= 3))) {
+      if (key.replace(/\s/g, "").length < 5) {
         return json({ok:true,results:[]},200,origin);
       }
       const {data,error}=await db.rpc("rsvp_busca_rapida",{
@@ -152,12 +144,13 @@ Deno.serve(async (req: Request) => {
       assert(ev.whatsapp, "WhatsApp da organização não configurado.");
       const id = clean(body.colaborador_id, 48);
       const key = norm(body.query);
-      const terms = key.split(" ");
-      const validQuery = (terms.length === 1 && terms[0].length >= 3)
-        || (terms.length >= 2 && terms[0].length >= 2 && terms[terms.length - 1].length >= 3);
-      assert(/^[0-9a-f-]{36}$/i.test(id) && validQuery, "Identificação incompleta.");
-      const { data: employee } = await db.from("rsvp_colaboradores").select("id,nome_completo,nome_chave").eq("id", id).eq("evento_id", ev.id).eq("ativo", true).maybeSingle();
-      assert(employee && matchesSearch(employee.nome_completo, key), "Colaborador não encontrado. Faça a busca novamente.");
+      assert(/^[0-9a-f-]{36}$/i.test(id) && key.replace(/\s/g, "").length >= 5,
+        "Informe pelo menos 5 letras para buscar seu cadastro.");
+      const { data: employee } = await db.from("rsvp_colaboradores")
+        .select("id,nome_completo,nome_chave,apelido_chave")
+        .eq("id", id).eq("evento_id", ev.id).eq("ativo", true).maybeSingle();
+      assert(employee && matchesSearch(employee.nome_chave,employee.apelido_chave,key),
+        "Colaborador não encontrado. Faça a busca novamente.");
       const companion = body.acompanhante === true;
       assert(!companion || ev.permite_acompanhante, "Acompanhante não permitido neste evento.");
       const companionName = companion ? clean(body.acompanhante_nome) : null;
@@ -190,7 +183,7 @@ Deno.serve(async (req: Request) => {
     }
     if (action === "admin-bootstrap") {
       const [employees, confirmations] = await Promise.all([
-        db.from("rsvp_colaboradores").select("id,nome_completo,grupo,setor,ativo,criado_em").eq("evento_id", ev.id).order("nome_completo"),
+        db.from("rsvp_colaboradores").select("id,nome_completo,apelido,grupo,setor,ativo,criado_em").eq("evento_id", ev.id).order("nome_completo"),
         db.from("rsvp_confirmacoes").select("colaborador_id,acompanhante,acompanhante_nome,confirmado_em,origem").eq("evento_id", ev.id)
       ]);
       assert(!employees.error && !confirmations.error, "Falha ao carregar os dados.");
@@ -231,6 +224,9 @@ Deno.serve(async (req: Request) => {
       const id = action === "admin-update" ? clean(body.id, 48) : null;
       const name = clean(body.nome_completo);
       const sector = clean(body.setor, 90);
+      const nickname = clean(body.apelido, 60);
+      assert(!nickname || /^[\p{L}\p{N}\s'.-]+$/u.test(nickname),
+        "Apelido inválido. Use apenas letras, números e espaços.");
       const validFull = validColaboradorName(name);
       assert(validFull, "Informe um nome com pelo menos 3 letras.");
       assert(action !== "admin-add" || validFull, "Informe um nome válido.");
@@ -239,9 +235,10 @@ Deno.serve(async (req: Request) => {
       const active = body.ativo !== false;
       assert(!active || validFull, "Informe um nome válido para disponibilizar o colaborador.");
       assert(typeof body.confirmado === "boolean", "Informe o status da confirmação.");
-      const { data, error } = await db.rpc("rsvp_admin_save_person", {
+      const { data, error } = await db.rpc("rsvp_admin_save_person_v2", {
         p_evento: ev.id, p_id: id, p_nome: name, p_nome_chave: norm(name),
-        p_setor: sector, p_ativo: active, p_confirmado: body.confirmado
+        p_setor: sector, p_ativo: active, p_confirmado: body.confirmado,
+        p_apelido: nickname, p_apelido_chave: norm(nickname)
       });
       assert(!error && data, error?.code === "23505" ? "Este colaborador já está na lista." : "Falha ao salvar o cadastro e a confirmação.");
       return json({ ok: true, colaborador_id: data }, 200, origin);
