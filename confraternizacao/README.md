@@ -172,3 +172,10 @@ Implementação isolada do convite corporativo GaveBlue, sem alterações nos ap
 - Arquivo visual específico `confraternizacao/admin-v9.css`; JavaScript `app.js?v=26`; administração em `confraternizacao/admin/painel-v9.html`.
 - Caminhos do admin `index.html`, `painel-v6.html`, `painel-v7.html` e `painel-v8.html` alinhados à mesma interface, prevenindo referências a IDs antigos.
 - Nenhuma alteração feita no Supabase, respostas existentes, Edge Functions ou arquivos do convite público.
+
+## Admin v10 — polling adaptativo para o prazo RSVP (24/11/2026)
+- Consultas de `admin-bootstrap` automáticas a cada cerca de 5 segundos **somente** com status efetivo `aberto`, sessão ativa, aba visível e sem operação em andamento.
+- Status `rascunho`, `encerrado` e prazo expirado suspendem novas consultas automáticas, sem invalidar sessão e preservando tela/dados históricos.
+- Primeiro acesso, atualizações por botão `Atualizar dados` e gravação/reabertura pelo admin continuam funcionando; se outro administrador reabrir o evento, clicar `Atualizar dados` para retomar.
+- A Visão Geral informa quando o ciclo está ativo (5 segundos) ou pausado.
+- Reutilizado `app.js?v=28` com cache bust em todas as versões de URL do admin, sem tocar no convite público, dados SQL ou Supabase.
