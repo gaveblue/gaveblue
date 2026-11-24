@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b5e32">
+<meta name="description" content="Confirmação de presença na Confraternização 2026.">
+<meta name="robots" content="noindex,nofollow">
+<title>Confraternização 2026 · Convite</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="./style.css?v=14" rel="stylesheet">
+<link href="./guest-v8.css?v=14" rel="stylesheet">
+<link href="./guest-v10.css?v=14" rel="stylesheet">
+<script defer src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+<link href="./guest-v13.css?v=15" rel="stylesheet">
+<link href="./guest-v15.css?v=16" rel="stylesheet">
+<link href="./guest-v16.css?v=16" rel="stylesheet">
+<link href="./guest-v17.css?v=17" rel="stylesheet">
+<link href="./guest-v18.css?v=18" rel="stylesheet">
+<link href="./guest-v19.css?v=19" rel="stylesheet">
+<link href="./guest-v20.css?v=20" rel="stylesheet">
+<link href="./guest-v21.css?v=21" rel="stylesheet">
+<link href="./guest-v22.css?v=22" rel="stylesheet">
+<script defer src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.4/dist/confetti.browser.min.js"></script>
+<script defer src="./app.js?v=16"></script>
+</head>
+<body class="guest-page invite-booting" data-invite-version="22">
+<div id="invite-boot" class="invite-boot" role="status" aria-live="polite">
+  <div class="invite-boot-inner">
+    <span class="invite-boot-symbol" aria-hidden="true"><i data-lucide="calendar-heart"></i></span>
+    <div class="invite-boot-eyebrow">CONFRATERNIZAÇÃO 2026</div>
+    <h2 id="boot-title">Carregando seu convite</h2>
+    <p id="boot-message">Preparando tudo para você...</p>
+    <div class="invite-boot-progress" id="boot-progress" aria-hidden="true"><span></span></div>
+    <button id="boot-retry" class="boot-retry hidden" type="button"><i data-lucide="refresh-cw"></i> Tentar novamente</button>
+  </div>
+</div>
+<div class="invite-ribbons" aria-hidden="true">
+  <span class="ribbon ribbon-top-green"></span><span class="ribbon ribbon-top-gold"></span>
+  <span class="ribbon ribbon-bottom-green"></span><span class="ribbon ribbon-bottom-gold"></span>
+</div>
+<main class="guest-shell">
+  <header class="guest-header" aria-label="Empresas organizadoras">
+    <div class="company-logos">
+      <div class="company-logo company-logo-agricola"><img src="https://i.imgur.com/kXwEnSs.png" alt="Covre Agrícola" loading="eager" decoding="async" referrerpolicy="no-referrer"></div>
+      <span class="brand-divider" aria-hidden="true"></span>
+      <div class="company-logo company-logo-cia"><img src="./assets/covre-e-cia-oficial.png?v=9" alt="Covre &amp; Cia — Insumos Agrícolas" loading="eager" decoding="async"></div>
+    </div>
+  </header>
+  <section class="guest-hero">
+    <div class="eyebrow"><span class="eyebrow-dot"></span> UM CONVITE ESPECIAL <span class="eyebrow-year">• 2026</span></div>
+    <h1><span class="heading-prefix">Você foi convocado para nossa</span><span class="heading-rest"><em class="animated-event-title">Confraternização 2026<span class="title-sparkles" aria-hidden="true"><span class="title-spark title-spark-1"></span><span class="title-spark title-spark-2"></span><span class="title-spark title-spark-3"></span><span class="title-spark title-spark-4"></span><span class="title-spark title-spark-5"></span><span class="title-spark title-spark-6"></span><span class="title-spark title-spark-7"></span><span class="title-spark title-spark-8"></span><span class="title-spark title-spark-9"></span><span class="title-spark title-spark-10"></span></span></em></span></h1>
+    <div id="guest-description" class="guest-message">
+      <p>Convidamos vocês colaboradores, parceiros e amigos para a nossa confraternização. Será um momento especial para celebrarmos as conquistas, fortalecer os laços e renovar as energias para novos desafios.</p>
+    </div>
+  </section>
+  <section class="event-countdown" id="event-countdown" aria-labelledby="countdown-title">
+    <div class="event-countdown-kicker"><i data-lucide="calendar-clock" aria-hidden="true"></i><span>CONTAGEM REGRESSIVA</span></div>
+    <h2 id="countdown-title">Falta pouco para celebrarmos!</h2>
+    <div class="event-countdown-grid" role="timer" aria-live="off" aria-label="Tempo restante para a confraternização">
+      <div class="countdown-tile"><strong id="countdown-days" class="countdown-number" aria-label="dias">--</strong><span>DIAS</span></div>
+      <div class="countdown-tile"><strong id="countdown-hours" class="countdown-number" aria-label="horas">--</strong><span>HORAS</span></div>
+      <div class="countdown-tile"><strong id="countdown-minutes" class="countdown-number" aria-label="minutos">--</strong><span>MIN</span></div>
+      <div class="countdown-tile"><strong id="countdown-seconds" class="countdown-number" aria-label="segundos">--</strong><span>SEG</span></div>
+    </div>
+    <p id="countdown-status" class="countdown-status hidden" role="status" aria-live="polite"></p>
+    <p class="event-countdown-datetime"><i data-lucide="calendar-days" aria-hidden="true"></i><span>Dia <strong id="event-date-long">12 de dezembro</strong>, a partir das <strong id="event-time-inline">15h</strong></span></p>
+  </section>
+  <div class="rsvp-info-row" aria-label="Local e prazo de confirmação">
+  <section class="guest-details guest-location-only" aria-label="Local do evento">
+    <div class="event-location"><div class="event-location-copy"><small class="location-label"><i data-lucide="map-pin" aria-hidden="true"></i> LOCAL</small><strong id="event-place">Loja Maçônica Fenelon Barbosa</strong><a class="event-map-link" href="https://maps.app.goo.gl/YYeyFWafrcbeTBfd8?g_st=ac" target="_blank" rel="noopener noreferrer">Ver no mapa <i data-lucide="arrow-up-right" aria-hidden="true"></i></a></div></div>
+  </section>
+  <section class="rsvp-urgency" id="rsvp-urgency" aria-label="Prazo para confirmar presença">
+    <div class="rsvp-urgency-head"><i data-lucide="alert-circle" aria-hidden="true"></i><div><strong>Confirme até 25/11</strong><small id="rsvp-urgency-caption">O prazo está acabando — não deixe para depois!</small></div></div>
+    <div class="rsvp-urgency-grid" id="rsvp-urgency-grid" role="timer" aria-live="off" aria-label="Tempo restante para confirmar presença">
+      <div class="rsvp-urgency-unit"><strong id="rsvp-hours">--</strong><span aria-label="horas">HORAS</span></div>
+      <span class="rsvp-urgency-separator" aria-hidden="true">:</span>
+      <div class="rsvp-urgency-unit"><strong id="rsvp-minutes">--</strong><span aria-label="minutos">MIN</span></div>
+      <span class="rsvp-urgency-separator" aria-hidden="true">:</span>
+      <div class="rsvp-urgency-unit"><strong id="rsvp-seconds">--</strong><span aria-label="segundos">SEG</span></div>
+      <span class="rsvp-urgency-separator" aria-hidden="true">.</span>
+      <div class="rsvp-urgency-unit rsvp-urgency-ms"><strong id="rsvp-millis">---</strong><span aria-label="milésimos">MILÉS.</span></div>
+    </div>
+    <p id="rsvp-urgency-expired" class="rsvp-urgency-expired hidden" role="status">O prazo de confirmação terminou em 25/11.</p>
+  </section>
+  </div>
+  <section class="invite-card" id="invite-card">
+    <div id="guest-locked" class="locked hidden"><span class="big-icon"><i data-lucide="calendar-clock"></i></span><h2>Confirmações indisponíveis</h2><p>As confirmações ainda não estão abertas. Fale com a organização.</p></div>
+    <div id="guest-cta" class="guest-cta hidden">
+      <div class="guest-cta-copy"><span class="guest-cta-tag">SUA PRESENÇA IMPORTA</span><h2>Vamos contar com você?</h2><p>Confirme sua presença em poucos passos.</p></div>
+      <button id="start-confirm" class="main-button guest-start-button" type="button">Confirmar presença <i data-lucide="arrow-right"></i></button>
+      <div class="cta-footnote"><i data-lucide="lock-keyhole"></i> Seus dados serão usados apenas para organizar o evento.</div>
+    </div>
+    <div id="guest-saved" class="hidden guest-saved">
+      <span class="guest-saved-icon"><i data-lucide="check-circle-2"></i></span>
+      <div><strong>Presença registrada!</strong><small>Confira sua confirmação.</small></div>
+      <button id="open-receipt" class="guest-receipt-button" type="button">Ver <i data-lucide="chevron-right"></i></button>
+    </div>
+  </section>
+  <footer class="guest-footer" aria-label="Créditos e direitos autorais">
+    <p class="footer-credit">Desenvolvido com <span class="footer-heart" aria-label="amor" role="img">❤️</span> por <a href="https://gaveblue.com.br/" target="_blank" rel="noopener noreferrer">gaveblue.com.br</a></p>
+    <p class="footer-copyright">© Copyright 2026 - Todos os direitos reservados</p>
+  </footer>
+</main>
+<div id="rsvp-sheet" class="rsvp-sheet hidden" role="dialog" aria-modal="true" aria-labelledby="sheet-title" aria-hidden="true">
+  <div class="rsvp-sheet-backdrop" id="sheet-backdrop"></div>
+  <div class="rsvp-sheet-panel">
+    <button class="rsvp-sheet-handle" id="sheet-handle" type="button" aria-label="Deslize para baixo para fechar"><span></span></button>
+    <div class="rsvp-sheet-head"><div><span class="rsvp-sheet-kicker">CONFIRMAÇÃO DE PRESENÇA</span><h2 id="sheet-title" tabindex="-1">Encontre seu nome</h2></div>
+      <button id="sheet-close" class="rsvp-sheet-close" type="button" aria-label="Fechar"><i data-lucide="x"></i></button>
+    </div>
+    <div id="sheet-error" class="notice error hidden" role="alert"></div>
+    <div id="rsvp-sheet-scroll" class="rsvp-sheet-scroll">
+      <div id="guest-identify" class="hidden">
+        <p class="sheet-intro">Digite seu nome e pelo menos 3 letras do sobrenome.</p>
+        <label for="employee-search" class="sheet-field-label">Seu nome e sobrenome</label>
+        <div class="search-wrap" id="guest-search-wrap"><i data-lucide="search" id="search-icon"></i><input id="employee-search" autocomplete="name" autocapitalize="words" enterkeyhint="search" spellcheck="false" placeholder="Ex.: Marina Santos" maxlength="160" aria-describedby="search-hint" aria-autocomplete="list"><span class="search-spinner hidden" id="search-spinner" aria-hidden="true"></span><button type="button" id="clear-search" class="clear-search hidden" aria-label="Limpar busca"><i data-lucide="x"></i></button></div>
+        <p class="field-help" id="search-hint" role="status" aria-live="polite">Os resultados aparecem após 3 letras do sobrenome.</p>
+        <div id="employee-results" class="result-list" role="listbox" aria-label="Colaboradores encontrados"></div>
+        <p class="sheet-privacy"><i data-lucide="shield-check"></i> Sua identificação é usada somente nesta confirmação.</p>
+      </div>
+      <div id="guest-companion" class="hidden">
+        <div class="selected-person"><span class="selected-avatar"><i data-lucide="user-round-check"></i></span><div><small>COLABORADOR</small><strong id="selected-name"></strong></div><button id="change-person" class="text-btn" type="button">Alterar</button></div>
+        <h2>Falta só um detalhe.</h2><p class="support">Você vai levar acompanhante?</p>
+        <div class="companion-options">
+          <label class="option"><input type="radio" name="plus" value="yes"><span class="option-symbol"><i data-lucide="users"></i></span><span>Sim, vou levar acompanhante</span><i data-lucide="circle" class="option-check"></i></label>
+          <label class="option"><input type="radio" name="plus" value="no"><span class="option-symbol"><i data-lucide="user-round"></i></span><span>Não, irei sozinho(a)</span><i data-lucide="circle" class="option-check"></i></label>
+        </div>
+        <div id="companion-field" class="hidden"><label for="companion-name">Nome completo do acompanhante</label><input id="companion-name" class="standard-input" placeholder="Nome e sobrenome" autocomplete="off" maxlength="150"><p class="field-help">Informe o nome completo para a lista do evento.</p></div>
+        <p class="confirm-note">A presença será salva antes de abrir o WhatsApp.</p>
+        <div class="rsvp-sheet-action"><button class="main-button" type="button" id="confirm-button" disabled>Confirmar presença <i data-lucide="check"></i></button></div>
+      </div>
+      <div id="guest-done" class="hidden done-panel" aria-live="polite">
+        <div class="success-celebration" aria-hidden="true"><span class="clink-glass clink-glass-left"><i data-lucide="wine"></i></span><span class="clink-glass clink-glass-right"><i data-lucide="wine"></i></span><span class="celebration-star celebration-star-a"></span><span class="celebration-star celebration-star-b"></span><span class="celebration-star celebration-star-c"></span></div>
+        <div class="success-mark"><i data-lucide="check"></i></div><span class="done-eyebrow">TUDO CERTO!</span>
+        <h2>Presença confirmada!</h2><p class="done-lead">Estamos felizes com sua participação! Seu WhatsApp será aberto em instantes para avisar a organização.</p>
+        <div class="confirmation-receipt">
+          <div class="receipt-row"><span><i data-lucide="user-round"></i> Colaborador</span><strong id="done-person-name">—</strong></div>
+          <div class="receipt-row"><span><i data-lucide="users-round"></i> Acompanhante</span><strong id="done-companion-name">—</strong></div>
+        </div>
+        <a id="whatsapp-fallback" class="main-button whatsapp-button" target="_self" rel="noopener"><i data-lucide="message-circle"></i> Enviar mensagem no WhatsApp <i data-lucide="arrow-up-right"></i></a>
+        <p class="done-note"><i data-lucide="info"></i> O WhatsApp abrirá com a mensagem pronta. Toque em <strong>Enviar</strong> para concluir o contato.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

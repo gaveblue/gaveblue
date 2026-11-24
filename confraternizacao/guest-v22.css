@@ -1,0 +1,53 @@
+/* Convite público · v22: rodapé institucional Gaveblue */
+.guest-page .guest-footer{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+  padding:3px 6px 12px;
+  margin:12px auto 0;
+  max-width:100%;
+  text-align:center;
+  color:#78907a;
+  font:500 10px/1.5 "DM Sans",sans-serif;
+}
+.guest-page .guest-footer p{
+  padding:0;
+  margin:0;
+  line-height:1.5;
+  max-width:100%;
+  text-align:center;
+}
+.guest-page .guest-footer .footer-credit{
+  font-size:10px;
+  letter-spacing:0;
+  color:#59755e;
+}
+.guest-page .guest-footer .footer-heart{
+  display:inline-block;
+  margin:0 1px;
+  font-size:11px;
+  vertical-align:baseline;
+}
+.guest-page .guest-footer .footer-credit a{
+  color:#1b7543;
+  font-weight:800;
+  text-decoration:none;
+  text-underline-offset:3px;
+}
+.guest-page .guest-footer .footer-credit a:hover,
+.guest-page .guest-footer .footer-credit a:focus-visible{
+  text-decoration:underline;
+}
+.guest-page .guest-footer .footer-copyright{
+  font-size:9px;
+  color:#8ba18c;
+}
+@media(max-width:700px){
+  .guest-page .guest-footer{
+    margin-top:10px;
+    padding-bottom:10px;
+    gap:3px;
+  }
+}

@@ -23,10 +23,11 @@
 <link href="./guest-v19.css?v=19" rel="stylesheet">
 <link href="./guest-v20.css?v=20" rel="stylesheet">
 <link href="./guest-v21.css?v=21" rel="stylesheet">
+<link href="./guest-v22.css?v=22" rel="stylesheet">
 <script defer src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.4/dist/confetti.browser.min.js"></script>
 <script defer src="./app.js?v=16"></script>
 </head>
-<body class="guest-page invite-booting" data-invite-version="21">
+<body class="guest-page invite-booting" data-invite-version="22">
 <div id="invite-boot" class="invite-boot" role="status" aria-live="polite">
   <div class="invite-boot-inner">
     <span class="invite-boot-symbol" aria-hidden="true"><i data-lucide="calendar-heart"></i></span>
@@ -99,7 +100,10 @@
       <button id="open-receipt" class="guest-receipt-button" type="button">Ver <i data-lucide="chevron-right"></i></button>
     </div>
   </section>
-  <footer class="guest-footer">Covre Agrícola &amp; Covre &amp; Cia <span>2026</span></footer>
+  <footer class="guest-footer" aria-label="Créditos e direitos autorais">
+    <p class="footer-credit">Desenvolvido com <span class="footer-heart" aria-label="amor" role="img">❤️</span> por <a href="https://gaveblue.com.br/" target="_blank" rel="noopener noreferrer">gaveblue.com.br</a></p>
+    <p class="footer-copyright">© Copyright 2026 - Todos os direitos reservados</p>
+  </footer>
 </main>
 <div id="rsvp-sheet" class="rsvp-sheet hidden" role="dialog" aria-modal="true" aria-labelledby="sheet-title" aria-hidden="true">
   <div class="rsvp-sheet-backdrop" id="sheet-backdrop"></div>

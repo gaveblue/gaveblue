@@ -121,3 +121,9 @@ Implementação isolada do convite corporativo GaveBlue, sem alterações nos ap
 - 10 brilhos/confetes dourados leves com CSS puro sobre a região do título, com deriva para cima, animações escalonadas e desativação por `prefers-reduced-motion`.
 - Novos arquivos: `guest-v21.css` e `convite-v21.html`; todos os links de versão anteriores permanecem sincronizados com o mesmo convite.
 - Não houve mudança em `app.js`, formulários, backend, calendário ou dados de colaboradores.
+
+## Convite público v22 — rodapé institucional
+- Rodapé anterior com nomes Covre Agrícola/Covre & Cia e ano removido; as marcas permanecem no topo.
+- Rodapé novo em duas linhas centralizadas: `Desenvolvido com ❤️ por gaveblue.com.br` (link oficial) e `© Copyright 2026 - Todos os direitos reservados`.
+- Tipografia pequena, cores discretas, sem alterar fluxos de RSVP nem demais conteúdos.
+- Atualizadas rotas existentes e novo acesso `convite-v22.html`; estilo isolado em `guest-v22.css`.
