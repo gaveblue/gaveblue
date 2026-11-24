@@ -201,3 +201,10 @@ Implementação isolada do convite corporativo GaveBlue, sem alterações nos ap
 - **Festa manual:** após confirmação positiva do servidor, toca o mesmo som curto permitido pelo navegador e surge um efeito temporário de fogos/taças. Não ocorre na desconfirmação ou em tentativas malsucedidas.
 - **Carregamento:** indicação indeterminada verdadeira durante o pedido de rede (sem porcentagem fingida), com **Validando dados da confirmação...** ou **Removendo confirmação...** de acordo com a ação.
 - Código do admin em `app.js?v=30`, estilos `admin-v12.css`, versão de URL `admin/painel-v12.html`; convite público usa `guest-v24.css` e todas as páginas/aliases foram sincronizadas. Nenhuma confirmação preexistente foi alterada durante a implementação.
+
+## Admin v13 / Convite v25 — Apelido opcional e busca com 5 letras (24/11/2026)
+- Campo opcional de apelido de até 60 caracteres no cadastro/edição. Preservado na edição, nas confirmações manuais, no CSV e na listagem, sem alterar respostas antigas.
+- Busca pública inicia com **pelo menos 5 letras** (sem contar espaços), por início de nome, outras partes do nome ou apelido. Retorna até 40 colaboradores, incluindo vários com primeiro nome igual; o convidado escolhe o cadastro identificado pelo nome completo, com apelido visível quando houver.
+- O backend revalida que o registro selecionado corresponde à busca, mantendo limite de tentativas, verificação de evento aberto e confirmação por ID.
+- Novas colunas `apelido`/`apelido_chave` com valor padrão vazio; função `rsvp_admin_save_person_v2` atualiza cadastro e confirmação atomicamente; `rsvp_busca_rapida` preserva limite de requisições e aplica pesquisa parcial com 5 letras.
+- HTML e CSS do admin v13 e convite v25 sincronizados entre links principais e aliases. Sem alterações aos colaboradores existentes na migração.

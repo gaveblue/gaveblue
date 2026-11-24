@@ -16,11 +16,12 @@
 <link href="../admin-v9.css?v=9" rel="stylesheet">
 <link href="../admin-v11.css?v=11" rel="stylesheet">
 <link href="../admin-v12.css?v=12" rel="stylesheet">
+<link href="../admin-v13.css?v=13" rel="stylesheet">
 
 <script defer src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
-<script defer src="../app.js?v=30"></script>
+<script defer src="../app.js?v=31"></script>
 </head>
-<body class="admin-page" data-admin-version="12">
+<body class="admin-page" data-admin-version="13">
 <div id="admin-loading" class="admin-loading" role="status" aria-live="polite" aria-atomic="true">
   <div class="admin-loading-inner">
     <div class="admin-loading-symbol" aria-hidden="true"><span class="admin-loading-orbit"></span><i data-lucide="sparkles"></i></div>
@@ -107,7 +108,7 @@
       <section class="admin-panel">
       <div class="people-filter-panel">
         <div class="people-filter-controls">
-          <div class="search-wrap people-search"><i data-lucide="search"></i><input id="people-search" type="search" placeholder="Pesquisar por nome ou setor..." aria-label="Pesquisar colaboradores" autocomplete="off"><button id="clear-people-search" class="people-search-clear hidden" type="button" aria-label="Limpar pesquisa"><i data-lucide="x"></i></button></div>
+          <div class="search-wrap people-search"><i data-lucide="search"></i><input id="people-search" type="search" placeholder="Buscar nome, apelido ou setor..." aria-label="Pesquisar colaboradores" autocomplete="off"><button id="clear-people-search" class="people-search-clear hidden" type="button" aria-label="Limpar pesquisa"><i data-lucide="x"></i></button></div>
           <select id="status-filter" class="standard-input" aria-label="Filtrar por status"><option value="all">Todos os status</option><option value="confirmed">Confirmados</option><option value="pending">Não confirmados</option><option value="incomplete">Nome único</option><option value="inactive">Inativos</option></select>
           <select id="sector-filter" class="standard-input" aria-label="Filtrar por setor"><option value="all">Todos os setores</option></select>
         </div>
@@ -171,7 +172,9 @@
 <div id="edit-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
   <div class="modal-backdrop" data-close-modal></div><form id="person-form" class="modal-card">
     <div class="modal-head"><div><span class="eyebrow">LISTA DE CONVIDADOS</span><h2 id="modal-title">Novo colaborador</h2></div><button type="button" class="icon-btn" data-close-modal aria-label="Fechar"><i data-lucide="x"></i></button></div>
-    <label for="person-name">Nome completo do colaborador</label><input id="person-name" class="standard-input" placeholder="Nome e sobrenome" maxlength="150" required>
+    <label for="person-name">Nome do colaborador</label><input id="person-name" class="standard-input" placeholder="Ex.: Lucas Pimentel ou Lucas" minlength="3" maxlength="150" required>
+    <label for="person-nickname">Apelido <span class="field-optional">(opcional)</span></label><input id="person-nickname" class="standard-input" placeholder="Como a pessoa também é conhecida" maxlength="60" autocomplete="off">
+    <p class="nickname-field-help">O apelido ajuda a localizar o colaborador no convite. O cadastro e a confirmação continuam vinculados ao nome principal.</p>
     <label for="person-sector">Setor / grupo</label><input id="person-sector" class="standard-input" list="sector-suggestions" placeholder="Ex.: Covre e Cia" maxlength="90" autocomplete="off">
     <datalist id="sector-suggestions"></datalist>
     <label class="checkbox-line" id="person-active-wrap"><input id="person-active" type="checkbox" checked> Disponível na busca pública</label>

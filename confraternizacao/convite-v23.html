@@ -26,10 +26,11 @@
 <link href="./guest-v22.css?v=22" rel="stylesheet">
 <link href="./guest-v23.css?v=23" rel="stylesheet">
 <link href="./guest-v24.css?v=24" rel="stylesheet">
+<link href="./guest-v25.css?v=25" rel="stylesheet">
 <script defer src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.4/dist/confetti.browser.min.js"></script>
-<script defer src="./app.js?v=30"></script>
+<script defer src="./app.js?v=31"></script>
 </head>
-<body class="guest-page invite-booting" data-invite-version="24">
+<body class="guest-page invite-booting" data-invite-version="25">
 <div id="invite-boot" class="invite-boot" role="status" aria-live="polite">
   <div class="invite-boot-inner">
     <span class="invite-boot-symbol" aria-hidden="true"><i data-lucide="calendar-heart"></i></span>
@@ -117,10 +118,10 @@
     <div id="sheet-error" class="notice error hidden" role="alert"></div>
     <div id="rsvp-sheet-scroll" class="rsvp-sheet-scroll">
       <div id="guest-identify" class="hidden">
-        <p class="sheet-intro">Digite seu nome como aparece na lista. Se tiver sobrenome, informe também ao menos 3 letras dele.</p>
-        <label for="employee-search" class="sheet-field-label">Seu nome na lista</label>
-        <div class="search-wrap" id="guest-search-wrap"><i data-lucide="search" id="search-icon"></i><input id="employee-search" autocomplete="name" autocapitalize="words" enterkeyhint="search" spellcheck="false" placeholder="Ex.: Marina Santos ou Marina" maxlength="160" aria-describedby="search-hint" aria-autocomplete="list"><span class="search-spinner hidden" id="search-spinner" aria-hidden="true"></span><button type="button" id="clear-search" class="clear-search hidden" aria-label="Limpar busca"><i data-lucide="x"></i></button></div>
-        <p class="field-help" id="search-hint" role="status" aria-live="polite">Digite ao menos 3 letras do seu nome. Para nomes completos, informe também o sobrenome.</p>
+        <p class="sheet-intro">Digite pelo menos 5 letras do seu nome ou apelido. Escolha seu cadastro entre os resultados, mesmo que existam nomes parecidos.</p>
+        <label for="employee-search" class="sheet-field-label">Nome ou apelido</label>
+        <div class="search-wrap" id="guest-search-wrap"><i data-lucide="search" id="search-icon"></i><input id="employee-search" autocomplete="name" autocapitalize="words" enterkeyhint="search" spellcheck="false" placeholder="Ex.: Lucas ou apelido" maxlength="160" aria-describedby="search-hint" aria-autocomplete="list"><span class="search-spinner hidden" id="search-spinner" aria-hidden="true"></span><button type="button" id="clear-search" class="clear-search hidden" aria-label="Limpar busca"><i data-lucide="x"></i></button></div>
+        <p class="field-help" id="search-hint" role="status" aria-live="polite">A pesquisa começa a partir de 5 letras. Se houver nomes repetidos, selecione o seu.</p>
         <div id="employee-results" class="result-list" role="listbox" aria-label="Colaboradores encontrados"></div>
         <p class="sheet-privacy"><i data-lucide="shield-check"></i> Sua identificação é usada somente nesta confirmação.</p>
       </div>

@@ -1,0 +1,23 @@
+/* Admin RSVP v13: apelido opcional e pesquisa inclusiva */
+.admin-page .field-optional{
+ font-size:10px;font-weight:600;color:#91a091;margin-left:4px;
+}
+.admin-page .nickname-field-help{
+ font-size:10px;line-height:1.5;color:#819785;margin:-4px 0 8px;
+}
+.admin-page #person-nickname:focus-visible{
+ outline:2px solid #acd5b3;outline-offset:1px;
+}
+.admin-page .people-table .name-stack small{
+ display:block;max-width:100%;overflow:hidden;
+ text-overflow:ellipsis;white-space:nowrap;
+}
+.admin-page .people-filter-controls .people-search input{
+ text-overflow:ellipsis;
+}
+@media(max-width:700px){
+ .admin-page .nickname-field-help{font-size:10px}
+ .admin-page .people-table .name-stack small{
+   max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+ }
+}
