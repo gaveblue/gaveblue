@@ -17,11 +17,12 @@
 <link href="../admin-v11.css?v=11" rel="stylesheet">
 <link href="../admin-v12.css?v=12" rel="stylesheet">
 <link href="../admin-v13.css?v=13" rel="stylesheet">
+<link href="../admin-v14.css?v=14" rel="stylesheet">
 
 <script defer src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
-<script defer src="../app.js?v=31"></script>
+<script defer src="../app.js?v=32"></script>
 </head>
-<body class="admin-page" data-admin-version="13">
+<body class="admin-page" data-admin-version="14">
 <div id="admin-loading" class="admin-loading" role="status" aria-live="polite" aria-atomic="true">
   <div class="admin-loading-inner">
     <div class="admin-loading-symbol" aria-hidden="true"><span class="admin-loading-orbit"></span><i data-lucide="sparkles"></i></div>
@@ -111,6 +112,7 @@
           <div class="search-wrap people-search"><i data-lucide="search"></i><input id="people-search" type="search" placeholder="Buscar nome, apelido ou setor..." aria-label="Pesquisar colaboradores" autocomplete="off"><button id="clear-people-search" class="people-search-clear hidden" type="button" aria-label="Limpar pesquisa"><i data-lucide="x"></i></button></div>
           <select id="status-filter" class="standard-input" aria-label="Filtrar por status"><option value="all">Todos os status</option><option value="confirmed">Confirmados</option><option value="pending">Não confirmados</option><option value="incomplete">Nome único</option><option value="inactive">Inativos</option></select>
           <select id="sector-filter" class="standard-input" aria-label="Filtrar por setor"><option value="all">Todos os setores</option></select>
+          <select id="group-filter" class="standard-input" aria-label="Filtrar por grupo"><option value="all">Todos os grupos</option></select>
         </div>
         <div class="people-status-tabs" role="group" aria-label="Filtrar rapidamente por status">
           <button class="people-status-tab active" type="button" data-status="all" aria-pressed="true">Todos <span data-count-for="all">0</span></button>
@@ -119,8 +121,21 @@
           <button class="people-status-tab" type="button" data-status="inactive" aria-pressed="false">Inativos <span data-count-for="inactive">0</span></button>
           <button class="people-status-tab" type="button" data-status="incomplete" aria-pressed="false">Nome único <span data-count-for="incomplete">0</span></button>
         </div>
-        <div class="people-results-line"><span id="people-count" class="count-label" role="status">0 resultados</span></div>
-      </div><div class="table-scroll"><table class="people-table"><thead><tr><th>COLABORADOR / SETOR</th><th>ACOMPANHANTE</th><th>STATUS / CONFIRMAÇÃO</th><th>CONFIRMADO EM</th><th></th></tr></thead><tbody id="people-body"></tbody></table></div></section>
+        <div class="people-results-line people-results-actions">
+          <span id="people-count" class="count-label" role="status">0 resultados</span>
+          <div class="people-select-actions">
+            <button id="select-visible" type="button" class="people-select-visible"><i data-lucide="list-checks"></i> Selecionar visíveis</button>
+            <button id="clear-selection" type="button" class="people-clear-selection hidden">Limpar seleção</button>
+          </div>
+        </div>
+        <div id="bulk-selection-bar" class="people-bulk-bar hidden" role="status" aria-live="polite">
+          <div class="people-bulk-info">
+            <span class="people-bulk-icon"><i data-lucide="check-check"></i></span>
+            <div><strong id="bulk-selection-count">0 selecionados</strong><small>Seleção mantida ao mudar os filtros</small></div>
+          </div>
+          <button id="bulk-edit-button" type="button" class="main-button compact"><i data-lucide="layers-3"></i> Editar setor e grupo</button>
+        </div>
+      </div><div class="table-scroll"><table class="people-table"><thead><tr><th><label class="people-select-heading"><input id="people-select-all" type="checkbox" aria-label="Selecionar todos os colaboradores visíveis"><span>COLABORADOR / SETOR / GRUPO</span></label></th><th>ACOMPANHANTE</th><th>STATUS / CONFIRMAÇÃO</th><th>CONFIRMADO EM</th><th></th></tr></thead><tbody id="people-body"></tbody></table></div></section>
     </div>
     <div id="view-settings" class="admin-content hidden">
       <div class="section-intro"><h2>Configurações do evento</h2><p>Edite os dados do convite, o WhatsApp e o status das confirmações.</p></div>
@@ -169,14 +184,37 @@
     </div>
   </div>
 </div>
+<div id="bulk-modal" class="modal people-bulk-modal hidden" role="dialog" aria-modal="true" aria-labelledby="bulk-modal-title">
+  <div class="modal-backdrop" data-close-modal></div>
+  <form id="bulk-form" class="modal-card people-bulk-modal-card">
+    <div class="modal-head"><div><span class="eyebrow">EDIÇÃO DE VÁRIOS COLABORADORES</span><h2 id="bulk-modal-title">Organizar por setor e grupo</h2></div><button type="button" class="icon-btn" data-close-modal aria-label="Fechar edição em lote"><i data-lucide="x"></i></button></div>
+    <div class="bulk-selected-summary"><i data-lucide="users"></i><strong id="bulk-modal-count">0 colaboradores selecionados</strong></div>
+    <p class="bulk-modal-help">Marque os campos que deseja alterar. Os demais dados e confirmações permanecerão como estão.</p>
+    <div class="bulk-field">
+      <label class="bulk-field-check" for="bulk-apply-sector"><input id="bulk-apply-sector" type="checkbox"><span><strong>Alterar setor</strong><small>Atribua um setor existente ou crie outro</small></span></label>
+      <input id="bulk-sector" class="standard-input" list="sector-suggestions" placeholder="Ex.: Administrativo, Financeiro" maxlength="90" autocomplete="off" disabled aria-label="Novo setor para os selecionados">
+      <small class="bulk-field-note">Para limpar o setor, ative a opção e deixe o campo vazio.</small>
+    </div>
+    <div class="bulk-field">
+      <label class="bulk-field-check" for="bulk-apply-group"><input id="bulk-apply-group" type="checkbox"><span><strong>Alterar grupo</strong><small>Organize por empresa, equipe ou categoria</small></span></label>
+      <input id="bulk-group" class="standard-input" list="group-suggestions" placeholder="Ex.: Covre e Cia, Motoristas" maxlength="90" autocomplete="off" disabled aria-label="Novo grupo para os selecionados">
+    </div>
+    <div class="bulk-modal-footer">
+      <button type="button" class="secondary-button" data-close-modal>Cancelar</button>
+      <button id="bulk-submit" type="submit" class="main-button"><i data-lucide="check"></i> Revisar e salvar</button>
+    </div>
+  </form>
+</div>
 <div id="edit-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
   <div class="modal-backdrop" data-close-modal></div><form id="person-form" class="modal-card">
     <div class="modal-head"><div><span class="eyebrow">LISTA DE CONVIDADOS</span><h2 id="modal-title">Novo colaborador</h2></div><button type="button" class="icon-btn" data-close-modal aria-label="Fechar"><i data-lucide="x"></i></button></div>
     <label for="person-name">Nome do colaborador</label><input id="person-name" class="standard-input" placeholder="Ex.: Lucas Pimentel ou Lucas" minlength="3" maxlength="150" required>
     <label for="person-nickname">Apelido <span class="field-optional">(opcional)</span></label><input id="person-nickname" class="standard-input" placeholder="Como a pessoa também é conhecida" maxlength="60" autocomplete="off">
     <p class="nickname-field-help">O apelido ajuda a localizar o colaborador no convite. O cadastro e a confirmação continuam vinculados ao nome principal.</p>
-    <label for="person-sector">Setor / grupo</label><input id="person-sector" class="standard-input" list="sector-suggestions" placeholder="Ex.: Covre e Cia" maxlength="90" autocomplete="off">
+    <label for="person-sector">Setor</label><input id="person-sector" class="standard-input" list="sector-suggestions" placeholder="Ex.: Administrativo" maxlength="90" autocomplete="off">
     <datalist id="sector-suggestions"></datalist>
+    <label for="person-group">Grupo / categoria</label><input id="person-group" class="standard-input" list="group-suggestions" placeholder="Ex.: Covre e Cia, Motoristas" maxlength="90" autocomplete="off">
+    <datalist id="group-suggestions"></datalist>
     <label class="checkbox-line" id="person-active-wrap"><input id="person-active" type="checkbox" checked> Disponível na busca pública</label>
     <div class="manual-confirm-box manual-confirm-switch">
     <div class="manual-confirm-header"><div><strong>Status da presença</strong><small id="person-confirm-status">Não confirmado</small></div><button id="person-confirmed" type="button" class="rsvp-confirm-toggle" role="switch" aria-checked="false" aria-label="Ativar confirmação manual"><span class="rsvp-confirm-thumb" aria-hidden="true"></span></button></div>
