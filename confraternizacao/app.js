@@ -21,9 +21,39 @@ async function request(action, data = {}, token = "", options = {}) {
 }
 function validSearch(s) {
   const parts = norm(s).split(" ").filter(Boolean);
-  return parts.length >= 2 && parts[0].length >= 2 && parts[parts.length - 1].length >= 3;
+  return (parts.length === 1 && parts[0].length >= 3)
+    || (parts.length >= 2 && parts[0].length >= 2 && parts[parts.length - 1].length >= 3);
 }
 function validFullName(s) { const words = String(s || "").trim().split(/\s+/).filter(Boolean); return words.length >= 2 && String(s).trim().length >= 5; }
+// A mensagem é guardada como texto com marcadores, nunca como HTML enviado ao servidor.
+// Apenas negrito, itálico e tachado são renderizados, sempre com textContent.
+function renderRsvpMessage(target, raw) {
+  if (!target) return;
+  const source = String(raw ?? "").slice(0, 500).trim();
+  if (!source) { target.replaceChildren(); return; }
+  const parts = source.split(/\n\s*\n/).filter(Boolean);
+  const paragraphs = parts.map(part => {
+    const p = document.createElement("p");
+    const pattern = /(\*\*([^*\n]+)\*\*|~~([^~\n]+)~~|\*([^*\n]+)\*)/g;
+    let cursor=0, match;
+    while ((match=pattern.exec(part))!==null) {
+      if(match.index>cursor)p.append(document.createTextNode(part.slice(cursor,match.index)));
+      const tag=match[2] ? "strong" : match[3] ? "s" : "em";
+      const node=document.createElement(tag);
+      node.textContent=match[2] || match[3] || match[4] || "";
+      p.append(node);
+      cursor=pattern.lastIndex;
+    }
+    if(cursor<part.length)p.append(document.createTextNode(part.slice(cursor)));
+    return p;
+  });
+  target.replaceChildren(...paragraphs);
+}
+function validPersonName(value) {
+  const name = String(value||"").trim();
+  return name.length >= 3 && name.length <= 150 && /^[\p{L}\s'.-]+$/u.test(name);
+}
+
 function initGuest() {
   let event = null, selected = null, typedQuery = "", timer = null, searchSeq = 0;
   let loading = false, searchAbort = null, sheetTimer = null, finished = false;
@@ -329,15 +359,9 @@ function initGuest() {
 
   function updateEvent(data) {
     event = data;
-    // A descrição continua editável pelo painel: preservar parágrafos com segurança.
-    const description = $("guest-description");
-    if (description && String(event.descricao || "").trim()) {
-      const paragraphs = String(event.descricao).trim().split(/\n\s*\n/).filter(Boolean);
-      description.replaceChildren(...paragraphs.map(value => {
-        const paragraph = document.createElement("p");
-        paragraph.textContent = value.trim();
-        return paragraph;
-      }));
+    // Renderização segura de marcadores de estilo, sem interpretar HTML arbitrário.
+    if (String(event.descricao || "").trim()) {
+      renderRsvpMessage($("guest-description"), event.descricao);
     }
     const parts = /^\d{4}-\d{2}-\d{2}$/.test(String(event.data_evento || "")) ? event.data_evento.split("-") : null;
     const dateDisplay = parts ? new Intl.DateTimeFormat("pt-BR",{day:"numeric",month:"long",timeZone:"UTC"}).format(new Date(event.data_evento+"T12:00:00Z")) : "data a definir";
@@ -395,7 +419,7 @@ function initGuest() {
   function drawResults(items) {
     clearResults();
     if (!items.length) {
-      results.innerHTML = '<div class="result-empty">Nenhum colaborador encontrado. Confira o nome e sobrenome.</div>';
+      results.innerHTML = '<div class="result-empty">Nenhum colaborador encontrado. Confira o nome informado.</div>';
       return;
     }
     items.forEach(person => {
@@ -435,7 +459,7 @@ function initGuest() {
     clearResults();
     setSearching(false);
     if (!validSearch(query)) {
-      $("search-hint").textContent = "Digite seu nome e pelo menos 3 letras do sobrenome.";
+      $("search-hint").textContent = "Digite ao menos 3 letras do seu nome. Para nome e sobrenome, informe também 3 letras do sobrenome.";
       return;
     }
     const key = norm(query);
@@ -553,6 +577,34 @@ function initAdmin() {
     navCollapsed=!navCollapsed;refreshNav();
   });
   refreshNav();
+  function celebrateManualConfirmation() {
+    playConfirmationSound();
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+    const frame=document.createElement("div");
+    frame.className="admin-manual-celebration";
+    frame.setAttribute("aria-hidden","true");
+    frame.innerHTML='<div class="manual-celebration-glasses"><i data-lucide="wine"></i><i data-lucide="wine"></i></div>';
+    const palette=["#eba62f","#12834c","#e9ca46","#f7aa55"];
+    for(let burst=0;burst<3;burst++){
+      const container=document.createElement("div");
+      container.className="admin-manual-burst";
+      container.style.left=[29,50,71][burst]+"%";
+      container.style.top=[35,24,45][burst]+"%";
+      container.style.setProperty("--burst-delay",burst*.15+"s");
+      for(let i=0;i<12;i++){
+        const spark=document.createElement("span");
+        spark.className="admin-manual-spark";
+        spark.style.setProperty("--angle",(i*30)+"deg");
+        spark.style.setProperty("--spark-color",palette[(i+burst)%palette.length]);
+        container.append(spark);
+      }
+      frame.append(container);
+    }
+    document.body.append(frame);
+    icons();
+    setTimeout(()=>frame.remove(),1750);
+  }
+
   function setActionLoading(visible,title) {
     const loading=$("admin-action-loading");
     if(!loading)return;
@@ -822,7 +874,7 @@ function initAdmin() {
     $("share-url").textContent = location.origin + "/confraternizacao/";
     const employees = dataset.collaborators;
     const actives = employees.filter(p => p.ativo);
-    const incomplete = employees.filter(p => !validFullName(p.nome_completo));
+    const incomplete = employees.filter(p => p.nome_completo.trim().split(/\s+/).length===1);
     const confirmations = conMap();
     const confirmed = employees.filter(p => confirmations.has(p.id));
     const pending = actives.filter(p => !confirmations.has(p.id));
@@ -859,7 +911,7 @@ function initAdmin() {
       confirmed:dataset.collaborators.filter(p=>map.has(p.id)).length,
       pending:dataset.collaborators.filter(p=>!map.has(p.id)).length,
       inactive:dataset.collaborators.filter(p=>!p.ativo).length,
-      incomplete:dataset.collaborators.filter(p=>!validFullName(p.nome_completo)).length
+      incomplete:dataset.collaborators.filter(p=>p.nome_completo.trim().split(/\s+/).length===1).length
     };
     document.querySelectorAll("[data-count-for]").forEach(n=>n.textContent=byStatus[n.dataset.countFor]??0);
     document.querySelectorAll(".people-status-tab").forEach(n=>{
@@ -873,18 +925,17 @@ function initAdmin() {
       if(status==="confirmed")return confirmed;
       if(status==="pending")return !confirmed;
       if(status==="inactive")return !p.ativo;
-      if(status==="incomplete")return !validFullName(p.nome_completo);
+      if(status==="incomplete")return p.nome_completo.trim().split(/\s+/).length===1;
       return true;
     });
     $("people-count").textContent=list.length+" resultado"+(list.length===1?"":"s");
     $("people-body").innerHTML=list.length?list.map(p=>{
       const c=map.get(p.id),confirmed=!!c;
-      const badge=confirmed?'<span class="status-chip confirmed">Confirmado</span>'+(c.origem==="manual"?'<span class="origin-label">Manual</span>':""):
-        !validFullName(p.nome_completo)?'<span class="status-chip inactive">Sem sobrenome</span>':
+      const badge=confirmed?'<span class="status-chip confirmed">Confirmado</span>':
         !p.ativo?'<span class="status-chip inactive">Inativo</span>':'<span class="status-chip">Não confirmado</span>';
       const initials=p.nome_completo.split(/\s+/).slice(0,2).map(n=>n[0]).join("").toUpperCase();
       const sectorText=(p.setor||p.grupo||"Setor não informado").trim();
-      const disabled=statusBusy||!validFullName(p.nome_completo);
+      const disabled=statusBusy||!validPersonName(p.nome_completo);
       const toggle='<button type="button" role="switch" class="rsvp-confirm-toggle'+(statusBusy?' is-busy':'')+
         '" data-confirm-id="'+escapeHtml(p.id)+'" aria-checked="'+confirmed+'" aria-label="'+
         escapeHtml((confirmed?"Retirar confirmação de ":"Confirmar presença de ")+p.nome_completo)+'"'+
@@ -947,14 +998,14 @@ function initAdmin() {
   async function toggleListConfirmation(id) {
     if(statusBusy||!dataset||actionResolve)return;
     const p=dataset.collaborators.find(x=>x.id===id);
-    if(!p||!validFullName(p.nome_completo))return;
+    if(!p||!validPersonName(p.nome_completo))return;
     const next=!conMap().has(id);
     statusBusy=true;renderPeople();
     let loadingStarted=false;
     try {
       const approved=await confirmStatus({name:p.nome_completo,turningOn:next});
       if(!approved)return;
-      setActionLoading(true,next?"Confirmando presença...":"Retirando confirmação...");
+      setActionLoading(true,next?"Validando dados da confirmação...":"Removendo confirmação...");
       loadingStarted=true;
       const generation=authGeneration;
       mutedConfirmationIds.add(id);
@@ -962,6 +1013,7 @@ function initAdmin() {
         ativo:p.ativo!==false,confirmado:next});
       if(generation!==authGeneration)return;
       applySavedPerson(p.id,p.nome_completo,p.setor||"",p.ativo!==false,next);
+      if(next)celebrateManualConfirmation();
       toast(next?"Presença de "+p.nome_completo+" confirmada.":"Confirmação de "+p.nome_completo+" retirada.");
     }catch(err){toast(err.message||"Não foi possível salvar.","error");}
     finally{if(loadingStarted)setActionLoading(false);mutedConfirmationIds.delete(id);statusBusy=false;renderPeople();}
@@ -972,11 +1024,49 @@ function initAdmin() {
     finally { button.disabled = false; }
   });
 
+
+  function updateMessagePreview() {
+    renderRsvpMessage($("event-description-preview"), $("event-description").value);
+    $("event-description-count").textContent=String($("event-description").value.length)+" / 500";
+  }
+  $("event-description").addEventListener("input",updateMessagePreview);
+  document.querySelectorAll("[data-message-format]").forEach(button => {
+    button.addEventListener("pointerdown",event => {
+      if(event.pointerType === "mouse")event.preventDefault(); // preserva seleção do textarea
+    });
+    button.addEventListener("click",() => {
+      const textarea=$("event-description");
+      const marker=({bold:"**",italic:"*",strike:"~~"})[button.dataset.messageFormat];
+      if(!marker)return;
+      const start=textarea.selectionStart,end=textarea.selectionEnd;
+      const selected=textarea.value.slice(start,end);
+      const placeholder=selected||"texto";
+      const before=textarea.value.slice(0,start),after=textarea.value.slice(end);
+      const formatted=marker+placeholder+marker;
+      if((before+formatted+after).length>500){
+        notify("A mensagem pode ter até 500 caracteres, incluindo os marcadores.",true);
+        return;
+      }
+      textarea.setRangeText(formatted,start,end,"end");
+      textarea.focus();
+      textarea.setSelectionRange(start+marker.length,start+marker.length+placeholder.length);
+      updateMessagePreview();
+    });
+  });
+  $("event-description").addEventListener("keydown",event=>{
+    if(!(event.ctrlKey||event.metaKey) || event.altKey)return;
+    const format=event.key.toLowerCase()==="b"?"bold":event.key.toLowerCase()==="i"?"italic":null;
+    if(!format)return;
+    event.preventDefault();
+    document.querySelector('[data-message-format="'+format+'"]')?.click();
+  });
+
   function renderSettings() {
     if (!dataset) return;
     const ev = dataset.event;
     $("event-title").value = ev.titulo || "";
     $("event-description").value = ev.descricao || "";
+    renderRsvpMessage($("event-description-preview"), $("event-description").value);
     $("event-date-input").value = ev.data_evento || "";
     $("event-time-input").value = ev.horario || "";
     $("event-place-input").value = ev.local_evento || "";
@@ -1075,12 +1165,12 @@ function initAdmin() {
     e.preventDefault();
     if(statusBusy)return;
     const name=$("person-name").value.trim(),active=$("person-active").checked;
-    if(!name||(active&&!validFullName(name))||(!editingId&&!validFullName(name))){
-      notify("Informe nome e sobrenome para disponibilizar o cadastro na busca.",true);return;
+    if(!validPersonName(name)){
+      notify("Informe um nome com pelo menos 3 letras.",true);return;
     }
     const wasConfirmed=!!(editingId&&conMap().has(editingId));
     statusBusy=true;
-    setActionLoading(true,"Salvando colaborador...");
+    setActionLoading(true,wasConfirmed && !manualConfirmed?"Removendo confirmação...":"Validando dados do colaborador...");
     const button=$("person-save");
     button.disabled=true;button.classList.add("is-saving");
     $("person-save-label").textContent="Salvando...";
@@ -1096,6 +1186,7 @@ function initAdmin() {
       if(reply?.colaborador_id)mutedConfirmationIds.add(reply.colaborador_id);
       applySavedPerson(reply?.colaborador_id || editingId,name,savedSector,active,manualConfirmed);
       modal("edit-modal",false);
+      if(!wasConfirmed && manualConfirmed)celebrateManualConfirmation();
       if(wasConfirmed!==manualConfirmed){
         toast(manualConfirmed?"Presença de "+name+" confirmada.":"Confirmação de "+name+" retirada.");
       } else if(!editingId) toast(name+" cadastrado com sucesso.");
@@ -1130,7 +1221,7 @@ function initAdmin() {
     if(!dataset)return;
     const map=conMap();
     const rows=[["Colaborador","Setor","Grupo original","Status","Origem da confirmacao","Acompanhante","Nome do acompanhante","Data da confirmacao"]];
-    dataset.collaborators.forEach(p => {const c=map.get(p.id);rows.push([p.nome_completo,p.setor||"",p.grupo||"",c?"Confirmado":!validFullName(p.nome_completo)?"Sem sobrenome":!p.ativo?"Inativo":"Pendente",c?.origem==="manual"?"Manual":c?"Link":"",c?.acompanhante?"Sim":"Nao",c?.acompanhante_nome||"",stamp(c?.confirmado_em)]);});
+    dataset.collaborators.forEach(p => {const c=map.get(p.id);rows.push([p.nome_completo,p.setor||"",p.grupo||"",c?"Confirmado":!p.ativo?"Inativo":"Pendente",c?.origem==="manual"?"Manual":c?"Link":"",c?.acompanhante?"Sim":"Nao",c?.acompanhante_nome||"",stamp(c?.confirmado_em)]);});
     const csv="\uFEFF"+rows.map(row=>row.map(v=>'"'+String(v??"").replace(/"/g,'""')+'"').join(";")).join("\r\n");
     const url=window.URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"})); // replaced below to avoid shadowing global URL
     const a=document.createElement("a");a.href=url;a.download="confirmacoes-confraternizacao.csv";a.click();setTimeout(()=>window.URL.revokeObjectURL(url),1000);
