@@ -794,7 +794,10 @@ function initAdmin() {
       (state === "prazo_expirado" ? "Novas confirmações bloqueadas. Prorrogue o prazo para reabrir." :
        state === "encerrado_manual" ? "Encerramento manual. O histórico está preservado." :
        state === "nao_iniciadas" ? "O convite aguarda a abertura pela organização." :
-       "Recebendo confirmações até o horário configurado.");
+       "Recebendo confirmações até o horário configurado.") +
+       (state === "aberto"
+         ? " • Verificando novas presenças a cada 5 segundos."
+         : " • Atualizações automáticas pausadas; use Atualizar dados para consultar novamente.");
     const panel = document.querySelector(".rsvp-state-panel");
     if (panel) panel.dataset.state = state;
     const status = $("settings-rsvp-state");
@@ -1154,12 +1157,16 @@ function initAdmin() {
   });
   if (session) bootstrap(false);
   else showLogin();
+  // Só consulta automaticamente quando o evento aceita confirmações.
+  // Rascunho, encerramento manual e prazo vencido pausam todas as consultas periódicas.
+  // Um refresh manual ou a reabertura pelas configurações atualizam os dados e reativam o ciclo.
   setInterval(() => {
-    if (session && dataset && !pendingBootstrap && !statusBusy && !document.hidden
+    if (session && dataset && effectiveAdminState(dataset.event) === "aberto"
+      && !pendingBootstrap && !statusBusy && !document.hidden
       && $("edit-modal").classList.contains("hidden")
       && $("import-modal").classList.contains("hidden")
-      && Date.now()-lastLoad>=10000) bootstrap(true);
-  },5000);
+      && Date.now()-lastLoad>=5000) bootstrap(true);
+  },1000);
   icons();
 }
 document.addEventListener("DOMContentLoaded", () => {
