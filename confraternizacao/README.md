@@ -215,3 +215,13 @@ Implementação isolada do convite corporativo GaveBlue, sem alterações nos ap
 - Bottom sheet com altura preferencial de 80% da área visível em repouso, redução da altura quando o teclado aparece e rolagem restrita ao conteúdo; ações no rodapé.
 - Escolha de acompanhante separada do preenchimento do nome. Continuar abre a etapa adicional, Voltar preserva a seleção, e somente a ação final registra a presença. Sem alterações de backend ou de outros aplicativos.
 - Script público isolado em guest-app-v26.js; painel administrativo e versões anteriores preservados. Referências a IDs HTML verificadas; validação visual em aparelho real pendente.
+
+## Admin v14 — Classificação de colaboradores em lote (24/11/2026)
+- Seleção múltipla de colaboradores por checkbox individual, checkbox no cabeçalho da tabela e ação "Selecionar visíveis" (respeitando pesquisa, status, setor e grupo). A seleção persiste ao mudar filtros, com contagem e opção "Limpar seleção".
+- Barra de ação contextual para **Editar setor e grupo**; modal com opções independentes de aplicar setor, grupo, ou ambos. Campo desmarcado nunca é modificado; setor pode ser limpo explicitamente; grupo exige nome. Sugestões dos setores e grupos já cadastrados.
+- Incluído **Filtro por grupo** junto aos filtros existentes, e setor/grupo visíveis como metadados abaixo do nome (com tooltip quando truncados).
+- Edição individual agora tem **Setor** e **Grupo / categoria** separados, preservando as confirmações, nomes e apelidos.
+- Confirmação explícita antes de editar em lote, carregamento enquanto o servidor grava, bloqueio contra cliques duplicados e toast ao concluir. Máximo de 200 selecionados por operação.
+- No Supabase: funções novas rsvp_admin_bulk_classify (atômica por evento, validação de IDs e atualização de campos opcionais) e rsvp_admin_save_person_v3 (edição individual de grupo). Permissão apenas para service_role; nenhuma leitura ou gravação pública de classificação. A Edge Function rsvp-confraternizacao v11 exige sessão de administrador antes da ação admin-bulk-update.
+- Mudanças no banco foram apenas de definição de funções: nenhuma pessoa existente foi alterada pela migração. Testes de consultas, grupos, apelidos e filtros foram realizados com dados simulados, sem salvar alterações de teste em produção.
+- Visual novo: admin-v14.css; app.js?v=32; atalho da versão em confraternizacao/admin/painel-v14.html; aliases antigos sincronizados.
