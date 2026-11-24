@@ -237,3 +237,8 @@ Implementação isolada do convite corporativo GaveBlue, sem alterações nos ap
 - Cadastro separado da confirmação de presença (admin-save-profile); editar perfil não altera confirmação nem acompanhante. A ação de presença continua na tabela.
 - Exclusão individual com aviso de remoção definitiva da confirmação e acompanhante; admin-delete autentica sessão, restringe ao evento e usa FK CASCADE existente. Nenhum cadastro excluído durante a publicação.
 - Sintaxe JS e referências HTML verificadas; teste visual pendente.
+
+
+## Convite v27 / painel v17
+- Recusa de presença com motivo opcional (500 caracteres); etapa própria, sem WhatsApp obrigatório. Uma resposta por colaborador; nova resposta substitui a anterior.
+- Painel: recusados separados de pendentes e confirmados, motivo na lista e CSV. Presença manual pode substituir recusa; recusados fora do total esperado. Migração rsvp_resposta_recusada preserva respostas antigas. JS e IDs verificados.

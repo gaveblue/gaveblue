@@ -22,9 +22,10 @@
 <link href="../admin-v16.css?v=16" rel="stylesheet">
 
 <script defer src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
-<script defer src="../admin-app-v16.js?v=16"></script>
+<link href="../admin-v17.css?v=17" rel="stylesheet">
+<script defer src="../admin-app-v17.js?v=17"></script>
 </head>
-<body class="admin-page" data-admin-version="16">
+<body class="admin-page" data-admin-version="17">
 <div id="admin-loading" class="admin-loading" role="status" aria-live="polite" aria-atomic="true">
   <div class="admin-loading-inner">
     <div class="admin-loading-symbol" aria-hidden="true"><span class="admin-loading-orbit"></span><i data-lucide="sparkles"></i></div>
@@ -98,6 +99,7 @@
       <div class="stats-grid">
         <article class="stat-card"><span class="stat-icon"><i data-lucide="users"></i></span><small>Cadastrados</small><strong id="stat-invited">0</strong><span id="stat-eligible">0 aptos à busca</span></article>
         <article class="stat-card stat-card-confirmed"><span class="stat-icon green"><i data-lucide="check-circle-2"></i></span><small>Confirmados</small><strong id="stat-confirmed">0</strong><span>presenças confirmadas</span></article>
+        <article class="stat-card stat-card-declined"><span class="stat-icon"><i data-lucide="calendar-x"></i></span><small>Recusados</small><strong id="stat-declined">0</strong><span>não poderão comparecer</span></article>
         <article class="stat-card stat-card-pending"><span class="stat-icon amber"><i data-lucide="clock-3"></i></span><small>Pendentes</small><strong id="stat-pending">0</strong><span>aguardando resposta</span></article>
         <article class="stat-card"><span class="stat-icon violet"><i data-lucide="user-round-x"></i></span><small>Nome único</small><strong id="stat-incomplete">0</strong><span>colaboradores com um nome</span></article>
         <article class="stat-card"><span class="stat-icon purple"><i data-lucide="user-round-plus"></i></span><small>Total esperado</small><strong id="stat-total">0</strong><span id="stat-plus">incluindo 0 acompanhantes</span></article>
@@ -112,13 +114,14 @@
       <div class="people-filter-panel">
         <div class="people-filter-controls">
           <div class="search-wrap people-search"><i data-lucide="search"></i><input id="people-search" type="search" placeholder="Buscar nome, apelido ou categoria..." aria-label="Pesquisar colaboradores" autocomplete="off"><button id="clear-people-search" class="people-search-clear hidden" type="button" aria-label="Limpar pesquisa"><i data-lucide="x"></i></button></div>
-          <select id="status-filter" class="standard-input" aria-label="Filtrar por status"><option value="all">Todos os status</option><option value="confirmed">Confirmados</option><option value="pending">Não confirmados</option><option value="incomplete">Nome único</option><option value="inactive">Inativos</option></select>
+          <select id="status-filter" class="standard-input" aria-label="Filtrar por status"><option value="all">Todos os status</option><option value="confirmed">Confirmados</option><option value="pending">Pendentes</option><option value="declined">Recusados</option><option value="incomplete">Nome único</option><option value="inactive">Inativos</option></select>
           <select id="sector-filter" class="standard-input" aria-label="Filtrar por categoria"><option value="all">Todas as categorias</option></select>
         </div>
         <div class="people-status-tabs" role="group" aria-label="Filtrar rapidamente por status">
           <button class="people-status-tab active" type="button" data-status="all" aria-pressed="true">Todos <span data-count-for="all">0</span></button>
           <button class="people-status-tab" type="button" data-status="confirmed" aria-pressed="false">Confirmados <span data-count-for="confirmed">0</span></button>
-          <button class="people-status-tab" type="button" data-status="pending" aria-pressed="false">Não confirmados <span data-count-for="pending">0</span></button>
+          <button class="people-status-tab" type="button" data-status="pending" aria-pressed="false">Pendentes <span data-count-for="pending">0</span></button>
+          <button class="people-status-tab" type="button" data-status="declined" aria-pressed="false">Recusados <span data-count-for="declined">0</span></button>
           <button class="people-status-tab" type="button" data-status="inactive" aria-pressed="false">Inativos <span data-count-for="inactive">0</span></button>
           <button class="people-status-tab" type="button" data-status="incomplete" aria-pressed="false">Nome único <span data-count-for="incomplete">0</span></button>
         </div>
@@ -136,7 +139,7 @@
           </div>
           <button id="bulk-edit-button" type="button" class="main-button compact"><i data-lucide="layers-3"></i> Editar categoria</button>
         </div>
-      </div><div class="table-scroll"><table class="people-table"><thead><tr><th><label class="people-select-heading"><input id="people-select-all" type="checkbox" aria-label="Selecionar todos os colaboradores visíveis"><span>COLABORADOR / CATEGORIA</span></label></th><th>ACOMPANHANTE</th><th>STATUS / CONFIRMAÇÃO</th><th>CONFIRMADO EM</th><th></th></tr></thead><tbody id="people-body"></tbody></table></div></section>
+      </div><div class="table-scroll"><table class="people-table"><thead><tr><th><label class="people-select-heading"><input id="people-select-all" type="checkbox" aria-label="Selecionar todos os colaboradores visíveis"><span>COLABORADOR / CATEGORIA</span></label></th><th>ACOMPANHANTE / MOTIVO</th><th>STATUS / CONFIRMAÇÃO</th><th>RESPONDIDO EM</th><th></th></tr></thead><tbody id="people-body"></tbody></table></div></section>
     </div>
     <div id="view-settings" class="admin-content hidden">
       <div class="section-intro"><h2>Configurações do evento</h2><p>Edite os dados do convite, o WhatsApp e o status das confirmações.</p></div>

@@ -1,0 +1,5 @@
+/* Admin v17: recusas e motivos. */
+.admin-page .stat-card-declined .stat-icon,.admin-page .status-chip.declined{background:#faeeee;color:#a25050}
+.admin-page .decline-reason-cell{white-space:normal!important;overflow-wrap:anywhere;line-height:1.4}
+.admin-page .decline-reason-label{display:block;font-size:10px;color:#9c5858;font-weight:700;margin-bottom:3px}
+.admin-page .people-status-tabs{flex-wrap:wrap}
