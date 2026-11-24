@@ -1,0 +1,70 @@
+/* Admin RSVP v8 — busca, status, switches, dialogo e notificacoes */
+.admin-page .people-filter-controls{display:grid;grid-template-columns:minmax(180px,1fr) 170px 180px;gap:9px;align-items:center}
+.admin-page .people-filter-controls .people-search{position:relative;display:flex;min-width:0;width:100%;height:43px}
+.admin-page .people-search input{height:100%;min-width:0;width:100%;padding-right:38px}
+.admin-page .people-search input::-webkit-search-cancel-button{display:none}
+.admin-page .people-search-clear{position:absolute;right:3px;top:4px;width:34px;height:34px;border:0;border-radius:8px;background:transparent;color:#698675;display:grid;place-items:center}
+.admin-page .people-search-clear svg{width:15px;height:15px}
+.admin-page .people-filter-controls select{min-width:0;width:100%;min-height:43px;font-size:11px}
+.admin-page .people-status-tabs{display:flex;gap:6px;max-width:100%;overflow-x:auto;scrollbar-width:none;padding:12px 0 8px}
+.admin-page .people-status-tabs::-webkit-scrollbar{display:none}
+.admin-page .people-status-tab{flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;border:1px solid #e2ebe0;border-radius:999px;background:#fff;color:#718474;padding:7px 10px;font-size:10px;line-height:1.1;font-weight:800;white-space:nowrap}
+.admin-page .people-status-tab span{font-size:9px;padding:3px 6px;border-radius:999px;color:#788d7b;background:#f0f5ef}
+.admin-page .people-status-tab.active{color:#0b6f3d;background:#e7f5e9;border-color:#b8dfc3}
+.admin-page .people-status-tab.active span{color:#106d3d;background:#d5ecda}
+.admin-page .people-results-line{text-align:right;margin:0 0 11px}
+.admin-page .people-status-cell{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.admin-page .people-status-description{display:flex;flex-wrap:wrap;align-items:center;gap:4px;min-width:0}
+.admin-page .rsvp-confirm-toggle{position:relative;display:inline-flex;align-items:center;width:44px;min-width:44px;height:25px;border:0;border-radius:99px;background:#cbd4cb;padding:3px;box-shadow:inset 0 0 0 1px #00000009;cursor:pointer;transition:background .2s}
+.admin-page .rsvp-confirm-toggle[aria-checked="true"]{background:#168d4c}
+.admin-page .rsvp-confirm-toggle:focus-visible{outline:3px solid #a9dcb3;outline-offset:3px}
+.admin-page .rsvp-confirm-thumb{display:block;width:19px;height:19px;border-radius:50%;background:white;box-shadow:0 1px 3px #173e2930;transition:transform .2s}
+.admin-page .rsvp-confirm-toggle[aria-checked="true"] .rsvp-confirm-thumb{transform:translateX(19px)}
+.admin-page .rsvp-confirm-toggle:disabled{opacity:.48;cursor:not-allowed}
+.admin-page .rsvp-confirm-toggle.is-busy .rsvp-confirm-thumb{opacity:.3}
+.admin-page .rsvp-confirm-toggle.is-busy:after{content:"";position:absolute;left:15px;top:5px;width:15px;height:15px;border:2px solid #ffffff77;border-top-color:#fff;border-radius:50%;animation:rsvp-admin-spin .7s linear infinite}
+.admin-page .people-empty{text-align:center!important;padding:24px!important;color:#899f8d!important}
+.admin-page .manual-confirm-switch{background:#f7faf6;border-color:#d8e8d8;padding:13px}
+.admin-page .manual-confirm-header{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.admin-page .manual-confirm-header strong{display:block;font-size:12px;color:#244e33}
+.admin-page .manual-confirm-header small{display:block;margin-top:3px;font-size:11px;font-weight:800;color:#839285}
+.admin-page .manual-confirm-header small.is-confirmed{color:#16824b}
+.admin-page #person-save{display:flex;justify-content:center;align-items:center;gap:8px}
+.admin-page #person-save.is-saving>svg{display:none}
+.admin-page #person-save.is-saving:after{content:"";width:16px;height:16px;border-radius:50%;border:2px solid #ffffff88;border-top-color:white;animation:rsvp-admin-spin .7s linear infinite}
+.admin-page .rsvp-confirm-modal{position:fixed;z-index:60;inset:0;display:grid;place-items:center;padding:16px}
+.admin-page .rsvp-confirm-backdrop{position:absolute;inset:0;background:#14331e96;backdrop-filter:blur(5px)}
+.admin-page .rsvp-confirm-card{position:relative;width:min(100%,420px);padding:25px;background:white;border:1px solid #e3ede2;border-radius:20px;box-shadow:0 18px 80px #122d2033;animation:rsvp-dialog-in .22s ease both}
+.admin-page .rsvp-confirm-icon{display:grid;place-items:center;width:43px;height:43px;border-radius:12px;background:#e7f5e9;color:#126f3f;margin-bottom:15px}
+.admin-page .rsvp-confirm-icon svg{width:20px;height:20px}
+.admin-page .rsvp-confirm-card h2{font:800 20px/1.25 Manrope,sans-serif;color:#1d452b;margin:0 0 8px}
+.admin-page .rsvp-confirm-card p{font-size:12px;line-height:1.65;color:#748578;margin:0 0 21px}
+.admin-page .rsvp-confirm-buttons{display:flex;gap:9px}
+.admin-page .rsvp-confirm-buttons button{display:flex;align-items:center;justify-content:center;flex:1;min-height:43px;border-radius:11px;font-size:12px}
+.admin-page .rsvp-confirm-buttons .is-destructive{background:#a8443b;color:white;border:0;box-shadow:none}
+.admin-page .admin-toast-stack{position:fixed;right:16px;bottom:18px;width:330px;max-width:calc(100vw - 24px);z-index:75;pointer-events:none;display:flex;flex-direction:column;gap:8px}
+.admin-page .admin-toast{display:flex;align-items:center;gap:10px;padding:12px;background:white;border:1px solid #c6e3cd;border-radius:13px;box-shadow:0 10px 35px #17361e24;pointer-events:auto;animation:rsvp-dialog-in .25s ease both}
+.admin-page .admin-toast-error{border-color:#edcfc5}
+.admin-page .admin-toast-icon{flex:0 0 27px;width:27px;height:27px;display:grid;place-items:center;background:#e8f6ea;border-radius:50%;color:#127c41;font-size:14px;font-weight:900}
+.admin-page .admin-toast-error .admin-toast-icon{color:#ac493d;background:#fff0ea}
+.admin-page .admin-toast-copy{flex:1;min-width:0;font-size:12px;font-weight:750;line-height:1.4;overflow-wrap:anywhere;color:#28573a}
+.admin-page .admin-toast-close{border:0;background:transparent;font-size:21px;color:#859b8b;line-height:1;padding:3px}
+.admin-page .admin-toast.is-dismissing{opacity:0;transform:translateX(12px);transition:opacity .2s,transform .2s}
+@keyframes rsvp-admin-spin{to{transform:rotate(360deg)}}
+@keyframes rsvp-dialog-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:960px){.admin-page .people-filter-controls{grid-template-columns:minmax(0,1fr) minmax(150px,180px)}.admin-page .people-filter-controls #sector-filter{grid-column:1/-1}}
+@media(max-width:700px){
+ .admin-page .people-filter-controls{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+ .admin-page .people-filter-controls .people-search{grid-column:1/-1}
+ .admin-page .people-filter-controls #sector-filter{grid-column:auto}
+ .admin-page .people-filter-controls select{font-size:10px;padding-left:7px;padding-right:18px}
+ .admin-page .people-status-tab{font-size:9px;padding:7px 9px}
+ .admin-page .people-table td:nth-child(4){grid-column:1/-1;grid-row:2}
+ .admin-page .people-table td:nth-child(2){grid-column:2;grid-row:3}
+ .admin-page .people-table td:nth-child(3){grid-column:1;grid-row:3}
+ .admin-page .people-table td:nth-child(5){grid-column:1/-1;grid-row:4;justify-self:start;text-align:left}
+ .admin-page .rsvp-confirm-modal{align-items:end;padding:0}
+ .admin-page .rsvp-confirm-card{width:100%;border-radius:20px 20px 0 0;padding:22px 19px calc(19px + env(safe-area-inset-bottom,0px))}
+ .admin-page .admin-toast-stack{left:12px;right:12px;bottom:calc(77px + env(safe-area-inset-bottom,0px));width:auto;max-width:none}
+}
+@media(prefers-reduced-motion:reduce){.admin-page .rsvp-confirm-toggle,.admin-page .rsvp-confirm-thumb,.admin-page .rsvp-confirm-card,.admin-page .admin-toast,.admin-page .is-saving:after,.admin-page .rsvp-confirm-toggle:after{transition:none!important;animation:none!important}}
