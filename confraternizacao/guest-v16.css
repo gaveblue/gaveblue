@@ -1,0 +1,201 @@
+/* Convite v16: horário integrado, prazo de confirmação e celebração.
+   Camada isolada à página pública; preserva formulário/administrativo. */
+.guest-page .event-countdown{margin-bottom:8px;padding-bottom:12px}
+.guest-page .event-countdown-grid{margin-bottom:1px}
+.guest-page .event-countdown-datetime{
+  display:flex;align-items:center;justify-content:center;
+  flex-wrap:wrap;gap:6px;
+  margin:12px 0 0;padding:9px 5px 0;
+  border-top:1px solid rgba(218,245,220,.18);
+  color:#e3f4e1;
+  font:500 11px/1.4 Manrope,sans-serif;
+  letter-spacing:-.01em;
+  text-align:center;
+}
+.guest-page .event-countdown-datetime svg{
+  width:15px;height:15px;color:#f3d950;
+  flex-shrink:0;
+}
+.guest-page .event-countdown-datetime strong{color:white;font-weight:800}
+.guest-page .guest-details.guest-location-only{
+  margin-bottom:11px;
+  padding:0 13px;
+  background:#fff;border:1px solid #e4ebdf;
+  border-radius:14px;
+}
+.guest-page .guest-location-only .event-location{
+  min-height:62px;
+  padding:10px 5px;
+  display:flex;flex-direction:row;
+  align-items:center;justify-content:center;
+  border-top:0;
+  gap:11px;
+}
+.guest-page .guest-location-only .event-location-copy{
+  display:flex;flex-direction:column;
+  align-items:flex-start;min-width:0;
+  text-align:left;
+}
+.guest-page .guest-location-only .event-location strong{font-size:12px;line-height:1.33}
+.guest-page .guest-location-only .event-map-link{font-size:10px}
+.guest-page .rsvp-urgency{
+  width:100%;
+  margin:0 0 13px;
+  padding:12px 13px 13px;
+  background:linear-gradient(135deg,#fff5f2,#fff8f7);
+  border:1px solid #edcfcb;
+  border-radius:14px;
+  color:#9f3d36;
+  text-align:center;
+}
+.guest-page .rsvp-urgency-head{
+  display:flex;align-items:center;justify-content:center;
+  gap:8px;
+}
+.guest-page .rsvp-urgency-head>svg{
+  width:20px;height:20px;flex-shrink:0;color:#d24e48;
+  stroke-width:2;
+}
+.guest-page .rsvp-urgency-head>div{display:flex;flex-direction:column;gap:2px;min-width:0}
+.guest-page .rsvp-urgency-head strong{
+  font:800 12px/1.3 Manrope,sans-serif;
+  color:#a43732;
+}
+.guest-page .rsvp-urgency-head small{
+  font:500 10px/1.4 Manrope,sans-serif;
+  color:#b0716c;
+}
+.guest-page .rsvp-urgency-grid{
+  display:flex;align-items:flex-start;justify-content:center;
+  gap:4px;
+  width:100%;
+  margin:10px auto 0;
+  font-variant-numeric:tabular-nums;
+}
+.guest-page .rsvp-urgency-unit{
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  min-width:0;flex:0 1 61px;
+  gap:4px;
+}
+.guest-page .rsvp-urgency-unit strong{
+  display:flex;align-items:center;justify-content:center;
+  width:100%;height:39px;
+  padding:0 3px;
+  border:1px solid #f0dad6;
+  border-radius:9px;
+  background:white;color:#a43732;
+  font:800 clamp(18px,5vw,25px)/1 Manrope,sans-serif;
+  letter-spacing:-.045em;
+  box-shadow:0 3px 7px rgba(142,41,36,.045);
+}
+.guest-page .rsvp-urgency-unit span{
+  font:750 9px/1.1 Manrope,sans-serif;
+  letter-spacing:.08em;color:#b8706b;
+}
+.guest-page .rsvp-urgency-separator{
+  flex-shrink:0;display:block;
+  align-self:flex-start;
+  margin:7px 0 0;
+  color:#b26a66;
+  font:850 19px/1 Manrope,sans-serif;
+}
+.guest-page .rsvp-urgency-ms{flex-basis:74px}
+.guest-page .rsvp-urgency-ms strong{
+  font-size:clamp(16px,4.6vw,21px);
+  color:#c95244;
+}
+.guest-page .rsvp-urgency-expired{
+  margin:11px 0 0;color:#a43732;
+  font-size:11px;font-weight:750;
+}
+.guest-page .rsvp-urgency.is-expired .rsvp-urgency-grid{display:none}
+.guest-page .rsvp-urgency.is-expired .rsvp-urgency-head small{display:none}
+
+/* Comemoração apenas após confirmação gravada. */
+.guest-page .success-celebration{
+  position:relative;
+  width:120px;height:63px;
+  margin:0 auto 1px;
+  display:flex;align-items:center;justify-content:center;
+  pointer-events:none;
+}
+.guest-page .clink-glass{
+  display:grid;place-items:center;
+  width:46px;height:53px;color:#c49c29;
+  filter:drop-shadow(0 3px 5px rgba(105,78,10,.1));
+  transform-origin:50% 100%;
+}
+.guest-page .clink-glass svg{
+  width:38px;height:38px;stroke-width:1.8;
+}
+.guest-page .clink-glass-left{transform:translateX(4px) rotate(-22deg)}
+.guest-page .clink-glass-right{transform:translateX(-4px) rotate(22deg)}
+.guest-page .celebration-star{
+  display:block;position:absolute;z-index:1;
+  width:5px;height:5px;border-radius:50%;
+  background:#edc833;
+  box-shadow:0 0 0 2px #f9e9ab66;
+}
+.guest-page .celebration-star-a{left:13px;top:13px}
+.guest-page .celebration-star-b{right:14px;top:7px}
+.guest-page .celebration-star-c{left:50%;top:2px;width:6px;height:6px}
+.guest-page #guest-done.celebrating .clink-glass-left{
+  animation:rsvp-glass-left 1.6s cubic-bezier(.26,.75,.42,1) both;
+}
+.guest-page #guest-done.celebrating .clink-glass-right{
+  animation:rsvp-glass-right 1.6s cubic-bezier(.26,.75,.42,1) both;
+}
+.guest-page #guest-done.celebrating .celebration-star{
+  animation:rsvp-glow 1.6s ease-out both;
+}
+@keyframes rsvp-glass-left{
+  0%{transform:translateX(-8px) rotate(-34deg)}
+  30%{transform:translateX(5px) rotate(-12deg)}
+  46%{transform:translateX(4px) rotate(-18deg)}
+  100%{transform:translateX(4px) rotate(-22deg)}
+}
+@keyframes rsvp-glass-right{
+  0%{transform:translateX(8px) rotate(34deg)}
+  30%{transform:translateX(-5px) rotate(12deg)}
+  46%{transform:translateX(-4px) rotate(18deg)}
+  100%{transform:translateX(-4px) rotate(22deg)}
+}
+@keyframes rsvp-glow{
+  0%{opacity:0;transform:scale(.3)}
+  35%{opacity:1;transform:scale(1.5)}
+  70%{opacity:.75;transform:scale(1)}
+  100%{opacity:.5;transform:scale(1)}
+}
+.guest-page #guest-done .done-lead{max-width:360px}
+@media(max-width:700px){
+  .guest-page .event-countdown{padding-bottom:10px}
+  .guest-page .event-countdown-datetime{
+    margin-top:10px;padding-top:8px;font-size:10px;
+  }
+  .guest-page .guest-details.guest-location-only{padding:0 10px}
+  .guest-page .guest-location-only .event-location{min-height:58px;gap:9px;padding:9px 2px}
+  .guest-page .guest-location-only .event-location strong{font-size:11px}
+  .guest-page .guest-location-only .event-map-link{font-size:9px}
+  .guest-page .rsvp-urgency{padding:11px 10px 12px}
+  .guest-page .rsvp-urgency-head strong{font-size:11px}
+  .guest-page .rsvp-urgency-head small{font-size:9px}
+  .guest-page .rsvp-urgency-unit{flex-basis:53px}
+  .guest-page .rsvp-urgency-ms{flex-basis:66px}
+  .guest-page .rsvp-urgency-unit strong{height:35px}
+  .guest-page .rsvp-urgency-grid{margin-top:9px}
+}
+@media(max-width:355px){
+  .guest-page .event-countdown-datetime{font-size:9px}
+  .guest-page .rsvp-urgency-unit{flex-basis:47px}
+  .guest-page .rsvp-urgency-ms{flex-basis:59px}
+  .guest-page .rsvp-urgency-unit strong{font-size:18px}
+  .guest-page .rsvp-urgency-ms strong{font-size:15px}
+  .guest-page .rsvp-urgency-grid{gap:3px}
+}
+@media(prefers-reduced-motion:reduce){
+  .guest-page #guest-done.celebrating .clink-glass,
+  .guest-page #guest-done.celebrating .celebration-star{
+    animation:none!important;
+  }
+}
