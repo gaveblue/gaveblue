@@ -1,0 +1,144 @@
+/* RSVP v20 — melhor proporção 46/54 e relógio ultracompacto */
+.guest-page .rsvp-info-row{
+  grid-template-columns:minmax(0,46fr) minmax(0,54fr);
+  gap:6px;
+  align-items:stretch;
+}
+.guest-page .rsvp-info-row>.guest-details.guest-location-only{
+  padding:8px 9px;
+  min-width:0;
+}
+.guest-page .rsvp-info-row .guest-location-only .event-location{
+  display:block;
+  width:100%;
+  padding:0;
+  min-width:0;
+}
+.guest-page .rsvp-info-row .guest-location-only .event-location-copy{
+  display:flex;
+  width:100%;
+  min-width:0;
+  flex-direction:column;
+  justify-content:center;
+  align-items:flex-start;
+}
+.guest-page .rsvp-info-row .guest-location-only .location-label{
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  margin:0 0 3px;
+  font-size:8px;
+  line-height:1.2;
+}
+.guest-page .rsvp-info-row .guest-location-only .location-label svg{
+  display:block;
+  width:11px;
+  height:11px;
+  color:#29864b;
+}
+.guest-page .rsvp-info-row .guest-location-only .event-location strong{
+  font-size:10.6px;
+  line-height:1.3;
+  letter-spacing:-.01em;
+  overflow-wrap:normal;
+  word-break:normal;
+}
+.guest-page .rsvp-info-row .guest-location-only .event-map-link{
+  display:inline-flex;
+  flex-wrap:nowrap;
+  align-items:center;
+  gap:3px;
+  max-width:100%;
+  width:max-content;
+  margin:5px 0 0;
+  padding:1px 0;
+  white-space:nowrap;
+  color:#127546;
+  font-size:9px;
+  font-weight:750;
+  line-height:1.3;
+  text-decoration:underline;
+  text-underline-offset:2px;
+}
+.guest-page .rsvp-info-row .guest-location-only .event-map-link svg{
+  width:10px;height:10px;flex-shrink:0;
+}
+.guest-page .rsvp-info-row>.rsvp-urgency{
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  min-width:0;
+  padding:8px 7px;
+}
+.guest-page .rsvp-info-row .rsvp-urgency-head{
+  gap:4px;
+  min-width:0;
+}
+.guest-page .rsvp-info-row .rsvp-urgency-head strong{
+  font-size:9.6px;
+  line-height:1.25;
+  white-space:nowrap;
+}
+.guest-page .rsvp-info-row .rsvp-urgency-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:3px;
+  width:100%;
+  margin:6px 0 0;
+}
+.guest-page .rsvp-info-row .rsvp-urgency-unit{
+  min-width:0;
+  width:100%;
+  gap:2px;
+}
+.guest-page .rsvp-info-row .rsvp-urgency-unit strong{
+  box-sizing:border-box;
+  width:100%;
+  min-width:0;
+  height:25px;
+  padding:1px 0;
+  border-radius:6px;
+  font:800 12px/1 Manrope,sans-serif;
+  letter-spacing:-.035em;
+  font-variant-numeric:tabular-nums;
+}
+.guest-page .rsvp-info-row .rsvp-urgency-ms strong{font-size:10.6px}
+.guest-page .rsvp-info-row .rsvp-urgency-unit span{
+  font-size:7.5px;
+  line-height:1.1;
+  letter-spacing:.02em;
+}
+.guest-page .rsvp-info-row .rsvp-urgency-separator{display:none}
+@media(max-width:700px){
+  .guest-page .rsvp-info-row{
+    grid-template-columns:minmax(0,46fr) minmax(0,54fr);
+    gap:6px;
+  }
+  .guest-page .rsvp-info-row>.guest-details.guest-location-only{
+    padding:7px 7px;
+  }
+  .guest-page .rsvp-info-row .guest-location-only .event-location strong{
+    font-size:10px;
+    line-height:1.25;
+  }
+  .guest-page .rsvp-info-row .guest-location-only .event-map-link{font-size:8.5px}
+  .guest-page .rsvp-info-row>.rsvp-urgency{padding:7px 6px}
+  .guest-page .rsvp-info-row .rsvp-urgency-head strong{font-size:9px}
+  .guest-page .rsvp-info-row .rsvp-urgency-unit strong{height:24px;font-size:11.6px}
+  .guest-page .rsvp-info-row .rsvp-urgency-ms strong{font-size:10px}
+}
+@media(max-width:350px){
+  .guest-page .rsvp-info-row{
+    grid-template-columns:minmax(0,46fr) minmax(0,54fr);
+    gap:5px;
+  }
+  .guest-page .rsvp-info-row>.guest-details.guest-location-only{padding:7px 5px}
+  .guest-page .rsvp-info-row .guest-location-only .event-location strong{font-size:9.5px}
+  .guest-page .rsvp-info-row .guest-location-only .event-map-link{font-size:8px}
+  .guest-page .rsvp-info-row>.rsvp-urgency{padding:7px 4px}
+  .guest-page .rsvp-info-row .rsvp-urgency-head>svg{width:11px;height:11px;flex-basis:11px}
+  .guest-page .rsvp-info-row .rsvp-urgency-head strong{font-size:8.5px}
+  .guest-page .rsvp-info-row .rsvp-urgency-grid{gap:2px}
+  .guest-page .rsvp-info-row .rsvp-urgency-unit strong{height:23px;font-size:11px}
+  .guest-page .rsvp-info-row .rsvp-urgency-ms strong{font-size:9.6px}
+}
