@@ -113,3 +113,11 @@ Implementação isolada do convite corporativo GaveBlue, sem alterações nos ap
 - **Fluxo WhatsApp:** abre automaticamente após ~2,3 segundos para que a animação fique visível (300 ms para quem prefere movimento reduzido). Botão de WhatsApp continua clicável no estado de sucesso.
 - **QA estático:** IDs presentes, HTML fechado, JS sintaticamente válido, CSS equilibrado, contador com horário real de Brasília, e regras do servidor confirmadas na versão implantada. Ainda requer teste visual e abertura do WhatsApp no celular.
 - **Publicação:** folhas de estilo v16 em CSS isolado `guest-v16.css` e arquivos base versionados; caminhos `index.html`, `convite-atualizado.html`, `convite-v15.html` atualizados, mais `convite-v16.html`.
+
+## Visual v21 — 23/11/2026
+- Covre Agrícola: logo original preservado e ampliado visualmente ~15% (10% em telas muito estreitas), sem alterar arquivo/fundo.
+- Cronômetro do prazo 25/11: legendas compactas HORAS, MIN, SEG e MILÉS. em uma linha, sem alterar cálculos da API e do frontend.
+- Título “Confraternização 2026” ~10–15% maior no mobile, mantendo “Você foi convocado para nossa” na linha anterior.
+- 10 brilhos/confetes dourados leves com CSS puro sobre a região do título, com deriva para cima, animações escalonadas e desativação por `prefers-reduced-motion`.
+- Novos arquivos: `guest-v21.css` e `convite-v21.html`; todos os links de versão anteriores permanecem sincronizados com o mesmo convite.
+- Não houve mudança em `app.js`, formulários, backend, calendário ou dados de colaboradores.

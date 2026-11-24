@@ -1,0 +1,125 @@
+/* Confraternização 2026 — refinamento v21.
+   Logos equilibrados, títulos mais fortes e partículas douradas discretas.
+   A composição do convite, os dados e a confirmação permanecem intactos. */
+
+/* A imagem original da Covre Agrícola tem proporção menor:
+   aumento somente da apresentação, sem recriar ou recortar o logo. */
+.guest-page .company-logo-agricola img{
+  transform:scale(1.15);
+  transform-origin:center center;
+}
+
+/* Realçar a segunda linha do convite sem quebrar o título no mobile. */
+.guest-page .guest-hero h1{
+  max-width:100%;
+}
+.guest-page .guest-hero h1 .heading-rest{
+  font-size:clamp(24px,7.3vw,42px);
+  letter-spacing:-.064em;
+  line-height:1.07;
+  white-space:nowrap;
+  max-width:100%;
+  margin-top:2px;
+}
+.guest-page .guest-hero h1 .animated-event-title{
+  display:inline-block;
+  position:relative;
+  font-style:normal;
+  isolation:isolate;
+}
+.guest-page .guest-hero h1 .heading-rest::after{
+  margin-top:8px;
+}
+/* Os pontos ficam nas bordas e sobem suavemente; a frase continua legível. */
+.guest-page .title-sparkles{
+  position:absolute;
+  inset:-9px -5px -8px;
+  display:block;
+  overflow:visible;
+  pointer-events:none;
+  user-select:none;
+  z-index:1;
+}
+.guest-page .title-spark{
+  position:absolute;
+  display:block;
+  width:4px;
+  height:4px;
+  opacity:0;
+  border-radius:50%;
+  background:#f9d452;
+  box-shadow:0 0 7px 1px rgba(249,207,65,.36);
+  animation:rsvp-title-gold-rise 5.4s ease-out infinite;
+  animation-delay:var(--delay,0s);
+  will-change:transform,opacity;
+}
+.guest-page .title-spark:nth-child(odd)::before,
+.guest-page .title-spark:nth-child(odd)::after{
+  content:"";
+  position:absolute;
+  left:50%;top:50%;
+  transform:translate(-50%,-50%);
+  border-radius:5px;
+  background:#efd055;
+}
+.guest-page .title-spark:nth-child(odd)::before{width:2px;height:12px}
+.guest-page .title-spark:nth-child(odd)::after{width:12px;height:2px}
+.guest-page .title-spark-1 {left:2%;top:70%;--drift:-10px;--delay:-.3s}
+.guest-page .title-spark-2 {left:12%;top:7%;--drift:8px;--delay:-2.6s}
+.guest-page .title-spark-3 {left:24%;top:105%;--drift:-9px;--delay:-1.6s}
+.guest-page .title-spark-4 {left:39%;top:-5%;--drift:11px;--delay:-4.2s}
+.guest-page .title-spark-5 {left:51%;top:101%;--drift:-7px;--delay:-3.2s}
+.guest-page .title-spark-6 {left:63%;top:-9%;--drift:9px;--delay:-.9s}
+.guest-page .title-spark-7 {left:78%;top:102%;--drift:11px;--delay:-2.2s}
+.guest-page .title-spark-8 {left:89%;top:2%;--drift:-7px;--delay:-4.7s}
+.guest-page .title-spark-9 {left:98%;top:73%;--drift:10px;--delay:-3.6s}
+.guest-page .title-spark-10 {left:33%;top:97%;--drift:8px;--delay:-5.1s}
+@keyframes rsvp-title-gold-rise{
+  0%,8%{opacity:0;transform:translate3d(0,7px,0) scale(.35)}
+  26%{opacity:.84;transform:translate3d(0,0,0) scale(1)}
+  44%{opacity:.62;transform:translate3d(var(--drift,0px),-8px,0) scale(.85)}
+  70%,100%{opacity:0;transform:translate3d(var(--drift,0px),-22px,0) scale(.4)}
+}
+
+/* Legendas pequenas, mas inteligíveis, sob os quatro números. */
+.guest-page .rsvp-info-row .rsvp-urgency-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:3px;
+}
+.guest-page .rsvp-info-row .rsvp-urgency-unit,
+.guest-page .rsvp-info-row .rsvp-urgency-ms{
+  gap:3px;
+  min-width:0;
+}
+.guest-page .rsvp-info-row .rsvp-urgency-unit span{
+  display:block;
+  font-size:7px;
+  line-height:1;
+  font-weight:750;
+  letter-spacing:0;
+  text-transform:none;
+  white-space:nowrap;
+}
+@media(max-width:700px){
+  .guest-page .company-logo-agricola img{transform:scale(1.15)}
+  .guest-page .guest-hero h1 .heading-rest{
+    font-size:clamp(23px,7.35vw,36px);
+    letter-spacing:-.07em;
+  }
+  .guest-page .rsvp-info-row .rsvp-urgency-unit span{font-size:6.6px}
+}
+@media(max-width:380px){
+  .guest-page .guest-hero h1 .heading-rest{
+    font-size:clamp(22px,7.05vw,27px);
+    letter-spacing:-.069em;
+  }
+}
+@media(max-width:350px){
+  .guest-page .company-logo-agricola img{transform:scale(1.10)}
+  .guest-page .guest-hero h1 .heading-rest{font-size:clamp(21px,6.95vw,24px)}
+  .guest-page .rsvp-info-row .rsvp-urgency-unit span{font-size:6px}
+}
+@media(prefers-reduced-motion:reduce){
+  .guest-page .title-spark{animation:none!important;opacity:0!important;will-change:auto}
+}
