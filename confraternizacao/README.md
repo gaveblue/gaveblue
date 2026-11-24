@@ -190,3 +190,14 @@ Implementação isolada do convite corporativo GaveBlue, sem alterações nos ap
 - Proteção para não sobrescrever a atualização local com respostas antigas de bootstrap usando `mutationEpoch`; o fluxo público e Supabase não foram modificados.
 - Novos arquivos: `admin-v11.css`, `admin/painel-v11.html`, `app.js?v=29`; caminhos legados do admin sincronizados para evitar incompatibilidade de DOM.
 - Verificações: validação de sintaxe JS, integridade de IDs/HTML, CSS equilibrado, testes de cálculo e renderização local sem alterar dados de produção.
+
+## Admin v12 / Convite v24 — edição, identificação e celebração (24/11/2026)
+
+- **Mensagem editável:** painel permite selecionar texto e aplicar **negrito** (`**texto**`), *itálico* (`*texto*`) e ~~tachado~~ (`~~texto~~`) com barra de ferramentas e prévia em tempo real. Até 500 caracteres (incluindo marcações). O convite cria elementos de texto por DOM e `textContent`, não usa HTML bruto de usuário; parágrafos preservados no backend.
+- **Identificação com nome único:** não exige sobrenome do colaborador. Nomes com no mínimo três caracteres são aceitos; consultas com só um nome exigem correspondência exata do `nome_chave` (sem exibir várias pessoas com o mesmo primeiro nome). Permanece busca prefixada de nome + sobrenome para os cadastros completos. Companheiro continua exigindo nome completo. A RPC `rsvp_busca_rapida` foi atualizada via migração `rsvp_permitir_busca_nome_unico_exato_20261124` mantendo limites de busca. Edge Function `rsvp-confraternizacao` versão 8.
+- **Identidade visual:** logos originais da Covre Agrícola e Covre & Cia voltaram ao canto direito no desktop, com taças e fogos discretos. Título mantém o degradê e ganhou pequenos fogos complementares; movimentos desativados quando usuário opta por movimento reduzido.
+- **Indicadores:** Confirmados verdes e Pendentes amarelos; o indicador antigo de sobrenome foi renomeado para **Nome único**, informativo, sem impedir participação.
+- **Lista:** sem rótulo **Manual** ao lado do status; linhas com altura constante e nomes longos limitados a duas linhas, preservando o nome completo em `title`. A confirmação manual preserva dados já registrados dos acompanhantes quando continua ativa.
+- **Festa manual:** após confirmação positiva do servidor, toca o mesmo som curto permitido pelo navegador e surge um efeito temporário de fogos/taças. Não ocorre na desconfirmação ou em tentativas malsucedidas.
+- **Carregamento:** indicação indeterminada verdadeira durante o pedido de rede (sem porcentagem fingida), com **Validando dados da confirmação...** ou **Removendo confirmação...** de acordo com a ação.
+- Código do admin em `app.js?v=30`, estilos `admin-v12.css`, versão de URL `admin/painel-v12.html`; convite público usa `guest-v24.css` e todas as páginas/aliases foram sincronizadas. Nenhuma confirmação preexistente foi alterada durante a implementação.
