@@ -137,11 +137,11 @@ Deno.serve(async (req: Request) => {
         permite_acompanhante: ev.permite_acompanhante
       } }, 200, origin);
     }
-    if (action === "confirm") {
+    if (action === "confirm" || action === "decline") {
       await rate(req, "confirm", 15);
       const state = stateOf(ev);
       assert(state === "aberto", stateError(state));
-      assert(ev.whatsapp, "WhatsApp da organização não configurado.");
+      if(action==="confirm")assert(ev.whatsapp, "WhatsApp da organização não configurado.");
       const id = clean(body.colaborador_id, 48);
       const key = norm(body.query);
       assert(/^[0-9a-f-]{36}$/i.test(id) && key.replace(/\s/g, "").length >= 5,
@@ -151,6 +151,17 @@ Deno.serve(async (req: Request) => {
         .eq("id", id).eq("evento_id", ev.id).eq("ativo", true).maybeSingle();
       assert(employee && matchesSearch(employee.nome_chave,employee.apelido_chave,key),
         "Colaborador não encontrado. Faça a busca novamente.");
+      if(action==="decline"){
+        const reason=String(body.motivo??"").trim();
+        assert(reason.length<=500,"O motivo deve ter até 500 caracteres.");
+        assert(stateOf(ev)==="aberto","O prazo de confirmação terminou. Atualize o convite.");
+        const {error}=await db.from("rsvp_confirmacoes").upsert({
+          evento_id:ev.id,colaborador_id:employee.id,resposta:"recusado",motivo_recusa:reason||null,
+          acompanhante:false,acompanhante_nome:null,origem:"link",confirmado_em:new Date().toISOString()
+        },{onConflict:"evento_id,colaborador_id"});
+        assert(!error,"Não foi possível registrar a resposta.");
+        return json({ok:true,colaborador:employee.nome_completo},200,origin);
+      }
       const companion = body.acompanhante === true;
       assert(!companion || ev.permite_acompanhante, "Acompanhante não permitido neste evento.");
       const companionName = companion ? clean(body.acompanhante_nome) : null;
@@ -158,7 +169,7 @@ Deno.serve(async (req: Request) => {
       assert(stateOf(ev) === "aberto", "O prazo de confirmação terminou. Atualize o convite.");
       const { error } = await db.from("rsvp_confirmacoes").upsert({
         evento_id: ev.id, colaborador_id: employee.id, acompanhante: companion,
-        acompanhante_nome: companionName, origem: "link", confirmado_em: new Date().toISOString()
+        acompanhante_nome: companionName, origem: "link", resposta:"confirmado",motivo_recusa:null, confirmado_em: new Date().toISOString()
       }, { onConflict: "evento_id,colaborador_id" });
       assert(!error, "Não foi possível salvar a confirmação.");
       // Mensagem compacta aprovada: negrito com asterisco simples, padrão do WhatsApp.
@@ -184,10 +195,10 @@ Deno.serve(async (req: Request) => {
     if (action === "admin-bootstrap") {
       const [employees, confirmations] = await Promise.all([
         db.from("rsvp_colaboradores").select("id,nome_completo,apelido,grupo,setor,ativo,criado_em").eq("evento_id", ev.id).order("nome_completo"),
-        db.from("rsvp_confirmacoes").select("colaborador_id,acompanhante,acompanhante_nome,confirmado_em,origem").eq("evento_id", ev.id)
+        db.from("rsvp_confirmacoes").select("colaborador_id,acompanhante,acompanhante_nome,confirmado_em,origem,resposta,motivo_recusa").eq("evento_id", ev.id)
       ]);
       assert(!employees.error && !confirmations.error, "Falha ao carregar os dados.");
-      return json({ ok: true, event: { ...ev, estado_confirmacoes: stateOf(ev) }, collaborators: employees.data || [], confirmations: confirmations.data || [] }, 200, origin);
+      return json({ ok: true, event: { ...ev, estado_confirmacoes: stateOf(ev) }, collaborators: employees.data || [], confirmations: (confirmations.data || []).filter(c=>c.resposta==="confirmado"), declines:(confirmations.data||[]).filter(c=>c.resposta==="recusado") }, 200, origin);
     }
     if (action === "admin-save-event") {
       const title = clean(body.titulo, 100);
@@ -242,6 +253,22 @@ Deno.serve(async (req: Request) => {
       assert(!error && data === ids.length,
         error?.message || "Não foi possível atualizar os colaboradores selecionados.");
       return json({ok:true,updated:data},200,origin);
+    }
+    if (action === "admin-set-presence") {
+      const id=clean(body.id,48);
+      assert(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)&&typeof body.confirmado==="boolean","Resposta inválida.");
+      const {data:person,error:personError}=await db.from("rsvp_colaboradores").select("id").eq("evento_id",ev.id).eq("id",id).maybeSingle();
+      assert(!personError&&person,"Colaborador não encontrado.");
+      if(body.confirmado){
+        const {error}=await db.from("rsvp_confirmacoes").upsert({evento_id:ev.id,colaborador_id:id,resposta:"confirmado",motivo_recusa:null,acompanhante:false,acompanhante_nome:null,origem:"manual",confirmado_em:new Date().toISOString()},{onConflict:"evento_id,colaborador_id",ignoreDuplicates:true});
+        assert(!error,"Não foi possível confirmar a presença.");
+        const {error:changeError}=await db.from("rsvp_confirmacoes").update({resposta:"confirmado",motivo_recusa:null,acompanhante:false,acompanhante_nome:null,origem:"manual",confirmado_em:new Date().toISOString()}).eq("evento_id",ev.id).eq("colaborador_id",id).eq("resposta","recusado");
+        assert(!changeError,"Não foi possível atualizar a resposta.");
+      }else{
+        const {error}=await db.from("rsvp_confirmacoes").delete().eq("evento_id",ev.id).eq("colaborador_id",id).eq("resposta","confirmado");
+        assert(!error,"Não foi possível retirar a confirmação.");
+      }
+      return json({ok:true},200,origin);
     }
     if (action === "admin-delete") {
       const id = clean(body.id, 48);
