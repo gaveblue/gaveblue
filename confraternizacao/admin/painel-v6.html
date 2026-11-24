@@ -15,11 +15,12 @@
 <link href="../admin-v8.css?v=8" rel="stylesheet">
 <link href="../admin-v9.css?v=9" rel="stylesheet">
 <link href="../admin-v11.css?v=11" rel="stylesheet">
+<link href="../admin-v12.css?v=12" rel="stylesheet">
 
 <script defer src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
-<script defer src="../app.js?v=29"></script>
+<script defer src="../app.js?v=30"></script>
 </head>
-<body class="admin-page" data-admin-version="11">
+<body class="admin-page" data-admin-version="12">
 <div id="admin-loading" class="admin-loading" role="status" aria-live="polite" aria-atomic="true">
   <div class="admin-loading-inner">
     <div class="admin-loading-symbol" aria-hidden="true"><span class="admin-loading-orbit"></span><i data-lucide="sparkles"></i></div>
@@ -63,16 +64,21 @@
           <span class="eyebrow">ORGANIZAÇÃO DO EVENTO</span>
           <h1 id="admin-title" class="admin-celebration-title">
             <span id="admin-title-text" class="admin-event-title">Confraternização 2026</span>
+            <span class="admin-title-fireworks" aria-hidden="true"><span class="admin-title-firework firework-one"></span><span class="admin-title-firework firework-two"></span><span class="admin-title-firework firework-three"></span></span>
             <span class="admin-title-sparkles" aria-hidden="true"><span class="admin-title-spark admin-title-spark-1"></span><span class="admin-title-spark admin-title-spark-2"></span><span class="admin-title-spark admin-title-spark-3"></span><span class="admin-title-spark admin-title-spark-4"></span><span class="admin-title-spark admin-title-spark-5"></span><span class="admin-title-spark admin-title-spark-6"></span><span class="admin-title-spark admin-title-spark-7"></span><span class="admin-title-spark admin-title-spark-8"></span><span class="admin-title-spark admin-title-spark-9"></span><span class="admin-title-spark admin-title-spark-10"></span></span>
           </h1>
           <p>Gerencie confirmações e acompanhantes em um só lugar.</p>
         </div>
       </div>
-      <div class="admin-header-desktop admin-header-logos" aria-label="Covre Agrícola e Covre &amp; Cia">
-        <img src="https://i.imgur.com/kXwEnSs.png" alt="Covre Agrícola" loading="eager" decoding="async" referrerpolicy="no-referrer">
-        <img src="../assets/covre-e-cia-oficial.png?v=9" alt="Covre &amp; Cia" loading="eager" decoding="async">
-      </div>
       <div class="admin-top-actions">
+        <div class="admin-header-desktop admin-header-logos" aria-label="Covre Agrícola e Covre &amp; Cia">
+          <span class="brand-celebration brand-celebration-left" aria-hidden="true"><i data-lucide="wine"></i><i data-lucide="wine"></i></span>
+          <span class="admin-brand-firework admin-brand-firework-left" aria-hidden="true"></span>
+          <img src="https://i.imgur.com/kXwEnSs.png" alt="Covre Agrícola" loading="eager" decoding="async" referrerpolicy="no-referrer">
+          <img src="../assets/covre-e-cia-oficial.png?v=9" alt="Covre &amp; Cia" loading="eager" decoding="async">
+          <span class="admin-brand-firework admin-brand-firework-right" aria-hidden="true"></span>
+          <span class="brand-celebration brand-celebration-right" aria-hidden="true"><i data-lucide="wine"></i><i data-lucide="wine"></i></span>
+        </div>
         <button id="mobile-logout" class="admin-mobile-logout" type="button" aria-label="Sair do painel" title="Sair do painel"><i data-lucide="log-out"></i></button>
       </div>
     </header>
@@ -87,9 +93,9 @@
       </section>
       <div class="stats-grid">
         <article class="stat-card"><span class="stat-icon"><i data-lucide="users"></i></span><small>Cadastrados</small><strong id="stat-invited">0</strong><span id="stat-eligible">0 aptos à busca</span></article>
-        <article class="stat-card"><span class="stat-icon green"><i data-lucide="check-circle-2"></i></span><small>Confirmados</small><strong id="stat-confirmed">0</strong><span>presenças confirmadas</span></article>
-        <article class="stat-card"><span class="stat-icon amber"><i data-lucide="clock-3"></i></span><small>Pendentes</small><strong id="stat-pending">0</strong><span>aguardando resposta</span></article>
-        <article class="stat-card"><span class="stat-icon violet"><i data-lucide="user-round-x"></i></span><small>Sem sobrenome</small><strong id="stat-incomplete">0</strong><span>completar cadastros</span></article>
+        <article class="stat-card stat-card-confirmed"><span class="stat-icon green"><i data-lucide="check-circle-2"></i></span><small>Confirmados</small><strong id="stat-confirmed">0</strong><span>presenças confirmadas</span></article>
+        <article class="stat-card stat-card-pending"><span class="stat-icon amber"><i data-lucide="clock-3"></i></span><small>Pendentes</small><strong id="stat-pending">0</strong><span>aguardando resposta</span></article>
+        <article class="stat-card"><span class="stat-icon violet"><i data-lucide="user-round-x"></i></span><small>Nome único</small><strong id="stat-incomplete">0</strong><span>colaboradores com um nome</span></article>
         <article class="stat-card"><span class="stat-icon purple"><i data-lucide="user-round-plus"></i></span><small>Total esperado</small><strong id="stat-total">0</strong><span id="stat-plus">incluindo 0 acompanhantes</span></article>
       </div>
       <div class="two-panels"><section class="admin-panel"><div class="panel-heading"><div><h3>Participação</h3><p>Progresso das confirmações</p></div><span id="participation-rate" class="rate-pill">0%</span></div><div class="progress-track"><span id="participation-bar"></span></div><p class="muted" id="participation-text">Aguardando colaboradores.</p></section>
@@ -102,7 +108,7 @@
       <div class="people-filter-panel">
         <div class="people-filter-controls">
           <div class="search-wrap people-search"><i data-lucide="search"></i><input id="people-search" type="search" placeholder="Pesquisar por nome ou setor..." aria-label="Pesquisar colaboradores" autocomplete="off"><button id="clear-people-search" class="people-search-clear hidden" type="button" aria-label="Limpar pesquisa"><i data-lucide="x"></i></button></div>
-          <select id="status-filter" class="standard-input" aria-label="Filtrar por status"><option value="all">Todos os status</option><option value="confirmed">Confirmados</option><option value="pending">Não confirmados</option><option value="incomplete">Sem sobrenome</option><option value="inactive">Inativos</option></select>
+          <select id="status-filter" class="standard-input" aria-label="Filtrar por status"><option value="all">Todos os status</option><option value="confirmed">Confirmados</option><option value="pending">Não confirmados</option><option value="incomplete">Nome único</option><option value="inactive">Inativos</option></select>
           <select id="sector-filter" class="standard-input" aria-label="Filtrar por setor"><option value="all">Todos os setores</option></select>
         </div>
         <div class="people-status-tabs" role="group" aria-label="Filtrar rapidamente por status">
@@ -110,7 +116,7 @@
           <button class="people-status-tab" type="button" data-status="confirmed" aria-pressed="false">Confirmados <span data-count-for="confirmed">0</span></button>
           <button class="people-status-tab" type="button" data-status="pending" aria-pressed="false">Não confirmados <span data-count-for="pending">0</span></button>
           <button class="people-status-tab" type="button" data-status="inactive" aria-pressed="false">Inativos <span data-count-for="inactive">0</span></button>
-          <button class="people-status-tab" type="button" data-status="incomplete" aria-pressed="false">Sem sobrenome <span data-count-for="incomplete">0</span></button>
+          <button class="people-status-tab" type="button" data-status="incomplete" aria-pressed="false">Nome único <span data-count-for="incomplete">0</span></button>
         </div>
         <div class="people-results-line"><span id="people-count" class="count-label" role="status">0 resultados</span></div>
       </div><div class="table-scroll"><table class="people-table"><thead><tr><th>COLABORADOR / SETOR</th><th>ACOMPANHANTE</th><th>STATUS / CONFIRMAÇÃO</th><th>CONFIRMADO EM</th><th></th></tr></thead><tbody id="people-body"></tbody></table></div></section>
@@ -120,7 +126,18 @@
       <form id="event-form" class="admin-panel settings-form">
         <div class="form-grid">
           <div class="full"><label for="event-title">Título do evento</label><input id="event-title" required maxlength="100" class="standard-input" placeholder="Confraternização 2026"></div>
-          <div class="full"><label for="event-description">Mensagem do convite</label><textarea id="event-description" class="standard-input" rows="3" maxlength="500"></textarea></div>
+          <div class="full rsvp-message-field">
+            <label for="event-description">Mensagem do convite</label>
+            <div class="rsvp-rich-tools" role="toolbar" aria-label="Formatar mensagem selecionada">
+              <button type="button" data-message-format="bold" aria-label="Aplicar negrito ao texto selecionado" title="Negrito (Ctrl+B)"><strong>B</strong></button>
+              <button type="button" data-message-format="italic" aria-label="Aplicar itálico ao texto selecionado" title="Itálico (Ctrl+I)"><em>I</em></button>
+              <button type="button" data-message-format="strike" aria-label="Aplicar tachado ao texto selecionado" title="Tachado"><s>S</s></button>
+              <span class="rsvp-rich-help">Selecione o texto e toque no estilo</span>
+            </div>
+            <textarea id="event-description" class="standard-input rsvp-message-textarea" rows="5" maxlength="500" spellcheck="true" placeholder="Escreva a mensagem do convite..."></textarea>
+            <div class="rsvp-rich-footer"><span>Negrito, itálico e tachado aparecem no convite público.</span><span id="event-description-count">0 / 500</span></div>
+            <div class="rsvp-message-preview-box"><span class="rsvp-preview-kicker"><i data-lucide="eye"></i> PRÉVIA DA MENSAGEM</span><div id="event-description-preview" class="rsvp-message-preview"></div></div>
+          </div>
           <div><label for="event-date-input">Data</label><input id="event-date-input" type="date" class="standard-input"></div>
           <div><label for="event-time-input">Horário</label><input id="event-time-input" type="time" class="standard-input"></div>
           <div class="full"><label for="event-place-input">Local</label><input id="event-place-input" maxlength="180" class="standard-input" placeholder="Nome do local e endereço"></div>
@@ -187,8 +204,8 @@
   <div class="admin-action-loading-inner">
     <span class="admin-action-loading-symbol" aria-hidden="true"><i data-lucide="loader-circle"></i></span>
     <h2 id="admin-action-loading-title">Salvando alteração...</h2>
-    <p>Atualizando a confirmação com segurança. Não feche esta página.</p>
-    <div class="admin-action-progress" aria-hidden="true"><span></span></div>
+    <p>Aguardando a validação do servidor. Não feche esta página.</p>
+    <div class="admin-action-loading-status"><span class="server-status-dot" aria-hidden="true"></span> Processando solicitação</div>
   </div>
 </div>
 <div id="admin-toast-stack" class="admin-toast-stack" role="status" aria-live="polite" aria-atomic="false"></div>
