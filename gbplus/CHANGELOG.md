@@ -5,7 +5,7 @@
 - **Inicialização:** ao exceder o tempo de conexão, a tela orienta sobre indisponibilidade do servidor em vez de sugerir exclusivamente limpeza de cache; identifica modo offline.
 - **Recuperação:** "Tentar abrir novamente" passa a ser a ação principal; recuperação dos arquivos PWA fica como alternativa, sem remoção de dados locais, sessões ou registros financeiros.
 - **Distribuição:** versões HTML, manifest e cache do Service Worker atualizadas para 3.0.10/3010. Nenhuma migração financeira ou mudança de permissões.
-- **QA:** revisão estática do fluxo e das referências de versão; teste real de login e leitura depende do banco concluir `COMING_UP` e ficar `ACTIVE_HEALTHY`.
+- **QA:** revisão estática concluída. Backend confirmado `ACTIVE_HEALTHY` e SQL somente leitura respondeu, com tabela `gbplus_documents` presente. Login real e abertura do PWA instalado ainda aguardam validação no dispositivo.
 
 ## [3.0.9 — PENDENTES NA IMPORTAÇÃO, GRADE DE PARCEIROS E VIA IMPORTAÇÃO (QA PARCIAL)] — 2026-11-10
 - **Movimentação diária:** acrescentadas as ações **Selecionar somente pendentes** (substitui a seleção) e **Selecionar baixas**, com filtro de linhas Todos / Pendentes / Baixados / Novos / Conflitos / Já importados. A paginação respeita os índices originais, evitando marcar uma linha errada após filtrar. Somente títulos novos sem baixa realizada entram na seleção de pendentes; baixa com data futura permanece pendente e não reduz/eleva saldo.
