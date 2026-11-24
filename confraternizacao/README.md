@@ -250,3 +250,7 @@ Implementação isolada do convite corporativo GaveBlue, sem alterações nos ap
 
 ## Convite v28
 - Opção discreta de recusa abaixo do botão principal. Identificação por nome/apelido abre diretamente a etapa de motivo opcional quando iniciada pela recusa; fluxo de acompanhante permanece apenas para confirmações. Voltar permite corrigir a identificação. Sem alterações no backend ou painel.
+
+
+## Painel v19
+- Botões de impressão na visão geral e colaboradores. Nova aba com relatório A4 de confirmados, nomes de colaboradores e acompanhantes, logos existentes das Covres e assinatura tipográfica da confraternização; totais, data de emissão e cabeçalho de tabela repetido. Consulta atualizada via sessão administrativa; exclui pendentes/recusados. Impressão ou PDF pelo navegador. JS, IDs e amostra sintética verificados; impressão real pendente.

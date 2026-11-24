@@ -24,9 +24,9 @@
 <script defer src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
 <link href="../admin-v17.css?v=17" rel="stylesheet">
 <link href="../admin-v18.css?v=18" rel="stylesheet">
-<script defer src="../admin-app-v17.js?v=17"></script>
+<script defer src="../admin-app-v19.js?v=19"></script>
 </head>
-<body class="admin-page" data-admin-version="18">
+<body class="admin-page" data-admin-version="19">
 <div id="admin-loading" class="admin-loading" role="status" aria-live="polite" aria-atomic="true">
   <div class="admin-loading-inner">
     <div class="admin-loading-symbol" aria-hidden="true"><span class="admin-loading-orbit"></span><i data-lucide="sparkles"></i></div>
@@ -91,7 +91,7 @@
     <div id="mobile-nav" class="mobile-nav" aria-label="Navegação rápida"><button data-view="overview" class="mobile-tab active"><i data-lucide="layout-dashboard"></i> Geral</button><button data-view="people" class="mobile-tab"><i data-lucide="users"></i> Lista</button><button data-view="settings" class="mobile-tab"><i data-lucide="settings"></i> Evento</button></div>
     <div id="admin-notice" class="notice hidden" role="status"></div>
     <div id="view-overview" class="admin-content">
-      <div class="section-intro action-intro"><div><h2>Visão geral</h2><p>Acompanhe as respostas e os cadastros do evento.</p></div><button id="refresh-dashboard" class="secondary-button" type="button"><i data-lucide="refresh-cw"></i> Atualizar dados</button></div>
+      <div class="section-intro action-intro"><div><h2>Visão geral</h2><p>Acompanhe as respostas e os cadastros do evento.</p></div><div class="button-row"><button id="print-confirmed-overview" class="secondary-button" type="button"><i data-lucide="printer"></i> Lista de confirmados (PDF)</button><button id="refresh-dashboard" class="secondary-button" type="button"><i data-lucide="refresh-cw"></i> Atualizar dados</button></div></div>
       <section class="admin-panel rsvp-state-panel" aria-label="Situação do RSVP">
         <div class="rsvp-state-icon"><i data-lucide="calendar-check"></i></div>
         <div class="rsvp-state-copy"><small>STATUS DAS CONFIRMAÇÕES</small><strong id="rsvp-state-title">Carregando situação...</strong><p id="rsvp-state-detail">O prazo e a situação do evento aparecerão aqui.</p></div>
@@ -110,7 +110,7 @@
       <section class="admin-panel"><div class="panel-heading"><div><h3>Confirmações recentes</h3><p>Últimos colaboradores que responderam</p></div><button class="text-btn" data-view="people">Ver todos</button></div><div id="recent-list" class="recent-list"></div></section>
     </div>
     <div id="view-people" class="admin-content hidden">
-      <div class="section-intro action-intro"><div><h2>Colaboradores</h2><p>Cadastre, importe e acompanhe quem vai participar.</p></div><div class="button-row people-actions"><button id="people-add" class="main-button compact" type="button"><i data-lucide="user-plus"></i> Novo colaborador</button><button id="import-button" class="secondary-button"><i data-lucide="upload"></i> Importar lista</button><button id="export-button" class="secondary-button"><i data-lucide="download"></i> Exportar CSV</button></div></div>
+      <div class="section-intro action-intro"><div><h2>Colaboradores</h2><p>Cadastre, importe e acompanhe quem vai participar.</p></div><div class="button-row people-actions"><button id="people-add" class="main-button compact" type="button"><i data-lucide="user-plus"></i> Novo colaborador</button><button id="import-button" class="secondary-button"><i data-lucide="upload"></i> Importar lista</button><button id="export-button" class="secondary-button"><i data-lucide="download"></i> Exportar CSV</button><button id="print-confirmed" class="secondary-button" type="button"><i data-lucide="printer"></i> Imprimir confirmados (PDF)</button></div></div>
       <section class="admin-panel">
       <div class="people-filter-panel">
         <div class="people-filter-controls">
