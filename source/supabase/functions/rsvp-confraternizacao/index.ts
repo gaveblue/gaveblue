@@ -5,8 +5,24 @@ const URL = Deno.env.get("SUPABASE_URL") || "";
 const SECRET = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
 const db = createClient(URL, SECRET, { auth: { persistSession: false, autoRefreshToken: false } });
 const SLUG = "confraternizacao-2026";
-const DEADLINE_ISO = "2026-11-25T23:59:59.999-03:00";
-const deadlineExpired = () => Date.now() > Date.parse(DEADLINE_ISO);
+const DEADLINE_ISO = "2026-11-25T23:59:59.999-03:00"; // compatibilidade de registro legado
+const deadlineOf = (ev: { prazo_confirmacao?: string | null }) =>
+  Date.parse(ev.prazo_confirmacao || DEADLINE_ISO);
+const deadlineExpired = (ev: { prazo_confirmacao?: string | null }) =>
+  Date.now() > deadlineOf(ev);
+type RsvpState = "nao_iniciadas" | "aberto" | "encerrado_manual" | "prazo_expirado";
+const stateOf = (ev: { status: string; prazo_confirmacao?: string | null }): RsvpState => {
+  if (ev.status === "rascunho") return "nao_iniciadas";
+  if (ev.status === "encerrado") return "encerrado_manual";
+  return deadlineExpired(ev) ? "prazo_expirado" : "aberto";
+};
+const stateError = (state: RsvpState) => state === "nao_iniciadas"
+  ? "As confirmações ainda não foram abertas."
+  : state === "encerrado_manual"
+    ? "As confirmações foram encerradas pela organização."
+    : state === "prazo_expirado"
+      ? "O prazo para confirmação de presença já terminou."
+      : "";
 const allowed = new Set(["https://gaveblue.com.br", "https://www.gaveblue.com.br"]);
 const json = (data: unknown, status = 200, origin = "") => new Response(JSON.stringify(data), {
   status,
@@ -96,7 +112,9 @@ Deno.serve(async (req: Request) => {
     const body = JSON.parse(raw || "{}");
     const action = clean(body.action, 40);
     if (action === "search") {
-      assert(!deadlineExpired(), "O prazo de confirmação terminou em 25/11.");
+      const current = await event();
+      const currentState = stateOf(current);
+      assert(currentState === "aberto", stateError(currentState));
       const key = norm(body.query);
       const terms=key.split(" ").filter(Boolean);
       if (terms.length<2 || terms[0].length<2 || terms[terms.length-1].length<3) {
@@ -110,12 +128,22 @@ Deno.serve(async (req: Request) => {
     }
     const ev = await event();
     if (action === "event") {
-      return json({ ok: true, event: { titulo: ev.titulo, descricao: ev.descricao, data_evento: ev.data_evento, horario: ev.horario, local_evento: ev.local_evento, status: ev.status === "aberto" && deadlineExpired() ? "encerrado" : ev.status, prazo_confirmacao: DEADLINE_ISO, permite_acompanhante: ev.permite_acompanhante } }, 200, origin);
+      const state = stateOf(ev);
+      return json({ ok: true, event: {
+        titulo: ev.titulo, descricao: ev.descricao, data_evento: ev.data_evento,
+        horario: ev.horario, local_evento: ev.local_evento,
+        status: state === "aberto" ? "aberto" : state === "nao_iniciadas" ? "rascunho" : "encerrado",
+        estado_confirmacoes: state,
+        prazo_confirmacao: ev.prazo_confirmacao || DEADLINE_ISO,
+        mensagem_encerramento: ev.mensagem_encerramento || "",
+        permite_acompanhante: ev.permite_acompanhante
+      } }, 200, origin);
     }
     if (action === "confirm") {
       await rate(req, "confirm", 15);
-      assert(!deadlineExpired(), "O prazo de confirmação terminou em 25/11.");
-      assert(ev.status === "aberto" && ev.whatsapp, "As confirmações ainda não estão abertas.");
+      const state = stateOf(ev);
+      assert(state === "aberto", stateError(state));
+      assert(ev.whatsapp, "WhatsApp da organização não configurado.");
       const id = clean(body.colaborador_id, 48);
       const key = norm(body.query);
       const terms = key.split(" ");
@@ -126,6 +154,7 @@ Deno.serve(async (req: Request) => {
       assert(!companion || ev.permite_acompanhante, "Acompanhante não permitido neste evento.");
       const companionName = companion ? clean(body.acompanhante_nome) : null;
       assert(!companion || validName(companionName || ""), "Informe o nome completo do acompanhante.");
+      assert(stateOf(ev) === "aberto", "O prazo de confirmação terminou. Atualize o convite.");
       const { error } = await db.from("rsvp_confirmacoes").upsert({
         evento_id: ev.id, colaborador_id: employee.id, acompanhante: companion,
         acompanhante_nome: companionName, origem: "link", confirmado_em: new Date().toISOString()
@@ -153,7 +182,7 @@ Deno.serve(async (req: Request) => {
         db.from("rsvp_confirmacoes").select("colaborador_id,acompanhante,acompanhante_nome,confirmado_em,origem").eq("evento_id", ev.id)
       ]);
       assert(!employees.error && !confirmations.error, "Falha ao carregar os dados.");
-      return json({ ok: true, event: ev, collaborators: employees.data || [], confirmations: confirmations.data || [] }, 200, origin);
+      return json({ ok: true, event: { ...ev, estado_confirmacoes: stateOf(ev) }, collaborators: employees.data || [], confirmations: confirmations.data || [] }, 200, origin);
     }
     if (action === "admin-save-event") {
       const title = clean(body.titulo, 100);
@@ -162,6 +191,14 @@ Deno.serve(async (req: Request) => {
       const wa = clean(body.whatsapp, 20).replace(/\D/g, "");
       const date = clean(body.data_evento, 10);
       const status = clean(body.status, 20);
+      const deadline = body.prazo_confirmacao === undefined
+        ? (ev.prazo_confirmacao || DEADLINE_ISO) : clean(body.prazo_confirmacao, 48);
+      const customMessage = body.mensagem_encerramento === undefined
+        ? String(ev.mensagem_encerramento || "") : clean(body.mensagem_encerramento, 320);
+      assert(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:(?:\d{2})(?:\.\d{1,3})?(?:Z|[+-]\d{2}:\d{2})$/.test(deadline)
+        && Number.isFinite(Date.parse(deadline)), "Informe uma data e hora válidas para o prazo.");
+      assert(status !== "aberto" || Date.parse(deadline) > Date.now(),
+        "Para abrir ou reabrir, configure uma data limite futura.");
       assert(title.length >= 3, "Informe o nome do evento.");
       assert(["rascunho","aberto","encerrado"].includes(status), "Status inválido.");
       assert(!wa || /^\d{10,15}$/.test(wa), "Número de WhatsApp inválido. Informe DDI + DDD + número.");
@@ -170,7 +207,9 @@ Deno.serve(async (req: Request) => {
       const { error } = await db.from("rsvp_eventos").update({
         titulo: title, descricao: description, local_evento: place || null, whatsapp: wa || null,
         data_evento: date || null, horario: clean(body.horario, 30) || null,
-        status, permite_acompanhante: body.permite_acompanhante !== false, atualizado_em: new Date().toISOString()
+        status, prazo_confirmacao: new Date(deadline).toISOString(),
+        mensagem_encerramento: customMessage,
+        permite_acompanhante: body.permite_acompanhante !== false, atualizado_em: new Date().toISOString()
       }).eq("id", ev.id);
       assert(!error, "Não foi possível salvar o evento.");
       return json({ ok: true }, 200, origin);
