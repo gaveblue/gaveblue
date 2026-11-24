@@ -104,3 +104,12 @@ Implementação isolada do convite corporativo GaveBlue, sem alterações nos ap
 - Animação, marcas, descrição institucional, prazo RSVP 30/11 e confirmação em bottom sheet preservados.
 - Cache-busting assets v15, atualização do caminho padrão e de convite-atualizado.html; também URL única convite-v15.html para evitar cache de HTML antigo.
 - Verificações estáticas: HTML balanceado, IDs únicos, referências do JS presentes, sintaxe JS válida, CSS com chaves equilibradas; teste de fórmula 23/11 às 20h BRT → 18 dias e 19 horas para 12/12 às 15h.
+
+## Convite v16 · 23/11/2026
+- **Organização:** removido o antigo bloco lateral de data/horário; abaixo do contador principal há uma linha discreta dinâmica: `Dia 12 de dezembro, a partir das 15h`. O card branco agora mostra apenas local e Google Maps.
+- **Prazo alterado:** até 25/11/2026, 23h59:59.999 (UTC-03:00). Substituído o chip de aviso de 30/11 por cartão vermelho compacto, com contador de horas totais, minutos, segundos e milésimos (atualização de 50 ms, sem exibir dias fictícios).
+- **Segurança:** Supabase Edge Function `rsvp-confraternizacao` v6 define o prazo e impede buscas/confirmar após a data. O endpoint de evento retorna `prazo_confirmacao` e status `encerrado` após o prazo. O Super Admin continua podendo gerenciar cadastros e confirmações manuais.
+- **Celebração:** carregamento opcional da biblioteca open source `canvas-confetti@1.9.4` (licença ISC, repositório https://github.com/catdad/canvas-confetti; distribuição https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.4/dist/confetti.browser.min.js) para explosões sutis nas cores verde/dourado/branco após gravação bem-sucedida. Pares de ícones `wine` do Lucide animam um brinde. Sem dependência de imagens nem bibliotecas pagas, e com fallback gracioso caso o CDN não carregue.
+- **Fluxo WhatsApp:** abre automaticamente após ~2,3 segundos para que a animação fique visível (300 ms para quem prefere movimento reduzido). Botão de WhatsApp continua clicável no estado de sucesso.
+- **QA estático:** IDs presentes, HTML fechado, JS sintaticamente válido, CSS equilibrado, contador com horário real de Brasília, e regras do servidor confirmadas na versão implantada. Ainda requer teste visual e abertura do WhatsApp no celular.
+- **Publicação:** folhas de estilo v16 em CSS isolado `guest-v16.css` e arquivos base versionados; caminhos `index.html`, `convite-atualizado.html`, `convite-v15.html` atualizados, mais `convite-v16.html`.
