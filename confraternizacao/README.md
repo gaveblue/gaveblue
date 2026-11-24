@@ -242,3 +242,7 @@ Implementação isolada do convite corporativo GaveBlue, sem alterações nos ap
 ## Convite v27 / painel v17
 - Recusa de presença com motivo opcional (500 caracteres); etapa própria, sem WhatsApp obrigatório. Uma resposta por colaborador; nova resposta substitui a anterior.
 - Painel: recusados separados de pendentes e confirmados, motivo na lista e CSV. Presença manual pode substituir recusa; recusados fora do total esperado. Migração rsvp_resposta_recusada preserva respostas antigas. JS e IDs verificados.
+
+
+## Painel v18
+- Corrige a célula de acompanhante/motivo: display table-cell no desktop, alinhamento vertical central e quebra de linha natural; no celular, acompanha o início do texto do colaborador, sem truncar nomes ou motivos. Mantém seleção e ações existentes. Sem alterações no banco ou no convite.

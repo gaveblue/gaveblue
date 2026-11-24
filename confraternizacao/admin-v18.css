@@ -1,0 +1,37 @@
+/* Admin v18 — alinhamento da coluna de acompanhante e motivos. */
+@media(min-width:701px){
+  /* O line-clamp aplicado diretamente ao td alterava seu display,
+     retirando a célula do layout nativo da tabela. */
+  .admin-page .people-table tbody tr.people-selectable{
+    height:81px;max-height:none;
+  }
+  .admin-page .people-table tbody tr.people-selectable>td{
+    display:table-cell;vertical-align:middle;height:auto;max-height:none;
+  }
+  .admin-page .people-table tbody tr.people-selectable>td.companion-cell{
+    display:table-cell;vertical-align:middle;
+    -webkit-line-clamp:unset;line-clamp:unset;max-height:none;
+    white-space:normal;overflow-wrap:anywhere;
+    font-size:12px;line-height:1.4;
+  }
+}
+@media(max-width:700px){
+  .admin-page .people-table tbody tr.people-selectable:not(:has(td[colspan])){
+    height:auto!important;min-height:166px!important;max-height:none!important;
+    grid-template-rows:auto auto auto auto;align-content:start;
+  }
+  .admin-page .people-table tbody tr.people-selectable>td.companion-cell{
+    display:block!important;max-height:none;overflow:visible;
+    -webkit-line-clamp:unset;line-clamp:unset;
+    padding-left:64px!important;
+    white-space:normal;overflow-wrap:anywhere;text-align:left!important;
+    align-self:start;line-height:1.45;
+  }
+  .admin-page .people-table tbody tr.people-selectable>td:nth-child(2):before{
+    content:"Acompanhante: ";
+  }
+  .admin-page .people-table tbody tr.people-selectable>td.decline-reason-cell:before{content:none}
+  .admin-page .people-table tbody tr.people-selectable>td:nth-child(4):before{
+    content:"Respondido em: ";
+  }
+}
