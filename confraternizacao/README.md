@@ -159,3 +159,16 @@ Implementação isolada do convite corporativo GaveBlue, sem alterações nos ap
 - Previne chamadas simultâneas de bootstrap; as respostas de pedidos antigos não reabrem a sessão após logout. Timeout de 15 s evita spinner infinito.
 - Atualização silenciosa só ocorre se painel e dados já estiverem carregados.
 - Isolado ao admin, sem alteração no RSVP, banco, backend, convite público ou outras aplicações.
+
+## Admin v9 — navegação recolhível, acompanhantes e avisos (24/11/2026)
+
+- Botão hambúrguer no cabeçalho para ocultar/mostrar a navegação. No desktop recolhe a barra lateral; no celular oculta/mostra a navegação inferior.
+- Barra inferior reforçada como fixa no celular, com espaçamento da área segura.
+- Cabeçalho desktop com atalho de **Configurações** e logos oficiais da Covre Agrícola e Covre & Cia reaproveitados do convite. Logos ocultos em telas de até 960 px.
+- Botão **Novo colaborador** removido do cabeçalho geral; disponível apenas em Colaboradores, junto a Importar e Exportar.
+- Lista: removida a coluna Setor, incorporado à linha abaixo do nome do colaborador; a coluna Acompanhante recebe mais espaço e quebra de linha. Grade mobile reorganizada em 5 colunas lógicas.
+- Confirmação manual: sobreposição central de carregamento ao salvar / retirar confirmação e ao salvar colaborador, bloqueando interação enquanto a mutação está em andamento. Popups e controles anteriores preservados.
+- Toast e demais avisos do admin movidos para o alto da tela. Aviso de nova confirmação pública toca um *duplo tom suave* gerado por Web Audio API (sem arquivo de áudio); sujeito à permissão de reprodução após interação humana no navegador e apenas com o painel em primeiro plano.
+- Arquivo visual específico `confraternizacao/admin-v9.css`; JavaScript `app.js?v=26`; administração em `confraternizacao/admin/painel-v9.html`.
+- Caminhos do admin `index.html`, `painel-v6.html`, `painel-v7.html` e `painel-v8.html` alinhados à mesma interface, prevenindo referências a IDs antigos.
+- Nenhuma alteração feita no Supabase, respostas existentes, Edge Functions ou arquivos do convite público.
