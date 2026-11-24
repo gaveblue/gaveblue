@@ -137,3 +137,15 @@ Implementação isolada do convite corporativo GaveBlue, sem alterações nos ap
 - Formulários de inclusão/importação em bottom sheets no celular e sem alteração dos fluxos existentes.
 - No texto das configurações, substituída menção indevida a "período de confirmação" por "status das confirmações"; a data limite pública continua controlada pela API e **ainda não pode ser alterada pelo admin**.
 - Carregamento: `admin/index.html` agora usa `admin-v5.css?v=5` e `app.js?v=5` para invalidação de cache; `app.js` alterado apenas para disponibilizar sair no celular.
+
+## Admin v6 / Convite v23 — Prazo e controle de estados (23/11/2026)
+- Aplicada migration no Supabase Confraternização `rsvp_prazo_e_mensagem_encerramento_20261123`, com `rsvp_eventos.prazo_confirmacao timestamptz not null` e `mensagem_encerramento text not null default ''`. Valor inicial do prazo: 25/11/2026 23:59:59.999 no horário de Brasília.
+- Edge Function `rsvp-confraternizacao` v7: prazo lido do banco a cada consulta; estados `nao_iniciadas`, `aberto`, `encerrado_manual`, `prazo_expirado`, bloqueio de busca/confirmação quando fechado. Nenhuma alteração na autenticação ou nas tabelas de participantes.
+- Admin: edição de data/horário de prazo com seleção da situação, ações Abrir / Encerrar agora (confirmação explícita) / Reabrir, mensagem opcional de encerramento e card com situação efetiva no dashboard.
+- Convite: mensagens distintas para cada estado, campo de mensagem personalizada, timer e rótulo de prazo dinâmicos, polling leve de status com janela ativa e bloqueio imediato ao vencer o prazo.
+- Ao expirar, o status salvo `aberto` pode permanecer no banco; a **situação efetiva** é `prazo_expirado` calculada no servidor. Para reabrir, configure prazo futuro e salve com status `aberto`.
+- O encerramento manual fica salvo como `encerrado`; o estado `rascunho` representa confirmações ainda não iniciadas.
+- Estilos: `admin-v6.css` e `guest-v23.css` com escopo por página. Versionamento JS: `app.js?v=23`. Novo link anti-cache `/confraternizacao/convite-v23.html` e `/confraternizacao/admin/painel-v6.html`.
+- QA estático: HTML equilibrado e sem IDs duplicados, CSS equilibrado, JS sintaticamente válido; 6 cenários de status no convidado, 3 mensagens e 6 estados do admin verificados via funções reais do JS. API real não testada com código de acesso privado; não manipular dados reais para testes.
+- Seguranças preexistentes: RPC `rsvp_busca_rapida` não concedida a `anon`/`authenticated`; Edge Function mantém validação de sessão admin com token do evento e `verify_jwt=false` já configurado originalmente.
+- Para verificação manual: entrar no admin com código existente, conferir status e prazo, testar `rascunho`, `encerrado` e `aberto` (em janela segura de homologação), confirmar que a lista histórica se mantém.
