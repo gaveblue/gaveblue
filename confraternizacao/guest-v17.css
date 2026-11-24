@@ -1,0 +1,145 @@
+/* Convite v17 — densidade visual menor, especialmente local e prazo RSVP.
+   Apenas a página pública é alterada. */
+
+/* Margens gerais um pouco menores, mantendo a leitura dos textos. */
+.guest-page .guest-shell{padding-top:11px;padding-bottom:16px}
+.guest-page .guest-hero{padding-top:10px;padding-bottom:10px}
+.guest-page .guest-hero h1{margin-top:8px;margin-bottom:7px}
+.guest-page .guest-hero .guest-message p{line-height:1.43}
+.guest-page .event-countdown{margin-bottom:7px;padding-top:12px;padding-bottom:10px}
+.guest-page .event-countdown h2{margin-top:5px;margin-bottom:9px}
+.guest-page .countdown-tile{min-height:61px;padding:7px 2px 6px}
+.guest-page .event-countdown-datetime{margin-top:8px;padding-top:7px}
+
+/* O local vira uma linha compacta e limpa. */
+.guest-page .guest-details.guest-location-only{
+  margin-bottom:7px;
+  padding:0 9px;
+  border-radius:11px;
+}
+.guest-page .guest-location-only .event-location{
+  display:flex;flex-direction:row;
+  justify-content:center;align-items:center;
+  min-height:0;
+  padding:7px 3px;
+  gap:8px;
+}
+.guest-page .guest-location-only .event-location .detail-icon{
+  flex:0 0 27px;
+  min-width:27px;width:27px;height:27px;
+  border-radius:8px;
+}
+.guest-page .guest-location-only .event-location .detail-icon svg{
+  width:15px;height:15px;
+}
+.guest-page .guest-location-only .event-location-copy{
+  flex:0 1 auto;
+  align-items:flex-start;
+  justify-content:center;
+  text-align:left;
+  min-width:0;
+}
+.guest-page .guest-location-only .event-location small{
+  margin:0 0 1px;
+  font-size:8px;
+  line-height:1.15;
+}
+.guest-page .guest-location-only .event-location strong{
+  font-size:11px;
+  line-height:1.25;
+}
+.guest-page .guest-location-only .event-map-link{
+  display:inline-flex;align-items:center;
+  margin:1px 0 0;padding:1px 0;
+  line-height:1.25;
+  font-size:9px;
+}
+.guest-page .guest-location-only .event-map-link svg{width:11px;height:11px}
+
+/* Faixa de prazo discreta: números pequenos, sem quatro caixas enormes. */
+.guest-page .rsvp-urgency{
+  padding:8px 10px 7px;
+  margin:0 0 8px;
+  border-radius:10px;
+  box-shadow:none;
+}
+.guest-page .rsvp-urgency-head{
+  gap:6px;
+  justify-content:center;
+}
+.guest-page .rsvp-urgency-head>svg{
+  width:14px;height:14px;
+  stroke-width:2.2;
+}
+.guest-page .rsvp-urgency-head>div{
+  flex-direction:row;
+  align-items:baseline;
+  gap:5px;
+}
+.guest-page .rsvp-urgency-head strong{
+  font-size:10px;line-height:1.25;
+}
+.guest-page .rsvp-urgency-head small{display:none}
+.guest-page .rsvp-urgency-grid{
+  margin:5px auto 0;
+  gap:2px;
+}
+.guest-page .rsvp-urgency-unit{
+  flex:0 0 43px;
+  gap:3px;
+}
+.guest-page .rsvp-urgency-ms{flex-basis:51px}
+.guest-page .rsvp-urgency-unit strong{
+  width:100%;height:25px;
+  padding:0 2px;
+  border-radius:6px;
+  font-size:15px;
+  font-weight:800;
+  letter-spacing:-.04em;
+  box-shadow:none;
+}
+.guest-page .rsvp-urgency-ms strong{font-size:13px}
+.guest-page .rsvp-urgency-unit span{
+  font-size:7px;
+  letter-spacing:.08em;
+}
+.guest-page .rsvp-urgency-separator{
+  margin:3px 0 0;
+  font-size:14px;
+}
+.guest-page .rsvp-urgency-expired{margin:5px 0 0;font-size:10px}
+
+/* Evitar grandes espaços entre o aviso e o botão. */
+.guest-page .invite-card{padding-top:17px;padding-bottom:15px}
+.guest-page .guest-cta-tag{margin-bottom:6px}
+.guest-page .guest-cta h2{font-size:20px;margin-bottom:5px}
+.guest-page .guest-cta p{margin-bottom:13px}
+.guest-page .guest-start-button{min-height:47px}
+.guest-page .cta-footnote{margin-top:10px}
+.guest-page .guest-footer{margin-top:11px;padding-bottom:9px}
+
+@media(max-width:700px){
+  .guest-page .guest-shell{padding-top:10px;padding-bottom:13px}
+  .guest-page .guest-hero{padding-top:9px;padding-bottom:10px}
+  .guest-page .guest-hero h1{margin:7px auto 7px}
+  .guest-page .guest-hero .guest-message p{line-height:1.43}
+  .guest-page .event-countdown{padding:11px 10px 9px;margin-bottom:7px}
+  .guest-page .event-countdown h2{margin:5px auto 8px}
+  .guest-page .countdown-tile{min-height:56px;padding:6px 2px 5px}
+  .guest-page .countdown-number{margin-bottom:3px}
+  .guest-page .event-countdown-datetime{margin-top:7px;padding-top:6px}
+  .guest-page .guest-details.guest-location-only{padding:0 9px;margin-bottom:7px}
+  .guest-page .guest-location-only .event-location{padding:7px 2px;gap:7px;min-height:0}
+  .guest-page .guest-location-only .event-location strong{font-size:10.5px}
+  .guest-page .guest-location-only .event-map-link{font-size:8.5px}
+  .guest-page .rsvp-urgency{padding:7px 8px 6px;margin-bottom:8px}
+  .guest-page .rsvp-urgency-head strong{font-size:9.8px}
+  .guest-page .rsvp-urgency-unit{flex-basis:39px}
+  .guest-page .rsvp-urgency-ms{flex-basis:47px}
+  .guest-page .rsvp-urgency-unit strong{height:23px;font-size:14px}
+  .guest-page .rsvp-urgency-ms strong{font-size:12px}
+  .guest-page .rsvp-urgency-grid{margin-top:4px;gap:2px}
+  .guest-page .invite-card{padding:15px 17px 13px}
+  .guest-page .guest-cta h2{font-size:19px}
+  .guest-page .guest-start-button{min-height:46px}
+}
