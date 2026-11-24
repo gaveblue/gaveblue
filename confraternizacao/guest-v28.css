@@ -1,0 +1,9 @@
+/* Convite v28 — escolha de ausência antes da identificação. */
+.guest-page .guest-cta .decline-invite{
+ display:block;width:100%;border:0;background:transparent;color:#ffd0cc;
+ font:600 12px/1.4 DM Sans,sans-serif;margin:8px auto 0;padding:6px 4px;
+ text-align:center;cursor:pointer;
+}
+.guest-page .guest-cta .decline-invite:hover,.guest-page .guest-cta .decline-invite:focus-visible{text-decoration:underline}
+.guest-page .guest-cta .cta-footnote{margin-top:7px}
+.guest-page #guest-decline .selected-person{margin-bottom:18px}

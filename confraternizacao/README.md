@@ -246,3 +246,7 @@ Implementação isolada do convite corporativo GaveBlue, sem alterações nos ap
 
 ## Painel v18
 - Corrige a célula de acompanhante/motivo: display table-cell no desktop, alinhamento vertical central e quebra de linha natural; no celular, acompanha o início do texto do colaborador, sem truncar nomes ou motivos. Mantém seleção e ações existentes. Sem alterações no banco ou no convite.
+
+
+## Convite v28
+- Opção discreta de recusa abaixo do botão principal. Identificação por nome/apelido abre diretamente a etapa de motivo opcional quando iniciada pela recusa; fluxo de acompanhante permanece apenas para confirmações. Voltar permite corrigir a identificação. Sem alterações no backend ou painel.

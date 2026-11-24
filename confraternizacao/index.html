@@ -30,9 +30,10 @@
 <script defer src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.4/dist/confetti.browser.min.js"></script>
 <link href="./guest-v26.css?v=26" rel="stylesheet">
 <link href="./guest-v27.css?v=27" rel="stylesheet">
-<script defer src="./guest-app-v27.js?v=27"></script>
+<link href="./guest-v28.css?v=28" rel="stylesheet">
+<script defer src="./guest-app-v28.js?v=28"></script>
 </head>
-<body class="guest-page invite-booting" data-invite-version="27">
+<body class="guest-page invite-booting" data-invite-version="28">
 <div id="invite-boot" class="invite-boot" role="status" aria-live="polite">
   <div class="invite-boot-inner">
     <span class="invite-boot-symbol" aria-hidden="true"><i data-lucide="calendar-heart"></i></span>
@@ -97,6 +98,7 @@
     <div id="guest-cta" class="guest-cta hidden">
       <div class="guest-cta-copy"><span class="guest-cta-tag">SUA PRESENÇA IMPORTA</span><h2>Vamos contar com você?</h2><p>Confirme sua presença em poucos passos.</p></div>
       <button id="start-confirm" class="main-button guest-start-button" type="button">Confirmar presença <i data-lucide="arrow-right"></i></button>
+      <button id="decline-invite" class="decline-invite" type="button">Infelizmente não posso ir :(</button>
       <div class="cta-footnote"><i data-lucide="lock-keyhole"></i> Seus dados serão usados apenas para organizar o evento.</div>
     </div>
     <div id="guest-saved" class="hidden guest-saved">
@@ -132,12 +134,12 @@
           <label class="option"><input type="radio" name="plus" value="yes"><span class="option-symbol"><i data-lucide="users"></i></span><span>Sim, vou levar acompanhante</span><i data-lucide="circle" class="option-check"></i></label>
           <label class="option"><input type="radio" name="plus" value="no"><span class="option-symbol"><i data-lucide="user-round"></i></span><span>Não, irei sozinho(a)</span><i data-lucide="circle" class="option-check"></i></label>
         </div>
-        <button id="decline-invite" class="decline-invite" type="button">Infelizmente não posso ir :(</button>
       </div>
       <div id="guest-companion-name" class="hidden">
         <div id="companion-field"><label for="companion-name" class="sheet-field-label">Nome completo do acompanhante</label><input id="companion-name" class="standard-input" placeholder="Nome e sobrenome" autocomplete="off" autocapitalize="words" enterkeyhint="done" maxlength="150"></div>
       </div>
       <div id="guest-decline" class="hidden">
+        <div class="selected-person"><span class="selected-avatar"><i data-lucide="user-round-check"></i></span><div><small>COLABORADOR</small><strong id="decline-selected-name"></strong></div><button id="decline-change-person" class="text-btn" type="button">Alterar</button></div>
         <label for="decline-reason" class="sheet-field-label">Motivo <span class="decline-optional">(opcional)</span></label>
         <textarea id="decline-reason" class="standard-input" rows="3" maxlength="500" placeholder="Se quiser, conte por que não poderá participar."></textarea>
       </div>
