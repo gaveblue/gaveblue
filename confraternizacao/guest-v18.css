@@ -1,0 +1,179 @@
+/* Confraternização v18 — endereço e prazo em cards lado a lado.
+   Primeiro a localização (esquerda), depois o tempo de confirmação (direita).
+   Mantém funcionamento do formulário, prazo e cronômetro do evento. */
+.guest-page .rsvp-info-row{
+  display:grid;
+  grid-template-columns:minmax(0,1.08fr) minmax(0,1fr);
+  align-items:stretch;
+  gap:8px;
+  margin:0 0 8px;
+}
+.guest-page .rsvp-info-row > .guest-details.guest-location-only,
+.guest-page .rsvp-info-row > .rsvp-urgency{
+  box-sizing:border-box;
+  min-width:0;
+  width:100%;
+  height:100%;
+  margin:0;
+  border-radius:11px;
+  box-shadow:none;
+}
+.guest-page .rsvp-info-row > .guest-details.guest-location-only{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:8px 9px;
+}
+.guest-page .rsvp-info-row .guest-location-only .event-location{
+  display:flex;
+  flex-direction:row;
+  align-items:center;
+  justify-content:center;
+  min-width:0;
+  width:100%;
+  padding:0;
+  gap:7px;
+}
+.guest-page .rsvp-info-row .guest-location-only .detail-icon{
+  min-width:23px;width:23px;height:23px;
+  flex:0 0 23px;border-radius:7px;
+}
+.guest-page .rsvp-info-row .guest-location-only .detail-icon svg{
+  width:13px;height:13px;
+}
+.guest-page .rsvp-info-row .guest-location-only .event-location-copy{
+  min-width:0;
+  flex:1;
+  text-align:left;
+  align-items:flex-start;
+}
+.guest-page .rsvp-info-row .guest-location-only .event-location small{
+  font-size:8px;line-height:1.15;
+  margin:0 0 3px;
+}
+.guest-page .rsvp-info-row .guest-location-only .event-location strong{
+  font-size:10.5px;line-height:1.24;
+  overflow-wrap:normal;
+  text-wrap:pretty;
+}
+.guest-page .rsvp-info-row .guest-location-only .event-map-link{
+  display:inline-flex;
+  align-items:baseline;
+  justify-content:flex-start;
+  flex-wrap:wrap;
+  gap:2px 3px;
+  padding:0;
+  margin:5px 0 0;
+  font-size:8.7px;
+  line-height:1.4;
+}
+.guest-page .rsvp-info-row .guest-location-only .event-map-link svg{
+  width:10px;height:10px;align-self:center;
+}
+.guest-page .rsvp-info-row > .rsvp-urgency{
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  padding:8px 9px 7px;
+}
+.guest-page .rsvp-info-row .rsvp-urgency-head{
+  justify-content:center;
+  gap:4px;
+  padding:0;
+}
+.guest-page .rsvp-info-row .rsvp-urgency-head>svg{
+  width:13px;height:13px;flex:0 0 13px;
+}
+.guest-page .rsvp-info-row .rsvp-urgency-head strong{
+  font-size:9.6px;
+  line-height:1.23;
+  text-align:center;
+}
+.guest-page .rsvp-info-row .rsvp-urgency-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:5px 6px;
+  width:100%;
+  margin:7px auto 0;
+}
+.guest-page .rsvp-info-row .rsvp-urgency-separator{display:none}
+.guest-page .rsvp-info-row .rsvp-urgency-unit,
+.guest-page .rsvp-info-row .rsvp-urgency-ms{
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+  align-items:center;
+  justify-content:center;
+  flex:unset;
+  width:100%;
+  min-width:0;
+}
+.guest-page .rsvp-info-row .rsvp-urgency-unit strong{
+  display:grid;
+  place-items:center;
+  width:100%;
+  height:24px;
+  min-height:0;
+  padding:1px 1px;
+  border-radius:6px;
+  font-size:14px;
+  line-height:1;
+  font-variant-numeric:tabular-nums;
+}
+.guest-page .rsvp-info-row .rsvp-urgency-ms strong{font-size:13px}
+.guest-page .rsvp-info-row .rsvp-urgency-unit span{
+  font-size:7px;
+  line-height:1.1;
+  letter-spacing:.04em;
+}
+.guest-page .rsvp-info-row .rsvp-urgency-expired{
+  margin:5px 0 0;
+  font-size:9.5px;
+}
+@media(max-width:700px){
+  .guest-page .rsvp-info-row{
+    grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);
+    gap:7px;
+    margin-bottom:7px;
+  }
+  .guest-page .rsvp-info-row>.guest-details.guest-location-only{
+    padding:7px 7px;
+  }
+  .guest-page .rsvp-info-row .guest-location-only .event-location{
+    gap:6px;
+  }
+  .guest-page .rsvp-info-row .guest-location-only .detail-icon{
+    width:22px;min-width:22px;height:22px;flex-basis:22px;
+  }
+  .guest-page .rsvp-info-row .guest-location-only .event-location strong{
+    font-size:10px;line-height:1.26;
+  }
+  .guest-page .rsvp-info-row .guest-location-only .event-map-link{
+    font-size:8px;line-height:1.35;
+  }
+  .guest-page .rsvp-info-row>.rsvp-urgency{padding:7px 7px 6px}
+  .guest-page .rsvp-info-row .rsvp-urgency-head strong{font-size:9px}
+  .guest-page .rsvp-info-row .rsvp-urgency-grid{
+    gap:4px 5px;margin-top:6px;
+  }
+  .guest-page .rsvp-info-row .rsvp-urgency-unit strong{
+    height:23px;font-size:13px;
+  }
+  .guest-page .rsvp-info-row .rsvp-urgency-ms strong{font-size:12px}
+  .guest-page .rsvp-info-row .rsvp-urgency-unit span{font-size:6.6px}
+}
+@media(max-width:350px){
+  .guest-page .rsvp-info-row{grid-template-columns:minmax(0,1.06fr) minmax(0,1fr);gap:5px}
+  .guest-page .rsvp-info-row>.guest-details.guest-location-only{padding:7px 5px}
+  .guest-page .rsvp-info-row .guest-location-only .event-location{gap:4px}
+  .guest-page .rsvp-info-row .guest-location-only .detail-icon{
+    width:19px;min-width:19px;height:19px;flex-basis:19px;
+  }
+  .guest-page .rsvp-info-row .guest-location-only .event-location strong{font-size:9.5px}
+  .guest-page .rsvp-info-row .guest-location-only .event-map-link{font-size:7.7px}
+  .guest-page .rsvp-info-row>.rsvp-urgency{padding:7px 5px}
+  .guest-page .rsvp-info-row .rsvp-urgency-head strong{font-size:8.4px}
+  .guest-page .rsvp-info-row .rsvp-urgency-grid{gap:3px 4px}
+  .guest-page .rsvp-info-row .rsvp-urgency-unit strong{height:22px;font-size:12px}
+  .guest-page .rsvp-info-row .rsvp-urgency-ms strong{font-size:11px}
+}
