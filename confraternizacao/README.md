@@ -267,3 +267,7 @@ Implementação isolada do convite corporativo GaveBlue, sem alterações nos ap
 
 ## Convite v31
 - Remove o contorno de foco do título estático do comunicado; mantém indicação de foco no botão X. Hierarquia mais compacta com permitidos (cônjuge, namorado(a), filho(a)) em linhas e não permitidos em bloco separado. Mantém a espera mínima de cinco segundos e demais fluxos.
+
+
+## Convite v32
+- Card de prazo em vermelho, textos e números brancos, contorno pulsante suave apenas enquanto o prazo estiver aberto, mantendo o tamanho compacto e respeitando preferência por movimento reduzido. Botão de recusa com fundo transparente e borda discreta. Nenhuma alteração de fluxo, prazo ou backend.

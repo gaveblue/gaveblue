@@ -1,0 +1,50 @@
+/* v32 — destaque do prazo de confirmação e botão secundário de recusa. */
+.guest-page .rsvp-info-row>#rsvp-urgency{
+  background:linear-gradient(145deg,#a52631 0%,#871b27 100%)!important;
+  border:1.5px solid #e64d56;
+  color:#fff;
+  box-shadow:0 0 0 1px rgba(224,62,75,.15),0 3px 10px rgba(135,27,39,.18);
+  animation:rsvpUrgencyPulse32 1.8s ease-in-out infinite!important;
+}
+.guest-page #rsvp-urgency .rsvp-urgency-head,
+.guest-page #rsvp-urgency .rsvp-urgency-head strong,
+.guest-page #rsvp-urgency .rsvp-urgency-head small,
+.guest-page #rsvp-urgency .rsvp-urgency-head>svg,
+.guest-page #rsvp-urgency .rsvp-urgency-unit strong,
+.guest-page #rsvp-urgency .rsvp-urgency-unit span,
+.guest-page #rsvp-urgency .rsvp-urgency-separator,
+.guest-page #rsvp-urgency .rsvp-urgency-expired{color:#fff!important}
+.guest-page #rsvp-urgency .rsvp-urgency-unit strong{
+  background:rgba(255,255,255,.12)!important;
+  border:1px solid rgba(255,255,255,.28)!important;
+  box-shadow:none!important;
+}
+.guest-page .rsvp-info-row>#rsvp-urgency.is-expired{
+  animation:none!important;box-shadow:none!important;
+  background:#85222c!important;border-color:#b94850!important;
+}
+@keyframes rsvpUrgencyPulse32{
+  0%,100%{border-color:#db4650;box-shadow:0 0 0 1px rgba(224,62,75,.14),0 2px 9px rgba(135,27,39,.18)}
+  50%{border-color:#ff8489;box-shadow:0 0 0 3px rgba(232,64,76,.24),0 0 13px rgba(218,47,61,.4)}
+}
+.guest-page .guest-cta #decline-invite{
+  display:flex;align-items:center;justify-content:center;
+  width:max-content;max-width:100%;min-height:34px;
+  margin:10px auto 0;padding:6px 15px;
+  border:1px solid rgba(255,255,255,.28);
+  border-radius:999px;background:transparent;
+  color:#ffd0cc;box-sizing:border-box;
+  text-decoration:none;transition:background .18s,border-color .18s;
+}
+.guest-page .guest-cta #decline-invite:hover,
+.guest-page .guest-cta #decline-invite:active{
+  background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.48);
+  text-decoration:none;
+}
+.guest-page .guest-cta #decline-invite:focus-visible{
+  outline:2px solid #fff;outline-offset:3px;text-decoration:none;
+}
+@media(prefers-reduced-motion:reduce){
+  .guest-page .rsvp-info-row>#rsvp-urgency{animation:none!important}
+  .guest-page .guest-cta #decline-invite{transition:none}
+}
